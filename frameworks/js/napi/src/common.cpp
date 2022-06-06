@@ -386,7 +386,7 @@ napi_value Common::SetNotificationRequestByNumber(
     napi_set_named_property(env, result, "creatorPid", value);
 
     // badgeNumber?: number
-    napi_create_int32(env, request->GetBadgeNumber(), &value);
+    napi_create_uint32(env, request->GetBadgeNumber(), &value);
     napi_set_named_property(env, result, "badgeNumber", value);
 
     return NapiGetBoolean(env, true);
@@ -4204,6 +4204,11 @@ napi_value Common::GetNotificationBadgeNumber(
         }
 
         napi_get_value_int32(env, result, &badgeNumber);
+        if (badgeNumber < 0) {
+            ANS_LOGE("Wrong badge number.");
+            return nullptr;
+        }
+
         request.SetBadgeNumber(badgeNumber);
     }
 

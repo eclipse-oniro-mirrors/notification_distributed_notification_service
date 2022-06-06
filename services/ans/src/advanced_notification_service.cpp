@@ -1126,6 +1126,11 @@ ErrCode AdvancedNotificationService::UpdateSlots(
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
     }));
+
+    if (result == ERR_OK) {
+        PublishSlotChangeCommonEvent(bundle);
+    }
+
     return result;
 }
 
@@ -3489,7 +3494,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
             return;
         }
 
-        PublishSlotChangeCommonEvent(bundle, slotType);
+        PublishSlotChangeCommonEvent(bundle);
     }));
     return result;
 }
@@ -3531,17 +3536,15 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     return result;
 }
 
-bool AdvancedNotificationService::PublishSlotChangeCommonEvent(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType)
+bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGD("slotType: %{public}d", slotType);
+    ANS_LOGD("bundle [%{public}s : %{public}d]", bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
 
     EventFwk::Want want;
     AppExecFwk::ElementName element;
     element.SetBundleName(bundleOption->GetBundleName());
     want.SetElement(element);
     want.SetParam(AppExecFwk::Constants::UID, bundleOption->GetUid());
-    want.SetParam("SlotType", slotType);
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SLOT_CHANGE);
     EventFwk::CommonEventData commonData {want};
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {

@@ -88,12 +88,12 @@ void NotificationRequest::SetUnremovable(bool isUnremovable)
     unremovable_ = isUnremovable;
 }
 
-void NotificationRequest::SetBadgeNumber(int32_t number)
+void NotificationRequest::SetBadgeNumber(uint32_t number)
 {
     badgeNumber_ = number;
 }
 
-int32_t NotificationRequest::GetBadgeNumber() const
+uint32_t NotificationRequest::GetBadgeNumber() const
 {
     return badgeNumber_;
 }
@@ -842,7 +842,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(badgeNumber_)) {
+    if (!parcel.WriteUint32(badgeNumber_)) {
         ANS_LOGE("Failed to write badge number");
         return false;
     }
@@ -1232,7 +1232,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 {
     notificationId_ = parcel.ReadInt32();
     color_ = parcel.ReadUint32();
-    badgeNumber_ = parcel.ReadInt32();
+    badgeNumber_ = parcel.ReadUint32();
     progressValue_ = parcel.ReadInt32();
     progressMax_ = parcel.ReadInt32();
     createTime_ = parcel.ReadInt64();
@@ -1654,7 +1654,7 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
     }
 
     if (jsonObject.find("badgeNumber") != jsonEnd) {
-        target->badgeNumber_ = jsonObject.at("badgeNumber").get<int32_t>();
+        target->badgeNumber_ = jsonObject.at("badgeNumber").get<uint32_t>();
     }
 }
 
