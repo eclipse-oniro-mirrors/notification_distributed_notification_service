@@ -201,14 +201,14 @@ public:
      *
      * @param number Indicates the number to set.
      */
-    void SetBadgeNumber(int32_t number);
+    void SetBadgeNumber(uint32_t number);
 
     /**
      * @brief Obtains the number to be displayed for this notification.
      *
      * @return Returns the number to be displayed for this notification.
      */
-    int32_t GetBadgeNumber() const;
+    uint32_t GetBadgeNumber() const;
 
     /**
      * @brief Sets the current notification ID to uniquely identify the notification in the application.
@@ -1136,7 +1136,7 @@ private:
 private:
     int32_t notificationId_ {0};
     uint32_t color_ {NotificationRequest::COLOR_DEFAULT};
-    int32_t badgeNumber_ {0};
+    uint32_t badgeNumber_ {0};
     int32_t progressValue_ {0};
     int32_t progressMax_ {0};
     int64_t createTime_ {0};
