@@ -809,7 +809,7 @@ private:
     ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
         sptr<NotificationBundleOption> &targetBundle);
     bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
-    void ReportHasSeenEvent(const int32_t userId, const std::string &bundleName);
+    void ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
