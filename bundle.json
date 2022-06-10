@@ -48,6 +48,9 @@
     ],
     "rom": "3000KB",
     "ram": "16000KB",
+    "hisysevent_config":[
+      "//base/notification/distributed_notification_service/hisysevent.yaml"
+    ],
     "deps": {
       "components": [
         "ability_base",
