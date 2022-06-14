@@ -22,7 +22,6 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "mock_bundle_manager.h"
-#include "mock_ipc_skeleton.h"
 #include "notification_helper.h"
 #include "system_ability_definition.h"
 
@@ -31,7 +30,6 @@ namespace OHOS {
 namespace Notification {
 static sptr<ISystemAbilityManager> systemAbilityManager =
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-const int32_t CALLING_UID = 9998;
 
 class AnsInnerKitsModuleSlotTest : public testing::Test {
 public:
@@ -46,7 +44,6 @@ void AnsInnerKitsModuleSlotTest::SetUpTestCase()
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
-    MockIPCSkeleton::SetCallingUid(CALLING_UID);
 }
 
 void AnsInnerKitsModuleSlotTest::TearDownTestCase()
@@ -512,7 +509,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     EXPECT_EQ(spSlot->GetEnable(), true);
 
     bool enable = false;
-    NotificationBundleOption bo("bundleName", CALLING_UID);
+    NotificationBundleOption bo("bundlename", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
     EXPECT_EQ(enable, false);
@@ -527,7 +524,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
 HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00200, Function | MediumTest | Level1)
 {
     bool enable = true;
-    NotificationBundleOption bo("bundleName", CALLING_UID);
+    NotificationBundleOption bo("hello", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
     enable = false;
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
@@ -548,7 +545,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
 HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00300, Function | MediumTest | Level1)
 {
     bool enable = false;
-    NotificationBundleOption bo("bundleName", CALLING_UID);
+    NotificationBundleOption bo("bundleName", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     enable = true;
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));

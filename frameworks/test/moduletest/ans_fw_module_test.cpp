@@ -31,7 +31,6 @@
 #include "datetime_ex.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
-#include "mock_ipc_skeleton.h"
 #include "mock_single_kv_store.h"
 #include "notification_content.h"
 #include "notification_helper.h"
@@ -2321,7 +2320,6 @@ HWTEST_F(AnsFWModuleTest, DefaultRemindPolicy_00600, Function | MediumTest | Lev
 
 HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07100, Function | MediumTest | Level1)
 {
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     TestAnsSubscriber subscriber;
     EXPECT_EQ(NotificationHelper::SubscribeNotification(subscriber), ERR_OK);
 
@@ -2342,7 +2340,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07100, Function
     EXPECT_EQ(NotificationHelper::GetAllActiveNotifications(notifications), ERR_OK);
     EXPECT_NE((int)notifications.size(), (int)0);
     int32_t id = notifications[0]->GetId();
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     EXPECT_EQ(NotificationHelper::CancelContinuousTaskNotification(NOTIFICATION_LABEL_0, id), ERR_OK);
     EXPECT_EQ(NotificationHelper::GetAllActiveNotifications(notifications), ERR_OK);
     EXPECT_EQ((int)notifications.size(), (int)0);
@@ -2355,12 +2352,10 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07100, Function
     EXPECT_TRUE(eventParser.GetWaitOnCanceledWithSortingMapAndDeleteReason());
     subscriber.ClearEvents();
     SleepForFC();
-    MockIPCSkeleton::SetCallingUid(1);
 }
 
 HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07200, Function | MediumTest | Level1)
 {
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     TestAnsSubscriber subscriber;
     EXPECT_EQ(NotificationHelper::SubscribeNotification(subscriber), ERR_OK);
 
@@ -2383,7 +2378,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07200, Function
     std::string key = notifications[0]->GetKey().c_str();
     EXPECT_EQ(NotificationHelper::RemoveNotification(key), (int)ERR_OK);
     int32_t id = notifications[0]->GetId();
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     EXPECT_EQ(NotificationHelper::CancelContinuousTaskNotification(NOTIFICATION_LABEL_0, id), ERR_OK);
     EXPECT_EQ(NotificationHelper::GetAllActiveNotifications(notifications), ERR_OK);
     EXPECT_EQ((int)notifications.size(), (int)0);
@@ -2396,12 +2390,10 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07200, Function
     EXPECT_TRUE(eventParser.GetWaitOnCanceledWithSortingMapAndDeleteReason());
     subscriber.ClearEvents();
     SleepForFC();
-    MockIPCSkeleton::SetCallingUid(1);
 }
 
 HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07300, Function | MediumTest | Level1)
 {
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     TestAnsSubscriber subscriber;
     EXPECT_EQ(NotificationHelper::SubscribeNotification(subscriber), ERR_OK);
 
@@ -2423,7 +2415,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07300, Function
     EXPECT_NE((int)notifications.size(), (int)0);
     int32_t id = notifications[0]->GetId();
     EXPECT_EQ(NotificationHelper::CancelNotification(id), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     EXPECT_EQ(NotificationHelper::CancelContinuousTaskNotification(NOTIFICATION_LABEL_0, id), ERR_OK);
     EXPECT_EQ(NotificationHelper::GetAllActiveNotifications(notifications), ERR_OK);
     EXPECT_EQ((int)notifications.size(), (int)0);
@@ -2436,7 +2427,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07300, Function
     EXPECT_TRUE(eventParser.GetWaitOnCanceledWithSortingMapAndDeleteReason());
     subscriber.ClearEvents();
     SleepForFC();
-    MockIPCSkeleton::SetCallingUid(1);
 }
 
 HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07400, Function | MediumTest | Level1)
@@ -2487,7 +2477,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07500, Function
 
 HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07600, Function | MediumTest | Level1)
 {
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     TestAnsSubscriber subscriber;
     EXPECT_EQ(NotificationHelper::SubscribeNotification(subscriber), ERR_OK);
 
@@ -2512,12 +2501,10 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07600, Function
     EXPECT_EQ(NotificationHelper::UnSubscribeNotification(subscriber), ERR_OK);
     SleepForFC();
     subscriber.ClearEvents();
-    MockIPCSkeleton::SetCallingUid(1);
 }
 
 HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07700, Function | MediumTest | Level1)
 {
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     TestAnsSubscriber subscriber;
     EXPECT_EQ(NotificationHelper::SubscribeNotification(subscriber), ERR_OK);
 
@@ -2539,7 +2526,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07700, Function
     EXPECT_NE((int)notifications.size(), (int)0);
     int32_t id = notifications[0]->GetId();
     EXPECT_EQ(NotificationHelper::CancelAllNotifications(), (int)ERR_OK);
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     EXPECT_EQ(NotificationHelper::GetAllActiveNotifications(notifications), ERR_OK);
     EXPECT_NE((int)notifications.size(), (int)0);
     EXPECT_EQ(NotificationHelper::CancelContinuousTaskNotification(NOTIFICATION_LABEL_0, id), ERR_OK);
@@ -2554,12 +2540,10 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07700, Function
     EXPECT_TRUE(eventParser.GetWaitOnCanceledWithSortingMapAndDeleteReason());
     subscriber.ClearEvents();
     SleepForFC();
-    MockIPCSkeleton::SetCallingUid(1);
 }
 
 HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07800, Function | MediumTest | Level1)
 {
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     TestAnsSubscriber subscriber;
     EXPECT_EQ(NotificationHelper::SubscribeNotification(subscriber), ERR_OK);
 
@@ -2583,7 +2567,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07800, Function
     EXPECT_EQ(NotificationHelper::RemoveNotifications(), (int)ERR_OK);
     EXPECT_EQ(NotificationHelper::GetAllActiveNotifications(notifications), ERR_OK);
     EXPECT_NE((int)notifications.size(), (int)0);
-    MockIPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     EXPECT_EQ(NotificationHelper::CancelContinuousTaskNotification(NOTIFICATION_LABEL_0, id), ERR_OK);
     EXPECT_EQ(NotificationHelper::GetAllActiveNotifications(notifications), ERR_OK);
     EXPECT_EQ((int)notifications.size(), (int)0);
@@ -2596,7 +2579,6 @@ HWTEST_F(AnsFWModuleTest, ANS_Interface_MT_PublishContinuousTask_07800, Function
     EXPECT_TRUE(eventParser.GetWaitOnCanceledWithSortingMapAndDeleteReason());
     subscriber.ClearEvents();
     SleepForFC();
-    MockIPCSkeleton::SetCallingUid(1);
 }
 }  // namespace Notification
 }  // namespace OHOS

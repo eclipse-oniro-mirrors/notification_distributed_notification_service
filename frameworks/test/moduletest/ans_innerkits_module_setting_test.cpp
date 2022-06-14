@@ -22,7 +22,6 @@
 #include "iservice_registry.h"
 #include "notification_helper.h"
 #include "mock_bundle_manager.h"
-#include "mock_ipc_skeleton.h"
 #include "system_ability_definition.h"
 
 using namespace testing::ext;
@@ -45,7 +44,6 @@ void AnsInnerKitsModuleSettingTest::SetUpTestCase()
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
-    MockIPCSkeleton::SetCallingUid(CALLING_UID);
 }
 
 void AnsInnerKitsModuleSettingTest::TearDownTestCase()

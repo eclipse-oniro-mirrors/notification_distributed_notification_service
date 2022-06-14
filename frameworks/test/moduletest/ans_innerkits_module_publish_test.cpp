@@ -25,7 +25,6 @@
 #include "notification_helper.h"
 #include "notification_json_convert.h"
 #include "mock_bundle_manager.h"
-#include "mock_ipc_skeleton.h"
 #include "system_ability_definition.h"
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
@@ -57,7 +56,7 @@ const int32_t CASE_THIRTEEN = 13;
 const int32_t CASE_FOURTEEN = 14;
 const int32_t CASE_FIFTEEN = 15;
 const int32_t CASE_SIXTEEN = 16;
-const int32_t CALLING_UID = 9999;
+const int32_t CASE_SEVENTEEN = 17;
 
 const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
@@ -147,6 +146,8 @@ public:
             CheckCaseFifteenResult(notificationRequest);
         } else if (CASE_SIXTEEN == notificationRequest.GetNotificationId()) {
             CheckCaseSixteenResult(notificationRequest);
+        } else if (CASE_SEVENTEEN == notificationRequest.GetNotificationId()) {
+            CheckCaseSeventeenResult(notificationRequest);
         } else {
             GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish::OnConsumed do nothing!!!!!";
         }
@@ -372,9 +373,9 @@ private:
     {
         std::shared_ptr<NotificationTemplate> notiTemplate = notificationRequest.GetTemplate();
         if (notiTemplate != nullptr) {
-            EXPECT_EQ("process", notiTemplate->GetTemplateName());
+            EXPECT_EQ("downloadTemplate", notiTemplate->GetTemplateName());
             std::shared_ptr<AAFwk::WantParams> param = notiTemplate->GetTemplateData();
-            int value = AAFwk::Integer::Unbox(AAFwk::IInteger::Query(param->GetParam("process")));
+            int value = AAFwk::Integer::Unbox(AAFwk::IInteger::Query(param->GetParam("downloadTemplate")));
             EXPECT_EQ(20, value); // 20 test input
         }
         EXPECT_EQ(NotificationConstant::OTHER, notificationRequest.GetSlotType());
@@ -396,6 +397,13 @@ private:
             EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsSoundEnabled());
             EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsVibrationEnabled());
         }
+    }
+
+    void CheckCaseSeventeenResult(NotificationRequest notificationRequest)
+    {
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent =
+            notificationRequest.GetRemovalWantAgent();
+        EXPECT_NE(removalWantAgent, nullptr);
     }
 };
 
@@ -430,7 +438,6 @@ void AnsInnerKitsModulePublishTest::SetUpTestCase()
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
-    MockIPCSkeleton::SetCallingUid(CALLING_UID);
 }
 
 void AnsInnerKitsModulePublishTest::TearDownTestCase()
@@ -1285,10 +1292,10 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_04000, Function
 
     std::shared_ptr<NotificationTemplate> notiTemplate = std::make_shared<NotificationTemplate>();
     EXPECT_NE(notiTemplate, nullptr);
-    notiTemplate->SetTemplateName("process");
-    // [{'process':20}]
+    notiTemplate->SetTemplateName("downloadTemplate");
+    // [{'downloadTemplate':20}]
     AAFwk::WantParams wantParams;
-    std::string key("process");
+    std::string key("downloadTemplate");
     int resultValue = 20;
     wantParams.SetParam(key,  AAFwk::Integer::Box(resultValue));
     notiTemplate->SetTemplateData(std::make_shared<AAFwk::WantParams>(wantParams));
@@ -1461,6 +1468,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_06000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Function | MediumTest | Level1)
 {
+    GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00100::start:";
     NotificationSlot slot(NotificationConstant::CONTENT_INFORMATION);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
 
@@ -1479,6 +1487,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
     NotificationBundleOption bo("bundleName", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, enable));
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, enable));
+    GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00100::end:" << enable;
     EXPECT_EQ(enable, false);
     EXPECT_EQ(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, NotificationHelper::PublishNotification(req));
 }
@@ -1491,6 +1500,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Function | MediumTest | Level1)
 {
+    GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00200::start:";
     NotificationSlot slot(NotificationConstant::SERVICE_REMINDER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
 
@@ -1507,6 +1517,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
 
     bool enable = false;
     NotificationBundleOption bo("bundleName", 1);
+    GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00200::end:" << enable;
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, false);
@@ -1517,6 +1528,62 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, true);
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
+}
+
+/**
+ * @tc.number    : ANS_Interface_MT_Publish_09000
+ * @tc.name      : Publish_09000
+ * @tc.desc      : Add removalWantAgent, make a subscriber and publish a removalWantAgent notification.
+ * @tc.expected  : Add removalWantAgent success, make a subscriber and publish removalWantAgent notification success.
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function | MediumTest | Level1)
+{
+    NotificationSlot slot(NotificationConstant::OTHER);
+    EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
+    auto subscriber = TestAnsSubscriber();
+    NotificationSubscribeInfo info = NotificationSubscribeInfo();
+    info.AddAppName("bundleName");
+    info.AddAppUserId(SUBSCRIBE_USER_ALL);
+    g_subscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    WaitOnSubscribeResult();
+
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+
+    auto want = std::make_shared<OHOS::AAFwk::Want>();
+    EXPECT_NE(want, nullptr);
+    want->SetAction("usual.event.REMOVAL_WANTAGENT");
+    AppExecFwk::ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    std::vector<std::shared_ptr<AAFwk::Want>> wants { want };
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags {
+        AbilityRuntime::WantAgent::WantAgentConstant::Flags::CONSTANT_FLAG };
+    AbilityRuntime::WantAgent::WantAgentInfo paramsInfo(
+        10,
+        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
+        flags, wants, nullptr
+    );
+
+    std::shared_ptr<AbilityRuntime::ApplicationContext> context =
+        std::make_shared<AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(context, paramsInfo);
+    EXPECT_NE(wantAgent, nullptr);
+
+    NotificationRequest req;
+    req.SetContent(content);
+    req.SetSlotType(NotificationConstant::OTHER);
+    req.SetNotificationId(CASE_SEVENTEEN);
+    req.SetRemovalWantAgent(wantAgent);
+    g_consumed_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
+    WaitOnConsumed();
+    g_unsubscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    WaitOnUnsubscribeResult();
 }
 }  // namespace Notification
 }  // namespace OHOS

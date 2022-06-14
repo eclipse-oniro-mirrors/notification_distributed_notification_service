@@ -457,6 +457,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         }
         UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+        ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         DoDistributedPublish(bundleOption, record);
@@ -478,11 +479,10 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     if (result != ERR_OK) {
         return result;
     }
-    ReportHasSeenEvent(request->GetCreatorUserId(), bundleOption->GetBundleName());
     return PublishPreparedNotification(request, bundleOption);
 }
 
-void AdvancedNotificationService::ReportHasSeenEvent(const int32_t userId, const std::string &bundleName)
+void AdvancedNotificationService::ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName)
 {
     DeviceUsageStats::BundleActiveEvent event(DeviceUsageStats::BundleActiveEvent::NOTIFICATION_SEEN, bundleName);
     DeviceUsageStats::BundleActiveClient::GetInstance().ReportEvent(event, userId);

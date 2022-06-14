@@ -179,6 +179,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00200,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00300, Function | SmallTest | Level1)
 {
     IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CUSTOM);
@@ -1587,6 +1588,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10900,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11000, Function | SmallTest | Level1)
 {
     IPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
