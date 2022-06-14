@@ -15,6 +15,7 @@
 
 #include "access_token_helper.h"
 #include "ans_ut_constant.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace Notification {
@@ -31,7 +32,11 @@ bool AccessTokenHelper::VerifyNativeToken(const Security::AccessToken::AccessTok
 
 bool AccessTokenHelper::IsSystemHap()
 {
-    return true;
+    Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    if (tokenId == NATIVE_TOKEN) {
+        return true;
+    }
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -56,6 +56,7 @@ const int32_t CASE_THIRTEEN = 13;
 const int32_t CASE_FOURTEEN = 14;
 const int32_t CASE_FIFTEEN = 15;
 const int32_t CASE_SIXTEEN = 16;
+const int32_t CASE_SEVENTEEN = 17;
 
 const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
@@ -145,6 +146,8 @@ public:
             CheckCaseFifteenResult(notificationRequest);
         } else if (CASE_SIXTEEN == notificationRequest.GetNotificationId()) {
             CheckCaseSixteenResult(notificationRequest);
+        } else if (CASE_SEVENTEEN == notificationRequest.GetNotificationId()) {
+            CheckCaseSeventeenResult(notificationRequest);
         } else {
             GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish::OnConsumed do nothing!!!!!";
         }
@@ -394,6 +397,13 @@ private:
             EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsSoundEnabled());
             EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsVibrationEnabled());
         }
+    }
+
+    void CheckCaseSeventeenResult(NotificationRequest notificationRequest)
+    {
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent =
+            notificationRequest.GetRemovalWantAgent();
+        EXPECT_NE(removalWantAgent, nullptr);
     }
 };
 
@@ -1518,6 +1528,62 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, true);
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
+}
+
+/**
+ * @tc.number    : ANS_Interface_MT_Publish_09000
+ * @tc.name      : Publish_09000
+ * @tc.desc      : Add removalWantAgent, make a subscriber and publish a removalWantAgent notification.
+ * @tc.expected  : Add removalWantAgent success, make a subscriber and publish removalWantAgent notification success.
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function | MediumTest | Level1)
+{
+    NotificationSlot slot(NotificationConstant::OTHER);
+    EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
+    auto subscriber = TestAnsSubscriber();
+    NotificationSubscribeInfo info = NotificationSubscribeInfo();
+    info.AddAppName("bundleName");
+    info.AddAppUserId(SUBSCRIBE_USER_ALL);
+    g_subscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    WaitOnSubscribeResult();
+
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+
+    auto want = std::make_shared<OHOS::AAFwk::Want>();
+    EXPECT_NE(want, nullptr);
+    want->SetAction("usual.event.REMOVAL_WANTAGENT");
+    AppExecFwk::ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    std::vector<std::shared_ptr<AAFwk::Want>> wants { want };
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags {
+        AbilityRuntime::WantAgent::WantAgentConstant::Flags::CONSTANT_FLAG };
+    AbilityRuntime::WantAgent::WantAgentInfo paramsInfo(
+        10,
+        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
+        flags, wants, nullptr
+    );
+
+    std::shared_ptr<AbilityRuntime::ApplicationContext> context =
+        std::make_shared<AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(context, paramsInfo);
+    EXPECT_NE(wantAgent, nullptr);
+
+    NotificationRequest req;
+    req.SetContent(content);
+    req.SetSlotType(NotificationConstant::OTHER);
+    req.SetNotificationId(CASE_SEVENTEEN);
+    req.SetRemovalWantAgent(wantAgent);
+    g_consumed_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
+    WaitOnConsumed();
+    g_unsubscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    WaitOnUnsubscribeResult();
 }
 }  // namespace Notification
 }  // namespace OHOS
