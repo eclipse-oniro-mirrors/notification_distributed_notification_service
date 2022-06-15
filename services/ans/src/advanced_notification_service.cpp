@@ -29,7 +29,9 @@
 #include "ans_watchdog.h"
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
+#ifdef DEVICE_USAGE_STATISTICS_ENABLE
 #include "bundle_active_client.h"
+#endif
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "display_manager.h"
@@ -484,8 +486,10 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
 void AdvancedNotificationService::ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName)
 {
+#ifdef DEVICE_USAGE_STATISTICS_ENABLE
     DeviceUsageStats::BundleActiveEvent event(DeviceUsageStats::BundleActiveEvent::NOTIFICATION_SEEN, bundleName);
     DeviceUsageStats::BundleActiveClient::GetInstance().ReportEvent(event, userId);
+#endif
 }
 
 bool AdvancedNotificationService::IsNotificationExists(const std::string &key)
