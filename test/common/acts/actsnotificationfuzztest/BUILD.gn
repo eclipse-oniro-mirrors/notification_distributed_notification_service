@@ -31,7 +31,7 @@ ohos_systemtest("ActsNotificationFuzzTest") {
 
   include_dirs = [
     "${aafwk_inner_api_path}/ability_manager/include",
-    "${aafwk_kits_path}/ability/native/include",
+    "${aafwk_path}/interfaces/kits/native/ability/native",
     "${aafwk_kits_path}/app/native/app/include/task",
     "${aafwk_services_path}/abilitymgr/include",
     "${core_path}/include",
@@ -49,7 +49,7 @@ ohos_systemtest("ActsNotificationFuzzTest") {
   }
 
   deps = [
-    "${aafwk_kits_path}/appkit:appkit_native",
+    "${aafwk_path}/frameworks/native/appkit:appkit_native",
     "${aafwk_services_path}/abilitymgr:abilityms",
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",

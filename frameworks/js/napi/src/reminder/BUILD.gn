@@ -33,7 +33,7 @@ config("native_module_config") {
 
 ohos_shared_library("reminderagent") {
   include_dirs = [
-    "${aafwk_kits_path}/ability/native/include",
+    "${aafwk_path}/interfaces/kits/native/ability/native",
     "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common",
     "//foundation/multimedia/image_standard/interfaces/kits/js/common/include/",
     "../../include",
