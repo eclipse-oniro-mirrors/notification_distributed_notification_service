@@ -293,7 +293,8 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
     }
 }
 
-std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerType type) const
+std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerType type,
+    std::string bundleName, int32_t uid) const
 {
     auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
     if ((sharedTimerInfo->TIMER_TYPE_WAKEUP > UINT8_MAX) || (sharedTimerInfo->TIMER_TYPE_EXACT > UINT8_MAX)) {
@@ -306,6 +307,8 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
     sharedTimerInfo->SetType(timerType);
     sharedTimerInfo->SetRepeat(false);
     sharedTimerInfo->SetInterval(0);
+    sharedTimerInfo->SetBundleName(bundleName);
+    sharedTimerInfo->SetUid(uid);
 
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
@@ -315,6 +318,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
     switch (type) {
         case (TimerType::TRIGGER_TIMER): {
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+            sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, activeReminderId_);
             break;
         }
@@ -324,6 +328,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
                 return sharedTimerInfo;
             }
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+            sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, alertingReminderId_);
             break;
         }
@@ -1231,8 +1236,15 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
                 ANSR_LOGE("Trigger timer has already started.");
                 break;
             }
+            auto mit = notificationBundleOptionMap_.find(reminderRequest->GetReminderId());
+            if (mit == notificationBundleOptionMap_.end()) {
+                ANS_LOGE("Failed to get bundle information. reminderId=%{public}d",
+                    reminderRequest->GetReminderId());
+                break;
+            }
             SetActiveReminder(reminderRequest);
-            timerId_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type));
+            timerId_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type,
+                mit->second->GetBundleName(), mit->second->GetUid()));
             triggerTime = reminderRequest->GetTriggerTimeInMilli();
             timer->StartTimer(timerId_, triggerTime);
             ANSR_LOGD("Start timing (next triggerTime), timerId=%{public}" PRIu64 "", timerId_);
