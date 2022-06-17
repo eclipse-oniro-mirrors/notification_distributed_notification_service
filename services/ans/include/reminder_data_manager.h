@@ -223,12 +223,13 @@ private:
      * Create a information for timer, such as timer type, repeat policy, interval and want agent.
      *
      * @param type Indicates the timer type.
-     * @param bundleName Indicates the bundle name.
-     * @param uid Indicates the uid.
+     * @param reminderRequest Indicates the reminder request.
      * @return pointer of ReminderTimerInfo.
      */
-    std::shared_ptr<ReminderTimerInfo> CreateTimerInfo(TimerType type, std::string bundleName = "",
-        int32_t uid = -1) const;
+    std::shared_ptr<ReminderTimerInfo> CreateTimerInfo(TimerType type,
+        const sptr<ReminderRequest> &reminderRequest) const;
+    void InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &timerInfo,
+        const sptr<ReminderRequest> &reminderRequest) const;
 
     void GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const;
 
