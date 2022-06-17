@@ -23,6 +23,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_watchdog.h"
+#include "hitrace_meter.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager.h"
 #include "remote_death_recipient.h"
@@ -53,6 +54,7 @@ NotificationSubscriberManager::~NotificationSubscriberManager()
 ErrCode NotificationSubscriberManager::AddSubscriber(
     const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null.");
         return ERR_ANS_INVALID_PARAM;
@@ -91,6 +93,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
 ErrCode NotificationSubscriberManager::RemoveSubscriber(
     const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null.");
         return ERR_ANS_INVALID_PARAM;
@@ -107,6 +110,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
 void NotificationSubscriberManager::NotifyConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (handler_ == nullptr) {
         ANS_LOGE("handler is nullptr");
         return;
@@ -120,6 +124,7 @@ void NotificationSubscriberManager::NotifyConsumed(
 void NotificationSubscriberManager::NotifyCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (handler_ == nullptr) {
         ANS_LOGE("handler is nullptr");
         return;
@@ -160,6 +165,7 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChanged(const sptr<Not
 void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (handler_ == nullptr) {
         ANS_LOGE("handler is nullptr");
         return;
@@ -257,6 +263,7 @@ void NotificationSubscriberManager::RemoveRecordInfo(
 ErrCode NotificationSubscriberManager::AddSubscriberInner(
     const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(subscriber);
     if (record == nullptr) {
         record = CreateSubscriberRecord(subscriber);
@@ -280,6 +287,7 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
 ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
     const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(subscriber);
 
     if (record == nullptr) {
@@ -304,6 +312,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
 void NotificationSubscriberManager::NotifyConsumedInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
@@ -327,6 +336,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
 void NotificationSubscriberManager::NotifyCanceledInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();

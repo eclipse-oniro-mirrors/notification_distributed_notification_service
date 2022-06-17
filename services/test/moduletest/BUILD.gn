@@ -30,6 +30,7 @@ ohos_moduletest("ans_module_test") {
   sources = [
     "${services_path}/ans/src/advanced_notification_service.cpp",
     "${services_path}/ans/src/advanced_notification_service_ability.cpp",
+    "${services_path}/ans/src/event_report.cpp",
     "${services_path}/ans/src/notification_preferences.cpp",
     "${services_path}/ans/src/notification_preferences_database.cpp",
     "${services_path}/ans/src/notification_preferences_info.cpp",
@@ -74,6 +75,7 @@ ohos_moduletest("ans_module_test") {
     "distributeddatamgr:distributeddata_inner",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
     "hitrace_native:libhitrace",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

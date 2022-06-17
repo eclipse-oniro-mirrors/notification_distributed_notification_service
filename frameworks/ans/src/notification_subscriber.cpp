@@ -15,6 +15,7 @@
 
 #include "notification_subscriber.h"
 
+#include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -40,6 +41,7 @@ NotificationSubscriber::SubscriberImpl::SubscriberImpl(NotificationSubscriber &s
 
 void NotificationSubscriber::SubscriberImpl::OnConnected()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (GetAnsManagerProxy()) {
         proxy_->AsObject()->AddDeathRecipient(recipient_);
         ANS_LOGD("%s, Add death recipient.", __func__);
@@ -49,6 +51,7 @@ void NotificationSubscriber::SubscriberImpl::OnConnected()
 
 void NotificationSubscriber::SubscriberImpl::OnDisconnected()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (GetAnsManagerProxy()) {
         proxy_->AsObject()->RemoveDeathRecipient(recipient_);
         ANS_LOGD("%s, Remove death recipient.", __func__);
@@ -58,24 +61,28 @@ void NotificationSubscriber::SubscriberImpl::OnDisconnected()
 
 void NotificationSubscriber::SubscriberImpl::OnConsumed(const sptr<Notification> &notification)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnConsumed(std::make_shared<Notification>(*notification));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnConsumed(
         std::make_shared<Notification>(*notification), std::make_shared<NotificationSortingMap>(*notificationMap));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnCanceled(const sptr<Notification> &notification)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnCanceled(std::make_shared<Notification>(*notification));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
         std::make_shared<NotificationSortingMap>(*notificationMap),
         deleteReason);
@@ -94,6 +101,7 @@ void NotificationSubscriber::SubscriberImpl::OnDoNotDisturbDateChange(const sptr
 void NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
 }
 
