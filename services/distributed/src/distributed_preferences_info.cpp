@@ -55,5 +55,22 @@ void DistributedPreferencesInfo::DeleteDistributedBundleInfo(const std::string &
 {
     bundleEnable_.erase(std::make_pair(bundleName, uid));
 }
+
+void DistributedPreferencesInfo::SetSyncEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    enabledWithoutApp_[userId] = enabled;
+}
+
+ErrCode DistributedPreferencesInfo::GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    auto iter = enabledWithoutApp_.find(userId);
+    if (iter == enabledWithoutApp_.end()) {
+        ANS_LOGW("userId(%{public}d) not found.", userId);
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    enabled = iter->second;
+    return ERR_OK;
+}
 }  // namespace Notification
 }  // namespace OHOS

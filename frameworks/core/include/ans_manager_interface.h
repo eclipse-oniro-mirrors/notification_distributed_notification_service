@@ -720,6 +720,24 @@ public:
     virtual ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
         std::vector<std::string> &dumpInfo) = 0;
 
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    virtual ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled) = 0;
+
+    /**
+     * @brief Obtains whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns get enabled result.
+     */
+    virtual ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) = 0;
+
 protected:
     enum TransactId : uint32_t {
         PUBLISH_NOTIFICATION = FIRST_CALL_TRANSACTION,
@@ -798,7 +816,9 @@ protected:
         SET_DO_NOT_DISTURB_DATE_BY_USER,
         GET_DO_NOT_DISTURB_DATE_BY_USER,
         SET_ENABLED_FOR_BUNDLE_SLOT,
-        GET_ENABLED_FOR_BUNDLE_SLOT
+        GET_ENABLED_FOR_BUNDLE_SLOT,
+        SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
+        GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP
     };
 };
 }  // namespace Notification

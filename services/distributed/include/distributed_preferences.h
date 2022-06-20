@@ -34,7 +34,7 @@ public:
     /**
      * @brief Set whether the device supports distributed notifications.
      *
-     * @param enable Specifies whether to enable the device to support distributed notification.
+     * @param isEnable Specifies whether to enable the device to support distributed notification.
      * @return Returns enable distributed result.
      */
     ErrCode SetDistributedEnable(bool isEnable);
@@ -42,7 +42,7 @@ public:
     /**
      * @brief Check if the device supports distributed notification.
      *
-     * @param enabled True if the device supports distributed notification; false otherwise.
+     * @param isEnable True if the device supports distributed notification; false otherwise.
      * @return Returns is distributed enabled result.
      */
     ErrCode GetDistributedEnable(bool &isEnable);
@@ -51,7 +51,7 @@ public:
      * @brief Set whether an application supports distributed notifications.
      *
      * @param bundleOption Indicates the bundle name and uid of an application.
-     * @param enabled Specifies whether to enable an application to support distributed notification.
+     * @param isEnable Specifies whether to enable an application to support distributed notification.
      * @return Returns enable distributed by bundle result.
      */
     ErrCode SetDistributedBundleEnable(const sptr<NotificationBundleOption> &bundleOption, bool isEnable);
@@ -60,7 +60,7 @@ public:
      * @brief Check whether an application supports distributed notifications.
      *
      * @param bundleOption Indicates the bundle name and uid of an application.
-     * @param enabled True if the application supports distributed notification; false otherwise.
+     * @param isEnable True if the application supports distributed notification; false otherwise.
      * @return Returns is distributed enabled by bundle result.
      */
     ErrCode GetDistributedBundleEnable(const sptr<NotificationBundleOption> &bundleOption, bool &isEnable);
@@ -80,16 +80,26 @@ public:
      */
     ErrCode ClearDataInRestoreFactorySettings();
 
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    ErrCode SetSyncEnabledWithoutApp(const int32_t userId, const bool enabled);
+    ErrCode GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled);
+
 private:
-    struct ResolveKey {
-        bool isMainKey = false;
-        std::string bundleName;
-        int32_t uid = 0;
-    };
     bool InitDistributedAllInfo(void);
     void GetDistributedMainKey(std::string &key);
     void GetDistributedBundleKey(const sptr<NotificationBundleOption> &bundleOption, std::string &key);
-    bool ResolveDistributedKey(const std::string &key, ResolveKey &resolveKey);
+    bool ResolveDistributedKey(const DistributedKv::Entry &entry);
+    void GetEnabledWithoutApp(const int32_t userId, std::string &key);
+
+    bool ResolveDistributedEnable(const std::string &value);
+    bool ResolveDistributedBundleEnable(const std::string &key, const int32_t startPos, const std::string &value);
+    bool ResolveSyncWithoutAppEnable(const std::string &key, const int32_t startPos, const std::string &value);
 
 private:
     std::unique_ptr<DistributedPreferencesInfo> preferencesInfo_ = nullptr;

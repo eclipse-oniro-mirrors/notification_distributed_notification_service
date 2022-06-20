@@ -2712,7 +2712,75 @@ ErrCode AnsManagerProxy::GetEnabledForBundleSlot(
     }
 
     if (!reply.ReadBool(enabled)) {
-        ANS_LOGE("[GetEnabledForBundleSlot] fail: read canPublish failed.");
+        ANS_LOGE("[GetEnabledForBundleSlot] fail: read enable failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail:: write userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteBool(enabled)) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: write enabled failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail:: write userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadBool(enabled)) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: read enable failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
