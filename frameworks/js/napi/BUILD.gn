@@ -72,7 +72,7 @@ ohos_shared_library("notification") {
   ]
 
   deps = [
-    "${aafwk_path}/frameworks/kits/appkit:app_context",
+    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
