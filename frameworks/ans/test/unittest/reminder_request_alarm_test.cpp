@@ -35,45 +35,11 @@ public:
 
 /**
  * @tc.name: initHour_00100
- * @tc.desc: set hour < 0 should throw exception.
- * @tc.type: FUNC
- * @tc.require: SR000GGTRC AR000GH8E8
- */
-HWTEST_F(ReminderRequestAlarmTest, initHour_00100, Function | SmallTest | Level1)
-{
-    std::vector<uint8_t> daysOfWeek;
-    try {
-        auto rrc = std::make_shared<ReminderRequestAlarm>(-1, 1, daysOfWeek);
-        EXPECT_TRUE(false) << "hour < 0 should throw exception.";
-    } catch (const std::invalid_argument &e) {
-        ANSR_LOGI("hour < 0 throw exception.");
-    }
-}
-
-/**
- * @tc.name: initHour_00200
- * @tc.desc: set hour > 23 should throw exception.
- * @tc.type: FUNC
- * @tc.require: SR000GGTRC AR000GH8E8
- */
-HWTEST_F(ReminderRequestAlarmTest, initHour_00200, Function | SmallTest | Level1)
-{
-    std::vector<uint8_t> daysOfWeek;
-    try {
-        auto rrc = std::make_shared<ReminderRequestAlarm>(24, 1, daysOfWeek);
-        EXPECT_TRUE(false) << "hour > 23 should throw exception.";
-    } catch (const std::invalid_argument &e) {
-        ANSR_LOGI("hour > 23 throw exception.");
-    }
-}
-
-/**
- * @tc.name: initHour_00300
  * @tc.desc: test set edge value of hour (0 and 23).
  * @tc.type: FUNC
  * @tc.require: SR000GGTRC AR000GH8E8
  */
-HWTEST_F(ReminderRequestAlarmTest, initHour_00300, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestAlarmTest, initHour_00100, Function | SmallTest | Level1)
 {
     std::vector<uint8_t> daysOfWeek;
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 1, daysOfWeek);
@@ -93,46 +59,12 @@ HWTEST_F(ReminderRequestAlarmTest, initHour_00300, Function | SmallTest | Level1
 }
 
 /**
- * @tc.name: initHour_00400
- * @tc.desc: set minute < 0 should throw exception.
- * @tc.type: FUNC
- * @tc.require: SR000GGTRC AR000GH8E8
- */
-HWTEST_F(ReminderRequestAlarmTest, initHour_00400, Function | SmallTest | Level1)
-{
-    std::vector<uint8_t> daysOfWeek;
-    try {
-        auto rrc = std::make_shared<ReminderRequestAlarm>(1, -1, daysOfWeek);
-        EXPECT_TRUE(false) << "minute < 0 should throw exception.";
-    } catch (const std::invalid_argument &e) {
-        ANSR_LOGI("minute < 0 throw exception.");
-    }
-}
-
-/**
- * @tc.name: initHour_00500
- * @tc.desc: set minute > 59 should throw exception.
- * @tc.type: FUNC
- * @tc.require: SR000GGTRC AR000GH8E8
- */
-HWTEST_F(ReminderRequestAlarmTest, initHour_00500, Function | SmallTest | Level1)
-{
-    std::vector<uint8_t> daysOfWeek;
-    try {
-        auto rrc = std::make_shared<ReminderRequestAlarm>(1, 60, daysOfWeek);
-        EXPECT_TRUE(false) << "minute > 59 should throw exception.";
-    } catch (const std::invalid_argument &e) {
-        ANSR_LOGI("minute > 59 throw exception.");
-    }
-}
-
-/**
- * @tc.name: initHour_00600
+ * @tc.name: initHour_00200
  * @tc.desc: test set edge value of minute (0 and 59).
  * @tc.type: FUNC
  * @tc.require: SR000GGTRC AR000GH8E8
  */
-HWTEST_F(ReminderRequestAlarmTest, initHour_00600, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestAlarmTest, initHour_00200, Function | SmallTest | Level1)
 {
     std::vector<uint8_t> daysOfWeek;
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
@@ -187,29 +119,11 @@ HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00300, Function | SmallTest | 
 
 /**
  * @tc.name: initDaysOfWeek_00400
- * @tc.desc: test set daysOfWeek exceeding maximum length.
- * @tc.type: FUNC
- * @tc.require: SR000GGTRC AR000GH8E8
- */
-HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00400, Function | SmallTest | Level1)
-{
-    uint8_t arr[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
-    try {
-        auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
-        EXPECT_TRUE(false) << "repeatDays exceeding maximum length should throw exception";
-    } catch (const std::invalid_argument &e) {
-        EXPECT_TRUE(true);
-    }
-}
-
-/**
- * @tc.name: initDaysOfWeek_00500
  * @tc.desc: test set daysOfWeek with null value.
  * @tc.type: FUNC
  * @tc.require: SR000GGTRC AR000GH8E8
  */
-HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00500, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00400, Function | SmallTest | Level1)
 {
     uint8_t arr[] = {};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
