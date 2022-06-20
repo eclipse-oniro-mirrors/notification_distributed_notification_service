@@ -13,15 +13,28 @@
  * limitations under the License.
  */
 
-#include "ans_manager_death_recipient.h"
+#include <unistd.h>
+
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
+#include "hisysevent.h"
 #include "singleton.h"
+#include "ans_manager_death_recipient.h"
 
 namespace OHOS {
 namespace Notification {
 void AnsManagerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
+    std::string eventType = "ANS_SERVICE_DIED";
+    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
+        HiviewDFX::HiSysEvent::Domain::NOTIFICATION, eventType,
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "UID", getuid(),
+        "PID", getpid());
+    if (res != DH_ANS_SUCCESS) {
+        ANS_LOGE("Write HiSysEvent error, res:%d", res);
+    }
     ANS_LOGE("Ans service died");
     DelayedSingleton<AnsNotification>::GetInstance()->ResetAnsManagerProxy();
 }

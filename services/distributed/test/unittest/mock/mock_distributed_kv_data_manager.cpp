@@ -80,7 +80,7 @@ Status DistributedKvDataManager::CloseKvStore(const AppId &appId, std::shared_pt
     return Status::SUCCESS;
 }
 
-Status DistributedKvDataManager::DeleteKvStore(const AppId &appId, const StoreId &storeId)
+Status DistributedKvDataManager::DeleteKvStore(const AppId &appId, const StoreId &storeId, const std::string &path)
 {
     return Status::SUCCESS;
 }
