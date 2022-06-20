@@ -200,17 +200,6 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00500, Function | SmallTest |
     calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
     actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with 13 error.";
-
-    for (uint8_t i = 1; i <= 12; i++) {
-        repeatMonths.push_back(i);
-    }
-    repeatMonths.push_back(1);
-    try {
-        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
-        EXPECT_TRUE(false) << "length of repeat month > 12 should throw exception.";
-    } catch (const std::invalid_argument &e) {
-        ANSR_LOGI("length of repeat month > 12 throw exception.");
-    }
 }
 
 /**
@@ -283,18 +272,6 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00700, Function | SmallTest |
     calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
     actualRepeatDays = calendar->GetRepeatDays();
     EXPECT_TRUE(actualRepeatDays.size() == 0) << "Set repeat day with 32 error.";
-
-    repeatDays.clear();
-    for (uint8_t i = 1; i <= 31; i++) {
-        repeatDays.push_back(i);
-    }
-    repeatDays.push_back(1);
-    try {
-        calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
-        ANSR_LOGI("length of repeat month > 32 should throw exception.");
-    } catch (const std::invalid_argument &e) {
-        ANSR_LOGI("length of repeat month > 32 throw exception.");
-    }
 }
 
 /**

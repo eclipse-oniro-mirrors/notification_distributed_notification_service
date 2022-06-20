@@ -36,6 +36,21 @@ public:
         action_ = action;
     }
 
+    inline void SetPid(const int32_t pid)
+    {
+        pid_ = pid;
+    }
+
+    inline void SetUid(const int32_t uid)
+    {
+        uid_ = uid;
+    }
+
+    inline void SetBundleName(const std::string &bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
     /**
      * When timing is up, this function will execute as call back.
      */
@@ -63,6 +78,9 @@ public:
 
 private:
     std::string action_;
+    int32_t pid_ {-1};
+    int32_t uid_ {-1};
+    std::string bundleName_;
 };
 } // namespace OHOS
 } // namespace Notification

@@ -293,19 +293,35 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
     }
 }
 
-std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerType type) const
+void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &sharedTimerInfo,
+    const sptr<ReminderRequest> &reminderRequest) const
 {
-    auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
-    if ((sharedTimerInfo->TIMER_TYPE_WAKEUP > UINT8_MAX) || (sharedTimerInfo->TIMER_TYPE_EXACT > UINT8_MAX)) {
-        ANSR_LOGE("Failed to set timer type.");
-        return nullptr;
-    }
     uint8_t timerTypeWakeup = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_WAKEUP);
     uint8_t timerTypeExact = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_EXACT);
     int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
     sharedTimerInfo->SetType(timerType);
     sharedTimerInfo->SetRepeat(false);
     sharedTimerInfo->SetInterval(0);
+
+    auto mit = notificationBundleOptionMap_.find(reminderRequest->GetReminderId());
+    if (mit == notificationBundleOptionMap_.end()) {
+        ANS_LOGE("Failed to get bundle information. reminderId=%{public}d",
+            reminderRequest->GetReminderId());
+        return;
+    }
+    sharedTimerInfo->SetBundleName(mit->second->GetBundleName());
+    sharedTimerInfo->SetUid(mit->second->GetUid());
+}
+
+std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerType type,
+    const sptr<ReminderRequest> &reminderRequest) const
+{
+    auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
+    if ((sharedTimerInfo->TIMER_TYPE_WAKEUP > UINT8_MAX) || (sharedTimerInfo->TIMER_TYPE_EXACT > UINT8_MAX)) {
+        ANSR_LOGE("Failed to set timer type.");
+        return nullptr;
+    }
+    InitTimerInfo(sharedTimerInfo, reminderRequest);
 
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
@@ -315,6 +331,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
     switch (type) {
         case (TimerType::TRIGGER_TIMER): {
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+            sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, activeReminderId_);
             break;
         }
@@ -324,6 +341,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
                 return sharedTimerInfo;
             }
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+            sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, alertingReminderId_);
             break;
         }
@@ -1232,7 +1250,7 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
                 break;
             }
             SetActiveReminder(reminderRequest);
-            timerId_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type));
+            timerId_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type, reminderRequest));
             triggerTime = reminderRequest->GetTriggerTimeInMilli();
             timer->StartTimer(timerId_, triggerTime);
             ANSR_LOGD("Start timing (next triggerTime), timerId=%{public}" PRIu64 "", timerId_);
@@ -1245,7 +1263,7 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
             }
             triggerTime = ReminderRequest::GetDurationSinceEpochInMilli(now)
                 + static_cast<uint64_t>(reminderRequest->GetRingDuration() * ReminderRequest::MILLI_SECONDS);
-            timerIdAlerting_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type));
+            timerIdAlerting_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type, reminderRequest));
             timer->StartTimer(timerIdAlerting_, triggerTime);
             ANSR_LOGD(
                 "Start timing (alerting time out), timerId=%{public}" PRIu64 "", timerIdAlerting_);

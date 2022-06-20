@@ -17,9 +17,11 @@
 
 #include "ans_log_wrapper.h"
 #include "common_event_manager.h"
+#include "hisysevent.h"
 #include "reminder_request.h"
 
 using namespace OHOS::EventFwk;
+using namespace OHOS::HiviewDFX;
 namespace OHOS {
 namespace Notification {
 void ReminderTimerInfo::SetType(const int &_type)
@@ -45,6 +47,11 @@ void ReminderTimerInfo::SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantA
 void ReminderTimerInfo::OnTrigger()
 {
     ANSR_LOGI("Timing is arrivelled.");
+    if (action_ == ReminderRequest::REMINDER_EVENT_ALARM_ALERT) {
+        std::string eventType = "ALARM_TRIGGER";
+        HiSysEvent::Write(HiSysEvent::Domain::NOTIFICATION, eventType, HiSysEvent::EventType::STATISTIC,
+            "UID", uid_, "PID", pid_, "NAME", bundleName_);
+    }
 }
 }
 }
