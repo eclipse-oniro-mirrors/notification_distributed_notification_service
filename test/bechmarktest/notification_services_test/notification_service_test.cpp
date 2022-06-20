@@ -249,7 +249,6 @@ BENCHMARK_F(BenchmarkNotificationService, CancelNotificationTestCase001)(benchma
             state.SkipWithError("CancelNotificationTestCase001 publish failed.");
         }
         advancedNotificationService_->Cancel(id, label);
-        id++;
     }
 }
 
