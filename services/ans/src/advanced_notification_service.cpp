@@ -1581,6 +1581,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
             }
             if (result == ERR_OK) {
                 NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
+                PublishSlotChangeCommonEvent(bundle);
             }
         } else {
             // Remote revice
