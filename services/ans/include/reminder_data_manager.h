@@ -223,9 +223,13 @@ private:
      * Create a information for timer, such as timer type, repeat policy, interval and want agent.
      *
      * @param type Indicates the timer type.
+     * @param reminderRequest Indicates the reminder request.
      * @return pointer of ReminderTimerInfo.
      */
-    std::shared_ptr<ReminderTimerInfo> CreateTimerInfo(TimerType type) const;
+    std::shared_ptr<ReminderTimerInfo> CreateTimerInfo(TimerType type,
+        const sptr<ReminderRequest> &reminderRequest) const;
+    void InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &timerInfo,
+        const sptr<ReminderRequest> &reminderRequest) const;
 
     void GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const;
 

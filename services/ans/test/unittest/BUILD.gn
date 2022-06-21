@@ -88,6 +88,7 @@ ohos_unittest("ans_unit_test") {
     "device_usage_statistics:usagestatsinner",
     "distributeddatamgr:distributeddata_inner",
     "eventhandler:libeventhandler",
+    "hisysevent_native:libhisysevent",
     "hitrace_native:libhitrace",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

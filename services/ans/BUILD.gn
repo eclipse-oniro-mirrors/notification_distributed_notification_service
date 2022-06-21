@@ -81,6 +81,7 @@ ohos_shared_library("libans") {
     "access_token:libaccesstoken_sdk",
     "device_usage_statistics:usagestatsinner",
     "distributeddatamgr:distributeddata_inner",
+    "hisysevent_native:libhisysevent",
     "multimedia_image_standard:image_native",
     "multimedia_media_standard:media_client",
     "os_account:os_account_innerkits",

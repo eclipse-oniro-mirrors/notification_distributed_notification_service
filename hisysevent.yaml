@@ -27,3 +27,9 @@ ANS_SUBSCRIBE:
   __BASE: {type: FAULT, level: CRITICAL, tag: ANS, desc: ans subscribe}
   PID: {type: INT32, desc: pid}
   UID: {type: INT32, desc: uid}
+
+ALARM_TRIGGER:
+  __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: alarm trigger}
+  PID: {type: INT32, desc: thread pid}
+  UID: {type: INT32, desc: package uid}
+  NAME: {type: STRING, desc: call package name}
