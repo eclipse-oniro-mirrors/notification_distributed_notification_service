@@ -460,7 +460,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-        DoDistributedPublish(bundleOption, record);
+        if (!request->IsAgentNotification()) {
+            DoDistributedPublish(bundleOption, record);
+        }
 #endif
     }));
     return result;
