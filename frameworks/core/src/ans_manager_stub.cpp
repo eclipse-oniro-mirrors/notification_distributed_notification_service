@@ -1470,14 +1470,23 @@ ErrCode AnsManagerStub::HandleGetDeviceRemindType(MessageParcel &data, MessagePa
 
 ErrCode AnsManagerStub::HandleShellDump(MessageParcel &data, MessageParcel &reply)
 {
-    std::string dumpOption;
-    if (!data.ReadString(dumpOption)) {
-        ANS_LOGE("[HandleShellDump] fail: read dumpOption failed.");
+    std::string cmd;
+    if (!data.ReadString(cmd)) {
+        ANS_LOGE("[HandleShellDump] fail: read cmd failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+    std::string bundle;
+    if (!data.ReadString(bundle)) {
+        ANS_LOGE("[HandleShellDump] fail: read bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    int32_t userId;
+    if (!data.ReadInt32(userId)) {
+        ANS_LOGE("[HandleShellDump] fail: read userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     std::vector<std::string> notificationsInfo;
-    ErrCode result = ShellDump(dumpOption, notificationsInfo);
+    ErrCode result = ShellDump(cmd, bundle, userId, notificationsInfo);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleGetRecentNotificationsInfo] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2187,12 +2196,6 @@ ErrCode AnsManagerStub::GetDeviceRemindType(NotificationConstant::RemindType &re
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo)
-{
-    ANS_LOGE("AnsManagerStub::ShellDump called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::PublishContinuousTaskNotification(const sptr<NotificationRequest> &request)
 {
     ANS_LOGE("AnsManagerStub::PublishContinuousTaskNotification called!");
@@ -2276,6 +2279,13 @@ ErrCode AnsManagerStub::GetEnabledForBundleSlot(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled)
 {
     ANS_LOGE("AnsManagerStub::GetEnabledForBundleSlot called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
+{
+    ANS_LOGE("AnsManagerStub::ShellDump called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

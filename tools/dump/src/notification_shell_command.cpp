@@ -24,32 +24,51 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-
-static const struct option OPTIONS[] = {
-    {"help", no_argument, nullptr, 'h'},
-    {"active", no_argument, nullptr, 'A'},
-    {"recent", no_argument, nullptr, 'R'},
+constexpr char COMMAND_ACTIVE[] = "active";
+constexpr char COMMAND_RECENT[] = "recent";
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    {"distributed", no_argument, nullptr, 'D'},
+constexpr char COMMAND_DISTRIBUTED[] = "distributed";
+constexpr char SHORT_OPTIONS[] = "hARDb:";
+#else
+constexpr char SHORT_OPTIONS[] = "hARb:";
 #endif
-    {"setRecentCount", required_argument, nullptr, 0},
-    {0, 0, 0, 0},
+constexpr char COMMAND_SET_RECENT_COUNT[] = "setRecentCount";
+const struct option LONG_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {COMMAND_ACTIVE, no_argument, nullptr, 'A'},
+    {COMMAND_RECENT, no_argument, nullptr, 'R'},
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    {COMMAND_DISTRIBUTED, no_argument, nullptr, 'D'},
+#endif
+    {"bundle", required_argument, nullptr, 'b'},
 };
-
-static const std::string HELP_MSG = "usage: anm <command> [<options>]\n"
-                                    "These are common commands list:\n"
-                                    "  help                         list available commands\n"
-                                    "  dump                         dump the info of notification\n";
-static const std::string DUMP_HELP_MSG =
+constexpr char HELP_MSG[] =
+    "usage: anm <command> [<options>]\n"
+    "These are common commands list:\n"
+    "  help                         list available commands\n"
+    "  dump                         dump the info of notification\n"
+    "  setting                      notification setting\n";
+constexpr char DUMP_HELP_MSG[] =
     "usage: anm dump [<options>]\n"
     "options list:\n"
     "  --help, -h                   help menu\n"
-    "  --active, -A                 list all active notifications\n"
-    "  --recent, -R                 list recent notifications\n"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     "  --distributed, -D            list all distributed notifications by remote device\n"
 #endif
-    "  --setRecentCount <N>         set the max count of recent notifications keeping in memory\n";
+    "  --active, -A                 list all active notifications\n"
+    "  --recent, -R                 list recent notifications\n"
+    "  --bundle, -b  <name>         specified a bundle filter\n";
+
+constexpr char SETTING_SHORT_OPTIONS[] = "c:";
+const struct option SETTING_LONG_OPTIONS[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"recent-count", required_argument, nullptr, 'c'},
+};
+constexpr char SETTING_HELP_MSG[] =
+    "usage: anm setting [<options>]\n"
+    "options list:\n"
+    "  --help, -h                   help menu\n"
+    "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n";
 }  // namespace
 
 NotificationShellCommand::NotificationShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "anm_dump")
@@ -60,30 +79,20 @@ ErrCode NotificationShellCommand::CreateCommandMap()
     commandMap_ = {
         {"help", std::bind(&NotificationShellCommand::RunAsHelpCommand, this)},
         {"dump", std::bind(&NotificationShellCommand::RunAsDumpCommand, this)},
+        {"setting", std::bind(&NotificationShellCommand::RunAsSettingCommand, this)},
     };
-
     return ERR_OK;
 }
 
-ErrCode NotificationShellCommand::CreateMessageMap()
-{
-    messageMap_ = {};
-
-    return ERR_OK;
-}
-
-ErrCode NotificationShellCommand::init()
+ErrCode NotificationShellCommand::Init()
 {
     ErrCode result = OHOS::ERR_OK;
-
     if (!ans_) {
         ans_ = DelayedSingleton<AnsNotification>::GetInstance();
     }
-
     if (!ans_) {
         result = OHOS::ERR_INVALID_VALUE;
     }
-
     return result;
 }
 
@@ -99,90 +108,130 @@ ErrCode NotificationShellCommand::RunHelp()
     return ERR_OK;
 }
 
-ErrCode NotificationShellCommand::RunActive(std::vector<std::string> &infos)
-{
-    ErrCode ret = ERR_OK;
-    if (ans_ != nullptr) {
-        ret = ans_->ShellDump("active", infos);
-        resultReceiver_.append("Total:" + std::to_string(infos.size()) + "\n");
-    } else {
-        ret = ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ret;
-}
-
-ErrCode NotificationShellCommand::RunRecent(std::vector<std::string> &infos)
-{
-    ErrCode ret = ERR_OK;
-    if (ans_ != nullptr) {
-        ret = ans_->ShellDump("recent", infos);
-        resultReceiver_.append("Total:" + std::to_string(infos.size()) + "\n");
-    } else {
-        ret = ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ret;
-}
-
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-ErrCode NotificationShellCommand::RunDistributed(std::vector<std::string> &infos)
-{
-    ErrCode ret = ERR_OK;
-    if (ans_ != nullptr) {
-        ret = ans_->ShellDump("distributed", infos);
-        resultReceiver_.append("Total:" + std::to_string(infos.size()) + "\n");
-    } else {
-        ret = ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ret;
-}
-#endif
-
 ErrCode NotificationShellCommand::RunAsDumpCommand()
 {
-    int ind = 0;
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    int option = getopt_long(argc_, argv_, "hARD", OPTIONS, &ind);
-#else
-    int option = getopt_long(argc_, argv_, "hAR", OPTIONS, &ind);
-#endif
-
     ErrCode ret = ERR_OK;
     std::vector<std::string> infos;
-
-    switch (option) {
-        case 'h':
-            ret = RunHelp();
-            break;
-        case 'A':
-            ret = RunActive(infos);
-            break;
-        case 'R':
-            ret = RunRecent(infos);
-            break;
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-        case 'D':
-            ret = RunDistributed(infos);
-            break;
-#endif
-        case 0:
-            if (ans_ != nullptr) {
-                ret = ans_->ShellDump(std::string(OPTIONS[ind].name) + " " + std::string(optarg), infos);
-            } else {
-                ret = ERR_ANS_SERVICE_NOT_CONNECTED;
-            }
-            break;
-        default:
-            resultReceiver_.append(DUMP_HELP_MSG);
-            break;
+    std::string cmd;
+    std::string bundle;
+    SetDumpCmdInfo(cmd, bundle, ret);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (cmd.empty()) {
+        resultReceiver_.clear();
+        resultReceiver_ = "request a option 'A' or 'R' or 'D'\n";
+        resultReceiver_.append(DUMP_HELP_MSG);
+        return ERR_INVALID_VALUE;
     }
 
+    ret = RunDumpCmd(cmd, bundle, infos);
     int index = 0;
-    for (auto info : infos) {
-        resultReceiver_.append("No." + std::to_string(index) + "\n");
+    for (const auto &info : infos) {
+        resultReceiver_.append("No." + std::to_string(++index) + "\n");
         resultReceiver_.append(info);
     }
-
     return ret;
+}
+
+ErrCode NotificationShellCommand::RunDumpCmd(const std::string& cmd, const std::string& bundle,
+    std::vector<std::string> &infos)
+{
+    if (ans_ != nullptr) {
+        ErrCode ret = ans_->ShellDump(cmd, bundle, SUBSCRIBE_USER_INIT, infos);
+        if (strncmp(cmd.c_str(), COMMAND_SET_RECENT_COUNT, strlen(COMMAND_SET_RECENT_COUNT)) == 0) {
+            if (ret == ERR_OK) {
+                resultReceiver_.append("set recent count success\n");
+            } else {
+                resultReceiver_.append("set recent count failed\n");
+            }
+        } else {
+            resultReceiver_.append("Total:" + std::to_string(infos.size()) + "\n");
+        }
+        return ret;
+    }
+    return ERR_ANS_SERVICE_NOT_CONNECTED;
+}
+
+void NotificationShellCommand::SetDumpCmdInfo(std::string &cmd, std::string &bundle, ErrCode &ret)
+{
+    int option = -1;
+    bool hasOption = false;
+    while ((option = getopt_long(argc_, argv_, SHORT_OPTIONS, LONG_OPTIONS, nullptr)) != -1) {
+        if (option == '?') {
+            CheckDumpOpt();
+            resultReceiver_.append(DUMP_HELP_MSG);
+            ret = ERR_INVALID_VALUE;
+            return;
+        }
+        hasOption = true;
+        switch (option) {
+            case 'h':
+                ret = RunHelp();
+                break;
+            case 'A':
+                cmd = COMMAND_ACTIVE;
+                break;
+            case 'R':
+                cmd = COMMAND_RECENT;
+                break;
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            case 'D':
+                cmd = COMMAND_DISTRIBUTED;
+                break;
+#endif
+            case 'b':
+                bundle = optarg;
+                break;
+            default:
+                resultReceiver_.append(DUMP_HELP_MSG);
+                break;
+        }
+    }
+    if (!hasOption) {
+        resultReceiver_.append(DUMP_HELP_MSG);
+        ret = ERR_INVALID_VALUE;
+    }
+}
+
+void NotificationShellCommand::CheckDumpOpt()
+{
+    switch (optopt) {
+        case 'b':
+            resultReceiver_.append("error: option 'b' requires a value.\n");
+            break;
+        default:
+            resultReceiver_.append("error: unknown option.\n");
+            break;
+    }
+}
+
+ErrCode NotificationShellCommand::RunAsSettingCommand()
+{
+    std::vector<std::string> infos;
+    int option = getopt_long(argc_, argv_, SETTING_SHORT_OPTIONS, SETTING_LONG_OPTIONS, nullptr);
+    if (option == '?') {
+        if (optopt == 'c') {
+            resultReceiver_.append("error: option 'c' requires a value.\n");
+        } else {
+            resultReceiver_.append("error: unknown option.\n");
+        }
+        resultReceiver_.append(DUMP_HELP_MSG);
+        return ERR_INVALID_VALUE;
+    }
+    if (option == 'c') {
+        int32_t count = atoi(optarg);
+        if ((count < NOTIFICATION_MIN_COUNT) || (count > NOTIFICATION_MAX_COUNT)) {
+            resultReceiver_.append("error: recent count should between 1 and 1024\n");
+            resultReceiver_.append(SETTING_HELP_MSG);
+            return ERR_INVALID_VALUE;
+        }
+        std::string cmd = COMMAND_SET_RECENT_COUNT;
+        cmd.append(" ").append(std::string(optarg));
+        return RunDumpCmd(cmd, "", infos);
+    }
+    resultReceiver_.append(SETTING_HELP_MSG);
+    return ERR_INVALID_VALUE;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -583,15 +583,6 @@ public:
     ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType) override;
 
     /**
-     * @brief Dump current running status for debuging.
-     *
-     * @param dumpOption Indicates the dump action that needs to be performed.
-     * @param dumpInfo Indicates the dump information.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo) override;
-
-    /**
      * @brief Publishes a continuous notification.
      *
      * @param request Notification requests that need to be posted.
@@ -737,6 +728,18 @@ public:
     ErrCode PublishPreparedNotification(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
 
+    /**
+     * @brief Dump current running status for debuging.
+     *
+     * @param cmd Indicates the specified dump command.
+     * @param bundle Indicates the specified bundle name.
+     * @param userId Indicates the specified userId.
+     * @param dumpInfo Indicates the container containing datas.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+        std::vector<std::string> &dumpInfo) override;
+
 private:
     struct RecentInfo;
     AdvancedNotificationService();
@@ -766,10 +769,11 @@ private:
 
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
-    ErrCode ActiveNotificationDump(std::vector<std::string> &dumpInfo);
-    ErrCode RecentNotificationDump(std::vector<std::string> &dumpInfo);
+    ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
+    ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    ErrCode DistributedNotificationDump(std::vector<std::string> &dumpInfo);
+    ErrCode DistributedNotificationDump(const std::string& bundle, int32_t userId,
+        std::vector<std::string> &dumpInfo);
 #endif
     ErrCode SetRecentNotificationCount(const std::string arg);
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);

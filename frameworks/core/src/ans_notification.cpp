@@ -980,15 +980,6 @@ void AnsNotification::ResetAnsManagerProxy()
     ansManagerProxy_ = nullptr;
 }
 
-ErrCode AnsNotification::ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ansManagerProxy_->ShellDump(dumpOption, dumpInfo);
-}
-
 ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
 {
     if (!GetAnsManagerProxy()) {
@@ -1376,6 +1367,16 @@ ErrCode AnsNotification::GetEnabledForBundleSlot(
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     return ansManagerProxy_->GetEnabledForBundleSlot(bo, slotType, enabled);
+}
+
+ErrCode AnsNotification::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->ShellDump(cmd, bundle, userId, dumpInfo);
 }
 }  // namespace Notification
 }  // namespace OHOS
