@@ -79,7 +79,6 @@ ohos_shared_library("libans") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "device_usage_statistics:usagestatsinner",
     "distributeddatamgr:distributeddata_inner",
     "hisysevent_native:libhisysevent",
     "multimedia_image_standard:image_native",
@@ -89,6 +88,11 @@ ohos_shared_library("libans") {
     "window_manager:libwm",
   ]
   external_deps += component_external_deps
+
+  if (device_usage) {
+    external_deps += [ "device_usage_statistics:usagestatsinner" ]
+    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

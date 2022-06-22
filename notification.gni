@@ -41,3 +41,11 @@ component_external_deps = [
   "safwk:system_ability_fwk",
   "samgr_standard:samgr_proxy",
 ]
+
+declare_args() {
+  device_usage = true
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.device_usage_statistics)) {
+    device_usage = false
+  }
+}
