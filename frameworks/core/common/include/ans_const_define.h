@@ -40,6 +40,8 @@ constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 constexpr int32_t SUBSCRIBE_USER_ALL = -2;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_BEGIN = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_END = 99;
+constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
+constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
 
 // Default sound for notification
 const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");

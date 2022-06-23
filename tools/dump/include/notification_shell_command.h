@@ -38,17 +38,15 @@ public:
 
 private:
     ErrCode CreateCommandMap() override;
-    ErrCode CreateMessageMap() override;
-    ErrCode init() override;
+    ErrCode Init() override;
     ErrCode RunAsHelpCommand();
     ErrCode RunAsDumpCommand();
+    ErrCode RunAsSettingCommand();
 
     ErrCode RunHelp();
-    ErrCode RunActive(std::vector<std::string> &infos);
-    ErrCode RunRecent(std::vector<std::string> &infos);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    ErrCode RunDistributed(std::vector<std::string> &infos);
-#endif
+    void CheckDumpOpt();
+    void SetDumpCmdInfo(std::string &cmd, std::string &bundle, ErrCode &ret);
+    ErrCode RunDumpCmd(const std::string& cmd, const std::string& bundle, std::vector<std::string> &infos);
 
 private:
     std::shared_ptr<AnsNotification> ans_;

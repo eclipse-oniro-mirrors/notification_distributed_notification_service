@@ -16,9 +16,9 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_TOOLS_DUMP_INCLUDE_SHELL_COMMAND_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_TOOLS_DUMP_INCLUDE_SHELL_COMMAND_H
 
+#include <functional>
 #include <map>
 #include <string>
-#include <functional>
 #include <vector>
 
 #include "utils/native/base/include/errors.h"
@@ -76,7 +76,7 @@ public:
      * @param code Indicates the code.
      * @return Indicates the message.
      */
-    std::string GetMessageFromCode(const int32_t code) const;
+    std::string GetMessageFromCode(int32_t code) const;
 
     /**
      * @brief Create the command map.
@@ -86,18 +86,11 @@ public:
     virtual ErrCode CreateCommandMap() = 0;
 
     /**
-     * @brief Create the message map.
-     *
-     * @return Indicates the result code.
-     */
-    virtual ErrCode CreateMessageMap() = 0;
-
-    /**
      * @brief The initialize function.
      *
      * @return Indicates the result code.
      */
-    virtual ErrCode init() = 0;
+    virtual ErrCode Init() = 0;
 
 protected:
     static constexpr int32_t MIN_ARGUMENT_NUMBER = 2;
@@ -110,7 +103,7 @@ protected:
     std::string name_;
     std::map<std::string, std::function<int()>> commandMap_;
     std::map<int32_t, std::string> messageMap_;
-    std::string resultReceiver_ = "";
+    std::string resultReceiver_;
 };
 }  // namespace Notification
 }  // namespace OHOS
