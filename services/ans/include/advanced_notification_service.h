@@ -814,6 +814,8 @@ private:
         sptr<NotificationBundleOption> &targetBundle);
     bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
     void ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName);
+    int Dump(int fd, const std::vector<std::u16string> &args) override;
+    void GetDumpInfo(const std::vector<std::u16string> &args, std::string &result);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
