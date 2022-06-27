@@ -817,6 +817,20 @@ private:
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void GetDumpInfo(const std::vector<std::u16string> &args, std::string &result);
 
+    void SendSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info,
+        ErrCode errCode);
+    void SendUnSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info);
+    void SendPublishHiSysEvent(const sptr<NotificationRequest> &request, ErrCode errCode);
+    void SendCancelHiSysEvent(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode);
+    void SendRemoveHiSysEvent(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode);
+    void SendEnableNotificationHiSysEvent(const sptr<NotificationBundleOption> &bundleOption, bool enabled,
+        ErrCode errCode);
+    void SendEnableNotificationSlotHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
+    void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
+
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

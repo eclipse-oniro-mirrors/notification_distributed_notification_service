@@ -35,6 +35,8 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "display_manager.h"
+#include "event_report.h"
+#include "hitrace_meter.h"
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
 #include "notification_filter.h"
@@ -391,6 +393,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
 ErrCode AdvancedNotificationService::CancelPreparedNotification(
     int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -412,12 +415,15 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
 #endif
         }
     }));
+
+    SendCancelHiSysEvent(notificationId, label, bundleOption, result);
     return result;
 }
 
 ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if ((request->GetSlotType() == NotificationConstant::SlotType::CUSTOM) && !IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
@@ -444,6 +450,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
 ErrCode AdvancedNotificationService::PublishPreparedNotification(
     const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
     auto record = std::make_shared<NotificationRecord>();
     record->request = request;
@@ -486,18 +493,30 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
 
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT && !IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
+    ErrCode result = ERR_OK;
+    do {
+        if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT && !IsSystemApp()) {
+            result = ERR_ANS_NON_SYSTEM_APP;
+            break;
+        }
 
-    sptr<NotificationBundleOption> bundleOption;
-    ErrCode result = PrepareNotificationInfo(request, bundleOption);
-    if (result != ERR_OK) {
-        return result;
-    }
-    return PublishPreparedNotification(request, bundleOption);
+        sptr<NotificationBundleOption> bundleOption;
+        result = PrepareNotificationInfo(request, bundleOption);
+        if (result != ERR_OK) {
+            break;
+        }
+
+        result = PublishPreparedNotification(request, bundleOption);
+        if (result != ERR_OK) {
+            break;
+        }
+    } while (0);
+
+    SendPublishHiSysEvent(request, result);
+    return result;
 }
 
 void AdvancedNotificationService::ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName)
@@ -1327,28 +1346,42 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
 ErrCode AdvancedNotificationService::Subscribe(
     const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!IsSystemApp() && !isSubsystem) {
-        ANS_LOGE("Client is not a system app or subsystem");
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
+    ErrCode errCode = ERR_OK;
+    do {
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (!IsSystemApp() && !isSubsystem) {
+            ANS_LOGE("Client is not a system app or subsystem");
+            errCode = ERR_ANS_NON_SYSTEM_APP;
+            break;
+        }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
+        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            errCode = ERR_ANS_PERMISSION_DENIED;
+            break;
+        }
 
-    if (subscriber == nullptr) {
-        return ERR_ANS_INVALID_PARAM;
-    }
+        if (subscriber == nullptr) {
+            errCode = ERR_ANS_INVALID_PARAM;
+            break;
+        }
 
-    return NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, info);
+        errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, info);
+        if (errCode != ERR_OK) {
+            break;
+        }
+    } while (0);
+
+    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
+    return errCode;
 }
 
 ErrCode AdvancedNotificationService::Unsubscribe(
     const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -1365,7 +1398,13 @@ ErrCode AdvancedNotificationService::Unsubscribe(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    return NotificationSubscriberManager::GetInstance()->RemoveSubscriber(subscriber, info);
+    ErrCode errCode = NotificationSubscriberManager::GetInstance()->RemoveSubscriber(subscriber, info);
+    if (errCode != ERR_OK) {
+        return errCode;
+    }
+
+    SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(
@@ -1573,6 +1612,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
 ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     if (!IsSystemApp()) {
@@ -1606,6 +1646,8 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
             // Remote revice
         }
     }));
+
+    SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
     return result;
 }
 
@@ -2139,18 +2181,25 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
         }
     }
 
+    std::shared_ptr<NotificationRecord> recordToRemove;
     if (bundleList.size() >= MAX_ACTIVE_NUM_PERAPP) {
         bundleList.sort(SortNotificationsByLevelAndTime);
+        recordToRemove = bundleList.front();
+        SendFlowControlOccurHiSysEvent(recordToRemove);
         notificationList_.remove(bundleList.front());
     }
 
     if (notificationList_.size() >= MAX_ACTIVE_NUM) {
         if (bundleList.size() > 0) {
             bundleList.sort(SortNotificationsByLevelAndTime);
+            recordToRemove = bundleList.front();
+            SendFlowControlOccurHiSysEvent(recordToRemove);
             notificationList_.remove(bundleList.front());
         } else {
             std::list<std::shared_ptr<NotificationRecord>> sorted = notificationList_;
             sorted.sort(SortNotificationsByLevelAndTime);
+            recordToRemove = bundleList.front();
+            SendFlowControlOccurHiSysEvent(recordToRemove);
             notificationList_.remove(sorted.front());
         }
     }
@@ -2269,6 +2318,7 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
 ErrCode AdvancedNotificationService::RemoveNotification(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     if (!IsSystemApp()) {
@@ -2328,11 +2378,13 @@ ErrCode AdvancedNotificationService::RemoveNotification(
         TriggerRemoveWantAgent(notificationRequest);
     }));
 
+    SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
     return result;
 }
 
 ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     if (!IsSystemApp()) {
@@ -2917,6 +2969,7 @@ ErrCode AdvancedNotificationService::DoDistributedPublish(
 ErrCode AdvancedNotificationService::DoDistributedDelete(
     const std::string deviceId, const sptr<Notification> notification)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!notification->GetNotificationRequest().GetNotificationDistributedOptions().IsDistributed()) {
         return ERR_OK;
     }
@@ -3155,6 +3208,7 @@ bool AdvancedNotificationService::GetActiveUserId(int& userId)
 
 void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<NotificationRequest> &request)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     if ((request == nullptr) || (request->GetRemovalWantAgent() == nullptr)) {
@@ -3483,6 +3537,7 @@ void AdvancedNotificationService::GetDisplayPosition(
 ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d", slotType, enabled);
 
     if (!IsSystemApp()) {
@@ -3531,6 +3586,8 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
 
         PublishSlotChangeCommonEvent(bundle);
     }));
+
+    SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, result);
     return result;
 }
 
@@ -3573,6 +3630,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
 
 bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("bundle [%{public}s : %{public}d]", bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
 
     EventFwk::Want want;
@@ -3654,6 +3712,149 @@ void AdvancedNotificationService::GetDumpInfo(const std::vector<std::u16string> 
         result.append("No." + std::to_string(++index) + "\n");
         result.append(info);
     }
+}
+
+void AdvancedNotificationService::SendSubscribeHiSysEvent(int32_t pid, int32_t uid,
+    const sptr<NotificationSubscribeInfo> &info, ErrCode errCode)
+{
+    EventInfo eventInfo;
+    eventInfo.pid = pid;
+    eventInfo.uid = uid;
+    if (info != nullptr) {
+        eventInfo.userId = info->GetAppUserId();
+        std::vector<std::string> appNames = info->GetAppNames();
+        eventInfo.bundleName = std::accumulate(appNames.begin(), appNames.end(), std::string(""),
+            [appNames](std::string bundleName, const std::string &str) {
+                return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
+            });
+    }
+
+    if (errCode != ERR_OK) {
+        eventInfo.errCode = errCode;
+        EventReport::SendHiSysEvent(SUBSCRIBE_ERROR, eventInfo);
+    } else {
+        EventReport::SendHiSysEvent(SUBSCRIBE, eventInfo);
+    }
+}
+
+void AdvancedNotificationService::SendUnSubscribeHiSysEvent(int32_t pid, int32_t uid,
+    const sptr<NotificationSubscribeInfo> &info)
+{
+    EventInfo eventInfo;
+    eventInfo.pid = pid;
+    eventInfo.uid = uid;
+    if (info != nullptr) {
+        eventInfo.userId = info->GetAppUserId();
+        std::vector<std::string> appNames = info->GetAppNames();
+        eventInfo.bundleName = std::accumulate(appNames.begin(), appNames.end(), std::string(""),
+            [appNames](std::string bundleName, const std::string &str) {
+                return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
+            });
+    }
+
+    EventReport::SendHiSysEvent(UNSUBSCRIBE, eventInfo);
+}
+
+void AdvancedNotificationService::SendPublishHiSysEvent(const sptr<NotificationRequest> &request, ErrCode errCode)
+{
+    if (request == nullptr) {
+        return;
+    }
+
+    EventInfo eventInfo;
+    eventInfo.notificationId = request->GetNotificationId();
+    eventInfo.contentType = static_cast<int32_t>(request->GetNotificationType());
+    eventInfo.bundleName = request->GetCreatorBundleName();
+    eventInfo.userId = request->GetCreatorUserId();
+    if (errCode != ERR_OK) {
+        eventInfo.errCode = errCode;
+        EventReport::SendHiSysEvent(PUBLISH_ERROR, eventInfo);
+    } else {
+        EventReport::SendHiSysEvent(PUBLISH, eventInfo);
+    }
+}
+
+void AdvancedNotificationService::SendCancelHiSysEvent(int32_t notificationId, const std::string &label,
+    const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode)
+{
+    if (bundleOption == nullptr || errCode != ERR_OK) {
+        return;
+    }
+
+    EventInfo eventInfo;
+    eventInfo.notificationId = notificationId;
+    eventInfo.notificationLabel = label;
+    eventInfo.bundleName = bundleOption->GetBundleName();
+    eventInfo.uid = bundleOption->GetUid();
+    EventReport::SendHiSysEvent(CANCEL, eventInfo);
+}
+
+void AdvancedNotificationService::SendRemoveHiSysEvent(int32_t notificationId, const std::string &label,
+    const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode)
+{
+    if (bundleOption == nullptr || errCode != ERR_OK) {
+        return;
+    }
+
+    EventInfo eventInfo;
+    eventInfo.notificationId = notificationId;
+    eventInfo.notificationLabel = label;
+    eventInfo.bundleName = bundleOption->GetBundleName();
+    eventInfo.uid = bundleOption->GetUid();
+    EventReport::SendHiSysEvent(REMOVE, eventInfo);
+}
+
+void AdvancedNotificationService::SendEnableNotificationHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
+    bool enabled, ErrCode errCode)
+{
+    if (bundleOption == nullptr) {
+        return;
+    }
+
+    EventInfo eventInfo;
+    eventInfo.bundleName = bundleOption->GetBundleName();
+    eventInfo.uid = bundleOption->GetUid();
+    eventInfo.enable = enabled;
+    if (errCode != ERR_OK) {
+        eventInfo.errCode = errCode;
+        EventReport::SendHiSysEvent(ENABLE_NOTIFICATION_ERROR, eventInfo);
+    } else {
+        EventReport::SendHiSysEvent(ENABLE_NOTIFICATION, eventInfo);
+    }
+}
+
+void AdvancedNotificationService::SendEnableNotificationSlotHiSysEvent(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+    bool enabled, ErrCode errCode)
+{
+    if (bundleOption == nullptr) {
+        return;
+    }
+
+    EventInfo eventInfo;
+    eventInfo.bundleName = bundleOption->GetBundleName();
+    eventInfo.uid = bundleOption->GetUid();
+    eventInfo.slotType = slotType;
+    eventInfo.enable = enabled;
+    if (errCode != ERR_OK) {
+        eventInfo.errCode = errCode;
+        EventReport::SendHiSysEvent(ENABLE_NOTIFICATION_SLOT_ERROR, eventInfo);
+    } else {
+        EventReport::SendHiSysEvent(ENABLE_NOTIFICATION_SLOT, eventInfo);
+    }
+}
+
+void AdvancedNotificationService::SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record)
+{
+    if (record == nullptr || record->request == nullptr || record->bundleOption == nullptr) {
+        return;
+    }
+
+    EventInfo eventInfo;
+    eventInfo.notificationId = record->request->GetNotificationId();
+    eventInfo.bundleName = record->bundleOption->GetBundleName();
+    eventInfo.uid = record->bundleOption->GetUid();
+    EventReport::SendHiSysEvent(FLOW_CONTROL_OCCUR, eventInfo);
 }
 }  // namespace Notification
 }  // namespace OHOS

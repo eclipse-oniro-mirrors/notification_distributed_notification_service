@@ -18,7 +18,6 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "hisysevent.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
@@ -71,15 +70,6 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    std::string eventType = "ANS_PUBLISH";
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
-        HiviewDFX::HiSysEvent::Domain::NOTIFICATION, eventType,
-        HiviewDFX::HiSysEvent::EventType::FAULT,
-        "UID", getuid(),
-        "PID", getpid());
-    if (res != DH_ANS_SUCCESS) {
-        ANS_LOGE("Write HiSysEvent error, res:%d", res);
-    }
     return result;
 }
 
@@ -1540,15 +1530,6 @@ ErrCode AnsManagerProxy::GetShowBadgeEnabled(bool &enabled)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    std::string eventType = "ANS_SUBSCRIBE";
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
-        HiviewDFX::HiSysEvent::Domain::NOTIFICATION, eventType,
-        HiviewDFX::HiSysEvent::EventType::FAULT,
-        "UID", getuid(),
-        "PID", getpid());
-    if (res != DH_ANS_SUCCESS) {
-        ANS_LOGE("Write HiSysEvent error, res:%d", res);
-    }
     return result;
 }
 

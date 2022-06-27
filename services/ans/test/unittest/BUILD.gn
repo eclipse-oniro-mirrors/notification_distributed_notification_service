@@ -33,6 +33,7 @@ ohos_unittest("ans_unit_test") {
   sources = [
     "${services_path}/ans/src/advanced_notification_service.cpp",
     "${services_path}/ans/src/advanced_notification_service_ability.cpp",
+    "${services_path}/ans/src/event_report.cpp",
     "${services_path}/ans/src/notification_preferences.cpp",
     "${services_path}/ans/src/notification_preferences_database.cpp",
     "${services_path}/ans/src/notification_preferences_info.cpp",
@@ -52,6 +53,7 @@ ohos_unittest("ans_unit_test") {
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
+    "notification_hisysevent_test.cpp",
     "notification_preferences_database_test.cpp",
     "notification_preferences_test.cpp",
     "notification_slot_filter_test.cpp",
@@ -88,6 +90,7 @@ ohos_unittest("ans_unit_test") {
     "distributeddatamgr:distributeddata_inner",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
     "hitrace_native:libhitrace",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

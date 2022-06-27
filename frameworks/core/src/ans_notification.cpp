@@ -17,6 +17,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
@@ -182,6 +183,7 @@ ErrCode AnsNotification::PublishNotification(const NotificationRequest &request)
 
 ErrCode AnsNotification::PublishNotification(const std::string &label, const NotificationRequest &request)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("enter");
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
@@ -262,6 +264,7 @@ ErrCode AnsNotification::CancelNotification(int32_t notificationId)
 
 ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t notificationId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -472,6 +475,7 @@ ErrCode AnsNotification::GetBundleImportance(NotificationSlot::NotificationLevel
 
 ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &subscriber)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -488,6 +492,7 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
 ErrCode AnsNotification::SubscribeNotification(
     const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -509,6 +514,7 @@ ErrCode AnsNotification::SubscribeNotification(
 
 ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscriber)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -525,6 +531,7 @@ ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscri
 ErrCode AnsNotification::UnSubscribeNotification(
     NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -546,6 +553,7 @@ ErrCode AnsNotification::UnSubscribeNotification(
 
 ErrCode AnsNotification::RemoveNotification(const std::string &key)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (key.empty()) {
         ANS_LOGW("Input key is empty.");
         return ERR_ANS_INVALID_PARAM;
@@ -561,6 +569,7 @@ ErrCode AnsNotification::RemoveNotification(const std::string &key)
 ErrCode AnsNotification::RemoveNotification(
     const NotificationBundleOption &bundleOption, const int32_t notificationId, const std::string &label)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -723,6 +732,7 @@ ErrCode AnsNotification::SetNotificationsEnabledForDefaultBundle(const std::stri
 ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
     const NotificationBundleOption &bundleOption, const std::string &deviceId, bool enabled)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -1338,6 +1348,7 @@ ErrCode AnsNotification::GetDoNotDisturbDate(const int32_t &userId, Notification
 ErrCode AnsNotification::SetEnabledForBundleSlot(
     const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
