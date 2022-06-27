@@ -61,6 +61,7 @@ namespace Notification {
 namespace {
 constexpr char ACTIVE_NOTIFICATION_OPTION[] = "active";
 constexpr char RECENT_NOTIFICATION_OPTION[] = "recent";
+constexpr char HELP_NOTIFICATION_OPTION[] = "help";
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr char DISTRIBUTED_NOTIFICATION_OPTION[] = "distributed";
 #endif
@@ -76,6 +77,24 @@ constexpr int32_t DIALOG_DEFAULT_HEIGHT = 240;
 constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
+
+constexpr char HIDUMPER_HELP_MSG[] =
+    "Usage:dump <command> [options]\n"
+    "Description::\n"
+    "  --active, -a                 list all active notifications\n"
+    "  --recent, -r                 list recent notifications\n";
+
+constexpr char HIDUMPER_ERR_MSG[] =
+    "error: unknown option.\nThe arguments are illegal and you can enter '-h' for help.";
+
+const std::unordered_map<std::string, std::string> HIDUMPER_CMD_MAP = {
+    { "--help", HELP_NOTIFICATION_OPTION },
+    { "--active", ACTIVE_NOTIFICATION_OPTION },
+    { "--recent", RECENT_NOTIFICATION_OPTION },
+    { "-h", HELP_NOTIFICATION_OPTION },
+    { "-a", ACTIVE_NOTIFICATION_OPTION },
+    { "-r", RECENT_NOTIFICATION_OPTION },
+};
 
 struct RecentNotification {
     sptr<Notification> notification = nullptr;
@@ -3593,6 +3612,48 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
         }
     }));
     return result;
+}
+
+int AdvancedNotificationService::Dump(int fd, const std::vector<std::u16string> &args)
+{
+    ANS_LOGD("enter");
+    std::string result;
+    GetDumpInfo(args, result);
+    int ret = dprintf(fd, "%s\n", result.c_str());
+    if (ret < 0) {
+        ANS_LOGE("dprintf error");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ERR_OK;
+}
+
+void AdvancedNotificationService::GetDumpInfo(const std::vector<std::u16string> &args, std::string &result)
+{
+    if (args.size() != 1) {
+        result = HIDUMPER_ERR_MSG;
+        return;
+    }
+    std::vector<std::string> dumpInfo;
+    std::string cmd = Str16ToStr8(args.front());
+    if (HIDUMPER_CMD_MAP.find(cmd) == HIDUMPER_CMD_MAP.end()) {
+        result = HIDUMPER_ERR_MSG;
+        return;
+    }
+    std::string cmdValue = HIDUMPER_CMD_MAP.find(cmd)->second;
+    if (cmdValue == HELP_NOTIFICATION_OPTION) {
+        result = HIDUMPER_HELP_MSG;
+    }
+    ShellDump(cmdValue, "", SUBSCRIBE_USER_INIT, dumpInfo);
+    if (dumpInfo.empty()) {
+        result.append("no notification\n");
+        return;
+    }
+    int32_t index = 0;
+    result.append("notification list:\n");
+    for (const auto &info: dumpInfo) {
+        result.append("No." + std::to_string(++index) + "\n");
+        result.append(info);
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS
