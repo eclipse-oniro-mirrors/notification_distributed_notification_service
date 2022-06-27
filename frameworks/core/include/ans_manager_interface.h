@@ -600,15 +600,6 @@ public:
     virtual ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType) = 0;
 
     /**
-     * @brief Dump current running status for debuging.
-     *
-     * @param dumpOption Indicates the dump action that needs to be performed.
-     * @param dumpInfo Indicates the dump information.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo) = 0;
-
-    /**
      * @brief Publishes a continuous notification.
      *
      * @param request Notification requests that need to be posted.
@@ -716,6 +707,18 @@ public:
         const NotificationConstant::SlotType &slotType, bool enabled) = 0;
     virtual ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) = 0;
+
+    /**
+     * @brief Obtains specific datas via specified dump option.
+     *
+     * @param cmd Indicates the specified dump command.
+     * @param bundle Indicates the specified bundle name.
+     * @param userId Indicates the specified userId.
+     * @param dumpInfo Indicates the container containing datas.
+     * @return Returns check result.
+     */
+    virtual ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+        std::vector<std::string> &dumpInfo) = 0;
 
 protected:
     enum TransactId : uint32_t {

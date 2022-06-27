@@ -47,7 +47,7 @@ ErrCode ShellCommand::OnCommand()
         resultReceiver_.append(GetCommandErrorMsg());
         respond = commandMap_["help"];
     }
-    if (init() == OHOS::ERR_OK) {
+    if (Init() == OHOS::ERR_OK) {
         respond();
     } else {
         result = OHOS::ERR_INVALID_VALUE;
@@ -60,10 +60,6 @@ std::string ShellCommand::ExecCommand()
     int32_t result = CreateCommandMap();
     if (result != OHOS::ERR_OK) {
         ANS_LOGE("failed to create command map.\n");
-    }
-    result = CreateMessageMap();
-    if (result != OHOS::ERR_OK) {
-        ANS_LOGE("failed to create message map.\n");
     }
     result = OnCommand();
     if (result != OHOS::ERR_OK) {

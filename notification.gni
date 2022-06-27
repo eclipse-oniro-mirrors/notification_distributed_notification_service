@@ -46,7 +46,7 @@ component_external_deps = [
 declare_args() {
   device_usage = true
   if (defined(global_parts_info) &&
-      !defined(global_parts_info.device_usage_statistics)) {
+      !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
     device_usage = false
   }
 }

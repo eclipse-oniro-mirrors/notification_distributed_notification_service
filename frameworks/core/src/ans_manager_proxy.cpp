@@ -2162,40 +2162,6 @@ ErrCode AnsManagerProxy::GetDeviceRemindType(NotificationConstant::RemindType &r
     return result;
 }
 
-ErrCode AnsManagerProxy::ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[ShellDump] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteString(dumpOption)) {
-        ANS_LOGE("[ShellDump] fail: write option failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SHELL_DUMP, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[ShellDump] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[ShellDump] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.ReadStringVector(&dumpInfo)) {
-        ANS_LOGE("[ShellDump] fail: read dumpInfo failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::PublishContinuousTaskNotification(const sptr<NotificationRequest> &request)
 {
     if (request == nullptr) {
@@ -2769,6 +2735,44 @@ ErrCode AnsManagerProxy::GetEnabledForBundleSlot(
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
+    return result;
+}
+
+ErrCode AnsManagerProxy::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[ShellDump] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteString(cmd)) {
+        ANS_LOGE("[ShellDump] fail: write dump cmd failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteString(bundle)) {
+        ANS_LOGE("[ShellDump] fail: write dump bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        ANS_LOGE("[ShellDump] fail: write dump userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(SHELL_DUMP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[ShellDump] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[ShellDump] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!reply.ReadStringVector(&dumpInfo)) {
+        ANS_LOGE("[ShellDump] fail: read dumpInfo failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 }  // namespace Notification

@@ -67,9 +67,6 @@ constexpr char DISTRIBUTED_NOTIFICATION_OPTION[] = "distributed";
 constexpr char SET_RECENT_COUNT_OPTION[] = "setRecentCount";
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 
-constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
-constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
-
 constexpr int32_t DEFAULT_RECENT_COUNT = 16;
 
 constexpr int32_t HOURS_IN_ONE_DAY = 24;
@@ -1728,30 +1725,6 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
     return result;
 }
 
-ErrCode AdvancedNotificationService::ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    ErrCode result = ERR_ANS_NOT_ALLOWED;
-
-    handler_->PostSyncTask(std::bind([&]() {
-        if (dumpOption == ACTIVE_NOTIFICATION_OPTION) {
-            result = ActiveNotificationDump(dumpInfo);
-        } else if (dumpOption == RECENT_NOTIFICATION_OPTION) {
-            result = RecentNotificationDump(dumpInfo);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-        } else if (dumpOption == DISTRIBUTED_NOTIFICATION_OPTION) {
-            result = DistributedNotificationDump(dumpInfo);
-#endif
-        } else if (dumpOption.substr(0, dumpOption.find_first_of(" ", 0)) == SET_RECENT_COUNT_OPTION) {
-            result = SetRecentNotificationCount(dumpOption.substr(dumpOption.find_first_of(" ", 0) + 1));
-        } else {
-            result = ERR_ANS_INVALID_PARAM;
-        }
-    }));
-
-    return result;
-}
-
 ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1921,81 +1894,120 @@ ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<Reminder
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::ActiveNotificationDump(std::vector<std::string> &dumpInfo)
+ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::stringstream stream;
-    for (auto record : notificationList_) {
+    for (const auto &record : notificationList_) {
+        if (record->notification == nullptr || record->request == nullptr) {
+            continue;
+        }
+        if (userId != SUBSCRIBE_USER_INIT && userId != record->notification->GetUserId()) {
+            continue;
+        }
+        if (!bundle.empty() && bundle != record->notification->GetBundleName()) {
+            continue;
+        }
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         if (!record->deviceId.empty()) {
             continue;
         }
 #endif
         stream.clear();
-        stream << "\tBundleName: " << record->notification->GetBundleName() << "\n";
-
-        stream << "\tCreateTime: " << TimeToString(record->notification->GetNotificationRequest().GetCreateTime())
-               << "\n";
-
+        stream.str("");
+        stream << "\tUserId: " << record->notification->GetUserId() << "\n";
+        stream << "\tCreatePid: " << record->request->GetCreatorPid() << "\n";
+        stream << "\tOwnerBundleName: " << record->notification->GetBundleName() << "\n";
+        if (record->request->GetOwnerUid() > 0) {
+            stream << "\tOwnerUid: " << record->request->GetOwnerUid() << "\n";
+        } else {
+            stream << "\tOwnerUid: " << record->request->GetCreatorUid() << "\n";
+        }
+        stream << "\tDeliveryTime = " << TimeToString(record->request->GetDeliveryTime()) << "\n";
         stream << "\tNotification:\n";
         stream << "\t\tId: " << record->notification->GetId() << "\n";
         stream << "\t\tLabel: " << record->notification->GetLabel() << "\n";
-        stream << "\t\tClassification: " << record->notification->GetNotificationRequest().GetClassification() << "\n";
-
+        stream << "\t\tSlotType = " << record->request->GetSlotType() << "\n";
         dumpInfo.push_back(stream.str());
     }
-
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::RecentNotificationDump(std::vector<std::string> &dumpInfo)
+ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::stringstream stream;
     for (auto recentNotification : recentInfo_->list) {
+        if (recentNotification->notification == nullptr) {
+            continue;
+        }
+        const auto &notificationRequest = recentNotification->notification->GetNotificationRequest();
+        if (userId != SUBSCRIBE_USER_INIT && userId != notificationRequest.GetOwnerUserId()) {
+            continue;
+        }
+        if (!bundle.empty() && bundle != recentNotification->notification->GetBundleName()) {
+            continue;
+        }
         stream.clear();
+        stream.str("");
+        stream << "\tUserId: " << notificationRequest.GetCreatorUserId() << "\n";
+        stream << "\tCreatePid: " << notificationRequest.GetCreatorPid() << "\n";
         stream << "\tBundleName: " << recentNotification->notification->GetBundleName() << "\n";
-
-        stream << "\tCreateTime: "
-               << TimeToString(recentNotification->notification->GetNotificationRequest().GetCreateTime()) << "\n";
-
+        if (notificationRequest.GetOwnerUid() > 0) {
+            stream << "\tOwnerUid: " << notificationRequest.GetOwnerUid() << "\n";
+        } else {
+            stream << "\tOwnerUid: " << notificationRequest.GetCreatorUid() << "\n";
+        }
+        stream << "\tDeliveryTime = " << TimeToString(notificationRequest.GetDeliveryTime()) << "\n";
+        if (!recentNotification->isActive) {
+            stream << "\tDeleteTime: " << TimeToString(recentNotification->deleteTime) << "\n";
+            stream << "\tDeleteReason: " << recentNotification->deleteReason << "\n";
+        }
         stream << "\tNotification:\n";
         stream << "\t\tId: " << recentNotification->notification->GetId() << "\n";
         stream << "\t\tLabel: " << recentNotification->notification->GetLabel() << "\n";
-        stream << "\t\tClassification: "
-               << recentNotification->notification->GetNotificationRequest().GetClassification() << "\n";
-
-        if (!recentNotification->isActive) {
-            stream << "\t DeleteTime: " << TimeToString(recentNotification->deleteTime) << "\n";
-            stream << "\t DeleteReason: " << recentNotification->deleteReason << "\n";
-        }
-
+        stream << "\t\tSlotType = " << notificationRequest.GetSlotType() << "\n";
         dumpInfo.push_back(stream.str());
     }
     return ERR_OK;
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-ErrCode AdvancedNotificationService::DistributedNotificationDump(std::vector<std::string> &dumpInfo)
+ErrCode AdvancedNotificationService::DistributedNotificationDump(const std::string& bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::stringstream stream;
     for (auto record : notificationList_) {
+        if (record->notification == nullptr) {
+            continue;
+        }
+        if (userId != SUBSCRIBE_USER_INIT && userId != record->notification->GetUserId()) {
+            continue;
+        }
+        if (!bundle.empty() && bundle != record->notification->GetBundleName()) {
+            continue;
+        }
         if (record->deviceId.empty()) {
             continue;
         }
         stream.clear();
-        stream << "\tDeviceId: " << record->deviceId << "\n";
-        stream << "\tBundleName: " << record->notification->GetBundleName() << "\n";
-
-        stream << "\tCreateTime: " << TimeToString(record->notification->GetNotificationRequest().GetCreateTime())
-               << "\n";
-
+        stream.str("");
+        stream << "\tUserId: " << record->notification->GetUserId() << "\n";
+        stream << "\tCreatePid: " << record->request->GetCreatorPid() << "\n";
+        stream << "\tOwnerBundleName: " << record->notification->GetBundleName() << "\n";
+        if (record->request->GetOwnerUid() > 0) {
+            stream << "\tOwnerUid: " << record->request->GetOwnerUid() << "\n";
+        } else {
+            stream << "\tOwnerUid: " << record->request->GetCreatorUid() << "\n";
+        }
+        stream << "\tDeliveryTime = " << TimeToString(record->request->GetDeliveryTime()) << "\n";
         stream << "\tNotification:\n";
         stream << "\t\tId: " << record->notification->GetId() << "\n";
         stream << "\t\tLabel: " << record->notification->GetLabel() << "\n";
-        stream << "\t\tClassification: " << record->notification->GetNotificationRequest().GetClassification() << "\n";
-
+        stream << "\t\tSlotType = " << record->request->GetSlotType() << "\n";
         dumpInfo.push_back(stream.str());
     }
 
@@ -3557,6 +3569,30 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
     }
 
     return true;
+}
+
+ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    ErrCode result = ERR_ANS_NOT_ALLOWED;
+
+    handler_->PostSyncTask(std::bind([&]() {
+        if (cmd == ACTIVE_NOTIFICATION_OPTION) {
+            result = ActiveNotificationDump(bundle, userId, dumpInfo);
+        } else if (cmd == RECENT_NOTIFICATION_OPTION) {
+            result = RecentNotificationDump(bundle, userId, dumpInfo);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+        } else if (cmd == DISTRIBUTED_NOTIFICATION_OPTION) {
+            result = DistributedNotificationDump(bundle, userId, dumpInfo);
+#endif
+        } else if (cmd.substr(0, cmd.find_first_of(" ", 0)) == SET_RECENT_COUNT_OPTION) {
+            result = SetRecentNotificationCount(cmd.substr(cmd.find_first_of(" ", 0) + 1));
+        } else {
+            result = ERR_ANS_INVALID_PARAM;
+        }
+    }));
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS
