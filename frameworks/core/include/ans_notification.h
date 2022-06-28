@@ -851,6 +851,25 @@ public:
      */
     ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
         std::vector<std::string> &dumpInfo);
+
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled);
+
+    /**
+     * @brief Obtains whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns get enabled result.
+     */
+    ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.

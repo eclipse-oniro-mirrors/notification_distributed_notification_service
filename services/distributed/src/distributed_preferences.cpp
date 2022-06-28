@@ -26,6 +26,7 @@ const std::string DISTRIBUTED_LABEL = "distributed";
 const std::string DELIMITER = "|";
 const std::string MAIN_LABEL = "ans_main";
 const std::string BUNDLE_LABEL = "bundle";
+const std::string WITHOUT_APP = "without_app";
 }  // namespace
 
 inline bool GetBoolFromString(const std::string &str)
@@ -52,18 +53,8 @@ bool DistributedPreferences::InitDistributedAllInfo(void)
     }
 
     for (auto entry : entries) {
-        ResolveKey resolveKey;
-        if (!ResolveDistributedKey(entry.key.ToString(), resolveKey)) {
+        if (!ResolveDistributedKey(entry)) {
             ANS_LOGE("key <%{public}s> is invalid.", entry.key.ToString().c_str());
-            continue;
-        }
-
-        if (resolveKey.isMainKey) {
-            int32_t value = atoi(entry.value.ToString().data());
-            preferencesInfo_->SetDistributedEnable(static_cast<bool>(value));
-        } else {
-            preferencesInfo_->SetDistributedBundleEnable(
-                resolveKey.bundleName, resolveKey.uid, GetBoolFromString(entry.value.ToString()));
         }
     }
 
@@ -84,8 +75,9 @@ void DistributedPreferences::GetDistributedBundleKey(
     }
 }
 
-bool DistributedPreferences::ResolveDistributedKey(const std::string &key, ResolveKey &resolveKey)
+bool DistributedPreferences::ResolveDistributedKey(const DistributedKv::Entry &entry)
 {
+    std::string key = entry.key.ToString();
     std::size_t distributedLabelPosition = 0;
     std::size_t distributedLabelEndPosition = key.find(DELIMITER, distributedLabelPosition);
     if (distributedLabelEndPosition == std::string::npos) {
@@ -97,12 +89,28 @@ bool DistributedPreferences::ResolveDistributedKey(const std::string &key, Resol
         return false;
     }
 
-    if (key.substr(typeLabelPosition, typeLabelEndPosition - typeLabelPosition).compare(MAIN_LABEL) == 0) {
-        resolveKey.isMainKey = true;
-        return true;
+    std::string sign = key.substr(typeLabelPosition, typeLabelEndPosition - typeLabelPosition);
+    if (sign == MAIN_LABEL) {
+        return ResolveDistributedEnable(entry.value.ToString());
     }
+    if (sign == WITHOUT_APP) {
+        return ResolveSyncWithoutAppEnable(key, typeLabelEndPosition, entry.value.ToString());
+    }
+    return ResolveDistributedBundleEnable(key, typeLabelEndPosition, entry.value.ToString());
+}
 
-    std::size_t bundleNamePosition = typeLabelEndPosition + DELIMITER.size();
+bool DistributedPreferences::ResolveDistributedEnable(const std::string &value)
+{
+    int32_t enabled = atoi(value.data());
+    preferencesInfo_->SetDistributedEnable(static_cast<bool>(enabled));
+
+    return true;
+}
+
+bool DistributedPreferences::ResolveDistributedBundleEnable(const std::string &key,
+    const int32_t startPos, const std::string &value)
+{
+    std::size_t bundleNamePosition = startPos + DELIMITER.size();
     std::size_t bundleNameEndPosition = key.find(DELIMITER, bundleNamePosition);
     if (bundleNameEndPosition == std::string::npos) {
         return false;
@@ -113,9 +121,19 @@ bool DistributedPreferences::ResolveDistributedKey(const std::string &key, Resol
         return false;
     }
 
-    resolveKey.isMainKey = false;
-    resolveKey.bundleName = key.substr(bundleNamePosition, bundleNameEndPosition - bundleNamePosition);
-    resolveKey.uid = atoi(&key[uidPosition]);
+    std::string bundleName = key.substr(bundleNamePosition, bundleNameEndPosition - bundleNamePosition);
+    int32_t uid = atoi(&key[uidPosition]);
+    preferencesInfo_->SetDistributedBundleEnable(bundleName, uid, GetBoolFromString(value));
+
+    return true;
+}
+
+bool DistributedPreferences::ResolveSyncWithoutAppEnable(const std::string &key,
+    const int32_t startPos, const std::string &value)
+{
+    std::size_t pos = startPos + DELIMITER.size();
+    int32_t userId = atoi(&key[pos]);
+    preferencesInfo_->SetSyncEnabledWithoutApp(userId, GetBoolFromString(value));
 
     return true;
 }
@@ -213,6 +231,31 @@ ErrCode DistributedPreferences::ClearDataInRestoreFactorySettings()
     preferencesInfo_ = std::make_unique<DistributedPreferencesInfo>();
 
     return ERR_OK;
+}
+
+void DistributedPreferences::GetEnabledWithoutApp(const int32_t userId, std::string &key)
+{
+    key = DISTRIBUTED_LABEL + DELIMITER + WITHOUT_APP + DELIMITER + std::to_string(userId) + DELIMITER;
+}
+
+ErrCode DistributedPreferences::SetSyncEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    std::string key;
+    GetEnabledWithoutApp(userId, key);
+
+    if (!database_->PutToDistributedDB(key, std::to_string(enabled))) {
+        ANS_LOGE("put to distributed DB failed. key:%{public}s", key.c_str());
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
+
+    preferencesInfo_->SetSyncEnabledWithoutApp(userId, enabled);
+
+    return ERR_OK;
+}
+
+ErrCode DistributedPreferences::GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    return preferencesInfo_->GetSyncEnabledWithoutApp(userId, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

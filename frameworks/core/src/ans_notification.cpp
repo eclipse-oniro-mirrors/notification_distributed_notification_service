@@ -1387,7 +1387,38 @@ ErrCode AnsNotification::ShellDump(const std::string &cmd, const std::string &bu
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
+
     return ansManagerProxy_->ShellDump(cmd, bundle, userId, dumpInfo);
+}
+
+ErrCode AnsNotification::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Input userId is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetSyncNotificationEnabledWithoutApp(userId, enabled);
+}
+
+ErrCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Input userId is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

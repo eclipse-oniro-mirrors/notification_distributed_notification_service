@@ -700,6 +700,24 @@ public:
      */
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
 
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled) override;
+
+    /**
+     * @brief Obtains whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns get enabled result.
+     */
+    ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) override;
+
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     /**
      * @brief Obtains the event of turn on screen.
@@ -804,6 +822,7 @@ private:
     void OnDistributedDelete(
         const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id);
     ErrCode GetDistributedEnableInApplicationInfo(const sptr<NotificationBundleOption> bundleOption, bool &enable);
+    bool CheckPublishWithoutApp(const int32_t userId, const sptr<NotificationRequest> &request);
 #endif
 
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);

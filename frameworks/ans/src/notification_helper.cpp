@@ -422,5 +422,17 @@ ErrCode NotificationHelper::GetEnabledForBundleSlot(
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
 }
+
+ErrCode NotificationHelper::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetSyncNotificationEnabledWithoutApp(
+        userId, enabled);
+}
+
+ErrCode NotificationHelper::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetSyncNotificationEnabledWithoutApp(
+        userId, enabled);
+}
 }  // namespace Notification
 }  // namespace OHOS

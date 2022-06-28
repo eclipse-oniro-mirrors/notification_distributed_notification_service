@@ -30,6 +30,7 @@ namespace Notification {
 static sptr<ISystemAbilityManager> systemAbilityManager =
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
 const int32_t CALLING_UID = 9998;
+const int32_t USERID = 100;
 
 class AnsInnerKitsModuleSettingTest : public testing::Test {
 public:
@@ -141,11 +142,10 @@ HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_004
  */
 HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00500, Function | MediumTest | Level1)
 {
-    std::string templateName("process");
+    std::string templateName("downloadTemplate");
     bool support = false;
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED,
-        NotificationHelper::IsSupportTemplate(templateName, support));
-    EXPECT_EQ(false, support);
+    EXPECT_EQ(0, NotificationHelper::IsSupportTemplate(templateName, support));
+    EXPECT_EQ(true, support);
 }
 
 /**
@@ -156,11 +156,40 @@ HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_005
  */
 HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00700, Function | MediumTest | Level1)
 {
-    std::string templateName("template123");
+    std::string templateName("downloadTemplate_1");
     bool support = false;
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED,
-        NotificationHelper::IsSupportTemplate(templateName, support));
+    EXPECT_EQ(0, NotificationHelper::IsSupportTemplate(templateName, support));
     EXPECT_EQ(false, support);
+}
+
+/**
+ * @tc.number    : ANS_Interface_MT_NotificationSetting_00800
+ * @tc.name      : NotificationSetting_00800
+ * @tc.desc      : Set whether to sync notifications to devices that do not have the app installed.
+ * @tc.expected  : Set true, get true.
+ */
+HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00800, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundleOption("bundlename", CALLING_UID);
+    EXPECT_EQ(0, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, true));
+    bool enabled = false;
+    EXPECT_EQ(0, NotificationHelper::GetSyncNotificationEnabledWithoutApp(USERID, enabled));
+    EXPECT_EQ(true, enabled);
+}
+
+/**
+ * @tc.number    : ANS_Interface_MT_NotificationSetting_00900
+ * @tc.name      : NotificationSetting_00900
+ * @tc.desc      : Set a specified application do not show badge, get the specified application can not show badge.
+ * @tc.expected  : Set false, get false.
+ */
+HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00900, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundleOption("bundlename", CALLING_UID);
+    EXPECT_EQ(0, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, false));
+    bool enabled = true;
+    EXPECT_EQ(0, NotificationHelper::GetSyncNotificationEnabledWithoutApp(USERID, enabled));
+    EXPECT_EQ(false, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

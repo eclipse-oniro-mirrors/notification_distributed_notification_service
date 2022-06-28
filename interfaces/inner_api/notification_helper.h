@@ -804,6 +804,24 @@ public:
      */
     static ErrCode GetEnabledForBundleSlot(
         const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled);
+
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    static ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled);
+
+    /**
+     * @brief Obtains whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns get enabled result.
+     */
+    static ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled);
 };
 }  // namespace Notification
 }  // namespace OHOS

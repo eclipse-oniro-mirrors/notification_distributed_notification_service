@@ -19,6 +19,8 @@
 #include <map>
 #include <string>
 
+#include "ans_inner_errors.h"
+
 namespace OHOS {
 namespace Notification {
 class DistributedPreferencesInfo {
@@ -39,14 +41,6 @@ public:
      * @return True if the device supports distributed notification; false otherwise.
      */
     bool GetDistributedEnable(void);
-
-    /**
-     * @brief Set whether an application supports distributed notifications.
-     *
-     * @param bundleOption Indicates the bundle name and uid of an application.
-     * @param enabled Specifies whether to enable an application to support distributed notification.
-     * @return Returns enable distributed by bundle result.
-     */
 
     /**
      * @brief Set whether an application supports distributed notifications.
@@ -74,9 +68,20 @@ public:
      */
     void DeleteDistributedBundleInfo(const std::string &bundleName, int32_t uid);
 
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    void SetSyncEnabledWithoutApp(const int32_t userId, const bool enabled);
+    ErrCode GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled);
+
 private:
     bool distributedEnable_ = true;
     std::map<std::pair<const std::string, int32_t>, bool> bundleEnable_;
+    std::map<int32_t, bool> enabledWithoutApp_;
 };
 }  // namespace Notification
 }  // namespace OHOS

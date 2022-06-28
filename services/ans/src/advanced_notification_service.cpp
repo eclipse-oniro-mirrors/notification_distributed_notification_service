@@ -3012,7 +3012,7 @@ void AdvancedNotificationService::OnDistributedPublish(
     }
     request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId));
 
-    handler_->PostTask(std::bind([this, deviceId, bundleName, request]() {
+    handler_->PostTask(std::bind([this, deviceId, bundleName, request, activeUserId]() {
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("device type not support display.");
             return;
@@ -3020,7 +3020,8 @@ void AdvancedNotificationService::OnDistributedPublish(
 
         sptr<NotificationBundleOption> bundleOption =
             GenerateValidBundleOption(new NotificationBundleOption(bundleName, 0));
-        if (bundleOption == nullptr) {
+        if (bundleOption == nullptr && !CheckPublishWithoutApp(activeUserId, request)) {
+            ANS_LOGE("bundle does not exit and enable is closed!");
             return;
         }
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
@@ -3067,14 +3068,15 @@ void AdvancedNotificationService::OnDistributedUpdate(
     }
     request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId));
 
-    handler_->PostTask(std::bind([this, deviceId, bundleName, request]() {
+    handler_->PostTask(std::bind([this, deviceId, bundleName, request, activeUserId]() {
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("device type not support display.");
             return;
         }
         sptr<NotificationBundleOption> bundleOption =
             GenerateValidBundleOption(new NotificationBundleOption(bundleName, 0));
-        if (bundleOption == nullptr) {
+        if (bundleOption == nullptr && !CheckPublishWithoutApp(activeUserId, request)) {
+            ANS_LOGE("bundle does not exit, or enable is false!");
             return;
         }
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
@@ -3169,6 +3171,30 @@ ErrCode AdvancedNotificationService::GetDistributedEnableInApplicationInfo(
     }
 
     return ERR_OK;
+}
+
+bool AdvancedNotificationService::CheckPublishWithoutApp(const int32_t userId, const sptr<NotificationRequest> &request)
+{
+    bool enabled = false;
+    DistributedPreferences::GetInstance()->GetSyncEnabledWithoutApp(userId, enabled);
+    if (!enabled) {
+        ANS_LOGE("enable is false, userId[%{public}d]", userId);
+        return false;
+    }
+
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = request->GetWantAgent();
+    if (!wantAgent) {
+        ANS_LOGE("Failed to get wantAgent!");
+        return false;
+    }
+
+    std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(wantAgent);
+    if (!want || want->GetDeviceId().empty()) {
+        ANS_LOGE("Failed to get want!");
+        return false;
+    }
+
+    return true;
 }
 #endif
 
@@ -3855,6 +3881,54 @@ void AdvancedNotificationService::SendFlowControlOccurHiSysEvent(const std::shar
     eventInfo.bundleName = record->bundleOption->GetBundleName();
     eventInfo.uid = record->bundleOption->GetUid();
     EventReport::SendHiSysEvent(FLOW_CONTROL_OCCUR, eventInfo);
+}
+
+ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    ANS_LOGD("userId: %{public}d, enabled: %{public}d", userId, enabled);
+
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    if (!IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    ErrCode result = ERR_OK;
+    handler_->PostSyncTask(
+        std::bind([&]() {
+            result = DistributedPreferences::GetInstance()->SetSyncEnabledWithoutApp(userId, enabled);
+        }));
+    return result;
+#else
+    return ERR_INVALID_OPERATION;
+#endif
+}
+
+ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    ANS_LOGD("userId: %{public}d", userId);
+
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    if (!IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    ErrCode result = ERR_OK;
+    handler_->PostSyncTask(
+        std::bind([&]() {
+            result = DistributedPreferences::GetInstance()->GetSyncEnabledWithoutApp(userId, enabled);
+        }));
+    return result;
+#else
+    return ERR_INVALID_OPERATION;
+#endif
 }
 }  // namespace Notification
 }  // namespace OHOS
