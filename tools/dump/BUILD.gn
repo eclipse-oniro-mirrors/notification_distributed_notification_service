@@ -18,8 +18,12 @@ group("anm_target") {
   deps = [ ":anm" ]
 }
 
-ohos_executable("anm") {
+config("tools_dump_config") {
   include_dirs = [ "${tools_path}/dump/include" ]
+}
+
+ohos_executable("anm") {
+  public_configs = [ ":tools_dump_config" ]
 
   sources = [
     "src/main.cpp",
