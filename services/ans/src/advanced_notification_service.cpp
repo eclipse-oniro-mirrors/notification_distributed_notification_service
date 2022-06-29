@@ -3013,7 +3013,6 @@ void AdvancedNotificationService::OnDistributedPublish(
         ANS_LOGE("Failed to get active user id!");
         return;
     }
-    request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId));
 
     handler_->PostTask(std::bind([this, deviceId, bundleName, request, activeUserId]() {
         if (!CheckDistributedNotificationType(request)) {
@@ -3021,12 +3020,21 @@ void AdvancedNotificationService::OnDistributedPublish(
             return;
         }
 
-        sptr<NotificationBundleOption> bundleOption =
-            GenerateValidBundleOption(new NotificationBundleOption(bundleName, 0));
-        if (bundleOption == nullptr && !CheckPublishWithoutApp(activeUserId, request)) {
-            ANS_LOGE("bundle does not exit and enable is closed!");
-            return;
+        int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId);
+        if (uid <= 0) {
+            if (CheckPublishWithoutApp(activeUserId, request)) {
+                request->SetOwnerBundleName(FOUNDATION_BUNDLE_NAME);
+                request->SetCreatorBundleName(FOUNDATION_BUNDLE_NAME);
+            } else {
+                ANS_LOGE("bundle does not exit and enable is closed!");
+                return;
+            }
         }
+        std::string bundle = request->GetOwnerBundleName();
+        request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundle, activeUserId));
+        sptr<NotificationBundleOption> bundleOption =
+            GenerateValidBundleOption(new NotificationBundleOption(bundle, 0));
+
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
         if (record == nullptr) {
             return;
@@ -3069,19 +3077,28 @@ void AdvancedNotificationService::OnDistributedUpdate(
         ANS_LOGE("Failed to get active user id!");
         return;
     }
-    request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId));
 
     handler_->PostTask(std::bind([this, deviceId, bundleName, request, activeUserId]() {
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("device type not support display.");
             return;
         }
-        sptr<NotificationBundleOption> bundleOption =
-            GenerateValidBundleOption(new NotificationBundleOption(bundleName, 0));
-        if (bundleOption == nullptr && !CheckPublishWithoutApp(activeUserId, request)) {
-            ANS_LOGE("bundle does not exit, or enable is false!");
-            return;
+
+        int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId);
+        if (uid <= 0) {
+            if (CheckPublishWithoutApp(activeUserId, request)) {
+                request->SetOwnerBundleName(FOUNDATION_BUNDLE_NAME);
+                request->SetCreatorBundleName(FOUNDATION_BUNDLE_NAME);
+            } else {
+                ANS_LOGE("bundle does not exit and enable is closed!");
+                return;
+            }
         }
+        std::string bundle = request->GetOwnerBundleName();
+        request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundle, activeUserId));
+        sptr<NotificationBundleOption> bundleOption =
+            GenerateValidBundleOption(new NotificationBundleOption(bundle, 0));
+
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
         if (record == nullptr) {
             return;
@@ -3124,11 +3141,15 @@ void AdvancedNotificationService::OnDistributedDelete(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     handler_->PostTask(std::bind([this, deviceId, bundleName, label, id]() {
-        sptr<NotificationBundleOption> bundleOption =
-            GenerateValidBundleOption(new NotificationBundleOption(bundleName, 0));
-        if (bundleOption == nullptr) {
+        int32_t activeUserId = -1;
+        if (!GetActiveUserId(activeUserId)) {
+            ANS_LOGE("Failed to get active user id!");
             return;
         }
+        int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId);
+        std::string bundle = (uid > 0) ? bundleName : FOUNDATION_BUNDLE_NAME;
+        sptr<NotificationBundleOption> bundleOption =
+            GenerateValidBundleOption(new NotificationBundleOption(bundle, 0));
 
         std::string recordDeviceId;
         DistributedDatabase::DeviceInfo localDeviceInfo;
@@ -3142,7 +3163,8 @@ void AdvancedNotificationService::OnDistributedDelete(
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->deviceId == recordDeviceId) &&
-                (record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
+                ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
+                (FOUNDATION_BUNDLE_NAME == bundleOption->GetBundleName())) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
