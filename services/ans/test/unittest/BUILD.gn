@@ -89,7 +89,6 @@ ohos_unittest("ans_unit_test") {
     "common_event_service:cesfwk_innerkits",
     "distributeddatamgr:distributeddata_inner",
     "eventhandler:libeventhandler",
-    "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitrace",
     "hiviewdfx_hilog_native:libhilog",
@@ -105,6 +104,12 @@ ohos_unittest("ans_unit_test") {
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
     defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  cflags = []
+  if (hisysevent_usage) {
+    external_deps += [ "hisysevent_native:libhisysevent" ]
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
   }
 
   subsystem_name = "${subsystem_name}"

@@ -1108,6 +1108,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08300,
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
     EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
 }
 
@@ -1651,6 +1652,90 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11300,
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     EXPECT_EQ(
         advancedNotificationService_->CancelContinuousTaskNotification(label, 1), (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+}
+
+/**
+ * @tc.name: AdvancedNotificationServiceTest_12000
+ * @tc.desc: Send enable notification hisysevent and enable notification error hisysevent.
+ * @tc.type: FUNC
+ * @tc.require: I582Y4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12000, Function | SmallTest | Level1)
+{
+    // bundleName is empty
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
+        std::string(), new NotificationBundleOption(std::string(), -1), true),
+        (int)ERR_ANS_INVALID_PARAM);
+
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    req->SetLabel("req's label");
+    std::string label = "enable's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
+        std::string(), new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false),
+        (int)ERR_OK);
+
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NOT_ALLOWED);
+    SleepForFC();
+}
+
+/**
+ * @tc.name: AdvancedNotificationServiceTest_12100
+ * @tc.desc: Send enable notification slot hisysevent.
+ * @tc.type: FUNC
+ * @tc.require: I582Y4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12100, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    req->SetLabel("req's label");
+    std::string label = "enable's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    auto result = advancedNotificationService_->SetEnabledForBundleSlot(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
+        NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
+        false);
+    EXPECT_EQ(result, (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED);
+    SleepForFC();
+}
+
+/**
+ * @tc.name: AdvancedNotificationServiceTest_12200
+ * @tc.desc: Send remove notification hisysevent.
+ * @tc.type: FUNC
+ * @tc.require: I582Y4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12200, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    int32_t notificationId = 1;
+    std::string label = "testRemove";
+    sptr<NotificationRequest> req = new NotificationRequest(notificationId);
+    req->SetSlotType(NotificationConstant::OTHER);
+    req->SetLabel(label);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
+    auto result = advancedNotificationService_->RemoveNotification(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), notificationId, label);
+    EXPECT_EQ(result, (int)ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS
