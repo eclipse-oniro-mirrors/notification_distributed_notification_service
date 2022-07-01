@@ -43,8 +43,8 @@ config("native_module_config") {
 
 ohos_shared_library("notification") {
   include_dirs = [
-    "${aafwk_path}/interfaces/kits/native/ability/native",
-    "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_napi_path}/inner/napi_common",
     "//foundation/multimedia/image_standard/interfaces/kits/js/common/include/",
     "include",
     "//third_party/node/src",
@@ -74,10 +74,10 @@ ohos_shared_library("notification") {
   ]
 
   deps = [
-    "${aafwk_path}/frameworks/native/appkit:app_context",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_path}/frameworks/native/appkit:app_context",
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
-    "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image",
     "//third_party/jsoncpp:jsoncpp",
     "//third_party/libuv:uv_static",

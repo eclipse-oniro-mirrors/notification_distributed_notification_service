@@ -39,7 +39,7 @@ ohos_executable("anm") {
 
   configs = [
     "${core_path}:public_ans_core_config",
-    "${aafwk_kits_path}/wantagent:wantagent_innerkits_public_config",
+    "${ability_runtime_kits_path}/wantagent:wantagent_innerkits_public_config",
   ]
 
   defines = []
