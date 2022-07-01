@@ -45,8 +45,9 @@ private:
 
     ErrCode RunHelp();
     void CheckDumpOpt();
-    void SetDumpCmdInfo(std::string &cmd, std::string &bundle, ErrCode &ret);
-    ErrCode RunDumpCmd(const std::string& cmd, const std::string& bundle, std::vector<std::string> &infos);
+    void SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId, ErrCode &ret);
+    ErrCode RunDumpCmd(const std::string& cmd, const std::string& bundle, int32_t userId,
+        std::vector<std::string> &infos);
 
 private:
     std::shared_ptr<AnsNotification> ans_;
