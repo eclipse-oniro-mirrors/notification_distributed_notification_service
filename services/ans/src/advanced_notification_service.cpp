@@ -2937,7 +2937,7 @@ NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
     }
 }
 
-std::string AdvancedNotificationService::GetDistributedInfo(
+void AdvancedNotificationService::GetDistributedInfo(
     const std::string &key, std::string &deviceId, std::string &bundleName)
 {
     for (auto record : notificationList_) {
