@@ -18,7 +18,6 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "hisysevent.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
@@ -71,15 +70,6 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    std::string eventType = "ANS_PUBLISH";
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
-        HiviewDFX::HiSysEvent::Domain::NOTIFICATION, eventType,
-        HiviewDFX::HiSysEvent::EventType::FAULT,
-        "UID", getuid(),
-        "PID", getpid());
-    if (res != DH_ANS_SUCCESS) {
-        ANS_LOGE("Write HiSysEvent error, res:%d", res);
-    }
     return result;
 }
 
@@ -1540,15 +1530,6 @@ ErrCode AnsManagerProxy::GetShowBadgeEnabled(bool &enabled)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    std::string eventType = "ANS_SUBSCRIBE";
-    int32_t res = OHOS::HiviewDFX::HiSysEvent::Write(
-        HiviewDFX::HiSysEvent::Domain::NOTIFICATION, eventType,
-        HiviewDFX::HiSysEvent::EventType::FAULT,
-        "UID", getuid(),
-        "PID", getpid());
-    if (res != DH_ANS_SUCCESS) {
-        ANS_LOGE("Write HiSysEvent error, res:%d", res);
-    }
     return result;
 }
 
@@ -2162,40 +2143,6 @@ ErrCode AnsManagerProxy::GetDeviceRemindType(NotificationConstant::RemindType &r
     return result;
 }
 
-ErrCode AnsManagerProxy::ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[ShellDump] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteString(dumpOption)) {
-        ANS_LOGE("[ShellDump] fail: write option failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SHELL_DUMP, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[ShellDump] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[ShellDump] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.ReadStringVector(&dumpInfo)) {
-        ANS_LOGE("[ShellDump] fail: read dumpInfo failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::PublishContinuousTaskNotification(const sptr<NotificationRequest> &request)
 {
     if (request == nullptr) {
@@ -2765,10 +2712,116 @@ ErrCode AnsManagerProxy::GetEnabledForBundleSlot(
     }
 
     if (!reply.ReadBool(enabled)) {
-        ANS_LOGE("[GetEnabledForBundleSlot] fail: read canPublish failed.");
+        ANS_LOGE("[GetEnabledForBundleSlot] fail: read enable failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail:: write userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteBool(enabled)) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: write enabled failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail:: write userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadBool(enabled)) {
+        ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: read enable failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[ShellDump] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteString(cmd)) {
+        ANS_LOGE("[ShellDump] fail: write dump cmd failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteString(bundle)) {
+        ANS_LOGE("[ShellDump] fail: write dump bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        ANS_LOGE("[ShellDump] fail: write dump userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(SHELL_DUMP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[ShellDump] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[ShellDump] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!reply.ReadStringVector(&dumpInfo)) {
+        ANS_LOGE("[ShellDump] fail: read dumpInfo failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 }  // namespace Notification

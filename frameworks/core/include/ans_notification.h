@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -738,15 +738,6 @@ public:
     void ResetAnsManagerProxy();
 
     /**
-     * @brief Obtains specific informations via specified dump option.
-     *
-     * @param dumpOption Indicates the specified dump option.
-     * @param dumpInfo Indicates the container containing informations.
-     * @return Returns check result.
-     */
-    ErrCode ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo);
-
-    /**
      * @brief Publishes a scheduled reminder.
      *
      * @param reminder Indicates a reminder.
@@ -848,6 +839,37 @@ public:
      */
     ErrCode GetEnabledForBundleSlot(
         const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled);
+
+    /**
+     * @brief Obtains specific datas via specified dump option.
+     *
+     * @param cmd Indicates the specified dump command.
+     * @param bundle Indicates the specified bundle name.
+     * @param userId Indicates the specified userId.
+     * @param dumpInfo Indicates the container containing datas.
+     * @return Returns check result.
+     */
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+        std::vector<std::string> &dumpInfo);
+
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled);
+
+    /**
+     * @brief Obtains whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns get enabled result.
+     */
+    ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.

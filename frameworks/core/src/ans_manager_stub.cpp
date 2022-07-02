@@ -263,6 +263,12 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
         {AnsManagerStub::GET_ENABLED_FOR_BUNDLE_SLOT,
             std::bind(&AnsManagerStub::HandleGetEnabledForBundleSlot, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+        {AnsManagerStub::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
+            std::bind(&AnsManagerStub::HandleDistributedSetEnabledWithoutApp, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {AnsManagerStub::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
+            std::bind(&AnsManagerStub::HandleDistributedGetEnabledWithoutApp, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -1470,14 +1476,23 @@ ErrCode AnsManagerStub::HandleGetDeviceRemindType(MessageParcel &data, MessagePa
 
 ErrCode AnsManagerStub::HandleShellDump(MessageParcel &data, MessageParcel &reply)
 {
-    std::string dumpOption;
-    if (!data.ReadString(dumpOption)) {
-        ANS_LOGE("[HandleShellDump] fail: read dumpOption failed.");
+    std::string cmd;
+    if (!data.ReadString(cmd)) {
+        ANS_LOGE("[HandleShellDump] fail: read cmd failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+    std::string bundle;
+    if (!data.ReadString(bundle)) {
+        ANS_LOGE("[HandleShellDump] fail: read bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    int32_t userId;
+    if (!data.ReadInt32(userId)) {
+        ANS_LOGE("[HandleShellDump] fail: read userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     std::vector<std::string> notificationsInfo;
-    ErrCode result = ShellDump(dumpOption, notificationsInfo);
+    ErrCode result = ShellDump(cmd, bundle, userId, notificationsInfo);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleGetRecentNotificationsInfo] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1799,6 +1814,54 @@ ErrCode AnsManagerStub::HandleGetEnabledForBundleSlot(MessageParcel &data, Messa
 
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleGetEnabledForBundleSlot] fail: write enabled failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleDistributedSetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!data.ReadInt32(userId)) {
+        ANS_LOGE("[HandleDistributedSetEnabledWithoutApp] fail: read userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        ANS_LOGE("[HandleDistributedSetEnabledWithoutApp] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetSyncNotificationEnabledWithoutApp(userId, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleDistributedSetEnabledWithoutApp] fail: write result failed, ErrCode=%{public}d",
+            result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleDistributedGetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!data.ReadInt32(userId)) {
+        ANS_LOGE("[HandleDistributedGetEnabledWithoutApp] fail: read userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    ErrCode result = GetSyncNotificationEnabledWithoutApp(userId, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleDistributedGetEnabledWithoutApp] fail: write result failed, ErrCode=%{public}d",
+            result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteBool(enabled)) {
+        ANS_LOGE("[HandleDistributedGetEnabledWithoutApp] fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2187,12 +2250,6 @@ ErrCode AnsManagerStub::GetDeviceRemindType(NotificationConstant::RemindType &re
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo)
-{
-    ANS_LOGE("AnsManagerStub::ShellDump called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::PublishContinuousTaskNotification(const sptr<NotificationRequest> &request)
 {
     ANS_LOGE("AnsManagerStub::PublishContinuousTaskNotification called!");
@@ -2276,6 +2333,26 @@ ErrCode AnsManagerStub::GetEnabledForBundleSlot(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled)
 {
     ANS_LOGE("AnsManagerStub::GetEnabledForBundleSlot called!");
+    return ERR_INVALID_OPERATION;
+}
+
+
+ErrCode AnsManagerStub::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    std::vector<std::string> &dumpInfo)
+{
+    ANS_LOGE("AnsManagerStub::ShellDump called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
+{
+    ANS_LOGE("AnsManagerStub::SetSyncNotificationEnabledWithoutApp called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
+{
+    ANS_LOGE("AnsManagerStub::GetSyncNotificationEnabledWithoutApp called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

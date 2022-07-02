@@ -11,10 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-aafwk_inner_api_path =
-    "//foundation/ability/ability_runtime/interfaces/inner_api"
-aafwk_services_path = "//foundation/ability/ability_runtime/services"
-aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
+ability_runtime_path = "//foundation/ability/ability_runtime"
+ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
+ability_runtime_services_path = "${ability_runtime_path}/services"
+ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
+ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi/aafwk"
 component_name = "distributed_notification_service"
 component_path = "//base/notification/distributed_notification_service"
 services_path = "${component_path}/services"
@@ -25,7 +26,6 @@ inner_api_path = "${interfaces_path}/inner_api"
 core_path = "${frameworks_path}/core"
 test_path = "${component_path}/test"
 tools_path = "${component_path}/tools"
-aafwk_path = "//foundation/ability/ability_runtime"
 distributed_notification_supported = true
 subsystem_name = "notification"
 component_external_deps = [
@@ -41,3 +41,20 @@ component_external_deps = [
   "safwk:system_ability_fwk",
   "samgr_standard:samgr_proxy",
 ]
+
+declare_args() {
+  device_usage = true
+  hisysevent_usage = true
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
+    device_usage = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.hiviewdfx_hisysevent_native)) {
+    hisysevent_usage = false
+  }
+
+  print("hisysevent_usage = " + "$hisysevent_usage")
+}

@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Notification {
 // Max active notification number
-constexpr int32_t DH_ANS_SUCCESS = 0;
 constexpr size_t MAX_ACTIVE_NUM = 1000;
 constexpr uint32_t MAX_ACTIVE_NUM_PERAPP = 100;
 constexpr uint32_t MAX_ACTIVE_NUM_PERSECOND = 10;
@@ -40,6 +39,8 @@ constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 constexpr int32_t SUBSCRIBE_USER_ALL = -2;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_BEGIN = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_END = 99;
+constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
+constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
 
 // Default sound for notification
 const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");

@@ -25,6 +25,8 @@ config("native_module_config") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
+  cflags += [ "-Wno-error=deprecated-declarations" ]
+
   defines = [
     "APP_LOG_TAG = \"NOTIFICATION_REMINDER\"",
     "LOG_DOMAIN = 0xD001800",
@@ -33,8 +35,8 @@ config("native_module_config") {
 
 ohos_shared_library("reminderagent") {
   include_dirs = [
-    "${aafwk_kits_path}/ability/native/include",
-    "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common",
     "//foundation/multimedia/image_standard/interfaces/kits/js/common/include/",
     "../../include",
     "//third_party/node/src",
@@ -53,9 +55,9 @@ ohos_shared_library("reminderagent") {
   ]
 
   deps = [
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
-    "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image",
     "//third_party/jsoncpp:jsoncpp",
     "//third_party/libuv:uv_static",

@@ -17,6 +17,7 @@
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
+#include "hitrace_meter.h"
 #include "os_account_manager.h"
 
 #include "uri.h"
@@ -185,6 +186,7 @@ bool NotificationPreferencesDatabase::CheckKvStore()
 bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
     const std::string &bundleName, const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleName.empty()) {
         ANS_LOGE("Bundle name is null.");
@@ -618,6 +620,7 @@ bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(const std::stri
 bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     const std::string &bundleKey, const NotificationConstant::SlotType &type)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleKey.empty()) {
         ANS_LOGE("Bundle name is null.");

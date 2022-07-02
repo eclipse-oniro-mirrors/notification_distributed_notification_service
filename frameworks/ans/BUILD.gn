@@ -30,7 +30,7 @@ config("ans_innerkits_public_config") {
     "//utils/system/safwk/native/include",
   ]
   configs = [
-    "${aafwk_kits_path}/wantagent:wantagent_innerkits_public_config",
+    "${ability_runtime_kits_path}/wantagent:wantagent_innerkits_public_config",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_external_config",
   ]
 }
@@ -90,6 +90,7 @@ ohos_shared_library("ans_innerkits") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
+    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",

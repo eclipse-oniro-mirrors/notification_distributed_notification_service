@@ -34,6 +34,7 @@ ohos_shared_library("libans") {
     "src/advanced_notification_service.cpp",
     "src/advanced_notification_service_ability.cpp",
     "src/bundle_manager_helper.cpp",
+    "src/event_report.cpp",
     "src/notification_preferences.cpp",
     "src/notification_preferences_database.cpp",
     "src/notification_preferences_info.cpp",
@@ -52,6 +53,7 @@ ohos_shared_library("libans") {
   ]
 
   defines = []
+  cflags = []
 
   deps = [
     ":downloadTemplate.abc",
@@ -65,7 +67,7 @@ ohos_shared_library("libans") {
   ]
 
   if (is_double_framework) {
-    cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]
+    cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
 
   if (distributed_notification_supported) {
@@ -79,9 +81,8 @@ ohos_shared_library("libans") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "device_usage_statistics:usagestatsinner",
     "distributeddatamgr:distributeddata_inner",
-    "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
     "multimedia_image_standard:image_native",
     "multimedia_media_standard:media_client",
     "os_account:os_account_innerkits",
@@ -89,6 +90,16 @@ ohos_shared_library("libans") {
     "window_manager:libwm",
   ]
   external_deps += component_external_deps
+
+  if (device_usage) {
+    external_deps += [ "device_usage_statistics:usagestatsinner" ]
+    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  if (hisysevent_usage) {
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+    external_deps += [ "hisysevent_native:libhisysevent" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

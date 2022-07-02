@@ -21,6 +21,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "bundle_manager_helper.h"
+#include "hitrace_meter.h"
 #include "nlohmann/json.hpp"
 #include "os_account_manager.h"
 
@@ -43,6 +44,7 @@ NotificationPreferences &NotificationPreferences::GetInstance()
 ErrCode NotificationPreferences::AddNotificationSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || slots.empty()) {
         return ERR_ANS_INVALID_PARAM;
@@ -117,6 +119,7 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
 ErrCode NotificationPreferences::RemoveNotificationSlot(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
@@ -483,6 +486,7 @@ ErrCode NotificationPreferences::GetNotificationsEnabledForBundle(
 ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, const bool enabled)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }

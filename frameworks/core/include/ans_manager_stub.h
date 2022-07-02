@@ -608,15 +608,6 @@ public:
     virtual ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType) override;
 
     /**
-     * @brief Dump current running status for debuging.
-     *
-     * @param dumpOption Indicates the dump action that needs to be performed.
-     * @param dumpInfo Indicates the dump information.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo) override;
-
-    /**
      * @brief Publishes a continuous notification.
      *
      * @param request Notification requests that need to be posted.
@@ -725,6 +716,36 @@ public:
     virtual ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) override;
 
+    /**
+     * @brief Obtains specific datas via specified dump option.
+     *
+     * @param cmd Indicates the specified dump command.
+     * @param bundle Indicates the specified bundle name.
+     * @param userId Indicates the specified userId.
+     * @param dumpInfo Indicates the container containing datas.
+     * @return Returns check result.
+     */
+    virtual ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+        std::vector<std::string> &dumpInfo) override;
+
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    virtual ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled) override;
+
+    /**
+     * @brief Obtains whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns get enabled result.
+     */
+    virtual ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) override;
+
 private:
     static const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -806,6 +827,8 @@ private:
     ErrCode HandleGetDoNotDisturbDateByUser(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleDistributedSetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleDistributedGetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result);

@@ -583,15 +583,6 @@ public:
     ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType) override;
 
     /**
-     * @brief Dump current running status for debuging.
-     *
-     * @param dumpOption Indicates the dump action that needs to be performed.
-     * @param dumpInfo Indicates the dump information.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode ShellDump(const std::string &dumpOption, std::vector<std::string> &dumpInfo) override;
-
-    /**
      * @brief Publishes a continuous notification.
      *
      * @param request Notification requests that need to be posted.
@@ -709,6 +700,24 @@ public:
      */
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
 
+    /**
+     * @brief Set whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns set enabled result.
+     */
+    ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled) override;
+
+    /**
+     * @brief Obtains whether to sync notifications to devices that do not have the app installed.
+     *
+     * @param userId Indicates the specific user.
+     * @param enabled Allow or disallow sync notifications.
+     * @return Returns get enabled result.
+     */
+    ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) override;
+
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     /**
      * @brief Obtains the event of turn on screen.
@@ -736,6 +745,18 @@ public:
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishPreparedNotification(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Dump current running status for debuging.
+     *
+     * @param cmd Indicates the specified dump command.
+     * @param bundle Indicates the specified bundle name.
+     * @param userId Indicates the specified userId.
+     * @param dumpInfo Indicates the container containing datas.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+        std::vector<std::string> &dumpInfo) override;
 
 private:
     struct RecentInfo;
@@ -766,10 +787,11 @@ private:
 
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
-    ErrCode ActiveNotificationDump(std::vector<std::string> &dumpInfo);
-    ErrCode RecentNotificationDump(std::vector<std::string> &dumpInfo);
+    ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
+    ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    ErrCode DistributedNotificationDump(std::vector<std::string> &dumpInfo);
+    ErrCode DistributedNotificationDump(const std::string& bundle, int32_t userId,
+        std::vector<std::string> &dumpInfo);
 #endif
     ErrCode SetRecentNotificationCount(const std::string arg);
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);
@@ -790,8 +812,8 @@ private:
     NotificationConstant::RemindType GetRemindType();
     ErrCode DoDistributedPublish(
         const sptr<NotificationBundleOption> bundleOption, const std::shared_ptr<NotificationRecord> record);
-    ErrCode DoDistributedDelete(const std::string deviceId, const sptr<Notification> notification);
-    std::string GetNotificationDeviceId(const std::string &key);
+    ErrCode DoDistributedDelete(const std::string deviceId, const std::string bundleName, const sptr<Notification> notification);
+    void GetDistributedInfo(const std::string &key, std::string &deviceId, std::string &bundleName);
     bool CheckDistributedNotificationType(const sptr<NotificationRequest> &request);
     void OnDistributedPublish(
         const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request);
@@ -800,6 +822,7 @@ private:
     void OnDistributedDelete(
         const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id);
     ErrCode GetDistributedEnableInApplicationInfo(const sptr<NotificationBundleOption> bundleOption, bool &enable);
+    bool CheckPublishWithoutApp(const int32_t userId, const sptr<NotificationRequest> &request);
 #endif
 
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
@@ -810,6 +833,22 @@ private:
         sptr<NotificationBundleOption> &targetBundle);
     bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
     void ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName);
+    int Dump(int fd, const std::vector<std::u16string> &args) override;
+    void GetDumpInfo(const std::vector<std::u16string> &args, std::string &result);
+
+    void SendSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info,
+        ErrCode errCode);
+    void SendUnSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info);
+    void SendPublishHiSysEvent(const sptr<NotificationRequest> &request, ErrCode errCode);
+    void SendCancelHiSysEvent(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode);
+    void SendRemoveHiSysEvent(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode);
+    void SendEnableNotificationHiSysEvent(const sptr<NotificationBundleOption> &bundleOption, bool enabled,
+        ErrCode errCode);
+    void SendEnableNotificationSlotHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
+    void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
