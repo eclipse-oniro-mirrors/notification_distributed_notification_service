@@ -812,7 +812,8 @@ private:
     NotificationConstant::RemindType GetRemindType();
     ErrCode DoDistributedPublish(
         const sptr<NotificationBundleOption> bundleOption, const std::shared_ptr<NotificationRecord> record);
-    ErrCode DoDistributedDelete(const std::string deviceId, const std::string bundleName, const sptr<Notification> notification);
+    ErrCode DoDistributedDelete(
+        const std::string deviceId, const std::string bundleName, const sptr<Notification> notification);
     void GetDistributedInfo(const std::string &key, std::string &deviceId, std::string &bundleName);
     bool CheckDistributedNotificationType(const sptr<NotificationRequest> &request);
     void OnDistributedPublish(
