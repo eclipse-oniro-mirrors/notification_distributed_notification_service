@@ -15,6 +15,7 @@
 
 #include "distributed_kv_data_manager.h"
 
+#include "mock_single_kv_store.h"
 
 namespace OHOS {
 namespace DistributedKv {
