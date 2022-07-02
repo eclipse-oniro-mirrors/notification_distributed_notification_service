@@ -90,7 +90,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
         ANS_LOGW("Wrong argument type. Property type expected.");
         return nullptr;
     }
-    double begin = 0;
+    int64_t begin = 0;
     napi_get_named_property(env, argv, "begin", &value);
     bool isDate = false;
     napi_is_date(env, value, &isDate);
@@ -98,8 +98,8 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
         ANS_LOGE("Wrong argument type. Date expected.");
         return nullptr;
     }
-    napi_get_date_value(env, value, &begin);
-    params.date.SetBeginDate(int64_t(begin));
+    napi_get_value_int64(env, value, &begin);
+    params.date.SetBeginDate(begin);
 
     // argv[0]: date:end
     NAPI_CALL(env, napi_has_named_property(env, argv, "end", &hasProperty));
@@ -107,7 +107,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
         ANS_LOGW("Wrong argument type. Property type expected.");
         return nullptr;
     }
-    double end = 0;
+    int64_t end = 0;
     napi_get_named_property(env, argv, "end", &value);
     isDate = false;
     napi_is_date(env, value, &isDate);
@@ -115,8 +115,8 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
         ANS_LOGE("Wrong argument type. Date expected.");
         return nullptr;
     }
-    napi_get_date_value(env, value, &end);
-    params.date.SetEndDate(int64_t(end));
+    napi_get_value_int64(env, value, &end);
+    params.date.SetEndDate(end);
 
     return Common::NapiGetNull(env);
 }

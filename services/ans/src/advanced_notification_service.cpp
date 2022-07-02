@@ -3055,6 +3055,7 @@ void AdvancedNotificationService::OnDistributedPublish(
         record->notification = new Notification(deviceId, request);
         record->bundleOption = bundleOption;
         record->deviceId = deviceId;
+        record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
         ErrCode result = AssignValidNotificationSlot(record);
@@ -3119,6 +3120,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
         record->notification = new Notification(deviceId, request);
         record->bundleOption = bundleOption;
         record->deviceId = deviceId;
+        record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
         ErrCode result = AssignValidNotificationSlot(record);
