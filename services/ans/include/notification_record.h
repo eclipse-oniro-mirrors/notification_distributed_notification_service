@@ -34,6 +34,7 @@ struct NotificationRecord {
     sptr<NotificationSlot> slot;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     std::string deviceId;
+    std::string bundleName;
 #endif  // DISTRIBUTED_NOTIFICATION_SUPPORTED
 };
 }  // namespace Notification
