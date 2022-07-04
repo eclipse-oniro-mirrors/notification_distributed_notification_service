@@ -222,7 +222,8 @@ napi_value ParseGetValidParameter(
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn) {
+napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn)
+{
     if (callbackIn) {
         NotificationNapi::Common::SetCallback(env, callbackIn, NotificationNapi::ERROR,
             NotificationNapi::Common::NapiGetNull(env));

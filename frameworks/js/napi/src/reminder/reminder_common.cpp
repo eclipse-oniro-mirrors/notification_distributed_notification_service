@@ -429,26 +429,16 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
 
     // repeatMonth
-    const int32_t maxMonthSize = 12;
     std::vector<uint8_t> repeatMonths;
     if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_MONTHS, repeatMonths,
         ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) == nullptr) {
         return nullptr;
     }
-    if (repeatMonths.size() > maxMonthSize) {
-        ANSR_LOGE("The length of repeat months array should not larger than %{public}d", maxMonthSize);
-        return nullptr;
-    }
 
     // repeatDay
-    const int32_t maxDaySize = 31;
     std::vector<uint8_t> repeatDays;
     if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_DAYS, repeatDays,
         ReminderRequestCalendar::MAX_DAYS_OF_MONTH) == nullptr) {
-        return nullptr;
-    }
-    if (repeatDays.size() > maxDaySize) {
-        ANSR_LOGE("The length of repeat days array should not larger than %{public}d", maxDaySize);
         return nullptr;
     }
 
