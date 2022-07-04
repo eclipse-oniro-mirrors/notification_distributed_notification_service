@@ -3177,7 +3177,7 @@ void AdvancedNotificationService::OnDistributedDelete(
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->deviceId == recordDeviceId) &&
-                ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
+                ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) ||
                 (FOUNDATION_BUNDLE_NAME == bundleOption->GetBundleName())) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
