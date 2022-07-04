@@ -411,7 +411,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
             sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            DoDistributedDelete("", notification);
+            DoDistributedDelete("", "", notification);
 #endif
         }
     }));
@@ -644,7 +644,9 @@ ErrCode AdvancedNotificationService::CancelAll()
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            std::string deviceId = GetNotificationDeviceId(key);
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
 #endif
             result = RemoveFromNotificationList(key, notification, true);
             if (result != ERR_OK) {
@@ -657,7 +659,7 @@ ErrCode AdvancedNotificationService::CancelAll()
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(deviceId, notification);
+                DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
         }
@@ -983,7 +985,9 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key)
     handler_->PostSyncTask(std::bind([&]() {
         sptr<Notification> notification = nullptr;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-        std::string deviceId = GetNotificationDeviceId(key);
+        std::string deviceId;
+        std::string bundleName;
+        GetDistributedInfo(key, deviceId, bundleName);
 #endif
         result = RemoveFromNotificationList(key, notification);
         if (result != ERR_OK) {
@@ -996,7 +1000,7 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key)
             sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            DoDistributedDelete(deviceId, notification);
+            DoDistributedDelete(deviceId, bundleName, notification);
 #endif
         }
     }));
@@ -1026,7 +1030,9 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
         std::vector<std::string> keys = GetNotificationKeys(bundle);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            std::string deviceId = GetNotificationDeviceId(key);
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
 #endif
             sptr<Notification> notification = nullptr;
 
@@ -1041,7 +1047,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(deviceId, notification);
+                DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
         }
@@ -1071,7 +1077,9 @@ ErrCode AdvancedNotificationService::DeleteAll()
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            std::string deviceId = GetNotificationDeviceId(key);
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
 #endif
             sptr<Notification> notification = nullptr;
 
@@ -1086,7 +1094,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(deviceId, notification);
+                DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
         }
@@ -2240,7 +2248,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete("", notification);
+                DoDistributedDelete("", "", notification);
 #endif
             }
         }
@@ -2345,6 +2353,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         std::string deviceId;
+        std::string bundleName;
 #endif
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
@@ -2359,6 +2368,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(
                 }
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 deviceId = record->deviceId;
+                bundleName = record->bundleName;
 #endif
                 notification = record->notification;
                 notificationRequest = record->request;
@@ -2374,7 +2384,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(
             sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            DoDistributedDelete(deviceId, notification);
+            DoDistributedDelete(deviceId, bundleName, notification);
 #endif
         }
 
@@ -2428,7 +2438,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(record->deviceId, record->notification);
+                DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
 
@@ -2505,7 +2515,7 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName)
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(record->deviceId, record->notification);
+                DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
         }
@@ -2561,7 +2571,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(record->deviceId, record->notification);
+                DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
         }
@@ -2927,14 +2937,16 @@ NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
     }
 }
 
-std::string AdvancedNotificationService::GetNotificationDeviceId(const std::string &key)
+void AdvancedNotificationService::GetDistributedInfo(
+    const std::string &key, std::string &deviceId, std::string &bundleName)
 {
     for (auto record : notificationList_) {
         if (record->notification->GetKey() == key) {
-            return record->deviceId;
+            deviceId = record->deviceId;
+            bundleName = record->bundleName;
+            break;
         }
     }
-    return std::string();
 }
 
 ErrCode AdvancedNotificationService::DoDistributedPublish(
@@ -2970,7 +2982,7 @@ ErrCode AdvancedNotificationService::DoDistributedPublish(
 }
 
 ErrCode AdvancedNotificationService::DoDistributedDelete(
-    const std::string deviceId, const sptr<Notification> notification)
+    const std::string deviceId, const std::string bundleName, const sptr<Notification> notification)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!notification->GetNotificationRequest().GetNotificationDistributedOptions().IsDistributed()) {
@@ -2981,7 +2993,7 @@ ErrCode AdvancedNotificationService::DoDistributedDelete(
             notification->GetBundleName(), notification->GetLabel(), notification->GetId());
     } else {
         return DistributedNotificationManager::GetInstance()->DeleteRemoteNotification(
-            deviceId, notification->GetBundleName(), notification->GetLabel(), notification->GetId());
+            deviceId, bundleName, notification->GetLabel(), notification->GetId());
     }
 
     return ERR_OK;
@@ -3043,6 +3055,7 @@ void AdvancedNotificationService::OnDistributedPublish(
         record->notification = new Notification(deviceId, request);
         record->bundleOption = bundleOption;
         record->deviceId = deviceId;
+        record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
         ErrCode result = AssignValidNotificationSlot(record);
@@ -3107,6 +3120,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
         record->notification = new Notification(deviceId, request);
         record->bundleOption = bundleOption;
         record->deviceId = deviceId;
+        record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
         ErrCode result = AssignValidNotificationSlot(record);
@@ -3163,8 +3177,8 @@ void AdvancedNotificationService::OnDistributedDelete(
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->deviceId == recordDeviceId) &&
-                ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (FOUNDATION_BUNDLE_NAME == bundleOption->GetBundleName())) &&
+                ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) ||
+                (record->bundleName == bundleName)) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
@@ -3327,7 +3341,9 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            std::string deviceId = GetNotificationDeviceId(key);
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
 #endif
             sptr<Notification> notification = nullptr;
 
@@ -3342,7 +3358,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(deviceId, notification);
+                DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
         }
@@ -3525,7 +3541,9 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-            std::string deviceId = GetNotificationDeviceId(key);
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
 #endif
             sptr<Notification> notification = nullptr;
 
@@ -3540,7 +3558,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete(deviceId, notification);
+                DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
         }
