@@ -33,8 +33,6 @@ config("native_module_config") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  cflags += [ "-Wno-error=deprecated-declarations" ]
-
   defines = [
     "ANS_LOG_TAG = \"NOTIFICATION_NAPI\"",
     "LOG_DOMAIN = 0xD001800",
