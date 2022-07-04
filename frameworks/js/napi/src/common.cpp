@@ -1339,13 +1339,15 @@ napi_value Common::SetDoNotDisturbDate(
     napi_set_named_property(env, result, "type", typeNapi);
 
     // begin:Date
+    double begind = double(date.GetBeginDate());
     napi_value beginNapi = nullptr;
-    napi_create_int64(env, date.GetBeginDate(), &beginNapi);
+    napi_create_date(env, begind, &beginNapi);
     napi_set_named_property(env, result, "begin", beginNapi);
 
     // end:Date
+    double endd = double(date.GetEndDate());
     napi_value endNapi = nullptr;
-    napi_create_int64(env, date.GetEndDate(), &endNapi);
+    napi_create_date(env, endd, &endNapi);
     napi_set_named_property(env, result, "end", endNapi);
 
     return NapiGetBoolean(env, true);
