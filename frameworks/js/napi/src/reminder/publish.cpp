@@ -92,12 +92,6 @@ napi_value ParseParameters(
         return nullptr;
     }
 
-    // argv[0] : reminderRequest
-    if (ReminderCommon::GetReminderRequest(env, argv[0], params.reminder) == nullptr) {
-        ANSR_LOGW("[reminderAgent]CreateReminder returns nullptr");
-        return nullptr;
-    }
-
     // argv[1]: callback
     if (argc == PUBLISH_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
@@ -105,6 +99,13 @@ napi_value ParseParameters(
             return nullptr;
         }
     }
+
+    // argv[0] : reminderRequest
+    if (ReminderCommon::GetReminderRequest(env, argv[0], params.reminder) == nullptr) {
+        ANSR_LOGW("[reminderAgent]CreateReminder returns nullptr");
+        return nullptr;
+    }
+
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
@@ -156,6 +157,14 @@ napi_value ParseCanCelParameter(
         return nullptr;
     }
 
+    // argv[1]: callback
+    if (argc >= CANCEL_PARAM_LEN) {
+        if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
+            ANSR_LOGW("GetCallbak is nullptr");
+            return nullptr;
+        }
+    }
+
     // argv[0]: reminder id
     int32_t reminderId = -1;
     if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
@@ -167,13 +176,6 @@ napi_value ParseCanCelParameter(
     }
     params.reminderId = reminderId;
 
-    // argv[1]: callback
-    if (argc >= CANCEL_PARAM_LEN) {
-        if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGW("GetCallbak is nullptr");
-            return nullptr;
-        }
-    }
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
@@ -220,6 +222,14 @@ napi_value ParseGetValidParameter(
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
+napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn) {
+    if (callbackIn) {
+        NotificationNapi::Common::SetCallback(env, callbackIn, NotificationNapi::ERROR,
+            NotificationNapi::Common::NapiGetNull(env));
+    }
+    return NotificationNapi::Common::JSParaError(env, callbackIn);
+}
+
 napi_value CancelReminder(napi_env env, napi_callback_info info)
 {
     ANSR_LOGI("Cancel reminder");
@@ -234,7 +244,7 @@ napi_value CancelReminder(napi_env env, napi_callback_info info)
     // param
     Parameters params;
     if (ParseCanCelParameter(env, info, params, *asynccallbackinfo) == nullptr) {
-        return NotificationNapi::Common::JSParaError(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback);
     }
 
     // promise
@@ -290,7 +300,7 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
     // param
     Parameters params;
     if (ParseCanCelAllParameter(env, info, params, *asynccallbackinfo) == nullptr) {
-        return NotificationNapi::Common::JSParaError(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback);
     }
 
     // promise
@@ -587,7 +597,7 @@ napi_value GetValidReminders(napi_env env, napi_callback_info info)
     // param
     Parameters params;
     if (ParseGetValidParameter(env, info, params, *asynccallbackinfo) == nullptr) {
-        return NotificationNapi::Common::JSParaError(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback);
     }
 
     // promise
@@ -652,7 +662,7 @@ napi_value PublishReminder(napi_env env, napi_callback_info info)
     Parameters params;
     if (ParseParameters(env, info, params, *asynccallbackinfo) == nullptr) {
         ANSR_LOGW("Parse params error");
-        return NotificationNapi::Common::JSParaError(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback);
     }
 
     // promise
@@ -722,7 +732,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
     Parameters params;
     if (ParseSlotParameters(env, info, params, *asynccallbackinfo) == nullptr) {
         ANSR_LOGW("Parse params error");
-        return NotificationNapi::Common::JSParaError(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback);
     }
 
     // promise

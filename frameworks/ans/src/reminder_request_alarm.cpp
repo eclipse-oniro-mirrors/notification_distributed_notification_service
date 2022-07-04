@@ -57,11 +57,11 @@ void ReminderRequestAlarm::CheckParamValid() const
 {
     if (hour_ >= HOURS_PER_DAY) {
         ANSR_LOGE("setted hour is not between [0, 24)");
-        throw std::invalid_argument("setted hour is not between [0, 24)");
+        return;
     }
     if (minute_ >= MINUTES_PER_HOUR) {
         ANSR_LOGE("setted minute is not between [0, 60)");
-        throw std::invalid_argument("setted minute is not between [0, 60)");
+        return;
     }
 }
 
@@ -81,7 +81,7 @@ void ReminderRequestAlarm::SetDaysOfWeek(bool set, std::vector<uint8_t> daysOfWe
     }
     if (daysOfWeek.size() > DAYS_PER_WEEK) {
         ANSR_LOGE("The length of daysOfWeek should not larger than 7");
-        throw std::invalid_argument("The length of daysOfWeek should not larger than 7");
+        return;
     }
     for (std::vector<uint8_t>::iterator it = daysOfWeek.begin(); it != daysOfWeek.end(); ++it) {
         if (*it < MONDAY || *it > SUNDAY) {

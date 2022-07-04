@@ -351,13 +351,14 @@ napi_value ReminderCommon::CreateReminderTimer(
         return nullptr;
     }
 
-    if (propertyCountDownTime <= 0) {
-        ANSR_LOGW("Create countDown reminder fail: designated %{public}s should be set larger than 0.",
+    auto countDownTimeInSeconds = static_cast<uint64_t>(propertyCountDownTime);
+    if (propertyCountDownTime <= 0 || countDownTimeInSeconds >= (UINT64_MAX / ReminderRequest::MILLI_SECONDS)) {
+        ANSR_LOGW("Create countDown reminder fail: designated %{public}s is illegal.",
             ReminderAgentNapi::TIMER_COUNT_DOWN_TIME);
         return nullptr;
     }
 
-    reminder = std::make_shared<ReminderRequestTimer>(static_cast<uint64_t>(propertyCountDownTime));
+    reminder = std::make_shared<ReminderRequestTimer>(countDownTimeInSeconds);
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
@@ -428,16 +429,26 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
 
     // repeatMonth
+    const int32_t maxMonthSize = 12;
     std::vector<uint8_t> repeatMonths;
     if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_MONTHS, repeatMonths,
         ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) == nullptr) {
         return nullptr;
     }
+    if (repeatMonths.size() > maxMonthSize) {
+        ANSR_LOGE("The length of repeat months array should not larger than %{public}d", maxMonthSize);
+        return nullptr;
+    }
 
     // repeatDay
+    const int32_t maxDaySize = 31;
     std::vector<uint8_t> repeatDays;
     if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_DAYS, repeatDays,
         ReminderRequestCalendar::MAX_DAYS_OF_MONTH) == nullptr) {
+        return nullptr;
+    }
+    if (repeatDays.size() > maxDaySize) {
+        ANSR_LOGE("The length of repeat days array should not larger than %{public}d", maxDaySize);
         return nullptr;
     }
 
@@ -450,6 +461,9 @@ napi_value ReminderCommon::CreateReminderCalendar(
     dateTime.tm_sec = 0;
     dateTime.tm_isdst = -1;
     reminder = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays);
+    if (!(reminder->SetNextTriggerTime())) {
+        return nullptr;
+    }
     return NotificationNapi::Common::NapiGetNull(env);
 }
 

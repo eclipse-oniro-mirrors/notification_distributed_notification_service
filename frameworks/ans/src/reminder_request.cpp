@@ -823,6 +823,11 @@ bool ReminderRequest::UpdateNextReminder()
     return false;
 }
 
+bool ReminderRequest::SetNextTriggerTime()
+{
+    return false;
+}
+
 void ReminderRequest::UpdateNotificationRequest(UpdateNotificationType type, std::string extra)
 {
     switch (type) {

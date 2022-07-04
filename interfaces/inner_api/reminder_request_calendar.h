@@ -138,6 +138,7 @@ public:
      * @return true if read parcel success.
      */
     bool ReadFromParcel(Parcel &parcel) override;
+    bool SetNextTriggerTime() override;
 
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
@@ -180,7 +181,7 @@ private:
     void SetDay(const uint8_t &day, const bool &isSet);
     void SetMonth(const uint8_t &month, const bool &isSet);
     void SetRepeatMonths(const std::vector<uint8_t> &repeatMonths);
-    void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeateDays);
+    void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
 
     static const uint8_t JANUARY;
     static const uint8_t DECEMBER;

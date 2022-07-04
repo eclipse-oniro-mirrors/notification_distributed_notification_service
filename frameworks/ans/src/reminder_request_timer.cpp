@@ -85,7 +85,7 @@ void ReminderRequestTimer::CheckParamsValid(const uint64_t countDownTimeInSecond
 {
     if (countDownTimeInSeconds == 0 || countDownTimeInSeconds >= (UINT64_MAX / ReminderRequest::MILLI_SECONDS)) {
         ANSR_LOGE("Illegal count down time, please check the description of the constructor");
-        throw std::invalid_argument("Illegal count down time, please check the description of the constructor");
+        return;
     }
 }
 
