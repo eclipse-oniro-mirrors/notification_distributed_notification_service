@@ -284,7 +284,7 @@ sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
 
 AdvancedNotificationService::AdvancedNotificationService()
 {
-    runner_ = OHOS::AppExecFwk::EventRunner::Create();
+    runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationSvrMain");
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner_);
     AnsWatchdog::AddHandlerThread(handler_, runner_);
     recentInfo_ = std::make_shared<RecentInfo>();

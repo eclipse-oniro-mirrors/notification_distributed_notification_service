@@ -39,7 +39,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
-    runner_ = OHOS::AppExecFwk::EventRunner::Create();
+    runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationSubscriberMgr");
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner_);
     AnsWatchdog::AddHandlerThread(handler_, runner_);
     recipient_ =

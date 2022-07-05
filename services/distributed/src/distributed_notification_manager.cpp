@@ -30,7 +30,7 @@ const std::string DELIMITER = "|";
 
 DistributedNotificationManager::DistributedNotificationManager()
 {
-    runner_ = OHOS::AppExecFwk::EventRunner::Create();
+    runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationDistributedMgr");
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner_);
     AnsWatchdog::AddHandlerThread(handler_, runner_);
 
