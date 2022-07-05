@@ -60,7 +60,6 @@ ohos_shared_library("libans") {
     ":downloadTemplate.js",
     ":external.json",
     "${core_path}:ans_core",
-    "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/dialog/dialog_ui/js:dialog_js_files_etc",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//utils/native/base:utils",
@@ -77,8 +76,6 @@ ohos_shared_library("libans") {
   }
 
   external_deps = [
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "distributeddatamgr:distributeddata_inner",
@@ -87,7 +84,7 @@ ohos_shared_library("libans") {
     "multimedia_media_standard:media_client",
     "os_account:os_account_innerkits",
     "time_native:time_service",
-    "window_manager:libwm",
+    "window_manager:libdm",
   ]
   external_deps += component_external_deps
 

@@ -50,7 +50,6 @@
 #include "trigger_info.h"
 #include "ui_service_mgr_client.h"
 #include "want_agent_helper.h"
-#include "wm_common.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
