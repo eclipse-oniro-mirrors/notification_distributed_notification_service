@@ -222,11 +222,11 @@ napi_value ParseGetValidParameter(
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn)
+napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn, const napi_value &result)
 {
     if (callbackIn) {
         NotificationNapi::Common::SetCallback(env, callbackIn, NotificationNapi::ERROR,
-            NotificationNapi::Common::NapiGetNull(env));
+            result);
     }
     return NotificationNapi::Common::JSParaError(env, callbackIn);
 }
@@ -245,7 +245,7 @@ napi_value CancelReminder(napi_env env, napi_callback_info info)
     // param
     Parameters params;
     if (ParseCanCelParameter(env, info, params, *asynccallbackinfo) == nullptr) {
-        return DealErrorReturn(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
 
     // promise
@@ -301,7 +301,7 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
     // param
     Parameters params;
     if (ParseCanCelAllParameter(env, info, params, *asynccallbackinfo) == nullptr) {
-        return DealErrorReturn(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
 
     // promise
@@ -598,7 +598,7 @@ napi_value GetValidReminders(napi_env env, napi_callback_info info)
     // param
     Parameters params;
     if (ParseGetValidParameter(env, info, params, *asynccallbackinfo) == nullptr) {
-        return DealErrorReturn(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
 
     // promise
@@ -663,7 +663,8 @@ napi_value PublishReminder(napi_env env, napi_callback_info info)
     Parameters params;
     if (ParseParameters(env, info, params, *asynccallbackinfo) == nullptr) {
         ANSR_LOGW("Parse params error");
-        return DealErrorReturn(env, asynccallbackinfo->callback);
+        napi_create_int32(env, -1, &(asynccallbackinfo->result));
+        return DealErrorReturn(env, asynccallbackinfo->callback, asynccallbackinfo->result);
     }
 
     // promise
@@ -733,7 +734,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
     Parameters params;
     if (ParseSlotParameters(env, info, params, *asynccallbackinfo) == nullptr) {
         ANSR_LOGW("Parse params error");
-        return DealErrorReturn(env, asynccallbackinfo->callback);
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
 
     // promise
