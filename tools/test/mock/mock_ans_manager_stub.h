@@ -28,6 +28,7 @@ public:
 
     std::string GetCmd();
     std::string GetBundle();
+    int32_t GetUserId();
 
     /**
      * @brief Obtains specific datas via specified dump option.
