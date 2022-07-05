@@ -29,6 +29,11 @@ std::string MockAnsManagerStub::GetBundle()
     return bundle_;
 }
 
+int32_t MockAnsManagerStub::GetUserId()
+{
+    return userId_;
+}
+
 ErrCode MockAnsManagerStub::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
     std::vector<std::string> &dumpInfo)
 {
