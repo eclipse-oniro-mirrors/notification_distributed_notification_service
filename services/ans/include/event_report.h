@@ -43,18 +43,16 @@ const std::string REMOVE = "REMOVE";
 } // namespace
 
 struct EventInfo {
-    int32_t notificationId;
-    int32_t contentType;
-    int32_t userId;
-    int32_t pid;
-    int32_t uid;
-    int32_t slotType;
-    int32_t errCode;
-    bool enable;
+    int32_t notificationId = 0;
+    int32_t contentType = 0;
+    int32_t userId = -1;
+    int32_t pid = 0;
+    int32_t uid = 0;
+    int32_t slotType = 0;
+    int32_t errCode = 0;
+    bool enable = false;
     std::string bundleName;
     std::string notificationLabel;
-
-    EventInfo() : userId(-1), pid(0), uid(0), errCode(0), enable(false) {}
 };
 
 class EventReport {
