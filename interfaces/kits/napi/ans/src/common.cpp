@@ -2280,24 +2280,6 @@ napi_value Common::GetNotificationUserInput(
         if (!GetNotificationUserInputByInputKey(env, userInputResult, userInput)) {
             return nullptr;
         }
-        if (!GetNotificationUserInputByTag(env, userInputResult, userInput)) {
-            return nullptr;
-        }
-        if (!GetNotificationUserInputByOptions(env, userInputResult, userInput)) {
-            return nullptr;
-        }
-        if (!GetNotificationUserInputByPermitFreeFormInput(env, userInputResult, userInput)) {
-            return nullptr;
-        }
-        if (!GetNotificationUserInputByPermitMimeTypes(env, userInputResult, userInput)) {
-            return nullptr;
-        }
-        if (!GetNotificationUserInputByEditType(env, userInputResult, userInput)) {
-            return nullptr;
-        }
-        if (!GetNotificationUserInputByAdditionalData(env, userInputResult, userInput)) {
-            return nullptr;
-        }
         pActionButton->AddNotificationUserInput(userInput);
     }
 
