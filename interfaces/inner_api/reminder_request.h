@@ -546,6 +546,7 @@ public:
      * @return true if next trigger time exist and set success.
      */
     virtual bool UpdateNextReminder();
+    virtual bool SetNextTriggerTime();
 
     /**
      * @brief Update notification attributes.

@@ -49,26 +49,8 @@ ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime,
     SetRepeatDaysOfMonth(repeatDays);
     SetSnoozeTimes(DEFAULT_SNOOZE_TIMES);
 
-    // 2. get the latest valid trigger time.
+    // 2. should SetNextTriggerTime() after constructor
     InitDateTime(dateTime);
-    hour_ = static_cast<uint8_t>(dateTime_.tm_hour);
-    minute_ = static_cast<uint8_t>(dateTime_.tm_min);
-    uint64_t nextTriggerTime = INVALID_LONG_LONG_VALUE;
-    if ((nextTriggerTime = GetNextTriggerTime()) != INVALID_LONG_LONG_VALUE) {
-        time_t target = static_cast<time_t>(nextTriggerTime / MILLI_SECONDS);
-        (void)localtime_r(&target, &dateTime_);
-    } else {
-        ANSR_LOGW("Not exist next trigger time, please check the param of ReminderRequestCalendar constructor.");
-        throw std::invalid_argument(
-            "Not exist next trigger time, please check the param of ReminderRequestCalendar constructor.");
-    }
-
-    // 2. set the time information (used to transfer to proxy service) which is decided to trigger firstly.
-    year_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, dateTime_.tm_year));
-    month_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, dateTime_.tm_mon));
-    day_ = static_cast<uint8_t>(dateTime_.tm_mday);
-    second_ = 0;
-    SetTriggerTimeInMilli(nextTriggerTime);
 }
 
 ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &other) : ReminderRequest(other)
@@ -85,6 +67,28 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     second_ = other.second_;
     repeatMonth_ = other.repeatMonth_;
     repeatDay_ = other.repeatDay_;
+}
+
+bool ReminderRequestCalendar::SetNextTriggerTime()
+{
+    hour_ = static_cast<uint8_t>(dateTime_.tm_hour);
+    minute_ = static_cast<uint8_t>(dateTime_.tm_min);
+    uint64_t nextTriggerTime = INVALID_LONG_LONG_VALUE;
+    if ((nextTriggerTime = GetNextTriggerTime()) != INVALID_LONG_LONG_VALUE) {
+        time_t target = static_cast<time_t>(nextTriggerTime / MILLI_SECONDS);
+        (void)localtime_r(&target, &dateTime_);
+    } else {
+        ANSR_LOGW("Not exist next trigger time, please check the param of ReminderRequestCalendar constructor.");
+        return false;
+    }
+
+    // set the time information (used to transfer to proxy service) which is decided to trigger firstly.
+    year_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, dateTime_.tm_year));
+    month_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, dateTime_.tm_mon));
+    day_ = static_cast<uint8_t>(dateTime_.tm_mday);
+    second_ = 0;
+    SetTriggerTimeInMilli(nextTriggerTime);
+    return true;
 }
 
 uint8_t ReminderRequestCalendar::GetDaysOfMonth(const uint16_t &year, const uint8_t &month)
@@ -297,8 +301,7 @@ void ReminderRequestCalendar::SetRepeatMonths(const std::vector<uint8_t> &repeat
 {
     if (repeatMonths.size() > MAX_MONTHS_OF_YEAR) {
         ANSR_LOGW("The length of repeat months array should not larger than %{public}hhu", MAX_MONTHS_OF_YEAR);
-        throw std::invalid_argument(
-            "The length of repeat months array should not larger than " + std::to_string(MAX_MONTHS_OF_YEAR));
+        return;
     }
     repeatMonth_ = 0;
     for (auto it = repeatMonths.begin(); it != repeatMonths.end(); ++it) {
@@ -306,15 +309,14 @@ void ReminderRequestCalendar::SetRepeatMonths(const std::vector<uint8_t> &repeat
     }
 }
 
-void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeateDays)
+void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays)
 {
-    if (repeateDays.size() > MAX_DAYS_OF_MONTH) {
+    if (repeatDays.size() > MAX_DAYS_OF_MONTH) {
         ANSR_LOGW("The length of repeat days array should not larger than %{public}hhu", MAX_DAYS_OF_MONTH);
-        throw std::invalid_argument(
-            "The length of repeat days array should not larger than " + std::to_string(MAX_DAYS_OF_MONTH));
+        return;
     }
     repeatDay_ = 0;
-    for (auto it = repeateDays.begin(); it != repeateDays.end(); ++it) {
+    for (auto it = repeatDays.begin(); it != repeatDays.end(); ++it) {
         SetDay((*it), true);
     }
 }

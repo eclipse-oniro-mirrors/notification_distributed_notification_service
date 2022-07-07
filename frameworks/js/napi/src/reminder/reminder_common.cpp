@@ -351,13 +351,14 @@ napi_value ReminderCommon::CreateReminderTimer(
         return nullptr;
     }
 
-    if (propertyCountDownTime <= 0) {
-        ANSR_LOGW("Create countDown reminder fail: designated %{public}s should be set larger than 0.",
+    auto countDownTimeInSeconds = static_cast<uint64_t>(propertyCountDownTime);
+    if (propertyCountDownTime <= 0 || countDownTimeInSeconds >= (UINT64_MAX / ReminderRequest::MILLI_SECONDS)) {
+        ANSR_LOGW("Create countDown reminder fail: designated %{public}s is illegal.",
             ReminderAgentNapi::TIMER_COUNT_DOWN_TIME);
         return nullptr;
     }
 
-    reminder = std::make_shared<ReminderRequestTimer>(static_cast<uint64_t>(propertyCountDownTime));
+    reminder = std::make_shared<ReminderRequestTimer>(countDownTimeInSeconds);
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
@@ -450,6 +451,9 @@ napi_value ReminderCommon::CreateReminderCalendar(
     dateTime.tm_sec = 0;
     dateTime.tm_isdst = -1;
     reminder = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays);
+    if (!(reminder->SetNextTriggerTime())) {
+        return nullptr;
+    }
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
