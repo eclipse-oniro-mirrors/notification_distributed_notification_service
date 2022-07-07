@@ -16,7 +16,6 @@
 #include "reminder_event_manager.h"
 
 #include "ans_log_wrapper.h"
-#include "appmgr/app_mgr_constants.h"
 #include "bundle_constants.h"
 #include "bundle_mgr_interface.h"
 #include "common_event_manager.h"
