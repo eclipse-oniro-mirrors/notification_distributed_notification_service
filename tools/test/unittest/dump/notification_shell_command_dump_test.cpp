@@ -27,39 +27,38 @@ using namespace OHOS;
 using namespace OHOS::Notification;
 
 namespace {
-    static char DUMP_HELP_MSG[] =
-    "request a option 'A' or 'R' or 'D'\n"
-    "usage: anm dump [<options>]\n"
-    "options list:\n"
-    "  --help, -h                   help menu\n"
-    "  --active,  -A                 list all active notifications\n"
-    "  --recent,  -R                 list recent notifications\n"
-    "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-    "  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+static char g_dumpHelpMsg[] =
+"request a option 'A' or 'R' or 'D'\n"
+"usage: anm dump [<options>]\n"
+"options list:\n"
+"  --help, -h                   help menu\n"
+"  --active,  -A                 list all active notifications\n"
+"  --recent,  -R                 list recent notifications\n"
+"  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
 
-    static char DUMP_ACTIVE_BOUND[] =
-    "error: option 'b' requires a value.\n"
-    "usage: anm dump [<options>]\noptions list:\n"
-    "  --help, -h                   help menu\n"
-    "  --active,  -A                 list all active notifications\n"
-    "  --recent,  -R                 list recent notifications\n"
-    "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-    "  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+static char g_dumpActiveBound[] =
+"error: option 'b' requires a value.\n"
+"usage: anm dump [<options>]\noptions list:\n"
+"  --help, -h                   help menu\n"
+"  --active,  -A                 list all active notifications\n"
+"  --recent,  -R                 list recent notifications\n"
+"  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
 
-    static char DUMP_ACTIVE_USER[] =
-    "error: option 'u' requires a value.\n"
-    "usage: anm dump [<options>]\n"
-    "options list:\n"
-    "  --help, -h                   help menu\n"
-    "  --active,  -A                 list all active notifications\n"
-    "  --recent,  -R                 list recent notifications\n"
-    "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-    "  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+static char g_dumpActiveUser[] =
+"error: option 'u' requires a value.\n"
+"usage: anm dump [<options>]\n"
+"options list:\n"
+"  --help, -h                   help menu\n"
+"  --active,  -A                 list all active notifications\n"
+"  --recent,  -R                 list recent notifications\n"
+"  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
 
-    static char BUNDLE_NAME[] = "example";
-    static char COMMAND_ACTIVE[] = "active";
-    static char COMMAND_RECENT[] = "recent";
-}
+static char g_bundleName[] = "example";
+static char g_commandActive[] = "active";
+static char g_commandRecent[] = "recent";
 
 class AnmManagerDumpTest : public testing::Test {
 public:
@@ -124,7 +123,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0100, Function | Medium
 
     NotificationShellCommand cmd(argc, argv);
 
-    EXPECT_EQ(cmd.ExecCommand(), DUMP_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), g_dumpHelpMsg);
 }
 
 /**
@@ -146,7 +145,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0200, Function | Medium
 
     cmd.ExecCommand();
  
-    EXPECT_EQ(stubPtr_->GetCmd(), COMMAND_ACTIVE);
+    EXPECT_EQ(stubPtr_->GetCmd(), g_commandActive);
 }
 
 /**
@@ -168,7 +167,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0300, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), COMMAND_RECENT);
+    EXPECT_EQ(stubPtr_->GetCmd(), g_commandRecent);
 }
 
 /**
@@ -189,7 +188,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0400, Function | Medium
 
     NotificationShellCommand cmd(argc, argv);
 
-    EXPECT_EQ(cmd.ExecCommand(), DUMP_ACTIVE_BOUND);
+    EXPECT_EQ(cmd.ExecCommand(), g_dumpActiveBound);
 }
 
 /**
@@ -213,8 +212,8 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0500, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), COMMAND_ACTIVE);
-    EXPECT_EQ(stubPtr_->GetBundle(), BUNDLE_NAME);
+    EXPECT_EQ(stubPtr_->GetCmd(), g_commandActive);
+    EXPECT_EQ(stubPtr_->GetBundle(), g_bundleName);
 }
 
 /**
@@ -235,7 +234,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0600, Function | Medium
 
     NotificationShellCommand cmd(argc, argv);
 
-    EXPECT_EQ(cmd.ExecCommand(), DUMP_ACTIVE_BOUND);
+    EXPECT_EQ(cmd.ExecCommand(), g_dumpActiveBound);
 }
 
 /**
@@ -259,8 +258,8 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0700, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), COMMAND_RECENT);
-    EXPECT_EQ(stubPtr_->GetBundle(), BUNDLE_NAME);
+    EXPECT_EQ(stubPtr_->GetCmd(), g_commandRecent);
+    EXPECT_EQ(stubPtr_->GetBundle(), g_bundleName);
 }
 
 /**
@@ -281,7 +280,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0800, Function | Medium
 
     NotificationShellCommand cmd(argc, argv);
 
-    EXPECT_EQ(cmd.ExecCommand(), DUMP_ACTIVE_USER);
+    EXPECT_EQ(cmd.ExecCommand(), g_dumpActiveUser);
 }
 
 /**
@@ -302,7 +301,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0900, Function | Medium
 
     NotificationShellCommand cmd(argc, argv);
 
-    EXPECT_EQ(cmd.ExecCommand(), DUMP_ACTIVE_USER);
+    EXPECT_EQ(cmd.ExecCommand(), g_dumpActiveUser);
 }
 
 /**
@@ -326,7 +325,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1000, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), COMMAND_ACTIVE);
+    EXPECT_EQ(stubPtr_->GetCmd(), g_commandActive);
     EXPECT_EQ(stubPtr_->GetUserId(), 33);
 }
 
@@ -351,7 +350,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1100, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), COMMAND_RECENT);
+    EXPECT_EQ(stubPtr_->GetCmd(), g_commandRecent);
     EXPECT_EQ(stubPtr_->GetUserId(), 33);
 }
-
+}  // namespace
