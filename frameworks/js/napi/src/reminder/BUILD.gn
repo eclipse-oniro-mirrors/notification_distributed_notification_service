@@ -39,7 +39,6 @@ ohos_shared_library("reminderagent") {
     "../../include",
     "//third_party/node/src",
     "//third_party/libuv/include",
-    "//third_party/jsoncpp/include",
   ]
 
   configs = [ ":native_module_config" ]
@@ -57,7 +56,6 @@ ohos_shared_library("reminderagent") {
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image",
-    "//third_party/jsoncpp:jsoncpp",
     "//third_party/libuv:uv_static",
     "//utils/native/base:utils",
   ]
