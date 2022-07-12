@@ -22,6 +22,11 @@ int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& 
 {
     return PERMISSION_GRANTED;
 }
+
+ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
+{
+    return TOKEN_INVALID;
+}
 } // namespace AccessToken
 } // namespace Security
 } // namespace OHOS

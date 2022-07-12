@@ -498,6 +498,11 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     ErrCode result = ERR_OK;
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (isSubsystem) {
+        return PublishNotificationBySa(request);
+    }
+
     do {
         if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT && !IsSystemApp()) {
             result = ERR_ANS_NON_SYSTEM_APP;
@@ -3973,6 +3978,70 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
 #else
     return ERR_INVALID_OPERATION;
 #endif
+}
+
+ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    int32_t uid = request->GetCreatorUid();
+    if (uid <= 0) {
+        ANS_LOGE("CreatorUid[%{public}d] error", uid);
+        return ERR_ANS_INVALID_UID;
+    }
+
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("failed to get bundleManager!");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    std::string bundle = bundleManager->GetBundleNameByUid(uid);
+    if (request->GetCreatorBundleName().empty()) {
+        request->SetCreatorBundleName(bundle);
+    }
+    if (request->GetOwnerBundleName().empty()) {
+        request->SetOwnerBundleName(bundle);
+    }
+
+    request->SetCreatorPid(IPCSkeleton::GetCallingPid());
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+    request->SetCreatorUserId(userId);
+    ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid, userId, bundle.c_str());
+
+    ErrCode result = CheckPictureSize(request);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to check picture size");
+        return result;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundle, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->bundleOption = bundleOption;
+    record->notification = new (std::nothrow) Notification(request);
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create notification");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    handler_->PostSyncTask([this, &record]() {
+        if (AssignToNotificationList(record) != ERR_OK) {
+            ANS_LOGE("Failed to assign notification list");
+            return;
+        }
+
+        UpdateRecentNotification(record->notification, false, 0);
+        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+    });
+
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS
