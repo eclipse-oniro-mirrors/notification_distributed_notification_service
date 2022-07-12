@@ -43,7 +43,6 @@ ohos_moduletest("ans_fw_module_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "//utils/native/base/include",
-    "//third_party/jsoncpp/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 
@@ -117,7 +116,6 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "//utils/native/base/include",
-    "//third_party/jsoncpp/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 
@@ -193,7 +191,6 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "//utils/native/base/include",
-    "//third_party/jsoncpp/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 
@@ -267,7 +264,6 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "//utils/native/base/include",
-    "//third_party/jsoncpp/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 

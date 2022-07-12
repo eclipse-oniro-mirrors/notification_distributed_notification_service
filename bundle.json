@@ -69,7 +69,6 @@
         "os_account_innerkits"
       ],
       "third_party": [
-        "jsoncpp",
         "libuv",
         "icu",
         "node",

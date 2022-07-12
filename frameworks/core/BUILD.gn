@@ -25,7 +25,6 @@ config("public_ans_core_config") {
 
     "//utils/native/base/include",
     "//third_party/json/single_include",
-    "//third_party/jsoncpp/include",
   ]
 }
 
@@ -80,10 +79,7 @@ ohos_shared_library("ans_core") {
 
   public_configs = [ ":public_ans_core_config" ]
 
-  deps = [
-    "//third_party/jsoncpp:jsoncpp",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//utils/native/base:utils" ]
 
   external_deps = [
     "ability_base:base",
