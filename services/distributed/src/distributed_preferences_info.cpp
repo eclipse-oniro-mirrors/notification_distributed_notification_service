@@ -65,8 +65,8 @@ ErrCode DistributedPreferencesInfo::GetSyncEnabledWithoutApp(const int32_t userI
 {
     auto iter = enabledWithoutApp_.find(userId);
     if (iter == enabledWithoutApp_.end()) {
-        ANS_LOGW("userId(%{public}d) not found.", userId);
-        return ERR_ANS_INVALID_PARAM;
+        ANS_LOGW("userId(%{public}d) not found. enabled default false", userId);
+        enabled = false;
     }
 
     enabled = iter->second;
