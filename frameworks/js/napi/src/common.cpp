@@ -3457,25 +3457,20 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
     napi_get_value_int32(env, nobj, &slotType);
     NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
     if (!Common::SlotTypeJSToC(SlotType(slotType), outType)) {
-        ANS_LOGE("SlotTypeJSToC, type=%{public}d", outType);
         return nullptr;
     }
     slot.SetType(outType);
 
     if (GetNotificationSlotByString(env, value, slot) == nullptr) {
-        ANS_LOGE("GetNotificationSlotByString");
         return nullptr;
     }
     if (GetNotificationSlotByNumber(env, value, slot) == nullptr) {
-        ANS_LOGE("GetNotificationSlotByNumber");
         return nullptr;
     }
     if (GetNotificationSlotByVibration(env, value, slot) == nullptr) {
-        ANS_LOGE("GetNotificationSlotByVibration");
         return nullptr;
     }
     if (GetNotificationSlotByBool(env, value, slot) == nullptr) {
-        ANS_LOGE("GetNotificationSlotByBool");
         return nullptr;
     }
     return NapiGetNull(env);
@@ -3620,7 +3615,7 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
 
 napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const napi_value &value, NotificationSlot &slot)
 {
-        ANS_LOGI("enter");
+    ANS_LOGI("enter");
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -3655,23 +3650,22 @@ napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const nap
             ANS_LOGE("Property vibrationValues is expected to be an array.");
             return nullptr;
         }
+
         napi_get_array_length(env, nobj, &length);
-        if (length > 0) {    
-            std::vector<int64_t> vibrationValues;
-            for (size_t i = 0; i < length; i++) {
-                napi_value nVibrationValue = nullptr;
-                int64_t vibrationValue = 0;
-                napi_get_element(env, nobj, i, &nVibrationValue);
-                NAPI_CALL(env, napi_typeof(env, nVibrationValue, &valuetype));
-                if (valuetype != napi_number) {
-                    ANS_LOGE("Wrong argument type. Number expected.");
-                    return nullptr;
-                }
-                napi_get_value_int64(env, nVibrationValue, &vibrationValue);
-                vibrationValues.emplace_back(vibrationValue);
+        std::vector<int64_t> vibrationValues;
+        for (size_t i = 0; i < length; i++) {
+            napi_value nVibrationValue = nullptr;
+            int64_t vibrationValue = 0;
+            napi_get_element(env, nobj, i, &nVibrationValue);
+            NAPI_CALL(env, napi_typeof(env, nVibrationValue, &valuetype));
+            if (valuetype != napi_number) {
+                ANS_LOGE("Wrong argument type. Number expected.");
+                return nullptr;
             }
-            slot.SetVibrationStyle(vibrationValues);
+            napi_get_value_int64(env, nVibrationValue, &vibrationValue);
+            vibrationValues.emplace_back(vibrationValue);
         }
+        slot.SetVibrationStyle(vibrationValues);
     }
 
     return NapiGetNull(env);
