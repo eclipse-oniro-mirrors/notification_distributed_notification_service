@@ -1360,6 +1360,11 @@ ErrCode AdvancedNotificationService::Subscribe(
 
     ErrCode errCode = ERR_OK;
     do {
+        if (subscriber == nullptr) {
+            errCode = ERR_ANS_INVALID_PARAM;
+            break;
+        }
+
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!IsSystemApp() && !isSubsystem) {
             ANS_LOGE("Client is not a system app or subsystem");
@@ -1369,11 +1374,6 @@ ErrCode AdvancedNotificationService::Subscribe(
 
         if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             errCode = ERR_ANS_PERMISSION_DENIED;
-            break;
-        }
-
-        if (subscriber == nullptr) {
-            errCode = ERR_ANS_INVALID_PARAM;
             break;
         }
 
@@ -1392,6 +1392,8 @@ ErrCode AdvancedNotificationService::Unsubscribe(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
+
+    SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!IsSystemApp() && !isSubsystem) {
@@ -1412,7 +1414,6 @@ ErrCode AdvancedNotificationService::Unsubscribe(
         return errCode;
     }
 
-    SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info);
     return ERR_OK;
 }
 
