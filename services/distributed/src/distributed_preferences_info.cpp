@@ -65,11 +65,12 @@ ErrCode DistributedPreferencesInfo::GetSyncEnabledWithoutApp(const int32_t userI
 {
     auto iter = enabledWithoutApp_.find(userId);
     if (iter == enabledWithoutApp_.end()) {
-        ANS_LOGW("userId(%{public}d) not found.", userId);
-        return ERR_ANS_INVALID_PARAM;
+        enabled = false;
+        ANS_LOGW("userId(%{public}d) not found. enabled default false", userId);
+    } else {
+        enabled = iter->second;
+        ANS_LOGI("userId(%{public}d) enabled = %{public}d", userId, enabled);
     }
-
-    enabled = iter->second;
     return ERR_OK;
 }
 }  // namespace Notification

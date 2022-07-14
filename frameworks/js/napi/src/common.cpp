@@ -3621,39 +3621,51 @@ napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const nap
     bool hasProperty = false;
     uint32_t length = 0;
 
+    // vibrationEnabled?: boolean
+    bool vibrationEnabled = false;
+    NAPI_CALL(env, napi_has_named_property(env, value, "vibrationEnabled", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "vibrationEnabled", &nobj);
+        NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Bool expected.");
+            return nullptr;
+        }
+
+        napi_get_value_bool(env, nobj, &vibrationEnabled);
+        slot.SetEnableVibration(vibrationEnabled);
+    }
+
+    if (!vibrationEnabled) {
+        return NapiGetNull(env);
+    }
+
     // vibrationValues?: Array<number>
     NAPI_CALL(env, napi_has_named_property(env, value, "vibrationValues", &hasProperty));
     if (hasProperty) {
         bool isArray = false;
         napi_get_named_property(env, value, "vibrationValues", &nobj);
         napi_is_array(env, nobj, &isArray);
-        NAPI_ASSERT(env, isArray, "Property vibrationValues is expected to be an array.");
+        if (!isArray) {
+            ANS_LOGE("Property vibrationValues is expected to be an array.");
+            return nullptr;
+        }
+
         napi_get_array_length(env, nobj, &length);
-        NAPI_ASSERT(env, length > 0, "The array is empty.");
         std::vector<int64_t> vibrationValues;
         for (size_t i = 0; i < length; i++) {
             napi_value nVibrationValue = nullptr;
             int64_t vibrationValue = 0;
             napi_get_element(env, nobj, i, &nVibrationValue);
             NAPI_CALL(env, napi_typeof(env, nVibrationValue, &valuetype));
-            NAPI_ASSERT(env, valuetype == napi_number, "Wrong argument type. Number expected.");
+            if (valuetype != napi_number) {
+                ANS_LOGE("Wrong argument type. Number expected.");
+                return nullptr;
+            }
             napi_get_value_int64(env, nVibrationValue, &vibrationValue);
-            ANS_LOGI("vibrationValue is: %{public}" PRId64, vibrationValue);
             vibrationValues.emplace_back(vibrationValue);
         }
         slot.SetVibrationStyle(vibrationValues);
-    }
-
-    // vibrationEnabled?: boolean
-    NAPI_CALL(env, napi_has_named_property(env, value, "vibrationEnabled", &hasProperty));
-    if (hasProperty) {
-        bool vibrationEnabled = false;
-        napi_get_named_property(env, value, "vibrationEnabled", &nobj);
-        NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_boolean, "Wrong argument type. Bool expected.");
-        napi_get_value_bool(env, nobj, &vibrationEnabled);
-        ANS_LOGI("vibrationEnabled is: %{public}d", vibrationEnabled);
-        slot.SetEnableVibration(vibrationEnabled);
     }
 
     return NapiGetNull(env);

@@ -3686,8 +3686,9 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
             return;
         }
         if (slot == nullptr) {
-            ANS_LOGE("Get enable slot: object is null");
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+            ANS_LOGW("Get enable slot: object is null, enabled default true");
+            enabled = true;
+            result = ERR_OK;
             return;
         }
         enabled = slot->GetEnable();
