@@ -14,8 +14,17 @@
  */
 
 #include "message_user.h"
+
+#include <string>             // for basic_string, operator+, basic_string<>...
+#include <memory>             // for shared_ptr, shared_ptr<>::element_type
+
+
 #include "ans_image_util.h"
 #include "ans_log_wrapper.h"
+#include "nlohmann/json.hpp"  // for json, basic_json<>::object_t, basic_json
+#include "parcel.h"           // for Parcel
+#include "pixel_map.h"        // for PixelMap
+#include "uri.h"              // for Uri
 
 namespace OHOS {
 namespace Notification {

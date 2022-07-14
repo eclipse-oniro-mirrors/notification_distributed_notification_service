@@ -15,7 +15,13 @@
 
 #include "notification_long_text_content.h"
 
+#include <string>                            // for basic_string, operator+
+#include <algorithm>                         // for min
+
 #include "ans_log_wrapper.h"
+#include "nlohmann/json.hpp"                 // for json, basic_json<>::obje...
+#include "notification_basic_content.h"      // for NotificationBasicContent
+#include "parcel.h"                          // for Parcel
 
 namespace OHOS {
 namespace Notification {
