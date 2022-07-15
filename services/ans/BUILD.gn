@@ -81,7 +81,7 @@ ohos_shared_library("libans") {
     "distributeddatamgr:distributeddata_inner",
     "hitrace_native:hitrace_meter",
     "multimedia_image_standard:image_native",
-    "multimedia_media_standard:media_client",
+    "multimedia_player_framework:media_client",
     "os_account:os_account_innerkits",
     "time_native:time_service",
     "window_manager:libdm",
