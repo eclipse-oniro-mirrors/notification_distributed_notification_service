@@ -73,7 +73,6 @@ public:
      *
      * @param userId Indicates the specific user.
      * @param enabled Allow or disallow sync notifications.
-     * @return Returns set enabled result.
      */
     void SetSyncEnabledWithoutApp(const int32_t userId, const bool enabled);
     ErrCode GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled);
