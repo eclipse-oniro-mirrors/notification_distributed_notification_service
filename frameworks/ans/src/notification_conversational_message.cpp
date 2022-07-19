@@ -14,7 +14,13 @@
  */
 
 #include "notification_conversational_message.h"
+
 #include "ans_log_wrapper.h"
+#include "message_user.h"                         // for MessageUser
+#include "nlohmann/json.hpp"                      // for json, basic_json<>:...
+#include "notification_json_convert.h"            // for NotificationJsonCon...
+#include "parcel.h"                               // for Parcel
+#include "uri.h"                                  // for Uri
 
 namespace OHOS {
 namespace Notification {

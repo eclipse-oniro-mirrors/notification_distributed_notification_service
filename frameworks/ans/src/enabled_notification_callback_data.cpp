@@ -14,8 +14,12 @@
  */
 
 #include "enabled_notification_callback_data.h"
+
+#include <string>                                // for operator+, basic_string
+
 #include "ans_log_wrapper.h"
 #include "string_ex.h"
+#include "parcel.h"                              // for Parcel
 
 namespace OHOS {
 namespace Notification {

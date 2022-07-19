@@ -14,7 +14,11 @@
  */
 
 #include "notification_bundle_option.h"
+
+#include <string>                        // for operator+, basic_string, to_...
+
 #include "ans_log_wrapper.h"
+#include "parcel.h"                      // for Parcel
 
 namespace OHOS {
 namespace Notification {

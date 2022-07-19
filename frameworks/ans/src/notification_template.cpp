@@ -14,7 +14,10 @@
  */
 
 #include "notification_template.h"
+
 #include "ans_log_wrapper.h"
+#include "parcel.h"                 // for Parcel
+#include "want_params.h"            // for WantParams
 
 namespace OHOS {
 namespace Notification {

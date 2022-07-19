@@ -14,7 +14,12 @@
  */
 
 #include "notification_do_not_disturb_date.h"
+
+#include <string>                              // for operator+, to_string
+
 #include "ans_log_wrapper.h"
+#include "notification_constant.h"             // for NotificationConstant
+#include "parcel.h"                            // for Parcel
 
 namespace OHOS {
 namespace Notification {

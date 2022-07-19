@@ -14,7 +14,13 @@
  */
 
 #include "notification_flags.h"
+
+#include <string>                   // for operator+, to_string, basic_string
+
 #include "ans_log_wrapper.h"
+#include "nlohmann/json.hpp"        // for json, basic_json<>::object_t, bas...
+#include "notification_constant.h"  // for NotificationConstant::FlagStatus
+#include "parcel.h"                 // for Parcel
 
 namespace OHOS {
 namespace Notification {

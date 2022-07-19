@@ -16,7 +16,8 @@
 #ifndef BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_LOG_HELPER_H
 #define BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_LOG_HELPER_H
 
-#include <string>
+#include <stdint.h>         // for uint8_t
+#include <string>           // for basic_string
 
 #include "hilog/log.h"
 
