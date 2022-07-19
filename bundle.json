@@ -57,7 +57,7 @@
         "samgr_standard",
         "ipc",
         "ability_runtime",
-        "dmsfwk_standard",
+        "dmsfwk",
         "multimedia_image_standard",
         "hiviewdfx_hilog_native",
         "appexecfwk_standard",
