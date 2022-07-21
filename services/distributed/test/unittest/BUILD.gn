@@ -28,7 +28,7 @@ ohos_unittest("ans_distributed_unit_test") {
   module_out_path = "${component_name}/unittest"
   include_dirs = [
     "/${services_path}/distributed/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 
   sources = [
@@ -61,7 +61,6 @@ ohos_unittest("ans_distributed_unit_test") {
   deps = [
     "${core_path}:ans_core",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -69,6 +68,7 @@ ohos_unittest("ans_distributed_unit_test") {
     "ability_base:want",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "distributeddatamgr:distributeddata_inner",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",

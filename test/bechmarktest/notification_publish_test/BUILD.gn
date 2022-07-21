@@ -30,13 +30,13 @@ ohos_benchmarktest("Benchmark_Publish_Test") {
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/benchmark:benchmark",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
     "multimedia_image_standard:image_native",
     "relational_store:native_rdb",
   ]

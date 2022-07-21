@@ -57,7 +57,6 @@ ohos_shared_library("reminderagent") {
     "${frameworks_module_ans_path}:ans_innerkits",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image",
     "//third_party/libuv:uv_static",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -66,6 +65,7 @@ ohos_shared_library("reminderagent") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
