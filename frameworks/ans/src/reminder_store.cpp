@@ -29,7 +29,7 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-const std::string REMINDER_DB_DIR = "/data/system_ce/ans_standard/";
+const std::string REMINDER_DB_DIR = "/data/service/el1/public/notification/reminder_agent/";
 const std::string REMINDER_DB_NAME = "reminder.db";
 const std::string REMINDER_DB_TABLE = "reminder";
 const uint32_t REMINDER_RDB_VERSION = 1;
