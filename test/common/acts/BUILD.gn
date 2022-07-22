@@ -20,7 +20,7 @@ config("ansfwk_kits_test_config") {
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "${services_path}/include",
-    "//foundation/distributedschedule/safwk/services/safwk/include",
+    "//foundation/systemabilitymgr/safwk/services/safwk/include",
   ]
 }
 
