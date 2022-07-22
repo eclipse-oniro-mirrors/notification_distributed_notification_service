@@ -26,20 +26,20 @@ namespace OHOS {
 namespace Notification {
 namespace {
 // event name
-const std::string SUBSCRIBE_ERROR = "SUBSCRIBE_ERROR";
-const std::string ENABLE_NOTIFICATION_ERROR = "ENABLE_NOTIFICATION_ERROR";
-const std::string ENABLE_NOTIFICATION_SLOT_ERROR = "ENABLE_NOTIFICATION_SLOT_ERROR";
-const std::string PUBLISH_ERROR = "PUBLISH_ERROR";
-const std::string FLOW_CONTROL_OCCUR = "FLOW_CONTROL_OCCUR";
+constexpr char SUBSCRIBE_ERROR[] = "SUBSCRIBE_ERROR";
+constexpr char ENABLE_NOTIFICATION_ERROR[] = "ENABLE_NOTIFICATION_ERROR";
+constexpr char ENABLE_NOTIFICATION_SLOT_ERROR[] = "ENABLE_NOTIFICATION_SLOT_ERROR";
+constexpr char PUBLISH_ERROR[] = "PUBLISH_ERROR";
+constexpr char FLOW_CONTROL_OCCUR[] = "FLOW_CONTROL_OCCUR";
 
-const std::string SUBSCRIBE = "SUBSCRIBE";
-const std::string UNSUBSCRIBE = "UNSUBSCRIBE";
-const std::string ENABLE_NOTIFICATION = "ENABLE_NOTIFICATION";
-const std::string ENABLE_NOTIFICATION_SLOT = "ENABLE_NOTIFICATION_SLOT";
+constexpr char SUBSCRIBE[] = "SUBSCRIBE";
+constexpr char UNSUBSCRIBE[] = "UNSUBSCRIBE";
+constexpr char ENABLE_NOTIFICATION[] = "ENABLE_NOTIFICATION";
+constexpr char ENABLE_NOTIFICATION_SLOT[] = "ENABLE_NOTIFICATION_SLOT";
 
-const std::string PUBLISH = "PUBLISH";
-const std::string CANCEL = "CANCEL";
-const std::string REMOVE = "REMOVE";
+constexpr char PUBLISH[] = "PUBLISH";
+constexpr char CANCEL[] = "CANCEL";
+constexpr char REMOVE[] = "REMOVE";
 } // namespace
 
 struct EventInfo {
