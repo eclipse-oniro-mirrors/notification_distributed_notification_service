@@ -54,13 +54,13 @@ ohos_unittest("notification_shell_command_dump_test") {
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",

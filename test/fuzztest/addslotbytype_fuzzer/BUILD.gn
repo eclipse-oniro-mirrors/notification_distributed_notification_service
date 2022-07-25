@@ -31,14 +31,12 @@ ohos_fuzztest("AddSlotByTypeFuzzTest") {
   ]
   sources = [ "addslotbytype_fuzzer.cpp" ]
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "multimedia_image_standard:image_native",
     "relational_store:native_rdb",

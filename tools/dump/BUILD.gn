@@ -36,10 +36,7 @@ ohos_executable("anm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${core_path}:ans_core",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "${core_path}:ans_core" ]
 
   configs = [
     "${core_path}:public_ans_core_config",
@@ -52,6 +49,7 @@ ohos_executable("anm") {
   }
 
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "multimedia_image_standard:image_native",
     "relational_store:native_rdb",
