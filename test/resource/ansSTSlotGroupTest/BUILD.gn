@@ -46,7 +46,6 @@ ohos_shared_library("libraryAnsSTSlotGroupTest") {
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
-    "//utils/native/base:utilsbase",
   ]
 
   external_deps = [
@@ -55,6 +54,7 @@ ohos_shared_library("libraryAnsSTSlotGroupTest") {
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utilsbase",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]

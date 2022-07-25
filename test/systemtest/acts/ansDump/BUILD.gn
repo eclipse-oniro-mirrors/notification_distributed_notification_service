@@ -22,7 +22,7 @@ ohos_systemtest("AnsDumpTest") {
 
   include_dirs = [
     "//third_party/json/single_include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
   ]
 
@@ -35,13 +35,13 @@ ohos_systemtest("AnsDumpTest") {
   deps = [
     "${core_path}:ans_core",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",

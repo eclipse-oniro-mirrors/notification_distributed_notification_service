@@ -53,38 +53,52 @@
     ],
     "deps": {
       "components": [
-        "ability_base",
-        "samgr",
-        "ipc",
-        "ability_runtime",
-        "dmsfwk",
-        "multimedia_image_standard",
-        "hiviewdfx_hilog_native",
-        "appexecfwk_standard",
-        "time_native",
-        "common_event_service",
-        "napi",
-        "safwk",
         "distributeddatamgr",
-        "os_account_innerkits"
+        "ace_engine",
+        "samgr",
+        "hitrace_native",
+        "napi",
+        "window_manager",
+        "hiviewdfx_hilog_native",
+        "relational_store",
+        "device_usage_statistics",
+        "bundle_framework",
+        "time_native",
+        "safwk",
+        "ability_runtime",
+        "ability_base",
+        "common_event_service",
+        "os_account",
+        "hicollie_native",
+        "hisysevent_native",
+        "access_token",
+        "ipc",
+        "multimedia_player_framework",
+        "multimedia_image_standard",
+        "eventhandler",
+        "utils_base"
       ],
       "third_party": [
-        "libuv",
-        "icu",
-        "node",
-        "json"
+        "libuv"
       ]
     },
     "build": {
-      "sub_component": [
-        "//base/notification/distributed_notification_service/frameworks/ans:ans_client",
-        "//base/notification/distributed_notification_service/frameworks/core:ans_core",
-        "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
-        "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
-        "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
-        "//base/notification/distributed_notification_service/services:ans_service",
-        "//base/notification/distributed_notification_service/tools:tools_shell"
-      ],
+      "group_type": {
+        "base_group": [
+
+        ],
+        "fwk_group": [
+          "//base/notification/distributed_notification_service/frameworks/ans:ans_client",
+          "//base/notification/distributed_notification_service/frameworks/core:ans_core",
+          "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
+          "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder"
+        ],
+        "service_group": [
+          "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
+          "//base/notification/distributed_notification_service/services:ans_service",
+          "//base/notification/distributed_notification_service/tools:tools_shell"
+        ]
+      },
       "test": [
         "//base/notification/distributed_notification_service/services/ans/test/unittest:ans_unit_test",
         "//base/notification/distributed_notification_service/services/distributed/test/unittest:ans_unit_test",

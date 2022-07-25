@@ -72,21 +72,19 @@ ohos_shared_library("ans_innerkits") {
   ]
 
   configs = [
-    "//utils/native/base:utils_config",
+    "//commonlibrary/c_utils/base:utils_config",
     "${core_path}:public_ans_core_config",
   ]
 
   public_configs = [ ":ans_innerkits_public_config" ]
 
-  deps = [
-    "${core_path}:ans_core",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "${core_path}:ans_core" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

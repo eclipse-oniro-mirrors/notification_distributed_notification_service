@@ -39,7 +39,7 @@ ohos_systemtest("ActsNotificationFuzzTest") {
     "${services_path}/ans/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
     "//third_party/json/single_include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 
   cflags = []
@@ -57,7 +57,6 @@ ohos_systemtest("ActsNotificationFuzzTest") {
     "//base/global/resource_management/frameworks/resmgr:global_resmgr",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   defines = [
@@ -71,6 +70,7 @@ ohos_systemtest("ActsNotificationFuzzTest") {
     "ability_runtime:abilitykit_native",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
