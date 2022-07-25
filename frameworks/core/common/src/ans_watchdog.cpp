@@ -24,8 +24,7 @@ void AnsWatchdog::AddHandlerThread(std::shared_ptr<AppExecFwk::EventHandler> han
 {
     if (handler != nullptr && runner != nullptr) {
         std::string threadName = handler->GetEventRunner()->GetRunnerThreadName();
-        unsigned int timeval = 5000;
-        if (Singleton<HiviewDFX::Watchdog>::GetInstance().AddThread(threadName, handler, timeval) != 0) {
+        if (Singleton<HiviewDFX::Watchdog>::GetInstance().AddThread(threadName, handler) != 0) {
             ANS_LOGE("Failed to Add handler Thread");
         }
     }
