@@ -32,5 +32,10 @@ bool AccessTokenHelper::IsSystemHap()
 {
     return true;
 }
+
+bool AccessTokenHelper::IsDlpHap(const Security::AccessToken::AccessTokenID &callerToken)
+{
+    return false;
+}
 }  // namespace Notification
 }  // namespace OHOS

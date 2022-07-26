@@ -1766,5 +1766,32 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300,
     req->SetCreatorUid(1);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), 0);
 }
+
+/*
+ * @tc.name: AdvancedNotificationServiceTest_12400
+ * @tc.desc: DLP App publish notification failed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400, Function | SmallTest | Level1)
+{
+    IPCSkeleton::SetCallingTokenID(DLP_NATIVE_TOKEN);
+    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_DLP_HAP);
+    SleepForFC();
+
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

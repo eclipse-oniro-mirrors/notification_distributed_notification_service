@@ -76,6 +76,7 @@ enum ErrorCode : uint32_t {
     ERR_ANS_GET_ACTIVE_USER_FAILED,
     ERR_ANS_SUBSCRIBER_IS_DELETING,
     ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED,
+    ERR_ANS_DLP_HAP,
 };
 }  // namespace Notification
 }  // namespace OHOS

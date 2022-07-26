@@ -509,6 +509,13 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
+        Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+        if (AccessTokenHelper::IsDlpHap(callerToken)) {
+            result = ERR_ANS_DLP_HAP;
+            ANS_LOGE("DLP hap not allowed to send notifications");
+            break;
+        }
+
         sptr<NotificationBundleOption> bundleOption;
         result = PrepareNotificationInfo(request, bundleOption);
         if (result != ERR_OK) {
