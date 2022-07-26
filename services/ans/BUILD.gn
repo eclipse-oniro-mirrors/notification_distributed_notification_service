@@ -83,7 +83,7 @@ ohos_shared_library("libans") {
     "multimedia_image_standard:image_native",
     "multimedia_player_framework:media_client",
     "os_account:os_account_innerkits",
-    "time_native:time_service",
+    "time_service:time_service",
     "window_manager:libdm",
   ]
   external_deps += component_external_deps

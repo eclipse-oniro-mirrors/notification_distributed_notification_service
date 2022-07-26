@@ -63,7 +63,7 @@
         "relational_store",
         "device_usage_statistics",
         "bundle_framework",
-        "time_native",
+        "time_service",
         "safwk",
         "ability_runtime",
         "ability_base",
