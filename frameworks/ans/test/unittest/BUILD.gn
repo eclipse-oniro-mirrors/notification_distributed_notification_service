@@ -17,10 +17,6 @@ import("//build/test.gni")
 
 module_output_path = "${component_name}/unittest"
 
-config("exception") {
-  cflags_cc = [ "-fexceptions" ]
-}
-
 ohos_unittest("ans_reminder_unit_test") {
   module_out_path = module_output_path
 
@@ -40,10 +36,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/reminder_request_timer_test.cpp",
   ]
 
-  configs = [
-    "//utils/native/base:utils_config",
-    ":exception",
-  ]
+  configs = [ "//utils/native/base:utils_config" ]
 
   deps = [
     "${core_path}:ans_core",
