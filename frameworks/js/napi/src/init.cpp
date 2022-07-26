@@ -81,8 +81,8 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("show", ShowNotification),
         DECLARE_NAPI_FUNCTION("enableNotificationSlot", EnableNotificationSlot),
         DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", IsEnableNotificationSlot),
-        DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledForUninstallApp", SetSyncNotificationEnabledWithoutApp),
-        DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledForUninstallApp", GetSyncNotificationEnabledWithoutApp),
+        DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", SetSyncNotificationEnabledWithoutApp),
+        DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", GetSyncNotificationEnabledWithoutApp),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
