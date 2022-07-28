@@ -106,6 +106,7 @@
         "//base/notification/distributed_notification_service/frameworks/test/moduletest:moduletest",
         "//base/notification/distributed_notification_service/frameworks/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/test:systemtest",
+        "//base/notification/distributed_notification_service/tools:unittest",
         "//base/notification/distributed_notification_service/test/bechmarktest:benchmarktest",
         "//base/notification/distributed_notification_service/test/fuzztest:fuzztest"
       ]
