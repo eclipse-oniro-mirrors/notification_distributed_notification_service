@@ -303,6 +303,35 @@ public:
      * @return Indicates the status of this UnSubscribe operation.
      */
     virtual Status UnsubscribeWithQuery(const std::vector<std::string> &deviceIds, const DataQuery &query) override;
+
+    /**
+     * @brief backup the store to a specified backup file
+     *
+     * @param file target file of backup.
+     * @param baseDir root path of store manager.
+     * @return Indicates the status of this backup operation.
+     */
+    virtual Status Backup(std::string &file, std::string &baseDir) override;
+
+    /**
+     * @brief restore the store from a specified backup file
+     *
+     * @param file target file of backup.
+     * @param baseDir root path of store manager.
+     * @return Indicates the status of this restore operation.
+     */
+    virtual Status Restore(std::string &file, std::string &baseDir) override;
+
+    /**
+     * @brief delete the backup files
+     *
+     * @param file target file of backup.
+     * @param baseDir root path of store manager.
+     * @param status result of delete backup.
+     * @return Indicates the status of this delete backup operation.
+     */
+    virtual Status DeleteBackup(std::vector<std::string> &files, std::string &baseDir,
+        std::map<std::string, DistributedKv::Status> &status) override;
 };
 }  // namespace DistributedKv
 }  // namespace OHOS
