@@ -168,18 +168,19 @@ Status MockSingleKvStore::UnsubscribeWithQuery(const std::vector<std::string> &d
     return Status::SUCCESS;
 }
 
-Status MockSingleKvStore::Backup(std::string &file, std::string &baseDir)
+Status MockSingleKvStore::Backup(const std::string &file, const std::string &baseDir)
 {
     return Status::SUCCESS;
 }
 
-Status MockSingleKvStore::Restore(std::string &file, std::string &baseDir)
+Status MockSingleKvStore::Restore(const std::string &file, const std::string &baseDir)
 {
     return Status::SUCCESS;
 }
 
-Status MockSingleKvStore::DeleteBackup(std::vector<std::string> &files, std::string &baseDir,
-        std::map<std::string, DistributedKv::Status> &status)
+Status MockSingleKvStore::DeleteBackup(
+    const std::vector<std::string> &files, const std::string &baseDir,
+    std::map<std::string, DistributedKv::Status> &status)
 {
     return Status::SUCCESS;
 }

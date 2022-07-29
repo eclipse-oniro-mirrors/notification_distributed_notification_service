@@ -312,7 +312,7 @@ public:
      * @param baseDir root path of store manager.
      * @return Indicates the status of this backup operation.
      */
-    virtual Status Backup(std::string &file, std::string &baseDir) override;
+    virtual Status Backup(const std::string &file, const std::string &baseDir) override;
 
     /**
      * @brief restore the store from a specified backup file
@@ -321,7 +321,7 @@ public:
      * @param baseDir root path of store manager.
      * @return Indicates the status of this restore operation.
      */
-    virtual Status Restore(std::string &file, std::string &baseDir) override;
+    virtual Status Restore(const std::string &file, const std::string &baseDir) override;
 
     /**
      * @brief delete the backup files
@@ -331,7 +331,7 @@ public:
      * @param status result of delete backup.
      * @return Indicates the status of this delete backup operation.
      */
-    virtual Status DeleteBackup(std::vector<std::string> &files, std::string &baseDir,
+    virtual Status DeleteBackup(const std::vector<std::string> &files, const std::string &baseDir,
         std::map<std::string, DistributedKv::Status> &status) override;
 };
 }  // namespace DistributedKv
