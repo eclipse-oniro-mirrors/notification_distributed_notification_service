@@ -55,6 +55,7 @@ sptr<AdvancedNotificationService> AdvancedNotificationServiceTest::advancedNotif
 void AdvancedNotificationServiceTest::SetUpTestCase()
 {
     advancedNotificationService_ = AdvancedNotificationService::GetInstance();
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
 }
 
 void AdvancedNotificationServiceTest::TearDownTestCase()
@@ -1736,6 +1737,34 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12200,
     auto result = advancedNotificationService_->RemoveNotification(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), notificationId, label);
     EXPECT_EQ(result, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: AdvancedNotificationServiceTest_12300
+ * @tc.desc: SA publish notification, Failed to publish when creatorUid default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300, Function | SmallTest | Level1)
+{
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    TestAddSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_INVALID_UID);
+    SleepForFC();
+
+    req->SetCreatorUid(1);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), 0);
 }
 }  // namespace Notification
 }  // namespace OHOS

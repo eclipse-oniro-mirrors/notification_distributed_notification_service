@@ -15,6 +15,7 @@
 #include <functional>
 #include <gtest/gtest.h>
 
+#include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
 #define private public
 #include "advanced_notification_service.h"
@@ -92,6 +93,7 @@ void AnsModuleTest::SetUpTestCase()
     passed = false;
     g_advancedNotificationService = new AdvancedNotificationService();
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    IPCSkeleton::SetCallingTokenID(1);
 }
 
 void AnsModuleTest::TearDownTestCase()
