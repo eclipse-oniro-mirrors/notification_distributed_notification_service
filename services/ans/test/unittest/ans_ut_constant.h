@@ -22,6 +22,7 @@ namespace OHOS {
 namespace Notification {
 constexpr uint32_t NATIVE_TOKEN = 0;
 constexpr uint32_t NON_NATIVE_TOKEN = 1;
+constexpr uint32_t DLP_NATIVE_TOKEN = 2;
 constexpr int32_t SYSTEM_APP_UID = 100;
 constexpr int32_t NON_SYSTEM_APP_UID = 1000;
 constexpr int32_t NON_BUNDLE_NAME_UID = 2000;

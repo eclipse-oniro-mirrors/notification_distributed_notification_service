@@ -38,5 +38,10 @@ bool AccessTokenHelper::IsSystemHap()
     }
     return false;
 }
+
+bool AccessTokenHelper::IsDlpHap(const Security::AccessToken::AccessTokenID &callerToken)
+{
+    return callerToken == DLP_NATIVE_TOKEN;
+}
 }  // namespace Notification
 }  // namespace OHOS

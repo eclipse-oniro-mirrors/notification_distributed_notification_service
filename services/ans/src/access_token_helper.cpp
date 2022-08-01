@@ -55,5 +55,18 @@ bool AccessTokenHelper::IsSystemHap()
     }
     return false;
 }
+
+bool AccessTokenHelper::IsDlpHap(const AccessTokenID &callerToken)
+{
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (type == ATokenTypeEnum::TOKEN_HAP) {
+        HapTokenInfo info;
+        AccessTokenKit::GetHapTokenInfo(callerToken, info);
+        if (info.dlpType == DlpType::DLP_READ || info.dlpType == DlpType::DLP_FULL_CONTROL) {
+            return true;
+        }
+    }
+    return false;
+}
 }  // namespace Notification
 }  // namespace OHOS
