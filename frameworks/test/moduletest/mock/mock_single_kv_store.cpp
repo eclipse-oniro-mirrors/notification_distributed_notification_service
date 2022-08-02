@@ -275,5 +275,22 @@ Status MockSingleKvStore::UnsubscribeWithQuery(const std::vector<std::string> &d
 {
     return Status::SUCCESS;
 }
+
+Status MockSingleKvStore::Backup(const std::string &file, const std::string &baseDir)
+{
+    return Status::SUCCESS;
+}
+
+Status MockSingleKvStore::Restore(const std::string &file, const std::string &baseDir)
+{
+    return Status::SUCCESS;
+}
+
+Status MockSingleKvStore::DeleteBackup(
+    const std::vector<std::string> &files, const std::string &baseDir,
+    std::map<std::string, DistributedKv::Status> &status)
+{
+    return Status::SUCCESS;
+}
 }  // namespace DistributedKv
 }  // namespace OHOS
