@@ -24,11 +24,6 @@ config("native_module_config") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-
-  defines = [
-    "APP_LOG_TAG = \"NOTIFICATION_REMINDER\"",
-    "LOG_DOMAIN = 0xD001800",
-  ]
 }
 
 ohos_shared_library("reminderagent") {

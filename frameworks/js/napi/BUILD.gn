@@ -32,11 +32,6 @@ config("native_module_config") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-
-  defines = [
-    "ANS_LOG_TAG = \"NOTIFICATION_NAPI\"",
-    "LOG_DOMAIN = 0xD001800",
-  ]
 }
 
 ohos_shared_library("notification") {

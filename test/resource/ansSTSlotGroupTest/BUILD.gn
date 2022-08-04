@@ -30,11 +30,6 @@ config("ansSTSlotGroupTestConfig") {
     "${ability_runtime_services_path}/abilitymgr/include",
     "${inner_api_path}",
   ]
-
-  defines = [
-    "APP_LOG_TAG = \"ansSTSlotGroupTest\"",
-    "LOG_DOMAIN = 0xD002200",
-  ]
 }
 
 ohos_shared_library("libraryAnsSTSlotGroupTest") {
