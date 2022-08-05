@@ -20,10 +20,6 @@ group("ans_targets") {
 
 config("public_ans_config") {
   include_dirs = [ "${services_path}/ans/include" ]
-  defines = [
-    "ANS_LOG_TAG = \"NOTIFICATION_SERVICE\"",
-    "LOG_DOMAIN = 0xD002200",
-  ]
 }
 
 ohos_shared_library("libans") {

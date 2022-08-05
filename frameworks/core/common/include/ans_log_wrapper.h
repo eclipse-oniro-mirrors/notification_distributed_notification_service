@@ -23,18 +23,18 @@
 
 namespace OHOS {
 namespace Notification {
-#ifndef LOG_DOMAIN
-#define LOG_DOMAIN 0xD001800
+#ifndef ANS_LOG_DOMAIN
+#define ANS_LOG_DOMAIN 0xD001200
 #endif
 
 #ifndef ANS_LOG_TAG
-#define ANS_LOG_TAG "NOTIFICATION"
+#define ANS_LOG_TAG "Ans"
 #endif
 
 enum class AnsLogLevel : uint8_t { DEBUG = 0, INFO, WARN, ERROR, FATAL };
 
-static constexpr OHOS::HiviewDFX::HiLogLabel ANS_LABEL = {LOG_CORE, LOG_DOMAIN, ANS_LOG_TAG};
-static constexpr OHOS::HiviewDFX::HiLogLabel ANS_REMINDER_LABEL = {LOG_CORE, LOG_DOMAIN, "ANS_REMINDER"};
+static constexpr OHOS::HiviewDFX::HiLogLabel ANS_LABEL = {LOG_CORE, ANS_LOG_DOMAIN, ANS_LOG_TAG};
+static constexpr OHOS::HiviewDFX::HiLogLabel ANS_REMINDER_LABEL = {LOG_CORE, ANS_LOG_DOMAIN, "ANS_REMINDER"};
 
 class AnsLogWrapper {
 public:

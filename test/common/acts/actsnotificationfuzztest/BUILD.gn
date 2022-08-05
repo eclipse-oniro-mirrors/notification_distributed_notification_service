@@ -59,10 +59,6 @@ ohos_systemtest("ActsNotificationFuzzTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  defines = [
-    "ANS_LOG_TAG = \"AnsFwkKitsTest\"",
-    "LOG_DOMAIN = 0xD002200",
-  ]
   external_deps = [
     "ability_base:base",
     "ability_base:want",
