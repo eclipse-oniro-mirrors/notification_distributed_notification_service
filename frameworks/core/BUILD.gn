@@ -95,7 +95,7 @@ ohos_shared_library("ans_core") {
     "multimedia_image_standard:image_native",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     "time_service:time_service",
   ]
 

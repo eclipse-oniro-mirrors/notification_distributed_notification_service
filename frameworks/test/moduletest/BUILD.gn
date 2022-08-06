@@ -92,7 +92,7 @@ ohos_moduletest("ans_fw_module_test") {
     "multimedia_image_standard:image_native",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -167,7 +167,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "multimedia_image_standard:image_native",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -240,7 +240,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "multimedia_image_standard:image_native",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -312,7 +312,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "multimedia_image_standard:image_native",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "${subsystem_name}"
