@@ -190,7 +190,7 @@ napi_value Common::SetNotificationByDistributedOptions(
         ANS_LOGI("supportDisplayDevices = %{public}s", vec.c_str());
         napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
         napi_set_element(env, arrSupportDisplayDevices, count, vecValue);
-        count ++;
+        count++;
     }
     napi_set_named_property(env, result, "supportDisplayDevices", arrSupportDisplayDevices);
 
@@ -204,7 +204,7 @@ napi_value Common::SetNotificationByDistributedOptions(
         ANS_LOGI("supportOperateDevices  = %{public}s", vec.c_str());
         napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
         napi_set_element(env, arrSupportOperateDevices, count, vecValue);
-        count ++;
+        count++;
     }
     napi_set_named_property(env, result, "supportOperateDevices", arrSupportOperateDevices);
 
