@@ -1790,7 +1790,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400,
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_DLP_HAP);
     SleepForFC();
 
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
 }
 }  // namespace Notification
