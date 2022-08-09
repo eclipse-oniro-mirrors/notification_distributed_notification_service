@@ -48,7 +48,7 @@ ohos_shared_library("libans_distributed") {
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
-    "distributeddatamgr:distributeddata_inner",
+    "kv_store:distributeddata_inner",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
