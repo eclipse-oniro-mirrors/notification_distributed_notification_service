@@ -21,12 +21,13 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-const std::string APP_ID = "advanced_notification_service";
+const std::string APP_ID = "notification_service";
 const std::string STORE_ID = "distributed_screen_status";
 const std::string DELIMITER = "|";
 const std::string SCREEN_STATUS_LABEL = "screen_status";
 const std::string SCREEN_STATUS_VALUE_ON = "on";
 const std::string SCREEN_STATUS_VALUE_OFF = "off";
+constexpr char KV_STORE_PATH[] = "/data/service/el1/public/database/notification_service";
 }  // namespace
 
 DistributedScreenStatusManager::DistributedScreenStatusManager() : DistributedFlowControl()
@@ -37,7 +38,6 @@ DistributedScreenStatusManager::DistributedScreenStatusManager() : DistributedFl
     };
     deviceCb_ = std::make_shared<DistributedDeviceCallback>(callback);
     GetKvDataManager();
-    GetKvStore();
 }
 
 DistributedScreenStatusManager::~DistributedScreenStatusManager()
@@ -46,6 +46,8 @@ DistributedScreenStatusManager::~DistributedScreenStatusManager()
 void DistributedScreenStatusManager::OnDeviceConnected(const std::string &deviceId)
 {
     ANS_LOGI("deviceId:%{public}s", deviceId.c_str());
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    CheckKvStore();
 }
 
 void DistributedScreenStatusManager::OnDeviceDisconnected(const std::string &deviceId)
@@ -72,7 +74,7 @@ void DistributedScreenStatusManager::OnDeviceDisconnected(const std::string &dev
 
     DistributedKv::AppId appId = {.appId = APP_ID};
     DistributedKv::StoreId storeId = {.storeId = STORE_ID};
-    kvDataManager_->DeleteKvStore(appId, storeId);
+    kvDataManager_->DeleteKvStore(appId, storeId, KV_STORE_PATH);
 
     if (!CheckKvStore()) {
         return;
@@ -112,16 +114,16 @@ void DistributedScreenStatusManager::GetKvStore(void)
     if (!CheckKvDataManager()) {
         return;
     }
-
-    DistributedKv::Status status;
-    DistributedKv::Options options;
-    options.createIfMissing = true;
-    options.autoSync = true;
-    options.kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION;
-
+    DistributedKv::Options options = {
+        .createIfMissing = true,
+        .autoSync = true,
+        .area = DistributedKv::EL1,
+        .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
+        .baseDir = KV_STORE_PATH
+    };
     DistributedKv::AppId appId = {.appId = APP_ID};
     DistributedKv::StoreId storeId = {.storeId = STORE_ID};
-    status = kvDataManager_->GetSingleKvStore(options, appId, storeId, kvStore_);
+    DistributedKv::Status status = kvDataManager_->GetSingleKvStore(options, appId, storeId, kvStore_);
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvDataManager GetSingleKvStore failed ret = 0x%{public}x", status);
         kvStore_.reset();
@@ -153,7 +155,7 @@ std::string DistributedScreenStatusManager::GenerateDistributedKey(const std::st
 ErrCode DistributedScreenStatusManager::CheckRemoteDevicesIsUsing(bool &isUsing)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!CheckKvDataManager() || !CheckKvStore()) {
+    if (!CheckKvDataManager() || kvStore_ == nullptr) {
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
 
@@ -204,7 +206,7 @@ ErrCode DistributedScreenStatusManager::SetLocalScreenStatus(bool screenOn)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ANS_LOGI("%{public}s, screenOn:%{public}s", __FUNCTION__, screenOn ? "true" : "false");
     localScreenOn_ = screenOn;
-    if (!CheckKvStore()) {
+    if (kvStore_ == nullptr) {
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
 

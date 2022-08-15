@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-
+#define private public
 #include "distributed_notification_manager.h"
 
 using namespace testing::ext;
@@ -42,6 +42,7 @@ protected:
 void DistributedNotificationManagerTest::SetUp()
 {
     distributedManager_ = DistributedNotificationManager::GetInstance();
+    distributedManager_->OnDeviceConnected("test");
 }
 
 void DistributedNotificationManagerTest::TearDown()

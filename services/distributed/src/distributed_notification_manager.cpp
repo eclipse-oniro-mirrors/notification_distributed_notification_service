@@ -202,8 +202,15 @@ void DistributedNotificationManager::OnDatabaseDelete(
 void DistributedNotificationManager::OnDeviceConnected(const std::string &deviceId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    handler_->PostTask(std::bind([=]() {}));
-    return;
+    handler_->PostTask(std::bind([=]() {
+        if (database_ == nullptr) {
+            ANS_LOGE("OnDeviceConnected failed: database is null");
+            return;
+        }
+        if (!database_->OnDeviceConnected()) {
+            ANS_LOGE("OnDeviceConnected failed.");
+        }
+    }));
 }
 
 void DistributedNotificationManager::OnDeviceDisconnected(const std::string &deviceId)

@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#define private public
 #include "distributed_database.h"
 
 using namespace testing::ext;
@@ -67,6 +68,7 @@ void DistributedDatabaseTest::SetUp()
     databaseCallback_ = std::make_shared<DistributedDatabaseCallback>(databaseCallback);
     deviceCallback_ = std::make_shared<DistributedDeviceCallback>(deviceCallback);
     database_ = std::make_shared<DistributedDatabase>(databaseCallback_, deviceCallback_);
+    database_->OnDeviceConnected();
 }
 
 void DistributedDatabaseTest::TearDown()

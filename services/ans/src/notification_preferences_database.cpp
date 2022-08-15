@@ -203,6 +203,8 @@ const static std::string KEY_SLOT_ENABLE_BYPASS_DND = "enableBypassDnd";
  */
 const static std::string KEY_SLOT_ENABLED = "enabled";
 
+constexpr char KV_STORE_PATH[] = "/data/service/el1/public/database/notification_service";
+
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
     NotificationPreferencesDatabase::slotMap_ = {
@@ -338,7 +340,9 @@ DistributedKv::Status NotificationPreferencesDatabase::GetKvStore()
         .createIfMissing = true,
         .encrypt = false,
         .autoSync = false,
+        .area = DistributedKv::EL1,
         .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
+        .baseDir = KV_STORE_PATH
     };
     auto status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
     if (status != DistributedKv::Status::SUCCESS) {
@@ -392,6 +396,7 @@ bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
         return false;
     }
     DistributedKv::Status status = kvStorePtr_->PutBatch(entries);
+    CloseKvStore();
     return (status == DistributedKv::Status::SUCCESS);
 }
 
@@ -423,6 +428,7 @@ bool NotificationPreferencesDatabase::PutGroupsToDisturbeDB(
         return false;
     }
     DistributedKv::Status status = kvStorePtr_->PutBatch(entries);
+    CloseKvStore();
     return (status == DistributedKv::Status::SUCCESS);
 }
 
@@ -455,6 +461,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
                 break;
         }
     });
+    CloseKvStore();
     return result;
 }
 
@@ -559,6 +566,7 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabled(const int32_t &use
     DistributedKv::Key enableKey(typeKey);
     DistributedKv::Value enableValue(std::to_string(enabled));
     DistributedKv::Status status = kvStorePtr_->Put(enableKey, enableValue);
+    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("Store enable notification failed. %{public}d", status);
         return false;
@@ -622,6 +630,7 @@ bool NotificationPreferencesDatabase::PutDoNotDisturbDate(
     };
 
     DistributedKv::Status status = kvStorePtr_->PutBatch(entries);
+    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("Store DoNotDisturbDate failed. %{public}d", status);
         return false;
@@ -750,6 +759,7 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         return false;
     }
     ParseBundleFromDistureDB(info, entries);
+    CloseKvStore();
     return true;
 }
 
@@ -760,7 +770,7 @@ bool NotificationPreferencesDatabase::RemoveAllDataFromDisturbeDB()
         ANS_LOGE("KvStore is nullptr.");
         return false;
     }
-    DistributedKv::Status status = dataManager_.DeleteKvStore(appId_, storeId_);
+    DistributedKv::Status status = dataManager_.DeleteKvStore(appId_, storeId_, KV_STORE_PATH);
     return (status == DistributedKv::Status::SUCCESS);
 }
 
@@ -779,6 +789,7 @@ bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(const std::stri
 
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("Get Bundle Info failed.");
+        CloseKvStore();
         return false;
     }
 
@@ -790,6 +801,7 @@ bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(const std::stri
     DistributedKv::Key bundleDBKey(KEY_BUNDLE_LABEL + KEY_BUNDLE_NAME + KEY_UNDER_LINE + bundleKey);
     keys.push_back(bundleDBKey);
     status = kvStorePtr_->DeleteBatch(keys);
+    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -818,6 +830,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     status =
         kvStorePtr_->GetEntries(DistributedKv::Key(GenerateSlotKey(bundleKey, slotType) + KEY_UNDER_LINE), slotentries);
     if (status != DistributedKv::Status::SUCCESS) {
+        CloseKvStore();
         return false;
     }
     std::vector<DistributedKv::Key> keys;
@@ -826,6 +839,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     }
 
     status = kvStorePtr_->DeleteBatch(keys);
+    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -852,6 +866,7 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(const std::st
     std::vector<DistributedKv::Entry> slotsEntries;
     status = kvStorePtr_->GetEntries(DistributedKv::Key(GenerateSlotKey(bundleKey) + KEY_UNDER_LINE), slotsEntries);
     if (status != DistributedKv::Status::SUCCESS) {
+        CloseKvStore();
         return false;
     }
     std::vector<DistributedKv::Key> keys;
@@ -860,6 +875,7 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(const std::st
     }
 
     status = kvStorePtr_->DeleteBatch(keys);
+    CloseKvStore();
     ANS_LOGD("%{public}s remove all slots status %{public}d", __FUNCTION__, status);
     return (status == DistributedKv::Status::SUCCESS);
 }
@@ -887,11 +903,13 @@ bool NotificationPreferencesDatabase::RemoveGroupsFromDisturbeDB(
     for (auto iter : groupIds) {
         result = GetRemoveGroupKeysFromDisturbeDB(bundleKey, iter, keys);
         if (!result) {
+            CloseKvStore();
             return result;
         }
     }
 
     DistributedKv::Status status = kvStorePtr_->DeleteBatch(keys);
+    CloseKvStore();
     ANS_LOGD("%{public}s remove groups status %{public}d", __FUNCTION__, status);
     return (status == DistributedKv::Status::SUCCESS);
 }
@@ -961,6 +979,7 @@ DistributedKv::Status NotificationPreferencesDatabase::PutBundlePropertyToDistur
         return DistributedKv::Status::ERROR;
     }
     DistributedKv::Status status = kvStorePtr_->Put(key, value);
+    CloseKvStore();
     return status;
 }
 
@@ -1650,6 +1669,7 @@ bool NotificationPreferencesDatabase::RemoveNotificationEnable(const int32_t use
         std::string(KEY_ENABLE_ALL_NOTIFICATION).append(KEY_UNDER_LINE).append(std::to_string(userId));
     DistributedKv::Key enableKey(key);
     DistributedKv::Status status = kvStorePtr_->Delete(enableKey);
+    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -1681,6 +1701,7 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userI
     };
 
     DistributedKv::Status status = kvStorePtr_->DeleteBatch(keys);
+    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("delete DoNotDisturb date failed.");
         return false;

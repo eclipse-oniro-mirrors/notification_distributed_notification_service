@@ -83,6 +83,7 @@ private:
     bool CheckKvDataManager(void);
     void GetKvStore(void);
     bool CheckKvStore(void);
+    void CloseKvStore();
 
 private:
     std::mutex mutex_;
