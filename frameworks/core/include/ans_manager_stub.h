@@ -129,16 +129,6 @@ public:
     virtual ErrCode RemoveAllSlots() override;
 
     /**
-     * @brief Creates multiple notification slot groups.
-     * @note The precautions for using this method are similar to those for
-     *       AddNotificationSlotGroup(NotificationSlotGroup).
-     *
-     * @param groups Indicates a list of NotificationSlotGroup objects to create. This parameter cannot be null.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode AddSlotGroups(std::vector<sptr<NotificationSlotGroup>> groups) override;
-
-    /**
      * @brief Queries a created notification slot.
      *
      * @param slotType Indicates the ID of the slot, which is created by AddNotificationSlot(NotificationSlot). This
@@ -158,23 +148,6 @@ public:
     virtual ErrCode GetSlots(std::vector<sptr<NotificationSlot>> &slots) override;
 
     /**
-     * @brief Queries a created notification slot group.
-     *
-     * @param groupId Indicates the ID of the slot group.
-     * @param group   Indicates the created NotificationSlotGroup.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group) override;
-
-    /**
-     * @brief Obtains a list of created notification slot groups.
-     *
-     * @param  groups Indicates a list of created notification slot groups.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups) override;
-
-    /**
      * @brief Obtains the number of slot.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -182,15 +155,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode GetSlotNumAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint64_t &num) override;
-
-    /**
-     * @brief Deletes multiple notification slot groups.
-     *
-     * @param groupIds Indicates the IDs of the notification slot groups, which is created by
-     *                    AddNotificationSlotGroup(NotificationSlotGroup) This parameter must be specified.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode RemoveSlotGroups(const std::vector<std::string> &groupIds) override;
 
     /**
      * @brief Obtains active notifications of the current application in the system.
@@ -376,16 +340,6 @@ public:
      */
     virtual ErrCode UpdateSlots(
         const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots) override;
-
-    /**
-     * @brief Update slotgroup according to bundle.
-     * @param bundleOption Bundle as a condition.
-     * @param groups Groups that needs to be updated.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode UpdateSlotGroups(const sptr<NotificationBundleOption> &bundleOption,
-        const std::vector<sptr<NotificationSlotGroup>> &groups) override;
 
     /**
      * @brief Allow notifications to be sent based on the deviceId.
@@ -759,13 +713,9 @@ private:
     ErrCode HandleAddSlots(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveSlotByType(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveAllSlots(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleAddSlotGroups(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlots(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotByType(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetSlotGroup(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetSlotGroups(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotNumAsBundle(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleRemoveSlotGroups(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetActiveNotifications(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetActiveNotificationNums(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllActiveNotifications(MessageParcel &data, MessageParcel &reply);
@@ -786,7 +736,6 @@ private:
     ErrCode HandleDeleteAll(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotsByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUpdateSlots(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleUpdateSlotGroups(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRequestEnableNotification(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledForBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledForAllBundles(MessageParcel &data, MessageParcel &reply);

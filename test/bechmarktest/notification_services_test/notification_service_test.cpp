@@ -128,52 +128,6 @@ BENCHMARK_F(BenchmarkNotificationService, RemoveSlotByTypeTestCase)(benchmark::S
 }
 
 /**
- * @tc.name: AddSlotGroupTestCase
- * @tc.desc: AddSlotGroup
- * @tc.type: FUNC
- * @tc.require:
- */
-BENCHMARK_F(BenchmarkNotificationService, AddSlotGroupTestCase)(benchmark::State &state)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id0", "name0");
-    groups.push_back(group);
-    while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->AddSlotGroups(groups);
-        if (errCode != ERR_OK) {
-            state.SkipWithError("AddSlotGroupTestCase failed.");
-        }
-    }
-}
-
-/**
- * @tc.name: RemoveSlotGroupsTestCase
- * @tc.desc: RemoveSlotGroups
- * @tc.type: FUNC
- * @tc.require:
- */
-BENCHMARK_F(BenchmarkNotificationService, RemoveSlotGroupsTestCase)(benchmark::State &state)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id0", "name0");
-    groups.push_back(group);
-    std::vector<std::string> groupIds;
-    groupIds.push_back("id0");
-
-    while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->AddSlotGroups(groups);
-        if (errCode != ERR_OK) {
-            state.SkipWithError("RemoveSlotGroupsTestCase add failed.");
-        }
-
-        errCode = advancedNotificationService_->RemoveSlotGroups(groupIds);
-        if (errCode != ERR_OK) {
-            state.SkipWithError("RemoveSlotGroupsTestCase remove failed.");
-        }
-    }
-}
-
-/**
  * @tc.name: SubscribeTestCase
  * @tc.desc: Subscribe
  * @tc.type: FUNC

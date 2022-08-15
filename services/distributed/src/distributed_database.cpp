@@ -99,6 +99,7 @@ void DistributedDatabase::GetKvStore(void)
 
 bool DistributedDatabase::CheckKvStore(void)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (kvStore_ == nullptr) {
         GetKvStore();
     }
@@ -111,11 +112,7 @@ bool DistributedDatabase::CheckKvStore(void)
 
 bool DistributedDatabase::OnDeviceConnected()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!CheckKvStore()) {
-        return false;
-    }
-    return true;
+    return CheckKvStore();
 }
 
 bool DistributedDatabase::PutToDistributedDB(const std::string &key, const std::string &value)

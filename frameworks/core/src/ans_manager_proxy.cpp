@@ -332,46 +332,6 @@ ErrCode AnsManagerProxy::RemoveAllSlots()
     return result;
 }
 
-ErrCode AnsManagerProxy::AddSlotGroups(std::vector<sptr<NotificationSlotGroup>> groups)
-{
-    if (groups.empty()) {
-        ANS_LOGE("[AddSlotGroups] fail: groups is empty.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    size_t groupsSize = groups.size();
-    if (groupsSize > MAX_SLOT_GROUP_NUM) {
-        ANS_LOGE("[AddSlotGroups] fail: groupsSize over max size.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[AddSlotGroups] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!WriteParcelableVector(groups, data)) {
-        ANS_LOGE("[AddSlotGroups] fail: write groups failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(ADD_SLOT_GROUPS, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[AddSlotGroups] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[AddSlotGroups] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::GetSlotByType(const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot)
 {
     MessageParcel data;
@@ -433,72 +393,6 @@ ErrCode AnsManagerProxy::GetSlots(std::vector<sptr<NotificationSlot>> &slots)
     return result;
 }
 
-ErrCode AnsManagerProxy::GetSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group)
-{
-    if (groupId.empty()) {
-        ANS_LOGE("[GetSlotGroup] fail: groupId is null.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[GetSlotGroup] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteString(groupId)) {
-        ANS_LOGE("[GetSlotGroup] fail:: write groupId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SLOT_GROUP, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[GetSlotGroup] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[GetSlotGroup] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (result == ERR_OK) {
-        group = reply.ReadParcelable<NotificationSlotGroup>();
-        if (group == nullptr) {
-            ANS_LOGE("[GetSlotGroup] fail: read group failed");
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-    }
-
-    return result;
-}
-
-ErrCode AnsManagerProxy::GetSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[GetSlotGroups] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SLOT_GROUPS, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[GetSlotGroups] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!ReadParcelableVector(groups, reply, result)) {
-        ANS_LOGE("[GetSlotGroups] fail: read groups failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::GetSlotNumAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint64_t &num)
 {
     if (bundleOption == nullptr) {
@@ -532,40 +426,6 @@ ErrCode AnsManagerProxy::GetSlotNumAsBundle(const sptr<NotificationBundleOption>
 
     if (!reply.ReadUint64(num)) {
         ANS_LOGE("[GetShowBadgeEnabledForBundle] fail: read enabled failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
-ErrCode AnsManagerProxy::RemoveSlotGroups(const std::vector<std::string> &groupIds)
-{
-    if (groupIds.empty()) {
-        ANS_LOGE("[RemoveSlotGroups] fail: groupIds is empty.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[RemoveSlotGroups] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteStringVector(groupIds)) {
-        ANS_LOGE("[RemoveSlotGroups] fail:: write groupIds failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(REMOVE_SLOT_GROUPS, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[RemoveSlotGroups] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[RemoveSlotGroups] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1227,57 +1087,6 @@ ErrCode AnsManagerProxy::UpdateSlots(
 
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("[UpdateSlots] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
-ErrCode AnsManagerProxy::UpdateSlotGroups(
-    const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    if (bundleOption == nullptr) {
-        ANS_LOGE("[UpdateSlotGroups] fail: bundleOption is empty.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    if (groups.empty()) {
-        ANS_LOGE("[UpdateSlotGroups] fail: groups is empty.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    size_t groupSize = groups.size();
-    if (groupSize > MAX_SLOT_GROUP_NUM) {
-        ANS_LOGE("[UpdateSlotGroups] fail: groupSize over max size.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[UpdateSlotGroups] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteParcelable(bundleOption)) {
-        ANS_LOGE("[UpdateSlotGroups] fail:: write bundleOption failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!WriteParcelableVector(groups, data)) {
-        ANS_LOGE("[UpdateSlotGroups] fail: write groups failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(UPDATE_SLOT_GROUPS, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[UpdateSlotGroups] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[UpdateSlotGroups] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

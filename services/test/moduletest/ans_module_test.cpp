@@ -1151,20 +1151,10 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0054, Function | SmallTest | Level1)
 {
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     sptr<NotificationSlot> reminderSlot = new NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     sptr<NotificationSlot> contentSlot = new NotificationSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
     sptr<NotificationSlot> otherSlot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    socialSlot->SetSlotGroup(group->GetId());
-    reminderSlot->SetSlotGroup(group->GetId());
-    contentSlot->SetSlotGroup(group->GetId());
-    otherSlot->SetSlotGroup(group->GetId());
-
-    // add slot group
-    std::vector<sptr<NotificationSlotGroup>> slotGroups;
-    slotGroups.push_back(group);
-    g_advancedNotificationService->AddSlotGroups(slotGroups);
 
     slots.push_back(socialSlot);
     slots.push_back(reminderSlot);
@@ -1183,9 +1173,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0055, Function | SmallTest | Level1)
 {
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    socialSlot->SetSlotGroup(group->GetId());
     slots.push_back(socialSlot);
     EXPECT_EQ(g_advancedNotificationService->AddSlots(slots), 0);
 
@@ -1201,17 +1189,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0056, Function | SmallTest | Level1)
 {
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    socialSlot->SetSlotGroup(group->GetId());
     slots.push_back(socialSlot);
     EXPECT_EQ(g_advancedNotificationService->AddSlots(slots), 0);
-
-    // get slot group by groupId
-    group = nullptr;
-    g_advancedNotificationService->GetSlotGroup("id", group);
-    EXPECT_FALSE(group != nullptr);
-
     // remove slot group
     EXPECT_EQ(g_advancedNotificationService->RemoveSlotByType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION), 0);
 }
@@ -2439,19 +2419,12 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0127, Function | SmallTest | Level1)
                                       sortingMap) { ret++; };
 
     // add slot
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     slots.push_back(slot);
     slots.push_back(slot1);
-    slot->SetSlotGroup(group->GetId());
     g_advancedNotificationService->AddSlots(slots);
-
-    // add slot group
-    std::vector<sptr<NotificationSlotGroup>> slotGroups;
-    slotGroups.push_back(group);
-    g_advancedNotificationService->AddSlotGroups(slotGroups);
 
     // create content
     std::shared_ptr<NotificationPictureContent> contentImpl = std::make_shared<NotificationPictureContent>();
@@ -2500,19 +2473,12 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0128, Function | SmallTest | Level1)
                                       sortingMap) { ret++; };
 
     // add slot
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
     slots.push_back(slot1);
-    slot->SetSlotGroup(group->GetId());
     g_advancedNotificationService->AddSlots(slots);
-
-    // add slot group
-    std::vector<sptr<NotificationSlotGroup>> slotGroups;
-    slotGroups.push_back(group);
-    g_advancedNotificationService->AddSlotGroups(slotGroups);
 
     // create content
     std::shared_ptr<NotificationPictureContent> contentImpl = std::make_shared<NotificationPictureContent>();

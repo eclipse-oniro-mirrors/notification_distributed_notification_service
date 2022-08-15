@@ -149,16 +149,6 @@ void NotificationSlot::SetName(const std::string &name)
     name_ = TruncateString(name);
 }
 
-std::string NotificationSlot::GetSlotGroup() const
-{
-    return groupId_;
-}
-
-void NotificationSlot::SetSlotGroup(const std::string &groupId)
-{
-    groupId_ = groupId;
-}
-
 Uri NotificationSlot::GetSound() const
 {
     return sound_;
@@ -226,7 +216,6 @@ std::string NotificationSlot::Dump() const
             ", isVibrate = " + (isVibrationEnabled_ ? "true" : "false") +
             ", vibration = " + MergeVectorToString(vibrationValues_) +
             ", isShowBadge = " + (isShowBadge_ ? "true" : "false") +
-            ", groupId = " + groupId_ +
             ", enabled = " + (enabled_ ? "true" : "false") +
             " }";
 }
@@ -288,11 +277,6 @@ bool NotificationSlot::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteString(groupId_)) {
-        ANS_LOGE("Failed to write groupId");
-        return false;
-    }
-
     if (sound_.ToString().empty()) {
         if (!parcel.WriteInt32(VALUE_NULL)) {
             ANS_LOGE("Failed to write int");
@@ -335,7 +319,6 @@ bool NotificationSlot::ReadFromParcel(Parcel &parcel)
     level_ = static_cast<NotificationLevel>(parcel.ReadInt32());
     type_ = static_cast<NotificationConstant::SlotType>(parcel.ReadInt32());
     lockScreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(parcel.ReadInt32());
-    groupId_ = parcel.ReadString();
 
     int32_t empty = VALUE_NULL;
     if (!parcel.ReadInt32(empty)) {

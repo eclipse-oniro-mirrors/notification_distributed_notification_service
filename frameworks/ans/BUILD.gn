@@ -62,7 +62,6 @@ ohos_shared_library("ans_innerkits") {
     "src/notification_picture_content.cpp",
     "src/notification_request.cpp",
     "src/notification_slot.cpp",
-    "src/notification_slot_group.cpp",
     "src/notification_sorting.cpp",
     "src/notification_sorting_map.cpp",
     "src/notification_subscribe_info.cpp",

@@ -77,44 +77,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutSlotsToDisturbeDB_00300, Functi
 }
 
 /**
- * @tc.name      : PutGroupsToDisturbeDB_00100
- * @tc.number    :
- * @tc.desc      : Put slot group into disturbe DB, return is true.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, PutGroupsToDisturbeDB_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> slotGroup = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(slotGroup);
-
-    EXPECT_TRUE(preferncesDB_->PutGroupsToDisturbeDB(bundleName_, bundleUid_, groups));
-}
-
-/**
- * @tc.name      : PutGroupsToDisturbeDB_00200
- * @tc.number    :
- * @tc.desc      : Put slot group into disturbe DB when bundle name is null, return is false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, PutGroupsToDisturbeDB_00200, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> slotGroup = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(slotGroup);
-    EXPECT_FALSE(preferncesDB_->PutGroupsToDisturbeDB(std::string(), 0, groups));
-}
-
-/**
- * @tc.number    : PutGroupsToDisturbeDB_00300
- * @tc.name      :
- * @tc.desc      : Put slot group into disturbe DB when groups is null, return is false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, PutGroupsToDisturbeDB_00300, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    EXPECT_FALSE(preferncesDB_->PutGroupsToDisturbeDB(bundleName_, bundleUid_, groups));
-}
-
-/**
  * @tc.name      : PutShowBadge_00100
  * @tc.number    :
  * @tc.desc      : Put bundle show badge into disturbe DB, return is true.
@@ -416,47 +378,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSlotFromDisturbeDB_00200, Fu
 }
 
 /**
- * @tc.name      : RemoveGroupsFromDisturbeDB_00100
- * @tc.number    :
- * @tc.desc      : Remove slot froup from disturbe DB, return is true.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, RemoveGroupsFromDisturbeDB_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> slotGroup = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(slotGroup);
-    EXPECT_TRUE(preferncesDB_->PutGroupsToDisturbeDB(bundleName_, bundleUid_, groups));
-    std::vector<std::string> groupIds;
-    groupIds.push_back("id");
-    EXPECT_TRUE(preferncesDB_->RemoveGroupsFromDisturbeDB(bundleName_, groupIds));
-}
-
-/**
- * @tc.number    : RemoveGroupsFromDisturbeDB_00200
- * @tc.name      :
- * @tc.desc      :  Remove slot froup from disturbe DB when bundle name is null, return is false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, RemoveGroupsFromDisturbeDB_00200, Function | SmallTest | Level1)
-{
-    std::vector<std::string> groupIds;
-    groupIds.push_back("group1");
-    groupIds.push_back("group2");
-    EXPECT_FALSE(preferncesDB_->RemoveGroupsFromDisturbeDB(std::string(), groupIds));
-}
-
-/**
- * @tc.number    : GetRemoveGroupKeys_00100
- * @tc.name      :
- * @tc.desc      : Get remove group disturbe key, return is true.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, GetRemoveGroupKeys_00100, Function | SmallTest | Level1)
-{
-    std::string groupId = "id";
-    std::vector<OHOS::DistributedKv::Key> keys;
-    EXPECT_TRUE(preferncesDB_->GetRemoveGroupKeysFromDisturbeDB(bundleName_, groupId, keys));
-}
-
-/**
  * @tc.name      : StoreDeathRecipient_00100
  * @tc.number    :
  * @tc.desc      : Test store when death recipient.
@@ -507,19 +428,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00100, Function 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     std::vector<OHOS::DistributedKv::Entry> entries;
     EXPECT_TRUE(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, slot, entries));
-}
-
-/**
- * @tc.name      : ChangeGroupToEntry_00100
- * @tc.number    :
- * @tc.desc      : Change slot group to entry.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ChangeGroupToEntry_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> slotGroup = new NotificationSlotGroup("id", "name");
-    std::vector<OHOS::DistributedKv::Entry> entries;
-
-    EXPECT_TRUE(preferncesDB_->GroupToEntry(bundleName_, bundleUid_, slotGroup, entries));
 }
 
 /**

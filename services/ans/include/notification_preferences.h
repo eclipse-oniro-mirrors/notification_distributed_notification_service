@@ -44,16 +44,6 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots);
 
     /**
-     * @brief Add notification slot groups into DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @param groups Indicates add notification slot groups.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode AddNotificationSlotGroups(
-        const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups);
-
-    /**
      * @brief Add notification bunle info into DB.
      *
      * @param bundleOption Indicates bunlde info.
@@ -80,15 +70,6 @@ public:
     ErrCode RemoveNotificationAllSlots(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
-     * @brief Remove notification all slot in the of bundle from DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode RemoveNotificationSlotGroups(
-        const sptr<NotificationBundleOption> &bundleOption, const std::vector<std::string> &groupIds);
-
-    /**
      * @brief Remove notification bundle from DB.
      *
      * @param bundleOption Indicates bunlde info label.
@@ -105,16 +86,6 @@ public:
      */
     ErrCode UpdateNotificationSlots(
         const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slot);
-
-    /**
-     * @brief Update notification slot group into DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @param slot Indicates need to upadte slot group.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode UpdateNotificationSlotGroups(
-        const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups);
 
     /**
      * @brief Get notification slot from DB.
@@ -145,38 +116,6 @@ public:
      * @return Return ERR_OK on success, others on failure.
      */
     ErrCode GetNotificationSlotsNumForBundle(const sptr<NotificationBundleOption> &bundleOption, uint64_t &num);
-
-    /**
-     * @brief Get notification group in a bundle from DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @param groupId Indicates to get group id.
-     * @param group Indicates to get slot group.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode GetNotificationSlotGroup(const sptr<NotificationBundleOption> &bundleOption, const std::string &groupId,
-        sptr<NotificationSlotGroup> &group);
-
-    /**
-     * @brief Get notification all group in a bundle from DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @param groups Indicates to get slot groups.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode GetNotificationAllSlotGroups(
-        const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlotGroup>> &groups);
-
-    /**
-     * @brief Get notification all slot in a group in the of bunlde from DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @param groupId  Indicates to get group id.
-     * @param slots Indicates to get slots.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode GetNotificationAllSlotInSlotGroup(const sptr<NotificationBundleOption> &bundleOption,
-        const std::string &groupId, std::vector<sptr<NotificationSlot>> &slots);
 
     /**
      * @brief Get show badge in the of bunlde from DB.
@@ -326,16 +265,10 @@ public:
 private:
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const;
-    ErrCode CheckGroupForCreateSlotGroup(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlotGroup> &group, NotificationPreferencesInfo &preferencesInfo) const;
     ErrCode CheckSlotForRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, NotificationPreferencesInfo &preferencesInfo) const;
-    ErrCode CheckGroupForRemoveSlotGroup(const sptr<NotificationBundleOption> &bundleOption, const std::string &groupId,
-        NotificationPreferencesInfo &preferencesInfo) const;
     ErrCode CheckSlotForUpdateSlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const;
-    ErrCode CheckGroupForUpdateSlotGroup(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlotGroup> &group, NotificationPreferencesInfo &preferencesInfo) const;
     template <typename T>
     ErrCode SetBundleProperty(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, const T &value);
