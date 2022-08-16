@@ -43,8 +43,6 @@ namespace OHOS {
             Notification::NotificationConstant::VisiblenessType(visibleness);
         slot.SetLockscreenVisibleness(visiblenessType);
 
-        slot.SetSlotGroup(stringData);
-
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         slot.SetType(slotType);

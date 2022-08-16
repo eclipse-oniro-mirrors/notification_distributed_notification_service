@@ -20,8 +20,9 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-const std::string APP_ID = "advanced_notification_service";
+const std::string APP_ID = "notification_service";
 const std::string STORE_ID = "distributed_notification";
+constexpr char KV_STORE_PATH[] = "/data/service/el1/public/database/notification_service";
 }  // namespace
 
 DistributedDatabase::DistributedDatabase(
@@ -29,7 +30,6 @@ DistributedDatabase::DistributedDatabase(
     : DistributedFlowControl(), databaseCb_(databaseCb), deviceCb_(deviceCb)
 {
     GetKvDataManager();
-    GetKvStore();
 }
 
 DistributedDatabase::~DistributedDatabase()
@@ -66,12 +66,15 @@ void DistributedDatabase::GetKvStore(void)
     if (!CheckKvDataManager()) {
         return;
     }
-
-    DistributedKv::Options options;
-    options.createIfMissing = true;
-    options.securityLevel = DistributedKv::SecurityLevel::S1;
-    options.autoSync = true;
-    options.kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION;
+    DistributedKv::Options options {
+        .createIfMissing = true,
+        .securityLevel = DistributedKv::SecurityLevel::S1,
+        .autoSync = true,
+        .encrypt = false,
+        .area = DistributedKv::EL1,
+        .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
+        .baseDir = KV_STORE_PATH
+    };
     DistributedKv::AppId appId = {.appId = APP_ID};
     DistributedKv::StoreId storeId = {.storeId = STORE_ID};
     DistributedKv::Status status = kvDataManager_->GetSingleKvStore(options, appId, storeId, kvStore_);
@@ -96,6 +99,7 @@ void DistributedDatabase::GetKvStore(void)
 
 bool DistributedDatabase::CheckKvStore(void)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (kvStore_ == nullptr) {
         GetKvStore();
     }
@@ -106,11 +110,17 @@ bool DistributedDatabase::CheckKvStore(void)
     return true;
 }
 
+bool DistributedDatabase::OnDeviceConnected()
+{
+    return CheckKvStore();
+}
+
 bool DistributedDatabase::PutToDistributedDB(const std::string &key, const std::string &value)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (!CheckKvStore()) {
+    if (kvStore_ == nullptr) {
+        ANS_LOGE("kvStore is nullptr.");
         return false;
     }
 
@@ -134,7 +144,8 @@ bool DistributedDatabase::GetFromDistributedDB(const std::string &key, std::stri
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (!CheckKvStore()) {
+    if (kvStore_ == nullptr) {
+        ANS_LOGE("kvStore is nullptr.");
         return false;
     }
 
@@ -160,7 +171,8 @@ bool DistributedDatabase::GetEntriesFromDistributedDB(const std::string &prefixK
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (!CheckKvStore()) {
+    if (kvStore_ == nullptr) {
+        ANS_LOGE("kvStore is nullptr.");
         return false;
     }
 
@@ -183,7 +195,8 @@ bool DistributedDatabase::DeleteToDistributedDB(const std::string &key)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (!CheckKvStore()) {
+    if (kvStore_ == nullptr) {
+        ANS_LOGE("kvStore is nullptr.");
         return false;
     }
 
@@ -206,7 +219,8 @@ bool DistributedDatabase::ClearDataByDevice(const std::string &deviceId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (!CheckKvStore()) {
+    if (kvStore_ == nullptr) {
+        ANS_LOGE("kvStore is nullptr.");
         return false;
     }
 
@@ -305,18 +319,15 @@ bool DistributedDatabase::RecreateDistributedDB()
         ANS_LOGE("KvManager flow control.");
         return false;
     }
-
     kvStore_.reset();
-
     DistributedKv::AppId appId = {.appId = APP_ID};
     DistributedKv::StoreId storeId = {.storeId = STORE_ID};
-    DistributedKv::Status status = kvDataManager_->DeleteKvStore(appId, storeId);
+    DistributedKv::Status status = kvDataManager_->DeleteKvStore(appId, storeId, KV_STORE_PATH);
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvDataManager DeleteKvStore() failed ret = 0x%{public}x", status);
         return false;
     }
 
-    GetKvStore();
     return true;
 }
 }  // namespace Notification

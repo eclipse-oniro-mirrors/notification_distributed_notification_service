@@ -30,7 +30,6 @@ public:
     void TearDown();
 
     void TestAddNotificationSlot();
-    void TestAddNotificationSlotGroup();
 
     static sptr<NotificationBundleOption> bundleOption_;
     static sptr<NotificationBundleOption> noExsitbundleOption_;
@@ -55,14 +54,6 @@ void NotificationPreferencesTest::TestAddNotificationSlot()
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots);
-}
-
-void NotificationPreferencesTest::TestAddNotificationSlotGroup()
-{
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption_, groups);
 }
 
 /**
@@ -137,85 +128,6 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00500, Function | Sma
 }
 
 /**
- * @tc.number    : AddNotificationSlotGroups_00100
- * @tc.name      :
- * @tc.desc      : Add a notification groups into disturbe DB , return is ERR_OK
- */
-HWTEST_F(NotificationPreferencesTest, AddNotificationSlotGroups_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption_, groups), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AddNotificationSlotGroups_00200
- * @tc.name      :
- * @tc.desc      : Add a notification groups into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
- */
-HWTEST_F(NotificationPreferencesTest, AddNotificationSlotGroups_00200, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleEmptyOption_, groups),
-        (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : AddNotificationSlotGroups_00300
- * @tc.name      :
- * @tc.desc      : Add a notification groups into disturbe DB when groups is null, return is ERR_ANS_INVALID_PARAM.
- */
-HWTEST_F(NotificationPreferencesTest, AddNotificationSlotGroups_00300, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption_, groups),
-        (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : AddNotificationSlotGroups_00400
- * @tc.name      :
- * @tc.desc      : Add a notification groups into disturbe DB when group id is null, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_ID_INVALID
- */
-HWTEST_F(NotificationPreferencesTest, AddNotificationSlotGroups_00400, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption_, groups),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_ID_INVALID);
-}
-
-/**
- * @tc.number    : AddNotificationSlotGroups_00500
- * @tc.name      :
- * @tc.desc      : Add a notification groups into disturbe DB when add group exceed max num, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_EXCEED_MAX_NUM
- */
-HWTEST_F(NotificationPreferencesTest, AddNotificationSlotGroups_00500, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> group1 = new NotificationSlotGroup("id1", "name1");
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id2", "name1");
-    sptr<NotificationSlotGroup> group3 = new NotificationSlotGroup("id3", "name1");
-    sptr<NotificationSlotGroup> group4 = new NotificationSlotGroup("id4", "name1");
-    sptr<NotificationSlotGroup> group5 = new NotificationSlotGroup("id5", "name1");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group1);
-    groups.push_back(group2);
-    groups.push_back(group3);
-    groups.push_back(group4);
-    groups.push_back(group5);
-
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption_, groups),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_EXCEED_MAX_NUM);
-}
-
-/**
  * @tc.number    : RemoveNotificationSlot_00100
  * @tc.name      :
  * @tc.desc      : Remove a notification slot from disturbe DB , return is ERR_OK
@@ -268,79 +180,6 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00400, Function | S
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
-/**
- * @tc.number    : RemoveNotificationSlotGroups_00100
- * @tc.name      :
- * @tc.desc      : Remove a notification group from disturbe DB , return is ERR_OK
- */
-HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlotGroups_00100, Function | SmallTest | Level1)
-{
-    TestAddNotificationSlotGroup();
-    std::string groupId = "id";
-    std::vector<std::string> groupIds;
-    groupIds.push_back(groupId);
-    EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance().RemoveNotificationSlotGroups(bundleOption_, groupIds), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : RemoveNotificationSlotGroups_00200
- * @tc.name      :
- * @tc.desc      : Remove a notification group from disturbe DB when bundleName is null, return is ERR_ANS_INVALID_PARAM
- */
-HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlotGroups_00200, Function | SmallTest | Level1)
-{
-    TestAddNotificationSlotGroup();
-    std::string groupId("id");
-    std::vector<std::string> groupIds;
-    groupIds.push_back(groupId);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlotGroups(bundleEmptyOption_, groupIds),
-        (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : RemoveNotificationSlotGroups_00300
- * @tc.name      :
- * @tc.desc      : Remove a notification group from disturbe DB when group id is null, return is ERR_ANS_INVALID_PARAM
- */
-HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlotGroups_00300, Function | SmallTest | Level1)
-{
-    TestAddNotificationSlotGroup();
-    std::vector<std::string> groupIds;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlotGroups(bundleOption_, groupIds),
-        (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : RemoveNotificationSlotGroups_00400
- * @tc.name      :
- * @tc.desc      : Remove a notification group from disturbe DB when bundle name does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
- */
-HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlotGroups_00400, Function | SmallTest | Level1)
-{
-    TestAddNotificationSlotGroup();
-    std::vector<std::string> groupIds;
-    groupIds.push_back("id");
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlotGroups(noExsitbundleOption_, groupIds),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
-}
-
-/**
- * @tc.number    : RemoveNotificationSlotGroups_00500
- * @tc.name      :
- * @tc.desc      : Remove a notification group from disturbe DB when group id does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_ID_INVALID
- */
-HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlotGroups_00500, Function | SmallTest | Level1)
-{
-    TestAddNotificationSlotGroup();
-    std::string groupId = "id1";
-    std::vector<std::string> groupIds;
-    groupIds.push_back(groupId);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlotGroups(bundleOption_, groupIds),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_ID_INVALID);
-}
 /**
  * @tc.number    : RemoveNotificationForBundle_00100
  * @tc.name      :
@@ -448,82 +287,6 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00500, Function | 
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlots(noExsitbundleOption_, slots),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
-}
-
-/**
- * @tc.number    : UpdateNotificationSlotGroups_00100
- * @tc.name      :
- * @tc.desc      : Update notification slot group into disturbe DB  return is ERR_OK.
- */
-HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlotGroups_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption_, groups), (int)ERR_OK);
-    std::string des("This is a group description.");
-    group->SetDescription(des);
-    EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance().UpdateNotificationSlotGroups(bundleOption_, groups), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : UpdateNotificationSlotGroups_00200
- * @tc.name      :
- * @tc.desc      : Update notification slot group into disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM.
- */
-HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlotGroups_00200, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlotGroups(bundleEmptyOption_, groups),
-        (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : UpdateNotificationSlotGroups_00300
- * @tc.name      :
- * @tc.desc      : Update notification slot group into disturbe DB when groups is null, return is ERR_ANS_INVALID_PARAM.
- */
-HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlotGroups_00300, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlotGroups(bundleOption_, groups),
-        (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : UpdateNotificationSlotGroups_00400
- * @tc.name      :
- * @tc.desc      : Update notification slot group into disturbe DB when bundle does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
- */
-HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlotGroups_00400, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlotGroups(noExsitbundleOption_, groups),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
-}
-
-/**
- * @tc.number    : UpdateNotificationSlotGroups_00500
- * @tc.name      :
- * @tc.desc      : Update notification slot group into disturbe DB when groupid is null, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST
- */
-HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlotGroups_00500, Function | SmallTest | Level1)
-{
-    TestAddNotificationSlotGroup();
-    sptr<NotificationSlotGroup> spGroup = new NotificationSlotGroup("", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(spGroup);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlotGroups(bundleOption_, groups),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST);
 }
 
 /**
@@ -646,120 +409,6 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | 
     EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlots(noExsitbundleOption_, slotsResult),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
     EXPECT_EQ((int)slotsResult.size(), 0);
-}
-
-/**
- * @tc.number    : GetNotificationAllSlotGroups_00100
- * @tc.name      :
- * @tc.desc      : Get all notification slots from disturbe DB, return is ERR_OK.
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlotGroups_00100, Function | SmallTest | Level1)
-{
-    TestAddNotificationSlotGroup();
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance().GetNotificationAllSlotGroups(bundleOption_, groups), (int)ERR_OK);
-    EXPECT_EQ((int)groups.size(), 1);
-}
-
-/**
- * @tc.number    : GetNotificationAllSlotGroups_00200
- * @tc.name      :
- * @tc.desc      : Get all notification slots from disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlotGroups_00200, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlotGroups(bundleEmptyOption_, groups),
-        (int)ERR_ANS_INVALID_PARAM);
-    EXPECT_EQ((int)groups.size(), 0);
-}
-
-/**
- * @tc.number    : GetNotificationAllSlotGroups_00300
- * @tc.name      :
- * @tc.desc      : Get all notification slots from disturbe DB when bundle name does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlotGroups_00300, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlotGroups(noExsitbundleOption_, groups),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
-    EXPECT_EQ((int)groups.size(), 0);
-}
-
-/**
- * @tc.number    : GetNotificationAllSlotInSlotGroup_00100
- * @tc.name      :
- * @tc.desc      : Get all notification slots in the same group from disturbe DB , return is ERR_OK.
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlotInSlotGroup_00100, Function | SmallTest | Level1)
-{
-    std::string groupId = "groupId";
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("groupId", "name");
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    groups.push_back(group);
-    NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption_, groups);
-
-    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    slot->SetSlotGroup(groupId);
-    std::vector<sptr<NotificationSlot>> slots;
-    slots.push_back(slot);
-    NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots);
-    std::vector<sptr<NotificationSlot>> slotsReuslt;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlotInSlotGroup(
-                  bundleOption_, groupId, slotsReuslt),
-        (int)ERR_OK);
-    EXPECT_EQ((int)slotsReuslt.size(), 1);
-}
-
-/**
- * @tc.number    : GetNotificationAllSlotInSlotGroup_00200
- * @tc.name      :
- * @tc.desc      : Get all notification slots in the same group from disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM.
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlotInSlotGroup_00200, Function | SmallTest | Level1)
-{
-    std::string groupId = "groupId";
-    std::vector<sptr<NotificationSlot>> slotsReuslt;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlotInSlotGroup(
-                  bundleEmptyOption_, groupId, slotsReuslt),
-        (int)ERR_ANS_INVALID_PARAM);
-    EXPECT_EQ((int)slotsReuslt.size(), 0);
-}
-
-/**
- * @tc.number    : GetNotificationAllSlotInSlotGroup_00300
- * @tc.name      :
- * @tc.desc      : Get all notification slots in the same group from disturbe DB when group id is null, return is
- * ERR_ANS_INVALID_PARAM.
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlotInSlotGroup_00300, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlot>> slotsReuslt;
-    EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance().GetNotificationAllSlotInSlotGroup(bundleOption_, "", slotsReuslt),
-        (int)ERR_ANS_INVALID_PARAM);
-    EXPECT_EQ((int)slotsReuslt.size(), 0);
-}
-
-/**
- * @tc.number    : GetNotificationAllSlotInSlotGroup_00400
- * @tc.name      :
- * @tc.desc      : Get all notification slots in the same group from disturbe DB when bundle name does not exsit, return
- * is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlotInSlotGroup_00400, Function | SmallTest | Level1)
-{
-    std::string groupId = "groupId";
-    std::vector<sptr<NotificationSlot>> slotsReuslt;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlotInSlotGroup(
-                  noExsitbundleOption_, groupId, slotsReuslt),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
-    EXPECT_EQ((int)slotsReuslt.size(), 0);
 }
 
 /**

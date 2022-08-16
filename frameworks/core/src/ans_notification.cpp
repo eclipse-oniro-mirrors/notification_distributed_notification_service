@@ -103,62 +103,6 @@ ErrCode AnsNotification::GetNotificationSlots(std::vector<sptr<NotificationSlot>
     return ansManagerProxy_->GetSlots(slots);
 }
 
-ErrCode AnsNotification::AddNotificationSlotGroup(const NotificationSlotGroup &slotGroup)
-{
-    std::vector<NotificationSlotGroup> slotGroups;
-    slotGroups.emplace_back(slotGroup);
-    return AddNotificationSlotGroups(slotGroups);
-}
-
-ErrCode AnsNotification::AddNotificationSlotGroups(const std::vector<NotificationSlotGroup> &slotGroups)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-
-    std::vector<sptr<NotificationSlotGroup>> slotGroupsSptr;
-    for (auto it = slotGroups.begin(); it != slotGroups.end(); ++it) {
-        sptr<NotificationSlotGroup> slotGroup = new (std::nothrow) NotificationSlotGroup(*it);
-        if (slotGroup == nullptr) {
-            ANS_LOGE("Failed to add notification slot groups with NotificationSlotGroup nullptr");
-            return ERR_ANS_NO_MEMORY;
-        }
-        slotGroupsSptr.emplace_back(slotGroup);
-    }
-
-    return ansManagerProxy_->AddSlotGroups(slotGroupsSptr);
-}
-
-ErrCode AnsNotification::RemoveNotificationSlotGroup(const std::string &slotGroupId)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    std::vector<std::string> slotGroupIds;
-    slotGroupIds.emplace_back(slotGroupId);
-    return ansManagerProxy_->RemoveSlotGroups(slotGroupIds);
-}
-
-ErrCode AnsNotification::GetNotificationSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ansManagerProxy_->GetSlotGroup(groupId, group);
-}
-
-ErrCode AnsNotification::GetNotificationSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ansManagerProxy_->GetSlotGroups(groups);
-}
-
 ErrCode AnsNotification::GetNotificationSlotNumAsBundle(const NotificationBundleOption &bundleOption, uint64_t &num)
 {
     if (bundleOption.GetBundleName().empty()) {
@@ -657,23 +601,6 @@ ErrCode AnsNotification::UpdateNotificationSlots(
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     return ansManagerProxy_->UpdateSlots(bo, slots);
-}
-
-ErrCode AnsNotification::UpdateNotificationSlotGroups(
-    const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    if (bundleOption.GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->UpdateSlotGroups(bo, groups);
 }
 
 ErrCode AnsNotification::GetAllActiveNotifications(std::vector<sptr<Notification>> &notification)

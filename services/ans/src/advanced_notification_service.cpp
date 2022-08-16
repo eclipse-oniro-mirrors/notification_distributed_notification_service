@@ -751,21 +751,6 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
     return result;
 }
 
-ErrCode AdvancedNotificationService::AddSlotGroups(std::vector<sptr<NotificationSlotGroup>> groups)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind(
-        [&]() { result = NotificationPreferences::GetInstance().AddNotificationSlotGroups(bundleOption, groups); }));
-    return result;
-}
-
 ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>> &slots)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -781,62 +766,6 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slots.clear();
-        }
-    }));
-    return result;
-}
-
-ErrCode AdvancedNotificationService::GetSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().GetNotificationSlotGroup(bundleOption, groupId, group);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST;
-        }
-    }));
-    return result;
-}
-
-ErrCode AdvancedNotificationService::GetSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().GetNotificationAllSlotGroups(bundleOption, groups);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_OK;
-            groups.clear();
-        }
-    }));
-    return result;
-}
-
-ErrCode AdvancedNotificationService::RemoveSlotGroups(const std::vector<std::string> &groupIds)
-{
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().RemoveNotificationSlotGroups(bundleOption, groupIds);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_ID_INVALID;
         }
     }));
     return result;
@@ -1191,34 +1120,6 @@ ErrCode AdvancedNotificationService::UpdateSlots(
         PublishSlotChangeCommonEvent(bundle);
     }
 
-    return result;
-}
-
-ErrCode AdvancedNotificationService::UpdateSlotGroups(
-    const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    if (!IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().UpdateNotificationSlotGroups(bundle, groups);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST;
-        }
-    }));
     return result;
 }
 

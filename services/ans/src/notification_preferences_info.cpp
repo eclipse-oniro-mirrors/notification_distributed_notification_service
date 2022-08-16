@@ -124,82 +124,10 @@ uint32_t NotificationPreferencesInfo::BundleInfo::GetAllSlotsSize()
     return slots_.size();
 }
 
-bool NotificationPreferencesInfo::BundleInfo::GetAllSlotsInGroup(
-    const std::string &groupId, std::vector<sptr<NotificationSlot>> &slots)
-{
-    std::for_each(slots_.begin(),
-        slots_.end(),
-        [&](std::map<NotificationConstant::SlotType, sptr<NotificationSlot>>::reference iter) {
-            if (!iter.second->GetSlotGroup().compare(groupId)) {
-                slots.emplace_back(iter.second);
-            }
-        });
-    return true;
-}
-
-bool NotificationPreferencesInfo::BundleInfo::GetAllSlotsInGroup(
-    const std::string &groupId, std::vector<NotificationSlot> &slots)
-{
-    std::for_each(slots_.begin(),
-        slots_.end(),
-        [&](std::map<NotificationConstant::SlotType, sptr<NotificationSlot>>::reference &iter) {
-            if (!iter.second->GetSlotGroup().compare(groupId)) {
-                slots.emplace_back(*iter.second);
-            }
-        });
-    return true;
-}
-
-void NotificationPreferencesInfo::BundleInfo::SetGroup(const sptr<NotificationSlotGroup> &group)
-{
-    if (group) {
-        groups_.insert_or_assign(group->GetId(), group);
-    }
-}
-
-bool NotificationPreferencesInfo::BundleInfo::GetGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group)
-{
-    auto iter = groups_.find(groupId);
-    if (iter != groups_.end()) {
-        group = iter->second;
-        std::vector<NotificationSlot> slots;
-        GetAllSlotsInGroup(groupId, slots);
-        group->SetSlots(slots);
-        return true;
-    }
-    return false;
-}
-
-bool NotificationPreferencesInfo::BundleInfo::GetAllGroups(std::vector<sptr<NotificationSlotGroup>> &group)
-{
-    std::for_each(
-        groups_.begin(), groups_.end(), [&](std::map<std::string, sptr<NotificationSlotGroup>>::reference iter) {
-            std::vector<NotificationSlot> slots;
-            GetAllSlotsInGroup(iter.second->GetId(), slots);
-            iter.second->SetSlots(slots);
-            group.emplace_back(iter.second);
-        });
-    return true;
-}
-
-size_t NotificationPreferencesInfo::BundleInfo::GetGroupSize() const
-{
-    return groups_.size();
-}
-
 bool NotificationPreferencesInfo::BundleInfo::IsExsitSlot(const NotificationConstant::SlotType &type) const
 {
     auto iter = slots_.find(type);
     return (iter != slots_.end());
-}
-
-bool NotificationPreferencesInfo::BundleInfo::IsExsitSlotGroup(const std::string &groupId) const
-{
-    auto iter = groups_.find(groupId);
-    if (iter != groups_.end()) {
-        return true;
-    }
-    return false;
 }
 
 bool NotificationPreferencesInfo::BundleInfo::RemoveSlot(const NotificationConstant::SlotType &type)
@@ -215,16 +143,6 @@ bool NotificationPreferencesInfo::BundleInfo::RemoveSlot(const NotificationConst
 void NotificationPreferencesInfo::BundleInfo::RemoveAllSlots()
 {
     slots_.clear();
-}
-
-bool NotificationPreferencesInfo::BundleInfo::RemoveSlotGroup(const std::string &groupId)
-{
-    auto iter = groups_.find(groupId);
-    if (iter != groups_.end()) {
-        groups_.erase(groupId);
-        return true;
-    }
-    return false;
 }
 
 void NotificationPreferencesInfo::BundleInfo::SetBundleUid(const int32_t &uid)

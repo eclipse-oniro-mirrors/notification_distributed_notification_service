@@ -628,11 +628,6 @@ void AnsFWModuleTest::TearDown()
     NotificationHelper::CancelAllNotifications();
     NotificationHelper::RemoveAllSlots();
     NotificationHelper::RemoveNotifications();
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    NotificationHelper::GetNotificationSlotGroups(groups);
-    for (auto group : groups) {
-        NotificationHelper::RemoveNotificationSlotGroup(group->GetId().c_str());
-    }
     SleepForFC();
 }
 

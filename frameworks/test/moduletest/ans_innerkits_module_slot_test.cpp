@@ -69,7 +69,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00100, Fu
     slot.SetDescription("description");
     slot.SetLedLightColor(0);
     slot.SetLevel(NotificationSlot::NotificationLevel::LEVEL_LOW);
-    slot.SetSlotGroup("group");
     slot.SetSound(Uri("."));
     std::vector<int64_t> style;
     style.push_back(0);
@@ -93,7 +92,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00100, Fu
         EXPECT_EQ(NotificationConstant::SOCIAL_COMMUNICATION, spSlot->GetType());
         EXPECT_EQ(NotificationConstant::VisiblenessType::PUBLIC, spSlot->GetLockScreenVisibleness());
         EXPECT_EQ("SOCIAL_COMMUNICATION", spSlot->GetName());
-        EXPECT_EQ("group", spSlot->GetSlotGroup());
         EXPECT_EQ(Uri("."), spSlot->GetSound());
         for (auto it : spSlot->GetVibrationStyle()) {
             EXPECT_EQ(0, it);
@@ -120,7 +118,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00200, Fu
     slot.SetDescription("description");
     slot.SetLedLightColor(0);
     slot.SetLevel(NotificationSlot::NotificationLevel::LEVEL_LOW);
-    slot.SetSlotGroup("group");
     slot.SetSound(Uri("."));
     std::vector<int64_t> style;
     style.push_back(0);
@@ -143,7 +140,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00200, Fu
         EXPECT_EQ(NotificationConstant::SERVICE_REMINDER, spSlot->GetType());
         EXPECT_EQ(NotificationConstant::VisiblenessType::PUBLIC, spSlot->GetLockScreenVisibleness());
         EXPECT_EQ("SERVICE_REMINDER", spSlot->GetName());
-        EXPECT_EQ("group", spSlot->GetSlotGroup());
         EXPECT_EQ(Uri("."), spSlot->GetSound());
         for (auto it : spSlot->GetVibrationStyle()) {
             EXPECT_EQ(0, it);
@@ -171,7 +167,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00300, Fu
     slot.SetDescription("description");
     slot.SetLedLightColor(0);
     slot.SetLevel(NotificationSlot::NotificationLevel::LEVEL_LOW);
-    slot.SetSlotGroup("group");
     slot.SetSound(Uri("."));
     std::vector<int64_t> style;
     style.push_back(0);
@@ -194,7 +189,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00300, Fu
         EXPECT_EQ(NotificationConstant::CONTENT_INFORMATION, spSlot->GetType());
         EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
         EXPECT_EQ("CONTENT_INFORMATION", spSlot->GetName());
-        EXPECT_EQ("group", spSlot->GetSlotGroup());
         EXPECT_EQ(Uri("."), spSlot->GetSound());
         for (auto it : spSlot->GetVibrationStyle()) {
             EXPECT_EQ(0, it);
@@ -221,7 +215,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00400, Fu
     slot.SetDescription("description");
     slot.SetLedLightColor(0);
     slot.SetLevel(NotificationSlot::NotificationLevel::LEVEL_LOW);
-    slot.SetSlotGroup("group");
     slot.SetSound(Uri("."));
     std::vector<int64_t> style;
     style.push_back(0);
@@ -244,7 +237,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00400, Fu
         EXPECT_EQ(NotificationConstant::OTHER, spSlot->GetType());
         EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
         EXPECT_EQ("OTHER", spSlot->GetName());
-        EXPECT_EQ("group", spSlot->GetSlotGroup());
         EXPECT_EQ(Uri("."), spSlot->GetSound());
         for (auto it : spSlot->GetVibrationStyle()) {
             EXPECT_EQ(0, it);
@@ -273,7 +265,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00500, Fu
     slot.SetDescription(description);
     slot.SetLedLightColor(0);
     slot.SetLevel(NotificationSlot::NotificationLevel::LEVEL_LOW);
-    slot.SetSlotGroup("group");
     slot.SetSound(Uri("."));
     std::vector<int64_t> style;
     style.push_back(0);
@@ -298,7 +289,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00500, Fu
         EXPECT_EQ(NotificationConstant::OTHER, spSlot->GetType());
         EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
         EXPECT_EQ("OTHER", spSlot->GetName());
-        EXPECT_EQ("group", spSlot->GetSlotGroup());
         EXPECT_EQ(Uri("."), spSlot->GetSound());
         for (auto it : spSlot->GetVibrationStyle()) {
             EXPECT_EQ(0, it);
@@ -381,107 +371,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00900, Fu
 }
 
 /**
- * @tc.number    : ANS_Interface_MT_NotificationSlotGroup_00100
- * @tc.name      : NotificationSlotGroup_00100
- * @tc.desc      : Add notification slot group, get notification slot group and remove notification slot group.
- * @tc.expected  : Add notification slot group success, get notification slot group correctly and remove notification
- *                 slot group success.
- */
-HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlotGroup_00100, Function | MediumTest | Level1)
-{
-    NotificationSlotGroup slotGroup("id", "name");
-    slotGroup.SetDescription("description");
-    EXPECT_EQ(0, NotificationHelper::AddNotificationSlotGroup(slotGroup));
-    sptr<NotificationSlotGroup> spSlotGroup;
-    EXPECT_EQ(0, NotificationHelper::GetNotificationSlotGroup("id", spSlotGroup));
-
-    if (spSlotGroup == nullptr) {
-        GTEST_LOG_(INFO) << "get slot group is empty";
-    } else {
-        GTEST_LOG_(INFO) << "get slot group is:" << spSlotGroup->Dump();
-        EXPECT_EQ("description", spSlotGroup->GetDescription());
-        EXPECT_EQ("id", spSlotGroup->GetId());
-        EXPECT_EQ("name", spSlotGroup->GetName());
-        EXPECT_EQ(false, spSlotGroup->IsDisabled());
-    }
-    EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlotGroup("id"));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST,
-        NotificationHelper::GetNotificationSlotGroup("id", spSlotGroup));
-}
-
-/**
- * @tc.number    : ANS_Interface_MT_NotificationSlotGroup_00200
- * @tc.name      : NotificationSlotGroup_00200
- * @tc.desc      : Add notification slot group, slot group set description character length exceed 1000
- *                 characters, get notification slot group and remove notification slot group.
- * @tc.expected  : Add notification slot group success, get notification slot group correctly and remove notification
- *                 slot group success.
- */
-HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlotGroup_00200, Function | MediumTest | Level1)
-{
-    NotificationSlotGroup slotGroup("id", "name");
-    std::string description(2000, 'c');
-    slotGroup.SetDescription(description);
-    EXPECT_EQ(0, NotificationHelper::AddNotificationSlotGroup(slotGroup));
-    GTEST_LOG_(INFO) << "after add group is:" << slotGroup.Dump();
-    sptr<NotificationSlotGroup> spSlotGroup;
-    EXPECT_EQ(0, NotificationHelper::GetNotificationSlotGroup("id", spSlotGroup));
-
-    if (spSlotGroup == nullptr) {
-        GTEST_LOG_(INFO) << "get slot group is empty";
-    } else {
-        GTEST_LOG_(INFO) << "get slot group is:" << spSlotGroup->Dump();
-        std::string expectDescription(1000, 'c');
-        EXPECT_EQ(expectDescription, spSlotGroup->GetDescription());
-        EXPECT_EQ("id", spSlotGroup->GetId());
-        EXPECT_EQ("name", spSlotGroup->GetName());
-        EXPECT_EQ(false, spSlotGroup->IsDisabled());
-    }
-    EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlotGroup("id"));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST,
-        NotificationHelper::GetNotificationSlotGroup("id", spSlotGroup));
-}
-
-/**
- * @tc.number    : ANS_Interface_MT_NotificationSlotGroup_00300
- * @tc.name      : NotificationSlotGroup_00300
- * @tc.desc      : Two different slots added to the same slot group.
- * @tc.expected  : Add success.
- */
-HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlotGroup_00300, Function | MediumTest | Level1)
-{
-    NotificationSlot slotA(NotificationConstant::OTHER);
-    slotA.SetSlotGroup("id");
-
-    NotificationSlot slotB(NotificationConstant::CUSTOM);
-    slotA.SetSlotGroup("id");
-
-    NotificationSlotGroup slotGroup("id", "name");
-    EXPECT_EQ(0, NotificationHelper::AddNotificationSlotGroup(slotGroup));
-
-    sptr<NotificationSlotGroup> spSlotGroup;
-    EXPECT_EQ(0, NotificationHelper::GetNotificationSlotGroup("id", spSlotGroup));
-
-    if (spSlotGroup == nullptr) {
-        GTEST_LOG_(INFO) << "get slot group is empty";
-    } else {
-        std::vector<NotificationSlot> slots = spSlotGroup->GetSlots();
-        for (auto it : slots) {
-            if (NotificationConstant::OTHER == it.GetType()) {
-                EXPECT_EQ("OTHER", it.GetId());
-            } else if (NotificationConstant::CUSTOM == it.GetType()) {
-                EXPECT_EQ("CUSTOM", it.GetId());
-            } else {
-                GTEST_LOG_(INFO) << "slot group has wrong slot";
-            }
-        }
-    }
-    EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlotGroup("id"));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST,
-        NotificationHelper::GetNotificationSlotGroup("id", spSlotGroup));
-}
-
-/**
  * @tc.number    : ANS_Interface_MT_SetEnabledForBundleSlot_00100
  * @tc.name      : SetEnabledForBundleSlot_00100
  * @tc.desc      : Add notification slot(type is SOCIAL_COMMUNICATION), get slot default enable,
@@ -495,7 +384,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     slot.SetDescription("description");
     slot.SetLedLightColor(0);
     slot.SetLevel(NotificationSlot::NotificationLevel::LEVEL_LOW);
-    slot.SetSlotGroup("group");
     slot.SetSound(Uri("."));
     std::vector<int64_t> style;
     style.push_back(0);

@@ -44,7 +44,6 @@ public:
 
 private:
     void TestAddSlot(NotificationConstant::SlotType type);
-    void TestAddSlotGroup();
 
 private:
     static sptr<AdvancedNotificationService> advancedNotificationService_;
@@ -112,14 +111,6 @@ void AdvancedNotificationServiceTest::TestAddSlot(NotificationConstant::SlotType
     sptr<NotificationSlot> slot = new NotificationSlot(type);
     slots.push_back(slot);
     EXPECT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
-}
-
-void AdvancedNotificationServiceTest::TestAddSlotGroup()
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup("id0", "name0");
-    groups.push_back(group);
-    advancedNotificationService_->AddSlotGroups(groups);
 }
 
 /**
@@ -446,19 +437,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01300,
 }
 
 /**
- * @tc.number    : ANS_Publish_01400
- * @tc.name      : ANSPublish01400
- * @tc.desc      :
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01400, Function | SmallTest | Level1)
-{
-    TestAddSlotGroup();
-    std::vector<std::string> groupIds;
-    groupIds.push_back("id0");
-    EXPECT_EQ(advancedNotificationService_->RemoveSlotGroups(groupIds), (int)ERR_OK);
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_01600
  * @tc.name      : ANS_GetSlot_0200
  * @tc.desc      : Test GetSlots function when add two identical data
@@ -475,25 +453,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01600,
     advancedNotificationService_->GetSlots(slotsResult);
     EXPECT_EQ((int)slots.size(), 2);
     EXPECT_EQ((int)slotsResult.size(), 1);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_01700
- * @tc.name      : ANS_GetSlotGroup_0100
- * @tc.desc      : Test GetSlotGroup function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01700, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id2", "name2");
-    group2->SetDescription("Description");
-    groups.push_back(group2);
-    advancedNotificationService_->AddSlotGroups(groups);
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup();
-    EXPECT_EQ(advancedNotificationService_->GetSlotGroup("id2", group), ERR_OK);
-    EXPECT_EQ(group2->GetId(), group->GetId());
-    EXPECT_EQ(group2->GetName(), group->GetName());
-    EXPECT_EQ(group2->GetDescription(), group->GetDescription());
 }
 
 /**
@@ -573,38 +532,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02300,
     slots.push_back(slot0);
     EXPECT_EQ((int)advancedNotificationService_->UpdateSlots(
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots),
-        (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_02400
- * @tc.name      : ANS_UpdateSlotGroups_0100
- * @tc.desc      : Test UpdateSlotGroups function when no group
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02400, Function | SmallTest | Level1)
-{
-    TestAddSlotGroup();
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id1", "name1");
-    groups.push_back(group2);
-    EXPECT_EQ((int)advancedNotificationService_->UpdateSlotGroups(
-                  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), groups),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_02500
- * @tc.name      : ANS_UpdateSlotGroups_0200
- * @tc.desc      : Test UpdateSlotGroups function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02500, Function | SmallTest | Level1)
-{
-    TestAddSlotGroup();
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id0", "name1");
-    groups.push_back(group2);
-    EXPECT_EQ((int)advancedNotificationService_->UpdateSlotGroups(
-                  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), groups),
         (int)ERR_OK);
 }
 
@@ -854,34 +781,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05300,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_05400
- * @tc.name      : ANS_AddSlotGroups_0100
- * @tc.desc      : Test AddSlotGroups function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05400, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group0 = new NotificationSlotGroup("id0", "name0");
-    sptr<NotificationSlotGroup> group1 = new NotificationSlotGroup("id1", "name1");
-    groups.push_back(group0);
-    groups.push_back(group1);
-    EXPECT_EQ(advancedNotificationService_->AddSlotGroups(groups), ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_05500
- * @tc.name      : ANS_RemoveSlotGroups_0100
- * @tc.desc      : Test RemoveSlotGroups function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05500, Function | SmallTest | Level1)
-{
-    TestAddSlotGroup();
-    std::vector<std::string> groupIds;
-    groupIds.push_back("id0");
-    EXPECT_EQ(advancedNotificationService_->RemoveSlotGroups(groupIds), (int)ERR_OK);
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_05600
  * @tc.name      : ANS_GetSlot_0100
  * @tc.desc      : Test GetSlot function for data
@@ -897,25 +796,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05600,
     EXPECT_EQ(slot->GetName(), slot0->GetName());
     EXPECT_EQ(slot->GetId(), slot0->GetId());
     EXPECT_EQ(slot->GetLevel(), slot0->GetLevel());
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_05800
- * @tc.name      : ANS_GetSlotGroup_0100
- * @tc.desc      : Test GetSlotGroup function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05800, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id2", "name2");
-    group2->SetDescription("Description");
-    groups.push_back(group2);
-    advancedNotificationService_->AddSlotGroups(groups);
-    sptr<NotificationSlotGroup> group = new NotificationSlotGroup();
-    EXPECT_EQ(advancedNotificationService_->GetSlotGroup("id2", group), ERR_OK);
-    EXPECT_EQ(group2->GetId(), group->GetId());
-    EXPECT_EQ(group2->GetName(), group->GetName());
-    EXPECT_EQ(group2->GetDescription(), group->GetDescription());
 }
 
 /**
@@ -995,38 +875,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06400,
     slots.push_back(slot0);
     EXPECT_EQ((int)advancedNotificationService_->UpdateSlots(
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots),
-        (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_06500
- * @tc.name      : ANS_UpdateSlotGroups_0100
- * @tc.desc      : Test UpdateSlotGroups function when no group
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06500, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::OTHER);
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id2", "name2");
-    groups.push_back(group2);
-    EXPECT_EQ((int)advancedNotificationService_->UpdateSlotGroups(
-                  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), groups),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOTGROUP_NOT_EXIST);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_06600
- * @tc.name      : ANS_UpdateSlotGroups_0200
- * @tc.desc      : Test UpdateSlotGroups function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06600, Function | SmallTest | Level1)
-{
-    TestAddSlotGroup();
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id0", "name2");
-    groups.push_back(group2);
-    EXPECT_EQ((int)advancedNotificationService_->UpdateSlotGroups(
-                  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), groups),
         (int)ERR_OK);
 }
 
@@ -1142,23 +990,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08700,
     sptr<NotificationSlot> slot;
     EXPECT_EQ((int)advancedNotificationService_->GetSlotByType(NotificationConstant::OTHER, slot), (int)ERR_OK);
     EXPECT_EQ(slot->GetType(), NotificationConstant::SlotType::OTHER);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_08900
- * @tc.name      : ANS_GetSlotGroups_0100
- * @tc.desc      : Test GetSlotGroups function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08900, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    sptr<NotificationSlotGroup> group2 = new NotificationSlotGroup("id2", "name2");
-    group2->SetDescription("Description");
-    groups.push_back(group2);
-    advancedNotificationService_->AddSlotGroups(groups);
-    std::vector<sptr<NotificationSlotGroup>> group;
-    EXPECT_EQ(advancedNotificationService_->GetSlotGroups(group), ERR_OK);
-    EXPECT_EQ(groups.size(), group.size());
 }
 
 /**

@@ -51,26 +51,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
         OHOS::Notification::NotificationHelper::GetNotificationSlots(param);
     });
 
-    callFunctionMap_.emplace("NotificationHelperAddNotificationSlotGroup",
-        []() { OHOS::Notification::NotificationHelper::AddNotificationSlotGroup(*GetParamNotificationSlotGroup()); });
-
-    callFunctionMap_.emplace("NotificationHelperAddNotificationSlotGroups", []() {
-        OHOS::Notification::NotificationHelper::AddNotificationSlotGroups(GetParamNotificationSlotGroupVector());
-    });
-
-    callFunctionMap_.emplace("NotificationHelperRemoveNotificationSlotGroup",
-        []() { OHOS::Notification::NotificationHelper::RemoveNotificationSlotGroup(GetStringParam()); });
-
-    callFunctionMap_.emplace("NotificationHelperGetNotificationSlotGroup", []() {
-        sptr<OHOS::Notification::NotificationSlotGroup> param = GetParamNotificationSlotGroup();
-        OHOS::Notification::NotificationHelper::GetNotificationSlotGroup(GetStringParam(), param);
-    });
-
-    callFunctionMap_.emplace("NotificationHelperGetNotificationSlotGroups", []() {
-        std::vector<sptr<OHOS::Notification::NotificationSlotGroup>> param = GetParamNotificationSlotGroupSptrVector();
-        OHOS::Notification::NotificationHelper::GetNotificationSlotGroups(param);
-    });
-
     callFunctionMap_.emplace("NotificationHelperGetNotificationSlotNumAsBundle", []() {
         int param = GetIntParam();
         OHOS::Notification::NotificationHelper::GetNotificationSlotNumAsBundle(
@@ -307,11 +287,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
     callFunctionMap_.emplace("NotificationHelperUpdateNotificationSlots", []() {
         OHOS::Notification::NotificationHelper::UpdateNotificationSlots(
             *GetParamNotificationBundleOption(), GetParamNotificationSlotSptrVector());
-    });
-
-    callFunctionMap_.emplace("NotificationHelperUpdateNotificationSlotGroups", []() {
-        OHOS::Notification::NotificationHelper::UpdateNotificationSlotGroups(
-            *GetParamNotificationBundleOption(), GetParamNotificationSlotGroupSptrVector());
     });
 
     callFunctionMap_.emplace("NotificationHelperGetAllActiveNotificationsvectorsptrNotification", []() {

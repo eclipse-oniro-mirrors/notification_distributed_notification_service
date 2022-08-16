@@ -92,56 +92,6 @@ public:
     ErrCode GetNotificationSlots(std::vector<sptr<NotificationSlot>> &slots);
 
     /**
-     * @brief Creates a notification slot group to which a NotificationSlot object can be bound by
-     * calling NotificationSlot::SetSlotGroup(string).
-     * @note  A NotificationSlotGroup instance cannot be used directly after being initialized.
-     *        Instead, you have to call this method to create a notification slot group so that you can bind
-     *        NotificationSlot objects to it.
-     *
-     * @param slotGroup Indicates the notification slot group to be created, which is set by NotificationSlotGroup.
-     *                  This parameter must be specified. the notification slot to be created, which is set by
-     *                  NotificationSlot.
-     * @return Returns add notification slot group result.
-     */
-    ErrCode AddNotificationSlotGroup(const NotificationSlotGroup &slotGroup);
-
-    /**
-     * @brief Creates multiple notification slot groups.
-     * @note The precautions for using this method are similar to those for
-     * AddNotificationSlotGroup(NotificationSlotGroup).
-     *
-     * @param slotGroups Indicates a list of NotificationSlotGroup objects to create. This parameter cannot be null.
-     * @return Returns add notification slot groups result.
-     */
-    ErrCode AddNotificationSlotGroups(const std::vector<NotificationSlotGroup> &slotGroups);
-
-    /**
-     * @brief Deletes a created notification slot group based on the slot group ID.
-     *
-     * @param slotGroupId  Indicates the ID of the notification slot group, which is created by
-     *                     AddNotificationSlotGroup(NotificationSlotGroup) This parameter must be specified.
-     * @return Returns remove notification slot group result.
-     */
-    ErrCode RemoveNotificationSlotGroup(const std::string &slotGroupId);
-
-    /**
-     * @brief Queries a created notification slot group.
-     *
-     * @param  groupId Indicates the ID of the slot group.
-     * @param  group   Indicates the created NotificationSlotGroup.
-     * @return Returns get notification slot group result.
-     */
-    ErrCode GetNotificationSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group);
-
-    /**
-     * @brief Obtains a list of created notification slot groups.
-     *
-     * @param  groups Indicates a list of created notification slot groups.
-     * @return Returns get notification slot groups result.
-     */
-    ErrCode GetNotificationSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups);
-
-    /**
      * @brief Obtains number of slot.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -493,16 +443,6 @@ public:
      */
     ErrCode UpdateNotificationSlots(
         const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots);
-
-    /**
-     * @brief Updates all notification slot groups for the specified bundle.
-     *
-     * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param groups Indicates a list of new notification slot groups.
-     * @return Returns update notification slot groups for bundle result.
-     */
-    ErrCode UpdateNotificationSlotGroups(
-        const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups);
 
     /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to

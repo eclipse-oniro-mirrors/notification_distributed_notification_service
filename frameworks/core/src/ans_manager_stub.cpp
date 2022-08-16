@@ -55,26 +55,14 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
         {AnsManagerStub::REMOVE_ALL_SLOTS,
             std::bind(&AnsManagerStub::HandleRemoveAllSlots, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
-        {AnsManagerStub::ADD_SLOT_GROUPS,
-            std::bind(&AnsManagerStub::HandleAddSlotGroups, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
         {AnsManagerStub::GET_SLOT_BY_TYPE,
             std::bind(&AnsManagerStub::HandleGetSlotByType, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
         {AnsManagerStub::GET_SLOTS,
             std::bind(
                 &AnsManagerStub::HandleGetSlots, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {AnsManagerStub::GET_SLOT_GROUP,
-            std::bind(&AnsManagerStub::HandleGetSlotGroup, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {AnsManagerStub::GET_SLOT_GROUPS,
-            std::bind(&AnsManagerStub::HandleGetSlotGroups, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
         {AnsManagerStub::GET_SLOT_NUM_AS_BUNDLE,
             std::bind(&AnsManagerStub::HandleGetSlotNumAsBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {AnsManagerStub::REMOVE_SLOT_GROUPS,
-            std::bind(&AnsManagerStub::HandleRemoveSlotGroups, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
         {AnsManagerStub::GET_ACTIVE_NOTIFICATIONS,
             std::bind(&AnsManagerStub::HandleGetActiveNotifications, std::placeholders::_1, std::placeholders::_2,
@@ -135,9 +123,6 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
                 std::placeholders::_3)},
         {AnsManagerStub::UPDATE_SLOTS,
             std::bind(&AnsManagerStub::HandleUpdateSlots, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {AnsManagerStub::UPDATE_SLOT_GROUPS,
-            std::bind(&AnsManagerStub::HandleUpdateSlotGroups, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
         {AnsManagerStub::REQUEST_ENABLE_NOTIFICATION,
             std::bind(&AnsManagerStub::HandleRequestEnableNotification, std::placeholders::_1, std::placeholders::_2,
@@ -459,22 +444,6 @@ ErrCode AnsManagerStub::HandleRemoveAllSlots(MessageParcel &data, MessageParcel 
     return ERR_OK;
 }
 
-ErrCode AnsManagerStub::HandleAddSlotGroups(MessageParcel &data, MessageParcel &reply)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    if (!ReadParcelableVector(groups, data)) {
-        ANS_LOGE("[HandleAddSlotGroups] fail: read slotsSize failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = AddSlotGroups(groups);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleAddSlotGroups] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
 ErrCode AnsManagerStub::HandleGetSlots(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<sptr<NotificationSlot>> slots;
@@ -505,40 +474,6 @@ ErrCode AnsManagerStub::HandleGetSlotByType(MessageParcel &data, MessageParcel &
     return ERR_OK;
 }
 
-ErrCode AnsManagerStub::HandleGetSlotGroup(MessageParcel &data, MessageParcel &reply)
-{
-    std::string groupId;
-    if (!data.ReadString(groupId)) {
-        ANS_LOGE("[HandleGetSlotGroup] fail: read groupId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    sptr<NotificationSlotGroup> group;
-    ErrCode result = GetSlotGroup(groupId, group);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleGetSlotGroup] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.WriteParcelable(group)) {
-        ANS_LOGE("[HandleGetSlotGroup] fail: write group failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AnsManagerStub::HandleGetSlotGroups(MessageParcel &data, MessageParcel &reply)
-{
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    ErrCode result = GetSlotGroups(groups);
-    if (!WriteParcelableVector(groups, reply, result)) {
-        ANS_LOGE("[HandleGetSlotGroups] fail: write groups failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return ERR_OK;
-}
-
 ErrCode AnsManagerStub::HandleGetSlotNumAsBundle(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
@@ -556,22 +491,6 @@ ErrCode AnsManagerStub::HandleGetSlotNumAsBundle(MessageParcel &data, MessagePar
 
     if (!reply.WriteUint64(num)) {
         ANS_LOGE("[HandleGetSlotNumAsBundle] fail: write enabled failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AnsManagerStub::HandleRemoveSlotGroups(MessageParcel &data, MessageParcel &reply)
-{
-    std::vector<std::string> groupIds;
-    if (!data.ReadStringVector(&groupIds)) {
-        ANS_LOGE("[HandleRemoveSlotGroups] fail: read groupIds failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = RemoveSlotGroups(groupIds);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleRemoveSlotGroups] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -998,28 +917,6 @@ ErrCode AnsManagerStub::HandleUpdateSlots(MessageParcel &data, MessageParcel &re
     ErrCode result = UpdateSlots(bundleOption, slots);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleUpdateSlots] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AnsManagerStub::HandleUpdateSlotGroups(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
-    if (bundleOption == nullptr) {
-        ANS_LOGE("[HandleUpdateSlotGroups] fail: read bundle failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    std::vector<sptr<NotificationSlotGroup>> groups;
-    if (!ReadParcelableVector(groups, data)) {
-        ANS_LOGE("[HandleUpdateSlotGroups] fail: read groups failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = UpdateSlotGroups(bundleOption, groups);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleUpdateSlotGroups] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -1922,12 +1819,6 @@ ErrCode AnsManagerStub::RemoveAllSlots()
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::AddSlotGroups(std::vector<sptr<NotificationSlotGroup>> groups)
-{
-    ANS_LOGE("AnsManagerStub::AddSlotGroups called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::GetSlotByType(const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot)
 {
     ANS_LOGE("AnsManagerStub::GetSlotByType called!");
@@ -1940,27 +1831,9 @@ ErrCode AnsManagerStub::GetSlots(std::vector<sptr<NotificationSlot>> &slots)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::GetSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group)
-{
-    ANS_LOGE("AnsManagerStub::GetSlotGroup called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::GetSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    ANS_LOGE("AnsManagerStub::GetSlotGroups called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::GetSlotNumAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint64_t &num)
 {
     ANS_LOGE("AnsManagerStub::GetSlotNumAsBundle called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::RemoveSlotGroups(const std::vector<std::string> &groupIds)
-{
-    ANS_LOGE("AnsManagerStub::RemoveSlotGroups called!");
     return ERR_INVALID_OPERATION;
 }
 
@@ -2086,13 +1959,6 @@ ErrCode AnsManagerStub::UpdateSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
     ANS_LOGE("AnsManagerStub::UpdateSlots called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::UpdateSlotGroups(
-    const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    ANS_LOGE("AnsManagerStub::UpdateSlotGroups called!");
     return ERR_INVALID_OPERATION;
 }
 

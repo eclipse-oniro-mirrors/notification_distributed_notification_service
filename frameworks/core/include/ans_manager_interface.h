@@ -26,7 +26,6 @@
 #include "notification_do_not_disturb_date.h"
 #include "notification_request.h"
 #include "notification_slot.h"
-#include "notification_slot_group.h"
 #include "notification_subscribe_info.h"
 #include "reminder_request.h"
 
@@ -127,16 +126,6 @@ public:
     virtual ErrCode RemoveAllSlots() = 0;
 
     /**
-     * @brief Creates multiple notification slot groups.
-     * @note The precautions for using this method are similar to those for
-     *       AddNotificationSlotGroup(NotificationSlotGroup).
-     *
-     * @param groups Indicates a list of NotificationSlotGroup objects to create. This parameter cannot be null.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode AddSlotGroups(std::vector<sptr<NotificationSlotGroup>> groups) = 0;
-
-    /**
      * @brief Queries a created notification slot.
      *
      * @param slotType Indicates the ID of the slot, which is created by AddNotificationSlot(NotificationSlot). This
@@ -155,23 +144,6 @@ public:
     virtual ErrCode GetSlots(std::vector<sptr<NotificationSlot>> &slots) = 0;
 
     /**
-     * @brief Queries a created notification slot group.
-     *
-     * @param groupId Indicates the ID of the slot group.
-     * @param group   Indicates the created NotificationSlotGroup.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group) = 0;
-
-    /**
-     * @brief Obtains a list of created notification slot groups.
-     *
-     * @param  groups Indicates a list of created notification slot groups.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups) = 0;
-
-    /**
      * @brief Obtains the number of slot.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -179,15 +151,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode GetSlotNumAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint64_t &num) = 0;
-
-    /**
-     * @brief Deletes multiple notification slot groups.
-     *
-     * @param groupIds Indicates the IDs of the notification slot groups, which is created by
-     *                    AddNotificationSlotGroup(NotificationSlotGroup) This parameter must be specified.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode RemoveSlotGroups(const std::vector<std::string> &groupIds) = 0;
 
     /**
      * @brief Obtains active notifications of the current application in the system.
@@ -373,16 +336,6 @@ public:
      */
     virtual ErrCode UpdateSlots(
         const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots) = 0;
-
-    /**
-     * @brief Update slotgroup according to bundle.
-     *
-     * @param bundleOption Indicates the NotificationBundleOption object.
-     * @param groups Indicates the notification slots to be updated.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode UpdateSlotGroups(
-        const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups) = 0;
 
     /**
      * @brief Allow notifications to be sent based on the deviceId.

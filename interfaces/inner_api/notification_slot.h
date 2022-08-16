@@ -190,25 +190,6 @@ public:
     std::string GetName() const;
 
     /**
-     * @brief Obtains the ID of the NotificationSlotGroup object to which this NotificationSlot object belongs,
-     * which is set by SetSlotGroup(string).
-     *
-     * @return Returns the ID of the NotificationSlotGroup to which this NotificationSlot object belongs.
-     */
-    std::string GetSlotGroup() const;
-
-    /**
-     * @brief Binds a NotificationSlot object to a specified NotificationSlotGroup.
-     * @note SetSlotGroup must be called before the NotificationHelper::AddNotificationSlot(NotificationSlot) method is
-     * called. Otherwise, this method will not take effect.
-     *
-     * @param groupId Indicates the ID of the NotificationSlotGroup object to bind,
-     *                which must have been created by calling
-     * NotificationHelper::AddNotificationSlotGroup(NotificationSlotGroup).
-     */
-    void SetSlotGroup(const std::string &groupId);
-
-    /**
      * @brief Obtains the prompt tone of a NotificationSlot object, which is set by SetSound(Uri).
      *
      * @return Returns the prompt tone of the NotificationSlot object.
@@ -368,7 +349,6 @@ private:
     NotificationLevel level_ {LEVEL_DEFAULT};
     NotificationConstant::SlotType type_ {};
     NotificationConstant::VisiblenessType lockScreenVisibleness_ {NotificationConstant::VisiblenessType::NO_OVERRIDE};
-    std::string groupId_ {};
     Uri sound_;
     std::vector<int64_t> vibrationValues_ {};
     bool enabled_ {true};

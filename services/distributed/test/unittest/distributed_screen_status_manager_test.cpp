@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-
+#define private public
 #include "distributed_screen_status_manager.h"
 
 using namespace testing::ext;
@@ -27,17 +27,18 @@ public:
     void SetUp() override;
     void TearDown() override;
 protected:
-    std::shared_ptr<DistributedScreenStatusManager> DistributedScreenStatusManager_;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager_;
 };
 
 void DistributedScreenStatusManagerTest::SetUp()
 {
-    DistributedScreenStatusManager_ = DistributedScreenStatusManager::GetInstance();
+    distributedScreenStatusManager_ = DistributedScreenStatusManager::GetInstance();
+    distributedScreenStatusManager_->OnDeviceConnected("test");
 }
 
 void DistributedScreenStatusManagerTest::TearDown()
 {
-    DistributedScreenStatusManager_ = nullptr;
+    distributedScreenStatusManager_ = nullptr;
     DistributedScreenStatusManager::DestroyInstance();
 }
 
@@ -50,7 +51,7 @@ HWTEST_F(DistributedScreenStatusManagerTest, CheckRemoteDevicesIsUsing_00100, Fu
 {
     bool isUsing = true;
 
-    EXPECT_EQ(DistributedScreenStatusManager_->CheckRemoteDevicesIsUsing(isUsing), ERR_OK);
+    EXPECT_EQ(distributedScreenStatusManager_->CheckRemoteDevicesIsUsing(isUsing), ERR_OK);
 }
 
 /**
@@ -62,7 +63,7 @@ HWTEST_F(DistributedScreenStatusManagerTest, SetLocalScreenStatus_00100, Functio
 {
     bool screenOn = false;
 
-    EXPECT_EQ(DistributedScreenStatusManager_->SetLocalScreenStatus(screenOn), ERR_OK);
+    EXPECT_EQ(distributedScreenStatusManager_->SetLocalScreenStatus(screenOn), ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

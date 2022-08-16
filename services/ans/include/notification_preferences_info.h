@@ -23,7 +23,6 @@
 #include "notification_bundle_option.h"
 #include "notification_do_not_disturb_date.h"
 #include "notification_slot.h"
-#include "notification_slot_group.h"
 #include "preferences_constant.h"
 
 namespace OHOS {
@@ -171,51 +170,12 @@ public:
         bool GetAllSlotsInGroup(const std::string &groupId, std::vector<NotificationSlot> &slots);
 
         /**
-         * @brief Set bundle group.
-         *
-         * @param group Indicates the set group.
-         */
-        void SetGroup(const sptr<NotificationSlotGroup> &group);
-
-        /**
-         * @brief Get group from bundle.
-         *
-         * @param groupId Indicates the get group id in the of bundle.
-         * @param group Indicates the get group.
-         * @return Return true on success, false on failure.
-         */
-        bool GetGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group);
-
-        /**
-         * @brief Get all group from bundle.
-         *
-         * @param group Indicates the get groups.
-         * @return Return true on success, false on failure.
-         */
-        bool GetAllGroups(std::vector<sptr<NotificationSlotGroup>> &group);
-
-        /**
-         * @brief Get slot group num from bundle.
-         *
-         * @return Return num is group size.
-         */
-        size_t GetGroupSize() const;
-
-        /**
          * @brief Check whether to exsist slot in the of bundle.
          *
          * @param type Indicates the slot type.
          * @return Return true on success, false on failure.
          */
         bool IsExsitSlot(const NotificationConstant::SlotType &type) const;
-
-        /**
-         * @brief Check whether to exsist slot group in the of bundle.
-         *
-         * @param groupId Indicates the slot group id.
-         * @return Return true on success, false on failure.
-         */
-        bool IsExsitSlotGroup(const std::string &groupId) const;
 
         /**
          * @brief Rremove a slot from bundle.
@@ -232,13 +192,6 @@ public:
          */
         void RemoveAllSlots();
 
-        /**
-         * @brief remove slot group from bundle.
-         *
-         * @param groupId Indicates the slot group id.
-         * @return Return true on success, false on failure.
-         */
-        bool RemoveSlotGroup(const std::string &groupId);
         void SetBundleUid(const int32_t &uid);
         int32_t GetBundleUid() const;
         void SetSlotEnabled(NotificationConstant::SlotType slotType, bool enabled);
@@ -254,7 +207,6 @@ public:
         bool isEnabledNotification_ = BUNDLE_ENABLE_NOTIFICATION;
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
-        std::map<std::string, sptr<NotificationSlotGroup>> groups_;
     };
 
     /*

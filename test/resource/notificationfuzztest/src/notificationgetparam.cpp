@@ -559,32 +559,6 @@ std::vector<OHOS::Notification::NotificationSlot> GetParamNotificationSlotVector
     return param;
 }
 
-std::vector<OHOS::Notification::NotificationSlotGroup> GetParamNotificationSlotGroupVector()
-{
-    vector<OHOS::Notification::NotificationSlotGroup> param;
-    size_t len = GenRandom(0, MAX_LENGTH);
-    while (len--) {
-        OHOS::Notification::NotificationSlotGroup t = *GetParamNotificationSlotGroup();
-        param.push_back(t);
-    }
-    return param;
-}
-sptr<OHOS::Notification::NotificationSlotGroup> GetParamNotificationSlotGroup()
-{
-    sptr<OHOS::Notification::NotificationSlotGroup> param =
-        new OHOS::Notification::NotificationSlotGroup(GetStringParam(), GetStringParam());
-    return param;
-}
-std::vector<sptr<OHOS::Notification::NotificationSlotGroup>> GetParamNotificationSlotGroupSptrVector()
-{
-    vector<sptr<OHOS::Notification::NotificationSlotGroup>> param;
-    size_t len = GenRandom(0, MAX_LENGTH);
-    while (len--) {
-        sptr<OHOS::Notification::NotificationSlotGroup> t = GetParamNotificationSlotGroup();
-        param.push_back(t);
-    }
-    return param;
-}
 std::shared_ptr<OHOS::Notification::NotificationBundleOption> GetParamNotificationBundleOption()
 {
     if (GetBoolParam()) {

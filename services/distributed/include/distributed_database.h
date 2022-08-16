@@ -123,6 +123,8 @@ public:
      */
     bool RecreateDistributedDB();
 
+    bool OnDeviceConnected();
+
 private:
     void GetKvDataManager(void);
     bool CheckKvDataManager(void);

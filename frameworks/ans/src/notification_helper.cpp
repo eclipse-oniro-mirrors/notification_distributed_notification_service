@@ -55,31 +55,6 @@ ErrCode NotificationHelper::GetNotificationSlots(std::vector<sptr<NotificationSl
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlots(slots);
 }
 
-ErrCode NotificationHelper::AddNotificationSlotGroup(const NotificationSlotGroup &slotGroup)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlotGroup(slotGroup);
-}
-
-ErrCode NotificationHelper::AddNotificationSlotGroups(const std::vector<NotificationSlotGroup> &slotGroups)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlotGroups(slotGroups);
-}
-
-ErrCode NotificationHelper::RemoveNotificationSlotGroup(const std::string &slotGroupId)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationSlotGroup(slotGroupId);
-}
-
-ErrCode NotificationHelper::GetNotificationSlotGroup(const std::string &groupId, sptr<NotificationSlotGroup> &group)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotGroup(groupId, group);
-}
-
-ErrCode NotificationHelper::GetNotificationSlotGroups(std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotGroups(groups);
-}
-
 ErrCode NotificationHelper::GetNotificationSlotNumAsBundle(const NotificationBundleOption &bundleOption, uint64_t &num)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotNumAsBundle(bundleOption, num);
@@ -257,12 +232,6 @@ ErrCode NotificationHelper::UpdateNotificationSlots(
     const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationSlots(bundleOption, slots);
-}
-
-ErrCode NotificationHelper::UpdateNotificationSlotGroups(
-    const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlotGroup>> &groups)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationSlotGroups(bundleOption, groups);
 }
 
 ErrCode NotificationHelper::GetAllActiveNotifications(std::vector<sptr<Notification>> &notification)

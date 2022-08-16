@@ -21,7 +21,7 @@ namespace Notification {
 /**
  * Indicates distributed database app id.
  */
-constexpr char APP_ID[] = "advanced_notification_service";
+constexpr char APP_ID[] = "notification_service";
 
 /**
  * Indicates distributed database store id.
