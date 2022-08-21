@@ -47,7 +47,6 @@ ohos_shared_library("ans_innerkits") {
     "src/notification_action_button.cpp",
     "src/notification_basic_content.cpp",
     "src/notification_bundle_option.cpp",
-    "src/notification_constant.cpp",
     "src/notification_content.cpp",
     "src/notification_conversational_content.cpp",
     "src/notification_conversational_message.cpp",
