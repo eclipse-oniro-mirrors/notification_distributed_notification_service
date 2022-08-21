@@ -23,20 +23,20 @@ namespace OHOS {
         constexpr uint8_t SLOT_TYPE_NUM = 5;
         constexpr uint8_t FLAG_STATUS = 3;
     }
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData = reinterpret_cast<const char*>(data);
+        std::string stringData(data);
         Notification::NotificationRequest request;
         request.SetAlertOneTime(*data % ENABLE);
 
-        int32_t style = static_cast<int32_t>(U32_AT(data));
+        int32_t style = static_cast<int32_t>(GetU32Data(data));
         Notification::NotificationRequest::BadgeStyle badgeStyle =
             Notification::NotificationRequest::BadgeStyle(style);
         request.SetBadgeIconStyle(badgeStyle);
         request.SetBadgeNumber(style);
         request.SetClassification(stringData);
 
-        uint32_t color = U32_AT(data);
+        uint32_t color = GetU32Data(data);
         request.SetColor(color);
         request.SetColorEnabled(*data % ENABLE);
 
@@ -83,6 +83,11 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    char *ch = ParseData(data, size);
+    if (ch != nullptr && size >= GetU32Size()) {
+        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        free(ch);
+        ch = nullptr;
+    }
     return 0;
 }
