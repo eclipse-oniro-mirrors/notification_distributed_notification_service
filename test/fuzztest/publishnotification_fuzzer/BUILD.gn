@@ -23,7 +23,7 @@ ohos_fuzztest("PublishNotificationFuzzTest") {
   fuzz_config_file =
       "${component_path}/test/fuzztest/publishnotification_fuzzer"
 
-  include_dirs = []
+  include_dirs = [ "${component_path}/test/fuzztest/fuzz_common_base" ]
   cflags = [
     "-g",
     "-O0",
@@ -32,7 +32,10 @@ ohos_fuzztest("PublishNotificationFuzzTest") {
   ]
   sources = [ "publishnotification_fuzzer.cpp" ]
 
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+  deps = [
+    "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
+    "${frameworks_module_ans_path}:ans_innerkits",
+  ]
 
   external_deps = [
     "ability_base:want",

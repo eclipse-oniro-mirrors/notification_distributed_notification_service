@@ -23,15 +23,15 @@ constexpr uint8_t SLOT_VISIBLENESS_TYPE_NUM = 4;
 constexpr uint8_t SLOT_TYPE_NUM = 5;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData = reinterpret_cast<const char*>(data);
+        std::string stringData(data);
 
         Notification::NotificationSlot slot;
         slot.SetDescription(stringData);
         slot.SetEnableLight(*data % ENABLE);
         slot.SetEnableVibration(*data % ENABLE);
-        slot.SetLedLightColor(U32_AT(data));
+        slot.SetLedLightColor(GetU32Data(data));
 
         uint8_t level = *data % SLOT_LEVEL_NUM;
         Notification::NotificationSlot::NotificationLevel notificatoinLevel =
@@ -57,6 +57,11 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    char *ch = ParseData(data, size);
+    if (ch != nullptr && size >= GetU32Size()) {
+        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        free(ch);
+        ch = nullptr;
+    }
     return 0;
 }
