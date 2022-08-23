@@ -57,17 +57,17 @@ enum class SlotLevel {
     LEVEL_HIGH = 4,
 };
 
-enum class NotificationReason {
-    CLICK_REASON_DELETE,
-    CANCEL_REASON_DELETE,
-    CANCEL_ALL_REASON_DELETE,
-    ERROR_REASON_DELETE,
-    PACKAGE_CHANGED_REASON_DELETE,
-    USER_STOPPED_REASON_DELETE,
-    PACKAGE_BANNED_REASON_DELETE,
-    APP_CANCEL_REASON_DELETE,
-    APP_CANCEL_ALL_REASON_DELETE,
-    APP_CANCEL_REASON_OTHER
+enum class RemoveReason {
+    CLICK_REASON_REMOVE = 1,
+    CANCEL_REASON_REMOVE = 2,
+    CANCEL_ALL_REASON_REMOVE = 3,
+    ERROR_REASON_REMOVE = 4,
+    PACKAGE_CHANGED_REASON_REMOVE = 5,
+    USER_STOPPED_REASON_REMOVE = 6,
+    PACKAGE_BANNED_REASON_REMOVE = 7,
+    APP_CANCEL_REASON_REMOVE = 8,
+    APP_CANCEL_ALL_REASON_REMOVE = 9,
+    APP_CANCEL_REASON_OTHER = 10,
 };
 
 enum class SemanticActionButton {
@@ -1538,6 +1538,8 @@ public:
      */
     static napi_value GetNotificationBadgeNumber(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    static bool IsValidRemoveReason(int32_t reasonType);
 
 private:
     static const int32_t ARGS_ONE = 1;

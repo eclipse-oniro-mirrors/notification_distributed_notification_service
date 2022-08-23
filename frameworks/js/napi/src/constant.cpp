@@ -27,33 +27,18 @@ void SetNamedPropertyByInteger(napi_env env, napi_value dstObj, int32_t objName,
     }
 }
 
-napi_value NotificationReasonInit(napi_env env, napi_value exports)
+napi_value RemoveReasonInit(napi_env env, napi_value exports)
 {
     ANS_LOGI("%{public}s, called", __func__);
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
 
-    SetNamedPropertyByInteger(env, obj, (int32_t)NotificationReason::CLICK_REASON_DELETE, "CLICK_REASON_DELETE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)NotificationReason::CANCEL_REASON_DELETE, "CANCEL_REASON_DELETE");
-    SetNamedPropertyByInteger(
-        env, obj, (int32_t)NotificationReason::CANCEL_ALL_REASON_DELETE, "CANCEL_ALL_REASON_DELETE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)NotificationReason::ERROR_REASON_DELETE, "ERROR_REASON_DELETE");
-    SetNamedPropertyByInteger(
-        env, obj, (int32_t)NotificationReason::PACKAGE_CHANGED_REASON_DELETE, "PACKAGE_CHANGED_REASON_DELETE");
-    SetNamedPropertyByInteger(
-        env, obj, (int32_t)NotificationReason::USER_STOPPED_REASON_DELETE, "USER_STOPPED_REASON_DELETE");
-    SetNamedPropertyByInteger(
-        env, obj, (int32_t)NotificationReason::PACKAGE_BANNED_REASON_DELETE, "PACKAGE_BANNED_REASON_DELETE");
-    SetNamedPropertyByInteger(
-        env, obj, (int32_t)NotificationReason::APP_CANCEL_REASON_DELETE, "APP_CANCEL_REASON_DELETE");
-    SetNamedPropertyByInteger(
-        env, obj, (int32_t)NotificationReason::APP_CANCEL_ALL_REASON_DELETE, "APP_CANCEL_ALL_REASON_DELETE");
-    SetNamedPropertyByInteger(
-        env, obj, (int32_t)NotificationReason::APP_CANCEL_REASON_OTHER, "APP_CANCEL_REASON_OTHER");
+    SetNamedPropertyByInteger(env, obj, (int32_t)RemoveReason::CLICK_REASON_REMOVE, "CLICK_REASON_REMOVE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)RemoveReason::CANCEL_REASON_REMOVE, "CANCEL_REASON_REMOVE");
 
     napi_property_descriptor exportFuncs[] = {
-        DECLARE_NAPI_PROPERTY("NotificationReason", obj),
+        DECLARE_NAPI_PROPERTY("RemoveReason", obj),
     };
 
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
@@ -300,7 +285,7 @@ napi_value NotificationFlagTypeInit(napi_env env, napi_value exports)
 
 napi_value ConstantInit(napi_env env, napi_value exports)
 {
-    NotificationReasonInit(env, exports);
+    RemoveReasonInit(env, exports);
     SlotTypeInit(env, exports);
     SlotLevelInit(env, exports);
     SemanticActionButtonInit(env, exports);

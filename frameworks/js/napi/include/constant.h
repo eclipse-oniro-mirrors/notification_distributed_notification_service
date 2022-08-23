@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
-napi_value NotificationReasonInit(napi_env env, napi_value exports);
+napi_value RemoveReasonInit(napi_env env, napi_value exports);
 napi_value SlotTypeInit(napi_env env, napi_value exports);
 napi_value SlotLevelInit(napi_env env, napi_value exports);
 napi_value SemanticActionButtonInit(napi_env env, napi_value exports);

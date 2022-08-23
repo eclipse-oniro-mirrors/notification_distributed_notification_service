@@ -190,7 +190,7 @@ napi_value Common::SetNotificationByDistributedOptions(
         ANS_LOGI("supportDisplayDevices = %{public}s", vec.c_str());
         napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
         napi_set_element(env, arrSupportDisplayDevices, count, vecValue);
-        count ++;
+        count++;
     }
     napi_set_named_property(env, result, "supportDisplayDevices", arrSupportDisplayDevices);
 
@@ -204,7 +204,7 @@ napi_value Common::SetNotificationByDistributedOptions(
         ANS_LOGI("supportOperateDevices  = %{public}s", vec.c_str());
         napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
         napi_set_element(env, arrSupportOperateDevices, count, vecValue);
-        count ++;
+        count++;
     }
     napi_set_named_property(env, result, "supportOperateDevices", arrSupportOperateDevices);
 
@@ -3897,37 +3897,47 @@ bool Common::ReasonCToJS(const int &inType, int &outType)
 {
     switch (inType) {
         case NotificationConstant::CLICK_REASON_DELETE:
-            outType = (int)NotificationReason::CLICK_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::CLICK_REASON_REMOVE);
             break;
         case NotificationConstant::CANCEL_REASON_DELETE:
-            outType = (int)NotificationReason::CANCEL_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::CANCEL_REASON_REMOVE);
             break;
         case NotificationConstant::CANCEL_ALL_REASON_DELETE:
-            outType = (int)NotificationReason::CANCEL_ALL_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::CANCEL_ALL_REASON_REMOVE);
             break;
         case NotificationConstant::ERROR_REASON_DELETE:
-            outType = (int)NotificationReason::ERROR_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::ERROR_REASON_REMOVE);
             break;
         case NotificationConstant::PACKAGE_CHANGED_REASON_DELETE:
-            outType = (int)NotificationReason::PACKAGE_CHANGED_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::PACKAGE_CHANGED_REASON_REMOVE);
             break;
         case NotificationConstant::USER_STOPPED_REASON_DELETE:
-            outType = (int)NotificationReason::USER_STOPPED_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::USER_STOPPED_REASON_REMOVE);
             break;
         case NotificationConstant::APP_CANCEL_REASON_DELETE:
-            outType = (int)NotificationReason::APP_CANCEL_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_REMOVE);
             break;
         case NotificationConstant::APP_CANCEL_ALL_REASON_DELETE:
-            outType = (int)NotificationReason::APP_CANCEL_ALL_REASON_DELETE;
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_ALL_REASON_REMOVE);
             break;
         case NotificationConstant::APP_CANCEL_REASON_OTHER:
-            outType = (int)NotificationReason::APP_CANCEL_REASON_OTHER;
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
             break;
         default:
             ANS_LOGE("Reason %{public}d is an invalid value", inType);
             return false;
     }
     return true;
+}
+
+bool Common::IsValidRemoveReason(int32_t reasonType)
+{
+    if (reasonType == NotificationConstant::CLICK_REASON_DELETE ||
+        reasonType == NotificationConstant::CANCEL_REASON_DELETE) {
+        return true;
+    }
+    ANS_LOGE("Reason %{public}d is an invalid value", reasonType);
+    return false;
 }
 
 bool Common::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, NotificationConstant::DoNotDisturbType &outType)
