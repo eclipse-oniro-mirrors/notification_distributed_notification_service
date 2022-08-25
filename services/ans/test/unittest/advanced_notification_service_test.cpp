@@ -1574,6 +1574,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12200,
  * @tc.name: AdvancedNotificationServiceTest_12300
  * @tc.desc: SA publish notification, Failed to publish when creatorUid default.
  * @tc.type: FUNC
+ * @tc.require: I5P1GU
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300, Function | SmallTest | Level1)
 {
