@@ -13,28 +13,18 @@
  * limitations under the License.
  */
 
-#include "removenotification_fuzzer.h"
+#ifndef FUZZ_COMMON_BASE_H
+#define FUZZ_COMMON_BASE_H
 
-#include "notification_helper.h"
+#include <iostream>
+#include "securec.h"
 
-namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
-    {
-        std::string key(data);
-        return Notification::NotificationHelper::RemoveNotification(key);
-    }
+extern "C" {
+uint32_t GetU32Size();
+
+uint32_t GetU32Data(const char* ptr);
+
+char* ParseData(const uint8_t* data, size_t size);
 }
 
-/* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
-{
-    /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
-    return 0;
-}
-
+#endif // FUZZ_COMMON_BASE_H

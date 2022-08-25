@@ -16,14 +16,8 @@
 #ifndef TEST_FUZZTEST_GETNOTIFICATIONSLOTNUMASBUNDLE_FUZZER_GETNOTIFICATIONSLOTNUMASBUNDLE_FUZZER_H
 #define TEST_FUZZTEST_GETNOTIFICATIONSLOTNUMASBUNDLE_FUZZER_GETNOTIFICATIONSLOTNUMASBUNDLE_FUZZER_H
 
-#include <cstdint>
+#include "fuzz_common_base.h"
 
 #define FUZZ_PROJECT_NAME "getnotificationslotnumasbundle_fuzzer"
-
-uint32_t U32_AT(const uint8_t *ptr)
-{
-    // convert fuzz input data to an integer
-    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
-}
 
 #endif // TEST_FUZZTEST_GETNOTIFICATIONSLOTNUMASBUNDLE_FUZZER_GETNOTIFICATIONSLOTNUMASBUNDLE_FUZZER_H
