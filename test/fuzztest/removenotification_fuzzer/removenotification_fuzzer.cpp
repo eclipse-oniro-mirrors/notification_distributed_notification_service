@@ -18,9 +18,9 @@
 #include "notification_helper.h"
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string key = reinterpret_cast<const char*>(data);
+        std::string key(data);
         return Notification::NotificationHelper::RemoveNotification(key,
             Notification::NotificationConstant::CANCEL_REASON_DELETE);
     }
@@ -30,7 +30,12 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    char *ch = ParseData(data, size);
+    if (ch != nullptr) {
+        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        free(ch);
+        ch = nullptr;
+    }
     return 0;
 }
 

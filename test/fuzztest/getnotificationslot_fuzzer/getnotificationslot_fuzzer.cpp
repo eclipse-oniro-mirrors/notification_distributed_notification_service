@@ -20,7 +20,7 @@
 constexpr uint8_t SLOT_TYPE_NUM = 5;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
@@ -33,6 +33,11 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    char *ch = ParseData(data, size);
+    if (ch != nullptr) {
+        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        free(ch);
+        ch = nullptr;
+    }
     return 0;
 }

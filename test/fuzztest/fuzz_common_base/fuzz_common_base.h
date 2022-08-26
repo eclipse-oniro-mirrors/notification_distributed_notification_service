@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef TEST_FUZZTEST_ADDNOTIFICATIONSLOTS_FUZZER_ADDNOTIFICATIONSLOTS_FUZZER_H
-#define TEST_FUZZTEST_ADDNOTIFICATIONSLOTS_FUZZER_ADDNOTIFICATIONSLOTS_FUZZER_H
+#ifndef FUZZ_COMMON_BASE_H
+#define FUZZ_COMMON_BASE_H
 
-#include "fuzz_common_base.h"
+#include <iostream>
+#include "securec.h"
 
-#define FUZZ_PROJECT_NAME "addnotificationslots_fuzzer"
+extern "C" {
+uint32_t GetU32Size();
 
-#endif // TEST_FUZZTEST_ADDNOTIFICATIONSLOTS_FUZZER_ADDNOTIFICATIONSLOTS_FUZZER_H
+uint32_t GetU32Data(const char* ptr);
+
+char* ParseData(const uint8_t* data, size_t size);
+}
+
+#endif // FUZZ_COMMON_BASE_H

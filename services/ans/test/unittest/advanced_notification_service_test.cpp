@@ -1605,6 +1605,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300,
  * @tc.name: AdvancedNotificationServiceTest_12400
  * @tc.desc: DLP App publish notification failed.
  * @tc.type: FUNC
+ * @tc.require: I582TY
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400, Function | SmallTest | Level1)
 {
