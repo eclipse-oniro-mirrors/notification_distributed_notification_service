@@ -18,12 +18,12 @@
 #include "notification_helper.h"
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         Notification::NotificationBundleOption bundleOption;
-        std::string bundleName = reinterpret_cast<const char*>(data);
+        std::string bundleName (data);
         bundleOption.SetBundleName(bundleName);
-        int32_t uid = static_cast<int32_t>(U32_AT(data));
+        int32_t uid = static_cast<int32_t>(GetU32Data(data));
         bundleOption.SetUid(uid);
         uint64_t num;
         return Notification::NotificationHelper::GetNotificationSlotNumAsBundle(bundleOption, num) == ERR_OK;
@@ -34,6 +34,11 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    char *ch = ParseData(data, size);
+    if (ch != nullptr && size >= GetU32Size()) {
+        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        free(ch);
+        ch = nullptr;
+    }
     return 0;
 }

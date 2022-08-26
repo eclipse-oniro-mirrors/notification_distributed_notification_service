@@ -16,11 +16,10 @@
 #include "setnotificationbadgenum_fuzzer.h"
 
 #include "notification_helper.h"
-
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        return Notification::NotificationHelper::SetNotificationBadgeNum(U32_AT(data)) == ERR_OK;
+        return Notification::NotificationHelper::SetNotificationBadgeNum(GetU32Data(data)) == ERR_OK;
     }
 }
 
@@ -28,6 +27,11 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    char *ch = ParseData(data, size);
+    if (ch != nullptr && size >= GetU32Size()) {
+        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        free(ch);
+        ch = nullptr;
+    }
     return 0;
 }
