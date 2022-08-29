@@ -69,20 +69,16 @@ ohos_shared_library("notification") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
     "${core_path}:ans_core",
-    "${frameworks_module_ans_path}:ans_innerkits",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image",
-    "//third_party/libuv:uv_static",
   ]
 
   external_deps = [
-    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "napi:ace_napi",
     "relational_store:native_rdb",
   ]

@@ -51,9 +51,7 @@ ohos_shared_library("libans_distributed") {
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "kv_store:distributeddata_inner",
-    "multimedia_image_standard:image_native",
   ]
 
   subsystem_name = "${subsystem_name}"
