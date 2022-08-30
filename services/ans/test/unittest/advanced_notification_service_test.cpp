@@ -583,7 +583,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02900,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03700, Function | SmallTest | Level1)
 {
     const std::string key = "key";
-    EXPECT_EQ((int)advancedNotificationService_->Delete(key), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ((int)advancedNotificationService_->Delete(key, NotificationConstant::CANCEL_REASON_DELETE),
+              (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -922,7 +923,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_07000,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_07800, Function | SmallTest | Level1)
 {
     const std::string key = "key";
-    EXPECT_EQ((int)advancedNotificationService_->Delete(key), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ((int)advancedNotificationService_->Delete(key, NotificationConstant::CANCEL_REASON_DELETE),
+              (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -1566,7 +1568,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12200,
     req->SetLabel(label);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
     auto result = advancedNotificationService_->RemoveNotification(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), notificationId, label);
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
+        notificationId, label, NotificationConstant::CANCEL_REASON_DELETE);
     EXPECT_EQ(result, (int)ERR_OK);
 }
 

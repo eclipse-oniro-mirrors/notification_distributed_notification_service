@@ -281,10 +281,11 @@ public:
      * @param bundleOption Indicates the NotificationBundleOption of the notification.
      * @param notificationId Indicates the id of the notification.
      * @param label Indicates the label of the notification.
+     * @param removeReason Indicates the reason of remove notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RemoveNotification(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label) override;
+    ErrCode RemoveNotification(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+        const std::string &label, int32_t removeReason) override;
 
     /**
      * @brief Delete all notifications.
@@ -298,9 +299,10 @@ public:
      * @brief Delete notification based on key.
      *
      * @param key Indicates the key to delete notification.
+     * @param removeReason Indicates the reason of remove notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode Delete(const std::string &key) override;
+    ErrCode Delete(const std::string &key, int32_t removeReason) override;
 
     /**
      * @brief Remove notifications based on bundle.
@@ -725,7 +727,8 @@ private:
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption, const std::string &label,
         int32_t notificationId, sptr<Notification> &notification, bool isCancel = false);
-    ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification, bool isCancel = false);
+    ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
+        bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
         const int32_t &userId, sptr<Notification> &notification);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);

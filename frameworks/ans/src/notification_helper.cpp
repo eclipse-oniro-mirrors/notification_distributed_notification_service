@@ -196,15 +196,16 @@ ErrCode NotificationHelper::UnSubscribeNotification(
     return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber, subscribeInfo);
 }
 
-ErrCode NotificationHelper::RemoveNotification(const std::string &key)
+ErrCode NotificationHelper::RemoveNotification(const std::string &key, int32_t removeReason)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(key);
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(key, removeReason);
 }
 
-ErrCode NotificationHelper::RemoveNotification(
-    const NotificationBundleOption &bundleOption, const int32_t notificationId, const std::string &label)
+ErrCode NotificationHelper::RemoveNotification(const NotificationBundleOption &bundleOption,
+    const int32_t notificationId, const std::string &label, int32_t removeReason)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(bundleOption, notificationId, label);
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(bundleOption,
+        notificationId, label, removeReason);
 }
 
 ErrCode NotificationHelper::RemoveAllNotifications(const NotificationBundleOption &bundleOption)

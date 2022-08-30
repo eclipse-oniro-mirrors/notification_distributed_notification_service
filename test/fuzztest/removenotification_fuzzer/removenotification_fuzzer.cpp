@@ -21,7 +21,8 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         std::string key(data);
-        return Notification::NotificationHelper::RemoveNotification(key);
+        return Notification::NotificationHelper::RemoveNotification(key,
+            Notification::NotificationConstant::CANCEL_REASON_DELETE);
     }
 }
 

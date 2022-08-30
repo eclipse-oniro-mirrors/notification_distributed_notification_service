@@ -659,7 +659,8 @@ ErrCode AdvancedNotificationService::CancelAll()
             std::string bundleName;
             GetDistributedInfo(key, deviceId, bundleName);
 #endif
-            result = RemoveFromNotificationList(key, notification, true);
+            result = RemoveFromNotificationList(key, notification, true,
+                NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
             if (result != ERR_OK) {
                 continue;
             }
@@ -908,7 +909,7 @@ ErrCode AdvancedNotificationService::GetPrivateNotificationsAllowed(bool &allow)
     return result;
 }
 
-ErrCode AdvancedNotificationService::Delete(const std::string &key)
+ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t removeReason)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -929,16 +930,15 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key)
         std::string bundleName;
         GetDistributedInfo(key, deviceId, bundleName);
 #endif
-        result = RemoveFromNotificationList(key, notification);
+        result = RemoveFromNotificationList(key, notification, false, removeReason);
         if (result != ERR_OK) {
             return;
         }
 
         if (notification != nullptr) {
-            int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
-            UpdateRecentNotification(notification, true, reason);
+            UpdateRecentNotification(notification, true, removeReason);
             sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, removeReason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -976,7 +976,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
 #endif
             sptr<Notification> notification = nullptr;
 
-            result = RemoveFromNotificationList(key, notification);
+            result = RemoveFromNotificationList(key, notification, false, NotificationConstant::CANCEL_REASON_DELETE);
             if (result != ERR_OK) {
                 continue;
             }
@@ -1225,7 +1225,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 }
 
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(
-    const std::string &key, sptr<Notification> &notification, bool isCancel)
+    const std::string &key, sptr<Notification> &notification, bool isCancel, int32_t removeReason)
 {
     for (auto record : notificationList_) {
         if (record->notification->GetKey() == key) {
@@ -1234,7 +1234,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
             }
             notification = record->notification;
             // delete or delete all, call the function
-            if (!isCancel) {
+            if (!isCancel && removeReason != NotificationConstant::CLICK_REASON_DELETE) {
                 TriggerRemoveWantAgent(record->request);
             }
             notificationList_.remove(record);
@@ -2150,7 +2150,8 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 #endif
         for (auto key : keys) {
             sptr<Notification> notification = nullptr;
-            result = RemoveFromNotificationList(key, notification, true);
+            result = RemoveFromNotificationList(key, notification, true,
+                NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
             if (result != ERR_OK) {
                 continue;
             }
@@ -2239,8 +2240,8 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
     return result;
 }
 
-ErrCode AdvancedNotificationService::RemoveNotification(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label)
+ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, const std::string &label, int32_t removeReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -2292,16 +2293,16 @@ ErrCode AdvancedNotificationService::RemoveNotification(
         }
 
         if (notification != nullptr) {
-            int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
-            UpdateRecentNotification(notification, true, reason);
+            UpdateRecentNotification(notification, true, removeReason);
             sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, removeReason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete(deviceId, bundleName, notification);
 #endif
         }
-
-        TriggerRemoveWantAgent(notificationRequest);
+        if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
+            TriggerRemoveWantAgent(notificationRequest);
+        }
     }));
 
     SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
@@ -3460,13 +3461,14 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
 #endif
             sptr<Notification> notification = nullptr;
 
-            ErrCode result = RemoveFromNotificationList(key, notification);
+            ErrCode result = RemoveFromNotificationList(key, notification, true,
+                NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
             if (result != ERR_OK) {
                 continue;
             }
 
             if (notification != nullptr) {
-                int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
+                int32_t reason = NotificationConstant::PACKAGE_CHANGED_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);

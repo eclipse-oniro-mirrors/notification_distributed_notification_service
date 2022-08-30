@@ -817,7 +817,13 @@ ErrCode AnsManagerStub::HandleRemoveNotification(MessageParcel &data, MessagePar
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = RemoveNotification(bundleOption, notificationId, label);
+    int32_t removeReason = 0;
+    if (!data.ReadInt32(removeReason)) {
+        ANS_LOGE("[HandleRemoveNotification] fail: read removeReason failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = RemoveNotification(bundleOption, notificationId, label, removeReason);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRemoveNotification] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -849,7 +855,13 @@ ErrCode AnsManagerStub::HandleDelete(MessageParcel &data, MessageParcel &reply)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = Delete(key);
+    int32_t removeReason = 0;
+    if (!data.ReadInt32(removeReason)) {
+        ANS_LOGE("[HandleDelete] fail: read removeReason failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = Delete(key, removeReason);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleDelete] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1917,8 +1929,8 @@ ErrCode AnsManagerStub::GetPrivateNotificationsAllowed(bool &allow)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::RemoveNotification(
-    const sptr<NotificationBundleOption> &bundleOption, int notificationId, const std::string &label)
+ErrCode AnsManagerStub::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
+    int notificationId, const std::string &label, int32_t removeReason)
 {
     ANS_LOGE("AnsManagerStub::RemoveNotification called!");
     return ERR_INVALID_OPERATION;
@@ -1930,7 +1942,7 @@ ErrCode AnsManagerStub::RemoveAllNotifications(const sptr<NotificationBundleOpti
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::Delete(const std::string &key)
+ErrCode AnsManagerStub::Delete(const std::string &key, int32_t removeReason)
 {
     ANS_LOGE("AnsManagerStub::Delete called!");
     return ERR_INVALID_OPERATION;

@@ -836,8 +836,8 @@ ErrCode AnsManagerProxy::GetPrivateNotificationsAllowed(bool &allow)
     return result;
 }
 
-ErrCode AnsManagerProxy::RemoveNotification(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label)
+ErrCode AnsManagerProxy::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, const std::string &label, int32_t removeReason)
 {
     if (bundleOption == nullptr) {
         ANS_LOGE("[RemoveNotification] fail: bundle is empty.");
@@ -862,6 +862,11 @@ ErrCode AnsManagerProxy::RemoveNotification(
 
     if (!data.WriteString(label)) {
         ANS_LOGE("[RemoveNotification] fail: write label failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(removeReason)) {
+        ANS_LOGE("[RemoveNotification] fail: write removeReason failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -915,7 +920,7 @@ ErrCode AnsManagerProxy::RemoveAllNotifications(const sptr<NotificationBundleOpt
     return result;
 }
 
-ErrCode AnsManagerProxy::Delete(const std::string &key)
+ErrCode AnsManagerProxy::Delete(const std::string &key, int32_t removeReason)
 {
     if (key.empty()) {
         ANS_LOGE("[Delete] fail: key is empty.");
@@ -930,6 +935,11 @@ ErrCode AnsManagerProxy::Delete(const std::string &key)
 
     if (!data.WriteString(key)) {
         ANS_LOGE("[Delete] fail:: write key failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(removeReason)) {
+        ANS_LOGE("[Delete] fail: write removeReason failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

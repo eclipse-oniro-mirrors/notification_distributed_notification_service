@@ -495,7 +495,7 @@ ErrCode AnsNotification::UnSubscribeNotification(
     return ansManagerProxy_->Unsubscribe(subscriberSptr, sptrInfo);
 }
 
-ErrCode AnsNotification::RemoveNotification(const std::string &key)
+ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t removeReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (key.empty()) {
@@ -507,11 +507,11 @@ ErrCode AnsNotification::RemoveNotification(const std::string &key)
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->Delete(key);
+    return ansManagerProxy_->Delete(key, removeReason);
 }
 
-ErrCode AnsNotification::RemoveNotification(
-    const NotificationBundleOption &bundleOption, const int32_t notificationId, const std::string &label)
+ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bundleOption,
+    const int32_t notificationId, const std::string &label, int32_t removeReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption.GetBundleName().empty()) {
@@ -525,7 +525,7 @@ ErrCode AnsNotification::RemoveNotification(
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->RemoveNotification(bo, notificationId, label);
+    return ansManagerProxy_->RemoveNotification(bo, notificationId, label, removeReason);
 }
 
 ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &bundleOption)

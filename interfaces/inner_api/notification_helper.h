@@ -384,9 +384,10 @@ public:
      * @note Your application must have platform signature to use this method.
      *
      * @param key Indicates the key of the notification to remove.
+     * @param removeReason Indicates the reason of remove notification.
      * @return Returns remove notification result.
      */
-    static ErrCode RemoveNotification(const std::string &key);
+    static ErrCode RemoveNotification(const std::string &key, int32_t removeReason);
 
     /**
      * @brief Removes a specified removable notification of other applications.
@@ -395,10 +396,11 @@ public:
      * @param bundleOption Indicates the bundle name and uid of the application whose notifications are to be removed.
      * @param notificationId Indicates the id of the notification to remove.
      * @param label Indicates the label of the notification to remove.
+     * @param removeReason Indicates the reason of remove notification.
      * @return Returns remove notification result.
      */
-    static ErrCode RemoveNotification(
-        const NotificationBundleOption &bundleOption, const int32_t notificationId, const std::string &label);
+    static ErrCode RemoveNotification(const NotificationBundleOption &bundleOption,
+        const int32_t notificationId, const std::string &label, int32_t removeReason);
 
     /**
      * @brief Removes a specified removable notification of other applications.
