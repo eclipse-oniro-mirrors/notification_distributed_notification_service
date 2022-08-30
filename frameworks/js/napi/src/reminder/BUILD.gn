@@ -49,9 +49,7 @@ ohos_shared_library("reminderagent") {
   deps = [
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${core_path}:ans_core",
-    "${frameworks_module_ans_path}:ans_innerkits",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image",
-    "//third_party/libuv:uv_static",
   ]
 
   external_deps = [
@@ -59,10 +57,8 @@ ohos_shared_library("reminderagent") {
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
     "ability_runtime:wantagent_innerkits",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "napi:ace_napi",
     "relational_store:native_rdb",
   ]
