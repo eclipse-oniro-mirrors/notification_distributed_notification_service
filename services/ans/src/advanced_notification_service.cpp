@@ -1824,8 +1824,8 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     }
     bool allowedNotify = false;
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
-    if (!allowedNotify) {
-        ANSR_LOGW("The application does not request notification permission");
+    if (result != ERR_OK || !allowedNotify) {
+        ANSR_LOGW("The application does not request enable notification");
         return ERR_ANS_PERMISSION_DENIED;
     }
     auto rdm = ReminderDataManager::GetInstance();
