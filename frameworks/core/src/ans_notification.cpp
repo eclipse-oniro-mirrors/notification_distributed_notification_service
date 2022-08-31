@@ -948,10 +948,6 @@ ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
             return ERR_ANS_INVALID_PARAM;
         }
     }
-    std::string deviceId {""};
-    if (ansManagerProxy_->RequestEnableNotification(deviceId) != ERR_OK) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
     ErrCode code = ansManagerProxy_->PublishReminder(tarReminder);
     reminder.SetReminderId(tarReminder->GetReminderId());
     return code;
