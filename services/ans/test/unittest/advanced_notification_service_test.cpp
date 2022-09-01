@@ -26,9 +26,12 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_ut_constant.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
 #include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
 #include "notification_subscriber.h"
+#include "system_event_observer.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -1625,6 +1628,43 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400,
 
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
+}
+
+/*
+ * @tc.name: AdvancedNotificationServiceTest_12500
+ * @tc.desc: When the user removed event is received and the userid is less than or equal to 100,
+ * the notification cannot be deleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12500, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    req->SetCreatorUserId(DEFAULT_USER_ID);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
+    SleepForFC();
+
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED));
+    data.SetCode(DEFAULT_USER_ID);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+
+    std::stringstream key;
+    key << "_" << req->GetCreatorUserId() << "_" << req->GetCreatorUid() << "_"
+        << req->GetLabel() << "_" << req->GetNotificationId();
+
+    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
 }
 }  // namespace Notification
 }  // namespace OHOS
