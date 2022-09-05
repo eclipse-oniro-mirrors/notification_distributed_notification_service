@@ -21,8 +21,8 @@
 #include "ans_manager_proxy.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
-#include "mock_bundle_manager.h"
 #include "notification_helper.h"
+#include "remote_native_token.h"
 #include "system_ability_definition.h"
 
 using namespace testing::ext;
@@ -41,6 +41,7 @@ public:
 
 void AnsInnerKitsModuleSlotTest::SetUpTestCase()
 {
+    RemoteNativeToken::SetNativeToken();
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
@@ -412,7 +413,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
 HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00200, Function | MediumTest | Level1)
 {
     bool enable = true;
-    NotificationBundleOption bo("hello", 1);
+    NotificationBundleOption bo("bundleName", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
     enable = false;
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));

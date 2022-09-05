@@ -24,7 +24,7 @@
 #include "iservice_registry.h"
 #include "notification_helper.h"
 #include "notification_json_convert.h"
-#include "mock_bundle_manager.h"
+#include "remote_native_token.h"
 #include "system_ability_definition.h"
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
@@ -435,6 +435,7 @@ public:
 
 void AnsInnerKitsModulePublishTest::SetUpTestCase()
 {
+    RemoteNativeToken::SetNativeToken();
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
@@ -1490,6 +1491,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00100::end:" << enable;
     EXPECT_EQ(enable, false);
     EXPECT_EQ(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, NotificationHelper::PublishNotification(req));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, true));
 }
 
 /**

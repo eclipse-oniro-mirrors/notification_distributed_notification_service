@@ -21,7 +21,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "notification_helper.h"
-#include "mock_bundle_manager.h"
+#include "remote_native_token.h"
 #include "system_ability_definition.h"
 
 using namespace testing::ext;
@@ -42,6 +42,7 @@ public:
 
 void AnsInnerKitsModuleSettingTest::SetUpTestCase()
 {
+    RemoteNativeToken::SetNativeToken();
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);

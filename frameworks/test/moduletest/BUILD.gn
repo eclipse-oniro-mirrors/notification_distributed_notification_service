@@ -121,17 +121,10 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
 
   sources = [
     "ans_innerkits_module_publish_test.cpp",
-    "mock/blob.cpp",
-    "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
-    "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
-    "mock/mock_bundle_mgr_proxy.cpp",
-    "mock/mock_change_notification.cpp",
-    "mock/mock_common_event_data.cpp",
-    "mock/mock_common_event_manager.cpp",
     "mock/mock_ipc.cpp",
-    "mock/mock_single_kv_store.cpp",
+    "mock/remote_native_token.cpp",
   ]
 
   configs = [ "//commonlibrary/c_utils/base:utils_config" ]
@@ -156,6 +149,8 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -195,18 +190,12 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
   ]
 
   sources = [
-    "${services_path}/test/moduletest/mock/mock_access_token_helper.cpp",
     "ans_innerkits_module_slot_test.cpp",
-    "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
-    "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
-    "mock/mock_bundle_mgr_proxy.cpp",
-    "mock/mock_change_notification.cpp",
-    "mock/mock_common_event_data.cpp",
-    "mock/mock_common_event_manager.cpp",
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
+    "mock/remote_native_token.cpp",
   ]
 
   configs = [ "//commonlibrary/c_utils/base:utils_config" ]
@@ -229,6 +218,8 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -269,16 +260,11 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
 
   sources = [
     "ans_innerkits_module_setting_test.cpp",
-    "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
-    "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
-    "mock/mock_bundle_mgr_proxy.cpp",
-    "mock/mock_change_notification.cpp",
-    "mock/mock_common_event_data.cpp",
-    "mock/mock_common_event_manager.cpp",
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
+    "mock/remote_native_token.cpp",
   ]
 
   configs = [ "//commonlibrary/c_utils/base:utils_config" ]
@@ -301,6 +287,8 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
