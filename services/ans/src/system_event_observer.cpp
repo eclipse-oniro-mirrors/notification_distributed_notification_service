@@ -16,6 +16,7 @@
 #include "system_event_observer.h"
 
 #include "advanced_notification_service.h"
+#include "ans_const_define.h"
 #include "bundle_constants.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -85,6 +86,10 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NotificationPreferences::GetInstance().InitSettingFromDisturbDB();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();
+        if (userId <= DEFAULT_USER_ID) {
+            ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
+            return;
+        }
         if (callbacks_.onResourceRemove != nullptr) {
             callbacks_.onResourceRemove(userId);
         }
