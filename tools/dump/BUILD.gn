@@ -49,6 +49,8 @@ ohos_executable("anm") {
   }
 
   external_deps = [
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "multimedia_image_standard:image_native",
