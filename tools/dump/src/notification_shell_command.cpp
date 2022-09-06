@@ -19,6 +19,9 @@
 #include <iostream>
 
 #include "ans_inner_errors.h"
+#include "nativetoken_kit.h"
+#include "notification_bundle_option.h"
+#include "token_setproc.h"
 #include "singleton.h"
 
 namespace OHOS {
@@ -61,16 +64,18 @@ constexpr char DUMP_HELP_MSG[] =
     "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
     "  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
 
-constexpr char SETTING_SHORT_OPTIONS[] = "c:";
+constexpr char SETTING_SHORT_OPTIONS[] = "c:e:";
 const struct option SETTING_LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"recent-count", required_argument, nullptr, 'c'},
+    {"enable-notification", required_argument, nullptr, 'e'},
 };
 constexpr char SETTING_HELP_MSG[] =
     "usage: anm setting [<options>]\n"
     "options list:\n"
     "  --help, -h                   help menu\n"
-    "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n";
+    "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
+    "  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
 }  // namespace
 
 NotificationShellCommand::NotificationShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "anm_dump")
@@ -88,6 +93,7 @@ ErrCode NotificationShellCommand::CreateCommandMap()
 
 ErrCode NotificationShellCommand::Init()
 {
+    SetNativeToken();
     ErrCode result = OHOS::ERR_OK;
     if (!ans_) {
         ans_ = DelayedSingleton<AnsNotification>::GetInstance();
@@ -96,6 +102,27 @@ ErrCode NotificationShellCommand::Init()
         result = OHOS::ERR_INVALID_VALUE;
     }
     return result;
+}
+
+void NotificationShellCommand::SetNativeToken()
+{
+    uint64_t tokenId;
+    const char **perms = new const char *[1];
+    perms[0] = "ohos.permission.NOTIFICATION_CONTROLLER";
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .aplStr = "system_basic",
+    };
+
+    infoInstance.processName = "anm";
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    delete[] perms;
 }
 
 ErrCode NotificationShellCommand::RunAsHelpCommand()
@@ -222,10 +249,12 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
     if (option == '?') {
         if (optopt == 'c') {
             resultReceiver_.append("error: option 'c' requires a value.\n");
+        } else if (optopt == 'e') {
+            resultReceiver_.append("error: option 'e' requires a value.\n");
         } else {
             resultReceiver_.append("error: unknown option.\n");
         }
-        resultReceiver_.append(DUMP_HELP_MSG);
+        resultReceiver_.append(SETTING_HELP_MSG);
         return ERR_INVALID_VALUE;
     }
     if (option == 'c') {
@@ -239,8 +268,44 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
         cmd.append(" ").append(std::string(optarg));
         return RunDumpCmd(cmd, "", SUBSCRIBE_USER_INIT, infos);
     }
+    if (option == 'e') {
+        return RunSetEnableCmd();
+    }
+
     resultReceiver_.append(SETTING_HELP_MSG);
     return ERR_INVALID_VALUE;
+}
+
+ErrCode NotificationShellCommand::RunSetEnableCmd()
+{
+    if (ans_ == nullptr) {
+        resultReceiver_.append("error: object is null\n");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    NotificationBundleOption bundleOption;
+    std::string info = std::string(optarg);
+    if (std::count(info.begin(), info.end(), ':') != 2) {  // 2 (bundleName:uid:enable)
+        resultReceiver_.append("error: setting information error\n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_INVALID_VALUE;
+    }
+
+    size_t pos = info.find(':');
+    bundleOption.SetBundleName(info.substr(0, pos));
+    info = info.substr(pos + 1);
+    pos = info.find(':');
+    bundleOption.SetUid(atoi(info.substr(0, pos).c_str()));
+    bool enable = atoi(info.substr(pos + 1).c_str());
+
+    ErrCode ret = ans_->SetNotificationsEnabledForSpecifiedBundle(bundleOption, "", enable);
+    if (ret == ERR_OK) {
+        resultReceiver_.append("set notification enabled success\n");
+    } else {
+        resultReceiver_.append("set notification enabled failed\n");
+    }
+    return ret;
+
 }
 }  // namespace Notification
 }  // namespace OHOS

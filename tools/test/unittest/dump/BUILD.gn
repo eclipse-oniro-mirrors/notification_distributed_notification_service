@@ -60,6 +60,8 @@ ohos_unittest("notification_shell_command_dump_test") {
     "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",

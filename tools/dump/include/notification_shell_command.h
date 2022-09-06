@@ -48,6 +48,8 @@ private:
     void SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId, ErrCode &ret);
     ErrCode RunDumpCmd(const std::string& cmd, const std::string& bundle, int32_t userId,
         std::vector<std::string> &infos);
+    ErrCode RunSetEnableCmd();
+    void SetNativeToken();
 
 private:
     std::shared_ptr<AnsNotification> ans_;
