@@ -38,7 +38,7 @@ ohos_shared_library("notification") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_napi_path}/inner/napi_common",
-    "//foundation/multimedia/image_standard/interfaces/kits/js/common/include/",
+    "//foundation/multimedia/image_framework/interfaces/kits/js/common/include/",
     "include",
     "//third_party/node/src",
     "//third_party/libuv/include",
@@ -69,7 +69,7 @@ ohos_shared_library("notification") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
     "${core_path}:ans_core",
-    "//foundation/multimedia/image_standard/interfaces/innerkits:image",
+    "//foundation/multimedia/image_framework/interfaces/innerkits:image",
   ]
 
   external_deps = [
