@@ -41,12 +41,18 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     size_t argc = UNSUBSCRIBE_MAX_PARA;
     napi_value argv[UNSUBSCRIBE_MAX_PARA] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
-    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (argc < 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     napi_valuetype valuetype = napi_undefined;
     // argv[0]:subscriber
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_object, "Wrong argument type for arg0. Subscribe object expected.");
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
 
     SubscriberInstancesInfo subscriberInstancesInfo;
     if (!HasNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo)) {
@@ -59,7 +65,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]:callback
     if (argc >= UNSUBSCRIBE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
 

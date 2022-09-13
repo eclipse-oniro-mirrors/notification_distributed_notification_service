@@ -41,12 +41,18 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value argv[IS_TEMPLATE_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc <= IS_TEMPLATE_MAX_PARA, "Wrong number of arguments");
+    if (argc < IS_TEMPLATE_MAX_PARA - 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     napi_valuetype valuetype = napi_undefined;
     // argv[0]: name: string
     NAPI_CALL(env, napi_typeof(env, argv[0], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_string, "Wrong argument type. String expected.");
+    if (valuetype != napi_string) {
+        ANS_LOGE("Wrong argument type. String expected.");
+        return nullptr;
+    }
     char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
     NAPI_CALL(env, napi_get_value_string_utf8(env, argv[0], str, STR_MAX_SIZE - 1, &strLen));
@@ -55,7 +61,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]: callback
     if (argc >= IS_TEMPLATE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[1], 1, &params.callback);
     }
 
