@@ -167,13 +167,18 @@ napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_inf
     napi_value argv[ADD_SLOT_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (argc < 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     napi_valuetype valuetype = napi_undefined;
     // argv[0]: NotificationSlot
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    NAPI_ASSERT(
-        env, (valuetype == napi_object || valuetype == napi_number), "Wrong argument type. Object or number expected.");
+    if (valuetype != napi_object && valuetype != napi_number) {
+        ANS_LOGE("Wrong argument type. Object or number expected.");
+        return nullptr;
+    }
     if (valuetype == napi_number) {
         paras.isAddSlotByType = true;
         int32_t slotType = 0;
@@ -191,7 +196,10 @@ napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_inf
     // argv[1]:callback
     if (argc >= ADD_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
     return Common::NapiGetNull(env);
@@ -204,21 +212,33 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
     napi_value argv[ADD_SLOTS_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (argc < 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     napi_valuetype valuetype = napi_undefined;
     // argv[0]: Array<NotificationSlot>
     bool isArray = false;
     napi_is_array(env, argv[PARAM0], &isArray);
-    NAPI_ASSERT(env, isArray, "Wrong argument type. Array expected.");
+    if (!isArray) {
+        ANS_LOGE("Wrong argument type. Array expected.");
+        return nullptr;
+    }
     uint32_t length = 0;
     napi_get_array_length(env, argv[PARAM0], &length);
-    NAPI_ASSERT(env, length > 0, "The array is empty.");
+    if (length <= 0) {
+        ANS_LOGE("The array is empty.");
+        return nullptr;
+    }
     for (size_t i = 0; i < length; i++) {
         napi_value nSlot = nullptr;
         napi_get_element(env, argv[PARAM0], i, &nSlot);
         NAPI_CALL(env, napi_typeof(env, nSlot, &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_object, "Wrong argument type. Object expected.");
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return nullptr;
+        }
         NotificationSlot slot;
         if (!Common::GetNotificationSlot(env, nSlot, slot)) {
             return nullptr;
@@ -229,7 +249,10 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
     // argv[1]:callback
     if (argc >= ADD_SLOTS_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
     return Common::NapiGetNull(env);
@@ -245,11 +268,17 @@ napi_value ParseParametersSetSlotByBundle(
     napi_value thisVar = nullptr;
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc >= SET_SLOT_AS_BUNDLE_MAX_PARA - 1, "Wrong number of arguments");
+    if (argc < SET_SLOT_AS_BUNDLE_MAX_PARA - 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_object, "Wrong argument type. Object expected.");
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
@@ -258,7 +287,10 @@ napi_value ParseParametersSetSlotByBundle(
 
     // argv[1]: slot
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_object, "Wrong argument type. Object expected.");
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
     NotificationSlot slot;
     if (!Common::GetNotificationSlot(env, argv[PARAM1], slot)) {
         return nullptr;
@@ -278,7 +310,10 @@ napi_value ParseParametersSetSlotByBundle(
     // argv[2]:callback
     if (argc >= SET_SLOT_AS_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
     }
 
@@ -292,12 +327,18 @@ napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_inf
     napi_value argv[GET_SLOT_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (argc < 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     napi_valuetype valuetype = napi_undefined;
     // argv[0]: SlotType
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_number, "Wrong argument type. Number expected.");
+    if (valuetype != napi_number) {
+        ANS_LOGE("Wrong argument type. Number expected.");
+        return nullptr;
+    }
     int32_t slotType = 0;
     napi_get_value_int32(env, argv[PARAM0], &slotType);
     if (!Common::SlotTypeJSToC(SlotType(slotType), paras.outType)) {
@@ -307,7 +348,10 @@ napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_inf
     // argv[1]:callback
     if (argc >= GET_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
     return Common::NapiGetNull(env);
@@ -323,11 +367,17 @@ napi_value ParseParametersGetSlotNumByBundle(
     napi_value thisVar = nullptr;
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc >= GET_SLOT_NUM_AS_BUNDLE_MAX_PARA - 1, "Wrong number of arguments");
+    if (argc < GET_SLOT_NUM_AS_BUNDLE_MAX_PARA - 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_object, "Wrong argument type. Object expected.");
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
@@ -337,7 +387,10 @@ napi_value ParseParametersGetSlotNumByBundle(
     // argv[1]:callback
     if (argc >= GET_SLOT_NUM_AS_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);
     }
 
@@ -354,11 +407,17 @@ napi_value ParseParametersGetSlotsByBundle(
     napi_value thisVar = nullptr;
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc >= GET_SLOTS_AS_BUNDLE_MAX_PARA - 1, "Wrong number of arguments");
+    if (argc < GET_SLOTS_AS_BUNDLE_MAX_PARA - 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_object, "Wrong argument type. Object expected.");
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
@@ -368,7 +427,10 @@ napi_value ParseParametersGetSlotsByBundle(
     // argv[1]:callback
     if (argc >= GET_SLOTS_AS_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);
     }
 
@@ -383,12 +445,18 @@ napi_value ParseParametersByRemoveSlot(
     napi_value argv[REMOVE_SLOT_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (argc < 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
 
     napi_valuetype valuetype = napi_undefined;
     // argv[0]: SlotType
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_number, "Wrong argument type. Number expected.");
+    if (valuetype != napi_number) {
+        ANS_LOGE("Wrong argument type. Number expected.");
+        return nullptr;
+    }
     int32_t slotType = 0;
     napi_get_value_int32(env, argv[PARAM0], &slotType);
     if (!Common::SlotTypeJSToC(SlotType(slotType), paras.outType)) {
@@ -398,7 +466,10 @@ napi_value ParseParametersByRemoveSlot(
     // argv[1]:callback
     if (argc >= REMOVE_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
     return Common::NapiGetNull(env);

@@ -1126,9 +1126,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     // argv[1]:callback or NotificationSubscribeInfo
     if (argc >= SUBSRIBE_MAX_PARA - 1) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        NAPI_ASSERT(env,
-            (valuetype == napi_function) || (valuetype == napi_object),
-            "Wrong argument type for arg1. Function or NotificationSubscribeInfo object expected.");
+        if ((valuetype != napi_function) && (valuetype != napi_object)) {
+            ANS_LOGE("Wrong argument type for arg1. Function or NotificationSubscribeInfo object expected.");
+            return nullptr;
+        }
         if (valuetype == napi_function) {
             napi_create_reference(env, argv[PARAM1], 1, &callback);
         } else {
