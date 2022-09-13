@@ -38,34 +38,11 @@ BundleMgrProxy::BundleMgrProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<I
 BundleMgrProxy::~BundleMgrProxy()
 {}
 
-bool BundleMgrProxy::GetApplicationInfo(
-    const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
-{
-    appInfo.distributedNotificationEnabled = distributedNotificationEnabled;
-    return true;
-}
-
-bool BundleMgrProxy::GetApplicationInfos(
-    const ApplicationFlag flag, const int userId, std::vector<ApplicationInfo> &appInfos)
-{
-    return true;
-}
-
 bool BundleMgrProxy::GetBundleInfo(
     const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId)
 {
     bundleInfo.uid = 1;
     return true;
-}
-
-bool BundleMgrProxy::GetBundleInfos(const BundleFlag flag, std::vector<BundleInfo> &bundleInfos, int32_t userId)
-{
-    return true;
-}
-
-int BundleMgrProxy::GetUidByBundleName(const std::string &bundleName, const int userId)
-{
-    return 1;
 }
 
 std::string BundleMgrProxy::GetAppIdByBundleName(const std::string &bundleName, const int userId)
@@ -79,141 +56,9 @@ bool BundleMgrProxy::GetBundleNameForUid(const int uid, std::string &bundleName)
     return true;
 }
 
-bool BundleMgrProxy::GetBundlesForUid(const int uid, std::vector<std::string> &bundleNames)
-{
-    return true;
-}
-
-bool BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
-{
-    return true;
-}
-
-bool BundleMgrProxy::GetBundleGids(const std::string &bundleName, std::vector<int> &gids)
-{
-    return true;
-}
-
 std::string BundleMgrProxy::GetAppType(const std::string &bundleName)
 {
     return "Constants::EMPTY_STRING";
-}
-
-bool BundleMgrProxy::CheckIsSystemAppByUid(const int uid)
-{
-    return true;
-}
-
-bool BundleMgrProxy::GetBundleInfosByMetaData(const std::string &metaData, std::vector<BundleInfo> &bundleInfos)
-{
-    return true;
-}
-
-bool BundleMgrProxy::QueryAbilityInfo(const Want &want, AbilityInfo &abilityInfo)
-{
-    return true;
-}
-
-bool BundleMgrProxy::QueryAbilityInfoByUri(const std::string &abilityUri, AbilityInfo &abilityInfo)
-{
-    return true;
-}
-
-bool BundleMgrProxy::QueryKeepAliveBundleInfos(std::vector<BundleInfo> &bundleInfos)
-{
-    return true;
-}
-
-bool BundleMgrProxy::GetBundleArchiveInfo(const std::string &hapFilePath, const BundleFlag flag, BundleInfo &bundleInfo)
-{
-    return true;
-}
-
-bool BundleMgrProxy::GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModuleInfo &hapModuleInfo)
-{
-    return true;
-}
-
-bool BundleMgrProxy::GetLaunchWantForBundle(const std::string &bundleName, Want &want)
-{
-    return true;
-}
-
-int BundleMgrProxy::CheckPublicKeys(const std::string &firstBundleName, const std::string &secondBundleName)
-{
-    return 1;
-}
-
-bool BundleMgrProxy::GetPermissionDef(const std::string &permissionName, PermissionDef &permissionDef)
-{
-    return true;
-}
-
-bool BundleMgrProxy::HasSystemCapability(const std::string &capName)
-{
-    return true;
-}
-
-bool BundleMgrProxy::GetSystemAvailableCapabilities(std::vector<std::string> &systemCaps)
-{
-    return true;
-}
-
-bool BundleMgrProxy::IsSafeMode()
-{
-    return true;
-}
-
-bool BundleMgrProxy::CleanBundleDataFiles(const std::string &bundleName, const int userId)
-{
-    return true;
-}
-
-bool BundleMgrProxy::RegisterBundleStatusCallback(const sptr<IBundleStatusCallback> &bundleStatusCallback)
-{
-    return true;
-}
-
-bool BundleMgrProxy::ClearBundleStatusCallback(const sptr<IBundleStatusCallback> &bundleStatusCallback)
-{
-    return true;
-}
-
-bool BundleMgrProxy::UnregisterBundleStatusCallback()
-{
-    return true;
-}
-
-bool BundleMgrProxy::DumpInfos(const DumpFlag flag, const std::string &bundleName, int32_t userId, std::string &result)
-{
-    return true;
-}
-
-bool BundleMgrProxy::IsApplicationEnabled(const std::string &bundleName)
-{
-    return true;
-}
-
-bool BundleMgrProxy::IsAbilityEnabled(const AbilityInfo &abilityInfo)
-{
-    return true;
-}
-
-template <typename T>
-bool BundleMgrProxy::GetParcelableInfo(IBundleMgr::Message code, MessageParcel &data, T &parcelableInfo)
-{
-    return true;
-}
-
-template <typename T>
-bool BundleMgrProxy::GetParcelableInfos(IBundleMgr::Message code, MessageParcel &data, std::vector<T> &parcelableInfos)
-{
-    return true;
-}
-
-bool BundleMgrProxy::SendTransactCmd(IBundleMgr::Message code, MessageParcel &data, MessageParcel &reply)
-{
-    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
