@@ -56,5 +56,63 @@ HWTEST_F(ReminderRequestTimerTest, initCountDownTime_00100, Function | SmallTest
     auto rrc3 = std::make_shared<ReminderRequestTimer>(countDownTimeInSeconds);
     EXPECT_TRUE(rrc3->GetInitInfo() == 100) << "countDownTime is not 1";
 }
+
+/**
+ * @tc.number    : ANS_OnDateTimeChange_01000
+ * @tc.name      : OnDateTimeChange01000
+ * @tc.type      : FUNC
+ * @tc.require   : issueI5R30Z
+ */
+HWTEST_F(ReminderRequestTimerTest, OnDateTimeChange_00100, Function | SmallTest | Level1)
+{
+    uint64_t countDownTimeInSeconds = 1;
+    auto rrc = std::make_shared<ReminderRequestTimer>(countDownTimeInSeconds);
+    auto result = rrc->OnDateTimeChange();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.number    : ANS_OnTimeZoneChange_01000
+ * @tc.name      : OnTimeZoneChange01000
+ * @tc.type      : FUNC
+ * @tc.require   : issueI5R30Z
+ */
+HWTEST_F(ReminderRequestTimerTest, OnTimeZoneChange_00100, Function | SmallTest | Level1)
+{
+    uint64_t countDownTimeInSeconds = 1;
+    auto rrc = std::make_shared<ReminderRequestTimer>(countDownTimeInSeconds);
+    auto result = rrc->OnTimeZoneChange();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.number    : ANS_Marshalling_01000
+ * @tc.name      : Marshalling01000
+ * @tc.type      : FUNC
+ * @tc.require   : issueI5R30Z
+ */
+HWTEST_F(ReminderRequestTimerTest, Marshalling_00100, Function | SmallTest | Level1)
+{
+    uint64_t countDownTimeInSeconds = 1;
+    Parcel parcel;
+    auto rrc = std::make_shared<ReminderRequestTimer>(countDownTimeInSeconds);
+    auto result = rrc->Marshalling(parcel);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.number    : ANS_ReadFromParcel_01000
+ * @tc.name      : ReadFromParcel01000
+ * @tc.type      : FUNC
+ * @tc.require   : issueI5R30Z
+ */
+HWTEST_F(ReminderRequestTimerTest, ReadFromParcel_00100, Function | SmallTest | Level1)
+{
+    uint64_t countDownTimeInSeconds = 1;
+    Parcel parcel;
+    auto rrc = std::make_shared<ReminderRequestTimer>(countDownTimeInSeconds);
+    auto result = rrc->ReadFromParcel(parcel);
+    EXPECT_EQ(result, false);
+}
 }
 }
