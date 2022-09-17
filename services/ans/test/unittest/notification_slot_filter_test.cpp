@@ -16,7 +16,13 @@
 #include <functional>
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
+#include "notification_slot.h"
+#undef private 
+#undef protected
 #include "notification_slot_filter.h"
+#include "notification_subscribe_info.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -38,6 +44,13 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00100, Function 
 {
     NotificationSlotFilter notificationSlotFilter;
     notificationSlotFilter.OnStart();
+
+    // NotificationSlot Marshalling TDD test
+    Parcel p;
+    NotificationConstant::SlotType type = NotificationConstant::SlotType::CUSTOM;
+    NotificationSlot notificationSlot(type);
+    auto result = notificationSlot.Marshalling(p);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -49,6 +62,13 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00200, Function 
 {
     NotificationSlotFilter notificationSlotFilter;
     notificationSlotFilter.OnStop();
+
+    // NotificationSlot ReadFromParcel TDD test
+    Parcel p;
+    NotificationConstant::SlotType type = NotificationConstant::SlotType::CUSTOM;
+    NotificationSlot notificationSlot(type);
+    auto result = notificationSlot.ReadFromParcel(p);
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -64,6 +84,12 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00300, Function 
     record->notification = new Notification(record->request);
     record->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     notificationSlotFilter.OnPublish(record);
+
+    // NotificationSubscribeInfo Marshalling TDD test
+    Parcel p;
+    NotificationSubscribeInfo notificationSubscribeInfo;
+    auto result = notificationSubscribeInfo.Marshalling(p);
+    EXPECT_EQ(result, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

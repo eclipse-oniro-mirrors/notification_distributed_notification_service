@@ -18,6 +18,11 @@
 #include "event_report.h"
 #include "notification_constant.h"
 #include "notification_content.h"
+#define private public
+#define protected public
+#include "notification.h"
+#undef private
+#undef protected
 
 namespace OHOS {
 namespace Notification {
@@ -81,6 +86,11 @@ HWTEST_F(NotificationHisyseventTest, SendSubscriberErrorSysEvent_0100, Level1)
             return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
         });
     EventReport::SendHiSysEvent(SUBSCRIBE_ERROR, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.GetDeviceId();
+    EXPECT_EQ(result, deviceId);
 
     GTEST_LOG_(INFO) << "SendSubscriberErrorSysEvent_0100 end";
 }
@@ -101,6 +111,15 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationErrorSysEvent_0100, L
     eventInfo.enable = true;
     eventInfo.errCode = TEST_ERROR_CODE;
     EventReport::SendHiSysEvent(ENABLE_NOTIFICATION_ERROR, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    int32_t notificationId =5;
+    Notification notificationTest(deviceId, request);
+    NotificationRequest notificationRequest(notificationId);
+    pid_t myPid = notificationRequest.GetCreatorPid();
+    notificationRequest.SetCreatorPid(myPid);
+    auto result = notificationTest.GetPid();
+    EXPECT_EQ(result, myPid);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationErrorSysEvent_0100 end";
 }
@@ -122,6 +141,11 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationSlotErrorSysEvent_010
     eventInfo.slotType = NotificationConstant::SERVICE_REMINDER;
     eventInfo.errCode = TEST_ERROR_CODE;
     EventReport::SendHiSysEvent(ENABLE_NOTIFICATION_SLOT_ERROR, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.IsUnremovable();
+    EXPECT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationSlotErrorSysEvent_0100 end";
 }
@@ -143,6 +167,11 @@ HWTEST_F(NotificationHisyseventTest, SendPublishErrorSysEvent_0100, Level1)
     eventInfo.userId = TEST_USER_ID;
     eventInfo.errCode = TEST_ERROR_CODE;
     EventReport::SendHiSysEvent(PUBLISH_ERROR, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.IsGroup();
+    EXPECT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendPublishErrorSysEvent_0100 end";
 }
@@ -162,6 +191,11 @@ HWTEST_F(NotificationHisyseventTest, SendFlowControlOccurSysEvent_0100, Level1)
     eventInfo.bundleName = TEST_BUNDLE_OPTION_BUNDLE_NAME;
     eventInfo.uid = TEST_BUNDLE_OPTION_UID;
     EventReport::SendHiSysEvent(FLOW_CONTROL_OCCUR, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.IsFloatingIcon();
+    EXPECT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendFlowControlOccurSysEvent_0100 end";
 }
@@ -195,6 +229,12 @@ HWTEST_F(NotificationHisyseventTest, SendSubscribeSysEvent_0100, Level1)
             return (str == anotherBundle.front()) ? (bundleName + str) : (bundleName + "," + str);
         });
     EventReport::SendHiSysEvent(SUBSCRIBE, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Parcel p;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.MarshallingBool(p);
+    EXPECT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendSubscribeSysEvent_0100 end";
 }
@@ -219,6 +259,12 @@ HWTEST_F(NotificationHisyseventTest, SendUnSubscribeSysEvent_0100, Level1)
             return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
         });
     EventReport::SendHiSysEvent(UNSUBSCRIBE, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Parcel p;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.MarshallingInt32(p);
+    EXPECT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendUnSubscribeSysEvent_0100 end";
 }
@@ -238,6 +284,12 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationSysEvent_0100, Level1
     eventInfo.uid = getuid();
     eventInfo.enable = true;
     EventReport::SendHiSysEvent(ENABLE_NOTIFICATION, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Parcel p;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.MarshallingInt64(p);
+    EXPECT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationSysEvent_0100 end";
 }
@@ -258,6 +310,12 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationSlotSysEvent_0100, Le
     eventInfo.enable = true;
     eventInfo.slotType = NotificationConstant::CONTENT_INFORMATION;
     EventReport::SendHiSysEvent(ENABLE_NOTIFICATION_SLOT, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Parcel p;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.MarshallingParcelable(p);
+    EXPECT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationSlotSysEvent_0100 end";
 }
@@ -278,6 +336,12 @@ HWTEST_F(NotificationHisyseventTest, SendPublishSysEvent_0100, Level1)
     eventInfo.bundleName = TEST_CREATER_BUNDLE_NAME;
     eventInfo.userId = TEST_USER_ID;
     EventReport::SendHiSysEvent(PUBLISH, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Parcel p;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.Marshalling(p);
+    EXPECT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendPublishSysEvent_0100 end";
 }
@@ -298,6 +362,12 @@ HWTEST_F(NotificationHisyseventTest, SendCancelSysEvent_0100, Level1)
     eventInfo.bundleName = TEST_BUNDLE_OPTION_BUNDLE_NAME;
     eventInfo.uid = TEST_BUNDLE_OPTION_UID;
     EventReport::SendHiSysEvent(CANCEL, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    Parcel p;
+    Notification notificationTest(deviceId, request);
+    auto result = notificationTest.ReadFromParcel(p);
+    EXPECT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendCancelSysEvent_0100 end";
 }
@@ -318,6 +388,13 @@ HWTEST_F(NotificationHisyseventTest, SendRemoveSysEvent_0100, Level1)
     eventInfo.bundleName = TEST_BUNDLE_OPTION_BUNDLE_NAME;
     eventInfo.uid = TEST_BUNDLE_OPTION_UID;
     EventReport::SendHiSysEvent(REMOVE, eventInfo);
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = nullptr;
+    std::vector<int64_t> style = {1};
+    Notification notificationTest(deviceId, request);
+    notificationTest.SetVibrationStyle(style);
+    auto result = notificationTest.GetVibrationStyle();
+    EXPECT_EQ(result, style);
 
     GTEST_LOG_(INFO) << "SendRemoveSysEvent_0100 end";
 }
