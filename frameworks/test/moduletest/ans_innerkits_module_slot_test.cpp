@@ -80,27 +80,24 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00100, Fu
 
     sptr<NotificationSlot> spSlot;
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
-    if (spSlot == nullptr) {
-        GTEST_LOG_(INFO) << "get slot is empty";
-    } else {
-        GTEST_LOG_(INFO) << "after get slot dump slot information:" << spSlot->Dump();
-        EXPECT_EQ(true, spSlot->CanEnableLight());
-        EXPECT_EQ(true, spSlot->CanVibrate());
-        EXPECT_EQ("description", spSlot->GetDescription());
-        EXPECT_EQ("SOCIAL_COMMUNICATION", spSlot->GetId());
-        EXPECT_EQ(0, spSlot->GetLedLightColor());
-        EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
-        EXPECT_EQ(NotificationConstant::SOCIAL_COMMUNICATION, spSlot->GetType());
-        EXPECT_EQ(NotificationConstant::VisiblenessType::PUBLIC, spSlot->GetLockScreenVisibleness());
-        EXPECT_EQ("SOCIAL_COMMUNICATION", spSlot->GetName());
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        for (auto it : spSlot->GetVibrationStyle()) {
-            EXPECT_EQ(0, it);
-        }
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
-        EXPECT_EQ(true, spSlot->IsShowBadge());
+    EXPECT_NE(nullptr, spSlot);
+    GTEST_LOG_(INFO) << "after get slot dump slot information:" << spSlot->Dump();
+    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(true, spSlot->CanVibrate());
+    EXPECT_EQ("description", spSlot->GetDescription());
+    EXPECT_EQ("SOCIAL_COMMUNICATION", spSlot->GetId());
+    EXPECT_EQ(0, spSlot->GetLedLightColor());
+    EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
+    EXPECT_EQ(NotificationConstant::SOCIAL_COMMUNICATION, spSlot->GetType());
+    EXPECT_EQ(NotificationConstant::VisiblenessType::PUBLIC, spSlot->GetLockScreenVisibleness());
+    EXPECT_EQ("SOCIAL_COMMUNICATION", spSlot->GetName());
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    for (auto it : spSlot->GetVibrationStyle()) {
+        EXPECT_EQ(0, it);
     }
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
+    EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION));
     EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
         NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
@@ -129,26 +126,23 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00200, Fu
     sptr<NotificationSlot> spSlot;
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
 
-    if (spSlot == nullptr) {
-        GTEST_LOG_(INFO) << "get slot is empty";
-    } else {
-        EXPECT_EQ(true, spSlot->CanEnableLight());
-        EXPECT_EQ(true, spSlot->CanVibrate());
-        EXPECT_EQ("description", spSlot->GetDescription());
-        EXPECT_EQ("SERVICE_REMINDER", spSlot->GetId());
-        EXPECT_EQ(0, spSlot->GetLedLightColor());
-        EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
-        EXPECT_EQ(NotificationConstant::SERVICE_REMINDER, spSlot->GetType());
-        EXPECT_EQ(NotificationConstant::VisiblenessType::PUBLIC, spSlot->GetLockScreenVisibleness());
-        EXPECT_EQ("SERVICE_REMINDER", spSlot->GetName());
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        for (auto it : spSlot->GetVibrationStyle()) {
-            EXPECT_EQ(0, it);
-        }
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
-        EXPECT_EQ(true, spSlot->IsShowBadge());
+    EXPECT_NE(nullptr, spSlot);
+    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(true, spSlot->CanVibrate());
+    EXPECT_EQ("description", spSlot->GetDescription());
+    EXPECT_EQ("SERVICE_REMINDER", spSlot->GetId());
+    EXPECT_EQ(0, spSlot->GetLedLightColor());
+    EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
+    EXPECT_EQ(NotificationConstant::SERVICE_REMINDER, spSlot->GetType());
+    EXPECT_EQ(NotificationConstant::VisiblenessType::PUBLIC, spSlot->GetLockScreenVisibleness());
+    EXPECT_EQ("SERVICE_REMINDER", spSlot->GetName());
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    for (auto it : spSlot->GetVibrationStyle()) {
+        EXPECT_EQ(0, it);
     }
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
+    EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::SERVICE_REMINDER));
     EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
         NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
@@ -178,26 +172,23 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00300, Fu
     sptr<NotificationSlot> spSlot;
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::CONTENT_INFORMATION, spSlot));
 
-    if (spSlot == nullptr) {
-        GTEST_LOG_(INFO) << "get slot is empty";
-    } else {
-        EXPECT_EQ(true, spSlot->CanEnableLight());
-        EXPECT_EQ(true, spSlot->CanVibrate());
-        EXPECT_EQ("description", spSlot->GetDescription());
-        EXPECT_EQ("CONTENT_INFORMATION", spSlot->GetId());
-        EXPECT_EQ(0, spSlot->GetLedLightColor());
-        EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
-        EXPECT_EQ(NotificationConstant::CONTENT_INFORMATION, spSlot->GetType());
-        EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
-        EXPECT_EQ("CONTENT_INFORMATION", spSlot->GetName());
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        for (auto it : spSlot->GetVibrationStyle()) {
-            EXPECT_EQ(0, it);
-        }
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
-        EXPECT_EQ(true, spSlot->IsShowBadge());
+    EXPECT_NE(nullptr, spSlot);
+    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(true, spSlot->CanVibrate());
+    EXPECT_EQ("description", spSlot->GetDescription());
+    EXPECT_EQ("CONTENT_INFORMATION", spSlot->GetId());
+    EXPECT_EQ(0, spSlot->GetLedLightColor());
+    EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
+    EXPECT_EQ(NotificationConstant::CONTENT_INFORMATION, spSlot->GetType());
+    EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
+    EXPECT_EQ("CONTENT_INFORMATION", spSlot->GetName());
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    for (auto it : spSlot->GetVibrationStyle()) {
+        EXPECT_EQ(0, it);
     }
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
+    EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::CONTENT_INFORMATION));
     EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
         NotificationHelper::GetNotificationSlot(NotificationConstant::CONTENT_INFORMATION, spSlot));
@@ -226,26 +217,23 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00400, Fu
     sptr<NotificationSlot> spSlot;
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 
-    if (spSlot == nullptr) {
-        GTEST_LOG_(INFO) << "get slot is empty";
-    } else {
-        EXPECT_EQ(true, spSlot->CanEnableLight());
-        EXPECT_EQ(true, spSlot->CanVibrate());
-        EXPECT_EQ("description", spSlot->GetDescription());
-        EXPECT_EQ("OTHER", spSlot->GetId());
-        EXPECT_EQ(0, spSlot->GetLedLightColor());
-        EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
-        EXPECT_EQ(NotificationConstant::OTHER, spSlot->GetType());
-        EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
-        EXPECT_EQ("OTHER", spSlot->GetName());
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        for (auto it : spSlot->GetVibrationStyle()) {
-            EXPECT_EQ(0, it);
-        }
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
-        EXPECT_EQ(true, spSlot->IsShowBadge());
+    EXPECT_NE(nullptr, spSlot);
+    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(true, spSlot->CanVibrate());
+    EXPECT_EQ("description", spSlot->GetDescription());
+    EXPECT_EQ("OTHER", spSlot->GetId());
+    EXPECT_EQ(0, spSlot->GetLedLightColor());
+    EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
+    EXPECT_EQ(NotificationConstant::OTHER, spSlot->GetType());
+    EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
+    EXPECT_EQ("OTHER", spSlot->GetName());
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    for (auto it : spSlot->GetVibrationStyle()) {
+        EXPECT_EQ(0, it);
     }
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
+    EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::OTHER));
     EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
         NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
@@ -276,28 +264,25 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00500, Fu
     sptr<NotificationSlot> spSlot;
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 
-    if (spSlot == nullptr) {
-        GTEST_LOG_(INFO) << "get slot is empty";
-    } else {
-        GTEST_LOG_(INFO) << "get slot is:" << spSlot->Dump();
-        EXPECT_EQ(true, spSlot->CanEnableLight());
-        EXPECT_EQ(true, spSlot->CanVibrate());
-        std::string expecteDescription(1000, 'c');
-        EXPECT_EQ(expecteDescription, spSlot->GetDescription());
-        EXPECT_EQ("OTHER", spSlot->GetId());
-        EXPECT_EQ(0, spSlot->GetLedLightColor());
-        EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
-        EXPECT_EQ(NotificationConstant::OTHER, spSlot->GetType());
-        EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
-        EXPECT_EQ("OTHER", spSlot->GetName());
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        for (auto it : spSlot->GetVibrationStyle()) {
-            EXPECT_EQ(0, it);
-        }
-        EXPECT_EQ(Uri("."), spSlot->GetSound());
-        EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
-        EXPECT_EQ(true, spSlot->IsShowBadge());
+    EXPECT_NE(nullptr, spSlot);
+    GTEST_LOG_(INFO) << "get slot is:" << spSlot->Dump();
+    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(true, spSlot->CanVibrate());
+    std::string expecteDescription(1000, 'c');
+    EXPECT_EQ(expecteDescription, spSlot->GetDescription());
+    EXPECT_EQ("OTHER", spSlot->GetId());
+    EXPECT_EQ(0, spSlot->GetLedLightColor());
+    EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, spSlot->GetLevel());
+    EXPECT_EQ(NotificationConstant::OTHER, spSlot->GetType());
+    EXPECT_EQ(NotificationConstant::VisiblenessType::SECRET, spSlot->GetLockScreenVisibleness());
+    EXPECT_EQ("OTHER", spSlot->GetName());
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    for (auto it : spSlot->GetVibrationStyle()) {
+        EXPECT_EQ(0, it);
     }
+    EXPECT_EQ(Uri("."), spSlot->GetSound());
+    EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
+    EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::OTHER));
     EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
         NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));

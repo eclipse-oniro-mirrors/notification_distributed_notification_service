@@ -94,64 +94,17 @@ void NotificationSubscriberManagerTest::TearDown()
 
 /**
  * @tc.number    : NotificationSubscriberManagerTest_001
- * @tc.name      : ANS_NotifyUpdated_0100
- * @tc.desc      : Test NotifyUpdated function.
- */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_001, Function | SmallTest | Level1)
-{
-    const std::vector<NotificationSorting> sortingList;
-    sptr<NotificationSortingMap> map = new NotificationSortingMap(sortingList);
-    notificationSubscriberManager_->NotifyUpdated(map);
-}
-
-/**
- * @tc.number    : NotificationSubscriberManagerTest_002
- * @tc.name      : ANS_NotifyDisturbModeChanged_0100
- * @tc.desc      : Test NotifyDisturbModeChanged function.
- */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_002, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-    notificationSubscriberManager_->NotifyDoNotDisturbDateChanged(date);
-}
-
-/**
- * @tc.number    : NotificationSubscriberManagerTest_003
- * @tc.name      : ANS_NotifyConsumed_0100
- * @tc.desc      : Test NotifyConsumed function.
- */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_003, Function | SmallTest | Level1)
-{
-    std::vector<NotificationSorting> sortingList;
-    sptr<NotificationRequest> request = new NotificationRequest();
-    sptr<Notification> notification = new Notification(request);
-    sptr<NotificationSortingMap> notificationMap = new NotificationSortingMap(sortingList);
-    notificationSubscriberManager_->NotifyConsumed(notification, notificationMap);
-}
-
-/**
- * @tc.number    : NotificationSubscriberManagerTest_004
- * @tc.name      : ANS_NotifyCanceled_0100
- * @tc.desc      : Test NotifyCanceled function.
- */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_004, Function | SmallTest | Level1)
-{
-    std::vector<NotificationSorting> sortingList;
-    sptr<NotificationRequest> request = new NotificationRequest();
-    sptr<Notification> notification = new Notification(request);
-    sptr<NotificationSortingMap> notificationMap = new NotificationSortingMap(sortingList);
-    int deleteReason = 0;
-    notificationSubscriberManager_->NotifyCanceled(notification, notificationMap, deleteReason);
-}
-
-/**
- * @tc.number    : NotificationSubscriberManagerTest_005
  * @tc.name      : ANS_AddSubscriber_0100
  * @tc.desc      : Test AddSubscriber function, return is ERR_OK.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_005, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_001, Function | SmallTest | Level1)
 {
+    // Test NotifyUpdated function.
+    const std::vector<NotificationSorting> sortingList;
+    sptr<NotificationSortingMap> map = new NotificationSortingMap(sortingList);
+    notificationSubscriberManager_->NotifyUpdated(map);
+
+    // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     info->AddAppName("test_bundle");
     EXPECT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, info), (int)ERR_OK);
@@ -159,35 +112,58 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
 }
 
 /**
- * @tc.number    : NotificationSubscriberManagerTest_006
+ * @tc.number    : NotificationSubscriberManagerTest_002
  * @tc.name      : ANS_AddSubscriber_0100
  * @tc.desc      : Test AddSubscriber function when subscriber is nullptr, return is ERR_ANS_INVALID_PARAM.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_006, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_002, Function | SmallTest | Level1)
 {
+    // Test NotifyDisturbModeChanged function.
+    sptr<NotificationDoNotDisturbDate> date =
+        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+    notificationSubscriberManager_->NotifyDoNotDisturbDateChanged(date);
+
+    // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ(notificationSubscriberManager_->AddSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
- * @tc.number    : NotificationSubscriberManagerTest_007
+ * @tc.number    : NotificationSubscriberManagerTest_003
  * @tc.name      : ANS_RemoveSubscriber_0100
  * @tc.desc      : Test RemoveSubscriber function, return is ERR_OK.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_007, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_003, Function | SmallTest | Level1)
 {
+    // Test NotifyConsumed function.
+    std::vector<NotificationSorting> sortingList;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new NotificationSortingMap(sortingList);
+    notificationSubscriberManager_->NotifyConsumed(notification, notificationMap);
+
+    // Test RemoveSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     info->AddAppName("test_bundle");
     EXPECT_EQ(notificationSubscriberManager_->RemoveSubscriber(subscriber_, info), (int)ERR_OK);
 }
 
 /**
- * @tc.number    : NotificationSubscriberManagerTest_006
+ * @tc.number    : NotificationSubscriberManagerTest_004
  * @tc.name      : ANS_AddSubscriber_0100
  * @tc.desc      : Test RemoveSubscriber function when subscriber is nullptr, return is ERR_ANS_INVALID_PARAM.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_008, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_004, Function | SmallTest | Level1)
 {
+    // Test NotifyCanceled function.
+    std::vector<NotificationSorting> sortingList;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new NotificationSortingMap(sortingList);
+    int deleteReason = 0;
+    notificationSubscriberManager_->NotifyCanceled(notification, notificationMap, deleteReason);
+
+    // Test RemoveSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ(notificationSubscriberManager_->RemoveSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
 }
