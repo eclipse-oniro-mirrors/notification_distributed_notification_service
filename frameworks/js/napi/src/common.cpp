@@ -2993,7 +2993,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
     basicContent->SetTitle(str);
-    ANS_LOGI("normal::title = %{public}s", str);
+    ANS_LOGD("normal::title = %{public}s", str);
 
     // text: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "text", &hasProperty));
@@ -3009,7 +3009,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
     basicContent->SetText(str);
-    ANS_LOGI("normal::text = %{public}s", str);
+    ANS_LOGD("normal::text = %{public}s", str);
 
     // additionalText?: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "additionalText", &hasProperty));
@@ -3097,7 +3097,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, long_str, LONG_STR_MAX_SIZE, &strLen));
     longContent->SetLongText(long_str);
-    ANS_LOGI("longText::longText = %{public}s", long_str);
+    ANS_LOGD("longText::longText = %{public}s", long_str);
 
     // briefText: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "briefText", &hasProperty));
@@ -3113,7 +3113,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, str, STR_MAX_SIZE - 1, &strLen));
     longContent->SetBriefText(str);
-    ANS_LOGI("longText::briefText = %{public}s", str);
+    ANS_LOGD("longText::briefText = %{public}s", str);
 
     // expandedTitle: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "expandedTitle", &hasProperty));
@@ -3129,7 +3129,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, str, STR_MAX_SIZE - 1, &strLen));
     longContent->SetExpandedTitle(str);
-    ANS_LOGI("longText::expandedTitle = %{public}s", str);
+    ANS_LOGD("longText::expandedTitle = %{public}s", str);
 
     return NapiGetNull(env);
 }
@@ -3342,7 +3342,7 @@ napi_value Common::GetNotificationConversationalContentTitle(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, conversationalContentResult, str, STR_MAX_SIZE - 1, &strLen));
     conversationalContent->SetConversationTitle(str);
-    ANS_LOGI("conversationTitle = %{public}s", str);
+    ANS_LOGD("conversationTitle = %{public}s", str);
 
     return NapiGetNull(env);
 }
@@ -3662,7 +3662,7 @@ napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &r
     bool machine = false;
     napi_get_value_bool(env, machineResult, &machine);
     messageUser.SetMachine(machine);
-    ANS_LOGI("MessageUser::isMachine = %{public}d", machine);
+    ANS_LOGD("MessageUser::isMachine = %{public}d", machine);
 
     // isUserImportant: boolean
     NAPI_CALL(env, napi_has_named_property(env, result, "isUserImportant", &hasProperty));
@@ -3763,7 +3763,7 @@ napi_value Common::GetNotificationMultiLineContent(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, str, STR_MAX_SIZE - 1, &strLen));
     multiLineContent->SetBriefText(str);
-    ANS_LOGI("multiLine: briefText = %{public}s", str);
+    ANS_LOGD("multiLine: briefText = %{public}s", str);
 
     // longTitle: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "longTitle", &hasProperty));
@@ -3779,7 +3779,7 @@ napi_value Common::GetNotificationMultiLineContent(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, str, STR_MAX_SIZE - 1, &strLen));
     multiLineContent->SetExpandedTitle(str);
-    ANS_LOGI("multiLine: longTitle = %{public}s", str);
+    ANS_LOGD("multiLine: longTitle = %{public}s", str);
 
     // lines: Array<String>
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "lines", &hasProperty));
@@ -3793,6 +3793,7 @@ napi_value Common::GetNotificationMultiLineContent(
 
     request.SetContent(std::make_shared<NotificationContent>(multiLineContent));
 
+    ANS_LOGI("end");
     return NapiGetNull(env);
 }
 

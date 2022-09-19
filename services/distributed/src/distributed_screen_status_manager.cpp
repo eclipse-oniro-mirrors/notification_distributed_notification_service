@@ -45,7 +45,7 @@ DistributedScreenStatusManager::~DistributedScreenStatusManager()
 
 void DistributedScreenStatusManager::OnDeviceConnected(const std::string &deviceId)
 {
-    ANS_LOGI("deviceId:%{public}s", deviceId.c_str());
+    ANS_LOGD("deviceId:%{public}s", deviceId.c_str());
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     CheckKvStore();
 }

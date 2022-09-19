@@ -78,7 +78,7 @@ public:
     ErrCode GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled);
 
 private:
-    bool distributedEnable_ = true;
+    bool distributedEnable_ = false;
     std::map<std::pair<const std::string, int32_t>, bool> bundleEnable_;
     std::map<int32_t, bool> enabledWithoutApp_;
 };
