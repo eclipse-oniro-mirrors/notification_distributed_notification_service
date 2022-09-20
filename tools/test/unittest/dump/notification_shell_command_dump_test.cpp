@@ -18,6 +18,7 @@
 #define private public
 #include "notification_shell_command.h"
 #undef private
+#include "ans_inner_errors.h"
 #include "ans_manager_interface.h"
 #include "mock_ans_manager_stub.h"
 #include "singleton.h"
@@ -352,5 +353,109 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1100, Function | Medium
 
     EXPECT_EQ(stubPtr_->GetCmd(), g_commandRecent);
     EXPECT_EQ(stubPtr_->GetUserId(), 33);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1200
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: test RunAsSettingCommand function
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1200, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-h",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.RunAsSettingCommand(), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1300
+ * @tc.name: RunSetEnableCmd
+ * @tc.desc: test RunSetEnableCmd function
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1300, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-h",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.RunSetEnableCmd(), ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1400
+ * @tc.name: GetCommandErrorMsg
+ * @tc.desc: test GetCommandErrorMsg function
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1400, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-h",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.GetCommandErrorMsg(), "anm_dump: 'dump' is not a valid anm_dump command. See 'anm_dump help'.\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1500
+ * @tc.name: GetUnknownOptionMsg
+ * @tc.desc: test GetUnknownOptionMsg function
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1500, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-h",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string unknownOption = "aa";
+
+    EXPECT_EQ(cmd.GetUnknownOptionMsg(unknownOption), "error: unknown option.\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1600
+ * @tc.name: GetMessageFromCode
+ * @tc.desc: test GetMessageFromCode function
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1600, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-h",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    int32_t code = 11;
+
+    EXPECT_EQ(cmd.GetMessageFromCode(code), "");
 }
 }  // namespace
