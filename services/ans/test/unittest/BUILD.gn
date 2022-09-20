@@ -50,6 +50,7 @@ ohos_unittest("ans_unit_test") {
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_access_token_helper.cpp",
     "mock/mock_bundle_manager_helper.cpp",
+    "bundle_manager_helper_test.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
