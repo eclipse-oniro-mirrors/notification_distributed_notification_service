@@ -100,6 +100,20 @@ void DistributedDatabaseTest::OnDisconnected(const std::string &deviceId)
  */
 HWTEST_F(DistributedDatabaseTest, PutToDistributedDB_00100, Function | SmallTest | Level1)
 {
+    // text OnChange function
+    std::vector<DistributedKv::Entry> insertEntries;
+    std::vector<DistributedKv::Entry> updateEntries;
+    std::vector<DistributedKv::Entry> deleteEntries;
+    DistributedKv::ChangeNotification change(
+            std::move(insertEntries), std::move(updateEntries), std::move(deleteEntries), "<remoteDeviceId>", false);
+    databaseCallback_->OnChange(change);
+
+    // text OnDeviceChanged function DeviceChangeType is DEVICE_ONLINE and DEVICE_OFFLINE
+    DistributedKv::DeviceInfo deviceInfo;
+    deviceCallback_->OnDeviceChanged(deviceInfo, DistributedKv::DeviceChangeType::DEVICE_ONLINE);
+    deviceCallback_->OnDeviceChanged(deviceInfo, DistributedKv::DeviceChangeType::DEVICE_OFFLINE);
+
+    // text PutToDistributedDB function
     std::string key("<key>");
     std::string value("<value>");
 

@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #define private public
+#include "ans_inner_errors.h"
 #include "distributed_notification_manager.h"
 
 using namespace testing::ext;
@@ -180,6 +181,94 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Get_Local_DeviceInfo_00
 {
     DistributedDatabase::DeviceInfo deviceInfo;
     EXPECT_EQ(distributedManager_->GetLocalDeviceInfo(deviceInfo), ERR_OK);
+}
+
+/**
+ * @tc.name      : Distributed_ResolveDistributedKey_00100
+ * @tc.number    : Distributed_ResolveDistributedKey_00100
+ * @tc.desc      : text ResolveDistributedKey function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_ResolveDistributedKey_00100, Function | SmallTest | Level1)
+{
+    std::string key("<key>");
+    DistributedNotificationManager::ResolveKey resolveKey;
+    EXPECT_EQ(distributedManager_->ResolveDistributedKey(key, resolveKey), false);
+}
+
+/**
+ * @tc.name      : Distributed_CheckDeviceId_00100
+ * @tc.number    : Distributed_CheckDeviceId_00100
+ * @tc.desc      : text CheckDeviceId function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_CheckDeviceId_00100, Function | SmallTest | Level1)
+{
+    std::string deviceId = "<remoteDeviceId>";
+    std::string key("<key>");
+    std::string value("<value>");
+    // text OnDatabaseInsert function.
+    distributedManager_->OnDatabaseInsert(deviceId, key, value);
+    // text OnDatabaseUpdate function.
+    distributedManager_->OnDatabaseUpdate(deviceId, key, value);
+    // text OnDatabaseDelete function.
+    distributedManager_->OnDatabaseDelete(deviceId, key, value);
+    // text CheckDeviceId function.
+    EXPECT_EQ(distributedManager_->CheckDeviceId(deviceId, key), false);
+}
+
+/**
+ * @tc.name      : Distributed_OnDeviceDisconnected_00100
+ * @tc.number    : Distributed_OnDeviceDisconnected_00100
+ * @tc.desc      : text OnDeviceDisconnected function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_OnDeviceDisconnected_00100, Function | SmallTest | Level1)
+{
+    const std::string deviceId = "<remoteDeviceId>";
+    // text OnDeviceDisconnected function.
+    distributedManager_->OnDeviceDisconnected(deviceId);
+    // text PublishCallback function.
+    const std::string bundleName = "<bundleName>";
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    EXPECT_EQ(distributedManager_->PublishCallback(deviceId, bundleName, request), true);
+}
+
+/**
+ * @tc.name      : Distributed_UpdateCallback_00100
+ * @tc.number    : Distributed_UpdateCallback_00100
+ * @tc.desc      : text UpdateCallback function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_UpdateCallback_00100, Function | SmallTest | Level1)
+{
+    std::string deviceId = "<remoteDeviceId>";
+    std::string bundleName = "<bundleName>";
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    EXPECT_EQ(distributedManager_->UpdateCallback(deviceId, bundleName, request), true);
+}
+
+/**
+ * @tc.name      : Distributed_DeleteCallback_00100
+ * @tc.number    : Distributed_DeleteCallback_00100
+ * @tc.desc      : text DeleteCallback function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_DeleteCallback_00100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    request->SetLabel("<label>");
+
+    std::string deviceId = "<remoteDeviceId>";
+    std::string bundleName = "<bundleName>";
+    std::string label = request->GetLabel();
+    int32_t id = request->GetNotificationId();
+    EXPECT_EQ(distributedManager_->DeleteCallback(deviceId, bundleName, label, id), true);
+}
+
+/**
+ * @tc.name      : Distributed_OnDistributedKvStoreDeathRecipient_00100
+ * @tc.number    : Distributed_OnDistributedKvStoreDeathRecipient_00100
+ * @tc.desc      : text OnDistributedKvStoreDeathRecipient function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_OnDistributedKvStoreDeathRecipient_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS
