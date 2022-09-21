@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#define private public
 #include "distributed_preferences.h"
 
 using namespace testing::ext;
@@ -111,6 +112,43 @@ HWTEST_F(DistributedPreferencesTest, DeleteDistributedBundleInfo_00100, Function
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("<bundleName>", 783);
     EXPECT_EQ(distributedPreferences_->DeleteDistributedBundleInfo(bundleOption), ERR_OK);
+}
+
+/**
+ * @tc.name      : DistributedPreferences_ResolveDistributedEnable_00100
+ * @tc.number    : ResolveDistributedEnable_00100
+ * @tc.desc      : text ResolveDistributedEnable function.
+ */
+HWTEST_F(DistributedPreferencesTest, ResolveDistributedEnable_00100, Function | SmallTest | Level1)
+{
+    std::string value("<value>");
+    EXPECT_EQ(distributedPreferences_->ResolveDistributedEnable(value), true);
+}
+
+/**
+ * @tc.name      : DistributedPreferences_ResolveDistributedBundleEnable_00100
+ * @tc.number    : ResolveDistributedBundleEnable_00100
+ * @tc.desc      : text ResolveDistributedBundleEnable function.
+ */
+HWTEST_F(DistributedPreferencesTest, ResolveDistributedBundleEnable_00100, Function | SmallTest | Level1)
+{
+    int32_t startPos = 1;
+    std::string key("<key>");
+    std::string value("<value>");
+    EXPECT_EQ(distributedPreferences_->ResolveDistributedBundleEnable(key, startPos, value), false);
+}
+
+/**
+ * @tc.name      : DistributedPreferences_ResolveSyncWithoutAppEnable_00100
+ * @tc.number    : ResolveSyncWithoutAppEnable_00100
+ * @tc.desc      : text ResolveSyncWithoutAppEnable function.
+ */
+HWTEST_F(DistributedPreferencesTest, ResolveSyncWithoutAppEnable_00100, Function | SmallTest | Level1)
+{
+    int32_t startPos = 1;
+    std::string key("<key>");
+    std::string value("<value>");
+    EXPECT_EQ(distributedPreferences_->ResolveSyncWithoutAppEnable(key, startPos, value), true);
 }
 }  // namespace Notification
 }  // namespace OHOS
