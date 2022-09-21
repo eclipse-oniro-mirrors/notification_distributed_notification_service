@@ -46,34 +46,16 @@ void PermissionFilterTest::TearDown()
 
 /**
  * @tc.number    : PermissionFilterTest_00100
- * @tc.name      : ANS_OnStop_0100
- * @tc.desc      : Test OnStart function
- */
-HWTEST_F(PermissionFilterTest, PermissionFilterTest_00100, Function | SmallTest | Level1)
-{
-    PermissionFilter permissionFilter;
-    permissionFilter.OnStart();
-}
-
-/**
- * @tc.number    : PermissionFilterTest_00200
- * @tc.name      : ANS_OnStop_0100
- * @tc.desc      : Test OnStop function
- */
-HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest | Level1)
-{
-    PermissionFilter permissionFilter;
-    permissionFilter.OnStop();
-}
-
-/**
- * @tc.number    : PermissionFilterTest_00400
  * @tc.name      :
  * @tc.desc      : Test OnPublish function.Expect return ERR_OK
  */
-HWTEST_F(PermissionFilterTest, PermissionFilterTest_00400, Function | SmallTest | Level1)
+HWTEST_F(PermissionFilterTest, PermissionFilterTest_00100, Function | SmallTest | Level1)
 {
+    // Test OnStart function.
     PermissionFilter permissionFilter;
+    permissionFilter.OnStart();
+
+    // Test OnPublish function.
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
@@ -89,13 +71,17 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00400, Function | SmallTest 
 }
 
 /**
- * @tc.number    : PermissionFilterTest_00500
+ * @tc.number    : PermissionFilterTest_00200
  * @tc.name      :
  * @tc.desc      : Test OnPublish function when NotificationsEnabled is false.Expect return ERR_ANS_NOT_ALLOWED
  */
-HWTEST_F(PermissionFilterTest, PermissionFilterTest_00500, Function | SmallTest | Level1)
+HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest | Level1)
 {
+    // Test OnStop function.
     PermissionFilter permissionFilter;
+    permissionFilter.OnStop();
+
+    // Test OnPublish function.
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
