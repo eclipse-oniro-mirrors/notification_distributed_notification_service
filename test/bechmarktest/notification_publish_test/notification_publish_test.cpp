@@ -42,7 +42,7 @@ public:
         InitButtonRequest();
     }
 
-    virtual ~BenchmarkNotificationPublish() override = default;
+    ~BenchmarkNotificationPublish() override = default;
 
     void SetUp(const ::benchmark::State &state) override
     {}

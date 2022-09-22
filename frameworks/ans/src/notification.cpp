@@ -465,10 +465,10 @@ void Notification::SetRemindType(const NotificationConstant::RemindType &reminTy
 std::string Notification::GenerateNotificationKey(
     const std::string &deviceId, int32_t userId, int32_t uid, const std::string &label, int32_t id)
 {
-    const char *KEY_SPLITER = "_";
+    const char *keySpliter = "_";
 
     std::stringstream stream;
-    stream << deviceId << KEY_SPLITER << userId << KEY_SPLITER << uid << KEY_SPLITER << label << KEY_SPLITER << id;
+    stream << deviceId << keySpliter << userId << keySpliter << uid << keySpliter << label << keySpliter << id;
 
     return stream.str();
 }
