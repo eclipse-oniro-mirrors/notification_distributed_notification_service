@@ -1731,6 +1731,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12900,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13000, Function | SmallTest | Level1)
 {
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
     bool enabled = false;
     EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabled(enabled), (int)ERR_OK);
 }
@@ -1743,6 +1746,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13000,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100, Function | SmallTest | Level1)
 {
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
     std::string deviceId = "DeviceId";
     EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId), (int)ERR_ANS_INVALID_PARAM);
 }
@@ -1767,6 +1773,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13200,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13300, Function | SmallTest | Level1)
 {
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
     int32_t reminderId = 1;
     EXPECT_EQ(advancedNotificationService_->CancelReminder(reminderId), (int)ERR_NO_INIT);
 }
@@ -1859,6 +1868,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13900,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14200, Function | SmallTest | Level1)
 {
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
     bool doesSupport = true;
     EXPECT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), (int)ERR_OK);
 }
@@ -1871,6 +1883,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14200,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14300, Function | SmallTest | Level1)
 {
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
     bool enabled = true;
     EXPECT_EQ(advancedNotificationService_->IsDistributedEnabled(enabled), (int)ERR_OK);
 }
@@ -1883,6 +1898,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14300,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14400, Function | SmallTest | Level1)
 {
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
     bool enabled = true;
     EXPECT_EQ(advancedNotificationService_->EnableDistributed(enabled), (int)ERR_OK);
 }
@@ -1895,6 +1913,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14400,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14600, Function | SmallTest | Level1)
 {
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
     bool enabled = true;
     EXPECT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), (int)ERR_OK);
 }
