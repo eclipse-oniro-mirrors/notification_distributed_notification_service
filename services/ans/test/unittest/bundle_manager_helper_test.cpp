@@ -66,7 +66,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00200, Function | Smal
 /**
  * @tc.number    : BundleManagerHelperTest_00300
  * @tc.name      : CheckApiCompatibility
- * @tc.desc      : Test CheckApiCompatibility function
+ * @tc.desc      : Test CheckApiCompatibility function when the  bundleOption is nullptr,return is true
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00300, Level1)
@@ -80,7 +80,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00300, Level1)
 /**
  * @tc.number    : BundleManagerHelperTest_00400
  * @tc.name      : GetBundleInfoByBundleName
- * @tc.desc      : Test GetBundleInfoByBundleName function
+ * @tc.desc      : get bundleinfo by bundlename when the parameeter are normal, return is true
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00400, Level1)
@@ -96,7 +96,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00400, Level1)
 /**
  * @tc.number    : BundleManagerHelperTest_00500
  * @tc.name      : GetDefaultUidByBundleName
- * @tc.desc      : Test GetDefaultUidByBundleName function
+ * @tc.desc      : Test GetDefaultUidByBundleName function  when the parameeter are normal
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
@@ -111,7 +111,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
 /**
  * @tc.number    : AccessTokenHelperTest_00100
  * @tc.name      : IsSystemHap
- * @tc.desc      : Test IsSystemHap function
+ * @tc.desc      : Test IsSystemHap function when the parameeter are normal
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(BundleManagerHelperTest, AccessTokenHelperTest_00100, Level1)

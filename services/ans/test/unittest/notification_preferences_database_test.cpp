@@ -439,5 +439,31 @@ HWTEST_F(NotificationPreferencesDatabaseTest, CheckBundle_00100, Function | Smal
 {
     EXPECT_EQ(true, preferncesDB_->CheckBundle(bundleName_, bundleUid_));
 }
+
+/**
+ * @tc.number    : PutBundlePropertyToDisturbeDB_00100
+ * @tc.name      : PutBundlePropertyToDisturbeDB
+ * @tc.desc      : Test PutBundlePropertyToDisturbeDB function
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    EXPECT_EQ(false, preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo));
+}
+
+/**
+ * @tc.number    : RemoveAllSlotsFromDisturbeDB_00100
+ * @tc.name      : RemoveAllSlotsFromDisturbeDB
+ * @tc.desc      : Test RemoveAllSlotsFromDisturbeDB function
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00100, Function | SmallTest | Level1)
+{
+    std::string bundleKey = "BundleKey";
+    EXPECT_EQ(true, preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey));
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public:
 /**
  * @tc.number    : ReminderDataManagerTest_00200
  * @tc.name      : CheckReminderLimitExceededLocked
- * @tc.desc      : Test CheckReminderLimitExceededLocked function
+ * @tc.desc      : Test CheckReminderLimitExceededLocked function when the  bundleOption is nullptr,return is false
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00200, Level1)
@@ -50,7 +50,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00200, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_00300
  * @tc.name      : FindReminderRequestLocked
- * @tc.desc      : Test FindReminderRequestLocked function
+ * @tc.desc      : Test FindReminderRequestLocked function when the result is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00300, Level1)
@@ -64,7 +64,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00300, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_00400
  * @tc.name      : FindReminderRequestLocked
- * @tc.desc      : Test FindReminderRequestLocked function
+ * @tc.desc      : Test FindReminderRequestLocked function when the result is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00400, Level1)
@@ -79,7 +79,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00400, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_00500
  * @tc.name      : FindNotificationBundleOption
- * @tc.desc      : Test FindNotificationBundleOption function
+ * @tc.desc      : Test FindNotificationBundleOption function when the result is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00500, Level1)
@@ -93,7 +93,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00500, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_00700
  * @tc.name      : GetInstance
- * @tc.desc      : Test GetInstance function
+ * @tc.desc      : Test GetInstance function when the result is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00700, Level1)
@@ -106,7 +106,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00700, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_00900
  * @tc.name      : ShouldAlert
- * @tc.desc      : Test ShouldAlert function
+ * @tc.desc      : Test ShouldAlert function when the result is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00900, Level1)
@@ -120,7 +120,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_00900, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_01200
  * @tc.name      : GetRecentReminderLocked
- * @tc.desc      : Test GetRecentReminderLocked function
+ * @tc.desc      : Test GetRecentReminderLocked function when the result is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_01200, Level1)
@@ -133,7 +133,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_01200, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_01400
  * @tc.name      : IsAllowedNotify
- * @tc.desc      : Test IsAllowedNotify function
+ * @tc.desc      : Test IsAllowedNotify function when the  reminder is nullptr ,the result is false
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_01400, Level1)
@@ -160,7 +160,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_01500, Level1)
 /**
  * @tc.number    : ReminderDataManagerTest_01700
  * @tc.name      : GetSoundUri
- * @tc.desc      : Test GetSoundUri function
+ * @tc.desc      : Test GetSoundUri function when the  reminder is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_01700, Level1)
