@@ -29,7 +29,7 @@ void DistributedDeviceCallback::OnDeviceChanged(
 {
     ANS_LOGI("%{public}s start", __FUNCTION__);
     if (type == DistributedKv::DeviceChangeType::DEVICE_ONLINE) {
-        ANS_LOGI("device %{public}s is ONLINE", info.deviceId.c_str());
+        ANS_LOGD("device %{public}s is ONLINE", info.deviceId.c_str());
         if (callback_.OnConnected) {
             callback_.OnConnected(info.deviceId);
         }
