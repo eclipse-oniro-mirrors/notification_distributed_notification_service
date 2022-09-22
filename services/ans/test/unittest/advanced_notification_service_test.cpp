@@ -1669,5 +1669,351 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12500,
 
     EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
 }
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_12600
+ * @tc.name      : ANS_CancelAsBundle_0100
+ * @tc.desc      : Test CancelAsBundle function when the result is ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12600, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 1;
+    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_12700
+ * @tc.name      : ANS_CanPublishAsBundle_0100
+ * @tc.desc      : Test CanPublishAsBundle function when the result is ERR_INVALID_OPERATION
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12700, Function | SmallTest | Level1)
+{
+    std::string representativeBundle = "RepresentativeBundle";
+    bool canPublish = true;
+    int result = ERR_INVALID_OPERATION;
+    EXPECT_EQ(advancedNotificationService_->CanPublishAsBundle(representativeBundle, canPublish), result);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_12800
+ * @tc.name      : ANS_PublishAsBundle_0100
+ * @tc.desc      : Test PublishAsBundle function when the result is ERR_INVALID_OPERATION
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12800, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> notification = nullptr;
+    std::string representativeBundle = "RepresentativeBundle";
+    int result = ERR_INVALID_OPERATION;
+    EXPECT_EQ(advancedNotificationService_->PublishAsBundle(notification, representativeBundle), result);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_12900
+ * @tc.name      : ANS_HasNotificationPolicyAccessPermission_0100
+ * @tc.desc      : Test HasNotificationPolicyAccessPermission function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12900, Function | SmallTest | Level1)
+{
+    bool granted = true;
+    EXPECT_EQ(advancedNotificationService_->HasNotificationPolicyAccessPermission(granted), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13000
+ * @tc.name      : ANS_GetShowBadgeEnabled_0100
+ * @tc.desc      : Test GetShowBadgeEnabled function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13000, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    bool enabled = false;
+    EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabled(enabled), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13100
+ * @tc.name      : ANS_RequestEnableNotification_0100
+ * @tc.desc      : Test RequestEnableNotification function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    std::string deviceId = "DeviceId";
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId), (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13200
+ * @tc.name      : ANS_PublishReminder_0100
+ * @tc.desc      : Test PublishReminder function
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13200, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder = nullptr;
+    EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), -1);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13300
+ * @tc.name      : ANS_CancelReminder_0100
+ * @tc.desc      : Test CancelReminder function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13300, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    int32_t reminderId = 1;
+    EXPECT_EQ(advancedNotificationService_->CancelReminder(reminderId), (int)ERR_NO_INIT);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13400
+ * @tc.name      : ANS_CancelAllReminders_0100
+ * @tc.desc      : Test CancelAllReminders function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13400, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    EXPECT_EQ(advancedNotificationService_->CancelAllReminders(), (int)ERR_NO_INIT);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13500
+ * @tc.name      : ANS_GetValidReminders_0100
+ * @tc.desc      : Test GetValidReminders function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13500, Function | SmallTest | Level1)
+{
+    std::vector<sptr<ReminderRequest>> reminders;
+    EXPECT_EQ(advancedNotificationService_->GetValidReminders(reminders), (int)ERR_NO_INIT);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13600
+ * @tc.name      : ANS_ActiveNotificationDump_0100
+ * @tc.desc      : Test ActiveNotificationDump function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13600, Function | SmallTest | Level1)
+{
+    std::string bundle = "Bundle";
+    int32_t userId = 2;
+    std::vector<std::string> dumpInfo;
+    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, dumpInfo), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13700
+ * @tc.name      : ANS_RecentNotificationDump_0100
+ * @tc.desc      : Test RecentNotificationDump function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13700, Function | SmallTest | Level1)
+{
+    std::string bundle = "Bundle";
+    int32_t userId = 3;
+    std::vector<std::string> dumpInfo;
+    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, dumpInfo), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13800
+ * @tc.name      : ANS_SetRecentNotificationCount_0100
+ * @tc.desc      : Test SetRecentNotificationCount function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13800, Function | SmallTest | Level1)
+{
+    std::string arg = "Arg";
+    EXPECT_EQ(advancedNotificationService_->SetRecentNotificationCount(arg), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13900
+ * @tc.name      : ANS_RemoveAllSlots_0100
+ * @tc.desc      : Test RemoveAllSlots function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13900, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    EXPECT_EQ(advancedNotificationService_->RemoveAllSlots(), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14200
+ * @tc.name      : ANS_DoesSupportDoNotDisturbMode_0100
+ * @tc.desc      : Test DoesSupportDoNotDisturbMode function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14200, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    bool doesSupport = true;
+    EXPECT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14300
+ * @tc.name      : ANS_IsDistributedEnabled_0100
+ * @tc.desc      : Test IsDistributedEnabled function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14300, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnabled(enabled), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14400
+ * @tc.name      : ANS_EnableDistributed_0100
+ * @tc.desc      : Test EnableDistributed function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14400, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->EnableDistributed(enabled), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14600
+ * @tc.name      : ANS_EnableDistributedSelf_0100
+ * @tc.desc      : Test EnableDistributedSelf function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14600, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14800
+ * @tc.name      : ANS_IsSpecialUserAllowedNotify_0100
+ * @tc.desc      : Test IsSpecialUserAllowedNotify function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14800, Function | SmallTest | Level1)
+{
+    int32_t userId = 3;
+    bool allowed = true;
+    EXPECT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, allowed), (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14900
+ * @tc.name      : ANS_SetNotificationsEnabledByUser_0100
+ * @tc.desc      : Test SetNotificationsEnabledByUser function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14900, Function | SmallTest | Level1)
+{
+    int32_t userId = 3;
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(userId, enabled), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15000
+ * @tc.name      : ANS_GetDoNotDisturbDate_0100
+ * @tc.desc      : Test GetDoNotDisturbDate function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15000, Function | SmallTest | Level1)
+{
+    int32_t userId = 3;
+    sptr<NotificationDoNotDisturbDate> date = nullptr;
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15100
+ * @tc.name      : ANS_SetHasPoppedDialog_0100
+ * @tc.desc      : Test SetHasPoppedDialog function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    bool hasPopped = true;
+    EXPECT_EQ(advancedNotificationService_->SetHasPoppedDialog(bundleOption, hasPopped), (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15200
+ * @tc.name      : ANS_GetHasPoppedDialog_0100
+ * @tc.desc      : Test GetHasPoppedDialog function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    bool hasPopped = true;
+    EXPECT_EQ(advancedNotificationService_->GetHasPoppedDialog(bundleOption, hasPopped), (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15300
+ * @tc.name      : ANS_ShellDump_0100
+ * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300, Function | SmallTest | Level1)
+{
+    std::string cmd = "CMD";
+    std::string bundle = "Bundle";
+    int32_t userId = 4;
+    std::vector<std::string> dumpInfo;
+    EXPECT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15400
+ * @tc.name      : ANS_Dump_0100
+ * @tc.desc      : Test Dump function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15400, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args;
+    EXPECT_EQ(advancedNotificationService_->Dump(fd, args), (int)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

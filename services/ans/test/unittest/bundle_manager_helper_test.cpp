@@ -16,11 +16,17 @@
 #include <functional>
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "bundle_manager_helper.h"
+#undef private
+#undef protected
+
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "access_token_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -55,6 +61,64 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00200, Function | Smal
     pid_t callingUid = IPCSkeleton::GetCallingUid();
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     EXPECT_TRUE(bundleManager->IsSystemApp(callingUid));
+}
+
+/**
+ * @tc.number    : BundleManagerHelperTest_00300
+ * @tc.name      : CheckApiCompatibility
+ * @tc.desc      : Test CheckApiCompatibility function when the  bundleOption is nullptr,return is true
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00300, Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    BundleManagerHelper bundleManagerHelper;
+    bool result = bundleManagerHelper.CheckApiCompatibility(bundleOption);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.number    : BundleManagerHelperTest_00400
+ * @tc.name      : GetBundleInfoByBundleName
+ * @tc.desc      : get bundleinfo by bundlename when the parameeter are normal, return is true
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00400, Level1)
+{
+    std::string bundle = "Bundle";
+    int32_t userId = 1;
+    AppExecFwk::BundleInfo bundleInfo;
+    BundleManagerHelper bundleManagerHelper;
+    bool result = bundleManagerHelper.GetBundleInfoByBundleName(bundle, userId, bundleInfo);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.number    : BundleManagerHelperTest_00500
+ * @tc.name      : GetDefaultUidByBundleName
+ * @tc.desc      : Test GetDefaultUidByBundleName function  when the parameeter are normal
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
+{
+    std::string bundle = "Bundle";
+    int32_t userId = 1;
+    BundleManagerHelper bundleManagerHelper;
+    int32_t result = bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId);
+    EXPECT_EQ(result, 1000);
+}
+
+/**
+ * @tc.number    : AccessTokenHelperTest_00100
+ * @tc.name      : IsSystemHap
+ * @tc.desc      : Test IsSystemHap function when the parameeter are normal
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(BundleManagerHelperTest, AccessTokenHelperTest_00100, Level1)
+{
+    AccessTokenHelper accessTokenHelper;
+    bool result = accessTokenHelper.IsSystemHap();
+    EXPECT_EQ(result, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

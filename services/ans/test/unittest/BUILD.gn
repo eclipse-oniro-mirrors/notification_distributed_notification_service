@@ -46,6 +46,7 @@ ohos_unittest("ans_unit_test") {
     "${services_path}/ans/src/system_event_observer.cpp",
     "advanced_notification_service_ability_test.cpp",
     "advanced_notification_service_test.cpp",
+    "bundle_manager_helper_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_access_token_helper.cpp",
@@ -59,6 +60,7 @@ ohos_unittest("ans_unit_test") {
     "notification_slot_filter_test.cpp",
     "notification_subscriber_manager_test.cpp",
     "permission_filter_test.cpp",
+    "reminder_data_manager_test.cpp",
   ]
 
   configs = [ "//commonlibrary/c_utils/base:utils_config" ]
