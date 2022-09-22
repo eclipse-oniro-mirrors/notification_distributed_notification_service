@@ -1682,7 +1682,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12600,
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
 }
 
 /**
@@ -1695,7 +1696,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12700,
 {
     std::string representativeBundle = "RepresentativeBundle";
     bool canPublish = true;
-    EXPECT_EQ(advancedNotificationService_->CanPublishAsBundle(representativeBundle, canPublish), (int)ERR_INVALID_OPERATION);
+    int result = ERR_INVALID_OPERATION;
+    EXPECT_EQ(advancedNotificationService_->CanPublishAsBundle(representativeBundle, canPublish), result);
 }
 
 /**
@@ -1708,7 +1710,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12800,
 {
     sptr<NotificationRequest> notification = nullptr;
     std::string representativeBundle = "RepresentativeBundle";
-    EXPECT_EQ(advancedNotificationService_->PublishAsBundle(notification, representativeBundle), (int)ERR_INVALID_OPERATION);
+    int result = ERR_INVALID_OPERATION;
+    EXPECT_EQ(advancedNotificationService_->PublishAsBundle(notification, representativeBundle), result);
 }
 
 /**
