@@ -74,40 +74,40 @@ const std::string CLASSIFICATION_ALARM {"alarm"};
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
-    virtual void OnConnected() override
+    void OnConnected() override
     {
         g_subscribe_mtx.unlock();
     }
 
-    virtual void OnDisconnected() override
+    void OnDisconnected() override
     {
         g_unsubscribe_mtx.unlock();
     }
 
-    virtual void OnDied() override
+    void OnDied() override
     {}
 
-    virtual void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+    void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
 
-    virtual void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
+    void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
     {}
 
-    virtual void OnEnabledNotificationChanged(
+    void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
 
-    virtual void OnCanceled(const std::shared_ptr<Notification> &request) override
+    void OnCanceled(const std::shared_ptr<Notification> &request) override
     {
         GTEST_LOG_(INFO) << "ANS_Interface_MT::OnCanceled request : " << request->GetNotificationRequest().Dump();
         OnCanceledReceived = true;
     }
 
-    virtual void OnCanceled(const std::shared_ptr<Notification> &request,
+    void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
 
-    virtual void OnConsumed(const std::shared_ptr<Notification> &request) override
+    void OnConsumed(const std::shared_ptr<Notification> &request) override
     {
         OnConsumedReceived = true;
         g_consumed_mtx.unlock();
@@ -153,7 +153,7 @@ public:
         }
     }
 
-    virtual void OnConsumed(const std::shared_ptr<Notification> &request,
+    void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
 
