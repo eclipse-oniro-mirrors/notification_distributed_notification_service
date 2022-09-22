@@ -443,7 +443,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, CheckBundle_00100, Function | Smal
 /**
  * @tc.number    : PutBundlePropertyToDisturbeDB_00100
  * @tc.name      : PutBundlePropertyToDisturbeDB
- * @tc.desc      : Test PutBundlePropertyToDisturbeDB function
+ * @tc.desc      : Test PutBundlePropertyToDisturbeDB function return is false
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_00100, Function | SmallTest | Level1)
@@ -451,19 +451,19 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_EQ(false, preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo));
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
 }
 
 /**
  * @tc.number    : RemoveAllSlotsFromDisturbeDB_00100
  * @tc.name      : RemoveAllSlotsFromDisturbeDB
- * @tc.desc      : Test RemoveAllSlotsFromDisturbeDB function
+ * @tc.desc      : Test RemoveAllSlotsFromDisturbeDB function return is true
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00100, Function | SmallTest | Level1)
 {
     std::string bundleKey = "BundleKey";
-    EXPECT_EQ(true, preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey));
+    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey), true);
 }
 }  // namespace Notification
 }  // namespace OHOS
