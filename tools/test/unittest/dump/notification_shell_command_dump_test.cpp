@@ -60,15 +60,15 @@ static char g_dumpActiveUser[] =
 static char g_enableErrorInformation[] =
 "error: option 'e' requires a value.\nusage: anm setting [<options>]\noptions list:\n"
 "  --help, -h                   help menu\n"
-"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
-"  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
 
 static char g_enableBundleNameNull[] =
 "error: setting information error\n"
 "usage: anm setting [<options>]\n"
 "options list:\n  --help, -h                   help menu\n"
-"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
-"  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
 
 static char g_bundleName[] = "example";
 static char g_commandActive[] = "active";
