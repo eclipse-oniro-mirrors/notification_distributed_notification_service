@@ -828,7 +828,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00200, Funct
 /**
  * @tc.number    : RemoveNotificationAllSlots_00100
  * @tc.name      : RemoveNotificationAllSlots
- * @tc.desc      : Test RemoveNotificationAllSlots function when bundlename is null, 
+ * @tc.desc      : Test RemoveNotificationAllSlots function when bundlename is null,
  *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
@@ -841,7 +841,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00100, Function
 /**
  * @tc.number    : RemoveNotificationAllSlots_00200
  * @tc.name      : RemoveNotificationAllSlots
- * @tc.desc      : Test RemoveNotificationAllSlots function when bundleOption is null, 
+ * @tc.desc      : Test RemoveNotificationAllSlots function when bundleOption is null,
  *                 return is ERR_ANS_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
@@ -854,7 +854,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00200, Function
 /**
  * @tc.number    : GetNotificationSlotsNumForBundle_00100
  * @tc.name      : GetNotificationSlotsNumForBundle
- * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundlename is null, 
+ * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundlename is null,
  *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
@@ -868,7 +868,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00100, Fu
 /**
  * @tc.number    : GetNotificationSlotsNumForBundle_00200
  * @tc.name      : GetNotificationSlotsNumForBundle
- * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundleOption is null, 
+ * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundleOption is null,
  *                 return is ERR_ANS_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
