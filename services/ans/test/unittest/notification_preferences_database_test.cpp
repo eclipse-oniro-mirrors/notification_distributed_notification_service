@@ -465,5 +465,29 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00100
     std::string bundleKey = "BundleKey";
     EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey), true);
 }
+
+/**
+ * @tc.number    : RemoveNotificationEnable_00100
+ * @tc.name      : RemoveNotificationEnable
+ * @tc.desc      : Test RemoveNotificationEnable function when parameter is normal return is true
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveNotificationEnable_00100, Function | SmallTest | Level1)
+{
+    int32_t userId = 1;
+    EXPECT_EQ(preferncesDB_->RemoveNotificationEnable(userId), true);
+}
+
+/**
+ * @tc.number    : RemoveDoNotDisturbDate_00100
+ * @tc.name      : RemoveDoNotDisturbDate
+ * @tc.desc      : Test RemoveDoNotDisturbDate function when parameter is normal return is true
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveDoNotDisturbDate_00100, Function | SmallTest | Level1)
+{
+    int32_t userId = 1;
+    EXPECT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), true);
+}
 }  // namespace Notification
 }  // namespace OHOS

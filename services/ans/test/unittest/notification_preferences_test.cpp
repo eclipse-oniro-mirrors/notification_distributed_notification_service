@@ -798,5 +798,85 @@ HWTEST_F(NotificationPreferencesTest, GetHasPoppedDialog_00100, Function | Small
     EXPECT_EQ((int)NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption_, hasPopped), (int)ERR_OK);
     EXPECT_TRUE(hasPopped);
 }
+
+/**
+ * @tc.number    : AddNotificationBundleProperty_00100
+ * @tc.name      : AddNotificationBundleProperty
+ * @tc.desc      : Add a notification BundleProperty into distrube DB when bundleOption is null,
+ *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationBundleProperty(bundleOption_),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : AddNotificationBundleProperty_00200
+ * @tc.name      : AddNotificationBundleProperty
+ * @tc.desc      : Add a notification BundleProperty into distrube DB when bundlename is null,
+ *                 return is ERR_ANS_INVALID_PARAM.
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00200, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationBundleProperty(bundleEmptyOption_),
+        (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : RemoveNotificationAllSlots_00100
+ * @tc.name      : RemoveNotificationAllSlots
+ * @tc.desc      : Test RemoveNotificationAllSlots function when bundlename is null,
+ *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationAllSlots(bundleOption_),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+}
+
+/**
+ * @tc.number    : RemoveNotificationAllSlots_00200
+ * @tc.name      : RemoveNotificationAllSlots
+ * @tc.desc      : Test RemoveNotificationAllSlots function when bundleOption is null,
+ *                 return is ERR_ANS_INVALID_PARAM.
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00200, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationAllSlots(bundleEmptyOption_),
+        (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : GetNotificationSlotsNumForBundle_00100
+ * @tc.name      : GetNotificationSlotsNumForBundle
+ * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundlename is null,
+ *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00100, Function | SmallTest | Level1)
+{
+    uint64_t num = 1;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlotsNumForBundle(bundleOption_, num),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+}
+
+/**
+ * @tc.number    : GetNotificationSlotsNumForBundle_00200
+ * @tc.name      : GetNotificationSlotsNumForBundle
+ * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundleOption is null,
+ *                 return is ERR_ANS_INVALID_PARAM.
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00200, Function | SmallTest | Level1)
+{
+    uint64_t num = 2;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlotsNumForBundle(bundleEmptyOption_, num),
+        (int)ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS
