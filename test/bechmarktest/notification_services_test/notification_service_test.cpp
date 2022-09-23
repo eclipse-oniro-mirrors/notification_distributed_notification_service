@@ -68,7 +68,7 @@ public:
         ReportAggregatesOnly();
     }
 
-    virtual ~BenchmarkNotificationService() override = default;
+    ~BenchmarkNotificationService() override = default;
 
     void SetUp(const ::benchmark::State &state) override
     {}

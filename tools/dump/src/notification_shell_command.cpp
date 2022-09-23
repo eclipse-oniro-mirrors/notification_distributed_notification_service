@@ -305,7 +305,6 @@ ErrCode NotificationShellCommand::RunSetEnableCmd()
         resultReceiver_.append("set notification enabled failed\n");
     }
     return ret;
-
 }
 }  // namespace Notification
 }  // namespace OHOS
