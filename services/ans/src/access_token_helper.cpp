@@ -32,7 +32,7 @@ bool AccessTokenHelper::VerifyCallerPermission(
 bool AccessTokenHelper::VerifyNativeToken(const AccessTokenID &callerToken)
 {
     ATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(callerToken);
-    return tokenType == ATokenTypeEnum::TOKEN_NATIVE;
+    return (tokenType == ATokenTypeEnum::TOKEN_NATIVE || tokenType == ATokenTypeEnum::TOKEN_SHELL);
 }
 
 bool AccessTokenHelper::IsSystemHap()

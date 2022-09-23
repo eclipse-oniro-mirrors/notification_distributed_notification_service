@@ -134,7 +134,7 @@ void DistributedNotificationManager::OnDatabaseInsert(
     ANS_LOGD("%{public}s", __FUNCTION__);
     handler_->PostTask(std::bind([=]() {
         if (!CheckDeviceId(deviceId, key)) {
-            ANS_LOGW("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
+            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
         }
 
         ResolveKey resolveKey;
@@ -160,7 +160,7 @@ void DistributedNotificationManager::OnDatabaseUpdate(
     ANS_LOGD("%{public}s", __FUNCTION__);
     handler_->PostTask(std::bind([=]() {
         if (!CheckDeviceId(deviceId, key)) {
-            ANS_LOGW("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
+            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
         }
 
         ResolveKey resolveKey;
@@ -186,7 +186,7 @@ void DistributedNotificationManager::OnDatabaseDelete(
     ANS_LOGD("%{public}s", __FUNCTION__);
     handler_->PostTask(std::bind([=]() {
         if (!CheckDeviceId(deviceId, key)) {
-            ANS_LOGW("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
+            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
         }
 
         ResolveKey resolveKey;

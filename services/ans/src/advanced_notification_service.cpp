@@ -3635,8 +3635,13 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
     std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    ErrCode result = ERR_ANS_NOT_ALLOWED;
 
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        ANS_LOGE("Not subsystem or shell request");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    ErrCode result = ERR_ANS_NOT_ALLOWED;
     handler_->PostSyncTask(std::bind([&]() {
         if (cmd == ACTIVE_NOTIFICATION_OPTION) {
             result = ActiveNotificationDump(bundle, userId, dumpInfo);
