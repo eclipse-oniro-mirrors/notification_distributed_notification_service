@@ -17,6 +17,10 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
+    const int32_t DEFAULT_USERID = 10000;
+}
+
 BundleManagerHelper::BundleManagerHelper()
 {}
 
@@ -33,7 +37,7 @@ std::string BundleManagerHelper::GetBundleNameByUid(int uid)
 
 int BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId)
 {
-    return 10000;
+    return DEFAULT_USERID;
 }
 
 bool BundleManagerHelper::IsSystemApp(int uid)
