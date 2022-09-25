@@ -57,6 +57,19 @@ static char g_dumpActiveUser[] =
 "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
 "  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
 
+static char g_enableErrorInformation[] =
+"error: option 'e' requires a value.\nusage: anm setting [<options>]\noptions list:\n"
+"  --help, -h                   help menu\n"
+"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+
+static char g_enableBundleNameNull[] =
+"error: setting information error\n"
+"usage: anm setting [<options>]\n"
+"options list:\n  --help, -h                   help menu\n"
+"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+
 static char g_bundleName[] = "example";
 static char g_commandActive[] = "active";
 static char g_commandRecent[] = "recent";
@@ -71,6 +84,7 @@ public:
     void MakeMockObjects();
 
     std::string cmd_ = "dump";
+    std::string enable_ = "setting";
     std::string toolName_ = "anm";
     sptr<AnsManagerInterface> proxyPtr_;
     sptr<MockAnsManagerStub> stubPtr_;
@@ -457,5 +471,67 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1600, Function | Medium
     int32_t code = 11;
 
     EXPECT_EQ(cmd.GetMessageFromCode(code), "");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1700
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -e bundleName:uid:enable" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1700, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-e",
+        (char *)"dd:ss:aa",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "set notification enabled failed\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1800
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -e" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1800, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-e",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), g_enableErrorInformation);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_1900
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -e bundleName:uid" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1900, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-e",
+        (char *)"dd:ss",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), g_enableBundleNameNull);
 }
 }  // namespace
