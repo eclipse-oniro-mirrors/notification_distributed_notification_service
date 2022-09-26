@@ -75,8 +75,8 @@ static char g_enableObjectNull[] =
 "error: object is null\n"
 "usage: anm setting [<options>]\n"
 "options list:\n  --help, -h                   help menu\n"
-"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
-"  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
 
 static char g_bundleName[] = "example";
 static char g_commandActive[] = "active";
@@ -542,8 +542,6 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1900, Function | Medium
 
     EXPECT_EQ(cmd.ExecCommand(), g_enableBundleNameNull);
 }
-<<<<<<< HEAD
-=======
 
 /**
  * @tc.number: Anm_Command_Dump_2000
@@ -588,5 +586,4 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_2100, Function | Medium
 
     EXPECT_EQ(cmd.ExecCommand(), "set notification enabled success\n");
 }
->>>>>>> IssueNo:https://gitee.com/openharmony/notification_common_event_service/issues/I1T8PA
 }  // namespace
