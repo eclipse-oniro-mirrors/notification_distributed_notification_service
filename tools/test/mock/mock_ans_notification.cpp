@@ -23,10 +23,10 @@ ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
     const NotificationBundleOption &bundleOption, const std::string &deviceId, bool enabled)
 {
     if (bundleOption.GetBundleName() == "gg") {
-        return ERR_OK;
+         return ERR_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
+         return ERR_ANS_SERVICE_NOT_CONNECTED;
+    } 
 }
 }  // namespace Notification
 }  // namespace OHOS
