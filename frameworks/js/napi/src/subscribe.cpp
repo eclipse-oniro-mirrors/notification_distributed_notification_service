@@ -101,7 +101,7 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     // vibrationValues?: Array<number>
     napi_value arr = nullptr;
     napi_create_array(env, &arr);
-    size_t count = 0;
+    uint32_t count = 0;
     if (request->EnableVibrate()) {
         for (auto vec : request->GetVibrationStyle()) {
             napi_value nVibrationValue = nullptr;
@@ -158,7 +158,7 @@ void UvQueueWorkOnCanceled(uv_work_t *work, int status)
         return;
     }
 
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -180,7 +180,6 @@ void UvQueueWorkOnCanceled(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
@@ -256,7 +255,7 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
         return;
     }
 
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -278,7 +277,6 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request,
@@ -348,8 +346,7 @@ void UvQueueWorkOnUpdate(uv_work_t *work, int status)
         ANS_LOGE("work is null");
         return;
     }
-
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -367,7 +364,6 @@ void UvQueueWorkOnUpdate(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
@@ -430,7 +426,7 @@ void UvQueueWorkOnConnected(uv_work_t *work, int status)
         return;
     }
 
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -443,7 +439,6 @@ void UvQueueWorkOnConnected(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnConnected()
@@ -499,7 +494,7 @@ void UvQueueWorkOnDisconnected(uv_work_t *work, int status)
         return;
     }
 
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -514,7 +509,6 @@ void UvQueueWorkOnDisconnected(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnDisconnected()
@@ -570,8 +564,7 @@ void UvQueueWorkOnDied(uv_work_t *work, int status)
         ANS_LOGE("work is null");
         return;
     }
-
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -585,7 +578,6 @@ void UvQueueWorkOnDied(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnDied()
@@ -641,7 +633,7 @@ void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
         return;
     }
 
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -661,7 +653,6 @@ void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date)
@@ -723,7 +714,7 @@ void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
         return;
     }
 
-    NotificationReceiveDataWorker *dataWorkerData = (NotificationReceiveDataWorker *)work->data;
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
         delete work;
@@ -743,7 +734,6 @@ void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnEnabledNotificationChanged(
@@ -1192,7 +1182,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
             }
-            AsyncCallbackInfoSubscribe *asynccallbackinfo = (AsyncCallbackInfoSubscribe *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
                 ANS_LOGI("Subscribe with NotificationSubscribeInfo");
                 OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
@@ -1211,12 +1201,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
             }
-            AsyncCallbackInfoSubscribe *asynccallbackinfo = (AsyncCallbackInfoSubscribe *)data;
-            if (!asynccallbackinfo) {
-                ANS_LOGE("Invalid asynccallbackinfo!");
-                return;
-            }
-
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
 
             if (asynccallbackinfo->info.callback != nullptr) {

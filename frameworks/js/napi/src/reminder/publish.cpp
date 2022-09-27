@@ -263,12 +263,12 @@ napi_value CancelReminder(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANSR_LOGI("Cancel napi_create_async_work start");
-            AsyncCallbackInfo *asynccallbackinfo = (AsyncCallbackInfo *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
             asynccallbackinfo->info.errorCode = ReminderHelper::CancelReminder(asynccallbackinfo->reminderId);
         },
         [](napi_env env, napi_status status, void *data) {
             ANSR_LOGI("Cancel napi_create_async_work complete start");
-            AsyncCallbackInfo *asynccallbackinfo = (AsyncCallbackInfo *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
             NotificationNapi::Common::ReturnCallbackPromise(
@@ -318,12 +318,12 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANSR_LOGI("CancelAll napi_create_async_work start");
-            AsyncCallbackInfo *asynccallbackinfo = (AsyncCallbackInfo *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
             asynccallbackinfo->info.errorCode = ReminderHelper::CancelAllReminders();
         },
         [](napi_env env, napi_status status, void *data) {
             ANSR_LOGD("CancelAll napi_create_async_work complete start");
-            AsyncCallbackInfo *asynccallbackinfo = (AsyncCallbackInfo *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
             NotificationNapi::Common::ReturnCallbackPromise(
@@ -342,7 +342,7 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
     }
 }
 
-void ParseReminderTimer(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseReminderTimer(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     napi_value value = nullptr;
     ReminderRequestTimer& timer = (ReminderRequestTimer&)reminder;
@@ -350,7 +350,7 @@ void ParseReminderTimer(const napi_env &env, ReminderRequest &reminder, napi_val
     napi_set_named_property(env, result, TIMER_COUNT_DOWN_TIME, value);
 }
 
-void ParseReminderAlarm(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseReminderAlarm(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     // hour
     napi_value value = nullptr;
@@ -376,7 +376,7 @@ void ParseReminderAlarm(const napi_env &env, ReminderRequest &reminder, napi_val
     }
 }
 
-void ParseReminderCalendar(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseReminderCalendar(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     // dateTime
     napi_value value = nullptr;
@@ -422,7 +422,7 @@ void ParseReminderCalendar(const napi_env &env, ReminderRequest &reminder, napi_
 }
 
 void ParseReminder(
-    const napi_env &env, ReminderRequest::ReminderType &type, ReminderRequest &reminder, napi_value &result)
+    const napi_env &env, const ReminderRequest::ReminderType &type, ReminderRequest &reminder, napi_value &result)
 {
     switch (type) {
         case ReminderRequest::ReminderType::TIMER: {
@@ -563,7 +563,7 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     return NotificationNapi::Common::NapiGetBoolean(env, true);
 }
 
-void GetValidRemindersInner(napi_env env, std::vector<sptr<ReminderRequest>>& validReminders, napi_value& arr)
+void GetValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest>>& validReminders, napi_value& arr)
 {
     int32_t count = 0;
     napi_create_array(env, &arr);
