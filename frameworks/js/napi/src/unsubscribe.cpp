@@ -92,7 +92,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANS_LOGI("Unsubscribe napi_create_async_work start");
-            AsyncCallbackInfoUnsubscribe *asynccallbackinfo = (AsyncCallbackInfoUnsubscribe *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoUnsubscribe *>(data);
 
             if (asynccallbackinfo->objectInfo == nullptr) {
                 ANS_LOGE("invalid object info");

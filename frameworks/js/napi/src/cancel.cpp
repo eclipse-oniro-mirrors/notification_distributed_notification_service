@@ -220,8 +220,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoCancel *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
     }

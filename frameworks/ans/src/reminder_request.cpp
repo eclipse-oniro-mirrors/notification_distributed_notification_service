@@ -54,6 +54,7 @@ const std::string ReminderRequest::PARAM_REMINDER_ID = "REMINDER_ID";
 const std::string ReminderRequest::SEP_BUTTON_SINGLE = "<SEP,/>";
 const std::string ReminderRequest::SEP_BUTTON_MULTI = "<SEP#/>";
 const std::string ReminderRequest::SEP_WANT_AGENT = "<SEP#/>";
+const int32_t ReminderRequest::SUNDAY = 7;
 
 // For database recovery.
 const std::string ReminderRequest::REMINDER_ID = "reminder_id";
@@ -1503,12 +1504,7 @@ int32_t ReminderRequest::GetActualTime(const TimeTransferType &type, int32_t cTi
         case (TimeTransferType::MONTH):  // month
             return 1 + cTime;
         case (TimeTransferType::WEEK): {  // week
-            int32_t sunDay = 7;
-            if (cTime == 0) {
-                return sunDay;
-            } else {
-                return cTime;
-            }
+            return cTime == 0 ? SUNDAY : cTime;
         }
         default:
             return -1;
@@ -1523,12 +1519,7 @@ int32_t ReminderRequest::GetCTime(const TimeTransferType &type, int32_t actualTi
         case (TimeTransferType::MONTH):  // month
             return actualTime - 1;
         case (TimeTransferType::WEEK): {  // week
-            int32_t sunDay = 7;
-            if (actualTime == sunDay) {
-                return 0;
-            } else {
-                return actualTime;
-            }
+            return actualTime == SUNDAY ? 0 : actualTime;
         }
         default:
             return -1;

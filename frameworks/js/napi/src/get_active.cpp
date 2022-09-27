@@ -82,8 +82,7 @@ napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoActive *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
     }
@@ -173,8 +172,7 @@ napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoActive *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
     }
@@ -242,8 +240,7 @@ napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoActive *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
     }

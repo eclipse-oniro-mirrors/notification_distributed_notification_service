@@ -37,6 +37,14 @@ const std::string ReminderRequestCalendar::CALENDAR_DAY = "calendar_day";
 const std::string ReminderRequestCalendar::CALENDAR_HOUR = "calendar_hour";
 const std::string ReminderRequestCalendar::CALENDAR_MINUTE = "calendar_minute";
 
+const uint8_t ReminderRequestCalendar::DAY_ARRAY[12]    = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+const uint8_t ReminderRequestCalendar::FEBRUARY         = 2;
+const uint8_t ReminderRequestCalendar::LEAP_MONTH       = 29;
+const uint8_t ReminderRequestCalendar::NON_LEAP_MONTH   = 28;
+const uint16_t ReminderRequestCalendar::SOLAR_YEAR      = 400;
+const uint8_t ReminderRequestCalendar::LEAP_PARAM_MIN   = 4;
+const uint8_t ReminderRequestCalendar::LEAP_PARAM_MAX   = 100;
+
 ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime,
     const std::vector<uint8_t> &repeatMonths, const std::vector<uint8_t> &repeatDays)
     : ReminderRequest(ReminderRequest::ReminderType::CALENDAR)
@@ -94,18 +102,11 @@ bool ReminderRequestCalendar::SetNextTriggerTime()
 uint8_t ReminderRequestCalendar::GetDaysOfMonth(const uint16_t &year, const uint8_t &month)
 {
     uint8_t days;
-    uint8_t daysArray[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    uint8_t february = 2;
-    uint8_t leapMonth = 29;
-    uint8_t nonLeapMonth = 28;
-    uint16_t solarYear = 400;
-    uint8_t leapParam1 = 4;
-    uint8_t leapParam2 = 100;
-    if (month == february) {
-        days = ((((year % leapParam1 == 0) && (year % leapParam2 != 0)) || (year % solarYear == 0))
-            ? leapMonth : nonLeapMonth);
+    if (month == FEBRUARY) {
+        days = ((((year % LEAP_PARAM_MIN == 0) && (year % LEAP_PARAM_MAX != 0)) || (year % SOLAR_YEAR == 0))
+            ? LEAP_MONTH : NON_LEAP_MONTH);
     } else {
-        days = daysArray[month - 1];
+        days = DAY_ARRAY[month - 1];
     }
     return days;
 }
