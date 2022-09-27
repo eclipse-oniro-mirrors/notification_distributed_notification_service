@@ -936,17 +936,23 @@ ErrCode AnsManagerStub::HandleUpdateSlots(MessageParcel &data, MessageParcel &re
 
 ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, MessageParcel &reply)
 {
+    ANS_LOGI("enter");
     std::string deviceId;
+    bool popFlag = false;
     if (!data.ReadString(deviceId)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: read deviceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
-    ErrCode result = RequestEnableNotification(deviceId);
+    ErrCode result = RequestEnableNotification(deviceId, popFlag);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    if (!reply.WriteBool(popFlag)) {
+        ANS_LOGE("[HandleRequestEnableNotification] fail: write popFlag failed, ErrCode=%{public}d", popFlag);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    ANS_LOGD("Write popFlag into reply. popFlag = %{public}d", popFlag);
     return ERR_OK;
 }
 
@@ -1975,6 +1981,12 @@ ErrCode AnsManagerStub::UpdateSlots(
 }
 
 ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId)
+{
+    ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
 {
     ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
     return ERR_INVALID_OPERATION;

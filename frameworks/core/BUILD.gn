@@ -32,6 +32,7 @@ ohos_shared_library("ans_core") {
   sources = [
     "${core_path}/common/src/ans_log_wrapper.cpp",
     "${core_path}/common/src/ans_watchdog.cpp",
+    "${core_path}/src/ans_callback_stub.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_manager_death_recipient.cpp",
     "${core_path}/src/ans_manager_proxy.cpp",

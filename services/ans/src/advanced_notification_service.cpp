@@ -1436,65 +1436,41 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId)
 {
+    ANS_LOGE("[RequestEnableNotification] fail: deprecated.");
+    return ERR_ANS_NOT_ALLOWED;
+}
+
+ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
+{
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     ErrCode result = ERR_OK;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANS_LOGD("bundleOption == nullptr");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    // To get the permission
     bool allowedNotify = false;
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
+    ANS_LOGI("result = %{public}d, allowedNotify = %{public}d", result, allowedNotify);
     if (result != ERR_OK || allowedNotify) {
         ANS_LOGD("Already granted permission");
+        popFlag = false;
         return result;
     }
-
+    
+    // Check to see if it has been popover before
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
     if (result != ERR_OK || hasPopped) {
         ANS_LOGD("Already shown dialog");
+        popFlag = false;
         return result;
     }
-
-    int32_t positionX;
-    int32_t positionY;
-    int32_t width;
-    int32_t height;
-    bool wideScreen;
-    GetDisplayPosition(positionX, positionY, width, height, wideScreen);
-
-    const std::string params = std::string("{\"requestNotification\":\"Allowed to send notification?\", ") +
-        std::string("\"allowButton\":\"Allow\", \"cancelButton\":\"Cancel\", \"uid\":\"") +
-        std::to_string(bundleOption->GetUid()) + std::string("\"}");
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
-        "notification_dialog",
-        params,
-        Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-        positionX,
-        positionY,
-        width,
-        height,
-        [this](int32_t id, const std::string& event, const std::string& params) {
-            ANS_LOGD("Dialog callback: %{public}s, %{public}s", event.c_str(), params.c_str());
-            int32_t uid = std::stoi(params, nullptr);
-            std::string bundle;
-            std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-            if (bundleManager != nullptr) {
-                bundle = bundleManager->GetBundleNameByUid(uid);
-            }
-            sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundle, uid);
-            if (event == "EVENT_ALLOW") {
-                this->SetNotificationsEnabledForSpecialBundle("", bundleOption, true);
-                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
-            } else {
-                this->SetNotificationsEnabledForSpecialBundle("", bundleOption, false);
-                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
-            }
-            this->SetHasPoppedDialog(bundleOption, true);
-        });
-
+    SetHasPoppedDialog(bundleOption, true);
+    popFlag = true;
     return result;
 }
 
