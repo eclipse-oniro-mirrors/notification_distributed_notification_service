@@ -185,13 +185,13 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
         return nullptr;
     }
     if (valuetype == napi_object) {
-        BundleAndKeyInfo info {};
-        auto retValue = Common::GetBundleOption(env, argv[PARAM0], info.option);
+        BundleAndKeyInfo bundleandKeyInfo {};
+        auto retValue = Common::GetBundleOption(env, argv[PARAM0], bundleandKeyInfo.option);
         if (retValue == nullptr) {
             ANS_LOGW("GetBundleOption failed.");
             return nullptr;
         }
-        params.bundleAndKeyInfo = info;
+        params.bundleAndKeyInfo = bundleandKeyInfo;
     } else if (valuetype == napi_number) {
         NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &params.userId));
         params.hasUserId = true;
@@ -268,11 +268,7 @@ void RemoveExecuteCallback(napi_env env, void *data)
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    AsyncCallbackInfoRemove *removeInfo = static_cast<AsyncCallbackInfoRemove *>(data);
-    if (!removeInfo) {
-        ANS_LOGE("Invalid async callback data");
-        return;
-    }
+    auto removeInfo = static_cast<AsyncCallbackInfoRemove *>(data);
     if (removeInfo->params.hashcode.has_value()) {
         removeInfo->info.errorCode = NotificationHelper::RemoveNotification(removeInfo->params.hashcode.value(),
             removeInfo->params.removeReason);
@@ -290,16 +286,14 @@ void RemoveCompleteCallback(napi_env env, napi_status status, void *data)
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    AsyncCallbackInfoRemove *removeInfo = static_cast<AsyncCallbackInfoRemove *>(data);
-    if (removeInfo) {
-        Common::ReturnCallbackPromise(env, removeInfo->info, Common::NapiGetNull(env));
-        if (removeInfo->info.callback != nullptr) {
-            napi_delete_reference(env, removeInfo->info.callback);
-        }
-        napi_delete_async_work(env, removeInfo->asyncWork);
-        delete removeInfo;
-        removeInfo = nullptr;
+    auto removeInfo = static_cast<AsyncCallbackInfoRemove *>(data);
+    Common::ReturnCallbackPromise(env, removeInfo->info, Common::NapiGetNull(env));
+    if (removeInfo->info.callback != nullptr) {
+        napi_delete_reference(env, removeInfo->info.callback);
     }
+    napi_delete_async_work(env, removeInfo->asyncWork);
+    delete removeInfo;
+    removeInfo = nullptr;
 }
 
 napi_value Remove(napi_env env, napi_callback_info info)
@@ -309,8 +303,7 @@ napi_value Remove(napi_env env, napi_callback_info info)
     if (!ParseParameters(env, info, params)) {
         return Common::NapiGetUndefined(env);
     }
-    AsyncCallbackInfoRemove *removeInfo =
-        new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
+    auto removeInfo = new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
     if (!removeInfo) {
         return Common::JSParaError(env, params.callback);
     }

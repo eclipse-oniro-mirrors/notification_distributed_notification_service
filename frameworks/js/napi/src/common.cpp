@@ -1402,7 +1402,7 @@ napi_value Common::GetNotificationSubscriberInfo(
             return nullptr;
         }
         napi_get_array_length(env, nBundleNames, &length);
-        if (length <= 0) {
+        if (length == 0) {
             ANS_LOGE("The array is empty.");
             return nullptr;
         }
@@ -1887,7 +1887,6 @@ napi_value Common::GetNotificationGroupName(const napi_env &env, const napi_valu
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
 
     NAPI_CALL(env, napi_has_named_property(env, value, "groupName", &hasProperty));
@@ -1898,6 +1897,7 @@ napi_value Common::GetNotificationGroupName(const napi_env &env, const napi_valu
             ANS_LOGE("Wrong argument type. String expected.");
             return nullptr;
         }
+        char str[STR_MAX_SIZE] = {0};
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
         request.SetGroupName(str);
     }
@@ -2000,7 +2000,6 @@ napi_value Common::GetNotificationClassification(
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
 
     NAPI_CALL(env, napi_has_named_property(env, value, "classification", &hasProperty));
@@ -2011,6 +2010,7 @@ napi_value Common::GetNotificationClassification(
             ANS_LOGE("Wrong argument type. String expected.");
             return nullptr;
         }
+        char str[STR_MAX_SIZE] = {0};
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
         request.SetClassification(str);
     }
@@ -2154,7 +2154,6 @@ napi_value Common::GetNotificationStatusBarText(
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
 
     NAPI_CALL(env, napi_has_named_property(env, value, "statusBarText", &hasProperty));
@@ -2165,6 +2164,7 @@ napi_value Common::GetNotificationStatusBarText(
             ANS_LOGE("Wrong argument type. String expected.");
             return nullptr;
         }
+        char str[STR_MAX_SIZE] = {0};
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
         request.SetStatusBarText(str);
     }
@@ -2179,7 +2179,6 @@ napi_value Common::GetNotificationLabel(const napi_env &env, const napi_value &v
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
 
     NAPI_CALL(env, napi_has_named_property(env, value, "label", &hasProperty));
@@ -2190,6 +2189,7 @@ napi_value Common::GetNotificationLabel(const napi_env &env, const napi_value &v
             ANS_LOGE("Wrong argument type. String expected.");
             return nullptr;
         }
+        char str[STR_MAX_SIZE] = {0};
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
         request.SetLabel(str);
     }
@@ -2270,7 +2270,7 @@ napi_value Common::GetNotificationActionButtons(
         return nullptr;
     }
     napi_get_array_length(env, actionButtons, &length);
-    if (length <= 0) {
+    if (length == 0) {
         ANS_LOGE("The array is empty.");
         return nullptr;
     }
@@ -2536,7 +2536,7 @@ napi_value Common::GetNotificationUserInputByOptions(
         return nullptr;
     }
     napi_get_array_length(env, value, &length);
-    if (length <= 0) {
+    if (length == 0) {
         ANS_LOGE("The array is empty.");
         return nullptr;
     }
@@ -2585,7 +2585,7 @@ napi_value Common::GetNotificationUserInputByPermitMimeTypes(
             return nullptr;
         }
         napi_get_array_length(env, value, &length);
-        if (length <= 0) {
+        if (length == 0) {
             ANS_LOGE("The array is empty.");
             return nullptr;
         }
@@ -2826,7 +2826,6 @@ napi_value Common::GetNotificationSupportDisplayDevices(
     bool hasProperty = false;
     napi_valuetype valuetype = napi_undefined;
     napi_value supportDisplayDevices = nullptr;
-    char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
     uint32_t length = 0;
 
@@ -2840,7 +2839,7 @@ napi_value Common::GetNotificationSupportDisplayDevices(
         }
 
         napi_get_array_length(env, supportDisplayDevices, &length);
-        if (length <= 0) {
+        if (length == 0) {
             ANS_LOGE("The array is empty.");
             return nullptr;
         }
@@ -2853,6 +2852,7 @@ napi_value Common::GetNotificationSupportDisplayDevices(
                 ANS_LOGE("Wrong argument type. String expected.");
                 return nullptr;
             }
+            char str[STR_MAX_SIZE] = {0};
             NAPI_CALL(env, napi_get_value_string_utf8(env, line, str, STR_MAX_SIZE - 1, &strLen));
             devices.emplace_back(str);
             ANS_LOGI("supportDisplayDevices = %{public}s", str);
@@ -2871,7 +2871,6 @@ napi_value Common::GetNotificationSupportOperateDevices(
     bool hasProperty = false;
     napi_valuetype valuetype = napi_undefined;
     napi_value supportOperateDevices = nullptr;
-    char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
     uint32_t length = 0;
 
@@ -2885,7 +2884,7 @@ napi_value Common::GetNotificationSupportOperateDevices(
         }
 
         napi_get_array_length(env, supportOperateDevices, &length);
-        if (length <= 0) {
+        if (length == 0) {
             ANS_LOGE("The array is empty.");
             return nullptr;
         }
@@ -2898,6 +2897,7 @@ napi_value Common::GetNotificationSupportOperateDevices(
                 ANS_LOGE("Wrong argument type. String expected.");
                 return nullptr;
             }
+            char str[STR_MAX_SIZE] = {0};
             NAPI_CALL(env, napi_get_value_string_utf8(env, line, str, STR_MAX_SIZE - 1, &strLen));
             devices.emplace_back(str);
             ANS_LOGI("supportOperateDevices = %{public}s", str);
@@ -3400,7 +3400,7 @@ napi_value Common::GetNotificationConversationalContentMessages(
     }
     uint32_t length = 0;
     napi_get_array_length(env, conversationalContentResult, &length);
-    if (length <= 0) {
+    if (length == 0) {
         ANS_LOGE("The array is empty.");
         return nullptr;
     }
@@ -3817,7 +3817,7 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
     }
 
     napi_get_array_length(env, multilines, &length);
-    if (length <= 0) {
+    if (length == 0) {
         ANS_LOGE("The array is empty.");
         return nullptr;
     }

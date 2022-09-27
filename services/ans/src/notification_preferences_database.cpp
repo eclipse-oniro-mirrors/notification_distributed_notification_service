@@ -347,10 +347,9 @@ bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
         return false;
     }
 
-    bool result = true;
     std::vector<DistributedKv::Entry> entries;
     for (auto iter : slots) {
-        result = SlotToEntry(bundleName, bundleUid, iter, entries);
+        bool result = SlotToEntry(bundleName, bundleUid, iter, entries);
         if (!result) {
             return result;
         }
@@ -380,7 +379,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
 
     std::string bundleKeyStr = KEY_BUNDLE_LABEL + GenerateBundleLablel(bundleInfo);
     bool result = false;
-    GetValueFromDisturbeDB(bundleKeyStr, [&](DistributedKv::Status &status, DistributedKv::Value &value) {
+    GetValueFromDisturbeDB(bundleKeyStr, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
         switch (status) {
             case DistributedKv::Status::KEY_NOT_FOUND: {
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
@@ -616,7 +615,7 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
     std::string bundleKeyStr = KEY_BUNDLE_LABEL + bundleName + std::to_string(bundleUid);
     ANS_LOGD("CheckBundle bundleKeyStr %{public}s", bundleKeyStr.c_str());
     bool result = true;
-    GetValueFromDisturbeDB(bundleKeyStr, [&](DistributedKv::Status &status, DistributedKv::Value &value) {
+    GetValueFromDisturbeDB(bundleKeyStr, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
         switch (status) {
             case DistributedKv::Status::KEY_NOT_FOUND: {
                 NotificationPreferencesInfo::BundleInfo bundleInfo;
@@ -816,9 +815,7 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(const std::st
 bool NotificationPreferencesDatabase::StoreDeathRecipient()
 {
     ANS_LOGW("distribute remote died");
-    if (kvStorePtr_ != nullptr) {
-        kvStorePtr_ = nullptr;
-    }
+    kvStorePtr_ = nullptr;
     return true;
 }
 
@@ -1334,7 +1331,7 @@ void NotificationPreferencesDatabase::GetDoNotDisturbType(NotificationPreference
     std::string key =
         std::string().append(KEY_DO_NOT_DISTURB_TYPE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](DistributedKv::Status &status, DistributedKv::Value &value) {
+        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
             sptr<NotificationDoNotDisturbDate> disturbDate =
                         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             info.GetDoNotDisturbDate(userId, disturbDate);
@@ -1359,7 +1356,7 @@ void NotificationPreferencesDatabase::GetDoNotDisturbBeginDate(NotificationPrefe
     std::string key =
         std::string().append(KEY_DO_NOT_DISTURB_BEGIN_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](DistributedKv::Status &status, DistributedKv::Value &value) {
+        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
             sptr<NotificationDoNotDisturbDate> disturbDate =
                         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             info.GetDoNotDisturbDate(userId, disturbDate);
@@ -1383,7 +1380,7 @@ void NotificationPreferencesDatabase::GetDoNotDisturbEndDate(NotificationPrefere
     std::string key =
         std::string().append(KEY_DO_NOT_DISTURB_END_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](DistributedKv::Status &status, DistributedKv::Value &value) {
+        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
             sptr<NotificationDoNotDisturbDate> disturbDate =
                         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             info.GetDoNotDisturbDate(userId, disturbDate);
@@ -1407,7 +1404,7 @@ void NotificationPreferencesDatabase::GetEnableAllNotification(NotificationPrefe
     std::string key =
         std::string().append(KEY_ENABLE_ALL_NOTIFICATION).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](DistributedKv::Status &status, DistributedKv::Value &value) {
+        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
             if (status == DistributedKv::Status::KEY_NOT_FOUND) {
                 bool enable = true;
                 if (!info.GetEnabledAllNotification(userId, enable)) {

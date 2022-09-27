@@ -175,7 +175,6 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
     // argv[2]:callback
     if (argc >= ENABLED_BUNDLE_MAX_PARA) {
-        napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
@@ -215,7 +214,6 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
     // argv[1]:callback
     if (argc >= IS_ENABLED_BUNDLE_MAX_PARA) {
-        napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
@@ -260,8 +258,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoIsEnabled *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoIsEnabled {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoIsEnabled {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
     }
@@ -438,15 +435,14 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANS_LOGI("EnableDistributedSelf napi_create_async_work start");
-            AsyncCallbackInfoEnabled *asynccallbackinfo = (AsyncCallbackInfoEnabled *)data;
-
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             asynccallbackinfo->info.errorCode =
                 NotificationHelper::EnableDistributedSelf(asynccallbackinfo->params.enable);
             ANS_LOGI("EnableDistributedSelf enable = %{public}d", asynccallbackinfo->params.enable);
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGI("EnableDistributedSelf napi_create_async_work end");
-            AsyncCallbackInfoEnabled *asynccallbackinfo = (AsyncCallbackInfoEnabled *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
@@ -519,7 +515,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANS_LOGI("IsDistributedEnableByBundle napi_create_async_work start");
-            AsyncCallbackInfoIsEnabledByBundle *asynccallbackinfo = (AsyncCallbackInfoIsEnabledByBundle *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
 
             asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
                 asynccallbackinfo->params.option, asynccallbackinfo->enable);
@@ -575,8 +571,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoGetRemindType *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoGetRemindType {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoGetRemindType {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
     }
@@ -592,7 +587,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANS_LOGI("GetDeviceRemindType napi_create_async_work start");
-            AsyncCallbackInfoGetRemindType *asynccallbackinfo = (AsyncCallbackInfoGetRemindType *)data;
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetRemindType *>(data);
             asynccallbackinfo->info.errorCode =
                 NotificationHelper::GetDeviceRemindType(asynccallbackinfo->remindType);
         },
@@ -645,7 +640,6 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
     // argv[2]:callback
     if (argc >= ENABLED_SYNC_MAX_PARA) {
-        napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
@@ -749,7 +743,6 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
     // argv[1]:callback
     if (argc >= ENABLED_SYNC_MIN_PARA) {
-        napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
