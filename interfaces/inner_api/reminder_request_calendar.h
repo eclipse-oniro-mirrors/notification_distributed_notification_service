@@ -221,6 +221,14 @@ private:
     static const std::string CALENDAR_DAY;
     static const std::string CALENDAR_HOUR;
     static const std::string CALENDAR_MINUTE;
+
+    static const uint8_t DAY_ARRAY[12];
+    static const uint8_t FEBRUARY;
+    static const uint8_t LEAP_MONTH;
+    static const uint8_t NON_LEAP_MONTH;
+    static const uint16_t SOLAR_YEAR;
+    static const uint8_t LEAP_PARAM_MIN;
+    static const uint8_t LEAP_PARAM_MAX;
 };
 }
 }

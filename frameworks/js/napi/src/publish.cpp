@@ -116,8 +116,7 @@ napi_value Publish(napi_env env, napi_callback_info info)
     }
 
     napi_value promise = nullptr;
-    AsyncCallbackInfoPublish *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, params.callback);
     }
@@ -312,8 +311,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoPublish *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGW("failed to create asynccallbackinfo");
         return Common::JSParaError(env, params.callback);
@@ -428,8 +426,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
     }
 
     napi_value promise = nullptr;
-    AsyncCallbackInfoPublish *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, params.callback);
     }

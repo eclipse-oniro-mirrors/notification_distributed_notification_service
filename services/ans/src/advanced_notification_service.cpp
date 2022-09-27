@@ -3715,7 +3715,7 @@ void AdvancedNotificationService::SendSubscribeHiSysEvent(int32_t pid, int32_t u
         eventInfo.userId = info->GetAppUserId();
         std::vector<std::string> appNames = info->GetAppNames();
         eventInfo.bundleName = std::accumulate(appNames.begin(), appNames.end(), std::string(""),
-            [appNames](std::string bundleName, const std::string &str) {
+            [appNames](const std::string bundleName, const std::string &str) {
                 return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
             });
     }
@@ -3738,7 +3738,7 @@ void AdvancedNotificationService::SendUnSubscribeHiSysEvent(int32_t pid, int32_t
         eventInfo.userId = info->GetAppUserId();
         std::vector<std::string> appNames = info->GetAppNames();
         eventInfo.bundleName = std::accumulate(appNames.begin(), appNames.end(), std::string(""),
-            [appNames](std::string bundleName, const std::string &str) {
+            [appNames](const std::string bundleName, const std::string &str) {
                 return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
             });
     }

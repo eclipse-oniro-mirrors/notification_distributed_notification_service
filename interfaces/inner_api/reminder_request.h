@@ -575,6 +575,7 @@ public:
     static const uint16_t MILLI_SECONDS;
     static const uint16_t SAME_TIME_DISTINGUISH_MILLISECONDS;
     static const std::string NOTIFICATION_LABEL;
+    static const int32_t SUNDAY;
 
     /**
      * @brief Show the reminder with a notification.
