@@ -1118,7 +1118,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     ANSR_LOGD("uri:%{public}s", uri.c_str());
     soundPlayer_->SetSource(uri);
     soundPlayer_->SetLooping(true);
-    soundPlayer_->Prepare();
+    soundPlayer_->PrepareAsync();
     soundPlayer_->Play();
     SetAlertingReminder(reminder);
 }
