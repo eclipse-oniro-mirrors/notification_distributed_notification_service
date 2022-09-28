@@ -78,14 +78,6 @@ static char g_enableObjectNull[] =
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
 " -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
 
-static char g_enableObjectNull[] =
-"error: object is null\n"
-"error: object is null\n"
-"usage: anm setting [<options>]\n"
-"options list:\n  --help, -h                   help menu\n"
-"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
-"  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
-
 static char g_bundleName[] = "example";
 static char g_commandActive[] = "active";
 static char g_commandRecent[] = "recent";

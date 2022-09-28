@@ -37,7 +37,6 @@ ohos_unittest("notification_shell_command_dump_test") {
     "${tools_path}/dump/src/shell_command.cpp",
     "${tools_path}/test/mock/mock_ans_notification.cpp",
     "notification_shell_command_dump_test.cpp",
-    "${tools_path}/test/mock/mock_ans_notification.cpp",
   ]
   sources += tools_dump_mock_sources
 
