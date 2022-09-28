@@ -1669,5 +1669,78 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12500,
 
     EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
 }
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15500
+ * @tc.name      : OnReceiveEvent_0100
+ * @tc.desc      : Test OnReceiveEvent function userid<DEFAULT_USER_ID
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15500, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    req->SetCreatorUserId(DEFAULT_USER_ID);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
+    SleepForFC();
+
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED));
+    data.SetCode(50);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+
+    std::stringstream key;
+    key << "_" << req->GetCreatorUserId() << "_" << req->GetCreatorUid() << "_"
+        << req->GetLabel() << "_" << req->GetNotificationId();
+
+    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15600
+ * @tc.name      : OnReceiveEvent_0200
+ * @tc.desc      : Test OnReceiveEvent function when userid>DEFAULT_USER_ID
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15600, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    req->SetCreatorUserId(DEFAULT_USER_ID);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
+    SleepForFC();
+
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED));
+    data.SetCode(200);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+
+    std::stringstream key;
+    key << "_" << req->GetCreatorUserId() << "_" << req->GetCreatorUid() << "_"
+        << req->GetLabel() << "_" << req->GetNotificationId();
+
+    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
+}
 }  // namespace Notification
 }  // namespace OHOS
