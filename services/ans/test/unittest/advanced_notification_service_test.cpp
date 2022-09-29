@@ -2002,6 +2002,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300,
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
     EXPECT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
 }
 
 /**
