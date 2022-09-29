@@ -73,7 +73,7 @@ ohos_shared_library("libans") {
     "c_utils:utils",
     "hitrace_native:hitrace_meter",
     "kv_store:distributeddata_inner",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "multimedia_player_framework:media_client",
     "os_account:os_account_innerkits",
     "time_service:time_service",
