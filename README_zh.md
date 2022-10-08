@@ -1,4 +1,4 @@
-# 事件通知子系统
+# 通知子系统
 
 ## 简介
 
@@ -12,7 +12,11 @@ OpenHarmony通过ANS（Advanced Notification Service，通知系统服务）对�
 
 ### 架构图
 
-![](figures/ans_logical_architecture_diagram.png)
+**图1** 子系统架构图
+
+![子系统架构图](figures/ans_logical_architecture_diagram.png)
+
+
 
 ## 目录
 
@@ -20,13 +24,15 @@ OpenHarmony通过ANS（Advanced Notification Service，通知系统服务）对�
 /base/notification/distributed_notification_service/
 ├── frameworks   # 接口实现
 ├── interfaces
-│   ├── innerkits    # 对内接口目录
+│   ├── inner_api    # 对内接口目录
 │   └── kits         # 对外接口目录
-├── sa_profile   # 组件服务配置
-├── services     # 组件服务实现
-└── tools        # 组件工具实现
+├── sa_profile   # 服务配置
+├── services     # 服务实现
+└── tools        # 工具实现
 
 ```
+
+
 
 ## 使用说明
 
@@ -47,14 +53,12 @@ ANS支持4种类型的通道，分别为：
 
 并且可调整通知的标签、分组、触发事件等属性。
 
+
+
 ## 相关仓
 
-事件通知子系统
+**[通知子系统](https://gitee.com/openharmony/notification_distributed_notification_service/blob/master/README_zh.md)**
 
-**[notification_ans_standard](https://gitee.com/openharmony/aafwk_standard/blob/master/README_zh.md)**
+[SystemUI系统应用](https://gitee.com/openharmony/applications_systemui/blob/master/README_zh.md)
 
-[aafwk\_standard](https://gitee.com/openharmony/aafwk_standard)
-
-[appexecfwk\_standard](https://gitee.com/openharmony/appexecfwk_standard)
-
-[distributeddatamgr\_datamgr](https://gitee.com/openharmony/distributeddatamgr_datamgr)
+[元能力子系统](https://gitee.com/openharmony/ability_ability_runtime/blob/master/README_zh.md)
