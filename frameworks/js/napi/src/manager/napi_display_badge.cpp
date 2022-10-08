@@ -13,116 +13,20 @@
  * limitations under the License.
  */
 
+#include "napi_display_badge.h"
+
+#include "ans_inner_errors.h"
 #include "display_badge.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-const int ENABLE_BADGE_DISPLAYED_MAX_PARA = 3;
-const int ENABLE_BADGE_DISPLAYED_MIN_PARA = 2;
-const int IS_DISPLAY_BADGE_MAX_PARA = 2;
-const int IS_DISPLAY_BADGE_MIN_PARA = 1;
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableBadgeParams &params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = ENABLE_BADGE_DISPLAYED_MAX_PARA;
-    napi_value argv[ENABLE_BADGE_DISPLAYED_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < ENABLE_BADGE_DISPLAYED_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
-        return nullptr;
-    }
-
-    // argv[0]: bundle
-    napi_valuetype valuetype = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
-        return nullptr;
-    }
-
-    auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
-    if (retValue == nullptr) {
-        ANS_LOGE("GetBundleOption failed.");
-        return nullptr;
-    }
-
-    // argv[1]: enable
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_boolean) {
-        ANS_LOGW("Wrong argument type. Bool expected.");
-        return nullptr;
-    }
-    napi_get_value_bool(env, argv[PARAM1], &params.enable);
-
-    // argv[2]:callback
-    if (argc >= ENABLE_BADGE_DISPLAYED_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM2], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsDisplayBadgeParams &params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = IS_DISPLAY_BADGE_MAX_PARA;
-    napi_value argv[IS_DISPLAY_BADGE_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-
-    if (argc < IS_DISPLAY_BADGE_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
-        return nullptr;
-    }
-
-    // argv[0]: bundle / callback
-    napi_valuetype valuetype = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-
-    if ((valuetype != napi_function) && (valuetype != napi_object)) {
-        ANS_LOGW("Wrong argument type. Function or object expected, %{public}d", valuetype);
-        return nullptr;
-    }
-
-    if (valuetype == napi_object) {
-        auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
-        if (retValue == nullptr) {
-            ANS_LOGE("GetBundleOption failed.");
-            return nullptr;
-        }
-        params.hasBundleOption = true;
-    } else {
-        napi_create_reference(env, argv[PARAM0], 1, &params.callback);
-    }
-
-    // argv[1]:callback
-    if (argc >= IS_DISPLAY_BADGE_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value DisplayBadge(napi_env env, napi_callback_info info)
+napi_value Napi_DisplayBadge(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     EnableBadgeParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -157,7 +61,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
             ANS_LOGI("DisplayBadge napi_create_async_work end");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -178,7 +82,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
     }
 }
 
-void AsyncCompleteCallbackIsBadgeDisplayed(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackNapiIsBadgeDisplayed(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("enter");
     if (!data) {
@@ -188,7 +92,7 @@ void AsyncCompleteCallbackIsBadgeDisplayed(napi_env env, napi_status status, voi
     AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
     napi_value result = nullptr;
     napi_get_boolean(env, asynccallbackinfo->enabled, &result);
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
@@ -197,13 +101,14 @@ void AsyncCompleteCallbackIsBadgeDisplayed(napi_env env, napi_status status, voi
     asynccallbackinfo = nullptr;
 }
 
-napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
+napi_value Napi_IsBadgeDisplayed(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     IsDisplayBadgeParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         ANS_LOGE("Failed to parse params!");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -239,7 +144,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
             }
         },
-        AsyncCompleteCallbackIsBadgeDisplayed,
+        AsyncCompleteCallbackNapiIsBadgeDisplayed,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 

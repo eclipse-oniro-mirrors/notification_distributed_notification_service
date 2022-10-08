@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_TEMPLATE_H
-#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_TEMPLATE_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_SUBSCRIBE_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_SUBSCRIBE_H
 
 #include "common.h"
 
@@ -22,22 +21,8 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
-struct TemplateName {
-    std::string templateName = "";
-    bool support = false;
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoTemplate {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    TemplateName params;
-    CallbackPromiseInfo info;
-};
-
-napi_value IsSupportTemplate(napi_env env, napi_callback_info info);
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, TemplateName& params);
+napi_value Napi_Subscribe(napi_env env, napi_callback_info info);
+napi_value Napi_Unsubscribe(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
-
-#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_TEMPLATE_H
+#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_SUBSCRIBE_H

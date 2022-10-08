@@ -21,8 +21,38 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
+struct EnableBadgeParams {
+    NotificationBundleOption option;
+    bool enable = false;
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackInfoEnableBadge {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    EnableBadgeParams params;
+    CallbackPromiseInfo info;
+};
+
+struct IsDisplayBadgeParams {
+    NotificationBundleOption option;
+    napi_ref callback = nullptr;
+    bool hasBundleOption = false;
+};
+
+struct AsyncCallbackInfoIsDisplayBadge {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    IsDisplayBadgeParams params;
+    CallbackPromiseInfo info;
+    bool enabled = false;
+};
+
 napi_value DisplayBadge(napi_env env, napi_callback_info info);
 napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info);
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableBadgeParams &params);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsDisplayBadgeParams &params);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_DISPLAY_BADGE_H

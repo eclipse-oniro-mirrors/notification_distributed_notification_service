@@ -13,56 +13,20 @@
  * limitations under the License.
  */
 
+#include "napi_template.h"
+
+#include "ans_inner_errors.h"
 #include "ans_template.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-const int IS_TEMPLATE_MAX_PARA = 2;
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, TemplateName& params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = IS_TEMPLATE_MAX_PARA;
-    napi_value argv[IS_TEMPLATE_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < IS_TEMPLATE_MAX_PARA - 1) {
-        ANS_LOGE("Wrong number of arguments");
-        return nullptr;
-    }
-
-    napi_valuetype valuetype = napi_undefined;
-    // argv[0]: name: string
-    NAPI_CALL(env, napi_typeof(env, argv[0], &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
-        return nullptr;
-    }
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[0], str, STR_MAX_SIZE - 1, &strLen));
-    params.templateName = str;
-
-    // argv[1]: callback
-    if (argc >= IS_TEMPLATE_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[1], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[1], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
+napi_value Napi_IsSupportTemplate(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     TemplateName params;
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -95,7 +59,7 @@ napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
             if (asyncCallbackinfo) {
                 napi_value result = nullptr;
                 napi_get_boolean(env, asyncCallbackinfo->params.support, &result);
-                Common::ReturnCallbackPromise(env, asyncCallbackinfo->info, result);
+                Common::CreateReturnValue(env, asyncCallbackinfo->info, result);
                 if (asyncCallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asyncCallbackinfo->info.callback);
                 }

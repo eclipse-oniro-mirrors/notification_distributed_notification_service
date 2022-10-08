@@ -151,6 +151,14 @@ struct SubscriberInstancesInfo {
     SubscriberInstance *subscriber = nullptr;
 };
 
+struct AsyncCallbackInfoSubscribe {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    SubscriberInstance *objectInfo = nullptr;
+    NotificationSubscribeInfo subscriberInfo;
+    CallbackPromiseInfo info;
+};
+
 static std::mutex mutex_;
 static thread_local std::vector<SubscriberInstancesInfo> subscriberInstances_;
 
@@ -165,6 +173,9 @@ bool AddDeletingSubscriber(SubscriberInstance *subscriber);
 void DelDeletingSubscriber(SubscriberInstance *subscriber);
 
 napi_value Subscribe(napi_env env, napi_callback_info info);
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
+    NotificationSubscribeInfo &subscriberInfo, SubscriberInstance *&subscriber, napi_ref &callback);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_SUBSCRIBE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,111 +13,20 @@
  * limitations under the License.
  */
 
+#include "napi_cancel.h"
+
+#include "ans_inner_errors.h"
 #include "cancel.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-constexpr int8_t CANCEL_MAX_PARA = 3;
-constexpr int8_t CANCEL_GROUP_MAX_PARA = 2;
-constexpr int8_t CANCEL_GROUP_MIN_PARA = 1;
-constexpr int8_t CANCEL_AS_BUNDLE_MAX_PARA = 4;
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancel &paras)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = CANCEL_MAX_PARA;
-    napi_value argv[CANCEL_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < 1) {
-        ANS_LOGW("Wrong number of arguments");
-        return nullptr;
-    }
-
-    napi_valuetype valuetype = napi_undefined;
-    // argv[0]: id: number
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
-        return nullptr;
-    }
-    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &paras.id));
-
-    // argv[1]: label: string / callback
-    if (argc >= CANCEL_MAX_PARA - 1) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        if (valuetype != napi_string && valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. String or function expected.");
-            return nullptr;
-        }
-        if (valuetype == napi_string) {
-            char str[STR_MAX_SIZE] = {0};
-            size_t strLen = 0;
-            NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
-            paras.label = str;
-        } else {
-            napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
-        }
-    }
-
-    // argv[2]: callback
-    if (argc >= CANCEL_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM2], 1, &paras.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelGroup &paras)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = CANCEL_GROUP_MAX_PARA;
-    napi_value argv[CANCEL_GROUP_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < CANCEL_GROUP_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments");
-        return nullptr;
-    }
-
-    napi_valuetype valuetype = napi_undefined;
-    // argv[0]: groupName: string
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGW("Wrong argument type. String expected.");
-        return nullptr;
-    }
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen));
-    paras.groupName = str;
-
-    // argv[1]: callback
-    if (argc >= CANCEL_GROUP_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value Cancel(napi_env env, napi_callback_info info)
+napi_value Napi_Cancel(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     ParametersInfoCancel paras;
     if (ParseParameters(env, info, paras) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -148,7 +57,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
             ANS_LOGI("Cancel napi_create_async_work end");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -169,12 +78,13 @@ napi_value Cancel(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value CancelAll(napi_env env, napi_callback_info info)
+napi_value Napi_CancelAll(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -202,7 +112,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
             ANS_LOGI("CancelAll napi_create_async_work end");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -223,12 +133,13 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value CancelGroup(napi_env env, napi_callback_info info)
+napi_value Napi_CancelGroup(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     ParametersInfoCancelGroup params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -260,7 +171,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
             ANS_LOGI("CancelGroup napi_create_async_work end");
             AsyncCallbackInfoCancelGroup *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelGroup *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -281,67 +192,13 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelAsBundle &paras)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = CANCEL_AS_BUNDLE_MAX_PARA;
-    napi_value argv[CANCEL_AS_BUNDLE_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < 1) {
-        ANS_LOGW("Wrong number of arguments");
-        return nullptr;
-    }
-
-    napi_valuetype valuetype = napi_undefined;
-    // argv[0]: id: number
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
-        return nullptr;
-    }
-    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &paras.id));
-
-    // argv[1]: representativeBundle: string
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGW("Wrong argument type. String expected.");
-        return nullptr;
-    }
-
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
-    paras.representativeBundle = str;
-
-    // argv[2] : userId
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
-        return nullptr;
-    }
-    napi_get_value_int32(env, argv[PARAM2], &paras.userId);
-
-    // argv[3]: callback
-    if (argc >= CANCEL_AS_BUNDLE_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM3], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM2], 1, &paras.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value CancelAsBundle(napi_env env, napi_callback_info info)
+napi_value Napi_CancelAsBundle(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     ParametersInfoCancelAsBundle paras;
     if (ParseParameters(env, info, paras) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -376,7 +233,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
             ANS_LOGI("Cancel napi_create_async_work end");
             AsyncCallbackInfoCancelAsBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelAsBundle *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }

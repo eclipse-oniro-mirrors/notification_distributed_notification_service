@@ -13,16 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_UNSUBSCRIBE_H
-#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_UNSUBSCRIBE_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_UNSUBSCRIBE_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_UNSUBSCRIBE_H
 
 #include "common.h"
+#include "subscribe.h"
 
 namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
+struct AsyncCallbackInfoUnsubscribe {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    SubscriberInstance *objectInfo = nullptr;
+    CallbackPromiseInfo info;
+};
+
+struct ParametersInfoUnsubscribe {
+    SubscriberInstance *objectInfo = nullptr;
+    napi_ref callback = nullptr;
+};
+
 napi_value Unsubscribe(napi_env env, napi_callback_info info);
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoUnsubscribe &paras);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 
-#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_UNSUBSCRIBE_H
+#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_UNSUBSCRIBE_H

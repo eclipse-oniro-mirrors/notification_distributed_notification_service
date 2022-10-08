@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include "napi_get_active.h"
+
+#include "ans_inner_errors.h"
 #include "get_active.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-void AsyncCompleteCallbackGetAllActiveNotifications(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("GetAllActiveNotifications napi_create_async_work end");
 
@@ -55,7 +58,7 @@ void AsyncCompleteCallbackGetAllActiveNotifications(napi_env env, napi_status st
             result = Common::NapiGetNull(env);
         }
     }
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
@@ -64,12 +67,13 @@ void AsyncCompleteCallbackGetAllActiveNotifications(napi_env env, napi_status st
     asynccallbackinfo = nullptr;
 }
 
-napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
+napi_value Napi_GetAllActiveNotifications(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -94,7 +98,7 @@ napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
             asynccallbackinfo->info.errorCode =
                 NotificationHelper::GetAllActiveNotifications(asynccallbackinfo->notifications);
         },
-        AsyncCompleteCallbackGetAllActiveNotifications,
+        AsyncCompleteCallbackNapiGetAllActiveNotifications,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
@@ -107,7 +111,7 @@ napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
     }
 }
 
-void AsyncCompleteCallbackGetActiveNotifications(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("GetActiveNotifications napi_create_async_work end");
 
@@ -145,7 +149,7 @@ void AsyncCompleteCallbackGetActiveNotifications(napi_env env, napi_status statu
             result = Common::NapiGetNull(env);
         }
     }
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
@@ -154,12 +158,13 @@ void AsyncCompleteCallbackGetActiveNotifications(napi_env env, napi_status statu
     asynccallbackinfo = nullptr;
 }
 
-napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
+napi_value Napi_GetActiveNotifications(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -184,7 +189,7 @@ napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
             asynccallbackinfo->info.errorCode =
                 NotificationHelper::GetActiveNotifications(asynccallbackinfo->requests);
         },
-        AsyncCompleteCallbackGetActiveNotifications,
+        AsyncCompleteCallbackNapiGetActiveNotifications,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
@@ -197,7 +202,7 @@ napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
     }
 }
 
-void AsyncCompleteCallbackGetActiveNotificationCount(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackNapiGetActiveNotificationCount(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("GetActiveNotificationCount napi_create_async_work end");
 
@@ -213,7 +218,7 @@ void AsyncCompleteCallbackGetActiveNotificationCount(napi_env env, napi_status s
     } else {
         napi_create_uint32(env, asynccallbackinfo->num, &result);
     }
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
@@ -222,12 +227,13 @@ void AsyncCompleteCallbackGetActiveNotificationCount(napi_env env, napi_status s
     asynccallbackinfo = nullptr;
 }
 
-napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info)
+napi_value Napi_GetActiveNotificationCount(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -252,7 +258,7 @@ napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info)
             asynccallbackinfo->info.errorCode = NotificationHelper::GetActiveNotificationNums(asynccallbackinfo->num);
             ANS_LOGI("GetActiveNotificationCount count = %{public}" PRIu64 "", asynccallbackinfo->num);
         },
-        AsyncCompleteCallbackGetActiveNotificationCount,
+        AsyncCompleteCallbackNapiGetActiveNotificationCount,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 

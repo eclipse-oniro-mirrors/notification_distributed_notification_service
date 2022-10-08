@@ -98,6 +98,7 @@ static napi_value Init(napi_env env, napi_value exports)
     /*
      * Propertise define
      */
+    ANS_LOGI("libnotification Init start");
     NotificationInit(env, exports);
     ConstantInit(env, exports);
     OHOS::Media::PixelMapNapi::Init(env, exports);
@@ -110,6 +111,7 @@ static napi_value Init(napi_env env, napi_value exports)
  */
 __attribute__((constructor)) void RegisterModule(void)
 {
+    ANS_LOGI("libnotification register start");
     napi_module_register(&_module);
 }
 EXTERN_C_END

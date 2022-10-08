@@ -13,141 +13,14 @@
  * limitations under the License.
  */
 
+#include "napi_distributed.h"
+
+#include "ans_inner_errors.h"
 #include "distributed.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-const int ENABLED_MAX_PARA = 2;
-const int ENABLED_MIN_PARA = 1;
-const int ENABLED_BUNDLE_MAX_PARA = 3;
-const int ENABLED_BUNDLE_MIN_PARA = 2;
-const int IS_ENABLED_BUNDLE_MAX_PARA = 2;
-const int IS_ENABLED_BUNDLE_MIN_PARA = 1;
-const int ENABLED_SYNC_MAX_PARA = 3;
-const int ENABLED_SYNC_MIN_PARA = 2;
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledParams &params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = ENABLED_MAX_PARA;
-    napi_value argv[ENABLED_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < ENABLED_MIN_PARA) {
-        ANS_LOGE("Wrong number of arguments.");
-        return nullptr;
-    }
-    napi_valuetype valuetype = napi_undefined;
-
-    // argv[0]: enable
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_boolean) {
-        ANS_LOGE("Wrong argument type. Bool expected.");
-        return nullptr;
-    }
-    napi_get_value_bool(env, argv[PARAM0], &params.enable);
-
-    // argv[1]:callback
-    if (argc >= ENABLED_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledByBundleParams &params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = ENABLED_BUNDLE_MAX_PARA;
-    napi_value argv[ENABLED_BUNDLE_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < ENABLED_BUNDLE_MIN_PARA) {
-        ANS_LOGE("Wrong number of arguments.");
-        return nullptr;
-    }
-
-    // argv[0]: bundle
-    napi_valuetype valuetype = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
-        return nullptr;
-    }
-    auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
-    if (retValue == nullptr) {
-        ANS_LOGE("GetBundleOption failed.");
-        return nullptr;
-    }
-
-    // argv[1]: enable
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_boolean) {
-        ANS_LOGE("Wrong argument type. Bool expected.");
-        return nullptr;
-    }
-    napi_get_value_bool(env, argv[PARAM1], &params.enable);
-
-    // argv[2]:callback
-    if (argc >= ENABLED_BUNDLE_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM2], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnabledByBundleParams &params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = IS_ENABLED_BUNDLE_MAX_PARA;
-    napi_value argv[IS_ENABLED_BUNDLE_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < IS_ENABLED_BUNDLE_MIN_PARA) {
-        ANS_LOGE("Wrong number of arguments.");
-        return nullptr;
-    }
-
-    // argv[0]: bundle
-    napi_valuetype valuetype = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
-        return nullptr;
-    }
-    auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
-    if (retValue == nullptr) {
-        ANS_LOGE("GetBundleOption failed.");
-        return nullptr;
-    }
-
-    // argv[1]:callback
-    if (argc >= IS_ENABLED_BUNDLE_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-void AsyncCompleteCallbackIsDistributedEnabled(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackNapiIsDistributedEnabled(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("enter");
     if (!data) {
@@ -162,7 +35,7 @@ void AsyncCompleteCallbackIsDistributedEnabled(napi_env env, napi_status status,
     } else {
         napi_get_boolean(env, asynccallbackinfo->enable, &result);
     }
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
@@ -171,12 +44,13 @@ void AsyncCompleteCallbackIsDistributedEnabled(napi_env env, napi_status status,
     asynccallbackinfo = nullptr;
 }
 
-napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
+napi_value Napi_IsDistributedEnabled(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -204,7 +78,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
                 ANS_LOGI("IsDistributedEnabled enable = %{public}d", asynccallbackinfo->enable);
             }
         },
-        AsyncCompleteCallbackIsDistributedEnabled,
+        AsyncCompleteCallbackNapiIsDistributedEnabled,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
@@ -217,12 +91,13 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value EnableDistributed(napi_env env, napi_callback_info info)
+napi_value Napi_EnableDistributed(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -254,7 +129,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
             ANS_LOGI("EnableDistributed napi_create_async_work end");
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -275,12 +150,13 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
+napi_value Napi_EnableDistributedByBundle(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     EnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -310,7 +186,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
             ANS_LOGI("EnableDistributedByBundle napi_create_async_work end");
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -331,12 +207,13 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
+napi_value Napi_EnableDistributedSelf(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -366,7 +243,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
             ANS_LOGI("EnableDistributedSelf napi_create_async_work end");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -387,7 +264,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
     }
 }
 
-void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackNapiIsDistributedEnableByBundle(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("enter");
     if (!data) {
@@ -402,7 +279,7 @@ void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status 
     } else {
         napi_get_boolean(env, asynccallbackinfo->enable, &result);
     }
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
@@ -411,12 +288,13 @@ void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status 
     asynccallbackinfo = nullptr;
 }
 
-napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
+napi_value Napi_IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     IsEnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -442,7 +320,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
             asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
                 asynccallbackinfo->params.option, asynccallbackinfo->enable);
         },
-        AsyncCompleteCallbackIsDistributedEnableByBundle,
+        AsyncCompleteCallbackNapiIsDistributedEnableByBundle,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
@@ -455,7 +333,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
     }
 }
 
-void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackNapiGetDeviceRemindType(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("enter");
     if (!data) {
@@ -475,7 +353,7 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
         }
         napi_create_int32(env, (int32_t)outType, &result);
     }
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
@@ -484,12 +362,13 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
     asynccallbackinfo = nullptr;
 }
 
-napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
+napi_value Napi_GetDeviceRemindType(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -513,7 +392,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
             asynccallbackinfo->info.errorCode =
                 NotificationHelper::GetDeviceRemindType(asynccallbackinfo->remindType);
         },
-        AsyncCompleteCallbackGetDeviceRemindType,
+        AsyncCompleteCallbackNapiGetDeviceRemindType,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
@@ -526,59 +405,13 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledWithoutAppParams &params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = ENABLED_SYNC_MAX_PARA;
-    napi_value argv[ENABLED_SYNC_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
-    if (argc < ENABLED_SYNC_MIN_PARA) {
-        ANS_LOGE("Wrong number of arguments.");
-        return nullptr;
-    }
-
-    // argv[0]: userId
-    napi_valuetype valuetype = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
-        return nullptr;
-    }
-    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &params.userId));
-    if (params.userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Wrong userId[%{public}d].", params.userId);
-        return nullptr;
-    }
-
-    // argv[1]: enable
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_boolean) {
-        ANS_LOGE("Wrong argument type. Bool expected.");
-        return nullptr;
-    }
-    napi_get_value_bool(env, argv[PARAM1], &params.enable);
-
-    // argv[2]:callback
-    if (argc >= ENABLED_SYNC_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM2], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
+napi_value Napi_SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     EnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::JSParaError(env, params.callback);
     }
 
@@ -611,7 +444,7 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
             AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
@@ -637,51 +470,13 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
     return promise;
 }
 
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetEnabledWithoutAppParams &params)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = ENABLED_SYNC_MIN_PARA;
-    napi_value argv[ENABLED_SYNC_MIN_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < ENABLED_SYNC_MIN_PARA - 1) {
-        ANS_LOGE("Wrong number of arguments.");
-        return nullptr;
-    }
-
-    // argv[0]: userId
-    napi_valuetype valuetype = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
-        return nullptr;
-    }
-    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &params.userId));
-    if (params.userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Wrong userId[%{public}d].", params.userId);
-        return nullptr;
-    }
-
-    // argv[1]:callback
-    if (argc >= ENABLED_SYNC_MIN_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
-        }
-        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
-
-napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
+napi_value Napi_GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
 
     GetEnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::JSParaError(env, params.callback);
     }
 
@@ -721,7 +516,7 @@ napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
                 } else {
                     napi_get_boolean(env, asynccallbackinfo->enable, &result);
                 }
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+                Common::CreateReturnValue(env, asynccallbackinfo->info, result);
                 if (asynccallbackinfo->info.callback != nullptr) {
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }

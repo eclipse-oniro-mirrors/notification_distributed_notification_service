@@ -20,9 +20,27 @@
 namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
+
+struct AsyncCallbackInfoPublish {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    NotificationRequest request;
+    CallbackPromiseInfo info;
+};
+
+struct ParametersInfoPublish {
+    NotificationRequest request;
+    napi_ref callback = nullptr;
+};
+
 napi_value Publish(napi_env env, napi_callback_info info);
 napi_value ShowNotification(napi_env env, napi_callback_info info);
 napi_value PublishAsBundle(napi_env env, napi_callback_info info);
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoPublish &params);
+napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info, ParametersInfoPublish &params);
+napi_value ParsePublishAsBundleParameters(
+    const napi_env &env, const napi_callback_info &info, ParametersInfoPublish &params);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_PUBLISH_H
