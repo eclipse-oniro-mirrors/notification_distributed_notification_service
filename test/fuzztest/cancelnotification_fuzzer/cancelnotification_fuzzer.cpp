@@ -22,6 +22,10 @@ namespace OHOS {
     {
         std::string label(data);
         int32_t notificationId = static_cast<int32_t>(GetU32Data(data));
+        // test CancelAllNotifications function
+        Notification::NotificationHelper::CancelAllNotifications();
+        // test CancelNotification function
+        Notification::NotificationHelper::CancelNotification(notificationId);
         return Notification::NotificationHelper::CancelNotification(label, notificationId) == ERR_OK;
     }
 }

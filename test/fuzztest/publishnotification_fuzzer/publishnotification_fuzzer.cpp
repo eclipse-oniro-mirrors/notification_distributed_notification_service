@@ -75,6 +75,9 @@ namespace OHOS {
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(types);
         request.SetSlotType(slotType);
 
+        Notification::NotificationHelper::PublishNotification(request, stringData);
+
+        Notification::NotificationHelper::PublishNotification(request);
         return Notification::NotificationHelper::PublishNotification(stringData, request) == ERR_OK;
     }
 }

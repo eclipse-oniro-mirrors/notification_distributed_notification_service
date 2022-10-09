@@ -13,22 +13,42 @@
  * limitations under the License.
  */
 
-#include "removenotificationslot_fuzzer.h"
+#include "addnotificationslot_fuzzer.h"
 
 #include "notification_helper.h"
 
 namespace OHOS {
     namespace {
+        constexpr uint8_t ENABLE = 2;
+        constexpr uint8_t SLOT_LEVEL_NUM = 6;
+        constexpr uint8_t SLOT_VISIBLENESS_TYPE_NUM = 4;
         constexpr uint8_t SLOT_TYPE_NUM = 5;
     }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
+        std::string stringData(data);
+
+        Notification::NotificationSlot slot;
+        slot.SetDescription(stringData);
+        slot.SetEnableLight(*data % ENABLE);
+        slot.SetEnableVibration(*data % ENABLE);
+        slot.SetLedLightColor(GetU32Data(data));
+
+        uint8_t level = *data % SLOT_LEVEL_NUM;
+        Notification::NotificationSlot::NotificationLevel notificatoinLevel =
+            Notification::NotificationSlot::NotificationLevel(level);
+        slot.SetLevel(notificatoinLevel);
+
+        uint8_t visibleness = *data % SLOT_VISIBLENESS_TYPE_NUM;
+        Notification::NotificationConstant::VisiblenessType visiblenessType =
+            Notification::NotificationConstant::VisiblenessType(visibleness);
+        slot.SetLockscreenVisibleness(visiblenessType);
+
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
-        // test RemoveNotificationSlot function
-        Notification::NotificationHelper::RemoveNotificationSlot(slotType);
-        // test RemoveAllSlots function
-        return Notification::NotificationHelper::RemoveAllSlots() == ERR_OK;
+        slot.SetType(slotType);
+
+        return Notification::NotificationHelper::AddNotificationSlot(slot) == ERR_OK;
     }
 }
 
