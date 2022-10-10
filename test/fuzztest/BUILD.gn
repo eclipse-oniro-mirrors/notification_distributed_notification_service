@@ -15,8 +15,10 @@ group("fuzztest") {
   testonly = true
 
   deps = [
+    "addnotificationslot_fuzzer:AddNotificationSlotFuzzTest",
     "addnotificationslots_fuzzer:AddNotificationSlotsFuzzTest",
     "addslotbytype_fuzzer:AddSlotByTypeFuzzTest",
+    "cancelasbundle_fuzzer:CancelAsBundleFuzzTest",
     "cancelnotification_fuzzer:CancelNotificationFuzzTest",
     "getnotificationslot_fuzzer:GetNotificationSlotFuzzTest",
     "getnotificationslotnumasbundle_fuzzer:GetNotificationSlotNumAsBundleFuzzTest",
