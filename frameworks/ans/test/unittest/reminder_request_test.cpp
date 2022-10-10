@@ -533,7 +533,7 @@ HWTEST_F(ReminderRequestTest, Marshalling_00100, Function | SmallTest | Level1)
  * @tc.name: CanShow_00001
  * @tc.desc: Test CanShow parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
 {
@@ -545,7 +545,7 @@ HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
  * @tc.name: CanShow_00002
  * @tc.desc: Test CanShow parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, CanShow_00002, Function | SmallTest | Level1)
 {
@@ -559,7 +559,7 @@ HWTEST_F(ReminderRequestTest, CanShow_00002, Function | SmallTest | Level1)
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
 {
@@ -571,7 +571,7 @@ HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
  * @tc.name: SetExpired_00001
  * @tc.desc: Test SetExpired parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, SetExpired_00001, Function | SmallTest | Level1)
 {
@@ -585,7 +585,7 @@ HWTEST_F(ReminderRequestTest, SetExpired_00001, Function | SmallTest | Level1)
  * @tc.name: HandleTimeZoneChange_00001
  * @tc.desc: Test HandleTimeZoneChange parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00001, Function | SmallTest | Level1)
 {
@@ -601,7 +601,7 @@ HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00001, Function | SmallTest |
  * @tc.name: HandleTimeZoneChange_00002
  * @tc.desc: Test HandleTimeZoneChange parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00002, Function | SmallTest | Level1)
 {
@@ -617,7 +617,7 @@ HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00002, Function | SmallTest |
  * @tc.name: HandleTimeZoneChange_00003
  * @tc.desc: Test HandleTimeZoneChange parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00003, Function | SmallTest | Level1)
 {
@@ -633,7 +633,7 @@ HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00003, Function | SmallTest |
  * @tc.name: HandleTimeZoneChange_00001
  * @tc.desc: Test HandleSysTimeChange parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00001, Function | SmallTest | Level1)
 {
@@ -648,7 +648,7 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00001, Function | SmallTest | 
  * @tc.name: OnSnooze_00001
  * @tc.desc: Test OnSnooze parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00001, Function | SmallTest | Level1)
 {
@@ -661,7 +661,7 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00001, Function | SmallTest | Level1)
  * @tc.name: OnSnooze_00002
  * @tc.desc: Test OnSnooze parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00002, Function | SmallTest | Level1)
 {
@@ -674,7 +674,7 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00002, Function | SmallTest | Level1)
  * @tc.name: OnSnooze_00003
  * @tc.desc: Test OnSnooze parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00003, Function | SmallTest | Level1)
 {
@@ -687,7 +687,7 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00003, Function | SmallTest | Level1)
  * @tc.name: OnTerminate_00001
  * @tc.desc: Test OnTerminate parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, OnTerminate_00001, Function | SmallTest | Level1)
 {
@@ -700,7 +700,7 @@ HWTEST_F(ReminderRequestTest, OnTerminate_00001, Function | SmallTest | Level1)
  * @tc.name: OnTimeZoneChange_00001
  * @tc.desc: Test OnTerOnTimeZoneChangeminate parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, OnTimeZoneChange_00001, Function | SmallTest | Level1)
 {
@@ -712,7 +712,7 @@ HWTEST_F(ReminderRequestTest, OnTimeZoneChange_00001, Function | SmallTest | Lev
  * @tc.name: RecoverInt64FromDb_00001
  * @tc.desc: Test RecoverInt64FromDb parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00001, Function | SmallTest | Level1)
 {
@@ -727,7 +727,7 @@ HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00001, Function | SmallTest | L
  * @tc.name: RecoverInt64FromDb_00002
  * @tc.desc: Test RecoverInt64FromDb parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | Level1)
 {
@@ -742,7 +742,7 @@ HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | L
  * @tc.name: RecoverInt64FromDb_00003
  * @tc.desc: Test RecoverInt64FromDb parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00003, Function | SmallTest | Level1)
 {
@@ -757,7 +757,7 @@ HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00003, Function | SmallTest | L
  * @tc.name: StringSplit_00001
  * @tc.desc: Test StringSplit parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, StringSplit_00001, Function | SmallTest | Level1)
 {
@@ -772,7 +772,7 @@ HWTEST_F(ReminderRequestTest, StringSplit_00001, Function | SmallTest | Level1)
  * @tc.name: StringSplit_00002
  * @tc.desc: Test StringSplit parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, StringSplit_00002, Function | SmallTest | Level1)
 {
@@ -787,7 +787,7 @@ HWTEST_F(ReminderRequestTest, StringSplit_00002, Function | SmallTest | Level1)
  * @tc.name: SetMaxScreenWantAgentInfo_00001
  * @tc.desc: Test SetMaxScreenWantAgentInfo parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_00001, Function | SmallTest | Level1)
 {
@@ -801,7 +801,7 @@ HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_00001, Function | SmallT
  * @tc.name: SetSnoozeContent_00001
  * @tc.desc: Test SetSnoozeContent parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, SetSnoozeContent_00001, Function | SmallTest | Level1)
 {
@@ -815,7 +815,7 @@ HWTEST_F(ReminderRequestTest, SetSnoozeContent_00001, Function | SmallTest | Lev
  * @tc.name: SetWantAgentInfo_00001
  * @tc.desc: Test SetWantAgentInfo parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, SetWantAgentInfo_00001, Function | SmallTest | Level1)
 {
@@ -829,7 +829,7 @@ HWTEST_F(ReminderRequestTest, SetWantAgentInfo_00001, Function | SmallTest | Lev
  * @tc.name: SetReminderTimeInMilli_00001
  * @tc.desc: Test SetReminderTimeInMilli parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5UYGJ
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, SetReminderTimeInMilli_00001, Function | SmallTest | Level1)
 {
