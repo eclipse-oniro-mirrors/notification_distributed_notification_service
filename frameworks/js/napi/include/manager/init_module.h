@@ -36,7 +36,6 @@ static napi_value Init(napi_env env, napi_value exports);
  * Module define
  */
 napi_module _module_manager = {
-
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,

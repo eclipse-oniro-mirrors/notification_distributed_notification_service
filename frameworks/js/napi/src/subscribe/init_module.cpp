@@ -30,11 +30,11 @@ napi_value NotificationSubscribeInit(napi_env env, napi_value exports)
     ANS_LOGI("NotificationSubscribeInit start");
 
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_FUNCTION("subscribe", Napi_Subscribe),
-        DECLARE_NAPI_FUNCTION("unsubscribe", Napi_Unsubscribe),
-        DECLARE_NAPI_FUNCTION("remove", Napi_Remove),
-        DECLARE_NAPI_FUNCTION("removeAll", Napi_RemoveAll),
-        DECLARE_NAPI_FUNCTION("removeGroupByBundle", Napi_RemoveGroupByBundle),
+        DECLARE_NAPI_FUNCTION("subscribe", NapiSubscribe),
+        DECLARE_NAPI_FUNCTION("unsubscribe", NapiUnsubscribe),
+        DECLARE_NAPI_FUNCTION("remove", NapiRemove),
+        DECLARE_NAPI_FUNCTION("removeAll", NapiRemoveAll),
+        DECLARE_NAPI_FUNCTION("removeGroupByBundle", NapiRemoveGroupByBundle),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

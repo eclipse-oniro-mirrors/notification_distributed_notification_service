@@ -21,8 +21,8 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
-napi_value Napi_Subscribe(napi_env env, napi_callback_info info);
-napi_value Napi_Unsubscribe(napi_env env, napi_callback_info info);
+napi_value NapiSubscribe(napi_env env, napi_callback_info info);
+napi_value NapiUnsubscribe(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_SUBSCRIBE_H

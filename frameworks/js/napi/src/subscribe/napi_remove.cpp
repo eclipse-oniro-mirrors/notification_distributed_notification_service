@@ -55,7 +55,7 @@ void NapiRemoveCompleteCallback(napi_env env, napi_status status, void *data)
     removeInfo = nullptr;
 }
 
-napi_value Napi_Remove(napi_env env, napi_callback_info info)
+napi_value NapiRemove(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
     RemoveParams params {};
@@ -83,10 +83,9 @@ napi_value Napi_Remove(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value Napi_RemoveAll(napi_env env, napi_callback_info info)
+napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
-
     RemoveParams params {};
     if (ParseParametersByRemoveAll(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -113,7 +112,6 @@ napi_value Napi_RemoveAll(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {
                 auto &infos = asynccallbackinfo->params.bundleAndKeyInfo.value();
-
                 asynccallbackinfo->info.errorCode = NotificationHelper::RemoveAllNotifications(infos.option);
             } else if (asynccallbackinfo->params.hasUserId) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::RemoveNotifications(
@@ -164,10 +162,9 @@ void AsyncCompleteCallbackNapiRemoveGroupByBundle(napi_env env, napi_status stat
     asynccallbackinfo = nullptr;
 }
 
-napi_value Napi_RemoveGroupByBundle(napi_env env, napi_callback_info info)
+napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
-
     RemoveParamsGroupByBundle params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -204,7 +201,6 @@ napi_value Napi_RemoveGroupByBundle(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-
     if (asynccallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {

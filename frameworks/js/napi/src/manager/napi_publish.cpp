@@ -21,10 +21,9 @@
 namespace OHOS {
 namespace NotificationNapi {
 
-napi_value Napi_Publish(napi_env env, napi_callback_info info)
+napi_value NapiPublish(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
-
     ParametersInfoPublish params;
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -36,7 +35,6 @@ napi_value Napi_Publish(napi_env env, napi_callback_info info)
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, params.callback);
     }
-
     asynccallbackinfo->request = params.request;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
@@ -75,7 +73,6 @@ napi_value Napi_Publish(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-
     if (asynccallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {
@@ -83,10 +80,9 @@ napi_value Napi_Publish(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value Napi_ShowNotification(napi_env env, napi_callback_info info)
+napi_value NapiShowNotification(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
-
     ParametersInfoPublish params;
     if (ParseShowOptions(env, info, params) == nullptr) {
         ANS_LOGW("parse showOptions failed");
@@ -99,7 +95,6 @@ napi_value Napi_ShowNotification(napi_env env, napi_callback_info info)
         ANS_LOGW("failed to create asynccallbackinfo");
         return Common::JSParaError(env, params.callback);
     }
-
     asynccallbackinfo->request = params.request;
 
     napi_value resourceName = nullptr;
@@ -110,7 +105,6 @@ napi_value Napi_ShowNotification(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Show napi_create_async_work start");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             ANS_LOGI("Show napi_create_async_work start notificationId = %{public}d, contentType = "
                      "%{public}d",
@@ -140,10 +134,9 @@ napi_value Napi_ShowNotification(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-napi_value Napi_PublishAsBundle(napi_env env, napi_callback_info info)
+napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
-
     ParametersInfoPublish params;
     if (ParsePublishAsBundleParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -194,7 +187,6 @@ napi_value Napi_PublishAsBundle(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-
     if (asynccallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {

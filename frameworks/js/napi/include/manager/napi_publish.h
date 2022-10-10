@@ -21,9 +21,9 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
-napi_value Napi_Publish(napi_env env, napi_callback_info info);
-napi_value Napi_ShowNotification(napi_env env, napi_callback_info info);
-napi_value Napi_PublishAsBundle(napi_env env, napi_callback_info info);
+napi_value NapiPublish(napi_env env, napi_callback_info info);
+napi_value NapiShowNotification(napi_env env, napi_callback_info info);
+napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_PUBLISH_H

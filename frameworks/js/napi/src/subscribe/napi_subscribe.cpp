@@ -21,10 +21,9 @@
 
 namespace OHOS {
 namespace NotificationNapi {
-napi_value Napi_Subscribe(napi_env env, napi_callback_info info)
+napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
-
     napi_ref callback = nullptr;
     SubscriberInstance *objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
@@ -96,7 +95,6 @@ napi_value Napi_Subscribe(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-
     if (asynccallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {
@@ -104,10 +102,9 @@ napi_value Napi_Subscribe(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value Napi_Unsubscribe(napi_env env, napi_callback_info info)
+napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("Unsubscribe start");
-
     ParametersInfoUnsubscribe paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -167,7 +164,6 @@ napi_value Napi_Unsubscribe(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-
     if (asynccallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {

@@ -22,12 +22,13 @@ namespace OHOS {
 namespace NotificationNapi {
 std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> Common::wantAgent_;
 
-static const std::unordered_map<int32_t, std::string> ErrorCodeToMsg {
+namespace {
+static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_PERMISSION_DENIED, "Permission denied"},
     {ERROR_PARAM_INVALID, "Invalid parameter"},
     {ERROR_SYSTEM_CAP_ERROR, "SystemCapability not found"},
     {ERROR_INTERNAL_ERROR, "Internal error"},
-    {ERROR_IPC_ERROR, "marshalling or unmarshalling error"},
+    {ERROR_IPC_ERROR, "Marshalling or unmarshalling error"},
     {ERROR_SERVICE_CONNECT_ERROR, "Failed to connect service"},
     {ERROR_NOTIFICATION_CLOSED, "Notification is not enabled"},
     {ERROR_SLOT_CLOSED, "Notification slot is not enabled"},
@@ -39,6 +40,8 @@ static const std::unordered_map<int32_t, std::string> ErrorCodeToMsg {
     {ERROR_READ_TEMPLATE_CONFIG_FAILED, "Read template config failed"},
     {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
 };
+}
+
 Common::Common()
 {}
 
@@ -71,8 +74,8 @@ napi_value Common::CreateErrorValue(napi_env env, int32_t errCode)
     napi_value code = nullptr;
     napi_create_int32(env, errCode, &code);
 
-    auto iter = ErrorCodeToMsg.find(errCode);
-    std::string errMsg = iter != ErrorCodeToMsg.end() ? iter->second : "";
+    auto iter = ERROR_CODE_MESSAGE.find(errCode);
+    std::string errMsg = iter != ERROR_CODE_MESSAGE.end() ? iter->second : "";
     napi_value message = nullptr;
     napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
 
