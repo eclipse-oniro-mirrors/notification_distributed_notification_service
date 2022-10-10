@@ -24,9 +24,6 @@
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
-static char dumpReminder[] =
-"Reminder[reminderId=-1, type=3, state='Inactive, nextTriggerTime=1970-01-01 00:00:00]";
-
 class ReminderRequestChild : public ReminderRequest {
 public:
     ReminderRequestChild() : ReminderRequest() {};
@@ -563,8 +560,9 @@ HWTEST_F(ReminderRequestTest, CanShow_00002, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
 {
+    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive, nextTriggerTime=1970-01-01 00:00:00]";
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->Dump(), dumpReminder);
+    EXPECT_EQ(rrc->Dump(), ret);
 }
 
 /**
@@ -791,7 +789,8 @@ HWTEST_F(ReminderRequestTest, StringSplit_00002, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_00001, Function | SmallTest | Level1)
 {
-    std::shared_ptr<ReminderRequest::MaxScreenAgentInfo> maxScreenWantAgentInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
+    std::shared_ptr<ReminderRequest::MaxScreenAgentInfo> maxScreenWantAgentInfo =
+    std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
     EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), maxScreenWantAgentInfo);
