@@ -17,6 +17,8 @@
 #include "constant.h"
 #include "napi_cancel.h"
 #include "napi_display_badge.h"
+#include "napi_distributed.h"
+#include "napi_disturb_mode.h"
 #include "napi_enable_notification.h"
 #include "napi_get_active.h"
 #include "napi_publish.h"
@@ -62,6 +64,17 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", NapiIsBadgeDisplayed),
         DECLARE_NAPI_FUNCTION("isSupportTemplate", NapiIsSupportTemplate),
+        DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", NapiSetDoNotDisturbDate),
+        DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", NapiGetDoNotDisturbDate),
+        DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", NapiSupportDoNotDisturbMode),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabled", NapiIsDistributedEnabled),
+        DECLARE_NAPI_FUNCTION("setDistributedEnable", NapiEnableDistributed),
+        DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", NapiEnableDistributedByBundle),
+        DECLARE_NAPI_FUNCTION("enableDistributedSelf", NapiEnableDistributedSelf),
+        DECLARE_NAPI_FUNCTION("isDistributedEnableByBundle", NapiIsDistributedEnableByBundle),
+        DECLARE_NAPI_FUNCTION("getDeviceRemindType", NapiGetDeviceRemindType),
+        DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
+        DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
