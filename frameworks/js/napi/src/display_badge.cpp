@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enable_notification.h"
+#include "display_badge.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -21,33 +21,6 @@ const int ENABLE_BADGE_DISPLAYED_MAX_PARA = 3;
 const int ENABLE_BADGE_DISPLAYED_MIN_PARA = 2;
 const int IS_DISPLAY_BADGE_MAX_PARA = 2;
 const int IS_DISPLAY_BADGE_MIN_PARA = 1;
-
-struct EnableBadgeParams {
-    NotificationBundleOption option;
-    bool enable = false;
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoEnableBadge {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    EnableBadgeParams params;
-    CallbackPromiseInfo info;
-};
-
-struct IsDisplayBadgeParams {
-    NotificationBundleOption option;
-    napi_ref callback = nullptr;
-    bool hasBundleOption = false;
-};
-
-struct AsyncCallbackInfoIsDisplayBadge {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    IsDisplayBadgeParams params;
-    CallbackPromiseInfo info;
-    bool enabled = false;
-};
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableBadgeParams &params)
 {

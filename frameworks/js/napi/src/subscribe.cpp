@@ -866,14 +866,6 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
     }
 }
 
-struct AsyncCallbackInfoSubscribe {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
-    NotificationSubscribeInfo subscriberInfo;
-    CallbackPromiseInfo info;
-};
-
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo)
 {
     std::lock_guard<std::mutex> lock(mutex_);

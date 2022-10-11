@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,18 +14,6 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
-group("napi_reminder") {
-  deps = [ "src/reminder:reminderagent" ]
-}
-
-group("napi_notification") {
-  deps = [
-    ":notification",
-    "src/manager:notificationmanager",
-    "src/subscribe:notificationsubscribe",
-  ]
-}
-
 cflags = []
 
 config("native_module_config") {
@@ -38,35 +26,32 @@ config("native_module_config") {
   }
 }
 
-ohos_shared_library("notification") {
+ohos_shared_library("notificationmanager") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_napi_path}/inner/napi_common",
     "//foundation/multimedia/image_framework/interfaces/kits/js/common/include/",
-    "include",
+    "../../include",
+    "../../include/manager",
     "//third_party/node/src",
-    "//third_party/libuv/include",
-    "//third_party/json/single_include",
   ]
 
   configs = [ ":native_module_config" ]
 
   sources = [
-    "src/ans_template.cpp",
-    "src/cancel.cpp",
-    "src/common.cpp",
-    "src/constant.cpp",
-    "src/display_badge.cpp",
-    "src/distributed.cpp",
-    "src/disturb_mode.cpp",
-    "src/enable_notification.cpp",
-    "src/get_active.cpp",
-    "src/init.cpp",
-    "src/publish.cpp",
-    "src/remove.cpp",
-    "src/slot.cpp",
-    "src/subscribe.cpp",
-    "src/unsubscribe.cpp",
+    "../ans_template.cpp",
+    "../cancel.cpp",
+    "../common.cpp",
+    "../constant.cpp",
+    "../display_badge.cpp",
+    "../distributed.cpp",
+    "../disturb_mode.cpp",
+    "../enable_notification.cpp",
+    "../get_active.cpp",
+    "../publish.cpp",
+    "../slot.cpp",
+    "init_module.cpp",
+    "napi_publish.cpp",
   ]
 
   deps = [

@@ -14,25 +14,12 @@
  */
 
 #include "unsubscribe.h"
-#include "subscribe.h"
 
 #include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {
 const int UNSUBSCRIBE_MAX_PARA = 2;
-
-struct AsyncCallbackInfoUnsubscribe {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
-    CallbackPromiseInfo info;
-};
-
-struct ParametersInfoUnsubscribe {
-    SubscriberInstance *objectInfo = nullptr;
-    napi_ref callback = nullptr;
-};
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoUnsubscribe &paras)
 {

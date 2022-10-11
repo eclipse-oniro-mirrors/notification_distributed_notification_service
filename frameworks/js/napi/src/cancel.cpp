@@ -22,48 +22,6 @@ constexpr int8_t CANCEL_GROUP_MAX_PARA = 2;
 constexpr int8_t CANCEL_GROUP_MIN_PARA = 1;
 constexpr int8_t CANCEL_AS_BUNDLE_MAX_PARA = 4;
 
-struct ParametersInfoCancel {
-    int32_t id = 0;
-    std::string label = "";
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoCancel {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    int32_t id = 0;
-    std::string label;
-    CallbackPromiseInfo info;
-};
-
-struct ParametersInfoCancelGroup {
-    std::string groupName = "";
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoCancelGroup {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    CallbackPromiseInfo info;
-    ParametersInfoCancelGroup params {};
-};
-
-struct  ParametersInfoCancelAsBundle {
-    int32_t id = 0;
-    std::string representativeBundle = "";
-    int32_t userId = 0;
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoCancelAsBundle {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    int32_t id = 0;
-    std::string representativeBundle = "";
-    int32_t userId = 0;
-    CallbackPromiseInfo info;
-};
-
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancel &paras)
 {
     ANS_LOGI("enter");

@@ -21,35 +21,6 @@ const int ENABLE_NOTIFICATION_MAX_PARA = 3;
 const int ENABLE_NOTIFICATION_MIN_PARA = 2;
 const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
 
-struct EnableParams {
-    NotificationBundleOption option;
-    bool enable = false;
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoEnable {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    EnableParams params;
-    CallbackPromiseInfo info;
-};
-
-struct IsEnableParams {
-    NotificationBundleOption option;
-    napi_ref callback = nullptr;
-    bool hasBundleOption = false;
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    bool hasUserId = false;
-};
-
-struct AsyncCallbackInfoIsEnable {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    IsEnableParams params;
-    CallbackPromiseInfo info;
-    bool allowed = false;
-};
-
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableParams &params)
 {
     ANS_LOGI("enter");

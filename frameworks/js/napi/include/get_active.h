@@ -22,6 +22,15 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
+struct AsyncCallbackInfoActive {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    CallbackPromiseInfo info;
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    std::vector<sptr<OHOS::Notification::NotificationRequest>> requests;
+    uint64_t num = 0;
+};
+
 napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info);
 napi_value GetActiveNotifications(napi_env env, napi_callback_info info);
 napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info);

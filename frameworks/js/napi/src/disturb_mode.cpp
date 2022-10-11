@@ -21,42 +21,6 @@ const int SET_DISTURB_MAX_PARA = 3;
 const int SET_DISTURB_MIN_PARA = 1;
 const int GET_DISTURB_MAX_PARA = 2;
 
-struct SetDoNotDisturbDateParams {
-    NotificationDoNotDisturbDate date;
-    bool hasUserId = false;
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    napi_ref callback = nullptr;
-};
-
-struct GetDoNotDisturbDateParams {
-    bool hasUserId = false;
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoSetDoNotDisturb {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    SetDoNotDisturbDateParams params;
-    CallbackPromiseInfo info;
-};
-
-struct AsyncCallbackInfoGetDoNotDisturb {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    GetDoNotDisturbDateParams params;
-    NotificationDoNotDisturbDate date;
-    CallbackPromiseInfo info;
-};
-
-struct AsyncCallbackInfoSupportDoNotDisturb {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    napi_ref callback = nullptr;
-    bool isSupported = false;
-    CallbackPromiseInfo info;
-};
-
 napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetDoNotDisturbDateParams &params)
 {
     ANS_LOGI("enter");
