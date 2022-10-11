@@ -66,7 +66,7 @@ describe("ReminderHelperTest", function () {
         function reminderCallback(err, reminderId){
             let end = getTime();
             let times = end - begin;
-            if (times < 50) {
+            if (times < 500) {
                 expect(true).assertTrue();
             } else {
                 expect(false).assertTrue();
