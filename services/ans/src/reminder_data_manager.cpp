@@ -42,23 +42,24 @@ std::mutex ReminderDataManager::SHOW_MUTEX;
 std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
 
-void ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
+ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption)
 {
     if (CheckReminderLimitExceededLocked(bundleOption)) {
-        return;
+        return ERR_REMINDER_NUMBER_OVERLOAD;
     }
     UpdateAndSaveReminderLocked(reminder, bundleOption);
     StartRecentReminder();
+    return ERR_OK;
 }
 
-void ReminderDataManager::CancelReminder(
+ErrCode ReminderDataManager::CancelReminder(
     const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption)
 {
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, bundleOption->GetBundleName());
     if (reminder == nullptr) {
         ANSR_LOGW("Cancel reminder, not find the reminder");
-        return;
+        return ERR_REMINDER_NOT_EXIST;
     }
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", reminderId);
@@ -73,13 +74,15 @@ void ReminderDataManager::CancelReminder(
     RemoveReminderLocked(id);
     CancelNotification(reminder);
     StartRecentReminder();
+    return ERR_OK;
 }
 
-void ReminderDataManager::CancelAllReminders(const std::string &packageName, const int32_t &userId)
+ErrCode ReminderDataManager::CancelAllReminders(const std::string &packageName, const int32_t &userId)
 {
     ANSR_LOGD("CancelAllReminders, userId=%{public}d, pkgName=%{public}s",
         userId, packageName.c_str());
     CancelRemindersImplLocked(packageName, userId);
+    return ERR_OK;
 }
 
 void ReminderDataManager::GetValidReminders(

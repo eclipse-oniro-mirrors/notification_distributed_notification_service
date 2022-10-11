@@ -16,6 +16,8 @@
 #ifndef BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_INNER_ERRORS_H
 #define BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_INNER_ERRORS_H
 
+#include <map>
+#include <sstream>
 #include "errors.h"
 
 namespace OHOS {
@@ -77,6 +79,24 @@ enum ErrorCode : uint32_t {
     ERR_ANS_SUBSCRIBER_IS_DELETING,
     ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED,
     ERR_ANS_DLP_HAP,
+};
+
+enum ReminderErrorCode : uint32_t {
+    ERR_REMINDER_PERMISSION_DENIED = 201,
+    ERR_REMINDER_INVALID_PARAM = 401,
+    ERR_REMINDER_NOTIFICATION_NOT_ENABLE = 1700001,
+    ERR_REMINDER_NUMBER_OVERLOAD,
+    ERR_REMINDER_NOT_EXIST,
+    ERR_REMINDER_PACKAGE_NOT_EXIST,
+};
+
+static std::map<int32_t, std::string> reminderErrCodeMsgMap = {
+    { ERR_REMINDER_PERMISSION_DENIED, "BussinessError 201: Permission denied." },
+    { ERR_REMINDER_INVALID_PARAM, "BussinessError 401: Parameter error." },
+    { ERR_REMINDER_NOTIFICATION_NOT_ENABLE, "BussinessError 1700001: Notification not enable." },
+    { ERR_REMINDER_NUMBER_OVERLOAD, "BussinessError 1700002: The number of reminders exceeds the limit." },
+    { ERR_REMINDER_NOT_EXIST, "BussinessError 1700003: The reminder not exist." },
+    { ERR_REMINDER_PACKAGE_NOT_EXIST, "BussinessError 1700004: The package name not exist." }
 };
 }  // namespace Notification
 }  // namespace OHOS

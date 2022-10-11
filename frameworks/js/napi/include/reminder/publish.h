@@ -63,6 +63,51 @@ napi_value PublishReminder(napi_env env, napi_callback_info info);
  * @return opaque pointer that is used to represent a JavaScript value.
  */
 napi_value AddSlot(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Cancels a reminder.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value CancelReminderMgr(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Cancels all reminders of current bundle.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value CancelAllRemindersMgr(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Obtains all reminders of current bundle.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value GetValidRemindersMgr(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Publishes a reminder.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value PublishReminderMgr(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Adds a slot type.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value.
+ */
+napi_value AddSlotMgr(napi_env env, napi_callback_info info);
 }  // namespace ReminderAgentNapi
 }  // namespace OHOS
 

@@ -52,7 +52,7 @@ struct AsyncCallbackInfo {
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
     std::shared_ptr<ReminderRequest> reminder = nullptr;
     std::vector<sptr<ReminderRequest>> validReminders;
-    NotificationNapi::CallbackPromiseInfo info;
+    CallbackPromiseInfo info;
 };
 
 struct Parameters {
@@ -77,25 +77,31 @@ napi_value GetCallback(const napi_env &env, const napi_value &value, AsyncCallba
 
 void SetAsynccallbackinfo(const napi_env &env, AsyncCallbackInfo& asynccallbackinfo, napi_value& promise)
 {
-    NotificationNapi::Common::PaddingCallbackPromiseInfo(
+    ReminderCommon::PaddingCallbackPromiseInfo(
         env, asynccallbackinfo.callback, asynccallbackinfo.info, promise);
 }
 
-napi_value ParseParameters(
-    const napi_env &env, const napi_callback_info &info, Parameters &params, AsyncCallbackInfo &asyncCallbackInfo)
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, Parameters &params,
+    AsyncCallbackInfo &asyncCallbackInfo, bool isThrow)
 {
     size_t argc = PUBLISH_PARAM_LEN;
     napi_value argv[PUBLISH_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    if ((argc < 1) || (argc > PUBLISH_PARAM_LEN)) {
+    if (argc < 1) {
         ANSR_LOGW("Wrong number of arguments");
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return nullptr;
     }
 
     // argv[1]: callback
-    if (argc == PUBLISH_PARAM_LEN) {
+    if (argc >= PUBLISH_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
             ANSR_LOGW("[reminderAgent]GetCallbak returns nullptr");
+            if (isThrow) {
+                ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+            }
             return nullptr;
         }
     }
@@ -103,27 +109,36 @@ napi_value ParseParameters(
     // argv[0] : reminderRequest
     if (ReminderCommon::GetReminderRequest(env, argv[0], params.reminder) == nullptr) {
         ANSR_LOGW("[reminderAgent]CreateReminder returns nullptr");
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return nullptr;
     }
 
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-napi_value ParseSlotParameters(
-    const napi_env &env, const napi_callback_info &info, Parameters &params, AsyncCallbackInfo &asyncCallbackInfo)
+napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &info, Parameters &params,
+    AsyncCallbackInfo &asyncCallbackInfo, bool isThrow)
 {
     size_t argc = ADD_SLOT_PARAM_LEN;
     napi_value argv[ADD_SLOT_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    if ((argc < 1) || (argc > ADD_SLOT_PARAM_LEN)) {
+    if (argc < 1) {
         ANSR_LOGW("Wrong number of arguments");
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return nullptr;
     }
 
     // argv[1]: callback
-    if (argc == ADD_SLOT_PARAM_LEN) {
+    if (argc >= ADD_SLOT_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
             ANSR_LOGW("GetCallbak returns nullptr");
+            if (isThrow) {
+                ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+            }
             return nullptr;
         }
     }
@@ -134,26 +149,35 @@ napi_value ParseSlotParameters(
     int32_t propertyVal = 0;
     if (!ReminderCommon::GetInt32(env, argv[0], propertyKey, propertyVal, false)) {
         ANSR_LOGW("Failed to get valid slot type.");
-        params.errCode = ERR_INVALID_VALUE;
+        params.errCode = ERR_REMINDER_INVALID_PARAM;
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return NotificationNapi::Common::NapiGetNull(env);
     }
 
     if (!NotificationNapi::Common::SlotTypeJSToC(NotificationNapi::SlotType(propertyVal), params.inType)) {
         ANSR_LOGW("Failed to get valid slot type");
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return nullptr;
     }
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-napi_value ParseCanCelParameter(
-    const napi_env &env, const napi_callback_info &info, Parameters &params, AsyncCallbackInfo &asyncCallbackInfo)
+napi_value ParseCanCelParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
+    AsyncCallbackInfo &asyncCallbackInfo, bool isThrow)
 {
     ANSR_LOGI("ParseCanCelParameter");
     size_t argc = CANCEL_PARAM_LEN;
     napi_value argv[CANCEL_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    if ((argc < 1) || (argc > CANCEL_PARAM_LEN)) {
+    if (argc < 1) {
         ANSR_LOGW("Wrong number of arguments");
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return nullptr;
     }
 
@@ -161,6 +185,9 @@ napi_value ParseCanCelParameter(
     if (argc >= CANCEL_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
             ANSR_LOGW("GetCallbak is nullptr");
+            if (isThrow) {
+                ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+            }
             return nullptr;
         }
     }
@@ -168,10 +195,16 @@ napi_value ParseCanCelParameter(
     // argv[0]: reminder id
     int32_t reminderId = -1;
     if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return nullptr;
     }
     if (reminderId < 0) {
         ANSR_LOGW("Param id of cancels Reminder is illegal.");
+        if (isThrow) {
+            ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        }
         return nullptr;
     }
     params.reminderId = reminderId;
@@ -179,43 +212,41 @@ napi_value ParseCanCelParameter(
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-napi_value ParseCanCelAllParameter(
-    const napi_env &env, const napi_callback_info &info, Parameters &params, AsyncCallbackInfo &asyncCallbackInfo)
+napi_value ParseCanCelAllParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
+    AsyncCallbackInfo &asyncCallbackInfo, bool isThrow)
 {
     ANSR_LOGI("ParseCanCelAllParameter");
     size_t argc = CANCEL_ALL_PARAM_LEN;
     napi_value argv[CANCEL_ALL_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    if (argc > CANCEL_ALL_PARAM_LEN) {
-        ANSR_LOGW("Wrong number of arguments");
-        return nullptr;
-    }
 
     // argv[0]: callback
-    if (argc == CANCEL_ALL_PARAM_LEN) {
+    if (argc >= CANCEL_ALL_PARAM_LEN) {
         if (GetCallback(env, argv[0], asyncCallbackInfo) == nullptr) {
             ANSR_LOGW("getCallbak is nullptr");
+            if (isThrow) {
+                ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+            }
             return nullptr;
         }
     }
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-napi_value ParseGetValidParameter(
-    const napi_env &env, const napi_callback_info &info, Parameters &params, AsyncCallbackInfo &asyncCallbackInfo)
+napi_value ParseGetValidParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
+    AsyncCallbackInfo &asyncCallbackInfo, bool isThrow)
 {
     size_t argc = GET_VALID_PARAM_LEN;
     napi_value argv[GET_VALID_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    if (argc > GET_VALID_PARAM_LEN) {
-        ANSR_LOGW("Wrong number of arguments");
-        return nullptr;
-    }
 
     // argv[0]: callback
-    if (argc == GET_VALID_PARAM_LEN) {
+    if (argc >= GET_VALID_PARAM_LEN) {
         if (GetCallback(env, argv[0], asyncCallbackInfo) == nullptr) {
             ANSR_LOGW("getCallbak is nullptr");
+            if (isThrow) {
+                ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+            }
             return nullptr;
         }
     }
@@ -225,13 +256,13 @@ napi_value ParseGetValidParameter(
 napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn, const napi_value &result)
 {
     if (callbackIn) {
-        NotificationNapi::Common::SetCallback(env, callbackIn, NotificationNapi::ERROR,
+        ReminderCommon::SetCallback(env, callbackIn, ERR_REMINDER_INVALID_PARAM,
             result);
     }
-    return NotificationNapi::Common::JSParaError(env, callbackIn);
+    return ReminderCommon::JSParaError(env, callbackIn);
 }
 
-napi_value CancelReminder(napi_env env, napi_callback_info info)
+napi_value CancelReminderInner(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("Cancel reminder");
 
@@ -244,7 +275,7 @@ napi_value CancelReminder(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseCanCelParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseCanCelParameter(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
 
@@ -271,7 +302,7 @@ napi_value CancelReminder(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
-            NotificationNapi::Common::ReturnCallbackPromise(
+            ReminderCommon::ReturnCallbackPromise(
                 env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
             ANSR_LOGI("Cancel napi_create_async_work complete end");
         },
@@ -287,7 +318,17 @@ napi_value CancelReminder(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value CancelAllReminders(napi_env env, napi_callback_info info)
+napi_value CancelReminderMgr(napi_env env, napi_callback_info info)
+{
+    return CancelReminderInner(env, info, true);
+}
+
+napi_value CancelReminder(napi_env env, napi_callback_info info)
+{
+    return CancelReminderInner(env, info, false);
+}
+
+napi_value CancelAllRemindersInner(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("Cancel all reminder");
 
@@ -300,7 +341,7 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseCanCelAllParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseCanCelAllParameter(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
 
@@ -326,7 +367,7 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
-            NotificationNapi::Common::ReturnCallbackPromise(
+            ReminderCommon::ReturnCallbackPromise(
                 env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
             ANSR_LOGD("CancelAll napi_create_async_work complete end");
         },
@@ -340,6 +381,16 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+}
+
+napi_value CancelAllRemindersMgr(napi_env env, napi_callback_info info)
+{
+    return CancelAllRemindersInner(env, info, true);
+}
+
+napi_value CancelAllReminders(napi_env env, napi_callback_info info)
+{
+    return CancelAllRemindersInner(env, info, false);
 }
 
 void ParseReminderTimer(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
@@ -584,7 +635,7 @@ void GetValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest
     ANSR_LOGI("GetValid reminders count = %{public}d", count);
 }
 
-napi_value GetValidReminders(napi_env env, napi_callback_info info)
+napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("Get valid reminders");
 
@@ -597,7 +648,7 @@ napi_value GetValidReminders(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseGetValidParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseGetValidParameter(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
 
@@ -632,7 +683,7 @@ napi_value GetValidReminders(napi_env env, napi_callback_info info)
                     GetValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
                 }
 
-                NotificationNapi::Common::ReturnCallbackPromise(
+                ReminderCommon::ReturnCallbackPromise(
                     env, asynccallbackinfo->info, asynccallbackinfo->result);
             }
         },
@@ -648,7 +699,17 @@ napi_value GetValidReminders(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value PublishReminder(napi_env env, napi_callback_info info)
+napi_value GetValidRemindersMgr(napi_env env, napi_callback_info info)
+{
+    return InnerGetValidReminders(env, info, true);
+}
+
+napi_value GetValidReminders(napi_env env, napi_callback_info info)
+{
+    return InnerGetValidReminders(env, info, false);
+}
+
+napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("PublishReminder");
 
@@ -661,7 +722,7 @@ napi_value PublishReminder(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseParameters(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseParameters(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         ANSR_LOGW("Parse params error");
         napi_create_int32(env, -1, &(asynccallbackinfo->result));
         return DealErrorReturn(env, asynccallbackinfo->callback, asynccallbackinfo->result);
@@ -701,7 +762,7 @@ napi_value PublishReminder(napi_env env, napi_callback_info info)
                     napi_create_int32(env, -1, &(asynccallbackinfo->result));
                 }
 
-                NotificationNapi::Common::ReturnCallbackPromise(
+                ReminderCommon::ReturnCallbackPromise(
                     env, asynccallbackinfo->info, asynccallbackinfo->result);
                 ANSR_LOGI("Publish napi_create_async_work complete end");
             }
@@ -719,7 +780,17 @@ napi_value PublishReminder(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value AddSlot(napi_env env, napi_callback_info info)
+napi_value PublishReminderMgr(napi_env env, napi_callback_info info)
+{
+    return PublishReminderInner(env, info, true);
+}
+
+napi_value PublishReminder(napi_env env, napi_callback_info info)
+{
+    return PublishReminderInner(env, info, false);
+}
+
+napi_value AddSlotInner(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("AddSlot");
 
@@ -732,7 +803,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseSlotParameters(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseSlotParameters(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         ANSR_LOGW("Parse params error");
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env));
     }
@@ -762,7 +833,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
             AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
-            NotificationNapi::Common::ReturnCallbackPromise(
+            ReminderCommon::ReturnCallbackPromise(
                 env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
             ANSR_LOGD("AddSlot napi_create_async_work complete end.");
         },
@@ -777,6 +848,16 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+}
+
+napi_value AddSlotMgr(napi_env env, napi_callback_info info)
+{
+    return AddSlotInner(env, info, true);
+}
+
+napi_value AddSlot(napi_env env, napi_callback_info info)
+{
+    return AddSlotInner(env, info, false);
 }
 }
 }

@@ -1812,7 +1812,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         callerToken, "ohos.permission.PUBLISH_AGENT_REMINDER");
     if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
-        return result;
+        return ERR_REMINDER_PERMISSION_DENIED;
     }
 
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
@@ -1826,14 +1826,13 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK || !allowedNotify) {
         ANSR_LOGW("The application does not request enable notification");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_REMINDER_NOTIFICATION_NOT_ENABLE;
     }
     auto rdm = ReminderDataManager::GetInstance();
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    rdm->PublishReminder(reminder, bundleOption);
-    return ERR_OK;
+    return rdm->PublishReminder(reminder, bundleOption);
 }
 
 ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
@@ -1847,8 +1846,7 @@ ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    rdm->CancelReminder(reminderId, bundleOption);
-    return ERR_OK;
+    return rdm->CancelReminder(reminderId, bundleOption);
 }
 
 ErrCode AdvancedNotificationService::CancelAllReminders()
@@ -1864,8 +1862,7 @@ ErrCode AdvancedNotificationService::CancelAllReminders()
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    rdm->CancelAllReminders(bundleOption->GetBundleName(), userId);
-    return ERR_OK;
+    return rdm->CancelAllReminders(bundleOption->GetBundleName(), userId);
 }
 
 ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders)
