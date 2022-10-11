@@ -17,14 +17,20 @@
 
 #include "notification_helper.h"
 
-constexpr uint8_t SLOT_TYPE_NUM = 5;
-
 namespace OHOS {
+    namespace {
+        constexpr uint8_t SLOT_TYPE_NUM = 5;
+    }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         sptr<Notification::NotificationSlot> slot = nullptr;
+        // test GetNotificationSlots function
+        std::vector<sptr<Notification::NotificationSlot>> slots;
+        slots.emplace_back(slot);
+        Notification::NotificationHelper::GetNotificationSlots(slots);
+        // test GetNotificationSlot function
         return Notification::NotificationHelper::GetNotificationSlot(slotType, slot) == ERR_OK;
     }
 }

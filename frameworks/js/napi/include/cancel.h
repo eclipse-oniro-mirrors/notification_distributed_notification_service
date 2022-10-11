@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_CANCEL_H
-#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_CANCEL_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_CANCEL_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_CANCEL_H
 
 #include "common.h"
 
@@ -22,11 +22,57 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
+struct ParametersInfoCancel {
+    int32_t id = 0;
+    std::string label = "";
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackInfoCancel {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    int32_t id = 0;
+    std::string label;
+    CallbackPromiseInfo info;
+};
+
+struct ParametersInfoCancelGroup {
+    std::string groupName = "";
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackInfoCancelGroup {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    CallbackPromiseInfo info;
+    ParametersInfoCancelGroup params {};
+};
+
+struct  ParametersInfoCancelAsBundle {
+    int32_t id = 0;
+    std::string representativeBundle = "";
+    int32_t userId = 0;
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackInfoCancelAsBundle {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    int32_t id = 0;
+    std::string representativeBundle = "";
+    int32_t userId = 0;
+    CallbackPromiseInfo info;
+};
+
 napi_value Cancel(napi_env env, napi_callback_info info);
 napi_value CancelAll(napi_env env, napi_callback_info info);
 napi_value CancelGroup(napi_env env, napi_callback_info info);
 napi_value CancelAsBundle(napi_env env, napi_callback_info info);
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelAsBundle &paras);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelGroup &paras);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancel &paras);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 
-#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_CANCEL_H
+#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_CANCEL_H

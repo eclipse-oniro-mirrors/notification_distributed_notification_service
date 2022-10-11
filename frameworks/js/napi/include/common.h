@@ -1539,7 +1539,19 @@ public:
     static napi_value GetNotificationBadgeNumber(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
+    /**
+     * @brief Create a napi value with specified error object for callback
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param errCode Indicates specified err code
+     * @return Returns a napi value with specified error object for callback
+     */
+    static napi_value CreateErrorValue(napi_env env, int32_t errCode);
+
     static bool IsValidRemoveReason(int32_t reasonType);
+    static void NapiThrow(napi_env env, int32_t errCode);
+    static int32_t ErrorToExternal(uint32_t errCode);
+    static void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result);
 
 private:
     static const int32_t ARGS_ONE = 1;

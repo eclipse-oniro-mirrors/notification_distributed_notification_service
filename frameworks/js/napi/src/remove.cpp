@@ -29,40 +29,6 @@ const int REMOVE_BY_BUNDLE_AND_KEY_MAX_PARA = 4;
 const int REMOVE_GROUP_BY_BUNDLE_MIN_PARA = 2;
 const int REMOVE_GROUP_BY_BUNDLE_MAX_PARA = 3;
 
-struct BundleAndKeyInfo {
-    NotificationBundleOption option;
-    NotificationKey key;
-};
-
-struct RemoveParams {
-    std::optional<std::string> hashcode {};
-    std::optional<BundleAndKeyInfo> bundleAndKeyInfo {};
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    int32_t removeReason = NotificationConstant::CANCEL_REASON_DELETE;
-    bool hasUserId = false;
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoRemove {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    RemoveParams params {};
-    CallbackPromiseInfo info;
-};
-
-struct RemoveParamsGroupByBundle {
-    NotificationBundleOption option;
-    std::string groupName = "";
-    napi_ref callback = nullptr;
-};
-
-struct AsyncCallbackInfoRemoveGroupByBundle {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    RemoveParamsGroupByBundle params {};
-    CallbackPromiseInfo info;
-};
-
 bool ParseRemoveReason(const napi_env &env, const napi_value &value, RemoveParams &params)
 {
     napi_valuetype valueType = napi_undefined;

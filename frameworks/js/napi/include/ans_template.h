@@ -22,7 +22,21 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
+struct TemplateName {
+    std::string templateName = "";
+    bool support = false;
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackInfoTemplate {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    TemplateName params;
+    CallbackPromiseInfo info;
+};
+
 napi_value IsSupportTemplate(napi_env env, napi_callback_info info);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, TemplateName& params);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

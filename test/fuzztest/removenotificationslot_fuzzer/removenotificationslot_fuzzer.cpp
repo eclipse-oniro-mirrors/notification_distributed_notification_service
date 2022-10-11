@@ -17,14 +17,18 @@
 
 #include "notification_helper.h"
 
-constexpr uint8_t SLOT_TYPE_NUM = 5;
-
 namespace OHOS {
+    namespace {
+        constexpr uint8_t SLOT_TYPE_NUM = 5;
+    }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
-        return Notification::NotificationHelper::RemoveNotificationSlot(slotType) == ERR_OK;
+        // test RemoveNotificationSlot function
+        Notification::NotificationHelper::RemoveNotificationSlot(slotType);
+        // test RemoveAllSlots function
+        return Notification::NotificationHelper::RemoveAllSlots() == ERR_OK;
     }
 }
 

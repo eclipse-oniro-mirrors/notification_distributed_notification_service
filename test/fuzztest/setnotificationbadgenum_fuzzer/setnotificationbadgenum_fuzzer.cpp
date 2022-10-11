@@ -19,6 +19,16 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
+        // test RequestEnableNotification function
+        std::string deviceId(data);
+        Notification::NotificationHelper::RequestEnableNotification(deviceId);
+        // test AreNotificationsSuspended function
+        bool suspended = true;
+        Notification::NotificationHelper::AreNotificationsSuspended(suspended);
+        // test HasNotificationPolicyAccessPermission function
+        bool hasPermission = true;
+        Notification::NotificationHelper::HasNotificationPolicyAccessPermission(hasPermission);
+        // test SetNotificationBadgeNum function
         return Notification::NotificationHelper::SetNotificationBadgeNum(GetU32Data(data)) == ERR_OK;
     }
 }

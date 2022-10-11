@@ -14,12 +14,33 @@
  */
 
 #include "common.h"
+#include "ans_inner_errors.h"
 #include "napi_common.h"
 #include "pixel_map_napi.h"
 
 namespace OHOS {
 namespace NotificationNapi {
 std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> Common::wantAgent_;
+
+namespace {
+static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
+    {ERROR_PERMISSION_DENIED, "Permission denied"},
+    {ERROR_PARAM_INVALID, "Invalid parameter"},
+    {ERROR_SYSTEM_CAP_ERROR, "SystemCapability not found"},
+    {ERROR_INTERNAL_ERROR, "Internal error"},
+    {ERROR_IPC_ERROR, "Marshalling or unmarshalling error"},
+    {ERROR_SERVICE_CONNECT_ERROR, "Failed to connect service"},
+    {ERROR_NOTIFICATION_CLOSED, "Notification is not enabled"},
+    {ERROR_SLOT_CLOSED, "Notification slot is not enabled"},
+    {ERROR_NOTIFICATION_UNREMOVABLE, "Notification is not allowed to remove"},
+    {ERROR_NOTIFICATION_NOT_EXIST, "The notification is not exist"},
+    {ERROR_USER_NOT_EXIST, "The user is not exist"},
+    {ERROR_OVER_MAX_NUM_PER_SECOND, "Over max number notifications per second"},
+    {ERROR_DISTRIBUTED_OPERATION_FAILED, "Distributed operation failed"},
+    {ERROR_READ_TEMPLATE_CONFIG_FAILED, "Read template config failed"},
+    {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
+};
+}
 
 Common::Common()
 {}
@@ -46,6 +67,29 @@ napi_value Common::NapiGetUndefined(napi_env env)
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     return result;
+}
+
+napi_value Common::CreateErrorValue(napi_env env, int32_t errCode)
+{
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+
+    auto iter = ERROR_CODE_MESSAGE.find(errCode);
+    std::string errMsg = iter != ERROR_CODE_MESSAGE.end() ? iter->second : "";
+    napi_value message = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
+
+    napi_value error = nullptr;
+    napi_create_error(env, nullptr, message, &error);
+    napi_set_named_property(env, error, "code", code);
+    return error;
+}
+
+void Common::NapiThrow(napi_env env, int32_t errCode)
+{
+    ANS_LOGI("enter");
+
+    napi_throw(env, CreateErrorValue(env, errCode));
 }
 
 napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
@@ -96,7 +140,7 @@ void Common::SetCallback(
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
     napi_value results[ARGS_TWO] = {nullptr};
-    results[PARAM0] = GetCallbackErrorValue(env, errorCode);
+    results[PARAM0] = CreateErrorValue(env, errorCode);
     results[PARAM1] = result;
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout));
     ANS_LOGI("end");
@@ -123,7 +167,7 @@ void Common::SetPromise(
     if (errorCode == ERR_OK) {
         napi_resolve_deferred(env, deferred, result);
     } else {
-        napi_reject_deferred(env, deferred, GetCallbackErrorValue(env, errorCode));
+        napi_reject_deferred(env, deferred, CreateErrorValue(env, errorCode));
     }
     ANS_LOGI("end");
 }
@@ -4665,6 +4709,83 @@ napi_value Common::GetNotificationBadgeNumber(
     }
 
     return NapiGetNull(env);
+}
+
+void Common::CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
+{
+    ANS_LOGI("enter errorCode=%{public}d", info.errorCode);
+    int32_t errorCode = info.errorCode == ERR_OK ? ERR_OK : ErrorToExternal(info.errorCode);
+    if (info.isCallback) {
+        SetCallback(env, info.callback, errorCode, result);
+    } else {
+        SetPromise(env, info.deferred, errorCode, result);
+    }
+    ANS_LOGI("end");
+}
+
+int32_t Common::ErrorToExternal(uint32_t errCode)
+{
+    int32_t ExternalCode = ERROR_INTERNAL_ERROR;
+    switch (errCode) {
+        case ERR_ANS_PERMISSION_DENIED:
+        case ERR_ANS_NON_SYSTEM_APP:
+            ExternalCode = ERROR_PERMISSION_DENIED;
+            break;
+        case ERR_ANS_INVALID_PARAM:
+        case ERR_ANS_INVALID_UID:
+        case ERR_ANS_ICON_OVER_SIZE:
+        case ERR_ANS_PICTURE_OVER_SIZE:
+            ExternalCode = ERROR_PARAM_INVALID;
+            break;
+        case ERR_ANS_NO_MEMORY:
+        case ERR_ANS_TASK_ERR:
+            ExternalCode = ERROR_INTERNAL_ERROR;
+            break;
+        case ERR_ANS_PARCELABLE_FAILED:
+        case ERR_ANS_TRANSACT_FAILED:
+        case ERR_ANS_REMOTE_DEAD:
+            ExternalCode = ERROR_IPC_ERROR;
+            break;
+        case ERR_ANS_SERVICE_NOT_READY:
+        case ERR_ANS_SERVICE_NOT_CONNECTED:
+            ExternalCode = ERROR_SERVICE_CONNECT_ERROR;
+            break;
+        case ERR_ANS_NOT_ALLOWED:
+            ExternalCode = ERROR_NOTIFICATION_CLOSED;
+            break;
+        case ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED:
+            ExternalCode = ERROR_SLOT_CLOSED;
+            break;
+        case ERR_ANS_NOTIFICATION_IS_UNREMOVABLE:
+            ExternalCode = ERROR_NOTIFICATION_UNREMOVABLE;
+            break;
+        case ERR_ANS_NOTIFICATION_NOT_EXISTS:
+            ExternalCode = ERROR_NOTIFICATION_NOT_EXIST;
+            break;
+        case ERR_ANS_GET_ACTIVE_USER_FAILED:
+            ExternalCode = ERROR_USER_NOT_EXIST;
+            break;
+        case ERR_ANS_INVALID_PID:
+        case ERR_ANS_INVALID_BUNDLE:
+            ExternalCode = ERROR_BUNDLE_NOT_FOUND;
+            break;
+        case ERR_ANS_OVER_MAX_ACTIVE_PERSECOND:
+            ExternalCode = ERROR_OVER_MAX_NUM_PER_SECOND;
+            break;
+        case ERR_ANS_DISTRIBUTED_OPERATION_FAILED:
+        case ERR_ANS_DISTRIBUTED_GET_INFO_FAILED:
+            ExternalCode = ERROR_DISTRIBUTED_OPERATION_FAILED;
+            break;
+        case ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED:
+            ExternalCode = ERROR_READ_TEMPLATE_CONFIG_FAILED;
+            break;
+        default:
+            ExternalCode = ERROR_INTERNAL_ERROR;
+            break;
+    }
+
+    ANS_LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, ExternalCode);
+    return ExternalCode;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

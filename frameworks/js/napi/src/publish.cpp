@@ -27,18 +27,6 @@ constexpr int8_t SHOW_NOTIFICATION_MAX = 1;
 constexpr int8_t PUBLISH_AS_BUNDLE_MAX = 4;
 }
 
-struct AsyncCallbackInfoPublish {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    NotificationRequest request;
-    CallbackPromiseInfo info;
-};
-
-struct ParametersInfoPublish {
-    NotificationRequest request;
-    napi_ref callback = nullptr;
-};
-
 napi_value GetCallback(const napi_env &env, const napi_value &value, ParametersInfoPublish &params)
 {
     ANS_LOGI("enter");

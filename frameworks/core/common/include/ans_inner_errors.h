@@ -98,6 +98,24 @@ static std::map<int32_t, std::string> reminderErrCodeMsgMap = {
     { ERR_REMINDER_NOT_EXIST, "BussinessError 1700003: The reminder not exist." },
     { ERR_REMINDER_PACKAGE_NOT_EXIST, "BussinessError 1700004: The package name not exist." }
 };
+// Common error code
+const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
+const uint32_t ERROR_PARAM_INVALID     = 401;          // Invalid input parameter.
+const uint32_t ERROR_SYSTEM_CAP_ERROR  = 801;          // The specified SystemCapability names was not found.
+
+// Notification error code
+const int32_t ERROR_INTERNAL_ERROR               = 1600001;    // Internal error.
+const int32_t ERROR_IPC_ERROR                    = 1600002;    // marshalling or unmarshalling error.
+const int32_t ERROR_SERVICE_CONNECT_ERROR        = 1600003;    // Failed to connect service.
+const int32_t ERROR_NOTIFICATION_CLOSED          = 1600004;    // Notification is not enabled.
+const int32_t ERROR_SLOT_CLOSED                  = 1600005;    // Notification slot is not enabled.
+const int32_t ERROR_NOTIFICATION_UNREMOVABLE     = 1600006;    // Notification is not allowed to remove.
+const int32_t ERROR_NOTIFICATION_NOT_EXIST       = 1600007;    // The notification is not exist.
+const int32_t ERROR_USER_NOT_EXIST               = 1600008;    // The user is not exist.
+const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;    // Over max number notifications per second.
+const int32_t ERROR_DISTRIBUTED_OPERATION_FAILED = 1600010;    // Distributed operation failed.
+const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Read template config failed.
+const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification
 }  // namespace OHOS
 

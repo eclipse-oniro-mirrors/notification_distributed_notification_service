@@ -22,7 +22,11 @@ group("napi_reminder") {
 }
 
 group("napi_notification") {
-  deps = [ ":notification" ]
+  deps = [
+    ":notification",
+    "src/manager:notificationmanager",
+    "src/subscribe:notificationsubscribe",
+  ]
 }
 
 cflags = []
