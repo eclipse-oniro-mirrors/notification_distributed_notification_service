@@ -15,7 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "reminder_request.h"
+#undef private
+#undef protected
 
 using namespace testing::ext;
 namespace OHOS {
@@ -520,6 +524,318 @@ HWTEST_F(ReminderRequestTest, Marshalling_00100, Function | SmallTest | Level1)
     auto rrc = std::make_shared<ReminderRequestChild>();
     Parcel p;
     EXPECT_EQ(rrc->Marshalling(p), true);
+}
+
+/**
+ * @tc.name: CanShow_00001
+ * @tc.desc: Test CanShow parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->CanShow(), true);
+}
+
+/**
+ * @tc.name: CanShow_00002
+ * @tc.desc: Test CanShow parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, CanShow_00002, Function | SmallTest | Level1)
+{
+    uint64_t reminderTimeInMilli = 5 * 60 * 1000;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetReminderTimeInMilli(reminderTimeInMilli);
+    EXPECT_EQ(rrc->CanShow(), true);
+}
+
+/**
+ * @tc.name: Dump_00001
+ * @tc.desc: Test Dump parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
+{
+    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive, nextTriggerTime=1970-01-01 00:00:00]";
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->Dump(), ret);
+}
+
+/**
+ * @tc.name: SetExpired_00001
+ * @tc.desc: Test SetExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, SetExpired_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    bool isExpired = rrc->IsExpired();
+    rrc->SetExpired(isExpired);
+    EXPECT_EQ(isExpired, false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00001
+ * @tc.desc: Test HandleTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetExpired(false);
+    uint64_t oldZoneTriggerTime = 1998;
+    uint64_t newZoneTriggerTime = 1999;
+    uint64_t optTriggerTime = 0;
+    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), true);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00002
+ * @tc.desc: Test HandleTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetExpired(true);
+    uint64_t oldZoneTriggerTime = 1998;
+    uint64_t newZoneTriggerTime = 1998;
+    uint64_t optTriggerTime = 0;
+    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00003
+ * @tc.desc: Test HandleTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetExpired(true);
+    uint64_t oldZoneTriggerTime = 1998;
+    uint64_t newZoneTriggerTime = 1999;
+    uint64_t optTriggerTime = 10;
+    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00001
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetExpired(true);
+    uint64_t oriTriggerTime = 10;
+    uint64_t optTriggerTime = 10;
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: OnSnooze_00001
+ * @tc.desc: Test OnSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, OnSnooze_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->OnShow(false, false, true);
+    EXPECT_EQ(rrc->OnSnooze(), true);
+}
+
+/**
+ * @tc.name: OnSnooze_00002
+ * @tc.desc: Test OnSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, OnSnooze_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->UpdateNextReminder(false);
+    EXPECT_EQ(rrc->OnSnooze(), true);
+}
+
+/**
+ * @tc.name: OnSnooze_00003
+ * @tc.desc: Test OnSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, OnSnooze_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetTimeInterval(100);
+    EXPECT_EQ(rrc->OnSnooze(), true);
+}
+
+/**
+ * @tc.name: OnTerminate_00001
+ * @tc.desc: Test OnTerminate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, OnTerminate_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->OnShow(false, false, true);
+    EXPECT_EQ(rrc->OnTerminate(), false);
+}
+
+/**
+ * @tc.name: OnTimeZoneChange_00001
+ * @tc.desc: Test OnTerOnTimeZoneChangeminate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, OnTimeZoneChange_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->OnTimeZoneChange(), false);
+}
+
+/**
+ * @tc.name: RecoverInt64FromDb_00001
+ * @tc.desc: Test RecoverInt64FromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00001, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
+    std::string columnName = "columnName";
+    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->RecoverInt64FromDb(resultSet, columnName, columnType), 0);
+}
+
+/**
+ * @tc.name: RecoverInt64FromDb_00002
+ * @tc.desc: Test RecoverInt64FromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
+    std::string columnName = "columnName";
+    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->RecoverInt64FromDb(resultSet, columnName, columnType), 0);
+}
+
+/**
+ * @tc.name: RecoverInt64FromDb_00003
+ * @tc.desc: Test RecoverInt64FromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00003, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
+    std::string columnName = "columnName";
+    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::LONG;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->RecoverInt64FromDb(resultSet, columnName, columnType), 0);
+}
+
+/**
+ * @tc.name: StringSplit_00001
+ * @tc.desc: Test StringSplit parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, StringSplit_00001, Function | SmallTest | Level1)
+{
+    std::string source = "";
+    std::string split = "split";
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::vector<std::string> ret = rrc->StringSplit(source, split);
+    EXPECT_EQ(ret.size(), 0);
+}
+
+/**
+ * @tc.name: StringSplit_00002
+ * @tc.desc: Test StringSplit parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, StringSplit_00002, Function | SmallTest | Level1)
+{
+    std::string source = "source";
+    std::string split = "split";
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::vector<std::string> ret = rrc->StringSplit(source, split);
+    EXPECT_EQ(ret.size(), 1);
+}
+
+/**
+ * @tc.name: SetMaxScreenWantAgentInfo_00001
+ * @tc.desc: Test SetMaxScreenWantAgentInfo parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_00001, Function | SmallTest | Level1)
+{
+    std::shared_ptr<ReminderRequest::MaxScreenAgentInfo> maxScreenWantAgentInfo =
+    std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), maxScreenWantAgentInfo);
+}
+
+/**
+ * @tc.name: SetSnoozeContent_00001
+ * @tc.desc: Test SetSnoozeContent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, SetSnoozeContent_00001, Function | SmallTest | Level1)
+{
+    std::string snoozeContent = "snoozeContent";
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetSnoozeContent(snoozeContent);
+    EXPECT_EQ(rrc->GetSnoozeContent(), snoozeContent);
+}
+
+/**
+ * @tc.name: SetWantAgentInfo_00001
+ * @tc.desc: Test SetWantAgentInfo parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, SetWantAgentInfo_00001, Function | SmallTest | Level1)
+{
+    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetWantAgentInfo(wantAgentInfo);
+    EXPECT_EQ(rrc->GetWantAgentInfo(), wantAgentInfo);
+}
+
+/**
+ * @tc.name: SetReminderTimeInMilli_00001
+ * @tc.desc: Test SetReminderTimeInMilli parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, SetReminderTimeInMilli_00001, Function | SmallTest | Level1)
+{
+    uint64_t reminderTimeInMilli = 10;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetReminderTimeInMilli(reminderTimeInMilli);
+    EXPECT_EQ(rrc->GetReminderTimeInMilli(), reminderTimeInMilli);
 }
 }
 }
