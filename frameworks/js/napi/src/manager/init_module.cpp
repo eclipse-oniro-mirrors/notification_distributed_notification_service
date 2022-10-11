@@ -15,7 +15,9 @@
 
 #include "init_module.h"
 #include "constant.h"
+#include "napi_cancel.h"
 #include "napi_publish.h"
+#include "napi_slot.h"
 #include "pixel_map_napi.h"
 
 namespace OHOS {
@@ -32,6 +34,21 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("publish", NapiPublish),
         DECLARE_NAPI_FUNCTION("publishAsBundle", NapiPublishAsBundle),
         DECLARE_NAPI_FUNCTION("show", NapiShowNotification),
+        DECLARE_NAPI_FUNCTION("cancel", NapiCancel),
+        DECLARE_NAPI_FUNCTION("cancelAll", NapiCancelAll),
+        DECLARE_NAPI_FUNCTION("cancelGroup", NapiCancelGroup),
+        DECLARE_NAPI_FUNCTION("cancelAsBundle", NapiCancelAsBundle),
+        DECLARE_NAPI_FUNCTION("addSlot", NapiAddSlot),
+        DECLARE_NAPI_FUNCTION("addSlots", NapiAddSlots),
+        DECLARE_NAPI_FUNCTION("setSlotByBundle", NapiSetSlotByBundle),
+        DECLARE_NAPI_FUNCTION("getSlot", NapiGetSlot),
+        DECLARE_NAPI_FUNCTION("getSlotNumByBundle", NapiGetSlotNumByBundle),
+        DECLARE_NAPI_FUNCTION("getSlots", NapiGetSlots),
+        DECLARE_NAPI_FUNCTION("getSlotsByBundle", NapiGetSlotsByBundle),
+        DECLARE_NAPI_FUNCTION("removeSlot", NapiRemoveSlot),
+        DECLARE_NAPI_FUNCTION("removeAllSlots", NapiRemoveAllSlots),
+        DECLARE_NAPI_FUNCTION("setNotificationEnableSlot", NapiEnableNotificationSlot),
+        DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", NapiIsEnableNotificationSlot),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
