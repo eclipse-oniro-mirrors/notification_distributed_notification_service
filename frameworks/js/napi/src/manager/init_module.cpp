@@ -16,8 +16,12 @@
 #include "init_module.h"
 #include "constant.h"
 #include "napi_cancel.h"
+#include "napi_display_badge.h"
+#include "napi_enable_notification.h"
+#include "napi_get_active.h"
 #include "napi_publish.h"
 #include "napi_slot.h"
+#include "napi_template.h"
 #include "pixel_map_napi.h"
 
 namespace OHOS {
@@ -49,6 +53,15 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("removeAllSlots", NapiRemoveAllSlots),
         DECLARE_NAPI_FUNCTION("setNotificationEnableSlot", NapiEnableNotificationSlot),
         DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", NapiIsEnableNotificationSlot),
+        DECLARE_NAPI_FUNCTION("setNotificationEnable", NapiEnableNotification),
+        DECLARE_NAPI_FUNCTION("isNotificationEnabled", NapiIsNotificationEnabled),
+        DECLARE_NAPI_FUNCTION("requestEnableNotification", NapiRequestEnableNotification),
+        DECLARE_NAPI_FUNCTION("getAllActiveNotifications", NapiGetAllActiveNotifications),
+        DECLARE_NAPI_FUNCTION("getActiveNotifications", NapiGetActiveNotifications),
+        DECLARE_NAPI_FUNCTION("getActiveNotificationCount", NapiGetActiveNotificationCount),
+        DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),
+        DECLARE_NAPI_FUNCTION("isBadgeDisplayed", NapiIsBadgeDisplayed),
+        DECLARE_NAPI_FUNCTION("isSupportTemplate", NapiIsSupportTemplate),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
