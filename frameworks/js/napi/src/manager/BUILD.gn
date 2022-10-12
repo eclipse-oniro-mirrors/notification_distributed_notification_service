@@ -52,11 +52,14 @@ ohos_shared_library("notificationmanager") {
     "../slot.cpp",
     "napi_cancel.cpp",
     "napi_display_badge.cpp",
+    "napi_distributed.cpp",
+    "napi_disturb_mode.cpp",
     "napi_enable_notification.cpp",
     "napi_get_active.cpp",
     "napi_publish.cpp",
     "napi_slot.cpp",
     "napi_template.cpp",
+    "init_module.cpp",
   ]
 
   deps = [
