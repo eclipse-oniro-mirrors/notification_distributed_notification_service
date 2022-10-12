@@ -19,14 +19,18 @@ group("fuzztest") {
     "addnotificationslots_fuzzer:AddNotificationSlotsFuzzTest",
     "addslotbytype_fuzzer:AddSlotByTypeFuzzTest",
     "cancelasbundle_fuzzer:CancelAsBundleFuzzTest",
+    "cancelgroup_fuzzer:CancelGroupFuzzTest",
     "cancelnotification_fuzzer:CancelNotificationFuzzTest",
+    "getallactivenotifications_fuzzer:GetAllActiveNotificationsFuzzTest",
     "getbundleimportance_fuzzer:GetBundleImportanceFuzzTest",
     "getnotificationslot_fuzzer:GetNotificationSlotFuzzTest",
     "getnotificationslotnumasbundle_fuzzer:GetNotificationSlotNumAsBundleFuzzTest",
+    "getnotificationslotsforbundle_fuzzer:GetNotificationSlotsForBundleFuzzTest",
     "publishnotification_fuzzer:PublishNotificationFuzzTest",
     "removenotification_fuzzer:RemoveNotificationFuzzTest",
     "removenotificationsbybundle_fuzzer:RemoveNotificationsByBundleFuzzTest",
     "removenotificationslot_fuzzer:RemoveNotificationSlotFuzzTest",
     "setnotificationbadgenum_fuzzer:SetNotificationBadgeNumFuzzTest",
+    "setnotificationsenabledforallbundles_fuzzer:SetNotificationsEnabledForAllBundlesFuzzTest",
   ]
 }
