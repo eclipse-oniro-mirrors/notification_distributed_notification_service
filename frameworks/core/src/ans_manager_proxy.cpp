@@ -1105,6 +1105,13 @@ ErrCode AnsManagerProxy::UpdateSlots(
 
 ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId)
 {
+    ANS_LOGE("[RequestEnableNotification] fail: deprecated.");
+    return ERR_ANS_NOT_ALLOWED;
+}
+
+ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
+{
+    ANS_LOGI("enter");
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
         ANS_LOGE("[RequestEnableNotification] fail: write interface token failed.");
@@ -1129,6 +1136,10 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
+    if (!reply.ReadBool(popFlag)) {
+        ANS_LOGE("[RequestEnableNotification] fail: read popFlag failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 
