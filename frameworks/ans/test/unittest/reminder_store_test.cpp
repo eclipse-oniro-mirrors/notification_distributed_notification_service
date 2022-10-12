@@ -44,7 +44,6 @@ public:
         ReminderHelper::CancelAllReminders();
     }
     static sptr<NotificationBundleOption> bundleOption_;
-
 };
 
 sptr<NotificationBundleOption> ReminderStoreTest::bundleOption_ =
