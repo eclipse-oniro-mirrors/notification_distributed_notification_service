@@ -59,6 +59,7 @@ ohos_shared_library("notificationmanager") {
     "napi_publish.cpp",
     "napi_slot.cpp",
     "napi_template.cpp",
+    "init_module.cpp",
   ]
 
   deps = [
