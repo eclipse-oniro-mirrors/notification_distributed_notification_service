@@ -226,7 +226,7 @@ napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn, cons
 {
     if (callbackIn) {
         NotificationNapi::Common::SetCallback(env, callbackIn, NotificationNapi::ERROR,
-            result);
+            result, false);
     }
     return NotificationNapi::Common::JSParaError(env, callbackIn);
 }
