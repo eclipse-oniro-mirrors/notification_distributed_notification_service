@@ -69,8 +69,14 @@ napi_value Common::NapiGetUndefined(napi_env env)
     return result;
 }
 
-napi_value Common::CreateErrorValue(napi_env env, int32_t errCode)
+napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
 {
+    ANS_LOGI("enter, errorCode[%{public}d]", errCode);
+    napi_value error =  Common::NapiGetNull(env);
+    if (errCode == ERR_OK && newType) {
+        return error;
+    }
+
     napi_value code = nullptr;
     napi_create_int32(env, errCode, &code);
 
@@ -79,7 +85,6 @@ napi_value Common::CreateErrorValue(napi_env env, int32_t errCode)
     napi_value message = nullptr;
     napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
 
-    napi_value error = nullptr;
     napi_create_error(env, nullptr, message, &error);
     napi_set_named_property(env, error, "code", code);
     return error;
@@ -89,7 +94,7 @@ void Common::NapiThrow(napi_env env, int32_t errCode)
 {
     ANS_LOGI("enter");
 
-    napi_throw(env, CreateErrorValue(env, errCode));
+    napi_throw(env, CreateErrorValue(env, errCode, true));
 }
 
 napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
@@ -122,15 +127,15 @@ void Common::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInf
 {
     ANS_LOGI("enter errorCode=%{public}d", info.errorCode);
     if (info.isCallback) {
-        SetCallback(env, info.callback, info.errorCode, result);
+        SetCallback(env, info.callback, info.errorCode, result, false);
     } else {
-        SetPromise(env, info.deferred, info.errorCode, result);
+        SetPromise(env, info.deferred, info.errorCode, result, false);
     }
     ANS_LOGI("end");
 }
 
 void Common::SetCallback(
-    const napi_env &env, const napi_ref &callbackIn, const int32_t &errorCode, const napi_value &result)
+    const napi_env &env, const napi_ref &callbackIn, const int32_t &errorCode, const napi_value &result, bool newType)
 {
     ANS_LOGI("enter");
     napi_value undefined = nullptr;
@@ -140,7 +145,7 @@ void Common::SetCallback(
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
     napi_value results[ARGS_TWO] = {nullptr};
-    results[PARAM0] = CreateErrorValue(env, errorCode);
+    results[PARAM0] = CreateErrorValue(env, errorCode, newType);
     results[PARAM1] = result;
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout));
     ANS_LOGI("end");
@@ -160,14 +165,14 @@ void Common::SetCallback(
     ANS_LOGI("end");
 }
 
-void Common::SetPromise(
-    const napi_env &env, const napi_deferred &deferred, const int32_t &errorCode, const napi_value &result)
+void Common::SetPromise(const napi_env &env,
+    const napi_deferred &deferred, const int32_t &errorCode, const napi_value &result, bool newType)
 {
     ANS_LOGI("enter");
     if (errorCode == ERR_OK) {
         napi_resolve_deferred(env, deferred, result);
     } else {
-        napi_reject_deferred(env, deferred, CreateErrorValue(env, errorCode));
+        napi_reject_deferred(env, deferred, CreateErrorValue(env, errorCode, newType));
     }
     ANS_LOGI("end");
 }
@@ -180,7 +185,7 @@ napi_value Common::JSParaError(const napi_env &env, const napi_ref &callback)
     napi_value promise = nullptr;
     napi_deferred deferred = nullptr;
     napi_create_promise(env, &deferred, &promise);
-    SetPromise(env, deferred, ERROR, Common::NapiGetNull(env));
+    SetPromise(env, deferred, ERROR, Common::NapiGetNull(env), false);
     return promise;
 }
 
@@ -4716,9 +4721,9 @@ void Common::CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &i
     ANS_LOGI("enter errorCode=%{public}d", info.errorCode);
     int32_t errorCode = info.errorCode == ERR_OK ? ERR_OK : ErrorToExternal(info.errorCode);
     if (info.isCallback) {
-        SetCallback(env, info.callback, errorCode, result);
+        SetCallback(env, info.callback, errorCode, result, true);
     } else {
-        SetPromise(env, info.deferred, errorCode, result);
+        SetPromise(env, info.deferred, errorCode, result, true);
     }
     ANS_LOGI("end");
 }
