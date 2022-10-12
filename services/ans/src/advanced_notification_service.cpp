@@ -2277,7 +2277,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 #endif
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+                (record->bundleOption->GetUid() == bundle->GetUid()) &&
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 (record->deviceId.empty()) &&
 #endif
