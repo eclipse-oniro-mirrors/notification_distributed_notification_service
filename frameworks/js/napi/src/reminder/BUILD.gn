@@ -68,6 +68,7 @@ ohos_shared_library("reminderagent") {
   part_name = "${component_name}"
 }
 
+# used for error code
 ohos_shared_library("reminderagentmanager") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
