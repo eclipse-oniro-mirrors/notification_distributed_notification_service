@@ -837,5 +837,168 @@ HWTEST_F(ReminderRequestTest, SetReminderTimeInMilli_00001, Function | SmallTest
     rrc->SetReminderTimeInMilli(reminderTimeInMilli);
     EXPECT_EQ(rrc->GetReminderTimeInMilli(), reminderTimeInMilli);
 }
+
+/**
+ * @tc.name: SetRingDuration_00001
+ * @tc.desc: Test SetRingDuration parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, SetRingDuration_00001, Function | SmallTest | Level1)
+{
+    uint64_t ringDurationInSeconds = 0;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetRingDuration(ringDurationInSeconds);
+    EXPECT_EQ(rrc->GetRingDuration(), 1);
+}
+
+/**
+ * @tc.name: SetRingDuration_00002
+ * @tc.desc: Test SetRingDuration parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, SetRingDuration_00002, Function | SmallTest | Level1)
+{
+    uint64_t ringDurationInSeconds = 10;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetRingDuration(ringDurationInSeconds);
+    EXPECT_EQ(rrc->GetRingDuration(), ringDurationInSeconds);
+}
+
+/**
+ * @tc.name: Unmarshalling_00001
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, Unmarshalling_00001, Function | SmallTest | Level1)
+{
+    bool result = false;
+    Parcel parcel;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    if (nullptr == rrc->Unmarshalling(parcel)) {
+        result = true;
+    }
+    EXPECT_EQ(true, result);
+}
+
+/**
+ * @tc.name: InitNotificationRequest_00001
+ * @tc.desc: Test InitNotificationRequest parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, InitNotificationRequest_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+}
+
+/**
+ * @tc.name: InitNotificationRequest_00002
+ * @tc.desc: Test InitNotificationRequest parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, InitNotificationRequest_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetNotificationId(100);
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+}
+
+/**
+ * @tc.name: IsAlerting_00001
+ * @tc.desc: Test IsAlerting parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, IsAlerting_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->IsAlerting(), false);
+}
+
+/**
+ * @tc.name: GetButtonInfo_00001
+ * @tc.desc: Test GetButtonInfo parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, GetButtonInfo_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetButtonInfo(), "");
+}
+
+/**
+ * @tc.name: GetShowTime_00001
+ * @tc.desc: Test GetShowTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, GetShowTime_00001, Function | SmallTest | Level1)
+{
+    uint64_t showTime = 8 * 60 * 1000;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string ret = "00:08";
+    EXPECT_EQ(rrc->GetShowTime(showTime), ret);
+}
+
+/**
+ * @tc.name: GetShowTime_00002
+ * @tc.desc: Test GetShowTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, GetShowTime_00002, Function | SmallTest | Level1)
+{
+    uint64_t showTime = 8 * 60 * 1000;
+    ReminderRequest reminder = ReminderRequest(ReminderRequest::ReminderType::TIMER);
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string ret = "00:08";
+    EXPECT_EQ(rrc->GetShowTime(showTime), ret);
+}
+
+/**
+ * @tc.name: CreateWantAgent_00001
+ * @tc.desc: Test CreateWantAgent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Level1)
+{
+    AppExecFwk::ElementName element;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->CreateWantAgent(element), nullptr);
+}
+
+/**
+ * @tc.name: GetUid_00001
+ * @tc.desc: Test GetUid parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, GetUid_00001, Function | SmallTest | Level1)
+{
+    int32_t userId = 1;
+    std::string bundleName = "bundleName";
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetUid(userId, bundleName), -1);
+}
+
+/**
+ * @tc.name: GetUserId_00001
+ * @tc.desc: Test GetUserId parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, GetUserId_00001, Function | SmallTest | Level1)
+{
+    int32_t uid = 1;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetUserId(uid), 0);
+}
 }
 }
