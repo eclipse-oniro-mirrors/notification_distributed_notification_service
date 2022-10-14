@@ -367,6 +367,7 @@ void StartNotificationDialog(AsyncCallbackInfoIsEnable *callbackInfo)
             want.SetElementName("com.example.dialogsPopped", "DialogPopped");
             want.SetParam("callbackStubImpl_", callbackStubImpl_);
             want.SetParam("tokenId", token);
+            want.SetParam("from", AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
             ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token, -1);
             ANS_LOGD("%{public}s, End Calling StartNotificationDialog. ret=%{public}d", __func__, err);
         } else {
@@ -394,7 +395,7 @@ void ResetCallbackStubImpl()
 
 bool CallbackStubImpl::OnEnableNotification(bool isAllow)
 {
-    ANS_LOGD("isAllow: %{public}d", isAllow);
+    ANS_LOGI("isAllow: %{public}d", isAllow);
     if (task_) {
         task_->allowed = isAllow;
         napi_value resourceName = nullptr;
