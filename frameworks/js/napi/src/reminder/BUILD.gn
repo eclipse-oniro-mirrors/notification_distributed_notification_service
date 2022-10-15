@@ -75,6 +75,7 @@ ohos_shared_library("reminderagentmanager") {
     "${ability_runtime_napi_path}/inner/napi_common",
     "//foundation/multimedia/image_framework/interfaces/kits/js/common/include/",
     "../../include",
+    "../../include/manager",
     "//third_party/node/src",
     "//third_party/libuv/include",
   ]
@@ -84,6 +85,7 @@ ohos_shared_library("reminderagentmanager") {
   sources = [
     "../common.cpp",
     "../slot.cpp",
+    "../manager/napi_slot.cpp",
     "native_module_manager.cpp",
     "publish.cpp",
     "reminder_common.cpp",

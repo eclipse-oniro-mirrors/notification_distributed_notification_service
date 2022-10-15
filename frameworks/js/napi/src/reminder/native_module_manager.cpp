@@ -18,7 +18,7 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "reminder/publish.h"
-#include "slot.h"
+#include "manager/napi_slot.h"
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -32,7 +32,7 @@ napi_value ReminderAgentManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getValidReminders", GetValidRemindersMgr),
         DECLARE_NAPI_FUNCTION("publishReminder", PublishReminderMgr),
         DECLARE_NAPI_FUNCTION("addNotificationSlot", AddSlotMgr),
-        DECLARE_NAPI_FUNCTION("removeNotificationSlot", NotificationNapi::RemoveSlot),
+        DECLARE_NAPI_FUNCTION("removeNotificationSlot", NotificationNapi::NapiRemoveSlot),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

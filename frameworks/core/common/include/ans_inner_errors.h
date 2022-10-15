@@ -90,7 +90,7 @@ enum ReminderErrorCode : uint32_t {
     ERR_REMINDER_PACKAGE_NOT_EXIST,
 };
 
-static std::map<int32_t, std::string> reminderErrCodeMsgMap = {
+static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
     { ERR_REMINDER_PERMISSION_DENIED, "BussinessError 201: Permission denied." },
     { ERR_REMINDER_INVALID_PARAM, "BussinessError 401: Parameter error." },
     { ERR_REMINDER_NOTIFICATION_NOT_ENABLE, "BussinessError 1700001: Notification not enable." },
