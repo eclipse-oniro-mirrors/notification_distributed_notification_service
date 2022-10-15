@@ -13,32 +13,30 @@
  * limitations under the License.
  */
 
-#include "enabledistributed_fuzzer.h"
+#include "getactivenotificationnums_fuzzer.h"
 
 #include "notification_helper.h"
-
 namespace OHOS {
     namespace {
         constexpr uint8_t ENABLE = 2;
     }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        // test EnableDistributed function
-        bool enabled = *data % ENABLE;
-        Notification::NotificationHelper::EnableDistributed(enabled);
-        // test EnableDistributedByBundle function
+        // test GetActiveNotificationNums function
+        uint64_t num;
+        Notification::NotificationHelper::GetActiveNotificationNums(num);
+        // test GetCurrentAppSorting function
+        const std::vector<Notification::NotificationSorting> sortingList;
+        sptr<Notification::NotificationSortingMap> map = new Notification::NotificationSortingMap(sortingList);
+        Notification::NotificationHelper::GetCurrentAppSorting(map);
+        // test SetNotificationAgent function
         std::string stringData(data);
-        int32_t usingData = static_cast<int32_t>(GetU32Data(data));
-        Notification::NotificationBundleOption bundleOption;
-        bundleOption.SetBundleName(stringData);
-        bundleOption.SetUid(usingData);
-        Notification::NotificationHelper::EnableDistributedByBundle(bundleOption, enabled);
-        // test EnableDistributedSelf function
-        Notification::NotificationHelper::EnableDistributedSelf(enabled);
-        // test IsDistributedEnableByBundle function
-        Notification::NotificationHelper::IsDistributedEnableByBundle(bundleOption, enabled);
-        // test RemoveNotification function
-        return Notification::NotificationHelper::RemoveNotification(bundleOption, usingData, stringData, usingData);
+        Notification::NotificationHelper::SetNotificationAgent(stringData);
+        // test GetNotificationAgent function
+        Notification::NotificationHelper::GetNotificationAgent(stringData);
+        // test CanPublishNotificationAsBundle function
+        bool enabled = *data % ENABLE;
+        return Notification::NotificationHelper::CanPublishNotificationAsBundle(stringData, enabled);
     }
 }
 
@@ -47,7 +45,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     char *ch = ParseData(data, size);
-    if (ch != nullptr) {
+    if (ch != nullptr && size >= GetU32Size()) {
         OHOS::DoSomethingInterestingWithMyAPI(ch, size);
         free(ch);
         ch = nullptr;
