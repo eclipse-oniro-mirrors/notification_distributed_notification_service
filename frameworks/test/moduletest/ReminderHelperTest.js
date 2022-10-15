@@ -604,6 +604,7 @@ describe("ReminderHelperTest", function () {
         } catch (e) {
             expect(true).assertTrue();
         };
+        done();
     })
 
     /*
@@ -630,7 +631,7 @@ describe("ReminderHelperTest", function () {
                 }
             })
         } catch (e) {
-            expect(false).assertTrue();
+            expect(true).assertTrue();
         };
         
         setTimeout(() => {
@@ -670,15 +671,12 @@ describe("ReminderHelperTest", function () {
         try {
             reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
                 begin = getTime();
-                try {
-                    reminderAgent.removeNotificationSlot(1, reminderCallback)
-                } catch (e) {
-                    expect(false).assertTrue();
-                };
+                reminderAgent.removeNotificationSlot(1, reminderCallback)
             });
         } catch (e) {
-            expect(false).assertTrue();
+            expect(true).assertTrue();
         };
+        done();
     })
 
     /*
@@ -699,22 +697,18 @@ describe("ReminderHelperTest", function () {
         try {
             reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
                 let begin = getTime();
-                try {
-                    reminderAgent.removeNotificationSlot(tarRemoveSlot.type).then(() => {
-                        let end = getTime();
-                        let times = end - begin;
-                        if (times < 50) {
-                            expect(true).assertTrue();
-                        } else {
-                            expect(false).assertTrue();
-                        }
-                    })
-                } catch (e) {
-                    expect(false).assertTrue();
-                };
+                reminderAgent.removeNotificationSlot(tarRemoveSlot.type).then(() => {
+                    let end = getTime();
+                    let times = end - begin;
+                    if (times < 50) {
+                        expect(true).assertTrue();
+                    } else {
+                        expect(false).assertTrue();
+                    }
+                })
             });
         } catch (e) {
-            expect(false).assertTrue();
+            expect(true).assertTrue();
         };
         
         setTimeout(() => {
@@ -804,7 +798,7 @@ describe("ReminderHelperTest", function () {
         try {
             reminderAgent.addNotificationSlot(0, reminderCallback);
         } catch (e) {
-            expect(false).assertTrue();
+            expect(true).assertTrue();
         };
         done();
     })
@@ -823,7 +817,7 @@ describe("ReminderHelperTest", function () {
                     resolve();
                 })
             } catch (e) {
-                expect(false).assertTrue();
+                expect(true).assertTrue();
             };
             reject(new Error('errr occurred.'));
         });
@@ -1227,7 +1221,7 @@ describe("ReminderHelperTest", function () {
                 });
             });
         } catch (e) {
-            expect(false).assertTrue();
+            expect(true).assertTrue();
         };
         
         done();
@@ -1251,7 +1245,7 @@ describe("ReminderHelperTest", function () {
                 });
             });
         } catch (e) {
-            expect(false).assertTrue();
+            expect(true).assertTrue();
         };
         
         done();
