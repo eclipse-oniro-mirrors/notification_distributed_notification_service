@@ -84,8 +84,8 @@ ohos_shared_library("reminderagentmanager") {
 
   sources = [
     "../common.cpp",
-    "../slot.cpp",
     "../manager/napi_slot.cpp",
+    "../slot.cpp",
     "native_module_manager.cpp",
     "publish.cpp",
     "reminder_common.cpp",
