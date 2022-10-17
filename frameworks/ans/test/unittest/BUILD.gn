@@ -38,6 +38,8 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/reminder_request_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_request_timer_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_store_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/enabled_notification_callback_data_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_conversational_message_test.cpp",
   ]
 
   configs = [ "//commonlibrary/c_utils/base:utils_config" ]
