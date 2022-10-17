@@ -27,9 +27,11 @@ namespace Notification {
 class NotificationConversationalMessageTest : public testing::Test {
 public:
     static void SetUpTestCase(){}
+
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown(){}
+    
 };
 
 /**
@@ -84,6 +86,7 @@ HWTEST_F(NotificationConversationalMessageTest, Dump_00001, Function | SmallTest
     std::string ret = 
     "NotificationConversationalMessage{ text = Text, arrivedTime = 10, mimeType = , uri = null, "
     "sender = MessageUser{ key = , name = , pixelMap = null, uri = , isMachine = false, isUserImportant = false } }";
+
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
@@ -135,6 +138,7 @@ HWTEST_F(NotificationConversationalMessageTest, Unmarshalling_001, Function | Sm
     Parcel parcel;
     std::shared_ptr<NotificationConversationalMessage> result = 
     std::make_shared<NotificationConversationalMessage>(text, timestamp, sender);
+
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {
             unmarshalling = false;
