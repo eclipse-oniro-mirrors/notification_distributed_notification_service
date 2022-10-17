@@ -2075,6 +2075,10 @@ ErrCode AnsManagerProxy::PublishReminder(sptr<ReminderRequest> &reminder)
     }
     reminder->SetReminderId(reminderId);
     ANSR_LOGD("ReminderId=%{public}d", reminder->GetReminderId());
+    if (!reply.ReadInt32(result)) {
+        ANSR_LOGE("[PublishReminder] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 
@@ -2098,6 +2102,10 @@ ErrCode AnsManagerProxy::CancelReminder(const int32_t reminderId)
         ANSR_LOGE("[CancelReminder] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
     }
+    if (!reply.ReadInt32(result)) {
+        ANSR_LOGE("[PublishReminder] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 
@@ -2116,6 +2124,10 @@ ErrCode AnsManagerProxy::CancelAllReminders()
     if (result != ERR_OK) {
         ANSR_LOGE("[CancelAllReminders] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANSR_LOGE("[PublishReminder] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
 }
@@ -2146,8 +2158,13 @@ ErrCode AnsManagerProxy::GetValidReminders(std::vector<sptr<ReminderRequest>> &r
     result = ReadReminders(count, reply, reminders);
     if (result != ERR_OK) {
         ANSR_LOGE("[GetValidReminders] fail: ReadReminders ErrCode=%{public}d", result);
+        return result;
     } else {
         ANSR_LOGD("[GetValidReminders], size=%{public}zu", reminders.size());
+    }
+    if (!reply.ReadInt32(result)) {
+        ANSR_LOGE("[PublishReminder] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
 }

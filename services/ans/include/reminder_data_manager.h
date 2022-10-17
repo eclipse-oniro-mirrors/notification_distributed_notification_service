@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "advanced_notification_service.h"
+#include "ans_inner_errors.h"
 #include "player.h"
 #include "reminder_request.h"
 #include "reminder_store.h"
@@ -43,16 +44,18 @@ public:
      *
      * @param packageName Indicates the package name.
      * @param userId Indicates the user id which the bundle belong to.
+     * @return ERR_OK if success, else not.
      */
-    void CancelAllReminders(const std::string &packageName, const int32_t &userId);
+    ErrCode CancelAllReminders(const std::string &packageName, const int32_t &userId);
 
     /**
      * @brief Cancels the target reminder relative to the reminder id and bundle option.
      *
      * @param reminderId Indicates the reminder id.
      * @param bundleOption Indicates the bundle option.
+     * @return ERR_OK if success, else not.
      */
-    void CancelReminder(const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode CancelReminder(const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Close the target reminder which is showing on panel.
@@ -115,8 +118,10 @@ public:
      *
      * @param reminder Indicates the reminder.
      * @param bundleOption Indicates bundle option the reminder belongs to.
+     * @return ERR_OK if success, else not.
      */
-    void PublishReminder(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode PublishReminder(const sptr<ReminderRequest> &reminder,
+        const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Refresh all reminders when date/time or timeZone of device changed by user.

@@ -1454,6 +1454,10 @@ ErrCode AnsManagerStub::HandlePublishReminder(MessageParcel &data, MessageParcel
         ANSR_LOGE("Write back reminderId failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 
@@ -1466,12 +1470,22 @@ ErrCode AnsManagerStub::HandleCancelReminder(MessageParcel &data, MessageParcel 
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    return CancelReminder(reminderId);
+    ErrCode result = CancelReminder(reminderId);
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 
 ErrCode AnsManagerStub::HandleCancelAllReminders(MessageParcel &data, MessageParcel &reply)
 {
-    return CancelAllReminders();
+    ErrCode result = CancelAllReminders();
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 
 ErrCode AnsManagerStub::HandleGetValidReminders(MessageParcel &data, MessageParcel &reply)
@@ -1498,6 +1512,10 @@ ErrCode AnsManagerStub::HandleGetValidReminders(MessageParcel &data, MessageParc
             ANSR_LOGW("Write reminder parcelable failed");
             return ERR_ANS_PARCELABLE_FAILED;
         }
+    }
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
 }

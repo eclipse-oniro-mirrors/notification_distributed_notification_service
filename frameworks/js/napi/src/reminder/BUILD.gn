@@ -67,3 +67,48 @@ ohos_shared_library("reminderagent") {
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
+
+# used for error code
+ohos_shared_library("reminderagentmanager") {
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_napi_path}/inner/napi_common",
+    "//foundation/multimedia/image_framework/interfaces/kits/js/common/include/",
+    "../../include",
+    "../../include/manager",
+    "//third_party/node/src",
+    "//third_party/libuv/include",
+  ]
+
+  configs = [ ":native_module_config" ]
+
+  sources = [
+    "../common.cpp",
+    "../manager/napi_slot.cpp",
+    "../slot.cpp",
+    "native_module_manager.cpp",
+    "publish.cpp",
+    "reminder_common.cpp",
+  ]
+
+  deps = [
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${core_path}:ans_core",
+    "//foundation/multimedia/image_framework/interfaces/innerkits:image",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "napi:ace_napi",
+    "relational_store:native_rdb",
+  ]
+
+  relative_install_dir = "module"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
