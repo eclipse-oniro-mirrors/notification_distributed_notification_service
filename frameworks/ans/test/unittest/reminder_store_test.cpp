@@ -198,8 +198,6 @@ HWTEST_F(ReminderStoreTest, GetReminders_00001, Function | SmallTest | Level1)
 {
     std::string queryCondition = "queryCondition";
     ReminderStore reminderStore;
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
-    reminderStore.BuildReminder(resultSet);
     std::vector<sptr<ReminderRequest>> ret = reminderStore.GetReminders(queryCondition);
     EXPECT_EQ(ret.size(), 0);
 }
@@ -214,6 +212,8 @@ HWTEST_F(ReminderStoreTest, GetBundleOption_00001, Function | SmallTest | Level1
 {
     int32_t reminderId = 0;
     ReminderStore reminderStore;
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
+    reminderStore.BuildReminder(resultSet);
     bool ret = reminderStore.GetBundleOption(reminderId, bundleOption_);
     EXPECT_EQ(ret, false);
 }
