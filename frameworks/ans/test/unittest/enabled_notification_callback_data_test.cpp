@@ -26,10 +26,10 @@ namespace OHOS {
 namespace Notification {
 class NotificationCallbackDataTest : public testing::Test {
 public:
-    static void SetUpTestCase(){}
+    static void SetUpTestCase() {}
     static void TearDownTestCase() {}
     void SetUp() {}
-    void TearDown(){}
+    void TearDown() {}
 };
 
 /**
