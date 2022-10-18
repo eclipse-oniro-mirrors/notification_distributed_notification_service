@@ -50,6 +50,7 @@ ohos_shared_library("notificationmanager") {
     "../get_active.cpp",
     "../publish.cpp",
     "../slot.cpp",
+    "init_module.cpp",
     "napi_cancel.cpp",
     "napi_display_badge.cpp",
     "napi_distributed.cpp",

@@ -260,7 +260,7 @@ napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn, cons
     }
     if (callbackIn) {
         ReminderCommon::SetCallback(env, callbackIn, ERR_REMINDER_INVALID_PARAM,
-            result);
+            result, false);
     }
     return ReminderCommon::JSParaError(env, callbackIn);
 }
