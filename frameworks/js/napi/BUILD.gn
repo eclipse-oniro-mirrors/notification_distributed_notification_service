@@ -15,7 +15,10 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
 group("napi_reminder") {
-  deps = [ "src/reminder:reminderagent" ]
+  deps = [
+    "src/reminder:reminderagent",
+    "src/reminder:reminderagentmanager",
+  ]
 }
 
 group("napi_notification") {
@@ -79,6 +82,7 @@ ohos_shared_library("notification") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",

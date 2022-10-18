@@ -936,17 +936,23 @@ ErrCode AnsManagerStub::HandleUpdateSlots(MessageParcel &data, MessageParcel &re
 
 ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, MessageParcel &reply)
 {
+    ANS_LOGI("enter");
     std::string deviceId;
+    bool popFlag = false;
     if (!data.ReadString(deviceId)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: read deviceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
-    ErrCode result = RequestEnableNotification(deviceId);
+    ErrCode result = RequestEnableNotification(deviceId, popFlag);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    if (!reply.WriteBool(popFlag)) {
+        ANS_LOGE("[HandleRequestEnableNotification] fail: write popFlag failed, ErrCode=%{public}d", popFlag);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    ANS_LOGD("Write popFlag into reply. popFlag = %{public}d", popFlag);
     return ERR_OK;
 }
 
@@ -1448,6 +1454,10 @@ ErrCode AnsManagerStub::HandlePublishReminder(MessageParcel &data, MessageParcel
         ANSR_LOGE("Write back reminderId failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 
@@ -1460,12 +1470,22 @@ ErrCode AnsManagerStub::HandleCancelReminder(MessageParcel &data, MessageParcel 
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    return CancelReminder(reminderId);
+    ErrCode result = CancelReminder(reminderId);
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 
 ErrCode AnsManagerStub::HandleCancelAllReminders(MessageParcel &data, MessageParcel &reply)
 {
-    return CancelAllReminders();
+    ErrCode result = CancelAllReminders();
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 
 ErrCode AnsManagerStub::HandleGetValidReminders(MessageParcel &data, MessageParcel &reply)
@@ -1492,6 +1512,10 @@ ErrCode AnsManagerStub::HandleGetValidReminders(MessageParcel &data, MessageParc
             ANSR_LOGW("Write reminder parcelable failed");
             return ERR_ANS_PARCELABLE_FAILED;
         }
+    }
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
 }
@@ -1975,6 +1999,12 @@ ErrCode AnsManagerStub::UpdateSlots(
 }
 
 ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId)
+{
+    ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
 {
     ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
     return ERR_INVALID_OPERATION;

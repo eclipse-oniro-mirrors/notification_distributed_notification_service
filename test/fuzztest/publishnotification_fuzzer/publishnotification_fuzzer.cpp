@@ -75,6 +75,15 @@ namespace OHOS {
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(types);
         request.SetSlotType(slotType);
 
+        Notification::NotificationHelper::PublishNotification(request, stringData);
+
+        Notification::NotificationHelper::PublishNotification(request);
+        // test GetActiveNotifications function
+        sptr<Notification::NotificationRequest> requester = new Notification::NotificationRequest(request);
+        std::vector<sptr<Notification::NotificationRequest>> requested;
+        requested.emplace_back(requester);
+        Notification::NotificationHelper::GetActiveNotifications(requested);
+        // test PublishNotification function
         return Notification::NotificationHelper::PublishNotification(stringData, request) == ERR_OK;
     }
 }

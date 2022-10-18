@@ -15,6 +15,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_REMINDER_COMMON_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_REMINDER_COMMON_H
 
+#include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -60,6 +61,13 @@ const char* WANT_AGENT_PKG = "pkgName";
 const char* WANT_AGENT_ABILITY = "abilityName";
 }
 
+struct CallbackPromiseInfo {
+    napi_ref callback = nullptr;
+    napi_deferred deferred = nullptr;
+    bool isCallback = false;
+    int32_t errorCode = 0;
+};
+
 class ReminderCommon {
     ReminderCommon();
     ~ReminderCommon();
@@ -81,6 +89,22 @@ public:
 
     static bool GetObject(const napi_env &env, const napi_value &value,
         const char* propertyName, napi_value& propertyVal);
+
+    static void HandleErrCode(const napi_env &env, int32_t errCode);
+
+    static void ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info,
+        const napi_value &result);
+
+    static void SetCallback(const napi_env &env, const napi_ref &callbackIn, const int32_t &errorCode,
+        const napi_value &result);
+
+    static napi_value  SetPromise(const napi_env &env, const CallbackPromiseInfo &info,
+        const napi_value &result);
+
+    static napi_value JSParaError(const napi_env &env, const napi_ref &callback);
+
+    static void PaddingCallbackPromiseInfo(const napi_env &env, const napi_ref &callback,
+        CallbackPromiseInfo &info, napi_value &promise);
 
 private:
     static bool CheckCalendarParams(const int32_t &year, const int32_t &month, const int32_t &day,
@@ -115,6 +139,10 @@ private:
 
     static napi_value ParseInt32Array(const napi_env &env, const napi_value &value,
         const char* propertyName, std::vector<uint8_t> &propertyVal, uint8_t maxLen);
+
+    static std::string FindErrMsg(const napi_env &env, const int32_t errCode);
+
+    static napi_value GetCallbackErrorValue(napi_env env, const int32_t errCode, const std::string errMsg);
 };
 }  // namespace OHOS
 }  // namespace ReminderAgentNapi

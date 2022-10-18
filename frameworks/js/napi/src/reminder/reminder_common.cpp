@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace ReminderAgentNapi {
 using namespace OHOS::Notification;
+const uint32_t ASYNC_CALLBACK_PARAM_NUM = 2;
 
 napi_value ReminderCommon::GetReminderRequest(
     const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
@@ -530,6 +531,141 @@ napi_value ReminderCommon::ParseInt32Array(const napi_env &env, const napi_value
         }
     }
     return NotificationNapi::Common::NapiGetNull(env);
+}
+
+void ReminderCommon::PaddingCallbackPromiseInfo(
+    const napi_env &env, const napi_ref &callback, CallbackPromiseInfo &info, napi_value &promise)
+{
+    if (callback) {
+        info.callback = callback;
+        info.isCallback = true;
+    } else {
+        napi_deferred deferred = nullptr;
+        NAPI_CALL_RETURN_VOID(env, napi_create_promise(env, &deferred, &promise));
+        info.deferred = deferred;
+        info.isCallback = false;
+    }
+}
+
+void ReminderCommon::HandleErrCode(const napi_env &env, int32_t errCode)
+{
+    if (errCode == ERR_OK) {
+        return;
+    }
+    std::string errCodeMsg = FindErrMsg(env, errCode);
+    errCodeMsg = reminderErrCodeMsgMap[errCode];
+    napi_throw_error(env, std::to_string(errCode).c_str(), errCodeMsg.c_str());
+}
+
+std::string ReminderCommon::FindErrMsg(const napi_env &env, const int32_t errCode)
+{
+    auto findMsg = reminderErrCodeMsgMap.find(errCode);
+    if (findMsg == reminderErrCodeMsgMap.end()) {
+        ANSR_LOGI("Inner error.");
+        return "Inner error.";
+    }
+    return reminderErrCodeMsgMap[errCode];
+}
+
+void ReminderCommon::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info,
+    const napi_value &result)
+{
+    ANSR_LOGI("enter errorCode=%{public}d", info.errorCode);
+    if (info.isCallback) {
+        SetCallback(env, info.callback, info.errorCode, result);
+    } else {
+        SetPromise(env, info, result);
+    }
+    ANSR_LOGI("end");
+}
+
+void ReminderCommon::SetCallback(
+    const napi_env &env, const napi_ref &callbackIn, const int32_t &errCode, const napi_value &result)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+
+    napi_value callback = nullptr;
+    napi_value resultout = nullptr;
+    napi_get_reference_value(env, callbackIn, &callback);
+    napi_value results[ASYNC_CALLBACK_PARAM_NUM] = {nullptr};
+    if (errCode == ERR_OK) {
+        results[0] = NotificationNapi::Common::NapiGetNull(env);
+    } else {
+        std::string errMsg = FindErrMsg(env, errCode);
+        results[0] = GetCallbackErrorValue(env, errCode, errMsg); 
+    }
+    results[1] = result;
+    NAPI_CALL_RETURN_VOID(env,
+        napi_call_function(env, undefined, callback, ASYNC_CALLBACK_PARAM_NUM, &results[0], &resultout));
+}
+
+napi_value ReminderCommon::GetCallbackErrorValue(napi_env env, const int32_t errCode, const std::string errMsg)
+{
+    if (errCode == ERR_OK) {
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    napi_value error = nullptr;
+    napi_value eCode = nullptr;
+    napi_value eMsg = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, errCode, &eCode));
+    NAPI_CALL(env, napi_create_string_utf8(env, errMsg.c_str(),
+        errMsg.length(), &eMsg));
+    NAPI_CALL(env, napi_create_object(env, &error));
+    NAPI_CALL(env, napi_set_named_property(env, error, "code", eCode));
+    NAPI_CALL(env, napi_set_named_property(env, error, "message", eMsg));
+    return error;
+}
+
+napi_value  ReminderCommon::SetPromise(
+    const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
+{
+    if (info.errorCode == ERR_OK) {
+        napi_resolve_deferred(env, info.deferred, result);
+    } else {
+        std::string errMsg = FindErrMsg(env, info.errorCode);
+        if (errMsg == "") {
+            return nullptr;
+        }
+        napi_value error = nullptr;
+        napi_value eCode = nullptr;
+        napi_value eMsg = nullptr;
+        NAPI_CALL(env, napi_create_int32(env, info.errorCode, &eCode));
+        NAPI_CALL(env, napi_create_string_utf8(env, errMsg.c_str(),
+            errMsg.length(), &eMsg));
+        NAPI_CALL(env, napi_create_object(env, &error));
+        NAPI_CALL(env, napi_set_named_property(env, error, "data", eCode));
+        NAPI_CALL(env, napi_set_named_property(env, error, "code", eCode));
+        NAPI_CALL(env, napi_set_named_property(env, error, "message", eMsg));
+        napi_reject_deferred(env, info.deferred, error);
+    }
+    return result;
+}
+
+napi_value ReminderCommon::JSParaError(const napi_env &env, const napi_ref &callback)
+{
+    if (callback) {
+        SetCallback(env, callback, ERR_REMINDER_INVALID_PARAM, nullptr);
+        return NotificationNapi::Common::NapiGetNull(env);
+    } else {
+        napi_value promise = nullptr;
+        napi_deferred deferred = nullptr;
+        napi_create_promise(env, &deferred, &promise);
+
+        napi_value res = nullptr;
+        napi_value eCode = nullptr;
+        napi_value eMsg = nullptr;
+        std::string errMsg = FindErrMsg(env, ERR_REMINDER_INVALID_PARAM);
+        NAPI_CALL(env, napi_create_int32(env, ERR_REMINDER_INVALID_PARAM, &eCode));
+        NAPI_CALL(env, napi_create_string_utf8(env, errMsg.c_str(),
+            errMsg.length(), &eMsg));
+        NAPI_CALL(env, napi_create_object(env, &res));
+        NAPI_CALL(env, napi_set_named_property(env, res, "data", eCode));
+        NAPI_CALL(env, napi_set_named_property(env, res, "code", eCode));
+        NAPI_CALL(env, napi_set_named_property(env, res, "message", eMsg));
+        napi_reject_deferred(env, deferred, res);
+        return promise;
+    }
 }
 }
 }

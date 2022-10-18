@@ -383,6 +383,16 @@ ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId)
     return ansManagerProxy_->RequestEnableNotification(deviceId);
 }
 
+ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId, bool &popFlag)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->RequestEnableNotification(deviceId, popFlag);
+}
+
 ErrCode AnsNotification::AreNotificationsSuspended(bool &suspended)
 {
     if (!GetAnsManagerProxy()) {

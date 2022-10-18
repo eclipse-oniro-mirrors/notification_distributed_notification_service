@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import reminderAgent from '@ohos.reminderAgent';
+import reminderAgent from '@ohos.reminderAgentManager';
 
 
 import {describe, beforeAll, beforeEach, afterEach, afterAll, it, expect} from 'deccjsunit/index'
@@ -66,7 +66,7 @@ describe("ReminderHelperTest", function () {
         function reminderCallback(err, reminderId){
             let end = getTime();
             let times = end - begin;
-            if (times < 50) {
+            if (times < 500) {
                 expect(true).assertTrue();
             } else {
                 expect(false).assertTrue();
@@ -81,7 +81,11 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.publishReminder(timer, reminderCallback)
+        try {
+            reminderAgent.publishReminder(timer, reminderCallback)
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -101,15 +105,19 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.publishReminder(timer).then((reminderId) => {
-            let end = getTime();
-            let times = end - begin;
-            if (times < 50) {
-                expect(true).assertTrue();
-            } else {
-                expect(false).assertTrue();
-            }
-        });
+        try {
+            reminderAgent.publishReminder(timer).then((reminderId) => {
+                let end = getTime();
+                let times = end - begin;
+                if (times < 50) {
+                    expect(true).assertTrue();
+                } else {
+                    expect(false).assertTrue();
+                }
+            });
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         setTimeout(() => {
             done();
         }, 500);
@@ -148,7 +156,11 @@ describe("ReminderHelperTest", function () {
         }
         let times = 0;
         let begin = getTime();
-        reminderAgent.publishReminder(alarm, reminderCallback)
+        try {
+            reminderAgent.publishReminder(alarm, reminderCallback)
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -172,15 +184,19 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.publishReminder(alarm).then((reminderId) => {
-            let end = getTime();
-            let times = end - begin;
-            if (times < 50) {
-                expect(true).assertTrue();
-            } else {
-                expect(false).assertTrue();
-            }
-        });
+        try {
+            reminderAgent.publishReminder(alarm).then((reminderId) => {
+                let end = getTime();
+                let times = end - begin;
+                if (times < 50) {
+                    expect(true).assertTrue();
+                } else {
+                    expect(false).assertTrue();
+                }
+            });
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         setTimeout(() => {
             done();
         }, 500);
@@ -222,7 +238,11 @@ describe("ReminderHelperTest", function () {
         }
         let begin = getTime();
         let times = 0;
-        reminderAgent.publishReminder(calendar, reminderCallback)
+        try {
+            reminderAgent.publishReminder(calendar, reminderCallback)
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -248,15 +268,19 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.publishReminder(calendar).then((reminderId) => {
-            let end = getTime();
-            let times = end - begin;
-            if (times < 50) {
-                expect(true).assertTrue();
-            } else {
-                expect(false).assertTrue();
-            }
-        })
+        try {
+            reminderAgent.publishReminder(calendar).then((reminderId) => {
+                let end = getTime();
+                let times = end - begin;
+                if (times < 50) {
+                    expect(true).assertTrue();
+                } else {
+                    expect(false).assertTrue();
+                }
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         setTimeout(() => {
             done();
         }, 500);
@@ -288,7 +312,11 @@ describe("ReminderHelperTest", function () {
         }
         let begin = getTime();
         let times = 0;
-        reminderAgent.cancelReminder(1, reminderCallback)
+        try {
+            reminderAgent.cancelReminder(1, reminderCallback)
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -304,15 +332,19 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.cancelReminder(1).then(() => {
-            let end = getTime();
-            let times = end - begin;
-            if (times < 50) {
-                expect(true).assertTrue();
-            } else {
-                expect(false).assertTrue();
-            }
-        })
+        try {
+            reminderAgent.cancelReminder(1).then(() => {
+                let end = getTime();
+                let times = end - begin;
+                if (times < 50) {
+                    expect(true).assertTrue();
+                } else {
+                    expect(false).assertTrue();
+                }
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         setTimeout(() => {
             done();
         }, 500);
@@ -348,10 +380,18 @@ describe("ReminderHelperTest", function () {
         }
         let begin = 0;
         let times = 0;
-        reminderAgent.publishReminder(timer, (err, reminderId) => {
-            begin = getTime();
-            reminderAgent.cancelReminder(reminderId, reminderCallback);
-        })
+        try {
+            reminderAgent.publishReminder(timer, (err, reminderId) => {
+                begin = getTime();
+                try {
+                    reminderAgent.cancelReminder(reminderId, reminderCallback);
+                } catch (e) {
+                    expect(false).assertTrue();
+                };
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -378,18 +418,27 @@ describe("ReminderHelperTest", function () {
         }
         let begin = 0;
         let times = 0;
-        reminderAgent.publishReminder(calendar, (err, reminderId) => {
-            begin = getTime();
-            reminderAgent.cancelReminder(reminderId).then(() => {
-                let end = getTime();
-                times = end - begin;
-                if (times < 50) {
-                    expect(true).assertTrue();
-                } else {
+        try {
+            reminderAgent.publishReminder(calendar, (err, reminderId) => {
+                begin = getTime();
+                try {
+                    reminderAgent.cancelReminder(reminderId).then(() => {
+                        let end = getTime();
+                        times = end - begin;
+                        if (times < 50) {
+                            expect(true).assertTrue();
+                        } else {
+                            expect(false).assertTrue();
+                        }
+                    })
+                } catch (e) {
                     expect(false).assertTrue();
-                }
+                };
+                
             })
-        })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         setTimeout(() => {
             done();
         }, 500);
@@ -421,7 +470,11 @@ describe("ReminderHelperTest", function () {
         }
         let begin = getTime();
         let times = 0;
-        reminderAgent.getValidReminders(reminderCallback)
+        try {
+            reminderAgent.getValidReminders(reminderCallback)
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -437,15 +490,19 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.getValidReminders().then((reminders) => {
-            let end = getTime();
-            let times = end - begin;
-            if (times < 50) {
-                expect(true).assertTrue();
-            } else {
-                expect(false).assertTrue();
-            }
-        })
+        try {
+            reminderAgent.getValidReminders().then((reminders) => {
+                let end = getTime();
+                let times = end - begin;
+                if (times < 50) {
+                    expect(true).assertTrue();
+                } else {
+                    expect(false).assertTrue();
+                }
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         setTimeout(() => {
             done();
         }, 500);
@@ -478,7 +535,11 @@ describe("ReminderHelperTest", function () {
         }
         let begin = getTime();
         let times = 0;
-        reminderAgent.cancelAllReminders(reminderCallback)
+        try {
+            reminderAgent.cancelAllReminders(reminderCallback)
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -494,15 +555,19 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.cancelAllReminders().then(() => {
-            let end = getTime();
-            let times = end - begin;
-            if (times < 50) {
-                expect(true).assertTrue();
-            } else {
-                expect(false).assertTrue();
-            }
-        })
+        try {
+            reminderAgent.cancelAllReminders().then(() => {
+                let end = getTime();
+                let times = end - begin;
+                if (times < 50) {
+                    expect(true).assertTrue();
+                } else {
+                    expect(false).assertTrue();
+                }
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         setTimeout(() => {
             done();
         }, 500);
@@ -534,7 +599,12 @@ describe("ReminderHelperTest", function () {
         }
         let begin = getTime();
         let times = 0;
-        reminderAgent.addNotificationSlot(1, reminderCallback)
+        try {
+            reminderAgent.addNotificationSlot(1, reminderCallback)
+        } catch (e) {
+            expect(true).assertTrue();
+        };
+        done();
     })
 
     /*
@@ -550,15 +620,20 @@ describe("ReminderHelperTest", function () {
             return Milliseconds;
         }
         let begin = getTime();
-        reminderAgent.addNotificationSlot(1).then(() => {
-            let end = getTime();
-            let times = end - begin;
-            if (times < 50) {
-                expect(true).assertTrue();
-            } else {
-                expect(false).assertTrue();
-            }
-        })
+        try {
+            reminderAgent.addNotificationSlot(1).then(() => {
+                let end = getTime();
+                let times = end - begin;
+                if (times < 50) {
+                    expect(true).assertTrue();
+                } else {
+                    expect(false).assertTrue();
+                }
+            })
+        } catch (e) {
+            expect(true).assertTrue();
+        };
+        
         setTimeout(() => {
             done();
         }, 500);
@@ -593,10 +668,15 @@ describe("ReminderHelperTest", function () {
         }
         let begin = getTime();
         let times = 0;
-        reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
-            begin = getTime();
-            reminderAgent.removeNotificationSlot(1, reminderCallback)
-        });
+        try {
+            reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
+                begin = getTime();
+                reminderAgent.removeNotificationSlot(1, reminderCallback)
+            });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
+        done();
     })
 
     /*
@@ -614,18 +694,23 @@ describe("ReminderHelperTest", function () {
             var Milliseconds = time.getTime();
             return Milliseconds;
         }
-        reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
-            let begin = getTime();
-            reminderAgent.removeNotificationSlot(tarRemoveSlot.type).then(() => {
-                let end = getTime();
-                let times = end - begin;
-                if (times < 50) {
-                    expect(true).assertTrue();
-                } else {
-                    expect(false).assertTrue();
-                }
-            })
-        });
+        try {
+            reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
+                let begin = getTime();
+                reminderAgent.removeNotificationSlot(tarRemoveSlot.type).then(() => {
+                    let end = getTime();
+                    let times = end - begin;
+                    if (times < 50) {
+                        expect(true).assertTrue();
+                    } else {
+                        expect(false).assertTrue();
+                    }
+                })
+            });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
+        
         setTimeout(() => {
             done();
         }, 500);
@@ -643,22 +728,31 @@ describe("ReminderHelperTest", function () {
             triggerTimeInSeconds: 100
         }
         let expectId = -1;
-        reminderAgent.publishReminder(timer).then((reminderId) => {
-            expectId = reminderId + 1;
+        try {
             reminderAgent.publishReminder(timer).then((reminderId) => {
-                if (reminderId === expectId){
-                    expect(true).assertTrue();
-                    setTimeout(() => {
-                        done();
-                    }, 500);
-                }
-            }, (error) => {
-                expect(false).assertTrue();
-                setTimeout(() => {
-                    done();
-                }, 500);
+                expectId = reminderId + 1;
+                try {
+                    reminderAgent.publishReminder(timer).then((reminderId) => {
+                        if (reminderId === expectId){
+                            expect(true).assertTrue();
+                            setTimeout(() => {
+                                done();
+                            }, 500);
+                        }
+                    }, (error) => {
+                        expect(false).assertTrue();
+                        setTimeout(() => {
+                            done();
+                        }, 500);
+                    });
+                } catch (e) {
+                    expect(false).assertTrue();
+                };
+                
             });
-        });
+        } catch (e) {
+            expect(false).assertTrue();
+        };
     })
 
     /*
@@ -676,10 +770,18 @@ describe("ReminderHelperTest", function () {
         function reminderCallback(err, reminderId) {
             expect(reminderId).assertEqual(expectId);
         }
-        reminderAgent.publishReminder(timer, (err, reminderId) => {
-            expectId = reminderId + 1;
-            reminderAgent.publishReminder(timer, reminderCallback);
-        })
+        try {
+            reminderAgent.publishReminder(timer, (err, reminderId) => {
+                expectId = reminderId + 1;
+                try {
+                    reminderAgent.publishReminder(timer, reminderCallback);
+                } catch (e) {
+                    expect(false).assertTrue();
+                };
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         done();
     })
 
@@ -693,7 +795,11 @@ describe("ReminderHelperTest", function () {
         function reminderCallback(err, data){
             expect(true).assertEqual(true);
         }
-        reminderAgent.addNotificationSlot(0, reminderCallback);
+        try {
+            reminderAgent.addNotificationSlot(0, reminderCallback);
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -706,9 +812,13 @@ describe("ReminderHelperTest", function () {
     it("testReminderHelper022", 0, async function (done) {
         let mySlot = null;
         let promise = new Promise((resolve, reject) => {
-            reminderAgent.addNotificationSlot(mySlot).then(() => {
-                resolve();
-            })
+            try {
+                reminderAgent.addNotificationSlot(mySlot).then(() => {
+                    resolve();
+                })
+            } catch (e) {
+                expect(true).assertTrue();
+            };
             reject(new Error('errr occurred.'));
         });
         promise.then(() => {
@@ -729,10 +839,14 @@ describe("ReminderHelperTest", function () {
         let mySlot = {
             type: 2
         }
-        reminderAgent.addNotificationSlot(mySlot).then(() => {
-            let i = 0;
-            expect(i).assertEqual(0);
-        });
+        try {
+            reminderAgent.addNotificationSlot(mySlot).then(() => {
+                let i = 0;
+                expect(i).assertEqual(0);
+            });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -743,10 +857,14 @@ describe("ReminderHelperTest", function () {
      * @tc.require: SR000GGTRB AR000GH8EC
      */
     it("testReminderHelper024", 0, async function (done) {
-        reminderAgent.addNotificationSlot(3, (err, data) => {
-            let i = 0;
-            expect(i).assertEqual(0);
-        });
+        try {
+            reminderAgent.addNotificationSlot(3, (err, data) => {
+                let i = 0;
+                expect(i).assertEqual(0);
+            });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -771,15 +889,19 @@ describe("ReminderHelperTest", function () {
                 minute: 30
             }
         }
-        reminderAgent.publishReminder(timer).then((reminderId) => {});
-        reminderAgent.publishReminder(calendar).then((reminderId) => {});
-        setTimeout(() => {
-            reminderAgent.cancelAllReminders().then(() => {
-                reminderAgent.getValidReminders().then((reminders) => {
-                    expect(reminders.length === 0).assertEqual(true);
+        try {
+            reminderAgent.publishReminder(timer).then((reminderId) => {});
+            reminderAgent.publishReminder(calendar).then((reminderId) => {});
+            setTimeout(() => {
+                reminderAgent.cancelAllReminders().then(() => {
+                    reminderAgent.getValidReminders().then((reminders) => {
+                        expect(reminders.length === 0).assertEqual(true);
+                    });
                 });
-            });
-        }, 5000);
+            }, 5000);
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         done();
     })
 
@@ -804,15 +926,20 @@ describe("ReminderHelperTest", function () {
                 minute: 30
             }
         }
-        reminderAgent.publishReminder(timer).then((reminderId) => {});
-        reminderAgent.publishReminder(calendar).then((reminderId) => {});
-        setTimeout(() => {
-            reminderAgent.cancelAllReminders((err, data) => {
-                reminderAgent.getValidReminders().then((reminders) => {
-                    expect(reminders.length === 0).assertEqual(true);
+        try {
+            reminderAgent.publishReminder(timer).then((reminderId) => {});
+            reminderAgent.publishReminder(calendar).then((reminderId) => {});
+            setTimeout(() => {
+                reminderAgent.cancelAllReminders((err, data) => {
+                    reminderAgent.getValidReminders().then((reminders) => {
+                        expect(reminders.length === 0).assertEqual(true);
+                    });
                 });
-            });
-        }, 5000);
+            }, 5000);
+        } catch (e) {
+            expect(false).assertTrue();
+        };
+        
         done();
     })
 
@@ -830,18 +957,22 @@ describe("ReminderHelperTest", function () {
         let publishlength = -1;
         let cancellength = -1;
         let firstdiff = -1;
-        reminderAgent.publishReminder(timer).then(() => {
-            reminderAgent.getValidReminders().then((reminders) => {
-                publishlength=reminders.length
-                reminderAgent.cancelReminder(0).then(() => {
-                    reminderAgent.getValidReminders().then((reminders) => {
-                        cancellength = reminders.length
-                        firstdiff = publishlength - cancellength;
-                        expect(0).assertEqual(firstdiff);
+        try {
+            reminderAgent.publishReminder(timer).then(() => {
+                reminderAgent.getValidReminders().then((reminders) => {
+                    publishlength=reminders.length
+                    reminderAgent.cancelReminder(0).then(() => {
+                        reminderAgent.getValidReminders().then((reminders) => {
+                            cancellength = reminders.length
+                            firstdiff = publishlength - cancellength;
+                            expect(0).assertEqual(firstdiff);
+                        });
                     });
                 });
             });
-        });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -859,18 +990,22 @@ describe("ReminderHelperTest", function () {
         let publishlength = -1;
         let cancellength = -1;
         let firstdiff = -1;
-        reminderAgent.publishReminder(timer).then(() => {
-            reminderAgent.getValidReminders((err, reminders) => {
-                publishlength = reminders.length;
-                reminderAgent.cancelReminder(0, (err, data)=>{
-                    reminderAgent.getValidReminders((err, reminders) => {
-                        cancellength = reminders.length;
-                        firstdiff = publishlength - cancellength;
-                        expect(0).assertEqual(firstdiff);
+        try {
+            reminderAgent.publishReminder(timer).then(() => {
+                reminderAgent.getValidReminders((err, reminders) => {
+                    publishlength = reminders.length;
+                    reminderAgent.cancelReminder(0, (err, data)=>{
+                        reminderAgent.getValidReminders((err, reminders) => {
+                            cancellength = reminders.length;
+                            firstdiff = publishlength - cancellength;
+                            expect(0).assertEqual(firstdiff);
+                        });
                     });
                 });
             });
-        });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -891,22 +1026,27 @@ describe("ReminderHelperTest", function () {
         let publishlength = -1;
         let cancellength = -1;
         let firstdiff = -1;
-        reminderAgent.publishReminder(alarm, (err, reminderId) => {
-            reminderAgent.getValidReminders((err, reminders) => {
-                publishlength = reminders.length;
-            });
-            setTimeout(() => {
-                reminderAgent.cancelReminder(reminderId, (err, data) => {
-                    reminderAgent.getValidReminders((err, reminders) => {
-                        cancellength = reminders.length;
-                        firstdiff = publishlength - cancellength;
-                        if (firstdiff === 0 || firstdiff === 1) {
-                            expect(0).assertEqual(firstdiff);
-                        }
-                    });
+        try {
+            reminderAgent.publishReminder(alarm, (err, reminderId) => {
+                reminderAgent.getValidReminders((err, reminders) => {
+                    publishlength = reminders.length;
                 });
-            }, 1000);
-        });
+                setTimeout(() => {
+                    reminderAgent.cancelReminder(reminderId, (err, data) => {
+                        reminderAgent.getValidReminders((err, reminders) => {
+                            cancellength = reminders.length;
+                            firstdiff = publishlength - cancellength;
+                            if (firstdiff === 0 || firstdiff === 1) {
+                                expect(0).assertEqual(firstdiff);
+                            }
+                        });
+                    });
+                }, 1000);
+            });
+        } catch (e) {
+            expect(false).assertTrue();
+        };
+        
         done();
     })
 
@@ -927,22 +1067,27 @@ describe("ReminderHelperTest", function () {
         let publishlength = -1;
         let cancellength = -1;
         let firstdiff = -1;
-        reminderAgent.publishReminder(alarm, (err, reminderId) => {
-            reminderAgent.getValidReminders((err, reminders) => {
-                publishlength = reminders.length;
-            });
-            setTimeout(() => {
-                reminderAgent.cancelReminder(reminderId).then(() => {
-                    reminderAgent.getValidReminders((err, reminders) => {
-                        cancellength = reminders.length;
-                        firstdiff = publishlength - cancellength;
-                        if (firstdiff === 0 || firstdiff === 1) {
-                            expect(0).assertEqual(firstdiff);
-                        }
-                    });
+        try {
+            reminderAgent.publishReminder(alarm, (err, reminderId) => {
+                reminderAgent.getValidReminders((err, reminders) => {
+                    publishlength = reminders.length;
                 });
-            }, 1000);
-        });
+                setTimeout(() => {
+                    reminderAgent.cancelReminder(reminderId).then(() => {
+                        reminderAgent.getValidReminders((err, reminders) => {
+                            cancellength = reminders.length;
+                            firstdiff = publishlength - cancellength;
+                            if (firstdiff === 0 || firstdiff === 1) {
+                                expect(0).assertEqual(firstdiff);
+                            }
+                        });
+                    });
+                }, 1000);
+            });
+        } catch (e) {
+            expect(false).assertTrue();
+        };
+        
         done();
     })
 
@@ -964,15 +1109,19 @@ describe("ReminderHelperTest", function () {
             reminderType: reminderAgent.ReminderType.REMINDER_TYPE_TIMER,
             triggerTimeInSeconds: 100
         }
-        reminderAgent.cancelAllReminders((err, data) => {
-            reminderAgent.publishReminder(timer, (error, reminderId) => {});
-            reminderAgent.publishReminder(alarm, (error, reminderId) => {});
-            setTimeout(() => {
-                reminderAgent.getValidReminders().then((reminders) => {
-                    expect(reminders.length).assertEqual(2);
-                });
-            }, 1000);
-        })
+        try {
+            reminderAgent.cancelAllReminders((err, data) => {
+                reminderAgent.publishReminder(timer, (error, reminderId) => {});
+                reminderAgent.publishReminder(alarm, (error, reminderId) => {});
+                setTimeout(() => {
+                    reminderAgent.getValidReminders().then((reminders) => {
+                        expect(reminders.length).assertEqual(2);
+                    });
+                }, 1000);
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         done();
     })
 
@@ -994,15 +1143,20 @@ describe("ReminderHelperTest", function () {
             reminderType: reminderAgent.ReminderType.REMINDER_TYPE_TIMER,
             triggerTimeInSeconds: 100
         }
-        reminderAgent.cancelAllReminders((err, data) => {
-            reminderAgent.publishReminder(timer, (error, reminderId) => {});
-            reminderAgent.publishReminder(alarm, (error, reminderId) => {});
-            setTimeout(() => {
-                reminderAgent.getValidReminders((err, reminders) => {
-                    expect(reminders.length).assertEqual(2);
-                });
-            }, 1000);
-        })
+        try {
+            reminderAgent.cancelAllReminders((err, data) => {
+                reminderAgent.publishReminder(timer, (error, reminderId) => {});
+                reminderAgent.publishReminder(alarm, (error, reminderId) => {});
+                setTimeout(() => {
+                    reminderAgent.getValidReminders((err, reminders) => {
+                        expect(reminders.length).assertEqual(2);
+                    });
+                }, 1000);
+            })
+        } catch (e) {
+            expect(false).assertTrue();
+        };
+        
         done();
     })
 
@@ -1017,7 +1171,11 @@ describe("ReminderHelperTest", function () {
             let i = 0;
             expect(0).assertEqual(i);
         }
-        reminderAgent.removeNotificationSlot(0, reminderCallback);
+        try {
+            reminderAgent.removeNotificationSlot(0, reminderCallback);
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -1029,9 +1187,13 @@ describe("ReminderHelperTest", function () {
      */
     it("testReminderHelper034", 0, function (done) {
        let promise = new Promise((resolve, reject) => {
-           reminderAgent.removeNotificationSlot(1).then(() => {
-               resolve();
-           });
+            try {
+                reminderAgent.removeNotificationSlot(1).then(() => {
+                    resolve();
+                });
+            } catch (e) {
+                expect(true).assertTrue();
+            };
            reject(new Error('errr occurred.'));
        });
        promise.then(() => {
@@ -1052,11 +1214,16 @@ describe("ReminderHelperTest", function () {
         var tarRemoveSlot = {
             type: 1
         }
-        reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
-            reminderAgent.removeNotificationSlot(tarRemoveSlot.type, (err, data) => {
-                expect(0).assertEqual(err.code);
+        try {
+            reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
+                reminderAgent.removeNotificationSlot(tarRemoveSlot.type, (err, data) => {
+                    expect(0).assertEqual(err.code);
+                });
             });
-        });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
+        
         done();
     })
 
@@ -1070,12 +1237,17 @@ describe("ReminderHelperTest", function () {
         var tarRemoveSlot = {
             type: 1
         }
-        reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
-            reminderAgent.removeNotificationSlot(tarRemoveSlot.type).then(() => {
-                let i = 0;
-                expect(0).assertEqual(i);
+        try {
+            reminderAgent.addNotificationSlot(tarRemoveSlot.type, (err, data) => {
+                reminderAgent.removeNotificationSlot(tarRemoveSlot.type).then(() => {
+                    let i = 0;
+                    expect(0).assertEqual(i);
+                });
             });
-        });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
+        
         done();
     })
 
@@ -1090,12 +1262,16 @@ describe("ReminderHelperTest", function () {
             reminderType: reminderAgent.ReminderType.REMINDER_TYPE_TIMER,
             triggerTimeInSeconds: 3
         }
-        reminderAgent.publishReminder(timer).then((reminderId) => { });
-        setTimeout(() => {
-            reminderAgent.getValidReminders().then((reminders) => {
-                expect(reminders.length === 0).assertEqual(true);
-            });
-        }, 5000);
+        try {
+            reminderAgent.publishReminder(timer).then((reminderId) => { });
+            setTimeout(() => {
+                reminderAgent.getValidReminders().then((reminders) => {
+                    expect(reminders.length === 0).assertEqual(true);
+                });
+            }, 5000);
+        } catch (e) {
+            expect(false).assertTrue();
+        };
         done();
     })
 
@@ -1110,12 +1286,17 @@ describe("ReminderHelperTest", function () {
             reminderType: reminderAgent.ReminderType.REMINDER_TYPE_TIMER,
             triggerTimeInSeconds: 3
         }
-        reminderAgent.publishReminder(timer, (err, data) => { });
-        setTimeout(() => {
-            reminderAgent.getValidReminders((err, reminders) => {
-                expect(reminders.length === 0).assertEqual(true);
-            });
-        }, 5000);
+        try {
+            reminderAgent.publishReminder(timer, (err, data) => { });
+            setTimeout(() => {
+                reminderAgent.getValidReminders((err, reminders) => {
+                    expect(reminders.length === 0).assertEqual(true);
+                });
+            }, 5000);
+        } catch (e) {
+            expect(false).assertTrue();
+        };
+        
         done();
     })
 
@@ -1134,14 +1315,18 @@ describe("ReminderHelperTest", function () {
             content: "this is content"
         }
         let expectId = -1;
-        reminderAgent.publishReminder(alarm).then((reminderId) => {
-            expectId = reminderId + 1;
+        try {
             reminderAgent.publishReminder(alarm).then((reminderId) => {
-                if (reminderId === expectId){
-                    expect(reminderId).assertEqual(expectId);
-                }
+                expectId = reminderId + 1;
+                reminderAgent.publishReminder(alarm).then((reminderId) => {
+                    if (reminderId === expectId){
+                        expect(reminderId).assertEqual(expectId);
+                    }
+                });
             });
-        });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -1163,10 +1348,14 @@ describe("ReminderHelperTest", function () {
         function reminderCallback(err, reminderId) {
             expect(reminderId).assertEqual(expectId);
         }
-        reminderAgent.publishReminder(alarm, (err, reminderId) => {
-            expectId = reminderId + 1;
-            reminderAgent.publishReminder(alarm, reminderCallback);
-        })
+        try {
+            reminderAgent.publishReminder(alarm, (err, reminderId) => {
+                expectId = reminderId + 1;
+                reminderAgent.publishReminder(alarm, reminderCallback);
+            })
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -1216,40 +1405,44 @@ describe("ReminderHelperTest", function () {
             notificationId:100,
             slotType:3
         }
-        reminderAgent.publishReminder(calendar).then((reminderId) => {
-            reminderAgent.getValidReminders().then((reminders) => {
-                for (let i = 0; i < reminders.length; i++) {
-                    console.log("getValidReminders = " + JSON.stringify(reminders[i]));
-                    console.log("getValidReminders, reminderType = " + reminders[i].reminderType);
-                    for (let j = 0; j < reminders[i].actionButton.length; j++) {
-                        console.log("getValidReminders, actionButton.title = " + reminders[i].actionButton[j].title);
-                        console.log("getValidReminders, actionButton.type = " + reminders[i].actionButton[j].type);
+        try {
+            reminderAgent.publishReminder(calendar).then((reminderId) => {
+                reminderAgent.getValidReminders().then((reminders) => {
+                    for (let i = 0; i < reminders.length; i++) {
+                        console.log("getValidReminders = " + JSON.stringify(reminders[i]));
+                        console.log("getValidReminders, reminderType = " + reminders[i].reminderType);
+                        for (let j = 0; j < reminders[i].actionButton.length; j++) {
+                            console.log("getValidReminders, actionButton.title = " + reminders[i].actionButton[j].title);
+                            console.log("getValidReminders, actionButton.type = " + reminders[i].actionButton[j].type);
+                        }
+                        console.log("getValidReminders, wantAgent.pkgName = " + reminders[i].wantAgent.pkgName);
+                        console.log("getValidReminders, wantAgent.abilityName = " + reminders[i].wantAgent.abilityName);
+                        console.log("getValidReminders, maxScreenWantAgent.pkgName = "
+                            + reminders[i].maxScreenWantAgent.pkgName);
+                        console.log("getValidReminders, maxScreenWantAgent.abilityName = "
+                            + reminders[i].maxScreenWantAgent.abilityName);
+                        expect(reminders[i].ringDuration).assertEqual(5);
+                        console.log("getValidReminders, ringDuration = " + reminders[i].ringDuration);
+                        expect(reminders[i].snoozeTimes).assertEqual(2);
+                        console.log("getValidReminders, snoozeTimes = " + reminders[i].snoozeTimes);
+                        console.log("getValidReminders, timeInterval = " + reminders[i].timeInterval);
+                        expect(reminders[i].title).assertEqual("this is title");
+                        console.log("getValidReminders, title = " + reminders[i].title);
+                        expect(reminders[i].content).assertEqual("this is content");
+                        console.log("getValidReminders, content = " + reminders[i].content);
+                        expect(reminders[i].expiredContent).assertEqual("this reminder has expired");
+                        console.log("getValidReminders, expiredContent = " + reminders[i].expiredContent);
+                        expect(reminders[i].snoozeContent).assertEqual("remind later");
+                        console.log("getValidReminders, snoozeContent = " + reminders[i].snoozeContent);
+                        expect(reminders[i].notificationId).assertEqual(100);
+                        console.log("getValidReminders, notificationId = " + reminders[i].notificationId);
+                        console.log("getValidReminders, slotType = " + reminders[i].slotType);
                     }
-                    console.log("getValidReminders, wantAgent.pkgName = " + reminders[i].wantAgent.pkgName);
-                    console.log("getValidReminders, wantAgent.abilityName = " + reminders[i].wantAgent.abilityName);
-                    console.log("getValidReminders, maxScreenWantAgent.pkgName = "
-                        + reminders[i].maxScreenWantAgent.pkgName);
-                    console.log("getValidReminders, maxScreenWantAgent.abilityName = "
-                        + reminders[i].maxScreenWantAgent.abilityName);
-                    expect(reminders[i].ringDuration).assertEqual(5);
-                    console.log("getValidReminders, ringDuration = " + reminders[i].ringDuration);
-                    expect(reminders[i].snoozeTimes).assertEqual(2);
-                    console.log("getValidReminders, snoozeTimes = " + reminders[i].snoozeTimes);
-                    console.log("getValidReminders, timeInterval = " + reminders[i].timeInterval);
-                    expect(reminders[i].title).assertEqual("this is title");
-                    console.log("getValidReminders, title = " + reminders[i].title);
-                    expect(reminders[i].content).assertEqual("this is content");
-                    console.log("getValidReminders, content = " + reminders[i].content);
-                    expect(reminders[i].expiredContent).assertEqual("this reminder has expired");
-                    console.log("getValidReminders, expiredContent = " + reminders[i].expiredContent);
-                    expect(reminders[i].snoozeContent).assertEqual("remind later");
-                    console.log("getValidReminders, snoozeContent = " + reminders[i].snoozeContent);
-                    expect(reminders[i].notificationId).assertEqual(100);
-                    console.log("getValidReminders, notificationId = " + reminders[i].notificationId);
-                    console.log("getValidReminders, slotType = " + reminders[i].slotType);
-                }
-            })
-        });
+                })
+            });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -1299,40 +1492,44 @@ describe("ReminderHelperTest", function () {
             notificationId:100,
             slotType:3
         }
-        reminderAgent.publishReminder(calendar, (err,reminderId) => {
-            reminderAgent.getValidReminders().then((reminders) => {
-                for (let i = 0; i < reminders.length; i++) {
-                    console.log("getValidReminders = " + JSON.stringify(reminders[i]));
-                    console.log("getValidReminders, reminderType = " + reminders[i].reminderType);
-                    for (let j = 0; j < reminders[i].actionButton.length; j++) {
-                        console.log("getValidReminders, actionButton.title = " + reminders[i].actionButton[j].title);
-                        console.log("getValidReminders, actionButton.type = " + reminders[i].actionButton[j].type);
+        try {
+            reminderAgent.publishReminder(calendar, (err,reminderId) => {
+                reminderAgent.getValidReminders().then((reminders) => {
+                    for (let i = 0; i < reminders.length; i++) {
+                        console.log("getValidReminders = " + JSON.stringify(reminders[i]));
+                        console.log("getValidReminders, reminderType = " + reminders[i].reminderType);
+                        for (let j = 0; j < reminders[i].actionButton.length; j++) {
+                            console.log("getValidReminders, actionButton.title = " + reminders[i].actionButton[j].title);
+                            console.log("getValidReminders, actionButton.type = " + reminders[i].actionButton[j].type);
+                        }
+                        console.log("getValidReminders, wantAgent.pkgName = " + reminders[i].wantAgent.pkgName);
+                        console.log("getValidReminders, wantAgent.abilityName = " + reminders[i].wantAgent.abilityName);
+                        console.log("getValidReminders, maxScreenWantAgent.pkgName = "
+                            + reminders[i].maxScreenWantAgent.pkgName);
+                        console.log("getValidReminders, maxScreenWantAgent.abilityName = "
+                            + reminders[i].maxScreenWantAgent.abilityName);
+                        expect(reminders[i].ringDuration).assertEqual(5);
+                        console.log("getValidReminders, ringDuration = " + reminders[i].ringDuration);
+                        expect(reminders[i].snoozeTimes).assertEqual(2);
+                        console.log("getValidReminders, snoozeTimes = " + reminders[i].snoozeTimes);
+                        console.log("getValidReminders, timeInterval = " + reminders[i].timeInterval);
+                        expect(reminders[i].title).assertEqual("this is title");
+                        console.log("getValidReminders, title = " + reminders[i].title);
+                        expect(reminders[i].content).assertEqual("this is content");
+                        console.log("getValidReminders, content = " + reminders[i].content);
+                        expect(reminders[i].expiredContent).assertEqual("this reminder has expired");
+                        console.log("getValidReminders, expiredContent = " + reminders[i].expiredContent);
+                        expect(reminders[i].snoozeContent).assertEqual("remind later");
+                        console.log("getValidReminders, snoozeContent = " + reminders[i].snoozeContent);
+                        expect(reminders[i].notificationId).assertEqual(100);
+                        console.log("getValidReminders, notificationId = " + reminders[i].notificationId);
+                        console.log("getValidReminders, slotType = " + reminders[i].slotType);
                     }
-                    console.log("getValidReminders, wantAgent.pkgName = " + reminders[i].wantAgent.pkgName);
-                    console.log("getValidReminders, wantAgent.abilityName = " + reminders[i].wantAgent.abilityName);
-                    console.log("getValidReminders, maxScreenWantAgent.pkgName = "
-                        + reminders[i].maxScreenWantAgent.pkgName);
-                    console.log("getValidReminders, maxScreenWantAgent.abilityName = "
-                        + reminders[i].maxScreenWantAgent.abilityName);
-                    expect(reminders[i].ringDuration).assertEqual(5);
-                    console.log("getValidReminders, ringDuration = " + reminders[i].ringDuration);
-                    expect(reminders[i].snoozeTimes).assertEqual(2);
-                    console.log("getValidReminders, snoozeTimes = " + reminders[i].snoozeTimes);
-                    console.log("getValidReminders, timeInterval = " + reminders[i].timeInterval);
-                    expect(reminders[i].title).assertEqual("this is title");
-                    console.log("getValidReminders, title = " + reminders[i].title);
-                    expect(reminders[i].content).assertEqual("this is content");
-                    console.log("getValidReminders, content = " + reminders[i].content);
-                    expect(reminders[i].expiredContent).assertEqual("this reminder has expired");
-                    console.log("getValidReminders, expiredContent = " + reminders[i].expiredContent);
-                    expect(reminders[i].snoozeContent).assertEqual("remind later");
-                    console.log("getValidReminders, snoozeContent = " + reminders[i].snoozeContent);
-                    expect(reminders[i].notificationId).assertEqual(100);
-                    console.log("getValidReminders, notificationId = " + reminders[i].notificationId);
-                    console.log("getValidReminders, slotType = " + reminders[i].slotType);
-                }
-            })
-        });
+                })
+            });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -1383,14 +1580,18 @@ describe("ReminderHelperTest", function () {
             slotType:3
         }
         let expectId = -1;
-        reminderAgent.publishReminder(calendar).then((reminderId) => {
-            expectId = reminderId + 1;
+        try {
             reminderAgent.publishReminder(calendar).then((reminderId) => {
-                if (reminderId === expectId){
-                    expect(reminderId).assertEqual(expectId);
-                }
+                expectId = reminderId + 1;
+                reminderAgent.publishReminder(calendar).then((reminderId) => {
+                    if (reminderId === expectId){
+                        expect(reminderId).assertEqual(expectId);
+                    }
+                });
             });
-        });
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -1444,10 +1645,14 @@ describe("ReminderHelperTest", function () {
         function reminderCallback(err, reminderId) {
             expect(reminderId).assertEqual(expectId);
         }
-        reminderAgent.publishReminder(calendar, (err, reminderId) => {
-            expectId = reminderId + 1;
-            reminderAgent.publishReminder(calendar, reminderCallback);
-        })
+        try {
+            reminderAgent.publishReminder(calendar, (err, reminderId) => {
+                expectId = reminderId + 1;
+                reminderAgent.publishReminder(calendar, reminderCallback);
+            })
+        } catch (e) {
+            expect(true).assertTrue();
+        };
         done();
     })
 
@@ -1470,17 +1675,21 @@ describe("ReminderHelperTest", function () {
             (function (i) {
                 var i = i;
                 setTimeout(function () {
-                    reminderAgent.publishReminder(timer).then((reminderId) => {
-                        if (i === 0) {
-                            firstId = reminderId
-                        }
-                        if (i === 29) {
-                            secondId = reminderId
-                            diffId = secondId - firstId
-                            expect(29).assertEqual(diffId);
-                            i = null
-                        }
-                    });
+                    try {
+                        reminderAgent.publishReminder(timer).then((reminderId) => {
+                            if (i === 0) {
+                                firstId = reminderId
+                            }
+                            if (i === 29) {
+                                secondId = reminderId
+                                diffId = secondId - firstId
+                                expect(29).assertEqual(diffId);
+                                i = null
+                            }
+                        });
+                    } catch (e) {
+                        expect(true).assertTrue();
+                    };
                 }, 500 * i);
             })(i);
         }

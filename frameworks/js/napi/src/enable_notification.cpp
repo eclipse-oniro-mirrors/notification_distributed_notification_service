@@ -14,6 +14,7 @@
  */
 
 #include "enable_notification.h"
+#include "ability_manager_client.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -324,14 +325,25 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("RequestEnableNotification napi_create_async_work start");
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-
             std::string deviceId {""};
-            asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId);
-            ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            bool popFlag = false;
+            asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
+            asynccallbackinfo->params.allowToPop = popFlag;
+            ANS_LOGI("errorCode = %{public}d, allowToPop = %{public}d",
+                     asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
+            if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
+                ANS_LOGI("Begin to start notification dialog");
+                auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
+                StartNotificationDialog(callbackInfo);
+            }
         },
-        AsyncCompleteCallbackIsNotificationEnabled,
+        [](napi_env env, napi_status status, void *data) {
+            AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
+            if (!(asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop)) {
+                AsyncCompleteCallbackIsNotificationEnabled(env, status, data);
+            }
+        },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
@@ -343,5 +355,63 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         return promise;
     }
 }
+
+void StartNotificationDialog(AsyncCallbackInfoIsEnable *callbackInfo)
+{
+    ANS_LOGD("%{public}s, Begin Calling StartNotificationDialog.", __func__);
+    if (CreateCallbackStubImpl(callbackInfo)) {
+        sptr<IRemoteObject> token;
+        auto result = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
+        if (result == ERR_OK) {
+            AAFwk::Want want;
+            want.SetElementName("com.example.dialogsPopped", "DialogPopped");
+            want.SetParam("callbackStubImpl_", callbackStubImpl_);
+            want.SetParam("tokenId", token);
+            want.SetParam("from", AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+            ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token, -1);
+            ANS_LOGD("%{public}s, End Calling StartNotificationDialog. ret=%{public}d", __func__, err);
+        } else {
+            ANS_LOGE("%{public}s, show notification dialog failed", __func__);
+            ResetCallbackStubImpl();
+        }
+    }
+}
+
+bool CreateCallbackStubImpl(AsyncCallbackInfoIsEnable *callbackInfo)
+{
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    if (callbackStubImpl_ != nullptr) {
+        return false;
+    }
+    callbackStubImpl_ = new (std::nothrow) CallbackStubImpl(callbackInfo);
+    return true;
+}
+
+void ResetCallbackStubImpl()
+{
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    callbackStubImpl_ = nullptr;
+}
+
+bool CallbackStubImpl::OnEnableNotification(bool isAllow)
+{
+    ANS_LOGI("isAllow: %{public}d", isAllow);
+    if (task_) {
+        task_->allowed = isAllow;
+        napi_value resourceName = nullptr;
+        napi_create_string_latin1(task_->env, "RequestEnableNotification", NAPI_AUTO_LENGTH, &resourceName);
+        napi_create_async_work(task_->env,
+            nullptr,
+            resourceName,
+            [](napi_env env, void *data) {},
+            AsyncCompleteCallbackIsNotificationEnabled,
+            (void *)task_,
+            &task_->asyncWork);
+        NAPI_CALL_BASE(task_->env, napi_queue_async_work(task_->env, task_->asyncWork), false);
+        return true;
+    }
+    return false;
+}
+
 }  // namespace NotificationNapi
 }  // namespace OHOS

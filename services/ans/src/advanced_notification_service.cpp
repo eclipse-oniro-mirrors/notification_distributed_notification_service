@@ -1436,65 +1436,41 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId)
 {
+    ANS_LOGE("[RequestEnableNotification] fail: deprecated.");
+    return ERR_ANS_NOT_ALLOWED;
+}
+
+ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
+{
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     ErrCode result = ERR_OK;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANS_LOGD("bundleOption == nullptr");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    // To get the permission
     bool allowedNotify = false;
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
+    ANS_LOGI("result = %{public}d, allowedNotify = %{public}d", result, allowedNotify);
     if (result != ERR_OK || allowedNotify) {
         ANS_LOGD("Already granted permission");
+        popFlag = false;
         return result;
     }
-
+    
+    // Check to see if it has been popover before
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
     if (result != ERR_OK || hasPopped) {
         ANS_LOGD("Already shown dialog");
+        popFlag = false;
         return result;
     }
-
-    int32_t positionX;
-    int32_t positionY;
-    int32_t width;
-    int32_t height;
-    bool wideScreen;
-    GetDisplayPosition(positionX, positionY, width, height, wideScreen);
-
-    const std::string params = std::string("{\"requestNotification\":\"Allowed to send notification?\", ") +
-        std::string("\"allowButton\":\"Allow\", \"cancelButton\":\"Cancel\", \"uid\":\"") +
-        std::to_string(bundleOption->GetUid()) + std::string("\"}");
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
-        "notification_dialog",
-        params,
-        Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-        positionX,
-        positionY,
-        width,
-        height,
-        [this](int32_t id, const std::string& event, const std::string& params) {
-            ANS_LOGD("Dialog callback: %{public}s, %{public}s", event.c_str(), params.c_str());
-            int32_t uid = std::stoi(params, nullptr);
-            std::string bundle;
-            std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-            if (bundleManager != nullptr) {
-                bundle = bundleManager->GetBundleNameByUid(uid);
-            }
-            sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundle, uid);
-            if (event == "EVENT_ALLOW") {
-                this->SetNotificationsEnabledForSpecialBundle("", bundleOption, true);
-                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
-            } else {
-                this->SetNotificationsEnabledForSpecialBundle("", bundleOption, false);
-                Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
-            }
-            this->SetHasPoppedDialog(bundleOption, true);
-        });
-
+    SetHasPoppedDialog(bundleOption, true);
+    popFlag = true;
     return result;
 }
 
@@ -1812,7 +1788,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         callerToken, "ohos.permission.PUBLISH_AGENT_REMINDER");
     if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
-        return result;
+        return ERR_REMINDER_PERMISSION_DENIED;
     }
 
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
@@ -1826,14 +1802,13 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK || !allowedNotify) {
         ANSR_LOGW("The application does not request enable notification");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_REMINDER_NOTIFICATION_NOT_ENABLE;
     }
     auto rdm = ReminderDataManager::GetInstance();
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    rdm->PublishReminder(reminder, bundleOption);
-    return ERR_OK;
+    return rdm->PublishReminder(reminder, bundleOption);
 }
 
 ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
@@ -1847,8 +1822,7 @@ ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    rdm->CancelReminder(reminderId, bundleOption);
-    return ERR_OK;
+    return rdm->CancelReminder(reminderId, bundleOption);
 }
 
 ErrCode AdvancedNotificationService::CancelAllReminders()
@@ -1864,8 +1838,7 @@ ErrCode AdvancedNotificationService::CancelAllReminders()
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    rdm->CancelAllReminders(bundleOption->GetBundleName(), userId);
-    return ERR_OK;
+    return rdm->CancelAllReminders(bundleOption->GetBundleName(), userId);
 }
 
 ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders)
