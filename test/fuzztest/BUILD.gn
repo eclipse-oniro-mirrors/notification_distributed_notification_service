@@ -28,6 +28,7 @@ group("fuzztest") {
     "getnotificationslot_fuzzer:GetNotificationSlotFuzzTest",
     "getnotificationslotnumasbundle_fuzzer:GetNotificationSlotNumAsBundleFuzzTest",
     "getnotificationslotsforbundle_fuzzer:GetNotificationSlotsForBundleFuzzTest",
+    "notificationrequest_fuzzer:NotificationRequestFuzzTest",
     "publishcontinuoustasknotification_fuzzer:PublishContinuousTaskNotificationFuzzTest",
     "publishnotification_fuzzer:PublishNotificationFuzzTest",
     "removenotification_fuzzer:RemoveNotificationFuzzTest",
@@ -36,5 +37,7 @@ group("fuzztest") {
     "setdonotdisturbdate_fuzzer:SetDoNotDisturbDateFuzzTest",
     "setnotificationbadgenum_fuzzer:SetNotificationBadgeNumFuzzTest",
     "setnotificationsenabledforallbundles_fuzzer:SetNotificationsEnabledForAllBundlesFuzzTest",
+    "setprogressbar_fuzzer:SetProgressBarFuzzTest",
+    "settemplate_fuzzer:SetTemplateFuzzTest",
   ]
 }
