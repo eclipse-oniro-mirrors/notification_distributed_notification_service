@@ -210,8 +210,8 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoIsEnable *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
+    AsyncCallbackInfoIsEnable *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoIsEnable {
+            .env = env, .params = params, .newInterface = true};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, params.callback);
     }
@@ -221,18 +221,29 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "RequestEnableNotification", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             ANS_LOGI("RequestEnableNotification napi_create_async_work start");
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
 
             std::string deviceId {""};
-            asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId);
-            ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            bool popFlag = false;
+            asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
+            asynccallbackinfo->params.allowToPop = popFlag;
+            ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowToPop = %{public}d",
+                asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
+            if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
+                ANS_LOGI("Begin to start notification dialog");
+                auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
+                StartNotificationDialog(callbackInfo);
+            }
         },
-        AsyncCompleteCallbackNapiIsNotificationEnabled,
+        [](napi_env env, napi_status status, void *data) {
+            AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
+            if (!(asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop)) {
+                AsyncCompleteCallbackNapiIsNotificationEnabled(env, status, data);
+            }
+        },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
