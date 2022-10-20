@@ -187,7 +187,11 @@ void AsyncCompleteCallbackIsNotificationEnabled(napi_env env, napi_status status
     AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
     napi_value result = nullptr;
     napi_get_boolean(env, asynccallbackinfo->allowed, &result);
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    if (asynccallbackinfo->newInterface) {
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    } else {
+        Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    }
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
