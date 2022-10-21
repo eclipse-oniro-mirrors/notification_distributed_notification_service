@@ -1744,7 +1744,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13000,
 /**
  * @tc.number    : AdvancedNotificationServiceTest_13100
  * @tc.name      : ANS_RequestEnableNotification_0100
- * @tc.desc      : Test RequestEnableNotification function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Test whether to pop dialog
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100, Function | SmallTest | Level1)
@@ -1753,7 +1753,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     std::string deviceId = "DeviceId";
-    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId), (int)ERR_ANS_INVALID_PARAM);
+    bool needPop = false;
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, needPop), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1765,7 +1766,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13200, Function | SmallTest | Level1)
 {
     sptr<ReminderRequest> reminder = nullptr;
-    EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), -1);
+    EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_REMINDER_PERMISSION_DENIED);
 }
 
 /**
