@@ -213,8 +213,8 @@ public:
      * @param errCode Indicates the error code returned by the callback
      * @param result Indicates the result returned by the callback
      */
-    static void SetCallback(
-        const napi_env &env, const napi_ref &callbackIn, const int32_t &errorCode, const napi_value &result);
+    static void SetCallback(const napi_env &env,
+        const napi_ref &callbackIn, const int32_t &errorCode, const napi_value &result, bool newType);
 
     /**
      * @brief Calls the callback with the result
@@ -234,8 +234,8 @@ public:
      * @param errorCode Indicates the error code returned by the callback
      * @param result Indicates the result returned by the callback
      */
-    static void SetPromise(
-        const napi_env &env, const napi_deferred &deferred, const int32_t &errorCode, const napi_value &result);
+    static void SetPromise(const napi_env &env,
+        const napi_deferred &deferred, const int32_t &errorCode, const napi_value &result, bool newType);
 
     /**
      * @brief Gets the returned result by the callback when an error occurs
@@ -1546,7 +1546,7 @@ public:
      * @param errCode Indicates specified err code
      * @return Returns a napi value with specified error object for callback
      */
-    static napi_value CreateErrorValue(napi_env env, int32_t errCode);
+    static napi_value CreateErrorValue(napi_env env, int32_t errCode, bool newType);
 
     static bool IsValidRemoveReason(int32_t reasonType);
     static void NapiThrow(napi_env env, int32_t errCode);
