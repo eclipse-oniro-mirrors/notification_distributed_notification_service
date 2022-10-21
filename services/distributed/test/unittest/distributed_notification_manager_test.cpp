@@ -266,7 +266,8 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_DeleteCallback_00100, F
  * @tc.number    : Distributed_OnDistributedKvStoreDeathRecipient_00100
  * @tc.desc      : text OnDistributedKvStoreDeathRecipient function.
  */
-HWTEST_F(DistributedNotificationManagerTest, Distributed_OnDistributedKvStoreDeathRecipient_00100, Function | SmallTest | Level1)
+HWTEST_F(DistributedNotificationManagerTest, Distributed_OnDistributedKvStoreDeathRecipient_00100,
+         Function | SmallTest | Level1)
 {
     EXPECT_EQ(distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_OK);
 }
