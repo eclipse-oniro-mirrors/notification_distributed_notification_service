@@ -45,7 +45,7 @@ DistributedScreenStatusManager::~DistributedScreenStatusManager()
 
 void DistributedScreenStatusManager::OnDeviceConnected(const std::string &deviceId)
 {
-    ANS_LOGI("deviceId:%{public}s", deviceId.c_str());
+    ANS_LOGI("deviceId");
 }
 
 void DistributedScreenStatusManager::OnDeviceDisconnected(const std::string &deviceId)
