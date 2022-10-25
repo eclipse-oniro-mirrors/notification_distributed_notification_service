@@ -93,7 +93,7 @@ public:
     static void HandleErrCode(const napi_env &env, int32_t errCode);
 
     static void ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info,
-        const napi_value &result);
+        const napi_value &result, bool isThrow = false);
 
     static void SetCallback(const napi_env &env, const napi_ref &callbackIn, const int32_t &errorCode,
         const napi_value &result);
