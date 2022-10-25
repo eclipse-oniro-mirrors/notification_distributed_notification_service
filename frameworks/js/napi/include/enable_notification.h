@@ -39,6 +39,7 @@ struct AsyncCallbackInfoIsEnable {
     napi_async_work asyncWork = nullptr;
     IsEnableParams params;
     CallbackPromiseInfo info;
+    bool newInterface = false;
     bool allowed = false;
 };
 
