@@ -1998,12 +1998,6 @@ ErrCode AnsManagerStub::UpdateSlots(
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId)
-{
-    ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
 {
     ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
