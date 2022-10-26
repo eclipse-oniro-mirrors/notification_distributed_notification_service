@@ -1103,12 +1103,6 @@ ErrCode AnsManagerProxy::UpdateSlots(
     return result;
 }
 
-ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId)
-{
-    ANS_LOGE("[RequestEnableNotification] fail: deprecated.");
-    return ERR_ANS_NOT_ALLOWED;
-}
-
 ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
 {
     ANS_LOGI("enter");

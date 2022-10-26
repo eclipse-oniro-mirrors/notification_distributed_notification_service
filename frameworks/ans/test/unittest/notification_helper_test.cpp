@@ -417,7 +417,8 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
 {
     std::string deviceId = "DeviceId";
     NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.RequestEnableNotification(deviceId);
+    bool needPop = true;
+    ErrCode ret = notificationHelper.RequestEnableNotification(deviceId, needPop);
     EXPECT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 }
 

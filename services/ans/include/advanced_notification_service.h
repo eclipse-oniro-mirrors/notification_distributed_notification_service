@@ -343,14 +343,6 @@ public:
      * @brief Allow notifications to be sent based on the deviceId.
      *
      * @param deviceId Indicates the device Id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode RequestEnableNotification(const std::string &deviceId) override;
-
-    /**
-     * @brief Allow notifications to be sent based on the deviceId.
-     *
-     * @param deviceId Indicates the device Id.
      * @param popFlag Indicates the flag that allows dialog to be popped.
      * @return Returns ERR_OK on success, others on failure.
      */
