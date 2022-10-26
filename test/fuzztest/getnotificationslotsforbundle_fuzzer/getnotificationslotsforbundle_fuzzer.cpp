@@ -42,7 +42,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     char *ch = ParseData(data, size);
-    if (ch != nullptr) {
+    if (ch != nullptr && size > GetU32Size()) {
         OHOS::DoSomethingInterestingWithMyAPI(ch, size);
         free(ch);
         ch = nullptr;
