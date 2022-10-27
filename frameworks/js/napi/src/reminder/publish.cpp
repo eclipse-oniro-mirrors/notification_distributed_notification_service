@@ -48,6 +48,7 @@ struct AsyncCallbackInfo {
     napi_ref callback = nullptr;
     napi_value result = nullptr;
     int32_t reminderId = -1;
+    bool isThrow = false;
     NotificationNapi::NotificationConstant::SlotType inType
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
     std::shared_ptr<ReminderRequest> reminder = nullptr;
@@ -259,10 +260,10 @@ napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn, cons
         return nullptr;
     }
     if (callbackIn) {
-        ReminderCommon::SetCallback(env, callbackIn, ERR_REMINDER_INVALID_PARAM,
-            result);
+        NotificationNapi::Common::SetCallback(env, callbackIn, ERR_REMINDER_INVALID_PARAM,
+            result, false);
     }
-    return ReminderCommon::JSParaError(env, callbackIn);
+    return NotificationNapi::Common::JSParaError(env, callbackIn);
 }
 
 napi_value CancelReminderInner(napi_env env, napi_callback_info info, bool isThrow)
@@ -286,6 +287,7 @@ napi_value CancelReminderInner(napi_env env, napi_callback_info info, bool isThr
     napi_value promise = nullptr;
     SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
     asynccallbackinfo->reminderId = params.reminderId;
+    asynccallbackinfo->isThrow = isThrow;
 
     // resource name
     napi_value resourceName = nullptr;
@@ -306,7 +308,7 @@ napi_value CancelReminderInner(napi_env env, napi_callback_info info, bool isThr
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
             ReminderCommon::ReturnCallbackPromise(
-                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
+                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
             ANSR_LOGI("Cancel napi_create_async_work complete end");
         },
         (void *)asynccallbackinfo,
@@ -351,6 +353,7 @@ napi_value CancelAllRemindersInner(napi_env env, napi_callback_info info, bool i
     // promise
     napi_value promise = nullptr;
     SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->isThrow = isThrow;
 
     // resource name
     napi_value resourceName = nullptr;
@@ -371,7 +374,7 @@ napi_value CancelAllRemindersInner(napi_env env, napi_callback_info info, bool i
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
             ReminderCommon::ReturnCallbackPromise(
-                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
+                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
             ANSR_LOGD("CancelAll napi_create_async_work complete end");
         },
         (void *)asynccallbackinfo,
@@ -658,6 +661,7 @@ napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool is
     // promise
     napi_value promise = nullptr;
     SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->isThrow = isThrow;
 
     // resource name
     napi_value resourceName = nullptr;
@@ -687,7 +691,7 @@ napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool is
                 }
 
                 ReminderCommon::ReturnCallbackPromise(
-                    env, asynccallbackinfo->info, asynccallbackinfo->result);
+                    env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
             }
         },
         (void *)asynccallbackinfo,
@@ -734,6 +738,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
     napi_value promise = nullptr;
     SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
     asynccallbackinfo->reminder = params.reminder;
+    asynccallbackinfo->isThrow = isThrow;
 
     // resource name
     napi_value resourceName = nullptr;
@@ -765,7 +770,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
                 }
 
                 ReminderCommon::ReturnCallbackPromise(
-                    env, asynccallbackinfo->info, asynccallbackinfo->result);
+                    env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
                 ANSR_LOGI("Publish napi_create_async_work complete end");
             }
         },
@@ -814,6 +819,7 @@ napi_value AddSlotInner(napi_env env, napi_callback_info info, bool isThrow)
     SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
     asynccallbackinfo->inType = params.inType;
     asynccallbackinfo->info.errorCode = params.errCode;
+    asynccallbackinfo->isThrow = isThrow;
 
     // resource name
     napi_value resourceName = nullptr;
@@ -835,7 +841,7 @@ napi_value AddSlotInner(napi_env env, napi_callback_info info, bool isThrow)
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
             ReminderCommon::ReturnCallbackPromise(
-                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
+                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
             ANSR_LOGD("AddSlot napi_create_async_work complete end.");
         },
         (void *)asynccallbackinfo,
