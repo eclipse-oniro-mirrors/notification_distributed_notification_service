@@ -37,8 +37,8 @@ int32_t AnsCallbackStub::OnRemoteRequest(
     if (InterfaceCode::ON_ENABLE_NOTIFICATION_CALLBACK == code) {
         bool result = false;
         if (!data.ReadBool(result)) {
-            ANS_LOGE("Notification not allowed by user.");
-            return ERR_ANS_PERMISSION_DENIED;
+            ANS_LOGE("read notification enabled result failed.");
+            return ERR_ANS_PARCELABLE_FAILED;
         }
         ANS_LOGD("result =  %{public}d", result);
         OnEnableNotification(result);

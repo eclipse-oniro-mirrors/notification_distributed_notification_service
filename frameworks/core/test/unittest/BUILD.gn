@@ -15,5 +15,8 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ "ans_manager_death_recipient_test:unittest" ]
+  deps += [
+    "ans_callback_stub_test:unittest",
+    "ans_manager_death_recipient_test:unittest",
+  ]
 }
