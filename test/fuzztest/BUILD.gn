@@ -18,6 +18,8 @@ group("fuzztest") {
     "addnotificationslot_fuzzer:AddNotificationSlotFuzzTest",
     "addnotificationslots_fuzzer:AddNotificationSlotsFuzzTest",
     "addslotbytype_fuzzer:AddSlotByTypeFuzzTest",
+    "ansmanagerstub_fuzzer:AnsManagerStubFuzzTest",
+    "ansmanagerstubannex_fuzzer:AnsManagerStubAnnexFuzzTest",
     "cancelasbundle_fuzzer:CancelAsBundleFuzzTest",
     "cancelgroup_fuzzer:CancelGroupFuzzTest",
     "cancelnotification_fuzzer:CancelNotificationFuzzTest",
