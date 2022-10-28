@@ -22,7 +22,7 @@ ohos_unittest("ans_manager_death_recipient_test") {
   include_dirs = [
     "${core_path}/include",
     "//commonlibrary/c_utils/base/include",
-    ]
+  ]
 
   sources = [ "ans_manager_death_recipient_unit_test.cpp" ]
 
