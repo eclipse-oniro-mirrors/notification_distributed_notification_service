@@ -232,7 +232,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnCanceled);
     if (ret != 0) {
@@ -327,7 +327,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnConsumed);
     if (ret != 0) {
@@ -406,7 +406,7 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnUpdate);
     if (ret != 0) {
@@ -474,7 +474,7 @@ void SubscriberInstance::OnConnected()
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnConnected);
     if (ret != 0) {
@@ -545,7 +545,7 @@ void SubscriberInstance::OnDisconnected()
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnDisconnected);
     if (ret != 0) {
@@ -613,7 +613,7 @@ void SubscriberInstance::OnDied()
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnDied);
     if (ret != 0) {
@@ -694,7 +694,7 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnDoNotDisturbDateChange);
     if (ret != 0) {
@@ -776,7 +776,7 @@ void SubscriberInstance::OnEnabledNotificationChanged(
         return;
     }
 
-    work->data = (void *)dataWorker;
+    work->data = reinterpret_cast<void *>(dataWorker);
 
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnEnabledNotificationChanged);
     if (ret != 0) {
