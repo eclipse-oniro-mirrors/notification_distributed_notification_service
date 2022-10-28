@@ -597,7 +597,7 @@ void ReminderCommon::SetCallback(
         results[0] = NotificationNapi::Common::NapiGetNull(env);
     } else {
         std::string errMsg = FindErrMsg(env, errCode);
-        results[0] = GetCallbackErrorValue(env, errCode, errMsg); 
+        results[0] = GetCallbackErrorValue(env, errCode, errMsg);
     }
     results[1] = result;
     NAPI_CALL_RETURN_VOID(env,
