@@ -167,7 +167,7 @@ static std::vector<SubscriberInstance*> DeletingSubscriber;
 
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo);
 bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesInfo &subscriberInfo);
-bool DelSubscriberInstancesInfo(const napi_env &env, SubscriberInstance *subscriber);
+bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *subscriber);
 
 bool AddDeletingSubscriber(SubscriberInstance *subscriber);
 void DelDeletingSubscriber(SubscriberInstance *subscriber);

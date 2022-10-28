@@ -486,7 +486,7 @@ void Notification::SetSourceType(NotificationConstant::SourceType sourceType)
 std::string Notification::Dump() const
 {
     std::string vibrationStyle = "";
-    for (auto &style : vibrationStyle_) {
+    for (const auto &style : vibrationStyle_) {
         vibrationStyle += std::to_string(style);
         vibrationStyle += ", ";
     }
