@@ -552,8 +552,7 @@ void ReminderCommon::HandleErrCode(const napi_env &env, int32_t errCode)
     if (errCode == ERR_OK) {
         return;
     }
-    std::string errCodeMsg = FindErrMsg(env, errCode);
-    errCodeMsg = reminderErrCodeMsgMap[errCode];
+    std::string errCodeMsg = reminderErrCodeMsgMap[errCode];
     napi_throw_error(env, std::to_string(errCode).c_str(), errCodeMsg.c_str());
 }
 

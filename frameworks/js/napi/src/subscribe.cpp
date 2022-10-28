@@ -1038,7 +1038,7 @@ bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesIn
     return true;
 }
 
-bool DelSubscriberInstancesInfo(const napi_env &env, SubscriberInstance *subscriber)
+bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *subscriber)
 {
     ANS_LOGI("enter");
     if (subscriber == nullptr) {
