@@ -1434,12 +1434,6 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     return result;
 }
 
-ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId)
-{
-    ANS_LOGE("[RequestEnableNotification] fail: deprecated.");
-    return ERR_ANS_NOT_ALLOWED;
-}
-
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

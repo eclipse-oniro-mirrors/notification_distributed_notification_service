@@ -21,7 +21,8 @@ namespace OHOS {
     {
         // test RequestEnableNotification function
         std::string deviceId(data);
-        Notification::NotificationHelper::RequestEnableNotification(deviceId);
+        bool needPop = true;
+        Notification::NotificationHelper::RequestEnableNotification(deviceId, needPop);
         // test AreNotificationsSuspended function
         bool suspended = true;
         Notification::NotificationHelper::AreNotificationsSuspended(suspended);
