@@ -2095,7 +2095,7 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
         } else {
             std::list<std::shared_ptr<NotificationRecord>> sorted = notificationList_;
             sorted.sort(SortNotificationsByLevelAndTime);
-            recordToRemove = bundleList.front();
+            recordToRemove = sorted.front();
             SendFlowControlOccurHiSysEvent(recordToRemove);
             notificationList_.remove(sorted.front());
         }

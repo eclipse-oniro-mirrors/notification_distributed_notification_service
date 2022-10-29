@@ -479,7 +479,7 @@ void ParseReminderCalendar(const napi_env &env, const ReminderRequest &reminder,
 }
 
 void ParseReminder(
-    const napi_env &env, const ReminderRequest::ReminderType &type, ReminderRequest &reminder, napi_value &result)
+    const napi_env &env, const ReminderRequest::ReminderType &type, const ReminderRequest &reminder, napi_value &result)
 {
     switch (type) {
         case ReminderRequest::ReminderType::TIMER: {

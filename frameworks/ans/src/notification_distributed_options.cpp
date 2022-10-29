@@ -56,13 +56,13 @@ std::vector<std::string> NotificationDistributedOptions::GetDevicesSupportOperat
 std::string NotificationDistributedOptions::Dump()
 {
     std::string devicesSupportDisplay = "";
-    for (auto &device : devicesSupportDisplay_) {
+    for (const auto &device : devicesSupportDisplay_) {
         devicesSupportDisplay += device;
         devicesSupportDisplay += ", ";
     }
 
     std::string devicesSupportOperate = "";
-    for (auto &device : devicesSupportOperate_) {
+    for (const auto &device : devicesSupportOperate_) {
         devicesSupportOperate += device;
         devicesSupportOperate += ", ";
     }
