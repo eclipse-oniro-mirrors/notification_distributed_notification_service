@@ -674,15 +674,14 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
 bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreferencesInfo &info)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    ParseDoNotDisturbType(info);
-    ParseDoNotDisturbBeginDate(info);
-    ParseDoNotDisturbEndDate(info);
-    ParseEnableAllNotification(info);
-
     if (!CheckKvStore()) {
         ANS_LOGE("KvStore is nullptr.");
         return false;
     }
+    ParseDoNotDisturbType(info);
+    ParseDoNotDisturbBeginDate(info);
+    ParseDoNotDisturbEndDate(info);
+    ParseEnableAllNotification(info);
     DistributedKv::Status status;
     std::vector<DistributedKv::Entry> entries;
     status = kvStorePtr_->GetEntries(DistributedKv::Key(KEY_BUNDLE_LABEL), entries);
