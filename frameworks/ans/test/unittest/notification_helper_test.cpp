@@ -419,7 +419,7 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
     NotificationHelper notificationHelper;
     bool needPop = true;
     ErrCode ret = notificationHelper.RequestEnableNotification(deviceId, needPop);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -883,7 +883,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotify_00003, Function | SmallTest | L
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotify(userId, allowed);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
