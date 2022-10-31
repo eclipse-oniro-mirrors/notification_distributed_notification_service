@@ -313,13 +313,14 @@ DistributedKv::Status NotificationPreferencesDatabase::GetKvStore()
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("Return error: %{public}d.", status);
     } else {
-        ANS_LOGD("Get kvStore success.");
+        ANS_LOGI("Get kvStore success.");
     }
     return status;
 }
 
 void NotificationPreferencesDatabase::CloseKvStore()
 {
+    ANS_LOGI("Close kvStore success.");
     dataManager_.CloseKvStore(appId_, kvStorePtr_);
 }
 
@@ -674,14 +675,15 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
 bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreferencesInfo &info)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
-        return false;
-    }
     ParseDoNotDisturbType(info);
     ParseDoNotDisturbBeginDate(info);
     ParseDoNotDisturbEndDate(info);
     ParseEnableAllNotification(info);
+
+    if (!CheckKvStore()) {
+        ANS_LOGE("KvStore is nullptr.");
+        return false;
+    }
     DistributedKv::Status status;
     std::vector<DistributedKv::Entry> entries;
     status = kvStorePtr_->GetEntries(DistributedKv::Key(KEY_BUNDLE_LABEL), entries);
