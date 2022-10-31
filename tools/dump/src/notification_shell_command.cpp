@@ -244,7 +244,6 @@ void NotificationShellCommand::CheckDumpOpt()
 
 ErrCode NotificationShellCommand::RunAsSettingCommand()
 {
-    std::vector<std::string> infos;
     int option = getopt_long(argc_, argv_, SETTING_SHORT_OPTIONS, SETTING_LONG_OPTIONS, nullptr);
     if (option == '?') {
         if (optopt == 'c') {
@@ -264,6 +263,7 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
             resultReceiver_.append(SETTING_HELP_MSG);
             return ERR_INVALID_VALUE;
         }
+        std::vector<std::string> infos;
         std::string cmd = COMMAND_SET_RECENT_COUNT;
         cmd.append(" ").append(std::string(optarg));
         return RunDumpCmd(cmd, "", SUBSCRIBE_USER_INIT, infos);
