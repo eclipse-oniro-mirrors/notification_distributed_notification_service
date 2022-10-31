@@ -57,7 +57,6 @@ void AnsManagerDeathRecipientUnitTest::TearDown() {}
  * @tc.desc: test if AnsManagerDeathRecipient's OnRemoteDied function executed as expected in normal case.
  * @tc.type: FUNC
  * @tc.require: #I5SJ62
- * 
  */
 HWTEST_F(AnsManagerDeathRecipientUnitTest, OnRemoteDiedTest_0100, Function | MediumTest | Level1)
 {
