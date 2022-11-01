@@ -471,6 +471,7 @@ bool NotificationPreferencesDatabase::PutPrivateNotificationsAllowed(
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
 {
+    ANS_LOGD("%{public}s, enabled[%{public}d]", __FUNCTION__, enabled);
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is null.");
         return false;
@@ -961,7 +962,7 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(
             }
         }
 
-        info.SetBundleInfo(bunldeInfo);
+        info.SetBundleInfoFromDb(bunldeInfo, bundleKey);
     }
 }
 
@@ -1115,6 +1116,7 @@ std::string NotificationPreferencesDatabase::GenerateBundleKey(
      * KEY_ANS_BUNDLE_bundlename_
      *
      */
+    ANS_LOGD("%{public}s, bundleKey[%{public}s] type[%{public}s]", __FUNCTION__, bundleKey.c_str(), type.c_str());
     std::string key =
         std::string().append(KEY_ANS_BUNDLE).append(KEY_UNDER_LINE).append(bundleKey).append(KEY_UNDER_LINE);
     if (!type.empty()) {
@@ -1473,6 +1475,26 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userI
     }
 
     ANS_LOGD("%{public}s remove DoNotDisturb date, userId : %{public}d", __FUNCTION__, userId);
+    return true;
+}
+
+bool NotificationPreferencesDatabase::RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid)
+{
+    if (!CheckKvStore()) {
+        ANS_LOGE("KvStore is nullptr.");
+        return false;
+    }
+
+    std::string key = KEY_BUNDLE_LABEL + bundleName + std::to_string(uid);
+    DistributedKv::Key enableKey(key);
+    DistributedKv::Status status = kvStorePtr_->Delete(enableKey);
+    CloseKvStore();
+    if (status != DistributedKv::Status::SUCCESS) {
+        ANS_LOGE("Delete ans bundle db info failed, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
+        return false;
+    }
+
+    ANS_LOGE("Remove ans bundle db info, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
     return true;
 }
 }  // namespace Notification
