@@ -1584,6 +1584,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(bool &allowed)
 ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption,
     bool &allowed)
 {
+    ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -2139,6 +2140,8 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 #endif
             }
         }
+
+        NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
     }));
 }
 
