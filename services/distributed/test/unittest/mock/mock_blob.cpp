@@ -90,18 +90,5 @@ std::string Blob::ToString() const
     return str;
 }
 
-bool Blob::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteUInt8Vector(this->blob_);
-}
-
-Blob *Blob::Unmarshalling(Parcel &parcel)
-{
-    std::vector<uint8_t> blobData;
-    if (!parcel.ReadUInt8Vector(&blobData)) {
-        return nullptr;
-    }
-    return new Blob(blobData);
-}
 }  // namespace DistributedKv
 }  // namespace OHOS
