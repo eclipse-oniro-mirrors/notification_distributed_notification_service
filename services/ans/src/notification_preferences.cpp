@@ -365,7 +365,6 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
 
 ErrCode NotificationPreferences::GetNotificationsEnabled(const int32_t &userId, bool &enabled)
 {
-    InitSettingFromDisturbDB();
     if (userId <= SUBSCRIBE_USER_INIT) {
         return ERR_ANS_INVALID_PARAM;
     }
