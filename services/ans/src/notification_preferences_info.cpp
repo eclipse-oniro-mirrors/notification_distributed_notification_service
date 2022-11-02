@@ -240,5 +240,10 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbDate(const int32_t userId)
 {
     doNotDisturbDate_.erase(userId);
 }
+
+void NotificationPreferencesInfo::SetBundleInfoFromDb(const BundleInfo &info, std::string bundleKey)
+{
+    infos_.insert_or_assign(bundleKey, info);
+}
 }  // namespace Notification
 }  // namespace OHOS
