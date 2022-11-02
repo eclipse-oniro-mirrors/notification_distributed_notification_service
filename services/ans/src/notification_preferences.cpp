@@ -365,6 +365,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
 
 ErrCode NotificationPreferences::GetNotificationsEnabled(const int32_t &userId, bool &enabled)
 {
+    InitSettingFromDisturbDB();
     if (userId <= SUBSCRIBE_USER_INIT) {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -700,6 +701,14 @@ bool NotificationPreferences::CheckApiCompatibility(const sptr<NotificationBundl
         return false;
     }
     return bundleManager->CheckApiCompatibility(bundleOption);
+}
+
+void NotificationPreferences::RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("%{public}s", __FUNCTION__);
+    if (preferncesDB_ != nullptr && bundleOption != nullptr) {
+        preferncesDB_->RemoveAnsBundleDbInfo(bundleOption->GetBundleName(), bundleOption->GetUid());
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS
