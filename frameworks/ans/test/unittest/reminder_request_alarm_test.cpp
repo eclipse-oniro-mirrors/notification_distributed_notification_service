@@ -15,8 +15,13 @@
 
 #include <gtest/gtest.h>
 
-#include "ans_log_wrapper.h"
+#define private public
+#define protected public
 #include "reminder_request_alarm.h"
+#undef private
+#undef protected
+
+#include "ans_log_wrapper.h"
 #include "reminder_helper.h"
 
 using namespace testing::ext;
@@ -130,6 +135,166 @@ HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00400, Function | SmallTest | 
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
     uint8_t expectedVal = 0;
     EXPECT_TRUE(rrc->GetRepeatDay() == expectedVal) << "repeatDays () should be 0";
+}
+
+/**
+ * @tc.name: IsRepeatReminder_00100
+ * @tc.desc: Test IsRepeatReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00100, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    EXPECT_EQ(rrc->IsRepeatReminder(), false);
+    EXPECT_EQ(rrc->UpdateNextReminder(), false);
+}
+
+/**
+ * @tc.name: IsRepeatReminder_00200
+ * @tc.desc: Test IsRepeatReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00200, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {1, 1, 5, 5, 7, 7, 7};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 1, daysOfWeek);
+    EXPECT_EQ(rrc->IsRepeatReminder(), true);
+    EXPECT_EQ(rrc->UpdateNextReminder(), true);
+}
+
+/**
+ * @tc.name: PreGetNextTriggerTimeIgnoreSnooze_00100
+ * @tc.desc: Test PreGetNextTriggerTimeIgnoreSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, PreGetNextTriggerTimeIgnoreSnooze_00100, Function | SmallTest | Level1)
+{
+    bool ignoreRepeat = true;
+    bool forceToGetNext = true;
+    uint8_t arr[] = {1, 1, 5, 5, 7, 7, 7};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 1, daysOfWeek);
+    rrc->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext);
+    EXPECT_EQ(rrc->GetNextTriggerTime(forceToGetNext),
+    rrc->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext));
+}
+
+/**
+ * @tc.name: GetDaysOfWeek_00100
+ * @tc.desc: Test GetDaysOfWeek parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, GetDaysOfWeek_00100, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    auto ret = rrc->GetDaysOfWeek();
+    EXPECT_EQ(ret.size(), 0);
+}
+
+/**
+ * @tc.name: OnDateTimeChange_00100
+ * @tc.desc: Test OnDateTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, OnDateTimeChange_00100, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    EXPECT_EQ(rrc->OnDateTimeChange(), false);
+}
+
+/**
+ * @tc.name: OnTimeZoneChange_00100
+ * @tc.desc: Test OnTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, OnTimeZoneChange_00100, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    EXPECT_EQ(rrc->OnTimeZoneChange(), false);
+}
+
+/**
+ * @tc.name: RecoverFromDb_00100
+ * @tc.desc: Test RecoverFromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, RecoverFromDb_00100, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
+    rrc->RecoverFromDb(resultSet);
+    uint8_t ret = rrc->GetRepeatDay();
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: Marshalling_00001
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, Marshalling_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+}
+
+/**
+ * @tc.name: Unmarshalling_00001
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, Unmarshalling_001, Function | SmallTest | Level1)
+{
+    bool unmarshalling = true;
+    Parcel parcel;
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    std::shared_ptr<ReminderRequestAlarm> result =
+    std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    if (nullptr != result) {
+        if (nullptr == result->Unmarshalling(parcel)) {
+            unmarshalling = false;
+        }
+    }
+    EXPECT_EQ(unmarshalling, false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00001
+ * @tc.desc: Test ReadFromParcel parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI
+ */
+HWTEST_F(ReminderRequestAlarmTest, ReadFromParcel_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
 }
 }
