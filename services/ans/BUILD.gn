@@ -76,6 +76,7 @@ ohos_shared_library("libans") {
     "multimedia_image_framework:image_native",
     "multimedia_player_framework:media_client",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "time_service:time_client",
     "window_manager:libdm",
   ]
