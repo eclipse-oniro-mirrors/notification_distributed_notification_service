@@ -34,7 +34,7 @@ public:
         return 0;
     }
 
-    MOCK_METHOD4(SendRequest, int(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
+    MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
 
     bool IsProxyObject() const override
     {
