@@ -27,6 +27,7 @@ constexpr int32_t SYSTEM_APP_UID = 100;
 constexpr int32_t NON_SYSTEM_APP_UID = 1000;
 constexpr int32_t NON_BUNDLE_NAME_UID = 2000;
 const std::string TEST_DEFUALT_BUNDLE = "bundleName";
+constexpr int32_t TEST_SUBSCRIBE_USER_INIT = -1;
 }  // namespace Notification
 }  // namespace OHOS
 
