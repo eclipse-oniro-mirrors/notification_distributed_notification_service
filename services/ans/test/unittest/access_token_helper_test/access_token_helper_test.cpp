@@ -30,7 +30,8 @@ namespace OHOS {
 namespace Notification {
 
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
-
+extern void MockDlpType(DlpType mockRet);
+extern void MockApl(ATokenAplEnum mockRet);
 class AccessTokenHelperTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -100,6 +101,7 @@ HWTEST_F(AccessTokenHelperTest, IsSystemHap_00100, Function | SmallTest | Level1
  */
 HWTEST_F(AccessTokenHelperTest, IsSystemHap_00200, Function | SmallTest | Level1)
 {
+    MockApl(ATokenAplEnum::APL_SYSTEM_CORE);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     EXPECT_TRUE(stub_->IsSystemHap());
 }
@@ -107,23 +109,39 @@ HWTEST_F(AccessTokenHelperTest, IsSystemHap_00200, Function | SmallTest | Level1
 /**
  * @tc.number    : AccessTokenHelperTest
  * @tc.name      : IsSystemHap_00300
- * @tc.desc      : IsSystemHap false
+ * @tc.desc      : IsSystemHap Token Type TOKEN_HAP
  */
 HWTEST_F(AccessTokenHelperTest, IsSystemHap_00300, Function | SmallTest | Level1)
 {
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_SHELL);
+    MockApl(ATokenAplEnum::APL_NORMAL);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     EXPECT_FALSE(stub_->IsSystemHap());
 }
 
 /**
  * @tc.number    : AccessTokenHelperTest
  * @tc.name      : IsDlpHap_00100
- * @tc.desc      : IsDlpHap Token Type TOKEN_NATIVE
+ * @tc.desc      : IsDlpHap Token Type TOKEN_HAP
  */
 HWTEST_F(AccessTokenHelperTest, IsDlpHap_00100, Function | SmallTest | Level1)
 {
+    AccessTokenID tokenID = 0;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    EXPECT_FALSE(stub_->IsSystemHap());
+    MockDlpType(DlpType::DLP_READ);
+    EXPECT_TRUE(stub_->IsDlpHap(tokenID));
+}
+
+/**
+ * @tc.number    : AccessTokenHelperTest
+ * @tc.name      : IsDlpHap_00200
+ * @tc.desc      : IsDlpHap Token Type TOKEN_NATIVE
+ */
+HWTEST_F(AccessTokenHelperTest, IsDlpHap_00200, Function | SmallTest | Level1)
+{
+    AccessTokenID tokenID = 0; 
+    MockDlpType(DlpType::DLP_COMMON);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    EXPECT_FALSE(stub_->IsDlpHap(tokenID));
 }
 }  // namespace Notification
 }  // namespace OHOS

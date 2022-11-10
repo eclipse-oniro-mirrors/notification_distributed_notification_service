@@ -163,6 +163,7 @@ public:
 
     bool RemoveNotificationEnable(const int32_t userId);
     bool RemoveDoNotDisturbDate(const int32_t userId);
+    bool RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid);
 
 private:
     void TryTwice(const std::function<DistributedKv::Status()> &func) const;

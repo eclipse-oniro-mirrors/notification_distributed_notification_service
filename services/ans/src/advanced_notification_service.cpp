@@ -1584,6 +1584,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(bool &allowed)
 ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption,
     bool &allowed)
 {
+    ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -2139,6 +2140,8 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 #endif
             }
         }
+
+        NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
     }));
 }
 
@@ -3687,7 +3690,7 @@ void AdvancedNotificationService::SendSubscribeHiSysEvent(int32_t pid, int32_t u
         eventInfo.userId = info->GetAppUserId();
         std::vector<std::string> appNames = info->GetAppNames();
         eventInfo.bundleName = std::accumulate(appNames.begin(), appNames.end(), std::string(""),
-            [appNames](const std::string bundleName, const std::string &str) {
+            [appNames](const std::string &bundleName, const std::string &str) {
                 return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
             });
     }
@@ -3710,7 +3713,7 @@ void AdvancedNotificationService::SendUnSubscribeHiSysEvent(int32_t pid, int32_t
         eventInfo.userId = info->GetAppUserId();
         std::vector<std::string> appNames = info->GetAppNames();
         eventInfo.bundleName = std::accumulate(appNames.begin(), appNames.end(), std::string(""),
-            [appNames](const std::string bundleName, const std::string &str) {
+            [appNames](const std::string &bundleName, const std::string &str) {
                 return (str == appNames.front()) ? (bundleName + str) : (bundleName + "," + str);
             });
     }

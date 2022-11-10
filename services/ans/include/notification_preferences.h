@@ -261,6 +261,7 @@ public:
     void OnDistributedKvStoreDeathRecipient();
     void InitSettingFromDisturbDB();
     void RemoveSettings(int32_t userId);
+    void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
 
 private:
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
