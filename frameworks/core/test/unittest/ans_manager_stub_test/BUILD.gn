@@ -17,25 +17,16 @@ import("//build/test.gni")
 
 module_output_path = "${component_name}/unittest"
 
-ohos_unittest("ans_manager_proxy_test") {
+ohos_unittest("ans_manager_stub_test") {
   module_out_path = module_output_path
   include_dirs = [
     "${core_path}/include",
     "//commonlibrary/c_utils/base/include",
-    "../mock/",
-    "${inner_api_path}",
   ]
 
-  sources = [
-    "../mock/mock_message_parcel.cpp",
-    "ans_manager_proxy_unit_test.cpp",
-  ]
+  sources = [ "ans_manager_stub_test.cpp" ]
 
-  deps = [
-    "${core_path}:ans_core",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${core_path}:ans_core" ]
 
   external_deps = [
     "ability_base:want",
@@ -43,7 +34,6 @@ ohos_unittest("ans_manager_proxy_test") {
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
   ]
@@ -56,5 +46,5 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ ":ans_manager_proxy_test" ]
+  deps += [ ":ans_manager_stub_test" ]
 }

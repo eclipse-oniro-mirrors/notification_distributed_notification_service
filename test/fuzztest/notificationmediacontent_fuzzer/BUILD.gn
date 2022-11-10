@@ -11,50 +11,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#####################hydra-fuzz###################
 import("//base/notification/distributed_notification_service/notification.gni")
-import("//build/ohos.gni")
+import("//build/config/features.gni")
 import("//build/test.gni")
+module_output_path = "${component_name}/fuzztest"
 
-module_output_path = "${component_name}/unittest"
-
-ohos_unittest("ans_manager_proxy_test") {
+##############################fuzztest##########################################
+ohos_fuzztest("NotificationMediaContentFuzzTest") {
   module_out_path = module_output_path
-  include_dirs = [
-    "${core_path}/include",
-    "//commonlibrary/c_utils/base/include",
-    "../mock/",
-    "${inner_api_path}",
-  ]
+  fuzz_config_file =
+      "${component_path}/test/fuzztest/notificationmediacontent_fuzzer"
 
-  sources = [
-    "../mock/mock_message_parcel.cpp",
-    "ans_manager_proxy_unit_test.cpp",
+  include_dirs = [ "${component_path}/test/fuzztest/fuzz_common_base" ]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
   ]
+  sources = [ "notificationmediacontent_fuzzer.cpp" ]
 
   deps = [
-    "${core_path}:ans_core",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
+    "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
+    "${frameworks_module_ans_path}:ans_innerkits",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
-    "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
   ]
-
-  subsystem_name = "${subsystem_name}"
-  part_name = "${component_name}"
 }
 
-group("unittest") {
+###############################################################################
+group("fuzztest") {
   testonly = true
-  deps = []
-
-  deps += [ ":ans_manager_proxy_test" ]
+  deps = [ ":NotificationMediaContentFuzzTest" ]
 }
+###############################################################################
