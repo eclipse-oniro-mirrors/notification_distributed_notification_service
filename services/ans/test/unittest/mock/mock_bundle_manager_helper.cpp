@@ -38,12 +38,16 @@ std::string BundleManagerHelper::GetBundleNameByUid(int uid)
 
 int BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId)
 {
-    return NON_SYSTEM_APP_UID;
+    if (userId == 0) {
+        return -1;
+    } else {
+        return NON_SYSTEM_APP_UID;
+    }
 }
 
 bool BundleManagerHelper::IsSystemApp(int uid)
 {
-    return (uid == SYSTEM_APP_UID);
+    return (uid == SYSTEM_APP_UID || uid == NON_BUNDLE_NAME_UID);
 }
 
 bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
