@@ -20,6 +20,7 @@
 #undef protected
 #include "notificationconversationalcontent_fuzzer.h"
 
+#define DISABLE_FUZZ
 namespace OHOS {
     namespace {
         constexpr uint8_t ENABLE = 2;
@@ -54,7 +55,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     char *ch = ParseData(data, size);
     if (ch != nullptr && size >= GetU32Size()) {
+#ifndef DISABLE_FUZZ
         OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+#endif
         free(ch);
         ch = nullptr;
     }
