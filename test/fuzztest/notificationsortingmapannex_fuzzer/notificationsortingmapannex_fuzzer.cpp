@@ -13,26 +13,21 @@
  * limitations under the License.
  */
 
-#include "notification_do_not_disturb_date.h"
-#include "notificationdonotdisturbdate_fuzzer.h"
+#define private public
+#define protected public
+#include "notification_sorting.h"
+#include "notification_sorting_map.h"
+#undef private
+#undef protected
+#include "notificationsortingmapannex_fuzzer.h"
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
-        int64_t beginDate = 1;
-        int64_t endDate = 3;
-        uint32_t type = GetU32Data(data);
-        Notification::NotificationConstant::DoNotDisturbType disturbType =
-            Notification::NotificationConstant::DoNotDisturbType(type);
-        Notification::NotificationDoNotDisturbDate notificationDoNotDisturbDate(disturbType, beginDate, endDate);
-        notificationDoNotDisturbDate.SetDoNotDisturbType(disturbType);
-        notificationDoNotDisturbDate.GetDoNotDisturbType();
-        notificationDoNotDisturbDate.SetBeginDate(beginDate);
-        notificationDoNotDisturbDate.GetBeginDate();
-        notificationDoNotDisturbDate.SetEndDate(endDate);
-        notificationDoNotDisturbDate.Dump();
-        return notificationDoNotDisturbDate.GetEndDate();
+        Notification::NotificationSortingMap notificationSortingMap;
+        Parcel parcel;
+        notificationSortingMap.Unmarshalling(parcel);
+        return notificationSortingMap.Marshalling(parcel);
     }
 }
 
