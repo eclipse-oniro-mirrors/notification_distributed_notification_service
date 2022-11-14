@@ -15,37 +15,52 @@
 
 #define private public
 #define protected public
-#include "notification_conversational_content.h"
+#include "message_user.h"
 #undef private
 #undef protected
-#include "notificationconversationalcontent_fuzzer.h"
+#include "messageuser_fuzzer.h"
 
-#define DISABLE_FUZZ
 namespace OHOS {
     namespace {
         constexpr uint8_t ENABLE = 2;
     }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
+        std::string key(data);
         Notification::MessageUser messageUser;
-        Notification::NotificationConversationalContent NotificationConversationalContent(messageUser);
-        NotificationConversationalContent.GetMessageUser();
-        std::string stringData(data);
-        NotificationConversationalContent.SetConversationTitle(stringData);
-        NotificationConversationalContent.GetConversationTitle();
-        NotificationConversationalContent.IsConversationGroup();
+        // test SetKey function
+        messageUser.SetKey(key);
+        // test SetName function
+        std::string name(data);
+        messageUser.SetName(name);
+        // test SetPixelMap function
+        std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+        messageUser.SetPixelMap(pixelMap);
+        // test SetUri function
+        Uri uri(key);
+        messageUser.SetUri(uri);
+        // test SetMachine function
         bool enabled = *data % ENABLE;
-        NotificationConversationalContent.SetConversationGroup(enabled);
-        int64_t timestamp = 1;
-        NotificationConversationalContent.AddConversationalMessage(stringData, timestamp, messageUser);
-        Notification::NotificationConversationalContent::MessagePtr message;
-        NotificationConversationalContent.AddConversationalMessage(message);
-        NotificationConversationalContent.GetAllConversationalMessages();
-        NotificationConversationalContent.Dump();
-        Parcel parcel;
-        NotificationConversationalContent.Marshalling(parcel);
-        NotificationConversationalContent.Unmarshalling(parcel);
-        return NotificationConversationalContent.ReadFromParcel(parcel);
+        messageUser.SetMachine(enabled);
+        // test SetUserAsImportant function
+        messageUser.SetUserAsImportant(enabled);
+        // test GetKey function
+        messageUser.GetKey();
+        // test GetName function
+        messageUser.GetName();
+        // test GetPixelMap function
+        messageUser.GetPixelMap();
+        // test GetUri function
+        messageUser.GetUri();
+        // test IsMachine function
+        messageUser.IsMachine();
+        // test IsUserImportant function
+        messageUser.IsUserImportant();
+        // test ToJson function
+        nlohmann::json jsonObject;
+        messageUser.ToJson(jsonObject);
+        messageUser.FromJson(jsonObject);
+        return true;
     }
 }
 
@@ -55,9 +70,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     char *ch = ParseData(data, size);
     if (ch != nullptr && size >= GetU32Size()) {
-#ifndef DISABLE_FUZZ
         OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-#endif
         free(ch);
         ch = nullptr;
     }

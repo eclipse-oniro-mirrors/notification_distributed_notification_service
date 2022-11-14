@@ -10,18 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-group("unittest") {
-  testonly = true
-  deps = []
-
-  deps += [
-    "ans_callback_stub_test:unittest",
-    "ans_image_util_test:unittest",
-    "ans_manager_death_recipient_test:unittest",
-    "ans_manager_proxy_test:unittest",
-    "ans_manager_stub_test:unittest",
-    "ans_subscriber_proxy_test:unittest",
-    "ans_subscriber_stub_test:unittest",
-  ]
-}
+FUZZ
