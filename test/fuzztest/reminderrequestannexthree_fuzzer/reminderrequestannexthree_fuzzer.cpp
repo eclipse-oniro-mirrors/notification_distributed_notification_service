@@ -13,26 +13,29 @@
  * limitations under the License.
  */
 
-#include "notification_do_not_disturb_date.h"
-#include "notificationdonotdisturbdate_fuzzer.h"
+#define private public
+#define protected public
+#include "reminder_request.h"
+#undef private
+#undef protected
+#include "reminderrequestannexthree_fuzzer.h"
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         std::string stringData(data);
-        int64_t beginDate = 1;
-        int64_t endDate = 3;
-        uint32_t type = GetU32Data(data);
-        Notification::NotificationConstant::DoNotDisturbType disturbType =
-            Notification::NotificationConstant::DoNotDisturbType(type);
-        Notification::NotificationDoNotDisturbDate notificationDoNotDisturbDate(disturbType, beginDate, endDate);
-        notificationDoNotDisturbDate.SetDoNotDisturbType(disturbType);
-        notificationDoNotDisturbDate.GetDoNotDisturbType();
-        notificationDoNotDisturbDate.SetBeginDate(beginDate);
-        notificationDoNotDisturbDate.GetBeginDate();
-        notificationDoNotDisturbDate.SetEndDate(endDate);
-        notificationDoNotDisturbDate.Dump();
-        return notificationDoNotDisturbDate.GetEndDate();
+        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
+        Notification::ReminderRequest reminderRequest(reminderId);
+        reminderRequest.GetTitle();
+        uint64_t showTime = 2;
+        reminderRequest.ReminderRequest::GetShowTime(showTime);
+        Notification::ReminderRequest::TimeTransferType type = Notification::ReminderRequest::TimeTransferType::YEAR;
+        int32_t cTime = static_cast<int32_t>(GetU32Data(data));
+        reminderRequest.GetActualTime(type, cTime);
+        reminderRequest.GetCTime(type, cTime);
+        int32_t uid = static_cast<int32_t>(GetU32Data(data));
+        reminderRequest.GetUserId(uid);
+        return reminderRequest.IsAlerting();
     }
 }
 
