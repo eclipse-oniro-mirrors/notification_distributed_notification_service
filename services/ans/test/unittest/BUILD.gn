@@ -50,6 +50,7 @@ ohos_unittest("ans_unit_test") {
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_access_token_helper.cpp",
+    "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
@@ -61,6 +62,7 @@ ohos_unittest("ans_unit_test") {
     "notification_subscriber_manager_test.cpp",
     "permission_filter_test.cpp",
     "reminder_data_manager_test.cpp",
+    "system_event_observer_test.cpp",
   ]
 
   configs = [ "//commonlibrary/c_utils/base:utils_config" ]
@@ -123,4 +125,6 @@ group("unittest") {
   deps = []
 
   deps += [ ":ans_unit_test" ]
+
+  deps += [ "access_token_helper_test:unittest" ]
 }
