@@ -13,26 +13,27 @@
  * limitations under the License.
  */
 
-#include "notification_do_not_disturb_date.h"
-#include "notificationdonotdisturbdate_fuzzer.h"
+#define private public
+#define protected public
+#include "notification_template.h"
+#include "notification_conversational_content.h"
+#undef private
+#undef protected
+#include "notificationtemplateannex_fuzzer.h"
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
-        int64_t beginDate = 1;
-        int64_t endDate = 3;
-        uint32_t type = GetU32Data(data);
-        Notification::NotificationConstant::DoNotDisturbType disturbType =
-            Notification::NotificationConstant::DoNotDisturbType(type);
-        Notification::NotificationDoNotDisturbDate notificationDoNotDisturbDate(disturbType, beginDate, endDate);
-        notificationDoNotDisturbDate.SetDoNotDisturbType(disturbType);
-        notificationDoNotDisturbDate.GetDoNotDisturbType();
-        notificationDoNotDisturbDate.SetBeginDate(beginDate);
-        notificationDoNotDisturbDate.GetBeginDate();
-        notificationDoNotDisturbDate.SetEndDate(endDate);
-        notificationDoNotDisturbDate.Dump();
-        return notificationDoNotDisturbDate.GetEndDate();
+        Notification::NotificationTemplate notificationTemplate;
+        Parcel parcel;
+        notificationTemplate.Unmarshalling(parcel);
+        notificationTemplate.ReadFromParcel(parcel);
+        Notification::MessageUser messageUser;
+        Notification::NotificationConversationalContent NotificationConversationalContent(messageUser);
+        nlohmann::json jsonObject;
+        NotificationConversationalContent.ToJson(jsonObject);
+        NotificationConversationalContent.FromJson(jsonObject);
+        return true;
     }
 }
 

@@ -13,26 +13,29 @@
  * limitations under the License.
  */
 
-#include "notification_do_not_disturb_date.h"
-#include "notificationdonotdisturbdate_fuzzer.h"
+#define private public
+#define protected public
+#include "notification_helper.h"
+#undef private
+#undef protected
+#include "notificationhelper_fuzzer.h"
 
 namespace OHOS {
+    namespace {
+        constexpr uint8_t ENABLE = 2;
+    }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
-        int64_t beginDate = 1;
-        int64_t endDate = 3;
-        uint32_t type = GetU32Data(data);
-        Notification::NotificationConstant::DoNotDisturbType disturbType =
-            Notification::NotificationConstant::DoNotDisturbType(type);
-        Notification::NotificationDoNotDisturbDate notificationDoNotDisturbDate(disturbType, beginDate, endDate);
-        notificationDoNotDisturbDate.SetDoNotDisturbType(disturbType);
-        notificationDoNotDisturbDate.GetDoNotDisturbType();
-        notificationDoNotDisturbDate.SetBeginDate(beginDate);
-        notificationDoNotDisturbDate.GetBeginDate();
-        notificationDoNotDisturbDate.SetEndDate(endDate);
-        notificationDoNotDisturbDate.Dump();
-        return notificationDoNotDisturbDate.GetEndDate();
+        Notification::NotificationHelper notificationHelper;
+        // test IsSoundEnabled function
+        std::string representativeBundle(data);
+        Notification::NotificationRequest request;
+        notificationHelper.PublishNotificationAsBundle(representativeBundle, request);
+        notificationHelper.RemoveNotifications();
+        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        bool enabled = *data % ENABLE;
+        notificationHelper.SetNotificationsEnabledForAllBundles(userId, enabled);
+        return true;
     }
 }
 

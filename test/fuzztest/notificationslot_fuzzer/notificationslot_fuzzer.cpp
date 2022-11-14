@@ -15,10 +15,10 @@
 
 #define private public
 #define protected public
-#include "reminder_request_timer.h"
+#include "notification_slot.h"
 #undef private
 #undef protected
-#include "reminderrequesttimer_fuzzer.h"
+#include "notificationslot_fuzzer.h"
 
 namespace OHOS {
     namespace {
@@ -26,21 +26,29 @@ namespace OHOS {
     }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        uint64_t countDownTimeInSeconds = 0;
-        std::string stringData(data);
-        Notification::ReminderRequestTimer reminderRequestTimer(countDownTimeInSeconds);
-        reminderRequestTimer.GetInitInfo();
+        Notification::NotificationSlot notificationSlot;
         bool enabled = *data % ENABLE;
-        reminderRequestTimer.PreGetNextTriggerTimeIgnoreSnooze(enabled, enabled);
-        reminderRequestTimer.OnDateTimeChange();
-        reminderRequestTimer.OnTimeZoneChange();
-        reminderRequestTimer.UpdateNextReminder();
-        reminderRequestTimer.CheckParamsValid(countDownTimeInSeconds);
-        reminderRequestTimer.UpdateTimeInfo(stringData);
+        notificationSlot.CanEnableLight();
+        notificationSlot.CanVibrate();
+        notificationSlot.GetDescription();
+        notificationSlot.GetId();
+        notificationSlot.GetLedLightColor();
+        notificationSlot.GetLevel();
+        notificationSlot.GetType();
+        notificationSlot.GetLockScreenVisibleness();
+        notificationSlot.GetName();
+        notificationSlot.GetSound();
+        notificationSlot.GetVibrationStyle();
+        notificationSlot.IsEnableBypassDnd();
+        notificationSlot.EnableBypassDnd(enabled);
+        notificationSlot.IsShowBadge();
+        notificationSlot.EnableBadge(enabled);
+        notificationSlot.SetEnable(enabled);
+        notificationSlot.GetEnable();
         Parcel parcel;
-        reminderRequestTimer.Unmarshalling(parcel);
-        reminderRequestTimer.Marshalling(parcel);
-        return reminderRequestTimer.ReadFromParcel(parcel);
+        notificationSlot.ReadFromParcel(parcel);
+        notificationSlot.Unmarshalling(parcel);
+        return notificationSlot.Marshalling(parcel);
     }
 }
 
