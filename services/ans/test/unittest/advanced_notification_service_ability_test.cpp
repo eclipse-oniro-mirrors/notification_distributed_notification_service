@@ -15,7 +15,8 @@
 
 #include <functional>
 #include <gtest/gtest.h>
-
+#define private public
+#define protected public
 #include "advanced_notification_service_ability.h"
 
 using namespace testing::ext;
@@ -41,6 +42,34 @@ HWTEST_F(
     int32_t systemAbilityId = 1;
     bool runOnCreate = true;
     AdvancedNotificationServiceAbility(systemAbilityId, runOnCreate);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_00200
+ * @tc.name      : ANS_AdvancedNotificationServiceAbility_0200
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_00200, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    test.OnStart();
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_00300
+ * @tc.name      : ANS_AdvancedNotificationServiceAbility_0300
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_00300, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    test.OnStop();
 }
 }  // namespace Notification
 }  // namespace OHOS

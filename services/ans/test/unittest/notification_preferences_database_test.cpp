@@ -489,5 +489,383 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveDoNotDisturbDate_00100, Func
     int32_t userId = 1;
     EXPECT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), true);
 }
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00100
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_name");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00200
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_importance");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00300
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00300, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_showBadge");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00400
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00400, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_badgeTotalNum");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00500
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00500, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_privateAllowed");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00600
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00600, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_enabledNotification");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00700
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00700, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_poppedDialog");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00800
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00800, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_uid");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00100
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_id");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00200
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_name");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00300
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00300, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_description");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00400
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00400, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_level");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00500
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00500, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_showBadge");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00600
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00600, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enableLight");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00700
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00700, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enableVibration");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00800
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00800, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_ledLightColor");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_00900
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00900, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_lockscreenVisibleness");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01000
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01000, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_sound");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01100
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_vibrationSytle");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01200
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01200, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enableBypassDnd");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01300
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01300, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    DistributedKv::Entry entry;
+    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enabled");
+    DistributedKv::Value dbValue("1");
+    entry.key = dbKey;
+    entry.value = dbValue;
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
 }  // namespace Notification
 }  // namespace OHOS
