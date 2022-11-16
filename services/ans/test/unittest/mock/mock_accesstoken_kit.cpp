@@ -15,6 +15,7 @@
 
 #include "accesstoken_kit.h"
 #include "ans_log_wrapper.h"
+#include "ans_ut_constant.h"
 #include "ipc_skeleton.h"
 
 using namespace OHOS::Security::AccessToken;
@@ -45,6 +46,9 @@ namespace Security {
 namespace AccessToken {
 int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& permissionName)
 {
+    if (tokenID == Notification::NON_NATIVE_TOKEN) {
+        return PERMISSION_DENIED;
+    }
     return PERMISSION_GRANTED;
 }
 
