@@ -56,24 +56,36 @@ sptr<AdvancedNotificationService> AdvancedNotificationServiceTest::advancedNotif
 
 void AdvancedNotificationServiceTest::SetUpTestCase()
 {
+    GTEST_LOG_(INFO) << "SetUpTestCase start";
     advancedNotificationService_ = AdvancedNotificationService::GetInstance();
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    GTEST_LOG_(INFO) << "SetUpTestCase end";
 }
 
 void AdvancedNotificationServiceTest::TearDownTestCase()
 {
+    GTEST_LOG_(INFO) << "TearDownTestCase start";
     advancedNotificationService_ = nullptr;
+    GTEST_LOG_(INFO) << "TearDownTestCase end";
 }
 
 void AdvancedNotificationServiceTest::SetUp()
 {
+    GTEST_LOG_(INFO) << "SetUp start";
+
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     advancedNotificationService_->CancelAll();
+    
+    GTEST_LOG_(INFO) << "SetUp end";
 }
 
 void AdvancedNotificationServiceTest::TearDown()
-{}
+{
+    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 inline void SleepForFC()
 {
@@ -2092,5 +2104,487 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15600,
 
     EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
 }
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15700
+ * @tc.name      : PrepareNotificationRequest_0100
+ * @tc.desc      : Test PrepareNotificationRequest function when notification is agent.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15700, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "PrepareNotificationRequest_0100 test start";
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+
+    req->SetContent(content);
+    req->SetIsAgentNotification(true);
+    EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "PrepareNotificationRequest_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15800
+ * @tc.name      : GenerateBundleOption_0100
+ * @tc.desc      : Test GenerateBundleOption function when bundle name is null.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15800, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GenerateBundleOption_0100 test start";
+    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    EXPECT_EQ(advancedNotificationService_->GenerateBundleOption(), nullptr);
+    GTEST_LOG_(INFO) << "GenerateBundleOption_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16000
+ * @tc.name      : CancelPreparedNotification_1000
+ * @tc.desc      : Test CancelPreparedNotification function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test start";
+    
+    int32_t notificationId = 0;
+    std::string label = "testLabel";
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    EXPECT_EQ(advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption),
+        ERR_ANS_INVALID_BUNDLE);
+
+    GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16100
+ * @tc.name      : PrepareNotificationInfo_1000
+ * @tc.desc      : Test PrepareNotificationInfo function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test start";
+    
+    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    req->SetCreatorUserId(DEFAULT_USER_ID);
+    req->SetIsAgentNotification(true);
+    advancedNotificationService_->Publish(label, req);
+    SleepForFC();
+
+    GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test end";
+}
+
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16200
+ * @tc.name      : ANS_CancelAsBundle_0200
+ * @tc.desc      : Test CancelAsBundle function
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0200 test start";
+
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 1;
+    int result = ERR_ANS_NON_SYSTEM_APP;
+    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
+
+    GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16300
+ * @tc.name      : ANS_CancelAsBundle_0300
+ * @tc.desc      : Test CancelAsBundle function when uid is less than 0.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0300 test start";
+
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 0;
+    int result = ERR_ANS_INVALID_UID;
+    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
+
+    GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0300 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16400
+ * @tc.name      : ANS_AddSlots_0100
+ * @tc.desc      : Test AddSlots function whith not system app
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_AddSlots_0100 test start";
+
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    slots.push_back(slot);
+    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "ANS_AddSlots_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16600
+ * @tc.name      : ANS_AddSlots_0300
+ * @tc.desc      : Test AddSlots function with bundle option is null
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16600, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_AddSlots_0300 test start";
+    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    slots.push_back(slot);
+    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_INVALID_BUNDLE);
+
+    GTEST_LOG_(INFO) << "ANS_AddSlots_0300 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16700
+ * @tc.name      : ANS_AddSlots_0400
+ * @tc.desc      : Test AddSlots function with invalid bundle option
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16700, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_AddSlots_0400 test start";
+
+    std::vector<sptr<NotificationSlot>> slots;
+    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "ANS_AddSlots_0400 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16800
+ * @tc.name      : ANS_GetSlots_0100
+ * @tc.desc      : Test GetSlots function with bundle option is null
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16800, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_GetSlots_0100 test start";
+    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    slots.push_back(slot);
+    EXPECT_EQ(advancedNotificationService_->GetSlots(slots), ERR_ANS_INVALID_BUNDLE);
+
+    GTEST_LOG_(INFO) << "ANS_GetSlots_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_16900
+ * @tc.name      : ANS_GetActiveNotifications_0100
+ * @tc.desc      : Test function with bundle option is null
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
+
+    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    std::vector<sptr<NotificationRequest>> notifications;
+    EXPECT_EQ(advancedNotificationService_->GetActiveNotifications(notifications), ERR_ANS_INVALID_BUNDLE);
+    uint64_t num = 1;
+    EXPECT_EQ(advancedNotificationService_->GetActiveNotificationNums(num), ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(advancedNotificationService_->SetNotificationBadgeNum(num), ERR_ANS_INVALID_BUNDLE);
+    int32_t importance = 2;
+    EXPECT_EQ(advancedNotificationService_->GetBundleImportance(importance), ERR_ANS_INVALID_BUNDLE);
+    bool allow = true;
+    EXPECT_EQ(advancedNotificationService_->SetPrivateNotificationsAllowed(allow), ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(advancedNotificationService_->GetPrivateNotificationsAllowed(allow), ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabled(allow), ERR_ANS_INVALID_BUNDLE);
+
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);
+    EXPECT_EQ(advancedNotificationService_->GetSlotByType(NotificationConstant::OTHER, slot), ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(advancedNotificationService_->RemoveSlotByType(NotificationConstant::OTHER), ERR_ANS_INVALID_BUNDLE);
+
+    std::string deviceId = "DeviceId";
+    bool needPop = false;
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, needPop), ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(advancedNotificationService_->IsAllowedNotifySelf(needPop), ERR_ANS_INVALID_BUNDLE);
+    sptr<NotificationBundleOption> bundleOption;
+    EXPECT_EQ(advancedNotificationService_->IsAllowedNotifySelf(bundleOption, needPop), ERR_ANS_INVALID_BUNDLE);
+
+    EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, bundleOption), ERR_ANS_INVALID_BUNDLE);
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17000
+ * @tc.name      : ANS_GetSetActiveNotifications_0100
+ * @tc.desc      : Test SetNotificationAgent and GetNotificationAgent function with bundle option is null
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
+
+    std::string agent = "agent";
+    EXPECT_EQ(advancedNotificationService_->SetNotificationAgent(agent), ERR_INVALID_OPERATION);
+    EXPECT_EQ(advancedNotificationService_->GetNotificationAgent(agent), ERR_INVALID_OPERATION);
+    
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17100
+ * @tc.name      : ANS_GetSetActiveNotifications_0100
+ * @tc.desc      : Test function with NON_SYSTEM_APP_UID
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
+
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    std::string key = "key";
+    int32_t removeReason = 0;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->Delete(key, removeReason), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->DeleteByBundle(bundleOption), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->DeleteAll(), ERR_ANS_NON_SYSTEM_APP);
+
+    bool enable = true;
+    EXPECT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, enable), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, enable), ERR_ANS_NON_SYSTEM_APP);
+
+    std::vector<sptr<Notification>> notifications;
+    EXPECT_EQ(advancedNotificationService_->GetAllActiveNotifications(notifications), ERR_ANS_NON_SYSTEM_APP);
+
+    std::vector<std::string> keys;
+    EXPECT_EQ(advancedNotificationService_->GetSpecialActiveNotifications(keys, notifications),
+        ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForAllBundles(key, enable),
+        ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
+        std::string(), bundleOption, enable), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->IsAllowedNotify(enable), ERR_ANS_NON_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17200
+ * @tc.name      : ANS_DeleteAll_0100
+ * @tc.desc      : Test DeleteAll function
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
+
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    sptr<NotificationRequest> req = new NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label");
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
+    SleepForFC();
+    req->SetCreatorUserId(SUBSCRIBE_USER_INIT);
+    std::shared_ptr<Notification> notification = std::make_shared<Notification>(req);
+    EXPECT_EQ(advancedNotificationService_->DeleteAll(), ERR_OK);
+
+    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17300
+ * @tc.name      : ANS_GetSlotsByBundle_0100
+ * @tc.desc      : Test GetSlotsByBundle function
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_GetSlotsByBundle_0100 test start";
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    EXPECT_EQ(advancedNotificationService_->GetSlotsByBundle(
+                  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), slots),
+        ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->UpdateSlots(
+                new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), slots),
+        ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "ANS_GetSlotsByBundle_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17400
+ * @tc.name      : CancelPreparedNotification_1000
+ * @tc.desc      : Test CancelPreparedNotification function.
+ * @tc.require   : #I60KYN
+ */
+// HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400, Function | SmallTest | Level1)
+// {
+//     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_17400 test start";
+    
+//     int32_t notificationId = 0;
+//     std::string label = "testLabel";
+//     sptr<NotificationBundleOption> bundleOption =  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+//     sptr<Notification> notification = nullptr;
+//     bool isCancel = false;
+//     EXPECT_EQ(advancedNotificationService_->RemoveFromNotificationList(bundleOption, label, notificationId,
+//         notification, isCancel), ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+        
+//     EXPECT_EQ(advancedNotificationService_->RemoveFromNotificationList(label, notification, isCancel,
+//         NotificationConstant::CANCEL_REASON_DELETE), ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+
+//     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_17400 test end";
+// }
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17400
+ * @tc.name      : Subscribe_1000
+ * @tc.desc      : Test Subscribe function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "Subscribe_1000 test start";
+
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "Subscribe_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17500
+ * @tc.name      : Unsubscribe_1000
+ * @tc.desc      : Test Subscribe function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "Unsubscribe_1000 test start";
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->Unsubscribe(nullptr, info), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "Unsubscribe_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17600
+ * @tc.name      : GetAppTargetBundle_1000
+ * @tc.desc      : Test GetAppTargetBundle function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17600, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test start";
+
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+
+    EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, bundleOption), ERR_OK);
+
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17700
+ * @tc.name      : GetAppTargetBundle_2000
+ * @tc.desc      : Test GetAppTargetBundle function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17700, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test start";
+
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    bundleOption->SetBundleName("test");
+    EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17800
+ * @tc.name      : GetAppTargetBundle_2000
+ * @tc.desc      : Test GetAppTargetBundle function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17800, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    bundleOption->SetBundleName("test");
+    EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_OK);
+
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test end";
+}
+
 }  // namespace Notification
 }  // namespace OHOS
