@@ -32,6 +32,10 @@
 #include "notification_preferences.h"
 #include "notification_subscriber.h"
 #include "system_event_observer.h"
+#include "notification_constant.h"
+#include "want_agent_info.h"
+#include "want_agent_helper.h"
+#include "want_params.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -2352,6 +2356,26 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     EXPECT_EQ(advancedNotificationService_->IsAllowedNotifySelf(bundleOption, needPop), ERR_ANS_INVALID_BUNDLE);
 
     EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, bundleOption), ERR_ANS_INVALID_BUNDLE);
+
+    int32_t reminderId = 1;
+    EXPECT_EQ(advancedNotificationService_->CancelReminder(reminderId), ERR_ANS_INVALID_BUNDLE);
+
+    EXPECT_EQ(advancedNotificationService_->CancelAllReminders(), ERR_ANS_INVALID_BUNDLE);
+
+    std::vector<sptr<ReminderRequest>> reminders;
+    EXPECT_EQ(advancedNotificationService_->GetValidReminders(reminders), ERR_ANS_INVALID_BUNDLE);
+
+    EXPECT_EQ(advancedNotificationService_->RemoveAllSlots(), ERR_ANS_INVALID_BUNDLE);
+
+    EXPECT_EQ(advancedNotificationService_->AddSlotByType(NotificationConstant::SlotType::OTHER),
+        ERR_ANS_INVALID_BUNDLE);
+
+    std::string groupName = "name";
+    EXPECT_EQ(advancedNotificationService_->CancelGroup(groupName), ERR_ANS_INVALID_BUNDLE);
+
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), ERR_ANS_INVALID_BUNDLE);
+
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
 
@@ -2411,6 +2435,59 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
         std::string(), bundleOption, enable), ERR_ANS_NON_SYSTEM_APP);
 
     EXPECT_EQ(advancedNotificationService_->IsAllowedNotify(enable), ERR_ANS_NON_SYSTEM_APP);
+
+    int32_t notificationId = 1;
+    EXPECT_EQ(advancedNotificationService_->RemoveNotification(bundleOption, notificationId,
+        key, removeReason), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->RemoveAllNotifications(bundleOption), ERR_ANS_NON_SYSTEM_APP);
+
+    uint64_t num = 1;
+    EXPECT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_ANS_NON_SYSTEM_APP);
+
+    std::string groupName = "group";
+    EXPECT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_NON_SYSTEM_APP);
+
+    sptr<NotificationDoNotDisturbDate> date = nullptr;
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(enable), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->EnableDistributed(enable), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enable), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enable), ERR_ANS_NON_SYSTEM_APP);
+
+    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType),
+        ERR_ANS_NON_SYSTEM_APP);
+
+    int32_t userId = 1;
+    EXPECT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, enable),
+        ERR_ANS_NON_SYSTEM_APP);
+    
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(userId, enable),
+        ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->SetEnabledForBundleSlot(bundleOption,
+        NotificationConstant::SlotType::OTHER, enable), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->GetEnabledForBundleSlot(bundleOption,
+        NotificationConstant::SlotType::OTHER, enable), ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(userId, enable),
+        ERR_ANS_NON_SYSTEM_APP);
+
+    EXPECT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(userId, enable),
+        ERR_ANS_NON_SYSTEM_APP);
+
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
 
@@ -2468,30 +2545,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17300,
 
     GTEST_LOG_(INFO) << "ANS_GetSlotsByBundle_0100 test end";
 }
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_17400
- * @tc.name      : CancelPreparedNotification_1000
- * @tc.desc      : Test CancelPreparedNotification function.
- * @tc.require   : #I60KYN
- */
-// HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400, Function | SmallTest | Level1)
-// {
-//     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_17400 test start";
-    
-//     int32_t notificationId = 0;
-//     std::string label = "testLabel";
-//     sptr<NotificationBundleOption> bundleOption =  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-//     sptr<Notification> notification = nullptr;
-//     bool isCancel = false;
-//     EXPECT_EQ(advancedNotificationService_->RemoveFromNotificationList(bundleOption, label, notificationId,
-//         notification, isCancel), ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
-        
-//     EXPECT_EQ(advancedNotificationService_->RemoveFromNotificationList(label, notification, isCancel,
-//         NotificationConstant::CANCEL_REASON_DELETE), ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
-
-//     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_17400 test end";
-// }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_17400
@@ -2570,7 +2623,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17700,
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_17800
- * @tc.name      : GetAppTargetBundle_2000
+ * @tc.name      : GetAppTargetBundle_3000
  * @tc.desc      : Test GetAppTargetBundle function.
  * @tc.require   : #I60KYN
  */
@@ -2584,6 +2637,609 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17800,
     EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_OK);
 
     GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_17900
+ * @tc.name      : PublishReminder_1000
+ * @tc.desc      : Test PublishReminder function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17900, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test start";
+
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    int32_t reminderId = 1;
+    sptr<ReminderRequest> reminder = new ReminderRequest(reminderId);
+    reminder->InitNotificationRequest();
+    EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_REMINDER_NOTIFICATION_NOT_ENABLE);
+
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18000
+ * @tc.name      : PublishReminder_2000
+ * @tc.desc      : Test PublishReminder function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test start";
+
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    int32_t reminderId = 1;
+    sptr<ReminderRequest> reminder = new ReminderRequest(reminderId);
+    reminder->InitNotificationRequest();
+    EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_ANS_INVALID_BUNDLE);
+
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18100
+ * @tc.name      : ActiveNotificationDump_1000
+ * @tc.desc      : Test ActiveNotificationDump function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ActiveNotificationDump_1000 test start";
+
+    std::string bundle = "Bundle";
+    int32_t userId = -1;
+    std::vector<std::string> dumpInfo;
+
+    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+
+    GTEST_LOG_(INFO) << "ActiveNotificationDump_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18200
+ * @tc.name      : RecentNotificationDump_1000
+ * @tc.desc      : Test RecentNotificationDump function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test start";
+
+    std::string bundle = "Bundle";
+    int32_t userId = -1;
+    std::vector<std::string> dumpInfo;
+
+    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+
+    GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18300
+ * @tc.name      : DistributedNotificationDump_1000
+ * @tc.desc      : Test DistributedNotificationDump function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DistributedNotificationDump_1000 test start";
+
+    std::string bundle = "Bundle";
+    int32_t userId = -1;
+    std::vector<std::string> dumpInfo;
+
+    EXPECT_EQ(advancedNotificationService_->DistributedNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+
+    GTEST_LOG_(INFO) << "DistributedNotificationDump_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18400
+ * @tc.name      : SetRecentNotificationCount_1000
+ * @tc.desc      : Test SetRecentNotificationCount function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SetRecentNotificationCount_1000 test start";
+
+    std::string arg = "1100";
+    EXPECT_EQ(advancedNotificationService_->SetRecentNotificationCount(arg), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "SetRecentNotificationCount_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18500
+ * @tc.name      : OnBundleRemoved_1000
+ * @tc.desc      : Test OnBundleRemoved function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnBundleRemoved_1000 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    advancedNotificationService_->OnBundleRemoved(bundleOption);
+
+    GTEST_LOG_(INFO) << "OnBundleRemoved_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18600
+ * @tc.name      : OnScreenOn_1000
+ * @tc.desc      : Test OnScreenOn function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18600, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnScreenOn_1000 test start";
+
+    advancedNotificationService_->OnScreenOn();
+    advancedNotificationService_->OnScreenOff();
+    advancedNotificationService_->OnDistributedKvStoreDeathRecipient();
+
+    GTEST_LOG_(INFO) << "OnScreenOn_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18700
+ * @tc.name      : AddSlotByType_1000
+ * @tc.desc      : Test AddSlotByType function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18700, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AddSlotByType_1000 test start";
+
+    EXPECT_EQ(advancedNotificationService_->AddSlotByType(NotificationConstant::SlotType::SERVICE_REMINDER),
+        ERR_OK);
+
+    GTEST_LOG_(INFO) << "AddSlotByType_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18800
+ * @tc.name      : GetSlotNumAsBundle_1000
+ * @tc.desc      : Test GetSlotNumAsBundle function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18800, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetSlotNumAsBundle_1000 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    uint64_t num = 1;
+    EXPECT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_OK);
+
+    GTEST_LOG_(INFO) << "GetSlotNumAsBundle_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18900
+ * @tc.name      : CancelGroup_1000
+ * @tc.desc      : Test CancelGroup function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18900, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CancelGroup_1000 test start";
+
+    std::string groupName = "";
+    EXPECT_EQ(advancedNotificationService_->CancelGroup(groupName), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "CancelGroup_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19000
+ * @tc.name      : RemoveGroupByBundle_1000
+ * @tc.desc      : Test RemoveGroupByBundle function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RemoveGroupByBundle_1000 test start";
+
+    std::string groupName = "group";
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    EXPECT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "RemoveGroupByBundle_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19100
+ * @tc.name      : ANS_IsDistributedEnabled_0100
+ * @tc.desc      : Test IsDistributedEnabled function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_IsDistributedEnabled_0100 test start";
+
+    bool enabled = false;
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnabled(enabled), ERR_OK);
+
+    GTEST_LOG_(INFO) << "ANS_IsDistributedEnabled_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19200
+ * @tc.name      : EnableDistributedByBundle_0100
+ * @tc.desc      : Test EnableDistributedByBundle function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "EnableDistributedByBundle_0100 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bool enabled = false;
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enabled), ERR_OK);
+
+    GTEST_LOG_(INFO) << "EnableDistributedByBundle_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19300
+ * @tc.name      : IsDistributedEnableByBundle_0100
+ * @tc.desc      : Test IsDistributedEnableByBundle function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0100 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
+
+    GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19400
+ * @tc.name      : IsDistributedEnableByBundle_0200
+ * @tc.desc      : Test IsDistributedEnableByBundle function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0200 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bool enabled = false;
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
+
+    GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19500
+ * @tc.name      : GetDeviceRemindType_0100
+ * @tc.desc      : Test GetDeviceRemindType function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test start";
+
+    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_OK);
+
+    GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19600
+ * @tc.name      : GetLocalNotificationKeys_0100
+ * @tc.desc      : Test GetLocalNotificationKeys function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19600, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetLocalNotificationKeys_0100 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    advancedNotificationService_->GetLocalNotificationKeys(bundleOption);
+
+    GTEST_LOG_(INFO) << "GetLocalNotificationKeys_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19700
+ * @tc.name      : CheckDistributedNotificationType_0100
+ * @tc.desc      : Test CheckDistributedNotificationType function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19700, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test start";
+
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_EQ(advancedNotificationService_->CheckDistributedNotificationType(req), true);
+
+    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19800
+ * @tc.name      : CheckDistributedNotificationType_0200
+ * @tc.desc      : Test CheckDistributedNotificationType function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19800, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0200 test start";
+
+    sptr<NotificationRequest> req = new NotificationRequest();
+    std::vector<std::string> devices;
+    devices.push_back("a");
+    devices.push_back("b");
+    devices.push_back("c");
+    req->GetNotificationDistributedOptions().SetDevicesSupportDisplay(devices);
+    EXPECT_EQ(advancedNotificationService_->CheckDistributedNotificationType(req), true);
+
+    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19900
+ * @tc.name      : OnDistributedPublish_0100
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test start";
+
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
+
+    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20000
+ * @tc.name      : OnDistributedUpdate_0100
+ * @tc.desc      : Test OnDistributedUpdate function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnDistributedUpdate_0100 test start";
+
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request);
+
+    GTEST_LOG_(INFO) << "OnDistributedUpdate_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20100
+ * @tc.name      : OnDistributedDelete_0100
+ * @tc.desc      : Test OnDistributedDelete function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnDistributedDelete_0100 test start";
+
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    std::string label = "testLabel";
+    int32_t id = 1;
+
+    advancedNotificationService_->OnDistributedDelete(deviceId, bundleName, label, id);
+
+    GTEST_LOG_(INFO) << "OnDistributedDelete_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20200
+ * @tc.name      : CheckPublishWithoutApp_0100
+ * @tc.desc      : Test CheckPublishWithoutApp function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0100 test start";
+
+    int32_t userId = 1;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    EXPECT_EQ(advancedNotificationService_->CheckPublishWithoutApp(userId, request), false);
+
+    GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20300
+ * @tc.name      : CheckPublishWithoutApp_0200
+ * @tc.desc      : Test CheckPublishWithoutApp function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0200 test start";
+
+    int32_t userId = SYSTEM_APP_UID;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    EXPECT_EQ(advancedNotificationService_->CheckPublishWithoutApp(userId, request), false);
+
+    GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20400
+ * @tc.name      : TriggerRemoveWantAgent_0100
+ * @tc.desc      : Test TriggerRemoveWantAgent function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "TriggerRemoveWantAgent_0100 test start";
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    AbilityRuntime::WantAgent::WantAgentInfo paramsInfo;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(paramsInfo);
+
+    request->SetRemovalWantAgent(wantAgent);
+    advancedNotificationService_->TriggerRemoveWantAgent(request);
+
+    GTEST_LOG_(INFO) << "TriggerRemoveWantAgent_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20500
+ * @tc.name      : DeleteAllByUser_0100
+ * @tc.desc      : Test DeleteAllByUser function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteAllByUser_0100 test start";
+
+    int32_t userId = -2;
+    EXPECT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_ANS_INVALID_PARAM);
+
+    sptr<NotificationDoNotDisturbDate> date = nullptr;
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDateByUser(userId, date), ERR_ANS_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "DeleteAllByUser_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20600
+ * @tc.name      : OnResourceRemove_0100
+ * @tc.desc      : Test OnResourceRemove function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20600, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnResourceRemove_0100 test start";
+
+    int32_t userId = -2;
+    advancedNotificationService_->OnResourceRemove(userId);
+
+    GTEST_LOG_(INFO) << "OnResourceRemove_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20700
+ * @tc.name      : OnBundleDataCleared_0100
+ * @tc.desc      : Test OnBundleDataCleared function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20700, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnBundleDataCleared_0100 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    advancedNotificationService_->OnBundleDataCleared(bundleOption);
+
+    GTEST_LOG_(INFO) << "OnBundleDataCleared_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20800
+ * @tc.name      : GetDisplayPosition_0100
+ * @tc.desc      : Test GetDisplayPosition function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20800, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetDisplayPosition_0100 test start";
+
+    int offsetX = 1;
+    int offsetY = 1;
+    int width = 1;
+    int height = 1;
+    bool wideScreen = 1;
+    advancedNotificationService_->GetDisplayPosition(offsetX, offsetY, width, height, wideScreen);
+
+    GTEST_LOG_(INFO) << "GetDisplayPosition_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20900
+ * @tc.name      : GetDumpInfo_0100
+ * @tc.desc      : Test GetDumpInfo function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20900, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetDumpInfo_0100 test start";
+
+    std::vector<std::u16string> args;
+    args.push_back(Str8ToStr16("args"));
+    std::string result = "result";
+    advancedNotificationService_->GetDumpInfo(args, result);
+
+    GTEST_LOG_(INFO) << "GetDumpInfo_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21000
+ * @tc.name      : GetDumpInfo_0200
+ * @tc.desc      : Test GetDumpInfo function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetDumpInfo_0200 test start";
+
+    std::vector<std::u16string> args;
+    args.push_back(Str8ToStr16("-h"));
+    std::string result = "result";
+    advancedNotificationService_->GetDumpInfo(args, result);
+
+    GTEST_LOG_(INFO) << "GetDumpInfo_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21100
+ * @tc.name      : SendFlowControlOccurHiSysEvent_0100
+ * @tc.desc      : Test SendFlowControlOccurHiSysEvent function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0100 test start";
+
+    std::shared_ptr<NotificationRecord> record = nullptr;
+    advancedNotificationService_->SendFlowControlOccurHiSysEvent(record);
+
+    GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21200
+ * @tc.name      : SendFlowControlOccurHiSysEvent_0200
+ * @tc.desc      : Test SendFlowControlOccurHiSysEvent function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0200 test start";
+
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = new NotificationRequest();
+    record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    advancedNotificationService_->SendFlowControlOccurHiSysEvent(record);
+
+    GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0200 test end";
 }
 
 }  // namespace Notification
