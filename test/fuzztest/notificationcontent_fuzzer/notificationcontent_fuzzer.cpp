@@ -35,10 +35,6 @@ namespace OHOS {
         std::make_shared<Notification::NotificationMultiLineContent>();
         std::shared_ptr<Notification::NotificationMediaContent> mediaContent =
         std::make_shared<Notification::NotificationMediaContent>();
-        if ((normalContent == nullptr) || (longTextContent == nullptr) || (pictureContent == nullptr) ||
-            (conversationContent == nullptr) || (multiLineContent == nullptr) || (mediaContent == nullptr)) {
-            return false;
-        }
         Notification::NotificationContent notificationContent(normalContent);
         Notification::NotificationContent notificationLongTextContent(longTextContent);
         Notification::NotificationContent notificationPictureContent(pictureContent);
