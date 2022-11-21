@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef BASE_NOTIFICATION_MOCK_I_REMOTE_OBJECT_H
+#define BASE_NOTIFICATION_MOCK_I_REMOTE_OBJECT_H
+
 #include "gmock/gmock.h"
 
 #include "iremote_broker.h"
@@ -31,7 +34,7 @@ public:
         return 0;
     }
 
-    MOCK_METHOD4(SendRequest, int(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
+    MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
 
     bool IsProxyObject() const override
     {
@@ -76,3 +79,4 @@ public:
 };
 } // namespace Notification
 } // namespace OHOS
+#endif

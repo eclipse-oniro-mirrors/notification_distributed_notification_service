@@ -101,8 +101,8 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     // vibrationValues?: Array<number>
     napi_value arr = nullptr;
     napi_create_array(env, &arr);
-    uint32_t count = 0;
     if (request->EnableVibrate()) {
+        uint32_t count = 0;
         for (auto vec : request->GetVibrationStyle()) {
             napi_value nVibrationValue = nullptr;
             napi_create_int64(env, vec, &nVibrationValue);

@@ -701,5 +701,13 @@ bool NotificationPreferences::CheckApiCompatibility(const sptr<NotificationBundl
     }
     return bundleManager->CheckApiCompatibility(bundleOption);
 }
+
+void NotificationPreferences::RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("%{public}s", __FUNCTION__);
+    if (preferncesDB_ != nullptr && bundleOption != nullptr) {
+        preferncesDB_->RemoveAnsBundleDbInfo(bundleOption->GetBundleName(), bundleOption->GetUid());
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -15,8 +15,13 @@
 
 #include <gtest/gtest.h>
 
-#include "ans_log_wrapper.h"
+#define private public
+#define protected public
 #include "reminder_request_calendar.h"
+#undef private
+#undef protected
+
+#include "ans_log_wrapper.h"
 #include "reminder_helper.h"
 
 using namespace testing::ext;
@@ -298,6 +303,155 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00900, Function | SmallTest |
     EXPECT_NE(nullptr, calendar);
     EXPECT_TRUE(1 == calendar->GetMinute()) << "Set minute error.";
     EXPECT_TRUE(0 == calendar->GetSecond()) << "Set seconds error.";
+}
+
+/**
+ * @tc.name: initDateTime_01000
+ * @tc.desc: Test InitDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, initDateTime_01000, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    calendar->InitDateTime();
+    EXPECT_EQ(calendar->IsRepeatReminder(), true);
+}
+
+/**
+ * @tc.name: OnDateTimeChange_01000
+ * @tc.desc: Test OnDateTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_01000, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->OnDateTimeChange(), false);
+}
+
+/**
+ * @tc.name: OnTimeZoneChange_01000
+ * @tc.desc: Test OnTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnTimeZoneChange_01000, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->OnTimeZoneChange(), false);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_01000
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_01000, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->UpdateNextReminder(), true);
+}
+
+/**
+ * @tc.name: PreGetNextTriggerTimeIgnoreSnooze_01000
+ * @tc.desc: Test PreGetNextTriggerTimeIgnoreSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_01000, Function | SmallTest | Level1)
+{
+    bool ignoreRepeat = true;
+    bool forceToGetNext = true;
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext),
+    calendar->GetNextTriggerTime());
+}
+
+/**
+ * @tc.name: PreGetNextTriggerTimeIgnoreSnooze_02000
+ * @tc.desc: Test PreGetNextTriggerTimeIgnoreSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_02000, Function | SmallTest | Level1)
+{
+    bool ignoreRepeat = false;
+    bool forceToGetNext = true;
+    time_t now;
+    time(&now);  // unit is seconds.
+    tm *tmp = localtime(&now);
+    EXPECT_NE(nullptr, tmp);
+    tm nowTime = *tmp;
+    nowTime.tm_year += 1;
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    repeatMonths.push_back(-1);
+    repeatDays.push_back(1);
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext), 0);
+}
+
+/**
+ * @tc.name: Marshalling_00001
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, Marshalling_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->Marshalling(parcel), true);
+}
+
+/**
+ * @tc.name: Unmarshalling_00001
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, Unmarshalling_001, Function | SmallTest | Level1)
+{
+    bool unmarshalling = true;
+    Parcel parcel;
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    if (nullptr != calendar) {
+        if (nullptr == calendar->Unmarshalling(parcel)) {
+            unmarshalling = false;
+        }
+    }
+    EXPECT_EQ(unmarshalling, false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00001
+ * @tc.desc: Test ReadFromParcel parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI
+ */
+HWTEST_F(ReminderRequestCalendarTest, ReadFromParcel_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->ReadFromParcel(parcel), false);
 }
 }
 }

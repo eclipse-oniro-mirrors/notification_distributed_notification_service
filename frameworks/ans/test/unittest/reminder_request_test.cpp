@@ -560,9 +560,10 @@ HWTEST_F(ReminderRequestTest, CanShow_00002, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
 {
-    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive, nextTriggerTime=1970-01-01 00:00:00]";
+    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive, nextTriggerTime=1970-01-01 ";
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->Dump(), ret);
+    std::string res = rrc->Dump();
+    EXPECT_EQ(res.substr(0, res.size()-9), ret);
 }
 
 /**
@@ -942,8 +943,9 @@ HWTEST_F(ReminderRequestTest, GetShowTime_00001, Function | SmallTest | Level1)
 {
     uint64_t showTime = 8 * 60 * 1000;
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string ret = "00:08";
-    EXPECT_EQ(rrc->GetShowTime(showTime), ret);
+    std::string ret = ":08";
+    std::string res = rrc->GetShowTime(showTime);
+    EXPECT_EQ(res.substr(2, res.size()), ret);
 }
 
 /**
@@ -957,8 +959,9 @@ HWTEST_F(ReminderRequestTest, GetShowTime_00002, Function | SmallTest | Level1)
     uint64_t showTime = 8 * 60 * 1000;
     ReminderRequest reminder = ReminderRequest(ReminderRequest::ReminderType::TIMER);
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string ret = "00:08";
-    EXPECT_EQ(rrc->GetShowTime(showTime), ret);
+    std::string ret = ":08";
+    std::string res = rrc->GetShowTime(showTime);
+    EXPECT_EQ(res.substr(2, res.size()), ret);
 }
 
 /**
