@@ -213,7 +213,7 @@ namespace OHOS {
         ansManagerStub.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         const std::string cmd = "this is a notification cmd";
         std::vector<std::string> dumpInfo;
-        ansManagerStub.ShellDump(cmd, bundle, userId, dumpInfo); 
+        ansManagerStub.ShellDump(cmd, bundle, userId, dumpInfo);
         ansManagerStub.SetSyncNotificationEnabledWithoutApp(userId, enabled);
         ansManagerStub.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         return true;
