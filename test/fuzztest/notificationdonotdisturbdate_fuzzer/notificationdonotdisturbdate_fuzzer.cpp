@@ -31,6 +31,7 @@ namespace OHOS {
         notificationDoNotDisturbDate.SetBeginDate(beginDate);
         notificationDoNotDisturbDate.GetBeginDate();
         notificationDoNotDisturbDate.SetEndDate(endDate);
+        notificationDoNotDisturbDate.Dump();
         return notificationDoNotDisturbDate.GetEndDate();
     }
 }

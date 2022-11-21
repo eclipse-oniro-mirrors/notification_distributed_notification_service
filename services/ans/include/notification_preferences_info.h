@@ -287,6 +287,7 @@ public:
     bool GetEnabledAllNotification(const int32_t &userId, bool &enable) const;
     void RemoveNotificationEnable(const int32_t userId);
     void RemoveDoNotDisturbDate(const int32_t userId);
+    void SetBundleInfoFromDb(const BundleInfo &info, std::string bundleKey);
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;

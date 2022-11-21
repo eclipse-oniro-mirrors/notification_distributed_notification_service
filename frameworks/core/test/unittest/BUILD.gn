@@ -17,7 +17,10 @@ group("unittest") {
 
   deps += [
     "ans_callback_stub_test:unittest",
+    "ans_image_util_test:unittest",
     "ans_manager_death_recipient_test:unittest",
+    "ans_manager_proxy_test:unittest",
+    "ans_manager_stub_test:unittest",
     "ans_subscriber_proxy_test:unittest",
     "ans_subscriber_stub_test:unittest",
   ]

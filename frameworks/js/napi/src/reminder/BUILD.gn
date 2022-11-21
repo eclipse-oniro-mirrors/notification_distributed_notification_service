@@ -49,7 +49,7 @@ ohos_shared_library("reminderagent") {
   deps = [
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${core_path}:ans_core",
-    "//foundation/multimedia/image_framework/interfaces/innerkits:image",
+    "//foundation/multimedia/image_framework/interfaces/kits/js/common:image",
   ]
 
   external_deps = [
@@ -94,7 +94,7 @@ ohos_shared_library("reminderagentmanager") {
   deps = [
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${core_path}:ans_core",
-    "//foundation/multimedia/image_framework/interfaces/innerkits:image",
+    "//foundation/multimedia/image_framework/interfaces/kits/js/common:image",
   ]
 
   external_deps = [

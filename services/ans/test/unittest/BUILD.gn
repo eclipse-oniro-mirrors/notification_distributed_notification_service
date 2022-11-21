@@ -143,6 +143,7 @@ ohos_unittest("ans_unit_test") {
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_access_token_helper.cpp",
+    "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
@@ -153,6 +154,7 @@ ohos_unittest("ans_unit_test") {
     "notification_slot_filter_test.cpp",
     "notification_subscriber_manager_test.cpp",
     "permission_filter_test.cpp",
+    "system_event_observer_test.cpp",
   ]
 
   configs = [ "//commonlibrary/c_utils/base:utils_config" ]
@@ -190,9 +192,10 @@ ohos_unittest("ans_unit_test") {
     "multimedia_image_framework:image_native",
     "multimedia_player_framework:media_client",
     "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "time_service:time_service",
+    "time_service:time_client",
   ]
 
   if (device_usage) {
@@ -217,4 +220,6 @@ group("unittest") {
   deps += [ ":reminder_unit_test" ]
 
   deps += [ ":ans_unit_test" ]
+
+  deps += [ "access_token_helper_test:unittest" ]
 }

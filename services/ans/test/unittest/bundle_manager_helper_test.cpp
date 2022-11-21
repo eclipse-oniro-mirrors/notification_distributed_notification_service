@@ -109,16 +109,18 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
 }
 
 /**
- * @tc.number    : AccessTokenHelperTest_00100
- * @tc.name      : IsSystemHap
- * @tc.desc      : Test IsSystemHap function when the parameeter are normal
+ * @tc.number    : GetDistributedNotificationEnabled_00100
+ * @tc.name      : GetDistributedNotificationEnabled
+ * @tc.desc      : Test GetDistributedNotificationEnabled function  when the parameeter are normal
  * @tc.require   : issueI5S4VP
  */
-HWTEST_F(BundleManagerHelperTest, AccessTokenHelperTest_00100, Level1)
+HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00100, Level1)
 {
-    AccessTokenHelper accessTokenHelper;
-    bool result = accessTokenHelper.IsSystemHap();
-    EXPECT_EQ(result, false);
+    std::string bundle = "Bundle";
+    int32_t userId = 1;
+    BundleManagerHelper bundleManagerHelper;
+    bool result = bundleManagerHelper.GetDistributedNotificationEnabled(bundle, userId);
+    EXPECT_EQ(result, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -21,6 +21,7 @@
 #include "notification_slot.h"
 #undef private 
 #undef protected
+#include "ans_inner_errors.h"
 #include "notification_slot_filter.h"
 #include "notification_subscribe_info.h"
 
@@ -77,6 +78,20 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00200, Function 
  * @tc.desc      : Test OnPublish function
  */
 HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00300, Function | SmallTest | Level1)
+{
+    NotificationSlotFilter notificationSlotFilter;
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    ErrCode result = notificationSlotFilter.OnPublish(record);
+    EXPECT_EQ(result, ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
+}
+
+
+/**
+ * @tc.number    : NotificationSlotFilterTest_00400
+ * @tc.name      : ANS_OnPublish_0200
+ * @tc.desc      : Test OnPublish function
+ */
+HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00400, Function | SmallTest | Level1)
 {
     NotificationSlotFilter notificationSlotFilter;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();

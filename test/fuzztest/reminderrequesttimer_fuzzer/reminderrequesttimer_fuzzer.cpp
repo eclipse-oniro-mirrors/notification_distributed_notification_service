@@ -38,6 +38,7 @@ namespace OHOS {
         reminderRequestTimer.CheckParamsValid(countDownTimeInSeconds);
         reminderRequestTimer.UpdateTimeInfo(stringData);
         Parcel parcel;
+        reminderRequestTimer.Unmarshalling(parcel);
         reminderRequestTimer.Marshalling(parcel);
         return reminderRequestTimer.ReadFromParcel(parcel);
     }
