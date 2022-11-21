@@ -25,7 +25,6 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
         sptr<IRemoteObject> impl;
         Notification::AnsSubscriberProxy ansSubscriberProxy(impl);
         uint32_t code = GetU32Data(data);

@@ -43,8 +43,7 @@ namespace OHOS {
         uint8_t inputEditTypes = *data % INPUT_EDIT_TYPE;
         Notification::NotificationConstant::InputEditType inputEditType =
             Notification::NotificationConstant::InputEditType(inputEditTypes);
-        std::shared_ptr<Notification::NotificationUserInput> notificationUserInputs =
-            Notification::NotificationUserInput::Create(inputKey, tag, options, permitFreeFormInput,
+        Notification::NotificationUserInput::Create(inputKey, tag, options, permitFreeFormInput,
                 permitMimeTypes, additional, inputEditType);
         Notification::NotificationUserInput notificationUserInputannex
             (inputKey, tag, options, permitFreeFormInput, permitMimeTypes, additional, inputEditType);

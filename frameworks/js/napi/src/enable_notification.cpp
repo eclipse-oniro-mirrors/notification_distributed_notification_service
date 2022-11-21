@@ -124,13 +124,15 @@ void AsyncCompleteCallbackEnableNotification(napi_env env, napi_status status, v
         return;
     }
     AsyncCallbackInfoEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoEnable *>(data);
-    Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    if (asynccallbackinfo) {
+        Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value EnableNotification(napi_env env, napi_callback_info info)
@@ -160,9 +162,11 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
             ANS_LOGI("EnableNotification napi_create_async_work start");
             AsyncCallbackInfoEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoEnable *>(data);
             std::string deviceId {""};
-            asynccallbackinfo->info.errorCode = NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
-                asynccallbackinfo->params.option, deviceId, asynccallbackinfo->params.enable);
-            ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+                    asynccallbackinfo->params.option, deviceId, asynccallbackinfo->params.enable);
+                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            }
         },
         AsyncCompleteCallbackEnableNotification,
         (void *)asynccallbackinfo,
@@ -185,19 +189,21 @@ void AsyncCompleteCallbackIsNotificationEnabled(napi_env env, napi_status status
         return;
     }
     AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-    napi_value result = nullptr;
-    napi_get_boolean(env, asynccallbackinfo->allowed, &result);
-    if (asynccallbackinfo->newInterface) {
-        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
-    } else {
-        Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    if (asynccallbackinfo) {
+        napi_value result = nullptr;
+        napi_get_boolean(env, asynccallbackinfo->allowed, &result);
+        if (asynccallbackinfo->newInterface) {
+            Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        } else {
+            Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+        }
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
-    }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
@@ -226,22 +232,23 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("IsNotificationEnabled napi_create_async_work start");
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-
-            if (asynccallbackinfo->params.hasBundleOption) {
-                ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d",
-                    asynccallbackinfo->params.option.GetBundleName().c_str(),
-                    asynccallbackinfo->params.option.GetUid());
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::IsAllowedNotify(asynccallbackinfo->params.option, asynccallbackinfo->allowed);
-            } else if (asynccallbackinfo->params.hasUserId) {
-                ANS_LOGI("userId = %{public}d", asynccallbackinfo->params.userId);
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::IsAllowedNotify(asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
-            } else {
-                asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(asynccallbackinfo->allowed);
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->params.hasBundleOption) {
+                    ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d",
+                        asynccallbackinfo->params.option.GetBundleName().c_str(),
+                        asynccallbackinfo->params.option.GetUid());
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::IsAllowedNotify(asynccallbackinfo->params.option, asynccallbackinfo->allowed);
+                } else if (asynccallbackinfo->params.hasUserId) {
+                    ANS_LOGI("userId = %{public}d", asynccallbackinfo->params.userId);
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::IsAllowedNotify(asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
+                } else {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(asynccallbackinfo->allowed);
+                }
+                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
+                    asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
-            ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
-                asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
         },
         AsyncCompleteCallbackIsNotificationEnabled,
         (void *)asynccallbackinfo,
@@ -282,14 +289,15 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("IsNotificationEnabledSelf napi_create_async_work start");
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-
-            if (asynccallbackinfo->params.hasBundleOption) {
-                ANS_LOGE("Not allowed to query another application");
-            } else {
-                asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->params.hasBundleOption) {
+                    ANS_LOGE("Not allowed to query another application");
+                } else {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
+                }
+                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
+                    asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
-            ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
-                asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
         },
         AsyncCompleteCallbackIsNotificationEnabled,
         (void *)asynccallbackinfo,
@@ -330,22 +338,26 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-            std::string deviceId {""};
-            bool popFlag = false;
-            asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
-            asynccallbackinfo->params.allowToPop = popFlag;
-            ANS_LOGI("errorCode = %{public}d, allowToPop = %{public}d",
-                     asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
-            if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
-                ANS_LOGI("Begin to start notification dialog");
-                auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-                StartNotificationDialog(callbackInfo);
+            if (asynccallbackinfo) {
+                std::string deviceId {""};
+                bool popFlag = false;
+                asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
+                asynccallbackinfo->params.allowToPop = popFlag;
+                ANS_LOGI("errorCode = %{public}d, allowToPop = %{public}d",
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
+                if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
+                    ANS_LOGI("Begin to start notification dialog");
+                    auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
+                    StartNotificationDialog(callbackInfo);
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-            if (!(asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop)) {
-                AsyncCompleteCallbackIsNotificationEnabled(env, status, data);
+            if (asynccallbackinfo) {
+                if (!(asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop)) {
+                    AsyncCompleteCallbackIsNotificationEnabled(env, status, data);
+                }
             }
         },
         (void *)asynccallbackinfo,

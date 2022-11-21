@@ -24,7 +24,6 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
         Notification::AnsSubscriberStub ansSubscriberStub;
         uint32_t code = GetU32Data(data);
         MessageParcel datas;

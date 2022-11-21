@@ -1176,16 +1176,18 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
                 return;
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
-            if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
-                ANS_LOGI("Subscribe with NotificationSubscribeInfo");
-                OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
-                subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
-                subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
-            } else {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
+                    ANS_LOGI("Subscribe with NotificationSubscribeInfo");
+                    OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
+                    subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
+                    subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
+                } else {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -1195,15 +1197,17 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
                 return;
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
-            Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+            if (asynccallbackinfo) {
+                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
 
-            if (asynccallbackinfo->info.callback != nullptr) {
-                napi_delete_reference(env, asynccallbackinfo->info.callback);
+                if (asynccallbackinfo->info.callback != nullptr) {
+                    napi_delete_reference(env, asynccallbackinfo->info.callback);
+                }
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
             }
-            napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-
-            delete asynccallbackinfo;
-            asynccallbackinfo = nullptr;
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);

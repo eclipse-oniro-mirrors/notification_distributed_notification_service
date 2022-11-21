@@ -29,19 +29,21 @@ void AsyncCompleteCallbackNapiIsDistributedEnabled(napi_env env, napi_status sta
     }
     ANS_LOGI("IsDistributedEnabled napi_create_async_work end");
     AsyncCallbackInfoIsEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnabled *>(data);
-    napi_value result = nullptr;
-    if (asynccallbackinfo->info.errorCode != ERR_OK) {
-        result = Common::NapiGetNull(env);
-    } else {
-        napi_get_boolean(env, asynccallbackinfo->enable, &result);
+    if (asynccallbackinfo) {
+        napi_value result = nullptr;
+        if (asynccallbackinfo->info.errorCode != ERR_OK) {
+            result = Common::NapiGetNull(env);
+        } else {
+            napi_get_boolean(env, asynccallbackinfo->enable, &result);
+        }
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
-    }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
@@ -178,9 +180,10 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("EnableDistributedByBundle napi_create_async_work start");
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
-
-            asynccallbackinfo->info.errorCode = NotificationHelper::EnableDistributedByBundle(
-                asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::EnableDistributedByBundle(
+                    asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
+            }
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGI("EnableDistributedByBundle napi_create_async_work end");
@@ -235,9 +238,11 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("EnableDistributedSelf napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
-            asynccallbackinfo->info.errorCode =
-                NotificationHelper::EnableDistributedSelf(asynccallbackinfo->params.enable);
-            ANS_LOGI("EnableDistributedSelf enable = %{public}d", asynccallbackinfo->params.enable);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::EnableDistributedSelf(asynccallbackinfo->params.enable);
+                ANS_LOGI("EnableDistributedSelf enable = %{public}d", asynccallbackinfo->params.enable);
+            }
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGI("EnableDistributedSelf napi_create_async_work end");
@@ -273,19 +278,21 @@ void AsyncCompleteCallbackNapiIsDistributedEnableByBundle(napi_env env, napi_sta
     }
     ANS_LOGI("IsDistributedEnableByBundle napi_create_async_work end");
     AsyncCallbackInfoIsEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
-    napi_value result = nullptr;
-    if (asynccallbackinfo->info.errorCode != ERR_OK) {
-        result = Common::NapiGetNull(env);
-    } else {
-        napi_get_boolean(env, asynccallbackinfo->enable, &result);
+    if (asynccallbackinfo) {
+        napi_value result = nullptr;
+        if (asynccallbackinfo->info.errorCode != ERR_OK) {
+            result = Common::NapiGetNull(env);
+        } else {
+            napi_get_boolean(env, asynccallbackinfo->enable, &result);
+        }
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
-    }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info)
@@ -316,9 +323,10 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
         [](napi_env env, void *data) {
             ANS_LOGI("IsDistributedEnableByBundle napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
-
-            asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
-                asynccallbackinfo->params.option, asynccallbackinfo->enable);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
+                    asynccallbackinfo->params.option, asynccallbackinfo->enable);
+            }
         },
         AsyncCompleteCallbackNapiIsDistributedEnableByBundle,
         (void *)asynccallbackinfo,
@@ -342,24 +350,26 @@ void AsyncCompleteCallbackNapiGetDeviceRemindType(napi_env env, napi_status stat
     }
     ANS_LOGI("GetDeviceRemindType napi_create_async_work end");
     AsyncCallbackInfoGetRemindType *asynccallbackinfo = static_cast<AsyncCallbackInfoGetRemindType *>(data);
-    napi_value result = nullptr;
-    if (asynccallbackinfo->info.errorCode != ERR_OK) {
-        result = Common::NapiGetNull(env);
-    } else {
-        DeviceRemindType outType = DeviceRemindType::IDLE_DONOT_REMIND;
-        if (!Common::DeviceRemindTypeCToJS(asynccallbackinfo->remindType, outType)) {
-            asynccallbackinfo->info.errorCode = ERROR;
+    if (asynccallbackinfo) {
+        napi_value result = nullptr;
+        if (asynccallbackinfo->info.errorCode != ERR_OK) {
             result = Common::NapiGetNull(env);
+        } else {
+            DeviceRemindType outType = DeviceRemindType::IDLE_DONOT_REMIND;
+            if (!Common::DeviceRemindTypeCToJS(asynccallbackinfo->remindType, outType)) {
+                asynccallbackinfo->info.errorCode = ERROR;
+                result = Common::NapiGetNull(env);
+            }
+            napi_create_int32(env, (int32_t)outType, &result);
         }
-        napi_create_int32(env, (int32_t)outType, &result);
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
-    }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
@@ -389,8 +399,10 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("GetDeviceRemindType napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetRemindType *>(data);
-            asynccallbackinfo->info.errorCode =
-                NotificationHelper::GetDeviceRemindType(asynccallbackinfo->remindType);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::GetDeviceRemindType(asynccallbackinfo->remindType);
+            }
         },
         AsyncCompleteCallbackNapiGetDeviceRemindType,
         (void *)asynccallbackinfo,

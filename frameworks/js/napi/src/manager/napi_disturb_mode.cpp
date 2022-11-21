@@ -44,17 +44,19 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
         nullptr, resourceName, [](napi_env env, void *data) {
             ANS_LOGI("SetDoNotDisturbDate napi_create_async_work start");
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
-            if (asynccallbackinfo->params.hasUserId) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetDoNotDisturbDate(
-                    asynccallbackinfo->params.userId, asynccallbackinfo->params.date);
-            } else {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetDoNotDisturbDate(
-                    asynccallbackinfo->params.date);
-            }
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->params.hasUserId) {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::SetDoNotDisturbDate(
+                        asynccallbackinfo->params.userId, asynccallbackinfo->params.date);
+                } else {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::SetDoNotDisturbDate(
+                        asynccallbackinfo->params.date);
+                }
 
-            ANS_LOGI("SetDoNotDisturbDate date=%{public}s errorCode=%{public}d, hasUserId=%{public}d",
-                asynccallbackinfo->params.date.Dump().c_str(), asynccallbackinfo->info.errorCode,
-                asynccallbackinfo->params.hasUserId);
+                ANS_LOGI("SetDoNotDisturbDate date=%{public}s errorCode=%{public}d, hasUserId=%{public}d",
+                    asynccallbackinfo->params.date.Dump().c_str(), asynccallbackinfo->info.errorCode,
+                    asynccallbackinfo->params.hasUserId);
+            }
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGI("SetDoNotDisturbDate napi_create_async_work end");
@@ -88,20 +90,22 @@ void AsyncCompleteCallbackNapiGetDoNotDisturbDate(napi_env env, napi_status stat
         return;
     }
     AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
-    napi_value result = Common::NapiGetNull(env);
-    if (asynccallbackinfo->info.errorCode == ERR_OK) {
-        napi_create_object(env, &result);
-        if (!Common::SetDoNotDisturbDate(env, asynccallbackinfo->date, result)) {
-            asynccallbackinfo->info.errorCode = ERROR;
+    if (asynccallbackinfo) {
+        napi_value result = Common::NapiGetNull(env);
+        if (asynccallbackinfo->info.errorCode == ERR_OK) {
+            napi_create_object(env, &result);
+            if (!Common::SetDoNotDisturbDate(env, asynccallbackinfo->date, result)) {
+                asynccallbackinfo->info.errorCode = ERROR;
+            }
         }
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
-    }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
@@ -131,16 +135,18 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("GetDoNotDisturbDate napi_create_async_work start");
             AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
-            if (asynccallbackinfo->params.hasUserId) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(
-                    asynccallbackinfo->params.userId, asynccallbackinfo->date);
-            } else {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(asynccallbackinfo->date);
-            }
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->params.hasUserId) {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(
+                        asynccallbackinfo->params.userId, asynccallbackinfo->date);
+                } else {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(asynccallbackinfo->date);
+                }
 
-            ANS_LOGI("GetDoNotDisturbDate errorCode=%{public}d date=%{public}s, hasUserId=%{public}d",
-                asynccallbackinfo->info.errorCode, asynccallbackinfo->date.Dump().c_str(),
-                asynccallbackinfo->params.hasUserId);
+                ANS_LOGI("GetDoNotDisturbDate errorCode=%{public}d date=%{public}s, hasUserId=%{public}d",
+                    asynccallbackinfo->info.errorCode, asynccallbackinfo->date.Dump().c_str(),
+                    asynccallbackinfo->params.hasUserId);
+            }
         },
         AsyncCompleteCallbackNapiGetDoNotDisturbDate,
         (void *)asynccallbackinfo,
@@ -185,10 +191,12 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
             ANS_LOGI("SupportDoNotDisturbMode napi_create_async_work start");
             AsyncCallbackInfoSupportDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
-            asynccallbackinfo->info.errorCode =
-                NotificationHelper::DoesSupportDoNotDisturbMode(asynccallbackinfo->isSupported);
-            ANS_LOGI("SupportDoNotDisturbMode errorCode=%{public}d isSupported=%{public}d",
-                asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::DoesSupportDoNotDisturbMode(asynccallbackinfo->isSupported);
+                ANS_LOGI("SupportDoNotDisturbMode errorCode=%{public}d isSupported=%{public}d",
+                    asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
+            }
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGI("SupportDoNotDisturbMode napi_create_async_work end");

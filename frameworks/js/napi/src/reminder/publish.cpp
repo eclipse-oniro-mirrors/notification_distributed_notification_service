@@ -300,7 +300,9 @@ napi_value CancelReminderInner(napi_env env, napi_callback_info info, bool isThr
         [](napi_env env, void *data) {
             ANSR_LOGI("Cancel napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
-            asynccallbackinfo->info.errorCode = ReminderHelper::CancelReminder(asynccallbackinfo->reminderId);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = ReminderHelper::CancelReminder(asynccallbackinfo->reminderId);
+            }
         },
         [](napi_env env, napi_status status, void *data) {
             ANSR_LOGI("Cancel napi_create_async_work complete start");
@@ -366,7 +368,9 @@ napi_value CancelAllRemindersInner(napi_env env, napi_callback_info info, bool i
         [](napi_env env, void *data) {
             ANSR_LOGI("CancelAll napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
-            asynccallbackinfo->info.errorCode = ReminderHelper::CancelAllReminders();
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = ReminderHelper::CancelAllReminders();
+            }
         },
         [](napi_env env, napi_status status, void *data) {
             ANSR_LOGD("CancelAll napi_create_async_work complete start");
@@ -838,11 +842,12 @@ napi_value AddSlotInner(napi_env env, napi_callback_info info, bool isThrow)
         },
         [](napi_env env, napi_status status, void *data) {
             AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
-            std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
-
-            ReminderCommon::ReturnCallbackPromise(
-                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
-            ANSR_LOGD("AddSlot napi_create_async_work complete end.");
+            if (asynccallbackinfo) {
+                std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+                ReminderCommon::ReturnCallbackPromise(
+                    env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
+                ANSR_LOGD("AddSlot napi_create_async_work complete end.");
+            }
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);

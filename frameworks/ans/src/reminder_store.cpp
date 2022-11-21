@@ -240,11 +240,9 @@ int64_t ReminderStore::Update(
 
 bool ReminderStore::IsReminderExist(const sptr<ReminderRequest> &reminder)
 {
-    std::string queryCondition = "select " + ReminderRequest::REMINDER_ID
-        + " from " + REMINDER_DB_TABLE + " where "
-        + ReminderRequest::REMINDER_ID + " = " + std::to_string(reminder->GetReminderId());
-    std::vector<std::string> whereArgs;
-    std::unique_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->QuerySql(queryCondition, whereArgs);
+    NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
+    absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminder->GetReminderId()));
+    std::unique_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
         ANSR_LOGE("QueryResultSet is null.");
         return false;
@@ -381,10 +379,9 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
 
 bool ReminderStore::GetBundleOption(const int32_t &reminderId, sptr<NotificationBundleOption> &bundleOption) const
 {
-    std::string queryCondition = "select " + ReminderRequest::PKG_NAME + ", "
-        + ReminderRequest::UID + " from " + REMINDER_DB_TABLE + " where "
-        + ReminderRequest::REMINDER_ID + "=" + std::to_string(reminderId);
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = Query(queryCondition);
+    NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
+    absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminderId));
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
         return false;
     }
