@@ -50,9 +50,6 @@ namespace OHOS {
         text.emplace_back(stringData);
         request.SetNotificationUserInputHistory(text);
         request.GetNotificationUserInputHistory();
-        std::shared_ptr<Notification::NotificationRequest> other = nullptr;
-        request.SetPublicNotification(other);
-        request.GetPublicNotification();
         request.GetNotificationHashCode();
         request.GetOwnerBundleName();
         request.GetCreatorBundleName();
