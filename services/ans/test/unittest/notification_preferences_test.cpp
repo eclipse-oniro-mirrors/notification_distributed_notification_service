@@ -34,6 +34,7 @@ public:
     void TearDown();
 
     void TestAddNotificationSlot();
+    void TestAddNotificationSlot(NotificationPreferencesInfo &info);
 
     static sptr<NotificationBundleOption> bundleOption_;
     static sptr<NotificationBundleOption> noExsitbundleOption_;
@@ -58,6 +59,12 @@ void NotificationPreferencesTest::TestAddNotificationSlot()
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots);
+}
+
+void NotificationPreferencesTest::TestAddNotificationSlot(NotificationPreferencesInfo &info)
+{
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    NotificationPreferences::GetInstance().CheckSlotForCreateSlot(bundleOption_, slot, info);
 }
 
 /**
@@ -134,14 +141,15 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00500, Function | Sma
 /**
  * @tc.number    : AddNotificationSlots_00600
  * @tc.name      :
- * @tc.desc      : Add a notification slot into distrube DB , return is ERR_OK.
+ * @tc.desc      : Add a notification slot into distrube DB , return is ERR_ANS_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00600, Function | SmallTest | Level1)
 {
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(nullptr, slots), (int)ERR_OK);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(nullptr, slots),
+        (int)ERR_ANS_INVALID_PARAM);
 }
 
 
@@ -209,7 +217,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00500, Function | S
     TestAddNotificationSlot();
     EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlot(
                   nullptr, NotificationConstant::SlotType::OTHER),
-        (int)ERR_OK);
+        (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1166,10 +1174,10 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00300, Fu
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00100, Function | SmallTest | Level1)
 {
-    NotificationPreferencesInfo info{};
+    NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForCreateSlot(bundleOption_, nullptr, info),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
 /**
@@ -1180,7 +1188,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00100, Function | S
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00200, Function | SmallTest | Level1)
 {
-    NotificationPreferencesInfo info{};
+    NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForCreateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
@@ -1189,28 +1197,27 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00200, Function | S
 /**
  * @tc.number    : CheckSlotForRemoveSlot_00100
  * @tc.name      : CheckSlotForRemoveSlot
- * @tc.desc      : Test CheckSlotForRemoveSlot function after add a notification slot, return is ERR_OK,
- * return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Test CheckSlotForRemoveSlot function after add a notification slot,
+ * return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00100, Function | SmallTest | Level1)
 {
-    TestAddNotificationSlot();
-    NotificationPreferencesInfo info{};
+    NotificationPreferencesInfo info;
+    TestAddNotificationSlot(info);
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForRemoveSlot(
-        bundleOption_, NotificationConstant::SlotType::OTHER, info), (int)ERR_ANS_INVALID_PARAM);
+        bundleOption_, NotificationConstant::SlotType::OTHER, info), (int)ERR_OK);
 }
 
 /**
  * @tc.number    : CheckSlotForRemoveSlot_00200
  * @tc.name      : CheckSlotForRemoveSlot
  * @tc.desc      : Test CheckSlotForRemoveSlot function, return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST,
- * return is ERR_ANS_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00200, Function | SmallTest | Level1)
 {
-    NotificationPreferencesInfo info{};
+    NotificationPreferencesInfo info;
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForRemoveSlot(
         bundleOption_, NotificationConstant::SlotType::OTHER, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
@@ -1219,14 +1226,13 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00200, Function | S
 /**
  * @tc.number    : CheckSlotForRemoveSlot_00300
  * @tc.name      : CheckSlotForRemoveSlot
- * @tc.desc      : Test CheckSlotForRemoveSlot function after add a notification slot, return is ERR_OK,
- * return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Test CheckSlotForRemoveSlot function after add a notification slot, return is ERR_OK.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00300, Function | SmallTest | Level1)
 {
-    TestAddNotificationSlot();
-    NotificationPreferencesInfo info{};
+    NotificationPreferencesInfo info;
+    TestAddNotificationSlot(info);
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForRemoveSlot(
         bundleOption_, NotificationConstant::SlotType::CONTENT_INFORMATION, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
@@ -1241,7 +1247,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00300, Function | S
 HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00100, Function | SmallTest | Level1)
 {
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    NotificationPreferencesInfo info{};
+    NotificationPreferencesInfo info;
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, nullptr, info),
         (int)ERR_ANS_INVALID_PARAM);
 }
@@ -1255,8 +1261,8 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00100, Function | S
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00200, Function | SmallTest | Level1)
 {
+    NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    NotificationPreferencesInfo info{};
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
@@ -1270,9 +1276,9 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00200, Function | S
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | SmallTest | Level1)
 {
-    TestAddNotificationSlot();
+    NotificationPreferencesInfo info;
+    TestAddNotificationSlot(info);
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    NotificationPreferencesInfo info{};
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
@@ -1285,9 +1291,9 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | S
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00400, Function | SmallTest | Level1)
 {
-    TestAddNotificationSlot();
+    NotificationPreferencesInfo info;
+    TestAddNotificationSlot(info);
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    NotificationPreferencesInfo info{};
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
 }
