@@ -833,22 +833,6 @@ public:
     std::vector<std::string> GetNotificationUserInputHistory() const;
 
     /**
-     * @brief Sets an alternative notification to be displayed on the lock screen for this notification.
-     * The display effect (whether and how this alternative notification will be displayed) is subject to
-     * the configuration in NotificationSlot::setLockscreenVisibleness(int).
-     *
-     * @param other Indicates the alternative notification to be displayed on the lock screen.
-     */
-    void SetPublicNotification(const std::shared_ptr<NotificationRequest> &other);
-
-    /**
-     * @brief Obtains the alternative notification to be displayed on the lock screen for this notification.
-     *
-     * @return Returns the alternative notification to be displayed on the lock screen for this notification.
-     */
-    const std::shared_ptr<NotificationRequest> GetPublicNotification() const;
-
-    /**
      * @brief Obtains the unique hash code of a notification in the current application.
      * To obtain a valid hash code, you must have subscribed to and received the notification.
      * A valid notification hash code is a string composed of multiple attributes separated by an underscore (_),
@@ -1188,7 +1172,6 @@ private:
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
     std::shared_ptr<Media::PixelMap> bigIcon_ {};
     std::shared_ptr<NotificationContent> notificationContent_ {};
-    std::shared_ptr<NotificationRequest> publicNotification_ {};
 
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::vector<std::shared_ptr<MessageUser>> messageUsers_ {};
