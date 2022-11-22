@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "ans_manager_stub.h"
+#include "ans_subscriber_stub.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_timer.h"
 #include "reminder_request_calendar.h"
@@ -1800,7 +1801,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetShowBadgeEnabledForBundle03, Function | Sm
  * @tc.name: HandleAddSlots01
  * @tc.desc: Test if the slots in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleAddSlots01, Function | SmallTest | Level1)
 {
@@ -1819,7 +1820,7 @@ HWTEST_F(AnsManagerStubTest, HandleAddSlots01, Function | SmallTest | Level1)
  * @tc.name: HandleAddSlots02
  * @tc.desc: Test if the result in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleAddSlots02, Function | SmallTest | Level1)
 {
@@ -1844,7 +1845,7 @@ HWTEST_F(AnsManagerStubTest, HandleAddSlots02, Function | SmallTest | Level1)
  * @tc.name: HandleGetSlots01
  * @tc.desc: Test HandleGetSlots succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSlots01, Function | SmallTest | Level1)
 {
@@ -1863,7 +1864,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlots01, Function | SmallTest | Level1)
  * @tc.name: HandleGetSpecialActiveNotifications01
  * @tc.desc: Test HandleGetSpecialActiveNotifications succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSpecialActiveNotifications01, Function | SmallTest | Level1)
 {
@@ -1885,7 +1886,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSpecialActiveNotifications01, Function | S
  * @tc.name: HandleGetShowBadgeEnabledForBundle01
  * @tc.desc: Test HandleGetShowBadgeEnabledForBundle succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle01, Function | SmallTest | Level1)
 {
@@ -1909,7 +1910,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle01, Function | Sm
  * @tc.name: HandleGetShowBadgeEnabledForBundle02
  * @tc.desc: Test if the bundleOption in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle02, Function | SmallTest | Level1)
 {
@@ -1931,7 +1932,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle02, Function | Sm
  * @tc.name: HandleGetShowBadgeEnabledForBundle03
  * @tc.desc: Test if the enabled in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle03, Function | SmallTest | Level1)
 {
@@ -1950,7 +1951,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle03, Function | Sm
  * @tc.name: HandleGetShowBadgeEnabled01
  * @tc.desc: Test HandleGetShowBadgeEnabled succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabled01, Function | SmallTest | Level1)
 {
@@ -1972,7 +1973,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabled01, Function | SmallTest |
  * @tc.name: HandleSubscribe01
  * @tc.desc: Test HandleSubscribe succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe01, Function | SmallTest | Level1)
 {
@@ -1998,7 +1999,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe01, Function | SmallTest | Level1)
  * @tc.name: HandleSubscribe02
  * @tc.desc: Test if the subcribeInfo in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe02, Function | SmallTest | Level1)
 {
@@ -2022,7 +2023,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe02, Function | SmallTest | Level1)
  * @tc.name: HandleSubscribe03
  * @tc.desc: Test if the info in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe03, Function | SmallTest | Level1)
 {
@@ -2046,7 +2047,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe03, Function | SmallTest | Level1)
  * @tc.name: HandleSubscribe04
  * @tc.desc: Test if the subscriber in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe04, Function | SmallTest | Level1)
 {
@@ -2070,7 +2071,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe04, Function | SmallTest | Level1)
  * @tc.name: HandleUnsubscribe01
  * @tc.desc: Test HandleUnsubscribe succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe01, Function | SmallTest | Level1)
 {
@@ -2096,7 +2097,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe01, Function | SmallTest | Level1)
  * @tc.name: HandleUnsubscribe02
  * @tc.desc: Test if the subcribeInfo in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe02, Function | SmallTest | Level1)
 {
@@ -2120,7 +2121,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe02, Function | SmallTest | Level1)
  * @tc.name: HandleUnsubscribe03
  * @tc.desc: Test if the info in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe03, Function | SmallTest | Level1)
 {
@@ -2144,7 +2145,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe03, Function | SmallTest | Level1)
  * @tc.name: HandleUnsubscribe04
  * @tc.desc: Test if the subscriber in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe04, Function | SmallTest | Level1)
 {
@@ -2168,7 +2169,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe04, Function | SmallTest | Level1)
  * @tc.name: HandleAreNotificationsSuspended01
  * @tc.desc: Test HandleAreNotificationsSuspended succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleAreNotificationsSuspended01, Function | SmallTest | Level1)
 {
@@ -2190,7 +2191,7 @@ HWTEST_F(AnsManagerStubTest, HandleAreNotificationsSuspended01, Function | Small
  * @tc.name: HandleGetCurrentAppSorting01
  * @tc.desc: Test HandleGetCurrentAppSorting succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetCurrentAppSorting01, Function | SmallTest | Level1)
 {
@@ -2209,7 +2210,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetCurrentAppSorting01, Function | SmallTest 
  * @tc.name: HandleIsAllowedNotify01
  * @tc.desc: Test HandleIsAllowedNotify succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotify01, Function | SmallTest | Level1)
 {
@@ -2228,7 +2229,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotify01, Function | SmallTest | Lev
  * @tc.name: HandleIsAllowedNotifySelf01
  * @tc.desc: Test HandleIsAllowedNotifySelf succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotifySelf01, Function | SmallTest | Level1)
 {
@@ -2247,7 +2248,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotifySelf01, Function | SmallTest |
  * @tc.name: HandleIsSpecialBundleAllowedNotify01
  * @tc.desc: Test HandleIsSpecialBundleAllowedNotify succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify01, Function | SmallTest | Level1)
 {
@@ -2269,7 +2270,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify01, Function | Sm
  * @tc.name: HandleIsSpecialBundleAllowedNotify02
  * @tc.desc: Test if the bundleOption in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify02, Function | SmallTest | Level1)
 {
@@ -2288,7 +2289,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify02, Function | Sm
  * @tc.name: HandleCancelGroup01
  * @tc.desc: Test HandleCancelGroup succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelGroup01, Function | SmallTest | Level1)
 {
@@ -2310,7 +2311,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelGroup01, Function | SmallTest | Level1)
  * @tc.name: HandleCancelGroup02
  * @tc.desc: Test if the groupName in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelGroup02, Function | SmallTest | Level1)
 {
@@ -2329,7 +2330,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelGroup02, Function | SmallTest | Level1)
  * @tc.name: HandleRemoveGroupByBundle01
  * @tc.desc: Test HandleRemoveGroupByBundle succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle01, Function | SmallTest | Level1)
 {
@@ -2353,7 +2354,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle01, Function | SmallTest |
  * @tc.name: HandleRemoveGroupByBundle02
  * @tc.desc: Test if the groupName in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle02, Function | SmallTest | Level1)
 {
@@ -2375,7 +2376,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle02, Function | SmallTest |
  * @tc.name: HandleRemoveGroupByBundle03
  * @tc.desc: Test if the bundleOption in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle03, Function | SmallTest | Level1)
 {
@@ -2397,7 +2398,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle03, Function | SmallTest |
  * @tc.name: HandleIsDistributedEnabled01
  * @tc.desc: Test HandleIsDistributedEnabled succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnabled01, Function | SmallTest | Level1)
 {
@@ -2416,7 +2417,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnabled01, Function | SmallTest 
  * @tc.name: HandleEnableDistributed01
  * @tc.desc: Test HandleEnableDistributed succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributed01, Function | SmallTest | Level1)
 {
@@ -2438,7 +2439,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributed01, Function | SmallTest | L
  * @tc.name: HandleEnableDistributed02
  * @tc.desc: Test if the enabled in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributed02, Function | SmallTest | Level1)
 {
@@ -2457,7 +2458,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributed02, Function | SmallTest | L
  * @tc.name: HandleEnableDistributedByBundle01
  * @tc.desc: Test HandleEnableDistributedByBundle succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle01, Function | SmallTest | Level1)
 {
@@ -2481,7 +2482,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle01, Function | Small
  * @tc.name: HandleEnableDistributedByBundle02
  * @tc.desc: Test if the enabled in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle02, Function | SmallTest | Level1)
 {
@@ -2503,7 +2504,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle02, Function | Small
  * @tc.name: HandleEnableDistributedByBundle03
  * @tc.desc: Test if the bundleOption in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle03, Function | SmallTest | Level1)
 {
@@ -2525,7 +2526,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle03, Function | Small
  * @tc.name: HandleEnableDistributedSelf01
  * @tc.desc: Test HandleEnableDistributedSelf succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf01, Function | SmallTest | Level1)
 {
@@ -2547,7 +2548,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf01, Function | SmallTest
  * @tc.name: HandleEnableDistributedSelf02
  * @tc.desc: Test if the enabled in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf02, Function | SmallTest | Level1)
 {
@@ -2566,7 +2567,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf02, Function | SmallTest
  * @tc.name: HandleIsDistributedEnableByBundle01
  * @tc.desc: Test HandleIsDistributedEnableByBundle succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle01, Function | SmallTest | Level1)
 {
@@ -2588,7 +2589,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle01, Function | Sma
  * @tc.name: HandleIsDistributedEnableByBundle02
  * @tc.desc: Test if the bundleOption in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle02, Function | SmallTest | Level1)
 {
@@ -2607,7 +2608,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle02, Function | Sma
  * @tc.name: HandleGetDeviceRemindType01
  * @tc.desc: Test HandleGetDeviceRemindType succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetDeviceRemindType01, Function | SmallTest | Level1)
 {
@@ -2626,7 +2627,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetDeviceRemindType01, Function | SmallTest |
  * @tc.name: HandleShellDump01
  * @tc.desc: Test HandleShellDump succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
 {
@@ -2652,7 +2653,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
  * @tc.name: HandleShellDump02
  * @tc.desc: Test if the userId in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump02, Function | SmallTest | Level1)
 {
@@ -2675,7 +2676,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump02, Function | SmallTest | Level1)
  * @tc.name: HandleShellDump03
  * @tc.desc: Test if the cmd in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump03, Function | SmallTest | Level1)
 {
@@ -2698,7 +2699,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump03, Function | SmallTest | Level1)
  * @tc.name: HandleShellDump04
  * @tc.desc: Test if the bundle in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump04, Function | SmallTest | Level1)
 {
@@ -2722,7 +2723,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump04, Function | SmallTest | Level1)
  * @tc.name: HandlePublishReminder01
  * @tc.desc: Test Reminder type ALARM.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder01, Function | SmallTest | Level1)
 {
@@ -2749,7 +2750,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder01, Function | SmallTest | Lev
  * @tc.name: HandlePublishReminder02
  * @tc.desc: Test Reminder type invalid.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder02, Function | SmallTest | Level1)
 {
@@ -2773,7 +2774,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder02, Function | SmallTest | Lev
  * @tc.name: HandlePublishReminder03
  * @tc.desc: Test reminder in date is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder03, Function | SmallTest | Level1)
 {
@@ -2792,7 +2793,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder03, Function | SmallTest | Lev
  * @tc.name: HandlePublishReminder04
  * @tc.desc: Test Reminder type TIMER.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder04, Function | SmallTest | Level1)
 {
@@ -2819,7 +2820,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder04, Function | SmallTest | Lev
  * @tc.name: HandlePublishReminder05
  * @tc.desc: Test Reminder type CALENDAR.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder05, Function | SmallTest | Level1)
 {
@@ -2846,7 +2847,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder05, Function | SmallTest | Lev
  * @tc.name: HandlePublishReminder06
  * @tc.desc: Test typeInfo in date is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder06, Function | SmallTest | Level1)
 {
@@ -2871,7 +2872,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder06, Function | SmallTest | Lev
  * @tc.name: HandleCancelReminder01
  * @tc.desc: Test HandleCancelReminder ERR_INVALID_OPERATION.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelReminder01, Function | SmallTest | Level1)
 {
@@ -2893,7 +2894,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelReminder01, Function | SmallTest | Leve
  * @tc.name: HandleCancelReminder02
  * @tc.desc: Test reminderId in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelReminder02, Function | SmallTest | Level1)
 {
@@ -2912,7 +2913,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelReminder02, Function | SmallTest | Leve
  * @tc.name: HandleCancelAllReminders01
  * @tc.desc: Test HandleCancelAllReminders result ERR_INVALID_OPERATION.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAllReminders01, Function | SmallTest | Level1)
 {
@@ -2931,7 +2932,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAllReminders01, Function | SmallTest | 
  * @tc.name: HandleGetValidReminders01
  * @tc.desc: Test HandleGetValidReminders result ERR_INVALID_OPERATION.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleGetValidReminders01, Function | SmallTest | Level1)
 {
@@ -2950,7 +2951,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetValidReminders01, Function | SmallTest | L
  * @tc.name: ReadParcelableVector01
  * @tc.desc: Test ReadParcelableVector result.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, ReadParcelableVector01, Function | SmallTest | Level1)
 {
@@ -2966,7 +2967,7 @@ HWTEST_F(AnsManagerStubTest, ReadParcelableVector01, Function | SmallTest | Leve
  * @tc.name: ReadParcelableVector02
  * @tc.desc: Test ReadParcelableVector result.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, ReadParcelableVector02, Function | SmallTest | Level1)
 {
@@ -2986,7 +2987,7 @@ HWTEST_F(AnsManagerStubTest, ReadParcelableVector02, Function | SmallTest | Leve
  * @tc.name: HandleIsSupportTemplate01
  * @tc.desc: Test HandleIsSupportTemplate succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate01, Function | SmallTest | Level1)
 {
@@ -3008,7 +3009,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate01, Function | SmallTest | L
  * @tc.name: HandleIsSupportTemplate02
  * @tc.desc: Test templateName in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate02, Function | SmallTest | Level1)
 {
@@ -3027,7 +3028,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate02, Function | SmallTest | L
  * @tc.name: HandleIsSpecialUserAllowedNotifyByUser01
  * @tc.desc: Test HandleIsSpecialUserAllowedNotifyByUser succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser01, Function | SmallTest | Level1)
 {
@@ -3049,7 +3050,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser01, Function 
  * @tc.name: HandleIsSpecialUserAllowedNotifyByUser02
  * @tc.desc: Test userId in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser02, Function | SmallTest | Level1)
 {
@@ -3068,7 +3069,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser02, Function 
  * @tc.name: HandleSetNotificationsEnabledByUser01
  * @tc.desc: Test HandleSetNotificationsEnabledByUser succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser01, Function | SmallTest | Level1)
 {
@@ -3092,7 +3093,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser01, Function | S
  * @tc.name: HandleSetNotificationsEnabledByUser02
  * @tc.desc: Test userId in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser02, Function | SmallTest | Level1)
 {
@@ -3114,7 +3115,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser02, Function | S
  * @tc.name: HandleSetNotificationsEnabledByUser03
  * @tc.desc: Test enabled in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser03, Function | SmallTest | Level1)
 {
@@ -3136,7 +3137,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser03, Function | S
  * @tc.name: HandleDeleteAllByUser01
  * @tc.desc: Test HandleDeleteAllByUser succeed.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser01, Function | SmallTest | Level1)
 {
@@ -3158,7 +3159,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser01, Function | SmallTest | Lev
  * @tc.name: HandleDeleteAllByUser02
  * @tc.desc: Test userId in data is null.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser02, Function | SmallTest | Level1)
 {
@@ -3171,6 +3172,1196 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser02, Function | SmallTest | Lev
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetDoNotDisturbDateByUser01
+ * @tc.desc: Test HandleSetDoNotDisturbDateByUser succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t userId = 4;
+    sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(userId);
+    data.WriteStrongParcelable(date);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetDoNotDisturbDateByUser02
+ * @tc.desc: Test userId in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(date);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetDoNotDisturbDateByUser03
+ * @tc.desc: Test date in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t userId = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(userId);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleGetDoNotDisturbDateByUser01
+ * @tc.desc: Test HandleGetDoNotDisturbDateByUser succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_DO_NOT_DISTURB_DATE_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t userId = 4;
+    sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(date);
+    data.WriteInt32(userId);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleGetDoNotDisturbDateByUser02
+ * @tc.desc: Test userId in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_DO_NOT_DISTURB_DATE_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetEnabledForBundleSlot01
+ * @tc.desc: Test HandleSetEnabledForBundleSlot succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t type = 4;
+    bool enabled = true;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(type);
+    data.WriteBool(enabled);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetEnabledForBundleSlot02
+ * @tc.desc: Test bundleOption in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t type = 4;
+    bool enabled = true;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(type);
+    data.WriteBool(enabled);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetEnabledForBundleSlot03
+ * @tc.desc: Test type in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool enabled = true;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteBool(enabled);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetEnabledForBundleSlot04
+ * @tc.desc: Test enabled in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot04, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t type = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(type);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleGetEnabledForBundleSlot01
+ * @tc.desc: Test HandleGetEnabledForBundleSlot succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ENABLED_FOR_BUNDLE_SLOT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t type = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(type);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleGetEnabledForBundleSlot02
+ * @tc.desc: Test bundleOption in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ENABLED_FOR_BUNDLE_SLOT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t type = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(type);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleGetEnabledForBundleSlot03
+ * @tc.desc: Test type in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ENABLED_FOR_BUNDLE_SLOT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleDistributedSetEnabledWithoutApp01
+ * @tc.desc: Test HandleDistributedSetEnabledWithoutApp succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t userId = 4;
+    bool enabled = true;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(userId);
+    data.WriteBool(enabled);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleDistributedSetEnabledWithoutApp02
+ * @tc.desc: Test userId in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    bool enabled = true;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteBool(enabled);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleDistributedSetEnabledWithoutApp03
+ * @tc.desc: Test enabled in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t userId = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(userId);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleDistributedGetEnabledWithoutApp01
+ * @tc.desc: Test HandleDistributedGetEnabledWithoutApp succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleDistributedGetEnabledWithoutApp01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t userId = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(userId);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleDistributedGetEnabledWithoutApp02
+ * @tc.desc: Test userId in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleDistributedGetEnabledWithoutApp02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: GetSlots01
+ * @tc.desc: Test GetSlots return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetSlots01, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot();
+    slots.emplace_back(slot);
+
+    ErrCode result = ansManagerStub_->GetSlots(slots);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetSpecialActiveNotifications01
+ * @tc.desc: Test GetSpecialActiveNotifications return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetSpecialActiveNotifications01, Function | SmallTest | Level1)
+{
+    std::vector<std::string> keys;
+    std::string key = "this is key";
+    keys.emplace_back(key);
+    std::vector<sptr<Notification>> notifications;
+    sptr<Notification> notification = new Notification();
+    notifications.emplace_back(notification);
+
+    ErrCode result = ansManagerStub_->GetSpecialActiveNotifications(keys, notifications);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: PublishAsBundle01
+ * @tc.desc: Test PublishAsBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, PublishAsBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> notification = new NotificationRequest();
+    std::string representativeBundle = "this is representativeBundle";
+
+    ErrCode result = ansManagerStub_->PublishAsBundle(notification, representativeBundle);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetNotificationBadgeNum01
+ * @tc.desc: Test SetNotificationBadgeNum return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetNotificationBadgeNum01, Function | SmallTest | Level1)
+{
+    int num = 2;
+    ErrCode result = ansManagerStub_->SetNotificationBadgeNum(num);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetBundleImportance01
+ * @tc.desc: Test GetBundleImportance return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetBundleImportance01, Function | SmallTest | Level1)
+{
+    int importance = 2;
+    ErrCode result = ansManagerStub_->GetBundleImportance(importance);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HasNotificationPolicyAccessPermission01
+ * @tc.desc: Test HasNotificationPolicyAccessPermission return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HasNotificationPolicyAccessPermission01, Function | SmallTest | Level1)
+{
+    bool granted = true;
+    ErrCode result = ansManagerStub_->HasNotificationPolicyAccessPermission(granted);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetPrivateNotificationsAllowed01
+ * @tc.desc: Test SetPrivateNotificationsAllowed return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetPrivateNotificationsAllowed01, Function | SmallTest | Level1)
+{
+    bool allow = true;
+    ErrCode result = ansManagerStub_->SetPrivateNotificationsAllowed(allow);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetPrivateNotificationsAllowed01
+ * @tc.desc: Test GetPrivateNotificationsAllowed return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetPrivateNotificationsAllowed01, Function | SmallTest | Level1)
+{
+    bool allow = true;
+    ErrCode result = ansManagerStub_->GetPrivateNotificationsAllowed(allow);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: RemoveNotification01
+ * @tc.desc: Test RemoveNotification return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, RemoveNotification01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int notificationId = 4;
+    std::string label = "this is label";
+    int32_t removeReason = 2;
+    ErrCode result = ansManagerStub_->RemoveNotification(bundleOption, notificationId, label, removeReason);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: RemoveAllNotifications01
+ * @tc.desc: Test RemoveAllNotifications return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, RemoveAllNotifications01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    ErrCode result = ansManagerStub_->RemoveAllNotifications(bundleOption);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: Delete01
+ * @tc.desc: Test Delete return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, Delete01, Function | SmallTest | Level1)
+{
+    std::string key = "this is key";
+    int32_t removeReason = 2;
+    ErrCode result = ansManagerStub_->Delete(key, removeReason);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: DeleteByBundle01
+ * @tc.desc: Test DeleteByBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, DeleteByBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    ErrCode result = ansManagerStub_->DeleteByBundle(bundleOption);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: DeleteAll01
+ * @tc.desc: Test DeleteAll return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, DeleteAll01, Function | SmallTest | Level1)
+{
+    ErrCode result = ansManagerStub_->DeleteAll();
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetSlotsByBundle01
+ * @tc.desc: Test GetSlotsByBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetSlotsByBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot();
+    slots.emplace_back(slot);
+
+    ErrCode result = ansManagerStub_->GetSlotsByBundle(bundleOption, slots);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: UpdateSlots01
+ * @tc.desc: Test UpdateSlots return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, UpdateSlots01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot();
+    slots.emplace_back(slot);
+
+    ErrCode result = ansManagerStub_->UpdateSlots(bundleOption, slots);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: RequestEnableNotification01
+ * @tc.desc: Test RequestEnableNotification return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, RequestEnableNotification01, Function | SmallTest | Level1)
+{
+    std::string deviceId = "this is deviceId";
+    bool popFlag = true;
+
+    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, popFlag);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetNotificationsEnabledForBundle01
+ * @tc.desc: Test SetNotificationsEnabledForBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetNotificationsEnabledForBundle01, Function | SmallTest | Level1)
+{
+    std::string bundle = "this is bundle";
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->SetNotificationsEnabledForBundle(bundle, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetNotificationsEnabledForAllBundles01
+ * @tc.desc: Test SetNotificationsEnabledForAllBundles return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetNotificationsEnabledForAllBundles01, Function | SmallTest | Level1)
+{
+    std::string deviceId = "this is deviceId";
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetNotificationsEnabledForSpecialBundle01
+ * @tc.desc: Test SetNotificationsEnabledForSpecialBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetNotificationsEnabledForSpecialBundle01, Function | SmallTest | Level1)
+{
+    std::string deviceId = "this is deviceId";
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->SetNotificationsEnabledForSpecialBundle(deviceId, bundleOption, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetShowBadgeEnabledForBundle01
+ * @tc.desc: Test SetShowBadgeEnabledForBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetShowBadgeEnabledForBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->SetShowBadgeEnabledForBundle(bundleOption, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetShowBadgeEnabledForBundle01
+ * @tc.desc: Test GetShowBadgeEnabledForBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetShowBadgeEnabledForBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetShowBadgeEnabled01
+ * @tc.desc: Test GetShowBadgeEnabled return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetShowBadgeEnabled01, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->GetShowBadgeEnabled(enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: AreNotificationsSuspended01
+ * @tc.desc: Test AreNotificationsSuspended return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, AreNotificationsSuspended01, Function | SmallTest | Level1)
+{
+    bool suspended = true;
+
+    ErrCode result = ansManagerStub_->AreNotificationsSuspended(suspended);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetCurrentAppSorting01
+ * @tc.desc: Test GetCurrentAppSorting return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetCurrentAppSorting01, Function | SmallTest | Level1)
+{
+    std::vector<NotificationSorting> sortingList;
+    sptr<NotificationSortingMap> sortingMap = new NotificationSortingMap(sortingList);
+
+    ErrCode result = ansManagerStub_->GetCurrentAppSorting(sortingMap);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: IsAllowedNotify01
+ * @tc.desc: Test IsAllowedNotify return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, IsAllowedNotify01, Function | SmallTest | Level1)
+{
+    bool allowed = true;
+
+    ErrCode result = ansManagerStub_->IsAllowedNotify(allowed);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: IsAllowedNotifySelf01
+ * @tc.desc: Test IsAllowedNotifySelf return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, IsAllowedNotifySelf01, Function | SmallTest | Level1)
+{
+    bool allowed = true;
+
+    ErrCode result = ansManagerStub_->IsAllowedNotifySelf(allowed);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: IsSpecialBundleAllowedNotify01
+ * @tc.desc: Test IsSpecialBundleAllowedNotify return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, IsSpecialBundleAllowedNotify01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool allowed = true;
+
+    ErrCode result = ansManagerStub_->IsSpecialBundleAllowedNotify(bundleOption, allowed);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: CancelGroup01
+ * @tc.desc: Test CancelGroup return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, CancelGroup01, Function | SmallTest | Level1)
+{
+    std::string groupName = "this is groupName";
+
+    ErrCode result = ansManagerStub_->CancelGroup(groupName);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: RemoveGroupByBundle01
+ * @tc.desc: Test RemoveGroupByBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, RemoveGroupByBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    std::string groupName = "this is groupName";
+
+    ErrCode result = ansManagerStub_->RemoveGroupByBundle(bundleOption, groupName);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetDoNotDisturbDate01
+ * @tc.desc: Test SetDoNotDisturbDate return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetDoNotDisturbDate01, Function | SmallTest | Level1)
+{
+    sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
+
+    ErrCode result = ansManagerStub_->SetDoNotDisturbDate(date);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbDate01
+ * @tc.desc: Test GetDoNotDisturbDate return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetDoNotDisturbDate01, Function | SmallTest | Level1)
+{
+    sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
+
+    ErrCode result = ansManagerStub_->GetDoNotDisturbDate(date);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: DoesSupportDoNotDisturbMode01
+ * @tc.desc: Test DoesSupportDoNotDisturbMode return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, DoesSupportDoNotDisturbMode01, Function | SmallTest | Level1)
+{
+    bool doesSupport = true;
+
+    ErrCode result = ansManagerStub_->DoesSupportDoNotDisturbMode(doesSupport);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: IsDistributedEnabled01
+ * @tc.desc: Test IsDistributedEnabled return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, IsDistributedEnabled01, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->IsDistributedEnabled(enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: EnableDistributed01
+ * @tc.desc: Test EnableDistributed return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, EnableDistributed01, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->EnableDistributed(enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: EnableDistributedByBundle01
+ * @tc.desc: Test EnableDistributedByBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, EnableDistributedByBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->EnableDistributedByBundle(bundleOption, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: EnableDistributedSelf01
+ * @tc.desc: Test EnableDistributedSelf return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, EnableDistributedSelf01, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->EnableDistributedSelf(enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: IsDistributedEnableByBundle01
+ * @tc.desc: Test IsDistributedEnableByBundle return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, IsDistributedEnableByBundle01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->IsDistributedEnableByBundle(bundleOption, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetDeviceRemindType01
+ * @tc.desc: Test GetDeviceRemindType return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetDeviceRemindType01, Function | SmallTest | Level1)
+{
+    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::NONE;
+
+    ErrCode result = ansManagerStub_->GetDeviceRemindType(remindType);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: PublishContinuousTaskNotification01
+ * @tc.desc: Test PublishContinuousTaskNotification return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, PublishContinuousTaskNotification01, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    ErrCode result = ansManagerStub_->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: CancelContinuousTaskNotification01
+ * @tc.desc: Test CancelContinuousTaskNotification return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, CancelContinuousTaskNotification01, Function | SmallTest | Level1)
+{
+    std::string label = "this is label";
+    int32_t notificationId = 4;
+
+    ErrCode result = ansManagerStub_->CancelContinuousTaskNotification(label, notificationId);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: PublishReminder01
+ * @tc.desc: Test PublishReminder return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, PublishReminder01, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequest();
+
+    ErrCode result = ansManagerStub_->PublishReminder(reminder);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: CancelReminder01
+ * @tc.desc: Test CancelReminder return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, CancelReminder01, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 5;
+
+    ErrCode result = ansManagerStub_->CancelReminder(reminderId);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetValidReminders01
+ * @tc.desc: Test GetValidReminders return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetValidReminders01, Function | SmallTest | Level1)
+{
+    std::vector<sptr<ReminderRequest>> reminders;
+    sptr<ReminderRequest> reminder = new ReminderRequest();
+    reminders.emplace_back(reminder);
+
+    ErrCode result = ansManagerStub_->GetValidReminders(reminders);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: CancelAllReminders01
+ * @tc.desc: Test CancelAllReminders return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, CancelAllReminders01, Function | SmallTest | Level1)
+{
+    ErrCode result = ansManagerStub_->CancelAllReminders();
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: IsSupportTemplate01
+ * @tc.desc: Test IsSupportTemplate return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, IsSupportTemplate01, Function | SmallTest | Level1)
+{
+    std::string templateName = "this is templateName";
+    bool support = true;
+
+    ErrCode result = ansManagerStub_->IsSupportTemplate(templateName, support);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: IsSpecialUserAllowedNotify01
+ * @tc.desc: Test IsSpecialUserAllowedNotify return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, IsSpecialUserAllowedNotify01, Function | SmallTest | Level1)
+{
+    int32_t userId = 2;
+    bool allowed = true;
+
+    ErrCode result = ansManagerStub_->IsSpecialUserAllowedNotify(userId, allowed);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetNotificationsEnabledByUser01
+ * @tc.desc: Test SetNotificationsEnabledByUser return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetNotificationsEnabledByUser01, Function | SmallTest | Level1)
+{
+    int32_t deviceId = 2;
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->SetNotificationsEnabledByUser(deviceId, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: DeleteAllByUser01
+ * @tc.desc: Test DeleteAllByUser return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, DeleteAllByUser01, Function | SmallTest | Level1)
+{
+    int32_t userId = 2;
+
+    ErrCode result = ansManagerStub_->DeleteAllByUser(userId);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetDoNotDisturbDate02
+ * @tc.desc: Test SetDoNotDisturbDate return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetDoNotDisturbDate02, Function | SmallTest | Level1)
+{
+    int32_t userId = 2;
+    sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
+
+    ErrCode result = ansManagerStub_->SetDoNotDisturbDate(userId, date);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbDate02
+ * @tc.desc: Test GetDoNotDisturbDate return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetDoNotDisturbDate02, Function | SmallTest | Level1)
+{
+    int32_t userId = 2;
+    sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
+
+    ErrCode result = ansManagerStub_->GetDoNotDisturbDate(userId, date);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetEnabledForBundleSlot01
+ * @tc.desc: Test SetEnabledForBundleSlot return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetEnabledForBundleSlot01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetEnabledForBundleSlot01
+ * @tc.desc: Test GetEnabledForBundleSlot return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetEnabledForBundleSlot01, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: ShellDump01
+ * @tc.desc: Test ShellDump return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, ShellDump01, Function | SmallTest | Level1)
+{
+    std::string cmd = "this is cmd";
+    std::string bundle = "this is bundle";
+    int32_t userId = 5;
+    std::vector<std::string> dumpInfo;
+
+    ErrCode result = ansManagerStub_->ShellDump(cmd, bundle, userId, dumpInfo);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetSyncNotificationEnabledWithoutApp01
+ * @tc.desc: Test SetSyncNotificationEnabledWithoutApp return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, SetSyncNotificationEnabledWithoutApp01, Function | SmallTest | Level1)
+{
+    int32_t userId = 2;
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->SetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetSyncNotificationEnabledWithoutApp01
+ * @tc.desc: Test GetSyncNotificationEnabledWithoutApp return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, GetSyncNotificationEnabledWithoutApp01, Function | SmallTest | Level1)
+{
+    int32_t userId = 2;
+    bool enabled = true;
+
+    ErrCode result = ansManagerStub_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 }
 }
