@@ -32,6 +32,7 @@ ohos_unittest("ans_reminder_unit_test") {
   sources = [
     "${frameworks_module_ans_path}/test/unittest/ans_log_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/enabled_notification_callback_data_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/message_user_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_bundle_option_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_conversational_content_test.cpp",
