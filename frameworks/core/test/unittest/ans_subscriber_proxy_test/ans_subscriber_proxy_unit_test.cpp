@@ -567,3 +567,75 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnEnabledNotificationChanged_0200, Function
     ASSERT_NE(nullptr, callbackData);
     proxy->OnEnabledNotificationChanged(callbackData);
 }
+
+/*
+ * @tc.name: OnConnected_0100
+ * @tc.desc: test AnsSubscriberProxy's OnConnected function
+ * @tc.type: FUNC
+ * @tc.require: issueI62D8C
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnConnected_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyUnitTest, OnConnected_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    proxy->OnConnected();
+}
+
+/*
+ * @tc.name: OnConnected_0200
+ * @tc.desc: test AnsSubscriberProxy's OnConnected function
+ * @tc.type: FUNC
+ * @tc.require: #issueI62D8C
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnConnected_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyUnitTest, OnConnected_0200, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    proxy->OnConnected();
+}
+
+/*
+ * @tc.name: OnDisconnected_0100
+ * @tc.desc: test AnsSubscriberProxy's OnDisconnected function
+ * @tc.type: FUNC
+ * @tc.require: issueI62D8C
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnDisconnected_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyUnitTest, OnDisconnected_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    proxy->OnDisconnected();
+}
+
+/*
+ * @tc.name: OnDisconnected_0200
+ * @tc.desc: test AnsSubscriberProxy's OnDisconnected function
+ * @tc.type: FUNC
+ * @tc.require: issueI62D8C
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnDisconnected_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyUnitTest, OnDisconnected_0200, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    proxy->OnDisconnected();
+}
