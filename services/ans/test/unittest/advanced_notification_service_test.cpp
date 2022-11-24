@@ -58,29 +58,20 @@ private:
 
 sptr<AdvancedNotificationService> AdvancedNotificationServiceTest::advancedNotificationService_ = nullptr;
 
-void AdvancedNotificationServiceTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "SetUpTestCase start";
-    advancedNotificationService_ = AdvancedNotificationService::GetInstance();
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-    GTEST_LOG_(INFO) << "SetUpTestCase end";
-}
+void AdvancedNotificationServiceTest::SetUpTestCase() {}
 
-void AdvancedNotificationServiceTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "TearDownTestCase start";
-    advancedNotificationService_ = nullptr;
-    GTEST_LOG_(INFO) << "TearDownTestCase end";
-}
+void AdvancedNotificationServiceTest::TearDownTestCase() {}
 
 void AdvancedNotificationServiceTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp start";
 
+    advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     advancedNotificationService_->CancelAll();
-    
+
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -88,6 +79,7 @@ void AdvancedNotificationServiceTest::TearDown()
 {
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -1782,7 +1774,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13200, Function | SmallTest | Level1)
 {
     sptr<ReminderRequest> reminder = nullptr;
-    EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_REMINDER_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_ANS_INVALID_PARAM);
 }
 
 /**
