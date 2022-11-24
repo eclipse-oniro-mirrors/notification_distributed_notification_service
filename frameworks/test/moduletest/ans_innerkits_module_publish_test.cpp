@@ -179,10 +179,6 @@ private:
         EXPECT_EQ("bundleName", notificationRequest.GetOwnerBundleName());
         EXPECT_EQ("bundleName", notificationRequest.GetCreatorBundleName());
         EXPECT_EQ("ANS_Interface_MT_Publish_00100", notificationRequest.GetLabel());
-        std::shared_ptr<NotificationRequest> NotificationRequestPtr = notificationRequest.GetPublicNotification();
-        if (NotificationRequestPtr != nullptr) {
-            EXPECT_EQ("ANS_Interface_MT_Publish_00100_REQUEST", NotificationRequestPtr->GetLabel());
-        }
 
         // pixelmap
         auto littleIcon = notificationRequest.GetLittleIcon();
@@ -582,10 +578,6 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00100, Function
     req.SetOwnerBundleName("bundleName");
     req.SetCreatorBundleName("creatorbundlename");
     req.SetLabel("ANS_Interface_MT_Publish_00100");
-    std::shared_ptr<NotificationRequest> requestPtr = std::make_shared<NotificationRequest>();
-    EXPECT_NE(requestPtr, nullptr);
-    requestPtr->SetLabel("ANS_Interface_MT_Publish_00100_REQUEST");
-    req.SetPublicNotification(requestPtr);
 
     // pixelmap
     auto pixelMap = std::make_shared<Media::PixelMap>();
