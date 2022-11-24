@@ -497,6 +497,10 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    if (!request) {
+        ANSR_LOGE("ReminderRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (isSubsystem) {
@@ -1778,6 +1782,11 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
 ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &reminder)
 {
     ANSR_LOGI("Publish reminder");
+    if (!reminder) {
+        ANSR_LOGE("ReminderRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
     ErrCode result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
         callerToken, "ohos.permission.PUBLISH_AGENT_REMINDER");
