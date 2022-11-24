@@ -627,6 +627,21 @@ HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForAllBundles_00001, Fun
 }
 
 /**
+ * @tc.name: SetNotificationsEnabledForDefaultBundle_00001
+ * @tc.desc: Test SetNotificationsEnabledForDefaultBundle parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForDefaultBundle_00001, Function | SmallTest | Level1)
+{
+    std::string deviceId = "DeviceId";
+    bool enabled = true;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetNotificationsEnabledForDefaultBundle(deviceId, enabled);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: SetShowBadgeEnabledForBundle_00001
  * @tc.desc: Test SetShowBadgeEnabledForBundle parameters.
  * @tc.type: FUNC
