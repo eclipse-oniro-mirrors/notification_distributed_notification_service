@@ -19,6 +19,7 @@
 
 #define private public
 #include "distributed_preferences.h"
+#include "distributed_preferences_info.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -132,10 +133,36 @@ HWTEST_F(DistributedPreferencesTest, ResolveDistributedEnable_00100, Function | 
  */
 HWTEST_F(DistributedPreferencesTest, ResolveDistributedBundleEnable_00100, Function | SmallTest | Level1)
 {
-    int32_t startPos = 1;
+    int32_t startPos = 0;
     std::string key("<key>");
     std::string value("<value>");
     EXPECT_EQ(distributedPreferences_->ResolveDistributedBundleEnable(key, startPos, value), false);
+}
+
+/**
+ * @tc.name      : DistributedPreferences_ResolveDistributedBundleEnable_00200
+ * @tc.number    : ResolveDistributedBundleEnable_00200
+ * @tc.desc      : text ResolveDistributedBundleEnable function.
+ */
+HWTEST_F(DistributedPreferencesTest, ResolveDistributedBundleEnable_00200, Function | SmallTest | Level1)
+{
+    int32_t startPos = 1;
+    std::string key("bundleName");
+    std::string value("<value>");
+    EXPECT_EQ(distributedPreferences_->ResolveDistributedBundleEnable(key, startPos, value), false);
+}
+
+/**
+ * @tc.name      : DistributedPreferences_ResolveDistributedBundleEnable_00300
+ * @tc.number    : ResolveDistributedBundleEnable_00300
+ * @tc.desc      : text ResolveDistributedBundleEnable function.
+ */
+HWTEST_F(DistributedPreferencesTest, ResolveDistributedBundleEnable_00300, Function | SmallTest | Level1)
+{
+    int32_t startPos = 1;
+    std::string key("bundleName|100101");
+    std::string value("<value>");
+    EXPECT_EQ(distributedPreferences_->ResolveDistributedBundleEnable(key, startPos, value), true);
 }
 
 /**
@@ -149,6 +176,19 @@ HWTEST_F(DistributedPreferencesTest, ResolveSyncWithoutAppEnable_00100, Function
     std::string key("<key>");
     std::string value("<value>");
     EXPECT_EQ(distributedPreferences_->ResolveSyncWithoutAppEnable(key, startPos, value), true);
+}
+
+/**
+ * @tc.name      : DistributedPreferencesInfo_GetSyncEnabledWithoutApp_00100
+ * @tc.number    : GetSyncEnabledWithoutApp_00100
+ * @tc.desc      : text GetSyncEnabledWithoutApp function.
+ */
+HWTEST_F(DistributedPreferencesTest, GetSyncEnabledWithoutApp_00100, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    DistributedPreferencesInfo distributedPreferencesInfo_;
+    distributedPreferencesInfo_.GetSyncEnabledWithoutApp(0, enabled);
+    EXPECT_EQ(enabled, false);
 }
 }  // namespace Notification
 }  // namespace OHOS
