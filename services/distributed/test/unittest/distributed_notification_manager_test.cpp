@@ -21,6 +21,8 @@
 #include "distributed_notification_manager.h"
 
 using namespace testing::ext;
+extern void MockGetLocalDevice(int32_t mockRet);
+
 namespace OHOS {
 namespace Notification {
 class DistributedNotificationManagerTest : public testing::Test {
@@ -44,6 +46,7 @@ void DistributedNotificationManagerTest::SetUp()
 {
     distributedManager_ = DistributedNotificationManager::GetInstance();
     distributedManager_->OnDeviceConnected("test");
+    MockGetLocalDevice(0);
 }
 
 void DistributedNotificationManagerTest::TearDown()
@@ -70,6 +73,24 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Publish_00100, Function
 }
 
 /**
+ * @tc.name      : Distributed_Publish_00200
+ * @tc.number    : Distributed_Publish_00200
+ * @tc.desc      : Publish a local notification to remote used distributed.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_Publish_00200, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    request->SetLabel("<label>");
+
+    std::string bundleName = "<bundleName>";
+    std::string label = request->GetLabel();
+    int32_t id = request->GetNotificationId();
+    MockGetLocalDevice(-1);
+
+    EXPECT_EQ(distributedManager_->Publish(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_GET_INFO_FAILED);
+}
+
+/**
  * @tc.name      : Distributed_Update_00100
  * @tc.number    : Distributed_Update_00100
  * @tc.desc      : Update a local notification to remote used distributed.
@@ -84,6 +105,24 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Update_00100, Function 
     int32_t id = request->GetNotificationId();
 
     EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_OK);
+}
+
+/**
+ * @tc.name      : Distributed_Update_00200
+ * @tc.number    : Distributed_Update_00200
+ * @tc.desc      : Update a local notification to remote used distributed.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_Update_00200, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    request->SetLabel("<label>");
+
+    std::string bundleName = "<bundleName>";
+    std::string label = request->GetLabel();
+    int32_t id = request->GetNotificationId();
+    MockGetLocalDevice(-1);
+
+    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_GET_INFO_FAILED);
 }
 
 /**
@@ -117,8 +156,26 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Delete_00200, Function 
     std::string bundleName = "<bundleName>";
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
+    MockGetLocalDevice(-1);
 
     EXPECT_EQ(distributedManager_->DeleteRemoteNotification(deviceId, bundleName, label, id), ERR_OK);
+}
+
+/**
+ * @tc.name      : Distributed_Delete_00300
+ * @tc.number    : Distributed_Delete_00300
+ * @tc.desc      : Delete a remote notification to remote used distributed.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_Delete_00300, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    request->SetLabel("<label>");
+
+    std::string bundleName = "<bundleName>";
+    std::string label = request->GetLabel();
+    int32_t id = request->GetNotificationId();
+
+    EXPECT_EQ(distributedManager_->Delete(bundleName, label, id), ERR_OK);
 }
 
 /**
@@ -196,6 +253,42 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_ResolveDistributedKey_0
 }
 
 /**
+ * @tc.name      : Distributed_ResolveDistributedKey_00200
+ * @tc.number    : Distributed_ResolveDistributedKey_00200
+ * @tc.desc      : text ResolveDistributedKey function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_ResolveDistributedKey_00200, Function | SmallTest | Level1)
+{
+    std::string key("deviceId|bundleName");
+    DistributedNotificationManager::ResolveKey resolveKey;
+    EXPECT_EQ(distributedManager_->ResolveDistributedKey(key, resolveKey), false);
+}
+
+/**
+ * @tc.name      : Distributed_ResolveDistributedKey_00300
+ * @tc.number    : Distributed_ResolveDistributedKey_00300
+ * @tc.desc      : text ResolveDistributedKey function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_ResolveDistributedKey_00300, Function | SmallTest | Level1)
+{
+    std::string key("deviceId|bundleName|label");
+    DistributedNotificationManager::ResolveKey resolveKey;
+    EXPECT_EQ(distributedManager_->ResolveDistributedKey(key, resolveKey), false);
+}
+
+/**
+ * @tc.name      : Distributed_ResolveDistributedKey_00400
+ * @tc.number    : Distributed_ResolveDistributedKey_00400
+ * @tc.desc      : text ResolveDistributedKey function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_ResolveDistributedKey_00400, Function | SmallTest | Level1)
+{
+    std::string key("deviceId|bundleName|label|0");
+    DistributedNotificationManager::ResolveKey resolveKey;
+    EXPECT_EQ(distributedManager_->ResolveDistributedKey(key, resolveKey), true);
+}
+
+/**
  * @tc.name      : Distributed_CheckDeviceId_00100
  * @tc.number    : Distributed_CheckDeviceId_00100
  * @tc.desc      : text CheckDeviceId function.
@@ -213,6 +306,26 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_CheckDeviceId_00100, Fu
     distributedManager_->OnDatabaseDelete(deviceId, key, value);
     // text CheckDeviceId function.
     EXPECT_EQ(distributedManager_->CheckDeviceId(deviceId, key), false);
+}
+
+/**
+ * @tc.name      : Distributed_CheckDeviceId_00200
+ * @tc.number    : Distributed_CheckDeviceId_00200
+ * @tc.desc      : text CheckDeviceId function.
+ */
+HWTEST_F(DistributedNotificationManagerTest, Distributed_CheckDeviceId_00200, Function | SmallTest | Level1)
+{
+    std::string deviceId = "deviceId";
+    std::string key("deviceId|bundleName|label|0");
+    std::string value("");
+    // text OnDatabaseInsert function.
+    distributedManager_->OnDatabaseInsert(deviceId, key, value);
+    // text OnDatabaseUpdate function.
+    distributedManager_->OnDatabaseUpdate(deviceId, key, value);
+    // text OnDatabaseDelete function.
+    distributedManager_->OnDatabaseDelete(deviceId, key, value);
+    // text CheckDeviceId function.
+    EXPECT_EQ(distributedManager_->CheckDeviceId(deviceId, key), true);
 }
 
 /**
