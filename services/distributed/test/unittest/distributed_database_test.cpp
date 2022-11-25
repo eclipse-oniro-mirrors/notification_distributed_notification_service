@@ -205,5 +205,17 @@ HWTEST_F(DistributedDatabaseTest, GetDeviceInfoList_00100, Function | SmallTest 
 
     EXPECT_EQ(database_->GetDeviceInfoList(deviceInfos), true);
 }
+
+/**
+ * @tc.name      : DistributedDatabase_GetFilterStrategy_00100
+ * @tc.number    : GetFilterStrategy_00100
+ * @tc.desc      : Get filter strategy.
+ */
+HWTEST_F(DistributedDatabaseTest, GetFilterStrategy_00100, Function | SmallTest | Level1)
+{
+    std::vector<DistributedDatabase::DeviceInfo> deviceInfos;
+
+    EXPECT_EQ(deviceCallback_->GetFilterStrategy(), DistributedKv::DeviceFilterStrategy::NO_FILTER);
+}
 }  // namespace Notification
 }  // namespace OHOS

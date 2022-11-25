@@ -17,6 +17,15 @@
 
 #include "mock_single_kv_store.h"
 
+namespace {
+    int32_t g_mockLocalDevice = 0;
+}
+
+void MockGetLocalDevice(int32_t mockRet)
+{
+    g_mockLocalDevice = mockRet;
+}
+
 namespace OHOS {
 namespace DistributedKv {
 DistributedKvDataManager::DistributedKvDataManager()
@@ -48,7 +57,7 @@ Status DistributedKvDataManager::GetLocalDevice(DeviceInfo &localDevice)
     localDevice.deviceId = "<localDeviceId>";
     localDevice.deviceName = "<localDeviceName>";
     localDevice.deviceType = "<localDeviceType>";
-    return Status::SUCCESS;
+    return static_cast<Status>(g_mockLocalDevice);
 }
 
 Status DistributedKvDataManager::GetDeviceList(std::vector<DeviceInfo> &deviceInfoList, DeviceFilterStrategy strategy)

@@ -38,6 +38,7 @@ void DistributedScreenStatusManagerTest::SetUp()
 
 void DistributedScreenStatusManagerTest::TearDown()
 {
+    distributedScreenStatusManager_->OnDeviceDisconnected("test");
     distributedScreenStatusManager_ = nullptr;
     DistributedScreenStatusManager::DestroyInstance();
 }
