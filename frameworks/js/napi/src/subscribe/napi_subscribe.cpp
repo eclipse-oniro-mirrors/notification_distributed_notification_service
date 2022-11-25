@@ -62,16 +62,18 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                 return;
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
-            if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
-                ANS_LOGI("Subscribe with NotificationSubscribeInfo");
-                OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
-                subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
-                subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
-            } else {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
+                    ANS_LOGI("Subscribe with NotificationSubscribeInfo");
+                    OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
+                    subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
+                    subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
+                } else {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -81,15 +83,17 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                 return;
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
-            Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+            if (asynccallbackinfo) {
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
 
-            if (asynccallbackinfo->info.callback != nullptr) {
-                napi_delete_reference(env, asynccallbackinfo->info.callback);
+                if (asynccallbackinfo->info.callback != nullptr) {
+                    napi_delete_reference(env, asynccallbackinfo->info.callback);
+                }
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
             }
-            napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-
-            delete asynccallbackinfo;
-            asynccallbackinfo = nullptr;
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -129,22 +133,23 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("Unsubscribe napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoUnsubscribe *>(data);
-
-            if (asynccallbackinfo->objectInfo == nullptr) {
-                ANS_LOGE("invalid object info");
-                asynccallbackinfo->info.errorCode = ERR_ANS_INVALID_PARAM;
-                return;
-            }
-
-            bool ret = AddDeletingSubscriber(asynccallbackinfo->objectInfo);
-            if (ret) {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::UnSubscribeNotification(*(asynccallbackinfo->objectInfo));
-                if (asynccallbackinfo->info.errorCode != ERR_OK) {
-                    DelDeletingSubscriber(asynccallbackinfo->objectInfo);
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->objectInfo == nullptr) {
+                    ANS_LOGE("invalid object info");
+                    asynccallbackinfo->info.errorCode = ERR_ANS_INVALID_PARAM;
+                    return;
                 }
-            } else {
-                asynccallbackinfo->info.errorCode = ERR_ANS_SUBSCRIBER_IS_DELETING;
+
+                bool ret = AddDeletingSubscriber(asynccallbackinfo->objectInfo);
+                if (ret) {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::UnSubscribeNotification(*(asynccallbackinfo->objectInfo));
+                    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+                        DelDeletingSubscriber(asynccallbackinfo->objectInfo);
+                    }
+                } else {
+                    asynccallbackinfo->info.errorCode = ERR_ANS_SUBSCRIBER_IS_DELETING;
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {

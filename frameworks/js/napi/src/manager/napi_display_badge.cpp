@@ -88,15 +88,17 @@ void AsyncCompleteCallbackNapiIsBadgeDisplayed(napi_env env, napi_status status,
         return;
     }
     AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
-    napi_value result = nullptr;
-    napi_get_boolean(env, asynccallbackinfo->enabled, &result);
-    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    if (asynccallbackinfo) {
+        napi_value result = nullptr;
+        napi_get_boolean(env, asynccallbackinfo->enabled, &result);
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)

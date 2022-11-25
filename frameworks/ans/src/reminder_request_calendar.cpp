@@ -572,16 +572,18 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     uint8_t minute = 0;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
-        repeatDay = calendar->GetRepeatDay();
-        repeatMonth = calendar->GetRepeatMonth();
-        firstDesignateYear = calendar->GetFirstDesignateYear();
-        firstDesignateMonth = calendar->GetFirstDesignageMonth();
-        firstDesignateDay = calendar->GetFirstDesignateDay();
-        year = calendar->GetYear();
-        month = calendar->GetMonth();
-        day = calendar->GetDay();
-        hour = calendar->GetHour();
-        minute = calendar->GetMinute();
+        if (calendar != nullptr) {
+            repeatDay = calendar->GetRepeatDay();
+            repeatMonth = calendar->GetRepeatMonth();
+            firstDesignateYear = calendar->GetFirstDesignateYear();
+            firstDesignateMonth = calendar->GetFirstDesignageMonth();
+            firstDesignateDay = calendar->GetFirstDesignateDay();
+            year = calendar->GetYear();
+            month = calendar->GetMonth();
+            day = calendar->GetDay();
+            hour = calendar->GetHour();
+            minute = calendar->GetMinute();
+        }
     }
     values.PutInt(REPEAT_DAYS, repeatDay);
     values.PutInt(REPEAT_MONTHS, repeatMonth);

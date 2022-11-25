@@ -33,7 +33,6 @@ class AnsCallbackStubImpl : public AnsCallbackStub {
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    std::string stringData(data);
     std::shared_ptr<AnsCallbackStubImpl> ansCallbackStub =
         std::make_shared<AnsCallbackStubImpl>();
     uint32_t code = GetU32Data(data);
