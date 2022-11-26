@@ -158,7 +158,7 @@ void AsyncCompleteCallbackNapiRemoveGroupByBundle(napi_env env, napi_status stat
         return;
     }
     AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
-    if (asynccallbackinfo){
+    if (asynccallbackinfo) {
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);

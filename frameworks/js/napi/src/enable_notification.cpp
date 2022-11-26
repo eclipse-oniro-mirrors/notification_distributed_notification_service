@@ -237,8 +237,8 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
                     ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d",
                         asynccallbackinfo->params.option.GetBundleName().c_str(),
                         asynccallbackinfo->params.option.GetUid());
-                    asynccallbackinfo->info.errorCode =
-                        NotificationHelper::IsAllowedNotify(asynccallbackinfo->params.option, asynccallbackinfo->allowed);
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
+                        asynccallbackinfo->params.option, asynccallbackinfo->allowed);
                 } else if (asynccallbackinfo->params.hasUserId) {
                     ANS_LOGI("userId = %{public}d", asynccallbackinfo->params.userId);
                     asynccallbackinfo->info.errorCode =
@@ -293,7 +293,8 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
                 if (asynccallbackinfo->params.hasBundleOption) {
                     ANS_LOGE("Not allowed to query another application");
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(
+                        asynccallbackinfo->allowed);
                 }
                 ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
@@ -344,7 +345,7 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
                 asynccallbackinfo->params.allowToPop = popFlag;
                 ANS_LOGI("errorCode = %{public}d, allowToPop = %{public}d",
-                        asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
+                    asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
                 if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
                     ANS_LOGI("Begin to start notification dialog");
                     auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
