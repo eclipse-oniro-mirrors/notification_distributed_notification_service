@@ -23,7 +23,6 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
         int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
         Notification::ReminderRequest reminderRequest(reminderId);
         reminderRequest.GetTitle();
