@@ -545,16 +545,6 @@ std::vector<std::string> NotificationRequest::GetNotificationUserInputHistory() 
     return userInputHistory_;
 }
 
-void NotificationRequest::SetPublicNotification(const std::shared_ptr<NotificationRequest> &other)
-{
-    publicNotification_ = other;
-}
-
-const std::shared_ptr<NotificationRequest> NotificationRequest::GetPublicNotification() const
-{
-    return publicNotification_;
-}
-
 std::string NotificationRequest::GetNotificationHashCode() const
 {
     if (creatorBundleName_.empty() || (creatorUid_ == 0) || ownerBundleName_.empty()) {
@@ -706,7 +696,6 @@ std::string NotificationRequest::Dump()
             ", littleIcon = " + (littleIcon_ ? "not null" : "null") +
             ", bigIcon = " + (bigIcon_ ? "not null" : "null") +
             ", notificationContent = " + (notificationContent_ ? notificationContent_->Dump() : "null") +
-            ", publicNotification = " + (publicNotification_ ? "not null" : "null") +
             ", notificationTemplate = " + (notificationTemplate_ ? "not null" : "null") +
             ", actionButtons = " + (!actionButtons_.empty() ? actionButtons_.at(0)->Dump() : "empty") +
             ", messageUsers = " + (!messageUsers_.empty() ? messageUsers_.at(0)->Dump() : "empty") +
@@ -1140,19 +1129,6 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
-    valid = publicNotification_ ? true : false;
-    if (!parcel.WriteBool(valid)) {
-        ANS_LOGE("Failed to write the flag which indicate whether publicNotification is null");
-        return false;
-    }
-
-    if (valid) {
-        if (!parcel.WriteParcelable(publicNotification_.get())) {
-            ANS_LOGE("Failed to write publicNotification");
-            return false;
-        }
-    }
-
     // write std::vector
     if (!parcel.WriteUint64(actionButtons_.size())) {
         ANS_LOGE("Failed to write the size of actionButtons");
@@ -1380,15 +1356,6 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         }
     }
 
-    valid = parcel.ReadBool();
-    if (valid) {
-        publicNotification_ = std::shared_ptr<NotificationRequest>(parcel.ReadParcelable<NotificationRequest>());
-        if (!publicNotification_) {
-            ANS_LOGE("Failed to read publicNotification");
-            return false;
-        }
-    }
-
     auto vsize = parcel.ReadUint64();
     for (uint64_t it = 0; it < vsize; ++it) {
         auto member = parcel.ReadParcelable<NotificationActionButton>();
@@ -1542,7 +1509,6 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->littleIcon_ = other.littleIcon_;
     this->bigIcon_ = other.bigIcon_;
     this->notificationContent_ = other.notificationContent_;
-    this->publicNotification_ = other.publicNotification_;
 
     this->actionButtons_ = other.actionButtons_;
     this->messageUsers_ = other.messageUsers_;

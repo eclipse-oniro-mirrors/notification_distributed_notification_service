@@ -16,7 +16,11 @@
 #define private public
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "notification_preferences_database.h"
+#undef private
+#undef protected
 
 using namespace testing::ext;
 namespace OHOS {
@@ -866,6 +870,83 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01300, Fun
     entry.key = dbKey;
     entry.value = dbValue;
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.name      : PutHasPoppedDialog_00100
+ * @tc.number    :
+ * @tc.desc      : Put bundle total badge nums into disturbe DB, return is true.
+ * @tc.require   : issueI62SME
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutHasPoppedDialog_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    EXPECT_TRUE(preferncesDB_->PutHasPoppedDialog(bundleInfo, 0));
+}
+
+/**
+ * @tc.number    : PutHasPoppedDialog_00200
+ * @tc.name      :
+ * @tc.desc      : Put bundle total badge nums into disturbe DB when bundle name is null, return is false.
+ * @tc.require   : #issueI62SME
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutHasPoppedDialog_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(std::string());
+    bundleInfo.SetBundleUid(bundleUid_);
+    EXPECT_FALSE(preferncesDB_->PutHasPoppedDialog(bundleInfo, 0));
+}
+
+/**
+ * @tc.number    : PutDoNotDisturbDate_00500
+ * @tc.name      :
+ * @tc.desc      : Put disturbe mode into disturbe DB when date is nullptr, return is false.
+ * @tc.require   : #issueI62SME
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutDoNotDisturbDate_00500, Function | SmallTest | Level1)
+{
+    int32_t userId = 0;
+    EXPECT_EQ(preferncesDB_->PutDoNotDisturbDate(userId, nullptr), false);
+}
+
+/**
+ * @tc.number    : RemoveAllSlotsFromDisturbeDB_00200
+ * @tc.name      : RemoveAllSlotsFromDisturbeDB
+ * @tc.desc      : Test RemoveAllSlotsFromDisturbeDB function return is true
+ * @tc.require   : #issueI62SME
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00200, Function | SmallTest | Level1)
+{
+    std::string bundleKey = "";
+    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey), false);
+}
+
+/**
+ * @tc.number    : ChangeSlotToEntry_00200
+ * @tc.name      :
+ * @tc.desc      : Change slot to entry.
+ * @tc.require   : #issueI62SME
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00200, Function | SmallTest | Level1)
+{
+    std::vector<OHOS::DistributedKv::Entry> entries;
+    EXPECT_EQ(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, nullptr, entries), false);
+}
+
+/**
+ * @tc.number    : RemoveAnsBundleDbInfo_00200
+ * @tc.name      :
+ * @tc.desc      : Test RemoveAnsBundleDbInfo function.
+ * @tc.require   : #issueI62SME
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAnsBundleDbInfo_00200, Function | SmallTest | Level1)
+{
+    std::string bundleName = "bundleName";
+    int32_t uid = 1;
+    EXPECT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, uid), true);
 }
 }  // namespace Notification
 }  // namespace OHOS

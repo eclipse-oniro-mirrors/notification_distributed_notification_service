@@ -108,5 +108,21 @@ HWTEST_F(SystemEventObserverTest, OnReceiveEvent_004, Function | SmallTest | Lev
     stub_->OnReceiveEvent(data);
 }
 
+/**
+ * @tc.number    : GetBundleOption_001
+ * @tc.name      : 
+ * @tc.desc      : Test GetBundleOption function.
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(SystemEventObserverTest, GetBundleOption_001, Function | SmallTest | Level1)
+{
+    EventFwk::Want want;
+    sptr<NotificationBundleOption> systemEventObserver = stub_->GetBundleOption(want);
+    EXPECT_NE(systemEventObserver, nullptr);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(std::string(), -1);
+    bundleOption ->SetBundleName("BundleName");
+    bundleOption ->SetUid(2);
+    stub_->GetBundleOption(want);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -94,6 +94,7 @@ public:
 
 protected:
     static constexpr int32_t MIN_ARGUMENT_NUMBER = 2;
+    static constexpr int32_t MAX_ARGUMENT_NUMBER = 256;
 
     int argc_;
     char **argv_;

@@ -36,6 +36,7 @@
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
 #include "want_params.h"
+#include "bundle_manager_helper.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -3234,5 +3235,81 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21200,
     GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0200 test end";
 }
 
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21300
+ * @tc.name      : PrepareNotificationRequest_0200
+ * @tc.desc      : Test PrepareNotificationRequest function when uid < 0.
+ * @tc.require   : issueI62D8C
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "PrepareNotificationRequest_0200 test start";
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+
+    sptr<NotificationRequest> req = new NotificationRequest();
+    int32_t myNotificationId = 10;
+    bool isAgentTrue = true;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetIsAgentNotification(isAgentTrue);
+    
+    std::shared_ptr<BundleManagerHelper> bundleManager = nullptr;
+    
+    EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_OK);
+    GTEST_LOG_(INFO) << "PrepareNotificationRequest_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21400
+ * @tc.name      : PrepareNotificationInfo_2000
+ * @tc.desc      : Test PrepareNotificationInfo function.
+ * @tc.require   : issueI62D8C
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "PrepareNotificationInfo_2000 test start";
+    
+    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    
+    EXPECT_EQ(advancedNotificationService_->PrepareNotificationInfo(req, bundleOption), ERR_OK);
+
+    GTEST_LOG_(INFO) << "PrepareNotificationInfo_2000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21500
+ * @tc.name      : PublishPreparedNotification_1000
+ * @tc.desc      : Test PublishPreparedNotification function.
+ * @tc.require   : issueI62D8C
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test start";
+    
+    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(req);
+    EXPECT_NE(notification, nullptr);
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    
+    EXPECT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_220000
+ * @tc.name      : TimeToString_1000
+ * @tc.desc      : Test TimeToString function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_220000, Function | SmallTest | Level1)
+{
+    int64_t time = 60;
+    std::string ret = "1970-01-01, ";
+    std::string result = advancedNotificationService_->TimeToString(time);
+    EXPECT_EQ(result.substr(0, result.size() - 8), ret);
+}
 }  // namespace Notification
 }  // namespace OHOS
