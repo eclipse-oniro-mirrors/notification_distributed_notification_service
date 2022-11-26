@@ -140,7 +140,8 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(
                         asynccallbackinfo->params.userId, asynccallbackinfo->date);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(asynccallbackinfo->date);
+                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(
+                        asynccallbackinfo->date);
                 }
 
                 ANS_LOGI("GetDoNotDisturbDate errorCode=%{public}d date=%{public}s, hasUserId=%{public}d",

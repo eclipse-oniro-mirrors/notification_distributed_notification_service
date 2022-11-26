@@ -44,7 +44,7 @@ namespace OHOS {
         Notification::NotificationConstant::InputEditType inputEditType =
             Notification::NotificationConstant::InputEditType(inputEditTypes);
         Notification::NotificationUserInput::Create(inputKey, tag, options, permitFreeFormInput,
-                permitMimeTypes, additional, inputEditType);
+            permitMimeTypes, additional, inputEditType);
         Notification::NotificationUserInput notificationUserInputannex
             (inputKey, tag, options, permitFreeFormInput, permitMimeTypes, additional, inputEditType);
         nlohmann::json jsonObject;

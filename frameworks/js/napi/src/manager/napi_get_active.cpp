@@ -255,7 +255,8 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
             ANS_LOGI("GetActiveNotificationCount napi_create_async_work start");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetActiveNotificationNums(asynccallbackinfo->num);
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetActiveNotificationNums(
+                    asynccallbackinfo->num);
                 ANS_LOGI("GetActiveNotificationCount count = %{public}" PRIu64 "", asynccallbackinfo->num);
             }
         },

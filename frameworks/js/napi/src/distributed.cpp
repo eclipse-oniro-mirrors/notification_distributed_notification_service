@@ -472,7 +472,7 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
     }
     ANS_LOGI("GetDeviceRemindType napi_create_async_work end");
     AsyncCallbackInfoGetRemindType *asynccallbackinfo = static_cast<AsyncCallbackInfoGetRemindType *>(data);
-    if (asynccallbackinfo){
+    if (asynccallbackinfo) {
         napi_value result = nullptr;
         if (asynccallbackinfo->info.errorCode != ERR_OK) {
             result = Common::NapiGetNull(env);
