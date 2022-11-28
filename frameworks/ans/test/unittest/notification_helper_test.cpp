@@ -898,7 +898,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotify_00003, Function | SmallTest | L
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotify(userId, allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**

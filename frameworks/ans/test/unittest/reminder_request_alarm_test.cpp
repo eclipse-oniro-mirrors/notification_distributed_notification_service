@@ -225,7 +225,7 @@ HWTEST_F(ReminderRequestAlarmTest, OnTimeZoneChange_00100, Function | SmallTest 
     uint8_t arr[] = {};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
-    EXPECT_EQ(rrc->OnTimeZoneChange(), false);
+    EXPECT_EQ(rrc->OnTimeZoneChange(), true);
 }
 
 /**

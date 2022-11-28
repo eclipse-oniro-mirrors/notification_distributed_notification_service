@@ -723,36 +723,6 @@ HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00001, Function | SmallTest | L
 }
 
 /**
- * @tc.name: RecoverInt64FromDb_00002
- * @tc.desc: Test RecoverInt64FromDb parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5UYHP
- */
-HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
-    std::string columnName = "columnName";
-    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->RecoverInt64FromDb(resultSet, columnName, columnType), 0);
-}
-
-/**
- * @tc.name: RecoverInt64FromDb_00003
- * @tc.desc: Test RecoverInt64FromDb parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5UYHP
- */
-HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00003, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
-    std::string columnName = "columnName";
-    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::LONG;
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->RecoverInt64FromDb(resultSet, columnName, columnType), 0);
-}
-
-/**
  * @tc.name: StringSplit_00001
  * @tc.desc: Test StringSplit parameters.
  * @tc.type: FUNC
