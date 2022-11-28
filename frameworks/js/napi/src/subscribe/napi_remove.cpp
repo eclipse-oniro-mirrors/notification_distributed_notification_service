@@ -28,13 +28,15 @@ void NapiRemoveExecuteCallback(napi_env env, void *data)
         return;
     }
     auto removeInfo = static_cast<AsyncCallbackInfoRemove *>(data);
-    if (removeInfo->params.hashcode.has_value()) {
-        removeInfo->info.errorCode = NotificationHelper::RemoveNotification(removeInfo->params.hashcode.value(),
-            removeInfo->params.removeReason);
-    } else if (removeInfo->params.bundleAndKeyInfo.has_value()) {
-        auto &infos = removeInfo->params.bundleAndKeyInfo.value();
-        removeInfo->info.errorCode = NotificationHelper::RemoveNotification(infos.option,
-            infos.key.id, infos.key.label, removeInfo->params.removeReason);
+    if (removeInfo) {
+        if (removeInfo->params.hashcode.has_value()) {
+            removeInfo->info.errorCode = NotificationHelper::RemoveNotification(removeInfo->params.hashcode.value(),
+                removeInfo->params.removeReason);
+        } else if (removeInfo->params.bundleAndKeyInfo.has_value()) {
+            auto &infos = removeInfo->params.bundleAndKeyInfo.value();
+            removeInfo->info.errorCode = NotificationHelper::RemoveNotification(infos.option,
+                infos.key.id, infos.key.label, removeInfo->params.removeReason);
+        }
     }
 }
 
@@ -46,13 +48,15 @@ void NapiRemoveCompleteCallback(napi_env env, napi_status status, void *data)
         return;
     }
     auto removeInfo = static_cast<AsyncCallbackInfoRemove *>(data);
-    Common::CreateReturnValue(env, removeInfo->info, Common::NapiGetNull(env));
-    if (removeInfo->info.callback != nullptr) {
-        napi_delete_reference(env, removeInfo->info.callback);
+    if (removeInfo) {
+        Common::CreateReturnValue(env, removeInfo->info, Common::NapiGetNull(env));
+        if (removeInfo->info.callback != nullptr) {
+            napi_delete_reference(env, removeInfo->info.callback);
+        }
+        napi_delete_async_work(env, removeInfo->asyncWork);
+        delete removeInfo;
+        removeInfo = nullptr;
     }
-    napi_delete_async_work(env, removeInfo->asyncWork);
-    delete removeInfo;
-    removeInfo = nullptr;
 }
 
 napi_value NapiRemove(napi_env env, napi_callback_info info)
@@ -109,15 +113,16 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("RemoveAll napi_create_async_work start");
             AsyncCallbackInfoRemove *asynccallbackinfo = static_cast<AsyncCallbackInfoRemove *>(data);
-
-            if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {
-                auto &infos = asynccallbackinfo->params.bundleAndKeyInfo.value();
-                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveAllNotifications(infos.option);
-            } else if (asynccallbackinfo->params.hasUserId) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveNotifications(
-                    asynccallbackinfo->params.userId);
-            } else {
-                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveNotifications();
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {
+                    auto &infos = asynccallbackinfo->params.bundleAndKeyInfo.value();
+                    asynccallbackinfo->info.errorCode = NotificationHelper::RemoveAllNotifications(infos.option);
+                } else if (asynccallbackinfo->params.hasUserId) {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::RemoveNotifications(
+                        asynccallbackinfo->params.userId);
+                } else {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::RemoveNotifications();
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -153,13 +158,15 @@ void AsyncCompleteCallbackNapiRemoveGroupByBundle(napi_env env, napi_status stat
         return;
     }
     AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
-    Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-    if (asynccallbackinfo->info.callback != nullptr) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    if (asynccallbackinfo) {
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
     }
-    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-    delete asynccallbackinfo;
-    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
@@ -189,12 +196,14 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
             ANS_LOGI("RemoveGroupByBundle napi_create_async_work start");
             AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
-            ANS_LOGI("option.bundle = %{public}s, option.uid = %{public}d, groupName = %{public}s",
-                asynccallbackinfo->params.option.GetBundleName().c_str(),
-                asynccallbackinfo->params.option.GetUid(),
-                asynccallbackinfo->params.groupName.c_str());
-            asynccallbackinfo->info.errorCode = NotificationHelper::RemoveGroupByBundle(
-                asynccallbackinfo->params.option, asynccallbackinfo->params.groupName);
+            if (asynccallbackinfo) {
+                ANS_LOGI("option.bundle = %{public}s, option.uid = %{public}d, groupName = %{public}s",
+                    asynccallbackinfo->params.option.GetBundleName().c_str(),
+                    asynccallbackinfo->params.option.GetUid(),
+                    asynccallbackinfo->params.groupName.c_str());
+                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveGroupByBundle(
+                    asynccallbackinfo->params.option, asynccallbackinfo->params.groupName);
+            }
         },
         AsyncCompleteCallbackNapiRemoveGroupByBundle,
         (void *)asynccallbackinfo,
