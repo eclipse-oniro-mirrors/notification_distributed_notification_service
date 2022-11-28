@@ -590,3 +590,140 @@ HWTEST_F(AnsNotificationUnitTest, GetDeviceRemindType_0100, Function | MediumTes
     ErrCode ret5 = ans_->GetValidReminders(validReminders);
     EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
+
+/*
+ * @tc.name: IsSupportTemplate_0100
+ * @tc.desc: test IsSupportTemplate ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, IsSupportTemplate_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::string templateName = "this is templateName";
+    bool support = true;
+    ErrCode ret1 = ans_->IsSupportTemplate(templateName, support);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    int32_t userId = -1;
+    bool allowed = true;
+    ErrCode ret2 = ans_->IsAllowedNotify(userId, allowed);
+    EXPECT_EQ(ret2, ERR_ANS_INVALID_PARAM);
+    int32_t userId1 = 2;
+    ErrCode ret3 = ans_->IsAllowedNotify(userId1, allowed);
+    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
+    bool enabled = true;
+    ErrCode ret4 = ans_->SetNotificationsEnabledForAllBundles(userId, enabled);
+    EXPECT_EQ(ret4, ERR_ANS_INVALID_PARAM);
+    ErrCode ret5 = ans_->SetNotificationsEnabledForAllBundles(userId1, enabled);
+    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
+    ErrCode ret6 = ans_->RemoveNotifications(userId);
+    EXPECT_EQ(ret6, ERR_ANS_INVALID_PARAM);
+    ErrCode ret7 = ans_->RemoveNotifications(userId1);
+    EXPECT_EQ(ret7, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetDoNotDisturbDate_0200
+ * @tc.desc: test SetDoNotDisturbDate ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetDoNotDisturbDate_0200, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    int32_t userId = -1;
+    NotificationDoNotDisturbDate doNotDisturbDate;
+    ErrCode ret1 = ans_->SetDoNotDisturbDate(userId, doNotDisturbDate);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    int32_t userId1 = 2;
+    ErrCode ret2 = ans_->SetDoNotDisturbDate(userId1, doNotDisturbDate);
+    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    ErrCode ret3 = ans_->GetDoNotDisturbDate(userId, doNotDisturbDate);
+    EXPECT_EQ(ret3, ERR_ANS_INVALID_PARAM);
+    ErrCode ret4 = ans_->GetDoNotDisturbDate(userId1, doNotDisturbDate);
+    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetEnabledForBundleSlot_0100
+ * @tc.desc: test SetEnabledForBundleSlot ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetEnabledForBundleSlot_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "this is bundleName";
+    bundleOption.SetBundleName(bundleName);
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
+    bool enabled = true;
+    ErrCode ret1 = ans_->SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    ErrCode ret2 = ans_->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: ShellDump_0100
+ * @tc.desc: test ShellDump ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, ShellDump_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::string cmd = "this is cmd";
+    std::string bundle = "this is bundle";
+    int32_t userId = 1;
+    std::vector<std::string> dumpInfo;
+    ErrCode ret1 = ans_->ShellDump(cmd, bundle, userId, dumpInfo);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetSyncNotificationEnabledWithoutApp_0100
+ * @tc.desc: test SetSyncNotificationEnabledWithoutApp ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetSyncNotificationEnabledWithoutApp_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    int32_t userId = -1;
+    bool enabled = true;
+    ErrCode ret1 = ans_->SetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    int32_t userId1 = 2;
+    ErrCode ret2 = ans_->SetSyncNotificationEnabledWithoutApp(userId1, enabled);
+    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    ErrCode ret3 = ans_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(ret3, ERR_ANS_INVALID_PARAM);
+    ErrCode ret4 = ans_->GetSyncNotificationEnabledWithoutApp(userId1, enabled);
+    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
+}

@@ -270,7 +270,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "inProgress = false, groupOverview = false, progressIndeterminate = false, "
     "unremovable = false, floatingIcon = false, onlyLocal = false, permitted = true, "
     "isAgent = false, removalWantAgent = null, maxScreenWantAgent = null, additionalParams = null, "
-    "littleIcon = null, bigIcon = null, notificationContent = null, publicNotification = null, "
+    "littleIcon = null, bigIcon = null, notificationContent = null, "
     "notificationTemplate = null, actionButtons = empty, messageUsers = empty, "
     "userInputHistory = empty, distributedOptions = NotificationDistributedOptions"
     "{ isDistributed = true, devicesSupportDisplay = [], devicesSupportOperate = [] }, "
