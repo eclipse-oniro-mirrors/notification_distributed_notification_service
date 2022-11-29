@@ -251,7 +251,8 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
         },
         [](napi_env env, napi_status status, void *data) {
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-            if (asynccallbackinfo != nullptr && !(asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop)) {
+            if (asynccallbackinfo != nullptr && !(asynccallbackinfo->info.errorCode == ERR_OK &&
+                asynccallbackinfo->params.allowToPop)) {
                 AsyncCompleteCallbackNapiIsNotificationEnabled(env, status, data);
             }
         },

@@ -241,10 +241,11 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
                         asynccallbackinfo->params.option, asynccallbackinfo->allowed);
                 } else if (asynccallbackinfo->params.hasUserId) {
                     ANS_LOGI("userId = %{public}d", asynccallbackinfo->params.userId);
-                    asynccallbackinfo->info.errorCode =
-                        NotificationHelper::IsAllowedNotify(asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
+                        asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(asynccallbackinfo->allowed);
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
+                        asynccallbackinfo->allowed);
                 }
                 ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
