@@ -215,20 +215,6 @@ HWTEST_F(ReminderRequestAlarmTest, OnDateTimeChange_00100, Function | SmallTest 
 }
 
 /**
- * @tc.name: OnTimeZoneChange_00100
- * @tc.desc: Test OnTimeZoneChange parameters.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestAlarmTest, OnTimeZoneChange_00100, Function | SmallTest | Level1)
-{
-    uint8_t arr[] = {};
-    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
-    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
-    EXPECT_EQ(rrc->OnTimeZoneChange(), true);
-}
-
-/**
  * @tc.name: RecoverFromDb_00100
  * @tc.desc: Test RecoverFromDb parameters.
  * @tc.type: FUNC
@@ -295,6 +281,20 @@ HWTEST_F(ReminderRequestAlarmTest, ReadFromParcel_00001, Function | SmallTest | 
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: OnTimeZoneChange_00100
+ * @tc.desc: Test OnTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestAlarmTest, OnTimeZoneChange_00100, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    EXPECT_EQ(rrc->OnTimeZoneChange(), false);
 }
 }
 }
