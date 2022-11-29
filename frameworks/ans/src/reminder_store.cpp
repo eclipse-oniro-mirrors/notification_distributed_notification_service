@@ -379,9 +379,14 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
 
 bool ReminderStore::GetBundleOption(const int32_t &reminderId, sptr<NotificationBundleOption> &bundleOption) const
 {
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return false;
+    }
     NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
     absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminderId));
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(
+        absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
         return false;
     }
