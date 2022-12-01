@@ -161,8 +161,8 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("EnableNotification napi_create_async_work start");
             AsyncCallbackInfoEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoEnable *>(data);
-            std::string deviceId {""};
             if (asynccallbackinfo) {
+                std::string deviceId {""};
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
                     asynccallbackinfo->params.option, deviceId, asynccallbackinfo->params.enable);
                 ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
