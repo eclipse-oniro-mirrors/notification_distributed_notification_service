@@ -887,21 +887,6 @@ HWTEST_F(NotificationHelperTest, IsSupportTemplate_00001, Function | SmallTest |
 }
 
 /**
- * @tc.name: IsAllowedNotify_00003
- * @tc.desc: Test IsAllowedNotify parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, IsAllowedNotify_00003, Function | SmallTest | Level1)
-{
-    int32_t userId = 10;
-    bool allowed = true;
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.IsAllowedNotify(userId, allowed);
-    EXPECT_EQ(ret, (int)ERR_OK);
-}
-
-/**
  * @tc.name: SetNotificationsEnabledForAllBundles_00002
  * @tc.desc: Test SetNotificationsEnabledForAllBundles parameters.
  * @tc.type: FUNC
