@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <uv.h>
 #include "enable_notification.h"
 #include "ability_manager_client.h"
 
@@ -413,21 +414,58 @@ void ResetCallbackStubImpl()
 bool CallbackStubImpl::OnEnableNotification(bool isAllow)
 {
     ANS_LOGI("isAllow: %{public}d", isAllow);
-    if (task_) {
-        task_->allowed = isAllow;
-        napi_value resourceName = nullptr;
-        napi_create_string_latin1(task_->env, "RequestEnableNotification", NAPI_AUTO_LENGTH, &resourceName);
-        napi_create_async_work(task_->env,
-            nullptr,
-            resourceName,
-            [](napi_env env, void *data) {},
-            AsyncCompleteCallbackIsNotificationEnabled,
-            (void *)task_,
-            &task_->asyncWork);
-        NAPI_CALL_BASE(task_->env, napi_queue_async_work(task_->env, task_->asyncWork), false);
-        return true;
+    if (!task_ || !task_->env) {
+        ANS_LOGW("invalid task.");
+        return false;
     }
-    return false;
+
+    uv_loop_s *loop = nullptr;
+    napi_get_uv_event_loop(task_->env, &loop);
+    if (!loop) {
+        ANS_LOGW("failed to get loop from env.");
+        delete task_;
+        task_ = nullptr;
+        return false;
+    }
+
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        ANS_LOGW("uv_work_t instance is nullptr");
+        delete task_;
+        task_ = nullptr;
+        return false;
+    }
+
+    task_->allowed = isAllow;
+    work->data = reinterpret_cast<void *>(task_);
+    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
+        [](uv_work_t *work, int status) {
+            auto task_ = static_cast<AsyncCallbackInfoIsEnable*>(work->data);
+            napi_value result = nullptr;
+            napi_get_boolean(task_->env, task_->allowed, &result);
+            if (task_->newInterface) {
+                Common::CreateReturnValue(task_->env, task_->info, result);
+            } else {
+                Common::ReturnCallbackPromise(task_->env, task_->info, result);
+            }
+            if (task_->info.callback != nullptr) {
+                napi_delete_reference(task_->env, task_->info.callback);
+            }
+            napi_delete_async_work(task_->env, task_->asyncWork);
+            delete task_;
+            task_ = nullptr;
+            delete work;
+            work = nullptr;
+        });
+    if (ret != 0) {
+        ANS_LOGW("failed to insert work into queue");
+        delete task_;
+        task_ = nullptr;
+        delete work;
+        work = nullptr;
+        return false;
+    }
+    return true;
 }
 
 }  // namespace NotificationNapi
