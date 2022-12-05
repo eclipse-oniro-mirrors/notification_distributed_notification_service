@@ -461,6 +461,7 @@ bool CallbackStubImpl::OnEnableNotification(bool isAllow)
         task_ = nullptr;
         delete work;
         work = nullptr;
+        return false;
     }
     return true;
 }
