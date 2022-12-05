@@ -308,7 +308,7 @@ MemoryUsagePreference ImageSource::GetMemoryUsagePreference()
     return preference_;
 }
 
-uint32_t ImageSource::GetRedactionArea(const int &fd, const int &redactionType,
+uint32_t ImageSource::GetFilterArea(const int &redactionType,
     std::vector<std::pair<uint32_t, uint32_t>> &ranges)
 {
     return 0;
