@@ -436,7 +436,7 @@ bool CallbackStubImpl::OnEnableNotification(bool isAllow)
 
     task_->allowed = isAllow;
     work->data = reinterpret_cast<void *>(task_);
-    uv_queue_work(loop, work, [](uv_work_t *work) {},
+    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
         [](uv_work_t *work, int status) {
             auto task_ = static_cast<AsyncCallbackInfoIsEnable*>(work->data);
             napi_value result = nullptr;
@@ -455,6 +455,13 @@ bool CallbackStubImpl::OnEnableNotification(bool isAllow)
             delete work;
             work = nullptr;
         });
+    if (ret != 0) {
+        ANS_LOGW("failed to insert work into queue");
+        delete task_;
+        task_ = nullptr;
+        delete work;
+        work = nullptr;
+    }
     return true;
 }
 
