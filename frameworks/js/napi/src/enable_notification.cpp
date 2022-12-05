@@ -452,6 +452,8 @@ bool CallbackStubImpl::OnEnableNotification(bool isAllow)
             napi_delete_async_work(task_->env, task_->asyncWork);
             delete task_;
             task_ = nullptr;
+            delete work;
+            work = nullptr;
         });
     return true;
 }
