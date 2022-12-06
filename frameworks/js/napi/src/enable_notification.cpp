@@ -381,7 +381,7 @@ void StartNotificationDialog(AsyncCallbackInfoIsEnable *callbackInfo)
         auto result = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
         if (result == ERR_OK) {
             AAFwk::Want want;
-            want.SetElementName("com.ohos.amsdialog", "EnableNotificationDialog");
+            want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
             want.SetParam("callbackStubImpl_", callbackStubImpl_);
             want.SetParam("tokenId", token);
             want.SetParam("from", AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());

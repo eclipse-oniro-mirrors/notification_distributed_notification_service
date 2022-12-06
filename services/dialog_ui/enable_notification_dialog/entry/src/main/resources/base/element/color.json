@@ -1,0 +1,20 @@
+{
+  "color": [
+    {
+      "name": "white",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "default_background_color",
+      "value": "#ffffff"
+    },
+    {
+      "name": "divider_color",
+      "value": "#f3f4f6"
+    },
+    {
+      "name": "button_color",
+      "value": "#007DFF"
+    }
+  ]
+}
