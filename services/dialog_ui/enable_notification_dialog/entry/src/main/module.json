@@ -1,0 +1,40 @@
+{
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "srcEntrance": "./ets/Application/AbilityStage.ts",
+    "description": "$string:entry_desc",
+    "mainElement": "MainAbility",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+    "uiSyntax": "ets",
+    "abilities": [],
+    "extensionAbilities": [
+      {
+        "name": "EnableNotificationDialog",
+        "srcEntrance": "./ets/ServiceExtAbility/NotificationServiceExtAbility.ts",
+        "description": "$string:NotificationServiceExtAbility_desc",
+        "icon": "$media:icon",
+        "label": "$string:NotificationServiceExtAbility_label",
+        "visible": true,
+        "type": "service"
+      }
+    ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED"
+      },
+      {
+        "name": "ohos.permission.START_ABILITIES_FROM_BACKGROUND"
+      },
+      {
+        "name": "ohos.permission.NOTIFICATION_CONTROLLER"
+      }
+    ]
+  }
+}
