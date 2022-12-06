@@ -223,7 +223,7 @@ template<typename... Types>
 void EventReport::InnerEventWrite(const std::string &eventName,
     HiviewDFX::HiSysEvent::EventType type, Types... keyValues)
 {
-    HiviewDFX::HiSysEvent::Write(
+    HiSysEventWrite(
         HiviewDFX::HiSysEvent::Domain::NOTIFICATION,
         eventName,
         static_cast<HiviewDFX::HiSysEvent::EventType>(type),
