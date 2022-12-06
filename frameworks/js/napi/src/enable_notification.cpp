@@ -425,15 +425,18 @@ bool CallbackStubImpl::OnEnableNotification(bool isAllow)
     napi_get_uv_event_loop(task_->env, &loop);
     if (!loop) {
         ANS_LOGW("failed to get loop from env.");
+        delete task_;
+        task_ = nullptr;
         return false;
     }
 
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         ANS_LOGW("uv_work_t instance is nullptr");
+        delete task_;
+        task_ = nullptr;
         return false;
     }
-
     task_->allowed = isAllow;
     work->data = reinterpret_cast<void *>(task_);
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
@@ -449,7 +452,6 @@ bool CallbackStubImpl::OnEnableNotification(bool isAllow)
             if (task_->info.callback != nullptr) {
                 napi_delete_reference(task_->env, task_->info.callback);
             }
-            napi_delete_async_work(task_->env, task_->asyncWork);
             delete task_;
             task_ = nullptr;
             delete work;
