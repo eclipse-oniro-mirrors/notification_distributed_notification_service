@@ -1563,8 +1563,8 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
 
     std::shared_ptr<AbilityRuntime::ApplicationContext> context =
         std::make_shared<AbilityRuntime::ApplicationContext>();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
-        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(context, paramsInfo);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = nullptr;
+    AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(context, paramsInfo, wantAgent);
     EXPECT_NE(wantAgent, nullptr);
 
     NotificationRequest req;
