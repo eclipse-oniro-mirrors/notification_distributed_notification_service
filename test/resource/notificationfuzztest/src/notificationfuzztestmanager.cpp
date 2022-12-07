@@ -487,7 +487,8 @@ void NotificationFuzzTestManager::RegisterWantAgentHelper()
     callFunctionMap_.emplace("WantAgentHelperGetWantAgentAppExecFwkparamsInfo", []() {
         std::shared_ptr<AbilityRuntime::Context> context = OHOS::AbilityRuntime::Context::GetApplicationContext();
         const OHOS::AbilityRuntime::WantAgent::WantAgentInfo paramsInfo = *GetParamWantAgentInfo();
-        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(context, paramsInfo);
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = nullptr;
+        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(context, paramsInfo, wantAgent);
     });
 
     callFunctionMap_.emplace("WantAgentHelperGetWantAgentparamsInfo", []() {
@@ -517,21 +518,19 @@ void NotificationFuzzTestManager::RegisterWantAgentHelper()
         const std::shared_ptr<OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgent> agent = GetParamWantAgent();
         const std::shared_ptr<OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgent> otherAgent
             = GetParamWantAgent();
-        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::JudgeEquality(agent, otherAgent);
-    });
-    callFunctionMap_.emplace("WantAgentHelperGetHashCode", []() {
-        const std::shared_ptr<OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgent> agent = GetParamWantAgent();
-        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::GetHashCode(agent);
+        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::IsEquals(agent, otherAgent);
     });
 
     callFunctionMap_.emplace("WantAgentHelperGetBundleName", []() {
         const std::shared_ptr<OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgent> agent = GetParamWantAgent();
-        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::GetBundleName(agent);
+        std::string bundleName = "";
+        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::GetBundleName(agent, bundleName);
     });
 
     callFunctionMap_.emplace("WantAgentHelperGetUid", []() {
         const std::shared_ptr<OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgent> agent = GetParamWantAgent();
-        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::GetUid(agent);
+        int32_t uid = -1;
+        OHOS::AbilityRuntime::AbilityRuntime::WantAgent::WantAgentHelper::GetUid(agent, uid);
     });
 
     callFunctionMap_.emplace("WantAgentHelperGetWant", []() {
