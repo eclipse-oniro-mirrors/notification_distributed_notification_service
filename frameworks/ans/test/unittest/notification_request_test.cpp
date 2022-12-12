@@ -176,5 +176,215 @@ HWTEST_F(NotificationRequestTest, NotificationSetReceiverUserId_0100, Level1)
     auto result = notificationRequest.GetReceiverUserId();
     EXPECT_EQ(result, userid);
 }
+
+/**
+ * @tc.name: AddActionButton_0100
+ * @tc.desc: AddActionButton
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, AddActionButton_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    std::shared_ptr<NotificationActionButton> actionButton = nullptr;
+    notificationRequest.AddActionButton(actionButton);
+    AbilityRuntime::WantAgent::WantAgentInfo paramsInfo;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(paramsInfo);
+    std::shared_ptr<NotificationActionButton> actionButton1 =
+        NotificationActionButton::Create(nullptr, "title", wantAgent);
+    notificationRequest.AddActionButton(actionButton1);
+    std::shared_ptr<NotificationActionButton> actionButton2 =
+        NotificationActionButton::Create(nullptr, "title2", wantAgent);
+    notificationRequest.AddActionButton(actionButton2);
+    std::shared_ptr<NotificationActionButton> actionButton3 =
+        NotificationActionButton::Create(nullptr, "title3", wantAgent);
+    notificationRequest.AddActionButton(actionButton3);
+    std::vector<std::shared_ptr<NotificationActionButton>> result =
+        notificationRequest.GetActionButtons();
+    notificationRequest.ClearActionButtons();
+    EXPECT_EQ(result.size(), 3);
+}
+
+/**
+ * @tc.name: AddMessageUser_0100
+ * @tc.desc: AddMessageUser
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, AddMessageUser_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    std::shared_ptr<MessageUser> messageUser = nullptr;
+    notificationRequest.AddMessageUser(messageUser);
+    std::vector<std::shared_ptr<MessageUser>> result = notificationRequest.GetMessageUsers();
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: SetColor_0100
+ * @tc.desc: SetColor
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, SetColor_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    uint32_t color = 1;
+    notificationRequest.SetColor(color);
+    uint32_t result = notificationRequest.GetColor();
+    uint32_t ret = 4278190081;
+    EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: IsColorEnabled_0100
+ * @tc.desc: IsColorEnabled
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, IsColorEnabled_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    notificationRequest.SetContent(nullptr);
+    notificationRequest.GetContent();
+    uint32_t result1 = notificationRequest.IsColorEnabled();
+    EXPECT_EQ(result1, false);
+}
+
+/**
+ * @tc.name: IsColorEnabled_0200
+ * @tc.desc: IsColorEnabled
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, IsColorEnabled_0200, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    notificationRequest.SetContent(content);
+    std::shared_ptr<NotificationContent> result = notificationRequest.GetContent();
+    EXPECT_EQ(result, content);
+    uint32_t result1 = notificationRequest.IsColorEnabled();
+    EXPECT_EQ(result1, false);
+}
+
+/**
+ * @tc.name: SetSettingsText_0100
+ * @tc.desc: SetSettingsText
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, SetSettingsText_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    std::shared_ptr<NotificationPictureContent> pictureContent = std::make_shared<NotificationPictureContent>();
+    std::shared_ptr<NotificationContent> content1 = std::make_shared<NotificationContent>(pictureContent);
+    notificationRequest.SetContent(content1);
+    std::shared_ptr<NotificationContent> result = notificationRequest.GetContent();
+    EXPECT_EQ(result, content1);
+    std::string text = "text";
+    notificationRequest.SetSettingsText(text);
+    
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    notificationRequest.SetContent(content2);
+    std::shared_ptr<NotificationContent> result2 = notificationRequest.GetContent();
+    EXPECT_EQ(result2, content2);
+    notificationRequest.SetSettingsText(text);
+}
+
+/**
+ * @tc.name: SetNotificationUserInputHistory_0100
+ * @tc.desc: SetNotificationUserInputHistory
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, SetNotificationUserInputHistory_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    std::vector<std::string> text;
+    notificationRequest.SetNotificationUserInputHistory(text);
+    std::vector<std::string> result = notificationRequest.GetNotificationUserInputHistory();
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: GetNotificationHashCode_0100
+ * @tc.desc: GetNotificationHashCode
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, GetNotificationHashCode_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    std::string ownerName = "";
+    notificationRequest.SetOwnerBundleName(ownerName);
+    std::string result1 = notificationRequest.GetNotificationHashCode();
+    EXPECT_EQ(result1, ownerName);
+
+    std::string creatorName = "";
+    notificationRequest.SetCreatorBundleName(creatorName);
+    std::string result2 = notificationRequest.GetNotificationHashCode();
+    EXPECT_EQ(result2, creatorName);
+
+    int32_t uid = 0;
+    notificationRequest.SetCreatorUid(uid);
+    std::string result3 = notificationRequest.GetNotificationHashCode();
+    EXPECT_EQ(result3, creatorName);
+
+    notificationRequest.SetOwnerBundleName("ownerName");
+    notificationRequest.SetCreatorBundleName("creatorName");
+    notificationRequest.SetCreatorUid(2);
+    std::string result4 = notificationRequest.GetNotificationHashCode();
+    std::string ret = "10_creatorName_2_ownerName";
+    EXPECT_EQ(result4, ret);
+}
+
+/**
+ * @tc.name: SetDevicesSupportDisplay_0100
+ * @tc.desc: SetDevicesSupportDisplay
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, SetDevicesSupportDisplay_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    std::vector<std::string> devices;
+    notificationRequest.SetDevicesSupportDisplay(devices);
+    notificationRequest.SetDevicesSupportOperate(devices);
+    nlohmann::json jsonObject;
+    notificationRequest.ConvertJsonToNum(nullptr, jsonObject);
+    notificationRequest.ConvertJsonToString(nullptr, jsonObject);
+    notificationRequest.ConvertJsonToEnum(nullptr, jsonObject);
+    notificationRequest.ConvertJsonToBool(nullptr, jsonObject);
+    notificationRequest.ConvertJsonToPixelMap(nullptr, jsonObject);
+    bool result1 = notificationRequest.ConvertJsonToNotificationContent(nullptr, jsonObject);
+    bool result2 = notificationRequest.ConvertJsonToNotificationActionButton(nullptr, jsonObject);
+    bool result3 = notificationRequest.ConvertJsonToNotificationFlags(nullptr, jsonObject);
+    EXPECT_EQ(result1, false);
+    EXPECT_EQ(result2, false);
+    EXPECT_EQ(result3, false);
+}
 }
 }
