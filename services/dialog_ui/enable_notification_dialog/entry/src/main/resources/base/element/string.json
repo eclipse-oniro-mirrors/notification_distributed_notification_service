@@ -1,0 +1,28 @@
+{
+  "string": [
+    {
+      "name": "entry_desc",
+      "value": "description"
+    },
+    {
+      "name": "NotificationServiceExtAbility_desc",
+      "value": "NotificationDialog"
+    },
+    {
+      "name": "NotificationServiceExtAbility_label",
+      "value": "NotificationDialog"
+    },
+    {
+      "name": "if_allow_to_publish_notification",
+      "value": "Do you allow the app to publish notification?"
+    },
+    {
+      "name": "allow",
+      "value": "allow"
+    },
+    {
+      "name": "ban",
+      "value": "ban"
+    }
+  ]
+}
