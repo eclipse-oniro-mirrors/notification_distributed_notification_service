@@ -365,9 +365,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSlotFromDisturbeDB_00100, Fu
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     slots.push_back(slot1);
     EXPECT_TRUE(preferncesDB_->PutSlotsToDisturbeDB(bundleName_, bundleUid_, slots));
-
     EXPECT_TRUE(preferncesDB_->RemoveSlotFromDisturbeDB(
-        bundleName_, OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION));
+        bundleName_ + std::to_string(bundleUid_),
+        OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION));
 }
 
 /**
@@ -392,23 +392,13 @@ HWTEST_F(NotificationPreferencesDatabaseTest, StoreDeathRecipient_00100, Functio
 }
 
 /**
- * @tc.name      : GetKvStore_00100
- * @tc.number    :
- * @tc.desc      : Open disturbe DB, return is SUCCESS.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, GetKvStore_00100, Function | SmallTest | Level1)
-{
-    EXPECT_EQ(OHOS::DistributedKv::Status::SUCCESS, preferncesDB_->GetKvStore());
-}
-
-/**
  * @tc.name      : CheckKvStore_00100
  * @tc.number    :
  * @tc.desc      : Check disturbe DB is exsit, return is true.
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, CheckKvStore_00100, Function | SmallTest | Level1)
 {
-    EXPECT_TRUE(preferncesDB_->CheckKvStore());
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
 }
 
 /**
@@ -430,8 +420,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyValueToDisturbeDB
 HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00100, Function | SmallTest | Level1)
 {
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    std::vector<OHOS::DistributedKv::Entry> entries;
-    EXPECT_TRUE(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, slot, entries));
+    std::unordered_map<std::string, std::string> values;
+    EXPECT_TRUE(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, slot, values));
 }
 
 /**
@@ -504,11 +494,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_name");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_name";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -522,11 +510,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_importance");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_importance";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -540,11 +526,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_showBadge");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_showBadge";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -558,11 +542,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_badgeTotalNum");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_badgeTotalNum";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -576,11 +558,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_privateAllowed");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_privateAllowed";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -594,11 +574,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_enabledNotification");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_enabledNotification";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -612,11 +590,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_poppedDialog");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_poppedDialog";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -630,11 +606,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_uid");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_uid";
+    entry.second = "1";
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -648,11 +622,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00100, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_id");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_id";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -666,11 +638,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00200, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_name");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_name";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -684,11 +654,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00300, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_description");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_description";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -702,11 +670,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00400, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_level");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_level";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -720,11 +686,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00500, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_showBadge");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_showBadge";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -738,11 +702,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00600, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enableLight");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_enableLight";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -756,11 +718,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00700, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enableVibration");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_enableVibration";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -774,11 +734,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00800, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_ledLightColor");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_ledLightColor";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -792,11 +750,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00900, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_lockscreenVisibleness");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_lockscreenVisibleness";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -810,11 +766,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01000, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_sound");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_sound";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -828,11 +782,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01100, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_vibrationSytle");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_vibrationSytle";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -846,11 +798,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01200, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enableBypassDnd");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_enableBypassDnd";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -864,11 +814,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01300, Fun
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     std::string bundleKey = "bundleKey";
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey("ans_bundle_bundleKey_slot_type_1_enabled");
-    DistributedKv::Value dbValue("1");
-    entry.key = dbKey;
-    entry.value = dbValue;
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_enabled";
+    entry.second = "1";
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -932,8 +880,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00200
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00200, Function | SmallTest | Level1)
 {
-    std::vector<OHOS::DistributedKv::Entry> entries;
-    EXPECT_EQ(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, nullptr, entries), false);
+    std::unordered_map<std::string, std::string> values;
+    EXPECT_EQ(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, nullptr, values), false);
 }
 
 /**
