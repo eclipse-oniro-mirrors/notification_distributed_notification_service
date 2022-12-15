@@ -1127,7 +1127,7 @@ HWTEST_F(ReminderRequestTest, GetActionButtons_00002, Function | SmallTest | Lev
  * @tc.name: UpdateNotificationContent_00002
  * @tc.desc: Test UpdateNotificationContent parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5VB6V
+ * @tc.require: issueI65R21
  */
 HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00002, Function | SmallTest | Level1)
 {
@@ -1148,7 +1148,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00002, Function | SmallT
  * @tc.name: AddColumn_00002
  * @tc.desc: Test AddColumn parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5VB6V
+ * @tc.require: issueI65R21
  */
 HWTEST_F(ReminderRequestTest, AddColumn_00002, Function | SmallTest | Level1)
 {

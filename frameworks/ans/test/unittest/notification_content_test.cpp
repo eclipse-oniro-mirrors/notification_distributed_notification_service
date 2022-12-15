@@ -123,5 +123,130 @@ HWTEST_F(NotificationContentTest, NotificationBasicContentMarshalling_0100, Leve
     auto result = notificationBasicContent.Marshalling(parcel);
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: NotificationContentReadFromParcel_0200
+ * @tc.desc: ReadFromParcel
+ * @tc.type: FUNC
+ * @tc.require: issueI665WK
+ */
+HWTEST_F(NotificationContentTest, NotificationContentReadFromParcel_0200, Level1)
+{
+    std::shared_ptr<NotificationNormalContent> normalContent0 = nullptr;
+    NotificationContent notificationContent0(normalContent0);
+
+    std::shared_ptr<NotificationLongTextContent> longTextContent = nullptr;
+    NotificationContent notificationContent1(longTextContent);
+
+    std::shared_ptr<NotificationPictureContent> pictureContent = nullptr;
+    NotificationContent notificationContent2(pictureContent);
+
+    std::shared_ptr<NotificationConversationalContent> conversationContent = nullptr;
+    NotificationContent notificationContent3(conversationContent);
+
+    std::shared_ptr<NotificationMultiLineContent> multiLineContent = nullptr;
+    NotificationContent notificationContent4(multiLineContent);
+
+    std::shared_ptr<NotificationMediaContent> mediaContent = nullptr;
+    NotificationContent notificationContent5(mediaContent);
+    
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    NotificationContent notificationContent(normalContent);
+    auto result = notificationContent.GetContentType();
+    EXPECT_EQ(result, NotificationContent::Type::BASIC_TEXT);
+
+    Parcel parcel;
+    auto result1 = notificationContent.ReadFromParcel(parcel);
+    EXPECT_EQ(result1, true);
+}
+
+/**
+ * @tc.name: NotificationContentReadFromParcel_0300
+ * @tc.desc: ReadFromParcel
+ * @tc.type: FUNC
+ * @tc.require: issueI665WK
+ */
+HWTEST_F(NotificationContentTest, NotificationContentReadFromParcel_0300, Level1)
+{
+    std::shared_ptr<NotificationConversationalContent> conversationContent =
+        std::make_shared<NotificationConversationalContent>();
+    NotificationContent notificationContent(conversationContent);
+    auto result = notificationContent.GetContentType();
+    EXPECT_EQ(result, NotificationContent::Type::CONVERSATION);
+
+    Parcel parcel;
+    auto result1 = notificationContent.ReadFromParcel(parcel);
+    EXPECT_EQ(result1, true);
+}
+
+/**
+ * @tc.name: NotificationContentReadFromParcel_0400
+ * @tc.desc: ReadFromParcel
+ * @tc.type: FUNC
+ * @tc.require: issueI665WK
+ */
+HWTEST_F(NotificationContentTest, NotificationContentReadFromParcel_0400, Level1)
+{
+    std::shared_ptr<NotificationPictureContent> pictureContent = std::make_shared<NotificationPictureContent>();
+    NotificationContent notificationContent(pictureContent);
+    auto result = notificationContent.GetContentType();
+    EXPECT_EQ(result, NotificationContent::Type::PICTURE);
+
+    Parcel parcel;
+    auto result1 = notificationContent.ReadFromParcel(parcel);
+    EXPECT_EQ(result1, true);
+}
+
+/**
+ * @tc.name: NotificationContentReadFromParcel_0500
+ * @tc.desc: ReadFromParcel
+ * @tc.type: FUNC
+ * @tc.require: issueI665WK
+ */
+HWTEST_F(NotificationContentTest, NotificationContentReadFromParcel_0500, Level1)
+{
+    std::shared_ptr<NotificationMultiLineContent> multiLineContent = std::make_shared<NotificationMultiLineContent>();
+    NotificationContent notificationContent(multiLineContent);
+    auto result = notificationContent.GetContentType();
+    EXPECT_EQ(result, NotificationContent::Type::MULTILINE);
+
+    Parcel parcel;
+    auto result1 = notificationContent.ReadFromParcel(parcel);
+    EXPECT_EQ(result1, true);
+}
+
+/**
+ * @tc.name: NotificationContentReadFromParcel_0600
+ * @tc.desc: ReadFromParcel
+ * @tc.type: FUNC
+ * @tc.require: issueI665WK
+ */
+HWTEST_F(NotificationContentTest, NotificationContentReadFromParcel_0600, Level1)
+{
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    NotificationContent notificationContent(mediaContent);
+    auto result = notificationContent.GetContentType();
+    EXPECT_EQ(result, NotificationContent::Type::MEDIA);
+
+    Parcel parcel;
+    auto result1 = notificationContent.ReadFromParcel(parcel);
+    EXPECT_EQ(result1, true);
+}
+
+/**
+ * @tc.name: ConvertJsonToContent_0100
+ * @tc.desc: ConvertJsonToContent
+ * @tc.type: FUNC
+ * @tc.require: issueI665WK
+ */
+HWTEST_F(NotificationContentTest, ConvertJsonToContent_0100, Level1)
+{
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    NotificationContent notificationContent(mediaContent);
+
+    nlohmann::json jsonObject;
+    auto result1 = notificationContent.ConvertJsonToContent(nullptr, jsonObject);
+    EXPECT_EQ(result1, false);
+}
 }
 }
