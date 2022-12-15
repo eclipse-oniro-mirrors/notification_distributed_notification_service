@@ -180,6 +180,14 @@ public:
      * The key indicates input source.
      */
     static const std::string EXTRA_INPUTS_SOURCE;
+
+    // rdb
+    constexpr static const char* NOTIFICATION_RDB_NAME = "/notificationdb.db";
+    constexpr static const char* NOTIFICATION_RDB_TABLE_NAME = "notification_table";
+    constexpr static const char* NOTIFICATION_RDB_PATH = "/data/service/el1/public/database/notification_service";
+    constexpr static const char* NOTIFICATION_JOURNAL_MODE = "WAL";
+    constexpr static const char* NOTIFICATION_SYNC_MODE = "MODE_OFF";
+    constexpr static int32_t NOTIFICATION_RDB_VERSION = 1;
 };
 }  // namespace Notification
 }  // namespace OHOS
