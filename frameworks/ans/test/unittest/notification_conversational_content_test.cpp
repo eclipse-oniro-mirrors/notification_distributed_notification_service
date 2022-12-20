@@ -96,5 +96,23 @@ HWTEST_F(NotificationConversationalContentTest, ReadFromParcel_00001, Function |
     auto rrc = std::make_shared<NotificationConversationalContent>(messageUser);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: AddConversationalMessage_00001
+ * @tc.desc: Test AddConversationalMessage parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConversationalContentTest, AddConversationalMessage_00001, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    auto rrc = std::make_shared<NotificationConversationalContent>(messageUser);
+
+    MessageUser  sender;
+    std::shared_ptr<NotificationConversationalMessage> messagePtr =
+        std::make_shared<NotificationConversationalMessage>("messageptr", 0, sender);
+    EXPECT_NE(messagePtr, nullptr);
+    rrc->AddConversationalMessage(messagePtr);
+}
 }
 }

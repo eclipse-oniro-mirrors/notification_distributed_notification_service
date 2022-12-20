@@ -539,20 +539,6 @@ HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: CanShow_00002
- * @tc.desc: Test CanShow parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5UYHP
- */
-HWTEST_F(ReminderRequestTest, CanShow_00002, Function | SmallTest | Level1)
-{
-    uint64_t reminderTimeInMilli = 5 * 60 * 1000;
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->SetReminderTimeInMilli(reminderTimeInMilli);
-    EXPECT_EQ(rrc->CanShow(), true);
-}
-
-/**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump parameters.
  * @tc.type: FUNC
@@ -972,6 +958,208 @@ HWTEST_F(ReminderRequestTest, GetUserId_00001, Function | SmallTest | Level1)
     int32_t uid = 1;
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->GetUserId(uid), 0);
+}
+
+/**
+ * @tc.name: SetActionButton_00001
+ * @tc.desc: Test SetActionButton parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, SetActionButton_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string title = "this is title";
+    Notification::ReminderRequest::ActionButtonType type =
+            Notification::ReminderRequest::ActionButtonType::INVALID;
+    rrc->SetActionButton(title, type);
+}
+
+/**
+ * @tc.name: SetActionButton_00002
+ * @tc.desc: Test SetActionButton parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, SetActionButton_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string title = "this is title";
+    Notification::ReminderRequest::ActionButtonType type2 =
+            Notification::ReminderRequest::ActionButtonType::CLOSE;
+    rrc->SetActionButton(title, type2);
+}
+
+/**
+ * @tc.name: SetActionButton_00003
+ * @tc.desc: Test SetActionButton parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, SetActionButton_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string title = "this is title";
+    Notification::ReminderRequest::ActionButtonType type3 =
+            Notification::ReminderRequest::ActionButtonType::SNOOZE;
+    rrc->SetActionButton(title, type3);
+}
+
+/**
+ * @tc.name: AddActionButtons_00001
+ * @tc.desc: Test AddActionButtons parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, AddActionButtons_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->AddActionButtons(true);
+    rrc->AddActionButtons(false);
+}
+
+/**
+ * @tc.name: InitUserId_00001
+ * @tc.desc: Test InitUserId parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, InitUserId_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    bool deSet = true;
+    uint8_t newState = 2;
+    std::string function = "this is function";
+    int32_t userId = 1;
+    int32_t uid = 2;
+    rrc->InitUserId(userId);
+    rrc->InitUid(uid);
+    rrc->SetState(deSet, newState, function);
+    uint8_t result1 = rrc->GetState();
+    EXPECT_EQ(result1, 2);
+    bool result = rrc->IsShowing();
+    EXPECT_EQ(result, false);
+    rrc->OnShow(true, true, true);
+    rrc->OnShowFail();
+}
+
+/**
+ * @tc.name: OnStart_00001
+ * @tc.desc: Test OnStart parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, OnStart_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->OnStart();
+    rrc->OnStop();
+    bool deSet = true;
+    uint8_t newState = 2;
+    std::string function = "this is function";
+    int32_t userId = 1;
+    int32_t uid = 2;
+    rrc->InitUserId(userId);
+    rrc->InitUid(uid);
+    rrc->SetState(deSet, newState, function);
+    rrc->OnStart();
+    rrc->OnStop();
+}
+
+/**
+ * @tc.name: RecoverInt64FromDb_00002
+ * @tc.desc: Test RecoverInt64FromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+        std::make_shared<NativeRdb::AbsSharedResultSet>();
+    std::string columnName = "this is columnName";
+    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
+    int64_t result = rrc->RecoverInt64FromDb(resultSet, columnName, columnType);
+    EXPECT_EQ(result, 0);
+
+    ReminderRequest::DbRecoveryType columnType2 = ReminderRequest::DbRecoveryType::LONG;
+    int64_t result2 = rrc->RecoverInt64FromDb(resultSet, columnName, columnType2);
+    EXPECT_EQ(result2, 0);
+    rrc->RecoverFromDb(resultSet);
+    rrc->RecoverActionButton(resultSet);
+    rrc->RecoverActionButton(nullptr);
+}
+
+/**
+ * @tc.name: RecoverWantAgent_00002
+ * @tc.desc: Test RecoverWantAgent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, RecoverWantAgent_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string source = "source";
+    std::string split = "split";
+    std::vector<std::string> ret = rrc->StringSplit(source, split);
+    EXPECT_EQ(ret.size(), 1);
+
+    std::string wantAgentInfo = "this is wantAgentInfo";
+    uint8_t type = 0;
+    rrc->RecoverWantAgent(wantAgentInfo, type);
+}
+
+/**
+ * @tc.name: GetActionButtons_00002
+ * @tc.desc: Test GetActionButtons parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, GetActionButtons_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::map<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo> ret =
+        rrc->GetActionButtons();
+    EXPECT_EQ(ret.size(), 0);
+}
+
+/**
+ * @tc.name: UpdateNotificationContent_00002
+ * @tc.desc: Test UpdateNotificationContent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetNotificationId(100);
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+
+    rrc->UpdateNotificationContent(true);
+    rrc->UpdateNotificationContent(false);
+
+    Notification::ReminderRequest::TimeTransferType type = Notification::ReminderRequest::TimeTransferType::WEEK;
+    int32_t actualTime = 1;
+    int32_t result = rrc->GetCTime(type, actualTime);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: AddColumn_00002
+ * @tc.desc: Test AddColumn parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, AddColumn_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->InitDbColumns();
+    std::string name = "this is name";
+    std::string type = "this is type";
+    rrc->AddColumn(name, type, true);
+    rrc->AddColumn(name, type, false);
+    int32_t result = rrc->GetReminderId();
+    EXPECT_EQ(result, -1);
 }
 }
 }
