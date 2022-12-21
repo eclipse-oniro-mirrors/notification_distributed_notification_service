@@ -1468,12 +1468,14 @@ HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification01, Function | Small
     MessageOption option = {MessageOption::TF_SYNC};
 
     std::string deviceId = "this is a deviceId";
+    sptr<IRemoteObject> callbackInfo;
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(deviceId);
+    data.WriteRemoteObject(callbackInfo);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -3786,9 +3788,8 @@ HWTEST_F(AnsManagerStubTest, UpdateSlots01, Function | SmallTest | Level1)
 HWTEST_F(AnsManagerStubTest, RequestEnableNotification01, Function | SmallTest | Level1)
 {
     std::string deviceId = "this is deviceId";
-    bool popFlag = true;
-
-    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, popFlag);
+    sptr<IRemoteObject> callbackInfo;
+    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, callbackInfo);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

@@ -39,6 +39,7 @@
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
+#include "notification_dialog.h"
 #include "notification_filter.h"
 #include "notification_preferences.h"
 #include "notification_slot.h"
@@ -1438,7 +1439,8 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     return result;
 }
 
-ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
+ErrCode AdvancedNotificationService::RequestEnableNotification(
+    const std::string &deviceId, const sptr<IRemoteObject> &callbackInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1455,7 +1457,6 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     ANS_LOGI("result = %{public}d, allowedNotify = %{public}d", result, allowedNotify);
     if (result != ERR_OK || allowedNotify) {
         ANS_LOGD("Already granted permission");
-        popFlag = false;
         return result;
     }
     
@@ -1464,11 +1465,19 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     result = GetHasPoppedDialog(bundleOption, hasPopped);
     if (result != ERR_OK || hasPopped) {
         ANS_LOGD("Already shown dialog");
-        popFlag = false;
         return result;
     }
+    
+    ANS_LOGI("hasPopped = %{public}d, allowedNotify = %{public}d", hasPopped, allowedNotify);
+    if (!hasPopped && !allowedNotify) {
+        auto notificationDialog = std::make_shared<NotificationDialog>();
+        result = notificationDialog->StartEnableNotificationDialogAbility(callbackInfo);
+        if (result != ERR_OK) {
+            ANS_LOGD("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
+            return result;
+        }
+    }
     SetHasPoppedDialog(bundleOption, true);
-    popFlag = true;
     return result;
 }
 

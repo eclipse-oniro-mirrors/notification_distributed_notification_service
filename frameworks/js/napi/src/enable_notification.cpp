@@ -342,23 +342,19 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 std::string deviceId {""};
-                bool popFlag = false;
-                asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
-                asynccallbackinfo->params.allowToPop = popFlag;
-                ANS_LOGI("errorCode = %{public}d, allowToPop = %{public}d",
-                        asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
-                if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
-                    ANS_LOGI("Begin to start notification dialog");
-                    auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-                    StartNotificationDialog(callbackInfo);
+                auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
+                if (CreateCallbackStubImpl(callbackInfo)) {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::RequestEnableNotification(deviceId, callbackStubImpl_);
                 }
             }
         },
         [](napi_env env, napi_status status, void *data) {
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
-                if (!(asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop)) {
+                if (asynccallbackinfo->info.errorCode != ERR_OK) {
                     AsyncCompleteCallbackIsNotificationEnabled(env, status, data);
+                    ResetCallbackStubImpl();
                 }
             }
         },
@@ -371,27 +367,6 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         return Common::NapiGetNull(env);
     } else {
         return promise;
-    }
-}
-
-void StartNotificationDialog(AsyncCallbackInfoIsEnable *callbackInfo)
-{
-    ANS_LOGD("%{public}s, Begin Calling StartNotificationDialog.", __func__);
-    if (CreateCallbackStubImpl(callbackInfo)) {
-        sptr<IRemoteObject> token;
-        auto result = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
-        if (result == ERR_OK) {
-            AAFwk::Want want;
-            want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
-            want.SetParam("callbackStubImpl_", callbackStubImpl_);
-            want.SetParam("tokenId", token);
-            want.SetParam("from", AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
-            ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token, -1);
-            ANS_LOGD("%{public}s, End Calling StartNotificationDialog. ret=%{public}d", __func__, err);
-        } else {
-            ANS_LOGE("%{public}s, show notification dialog failed", __func__);
-            ResetCallbackStubImpl();
-        }
     }
 }
 

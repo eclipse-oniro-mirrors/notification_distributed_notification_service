@@ -331,10 +331,10 @@ public:
      * @brief Allow notifications to be sent based on the deviceId.
      *
      * @param deviceId Indicates the device Id.
-     * @param popFlag Indicates the flag that allows dialog to be popped.
+     * @param callbackInfo Indicates the callbackinfo.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RequestEnableNotification(const std::string &deviceId, bool &popFlag) override;
+    ErrCode RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callbackInfo) override;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.
