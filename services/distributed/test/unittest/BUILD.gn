@@ -23,6 +23,10 @@ group("ans_unit_test") {
     deps += [
       ":ans_distributed_unit_test",
       ":distributed_database_branch_test",
+      ":distributed_database_callback_test",
+      ":distributed_device_callback_test",
+      ":distributed_flow_control_test",
+      ":distributed_preferences_branch_test",
       ":distributed_preferences_database_test",
       ":distributed_screen_status_manager_branch_test",
     ]
@@ -193,6 +197,169 @@ ohos_unittest("distributed_database_branch_test") {
     "distributed_database_branch_test/mock_distributed_kv_data_manager.cpp",
     "distributed_database_branch_test/mock_single_kv_store.cpp",
   ]
+
+  configs = [
+    "${services_path}/distributed/:ans_distributed_config",
+    "${core_path}:public_ans_core_config",
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
+  ]
+
+  deps = [
+    "${core_path}:ans_core",
+    "${services_path}/distributed:libans_distributed",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hitrace_native:hitrace_meter",
+    "hitrace_native:libhitracechain",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "multimedia_image_framework:image_native",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("distributed_preferences_branch_test") {
+  module_out_path = "${component_name}/unittest"
+  include_dirs = [
+    "/${services_path}/distributed/include",
+    "//commonlibrary/c_utils/base/include",
+  ]
+
+  sources = [
+    "distributed_preferences_branch_test/distributed_preferences_branch_test.cpp",
+    "distributed_preferences_branch_test/mock_distributed_preferences_database.cpp",
+  ]
+
+  configs = [
+    "${services_path}/distributed/:ans_distributed_config",
+    "${core_path}:public_ans_core_config",
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
+  ]
+
+  deps = [
+    "${core_path}:ans_core",
+    "${services_path}/distributed:libans_distributed",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hitrace_native:hitrace_meter",
+    "hitrace_native:libhitracechain",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "multimedia_image_framework:image_native",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("distributed_device_callback_test") {
+  module_out_path = "${component_name}/unittest"
+  include_dirs = [
+    "/${services_path}/distributed/include",
+    "//commonlibrary/c_utils/base/include",
+  ]
+
+  sources = [ "distributed_device_callback_test.cpp" ]
+
+  configs = [
+    "${services_path}/distributed/:ans_distributed_config",
+    "${core_path}:public_ans_core_config",
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
+  ]
+
+  deps = [
+    "${core_path}:ans_core",
+    "${services_path}/distributed:libans_distributed",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hitrace_native:hitrace_meter",
+    "hitrace_native:libhitracechain",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "multimedia_image_framework:image_native",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("distributed_database_callback_test") {
+  module_out_path = "${component_name}/unittest"
+  include_dirs = [
+    "/${services_path}/distributed/include",
+    "//commonlibrary/c_utils/base/include",
+  ]
+
+  sources = [ "distributed_database_callback_test.cpp" ]
+
+  configs = [
+    "${services_path}/distributed/:ans_distributed_config",
+    "${core_path}:public_ans_core_config",
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
+  ]
+
+  deps = [
+    "${core_path}:ans_core",
+    "${services_path}/distributed:libans_distributed",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hitrace_native:hitrace_meter",
+    "hitrace_native:libhitracechain",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "multimedia_image_framework:image_native",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("distributed_flow_control_test") {
+  module_out_path = "${component_name}/unittest"
+  include_dirs = [
+    "/${services_path}/distributed/include",
+    "//commonlibrary/c_utils/base/include",
+  ]
+
+  sources = [ "distributed_flow_control_test.cpp" ]
 
   configs = [
     "${services_path}/distributed/:ans_distributed_config",
