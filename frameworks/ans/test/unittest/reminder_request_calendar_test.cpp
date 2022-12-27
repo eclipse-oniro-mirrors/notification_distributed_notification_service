@@ -453,5 +453,309 @@ HWTEST_F(ReminderRequestCalendarTest, ReadFromParcel_00001, Function | SmallTest
     EXPECT_NE(nullptr, calendar);
     EXPECT_EQ(calendar->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: GetDaysOfMonth_00001
+ * @tc.desc: Test GetDaysOfMonth parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, GetDaysOfMonth_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint16_t year = 1;
+    uint8_t month = 2;
+    uint8_t result = calendar->GetDaysOfMonth(year, month);
+    uint8_t ret = 28;
+    EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: SetDay_00001
+ * @tc.desc: Test SetDay parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetDay_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = -1;
+    bool isSet = false;
+    calendar->SetDay(day, isSet);
+    bool result = calendar->IsRepeatDay(day);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetMonth_00001
+ * @tc.desc: Test SetMonth parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetMonth_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t month = -1;
+    bool isSet = false;
+    calendar->SetMonth(month, isSet);
+    bool result = calendar->IsRepeatMonth(month);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetRepeatDaysOfMonth_00001
+ * @tc.desc: Test SetRepeatDaysOfMonth parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetRepeatDaysOfMonth_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    std::vector<uint8_t> repeatDays;
+    repeatDays.emplace_back(1);
+    repeatDays.emplace_back(2);
+    repeatDays.emplace_back(3);
+    repeatDays.emplace_back(4);
+    repeatDays.emplace_back(5);
+    repeatDays.emplace_back(6);
+    repeatDays.emplace_back(7);
+    repeatDays.emplace_back(8);
+    repeatDays.emplace_back(9);
+    repeatDays.emplace_back(10);
+    repeatDays.emplace_back(11);
+    repeatDays.emplace_back(12);
+    repeatDays.emplace_back(13);
+    repeatDays.emplace_back(14);
+    repeatDays.emplace_back(15);
+    repeatDays.emplace_back(16);
+    repeatDays.emplace_back(17);
+    repeatDays.emplace_back(18);
+    repeatDays.emplace_back(19);
+    repeatDays.emplace_back(20);
+    repeatDays.emplace_back(21);
+    repeatDays.emplace_back(22);
+    repeatDays.emplace_back(23);
+    repeatDays.emplace_back(24);
+    repeatDays.emplace_back(25);
+    repeatDays.emplace_back(26);
+    repeatDays.emplace_back(27);
+    repeatDays.emplace_back(28);
+    repeatDays.emplace_back(29);
+    repeatDays.emplace_back(30);
+    repeatDays.emplace_back(31);
+    repeatDays.emplace_back(32);
+    EXPECT_EQ(repeatDays.size(), 32);
+
+    calendar->SetRepeatDaysOfMonth(repeatDays);
+    std::vector<uint8_t> result = calendar->GetRepeatMonths();
+    EXPECT_EQ(result.size(), 1);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_00001
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = 1;
+    bool isSet = false;
+    calendar->SetDay(day, isSet);
+
+    uint8_t month = 1;
+    calendar->SetMonth(month, isSet);
+
+    auto rrc = std::make_shared<ReminderRequest>();
+    rrc->SetSnoozeTimes(0);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 0) << "Get snoozeTimes not 1";
+
+    uint32_t minTimeIntervalInSecond = 0;
+    rrc->SetTimeInterval(0);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+
+    bool result2 = calendar->IsRepeatReminder();
+    EXPECT_EQ(result2, false);
+
+    uint32_t ret = calendar->GetRepeatDay();
+    uint16_t ret2 = calendar->GetRepeatMonth();
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret2, 0);
+
+    bool result3 = calendar->UpdateNextReminder();
+    EXPECT_EQ(result3, false);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_00002
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00002, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = 2;
+    bool isSet = true;
+    calendar->SetDay(day, isSet);
+    bool result = calendar->IsRepeatDay(day);
+    EXPECT_EQ(result, true);
+
+    uint8_t month = 2;
+    calendar->SetMonth(month, isSet);
+    bool result1 = calendar->IsRepeatMonth(month);
+    EXPECT_EQ(result1, true);
+
+    bool result2 = calendar->IsRepeatReminder();
+    EXPECT_EQ(result2, true);
+
+    auto rrc = std::make_shared<ReminderRequest>();
+    rrc->SetSnoozeTimes(1);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
+    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1) << "Get snoozeTimesDynamic not 1";
+
+    uint32_t minTimeIntervalInSecond = 5 * 60;
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+
+    bool result3 = calendar->UpdateNextReminder();
+    EXPECT_EQ(result3, true);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_00003
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00003, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = 1;
+    bool isSet = false;
+    calendar->SetDay(day, isSet);
+
+    uint8_t month = 2;
+    bool isSet1 = true;
+    calendar->SetMonth(month, isSet1);
+
+    auto rrc = std::make_shared<ReminderRequest>();
+    rrc->SetSnoozeTimesDynamic(0);
+    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0);
+
+    rrc->SetSnoozeTimes(1);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
+    uint32_t minTimeIntervalInSecond = 5 * 60;
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+
+    uint32_t ret = calendar->GetRepeatDay();
+    uint16_t ret2 = calendar->GetRepeatMonth();
+    uint16_t ret3 = 3;
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret2, ret3);
+
+    bool result3 = calendar->UpdateNextReminder();
+    EXPECT_EQ(result3, false);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_00004
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00004, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = 1;
+    bool isSet = false;
+    calendar->SetDay(day, isSet);
+    bool result = calendar->IsRepeatDay(day);
+    EXPECT_EQ(result, false);
+
+    uint8_t month = 1;
+    calendar->SetMonth(month, isSet);
+    bool result1 = calendar->IsRepeatMonth(month);
+    EXPECT_EQ(result1, false);
+
+    auto rrc = std::make_shared<ReminderRequest>();
+    rrc->SetSnoozeTimes(1);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
+
+    rrc->SetSnoozeTimesDynamic(0);
+    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0) << "Get snoozeTimesDynamic not 1";
+
+    uint32_t minTimeIntervalInSecond = 5 * 60;
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+
+    bool result3 = calendar->UpdateNextReminder();
+    EXPECT_EQ(result3, false);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_00005
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00005, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = 2;
+    bool isSet = true;
+    calendar->SetDay(day, isSet);
+    bool result = calendar->IsRepeatDay(day);
+    EXPECT_EQ(result, true);
+
+    uint8_t month = 1;
+    bool isSet1 = false;
+    calendar->SetMonth(month, isSet1);
+    bool result1 = calendar->IsRepeatMonth(month);
+    EXPECT_EQ(result1, false);
+
+    auto rrc = std::make_shared<ReminderRequest>();
+    rrc->SetSnoozeTimes(1);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
+
+    rrc->SetSnoozeTimesDynamic(0);
+    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0) << "Get snoozeTimesDynamic not 1";
+
+    uint32_t minTimeIntervalInSecond = 5 * 60;
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+
+    bool result3 = calendar->UpdateNextReminder();
+    EXPECT_EQ(result3, false);
+}
 }
 }
