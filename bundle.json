@@ -100,7 +100,7 @@
         ]
       },
       "test": [
-        "//base/notification/distributed_notification_service/services/ans/test/unittest:ans_unit_test",
+        "//base/notification/distributed_notification_service/services/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/services/distributed/test/unittest:ans_unit_test",
         "//base/notification/distributed_notification_service/services/test/moduletest:moduletest",
         "//base/notification/distributed_notification_service/frameworks/test/moduletest:moduletest",
