@@ -254,6 +254,7 @@ HWTEST_F(NotificationRequestTest, IsColorEnabled_0100, Level1)
     int32_t myNotificationId = 10;
     NotificationRequest notificationRequest(myNotificationId);
 
+    notificationRequest.SetColorEnabled(true);
     notificationRequest.SetContent(nullptr);
     notificationRequest.GetContent();
     uint32_t result1 = notificationRequest.IsColorEnabled();
@@ -271,11 +272,33 @@ HWTEST_F(NotificationRequestTest, IsColorEnabled_0200, Level1)
     int32_t myNotificationId = 10;
     NotificationRequest notificationRequest(myNotificationId);
 
+    notificationRequest.SetColorEnabled(true);
     std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
     notificationRequest.SetContent(content);
     std::shared_ptr<NotificationContent> result = notificationRequest.GetContent();
     EXPECT_EQ(result, content);
+    uint32_t result1 = notificationRequest.IsColorEnabled();
+    EXPECT_EQ(result1, false);
+}
+
+/**
+ * @tc.name: IsColorEnabled_0300
+ * @tc.desc: IsColorEnabled
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, IsColorEnabled_0300, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    notificationRequest.SetColorEnabled(true);
+    std::shared_ptr<NotificationPictureContent> pictureContent = std::make_shared<NotificationPictureContent>();
+    std::shared_ptr<NotificationContent> content1 = std::make_shared<NotificationContent>(pictureContent);
+    notificationRequest.SetContent(content1);
+    std::shared_ptr<NotificationContent> result = notificationRequest.GetContent();
+    EXPECT_EQ(result, content1);
     uint32_t result1 = notificationRequest.IsColorEnabled();
     EXPECT_EQ(result1, false);
 }
@@ -385,6 +408,22 @@ HWTEST_F(NotificationRequestTest, SetDevicesSupportDisplay_0100, Level1)
     EXPECT_EQ(result1, false);
     EXPECT_EQ(result2, false);
     EXPECT_EQ(result3, false);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationDistributedOptions_0100
+ * @tc.desc: ConvertJsonToNotificationDistributedOptions
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationDistributedOptions_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    nlohmann::json jsonObject;
+    bool result1 = notificationRequest.ConvertJsonToNotificationDistributedOptions(nullptr, jsonObject);
+    EXPECT_EQ(result1, false);
 }
 }
 }

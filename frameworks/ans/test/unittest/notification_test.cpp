@@ -346,5 +346,39 @@ HWTEST_F(NotificationTest, ReadFromParcel_00001, Function | SmallTest | Level1)
     auto rrc = std::make_shared<Notification>(deviceId, request);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
 }
+
+/**
+ * @tc.name: GetSound_00002
+ * @tc.desc: Test GetSound parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetSound_00002, Function | SmallTest | Level1)
+{
+    Uri sound = Uri("sound");
+    bool enable = false;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetSound(sound);
+    rrc->SetEnableSound(enable);
+    EXPECT_EQ(rrc->GetSound(), Uri(""));
+}
+
+/**
+ * @tc.name: GetSound_00003
+ * @tc.desc: Test GetSound parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetSound_00003, Function | SmallTest | Level1)
+{
+    Uri sound = Uri("");
+    bool enable = true;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetSound(sound);
+    rrc->SetEnableSound(enable);
+    EXPECT_EQ(rrc->GetSound(), Uri(""));
+}
 }
 }

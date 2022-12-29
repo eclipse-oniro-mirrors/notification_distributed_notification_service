@@ -76,5 +76,27 @@ HWTEST_F(NotificationActionButtontTest, Marshalling_0100, Level1)
     bool result = notificationActionButton1->Marshalling(parcel);
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: Unmarshalling_0100
+ * @tc.desc: Unmarshalling
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationActionButtontTest, Unmarshalling_0100, Level1)
+{
+    AbilityRuntime::WantAgent::WantAgentInfo paramsInfo;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(paramsInfo);
+    std::shared_ptr<NotificationActionButton> actionButton1 =
+        NotificationActionButton::Create(nullptr, "title", wantAgent);
+    std::shared_ptr<NotificationActionButton> notificationActionButton1 =
+        NotificationActionButton::Create(actionButton1);
+
+    Parcel parcel;
+    bool result = notificationActionButton1->ReadFromParcel(parcel);
+    notificationActionButton1->Unmarshalling(parcel);
+    EXPECT_EQ(result, false);
+}
 }
 }

@@ -921,19 +921,6 @@ HWTEST_F(ReminderRequestTest, GetShowTime_00002, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: CreateWantAgent_00001
- * @tc.desc: Test CreateWantAgent parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Level1)
-{
-    AppExecFwk::ElementName element;
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->CreateWantAgent(element), nullptr);
-}
-
-/**
  * @tc.name: GetUid_00001
  * @tc.desc: Test GetUid parameters.
  * @tc.type: FUNC
@@ -1160,6 +1147,21 @@ HWTEST_F(ReminderRequestTest, AddColumn_00002, Function | SmallTest | Level1)
     rrc->AddColumn(name, type, false);
     int32_t result = rrc->GetReminderId();
     EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: CreateWantAgent_00001
+ * @tc.desc: Test CreateWantAgent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Level1)
+{
+    AppExecFwk::ElementName element;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
+        rrc->CreateWantAgent(element);
+    rrc->SetMaxScreenWantAgent(element);
 }
 }
 }

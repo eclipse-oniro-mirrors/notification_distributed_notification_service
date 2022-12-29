@@ -493,6 +493,25 @@ HWTEST_F(ReminderRequestCalendarTest, SetDay_00001, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetDay_00002
+ * @tc.desc: Test SetDay parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetDay_00002, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = 32;
+    bool isSet = false;
+    calendar->SetDay(day, isSet);
+    bool result = calendar->IsRepeatDay(day);
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.name: SetMonth_00001
  * @tc.desc: Test SetMonth parameters.
  * @tc.type: FUNC
@@ -505,6 +524,25 @@ HWTEST_F(ReminderRequestCalendarTest, SetMonth_00001, Function | SmallTest | Lev
     EXPECT_NE(nullptr, calendar);
 
     uint8_t month = -1;
+    bool isSet = false;
+    calendar->SetMonth(month, isSet);
+    bool result = calendar->IsRepeatMonth(month);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetMonth_00002
+ * @tc.desc: Test SetMonth parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetMonth_00002, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t month = 13;
     bool isSet = false;
     calendar->SetMonth(month, isSet);
     bool result = calendar->IsRepeatMonth(month);
@@ -756,6 +794,44 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00005, Function | Small
 
     bool result3 = calendar->UpdateNextReminder();
     EXPECT_EQ(result3, false);
+}
+
+/**
+ * @tc.name: SetRepeatMonths_00001
+ * @tc.desc: Test SetRepeatMonths parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetRepeatMonths_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    std::vector<uint8_t> repeatMonths (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    calendar->SetRepeatMonths(repeatMonths);
+    uint8_t ret = 13;
+    EXPECT_EQ(repeatMonths.size(), ret);
+}
+
+/**
+ * @tc.name: RecoverFromDb_00001
+ * @tc.desc: Test RecoverFromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+        std::make_shared<NativeRdb::AbsSharedResultSet>();
+    calendar->RecoverFromDb(resultSet);
+    bool result = calendar->IsRepeatDay(1);
+    EXPECT_EQ(result, false);
 }
 }
 }
