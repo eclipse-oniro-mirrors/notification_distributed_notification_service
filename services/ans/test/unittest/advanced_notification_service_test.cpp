@@ -28,6 +28,7 @@
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "iremote_object.h"
 #include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
 #include "notification_subscriber.h"
@@ -1762,8 +1763,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     std::string deviceId = "DeviceId";
-    bool needPop = false;
-    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, needPop), (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, nullptr), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -2343,7 +2343,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
 
     std::string deviceId = "DeviceId";
     bool needPop = false;
-    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, needPop), ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, nullptr), ERR_ANS_INVALID_BUNDLE);
     EXPECT_EQ(advancedNotificationService_->IsAllowedNotifySelf(needPop), ERR_ANS_INVALID_BUNDLE);
     sptr<NotificationBundleOption> bundleOption;
     EXPECT_EQ(advancedNotificationService_->IsAllowedNotifySelf(bundleOption, needPop), ERR_ANS_INVALID_BUNDLE);

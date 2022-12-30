@@ -235,15 +235,10 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 std::string deviceId {""};
-                bool popFlag = false;
-                asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
-                asynccallbackinfo->params.allowToPop = popFlag;
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowToPop = %{public}d",
-                    asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
-                if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
-                    ANS_LOGI("Begin to start notification dialog");
-                    auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-                    StartNotificationDialog(callbackInfo);
+                auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
+                if (CreateCallbackStubImpl(callbackInfo)) {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::RequestEnableNotification(deviceId, callbackStubImpl_);
                 }
             }
         },

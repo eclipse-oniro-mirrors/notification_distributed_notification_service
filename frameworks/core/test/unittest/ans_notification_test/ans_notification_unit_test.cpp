@@ -363,8 +363,8 @@ HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0100, Function | Med
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::string deviceId = "this is deviceId";
-    bool popFlag = true;
-    ErrCode ret1 = ans_->RequestEnableNotification(deviceId, popFlag);
+    sptr<IRemoteObject> callbackInfo;
+    ErrCode ret1 = ans_->RequestEnableNotification(deviceId, callbackInfo);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
     bool suspended = true;
     ErrCode ret2 = ans_->AreNotificationsSuspended(suspended);

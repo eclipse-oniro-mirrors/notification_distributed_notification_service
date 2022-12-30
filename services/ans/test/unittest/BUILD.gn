@@ -59,6 +59,7 @@ ohos_unittest("reminder_unit_test") {
   deps = [
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]
@@ -162,6 +163,7 @@ ohos_unittest("ans_unit_test") {
   deps = [
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]

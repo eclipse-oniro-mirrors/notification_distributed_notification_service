@@ -144,7 +144,7 @@ struct NotificationDialog {
     console.log(this.TAG, "dialog page appears")
     this.want = globalThis.abilityWant
     this.style = globalThis.style
-    this.callBackImp_ = globalThis.abilityWant.parameters['callbackStubImpl_'].value
+    this.callBackImp_ = globalThis.abilityWant.parameters['callbackStubImpl'].value
     this.token_ = globalThis.abilityWant.parameters['tokenId'].value
     globalThis.bundleName = globalThis.abilityWant.parameters['from']
   }

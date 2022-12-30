@@ -1103,7 +1103,7 @@ ErrCode AnsManagerProxy::UpdateSlots(
     return result;
 }
 
-ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, bool &popFlag)
+ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callbackInfo)
 {
     ANS_LOGI("enter");
     MessageParcel data;
@@ -1117,6 +1117,11 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, 
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
+    if (!data.WriteRemoteObject(callbackInfo)) {
+        ANS_LOGE("[RequestEnableNotification] fail: write callbackInfo failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(REQUEST_ENABLE_NOTIFICATION, option, data, reply);
@@ -1127,11 +1132,6 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, 
 
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("[RequestEnableNotification] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.ReadBool(popFlag)) {
-        ANS_LOGE("[RequestEnableNotification] fail: read popFlag failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;

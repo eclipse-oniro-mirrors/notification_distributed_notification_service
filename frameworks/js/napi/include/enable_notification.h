@@ -78,7 +78,6 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 bool CreateCallbackStubImpl(AsyncCallbackInfoIsEnable *callbackInfo);
 void ResetCallbackStubImpl();
-void StartNotificationDialog(AsyncCallbackInfoIsEnable *callbackInfo);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_ENABLE_NOTIFICATION_H
