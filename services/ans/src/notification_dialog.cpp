@@ -44,7 +44,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(const sptr<IRem
         ANS_LOGD("%{public}s, GetTopAbility failed. result=%{public}d", __func__, result);
         return result;
     }
-    if(!JudgeSelfCalled(ability)) {
+    if (!JudgeSelfCalled(ability)) {
         ANS_LOGD("%{public}s, if it is not selfcalled.", __func__);
         return result;
     }
