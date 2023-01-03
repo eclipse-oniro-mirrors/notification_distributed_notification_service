@@ -49,10 +49,11 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(const sptr<IRem
         return result;
     }
     AAFwk::Want want;
+    std::string bundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
     want.SetParam("callbackStubImpl", callbackInfo);
     want.SetParam("tokenId", token);
-    want.SetParam("from", AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    want.SetParam("from", bundleName);
     result = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token, -1);
     ANS_LOGD("%{public}s, End Calling StartNotificationDialog. result=%{public}d", __func__, result);
     return result;
