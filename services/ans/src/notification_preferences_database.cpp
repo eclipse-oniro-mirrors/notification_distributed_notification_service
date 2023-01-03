@@ -173,7 +173,6 @@ const static std::string KEY_SLOT_ENABLE_BYPASS_DND = "enableBypassDnd";
  */
 const static std::string KEY_SLOT_ENABLED = "enabled";
 
-constexpr char KV_STORE_PATH[] = "/data/service/el1/public/database/notification_service";
 
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
@@ -282,55 +281,23 @@ const std::map<std::string,
 
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
-    TryTwice([this] { return GetKvStore(); });
+    NotificationRdbConfig notificationRdbConfig;
+    rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
+    ANS_LOGD("Notification Rdb is created");
 }
 
 NotificationPreferencesDatabase::~NotificationPreferencesDatabase()
 {
-    CloseKvStore();
+    ANS_LOGD("Notification Rdb is deleted");
 }
 
-void NotificationPreferencesDatabase::TryTwice(const std::function<DistributedKv::Status()> &func) const
+bool NotificationPreferencesDatabase::CheckRdbStore()
 {
-    DistributedKv::Status status = func();
-    if (status != DistributedKv::Status::SUCCESS) {
-        status = func();
-        ANS_LOGW("Distribute database error and try to call again, result = %{public}d.", status);
-    }
-}
-
-DistributedKv::Status NotificationPreferencesDatabase::GetKvStore()
-{
-    DistributedKv::Options options = {
-        .createIfMissing = true,
-        .encrypt = false,
-        .autoSync = false,
-        .area = DistributedKv::EL1,
-        .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
-        .baseDir = KV_STORE_PATH
-    };
-    auto status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("Return error: %{public}d.", status);
-    } else {
-        ANS_LOGI("Get kvStore success.");
-    }
-    return status;
-}
-
-void NotificationPreferencesDatabase::CloseKvStore()
-{
-    ANS_LOGI("Close kvStore success.");
-    dataManager_.CloseKvStore(appId_, kvStorePtr_);
-}
-
-bool NotificationPreferencesDatabase::CheckKvStore()
-{
-    if (kvStorePtr_ != nullptr) {
+    int32_t result = rdbDataManager_->Init();
+    if (result == NativeRdb::E_OK) {
         return true;
     }
-    TryTwice([this] { return GetKvStore(); });
-    return kvStorePtr_ != nullptr;
+    return false;
 }
 
 bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
@@ -348,21 +315,20 @@ bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
         return false;
     }
 
-    std::vector<DistributedKv::Entry> entries;
+    std::unordered_map<std::string, std::string> values;
     for (auto iter : slots) {
-        bool result = SlotToEntry(bundleName, bundleUid, iter, entries);
+        bool result = SlotToEntry(bundleName, bundleUid, iter, values);
         if (!result) {
             return result;
         }
     }
 
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    DistributedKv::Status status = kvStorePtr_->PutBatch(entries);
-    CloseKvStore();
-    return (status == DistributedKv::Status::SUCCESS);
+    int32_t result = rdbDataManager_->InsertBatchData(values);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
@@ -373,20 +339,20 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
         return false;
     }
 
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-
+    std::string values;
     std::string bundleKeyStr = KEY_BUNDLE_LABEL + GenerateBundleLablel(bundleInfo);
     bool result = false;
-    GetValueFromDisturbeDB(bundleKeyStr, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
+    GetValueFromDisturbeDB(bundleKeyStr, [&](const int32_t &status, std::string &value) {
         switch (status) {
-            case DistributedKv::Status::KEY_NOT_FOUND: {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
                 break;
             }
-            case DistributedKv::Status::SUCCESS: {
+            case NativeRdb::E_OK: {
                 ANS_LOGE("Current bundle has exsited.");
                 break;
             }
@@ -394,7 +360,6 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
                 break;
         }
     });
-    CloseKvStore();
     return result;
 }
 
@@ -411,9 +376,9 @@ bool NotificationPreferencesDatabase::PutShowBadge(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    DistributedKv::Status status =
+    int32_t result =
         PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SHOW_BADGE_TYPE, enable);
-    return (status == DistributedKv::Status::SUCCESS);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutImportance(
@@ -429,9 +394,9 @@ bool NotificationPreferencesDatabase::PutImportance(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    DistributedKv::Status status =
+    int32_t result =
         PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_IMPORTANCE_TYPE, importance);
-    return (status == DistributedKv::Status::SUCCESS);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutTotalBadgeNums(
@@ -446,9 +411,9 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
         return false;
     }
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    DistributedKv::Status status =
+    int32_t result =
         PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, totalBadgeNum);
-    return (status == DistributedKv::Status::SUCCESS);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutPrivateNotificationsAllowed(
@@ -463,10 +428,10 @@ bool NotificationPreferencesDatabase::PutPrivateNotificationsAllowed(
         return false;
     }
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    DistributedKv::Status status =
+    int32_t result =
         PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE, allow);
 
-    return (status == DistributedKv::Status::SUCCESS);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
@@ -483,26 +448,24 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    DistributedKv::Status status =
+    int32_t result =
         PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled);
-    return (status == DistributedKv::Status::SUCCESS);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutNotificationsEnabled(const int32_t &userId, const bool &enabled)
 {
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
     std::string typeKey =
         std::string().append(KEY_ENABLE_ALL_NOTIFICATION).append(KEY_UNDER_LINE).append(std::to_string(userId));
-    DistributedKv::Key enableKey(typeKey);
-    DistributedKv::Value enableValue(std::to_string(enabled));
-    DistributedKv::Status status = kvStorePtr_->Put(enableKey, enableValue);
-    CloseKvStore();
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("Store enable notification failed. %{public}d", status);
+    std::string enableValue = std::to_string(enabled);
+    int32_t result = rdbDataManager_->InsertData(typeKey, enableValue);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Store enable notification failed. %{public}d", result);
         return false;
     }
     return true;
@@ -521,9 +484,9 @@ bool NotificationPreferencesDatabase::PutHasPoppedDialog(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    DistributedKv::Status status =
+    int32_t result =
         PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped);
-    return (status == DistributedKv::Status::SUCCESS);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutDoNotDisturbDate(
@@ -534,39 +497,32 @@ bool NotificationPreferencesDatabase::PutDoNotDisturbDate(
         return false;
     }
 
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
-    DistributedKv::Entry type;
     std::string typeKey =
         std::string().append(KEY_DO_NOT_DISTURB_TYPE).append(KEY_UNDER_LINE).append(std::to_string(userId));
-    type.key = DistributedKv::Key(typeKey);
-    type.value = DistributedKv::Value(std::to_string((int)date->GetDoNotDisturbType()));
+    std::string typeValue = std::to_string((int)date->GetDoNotDisturbType());
 
-    DistributedKv::Entry beginDate;
     std::string beginDateKey =
         std::string().append(KEY_DO_NOT_DISTURB_BEGIN_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
-    beginDate.key = DistributedKv::Key(beginDateKey);
-    beginDate.value = DistributedKv::Value(std::to_string(date->GetBeginDate()));
+    std::string beginDateValue = std::to_string(date->GetBeginDate());
 
-    DistributedKv::Entry endDate;
     std::string endDateKey =
         std::string().append(KEY_DO_NOT_DISTURB_END_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
-    endDate.key = DistributedKv::Key(endDateKey);
-    endDate.value = DistributedKv::Value(std::to_string(date->GetEndDate()));
+    std::string endDateValue = std::to_string(date->GetEndDate());
 
-    std::vector<DistributedKv::Entry> entries = {
-        type,
-        beginDate,
-        endDate,
+    std::unordered_map<std::string, std::string> values = {
+        {typeKey, typeValue},
+        {beginDateKey, beginDateValue},
+        {endDateKey, endDateValue},
     };
 
-    DistributedKv::Status status = kvStorePtr_->PutBatch(entries);
-    CloseKvStore();
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("Store DoNotDisturbDate failed. %{public}d", status);
+    int32_t result = rdbDataManager_->InsertBatchData(values);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Store DoNotDisturbDate failed. %{public}d", result);
         return false;
     }
 
@@ -574,42 +530,31 @@ bool NotificationPreferencesDatabase::PutDoNotDisturbDate(
 }
 
 void NotificationPreferencesDatabase::GetValueFromDisturbeDB(
-    const std::string &key, std::function<void(DistributedKv::Value &)> callback)
+    const std::string &key, std::function<void(std::string &)> callback)
 {
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return;
     }
-
-    DistributedKv::Status status;
-    DistributedKv::Value value;
-    DistributedKv::Key getKey(key);
-    status = kvStorePtr_->Get(getKey, value);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("Get value failed, use default value. error code is %{public}d", status);
-        return;
-    }
-
-    if (value.Empty()) {
-        ANS_LOGE("Get value is empty, use default value. error code is %{public}d", value.Empty());
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(key, value);
+    if (result == NativeRdb::E_ERROR) {
+        ANS_LOGE("Get value failed, use default value. error code is %{public}d", result);
         return;
     }
     callback(value);
 }
 
 void NotificationPreferencesDatabase::GetValueFromDisturbeDB(
-    const std::string &key, std::function<void(DistributedKv::Status &, DistributedKv::Value &)> callback)
+    const std::string &key, std::function<void(int32_t &, std::string &)> callback)
 {
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return;
     }
-
-    DistributedKv::Status status;
-    DistributedKv::Value value;
-    DistributedKv::Key getKey(key);
-    status = kvStorePtr_->Get(getKey, value);
-    callback(status, value);
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(key, value);
+    callback(result, value);
 }
 
 bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName, const int32_t &bundleUid)
@@ -617,16 +562,16 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
     std::string bundleKeyStr = KEY_BUNDLE_LABEL + bundleName + std::to_string(bundleUid);
     ANS_LOGD("CheckBundle bundleKeyStr %{public}s", bundleKeyStr.c_str());
     bool result = true;
-    GetValueFromDisturbeDB(bundleKeyStr, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
+    GetValueFromDisturbeDB(bundleKeyStr, [&](const int32_t &status, std::string &value) {
         switch (status) {
-            case DistributedKv::Status::KEY_NOT_FOUND: {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 NotificationPreferencesInfo::BundleInfo bundleInfo;
                 bundleInfo.SetBundleName(bundleName);
                 bundleInfo.SetBundleUid(bundleUid);
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
                 break;
             }
-            case DistributedKv::Status::SUCCESS: {
+            case NativeRdb::E_OK: {
                 result = true;
                 break;
             }
@@ -641,33 +586,33 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
 bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo)
 {
-    std::vector<DistributedKv::Entry> entries;
+    std::unordered_map<std::string, std::string> values;
     std::string bundleKey = bundleInfo.GetBundleName().append(std::to_string(bundleInfo.GetBundleUid()));
-    GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_NAME), bundleInfo.GetBundleName(), entries);
+    GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_NAME), bundleInfo.GetBundleName(), values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_BADGE_TOTAL_NUM),
         std::to_string(bundleInfo.GetBadgeTotalNum()),
-        entries);
+        values);
     GenerateEntry(
-        GenerateBundleKey(bundleKey, KEY_BUNDLE_IMPORTANCE), std::to_string(bundleInfo.GetImportance()), entries);
+        GenerateBundleKey(bundleKey, KEY_BUNDLE_IMPORTANCE), std::to_string(bundleInfo.GetImportance()), values);
     GenerateEntry(
-        GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE), std::to_string(bundleInfo.GetIsShowBadge()), entries);
+        GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE), std::to_string(bundleInfo.GetIsShowBadge()), values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_PRIVATE_ALLOWED),
         std::to_string(bundleInfo.GetIsPrivateAllowed()),
-        entries);
+        values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_ENABLE_NOTIFICATION),
         std::to_string(bundleInfo.GetEnableNotification()),
-        entries);
+        values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_POPPED_DIALOG),
         std::to_string(bundleInfo.GetHasPoppedDialog()),
-        entries);
-    GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_UID), std::to_string(bundleInfo.GetBundleUid()), entries);
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+        values);
+    GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_UID), std::to_string(bundleInfo.GetBundleUid()), values);
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    DistributedKv::Status status = kvStorePtr_->PutBatch(entries);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("Store bundle failed. %{public}d", status);
+    int32_t result = rdbDataManager_->InsertBatchData(values);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Store bundle failed. %{public}d", result);
         return false;
     }
     return true;
@@ -681,62 +626,57 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
     ParseDoNotDisturbEndDate(info);
     ParseEnableAllNotification(info);
 
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    DistributedKv::Status status;
-    std::vector<DistributedKv::Entry> entries;
-    status = kvStorePtr_->GetEntries(DistributedKv::Key(KEY_BUNDLE_LABEL), entries);
-    if (status != DistributedKv::Status::SUCCESS) {
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(KEY_BUNDLE_LABEL, values);
+    if (result == NativeRdb::E_ERROR) {
         ANS_LOGE("Get Bundle Info failed.");
         return false;
     }
-    ParseBundleFromDistureDB(info, entries);
-    CloseKvStore();
+    ParseBundleFromDistureDB(info, values);
     return true;
 }
 
 bool NotificationPreferencesDatabase::RemoveAllDataFromDisturbeDB()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    DistributedKv::Status status = dataManager_.DeleteKvStore(appId_, storeId_, KV_STORE_PATH);
-    return (status == DistributedKv::Status::SUCCESS);
+    int32_t result = rdbDataManager_->Destroy();
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(const std::string &bundleKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
-    DistributedKv::Status status;
-    std::vector<DistributedKv::Entry> entries;
-    status = kvStorePtr_->GetEntries(
-        DistributedKv::Key(KEY_ANS_BUNDLE + KEY_UNDER_LINE + bundleKey + KEY_UNDER_LINE), entries);
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(
+        (KEY_ANS_BUNDLE + KEY_UNDER_LINE + bundleKey + KEY_UNDER_LINE), values);
 
-    if (status != DistributedKv::Status::SUCCESS) {
+    if (result == NativeRdb::E_ERROR) {
         ANS_LOGE("Get Bundle Info failed.");
-        CloseKvStore();
         return false;
     }
 
-    std::vector<DistributedKv::Key> keys;
-    for (auto iter : entries) {
-        keys.push_back(iter.key);
+    std::vector<std::string> keys;
+    for (auto iter : values) {
+        keys.push_back(iter.first);
     }
 
-    DistributedKv::Key bundleDBKey(KEY_BUNDLE_LABEL + KEY_BUNDLE_NAME + KEY_UNDER_LINE + bundleKey);
+    std::string bundleDBKey = KEY_BUNDLE_LABEL + KEY_BUNDLE_NAME + KEY_UNDER_LINE + bundleKey;
     keys.push_back(bundleDBKey);
-    status = kvStorePtr_->DeleteBatch(keys);
-    CloseKvStore();
-    if (status != DistributedKv::Status::SUCCESS) {
+    result = rdbDataManager_->DeleteBathchData(keys);
+    if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
     }
@@ -753,33 +693,29 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
         return false;
     }
 
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
-    DistributedKv::Status status;
-    std::vector<DistributedKv::Entry> slotentries;
+    std::unordered_map<std::string, std::string> values;
     std::string slotType = std::to_string(type);
-    status =
-        kvStorePtr_->GetEntries(DistributedKv::Key(GenerateSlotKey(bundleKey, slotType) + KEY_UNDER_LINE), slotentries);
-    if (status != DistributedKv::Status::SUCCESS) {
-        CloseKvStore();
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(
+        (GenerateSlotKey(bundleKey, slotType) + KEY_UNDER_LINE), values);
+    if (result == NativeRdb::E_ERROR) {
         return false;
     }
-    std::vector<DistributedKv::Key> keys;
-    for (auto iter : slotentries) {
-        keys.push_back(iter.key);
+    std::vector<std::string> keys;
+    for (auto iter : values) {
+        keys.push_back(iter.first);
     }
 
-    status = kvStorePtr_->DeleteBatch(keys);
-    CloseKvStore();
-    if (status != DistributedKv::Status::SUCCESS) {
+    result = rdbDataManager_->DeleteBathchData(keys);
+    if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
     }
 
-    ANS_LOGD("%{public}s remove slot status %{public}d", __FUNCTION__, status);
     return true;
 }
 
@@ -791,38 +727,35 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(const std::st
         return false;
     }
 
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
-    DistributedKv::Status status;
-    std::vector<DistributedKv::Entry> slotsEntries;
-    status = kvStorePtr_->GetEntries(DistributedKv::Key(GenerateSlotKey(bundleKey) + KEY_UNDER_LINE), slotsEntries);
-    if (status != DistributedKv::Status::SUCCESS) {
-        CloseKvStore();
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(
+        (GenerateSlotKey(bundleKey) + KEY_UNDER_LINE), values);
+    if (result == NativeRdb::E_ERROR) {
         return false;
     }
-    std::vector<DistributedKv::Key> keys;
-    for (auto iter : slotsEntries) {
-        keys.push_back(iter.key);
+    std::vector<std::string> keys;
+    for (auto iter : values) {
+        keys.push_back(iter.first);
     }
 
-    status = kvStorePtr_->DeleteBatch(keys);
-    CloseKvStore();
-    ANS_LOGD("%{public}s remove all slots status %{public}d", __FUNCTION__, status);
-    return (status == DistributedKv::Status::SUCCESS);
+    result = rdbDataManager_->DeleteBathchData(keys);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::StoreDeathRecipient()
 {
     ANS_LOGW("distribute remote died");
-    kvStorePtr_ = nullptr;
+    rdbDataManager_ = nullptr;
     return true;
 }
 
 template <typename T>
-DistributedKv::Status NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
+int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     const std::string &bundleKey, const BundleType &type, const T &t)
 {
     std::string keyStr;
@@ -848,29 +781,26 @@ DistributedKv::Status NotificationPreferencesDatabase::PutBundlePropertyToDistur
         default:
             break;
     }
-    DistributedKv::Key key(keyStr);
-    DistributedKv::Value value(std::to_string(t));
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
-        return DistributedKv::Status::ERROR;
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
     }
-    DistributedKv::Status status = kvStorePtr_->Put(key, value);
-    CloseKvStore();
-    return status;
+    std::string valueStr = std::to_string(t);
+    int32_t result = rdbDataManager_->InsertData(keyStr, valueStr);
+    return result;
 }
 
 bool NotificationPreferencesDatabase::PutBundleToDisturbeDB(
     const std::string &bundleKey, const NotificationPreferencesInfo::BundleInfo &bundleInfo)
 {
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
     ANS_LOGD("Key not fund, so create a bundle, bundle key is %{public}s.", bundleKey.c_str());
-    DistributedKv::Key bundleDBKey(bundleKey);
-    DistributedKv::Value bundleValue(GenerateBundleLablel(bundleInfo));
-    if (kvStorePtr_->Put(bundleDBKey, bundleValue) != DistributedKv::Status::SUCCESS) {
+    int32_t result = rdbDataManager_->InsertData(bundleKey, GenerateBundleLablel(bundleInfo));
+    if (result != NativeRdb::E_OK) {
         ANS_LOGE("Store bundle name to db is failed.");
         return false;
     }
@@ -878,23 +808,17 @@ bool NotificationPreferencesDatabase::PutBundleToDisturbeDB(
     if (!PutBundlePropertyValueToDisturbeDB(bundleInfo)) {
         return false;
     }
-
     return true;
 }
 
 void NotificationPreferencesDatabase::GenerateEntry(
-    const std::string &key, const std::string &value, std::vector<DistributedKv::Entry> &entries) const
+    const std::string &key, const std::string &value, std::unordered_map<std::string, std::string> &values) const
 {
-    DistributedKv::Entry entry;
-    DistributedKv::Key dbKey(key);
-    DistributedKv::Value dbValue(value);
-    entry.key = dbKey;
-    entry.value = dbValue;
-    entries.push_back(entry);
+    values.emplace(key, value);
 }
 
 bool NotificationPreferencesDatabase::SlotToEntry(const std::string &bundleName, const int32_t &bundleUid,
-    const sptr<NotificationSlot> &slot, std::vector<DistributedKv::Entry> &entries)
+    const sptr<NotificationSlot> &slot, std::unordered_map<std::string, std::string> &values)
 {
     if (slot == nullptr) {
         ANS_LOGE("Notification slot is nullptr.");
@@ -906,57 +830,53 @@ bool NotificationPreferencesDatabase::SlotToEntry(const std::string &bundleName,
     }
 
     std::string bundleKey = bundleName + std::to_string(bundleUid);
-    GenerateSlotEntry(bundleKey, slot, entries);
+    GenerateSlotEntry(bundleKey, slot, values);
     return true;
 }
 
 void NotificationPreferencesDatabase::GenerateSlotEntry(const std::string &bundleKey,
-    const sptr<NotificationSlot> &slot, std::vector<DistributedKv::Entry> &entries) const
+    const sptr<NotificationSlot> &slot, std::unordered_map<std::string, std::string> &values) const
 {
     std::string slotType = std::to_string(slot->GetType());
-    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_TYPE), std::to_string(slot->GetType()), entries);
-    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ID), slot->GetId(), entries);
-    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_NAME), slot->GetName(), entries);
-    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_DESCRIPTION), slot->GetDescription(), entries);
-    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_LEVEL), std::to_string(slot->GetLevel()), entries);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_TYPE), std::to_string(slot->GetType()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ID), slot->GetId(), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_NAME), slot->GetName(), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_DESCRIPTION), slot->GetDescription(), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_LEVEL), std::to_string(slot->GetLevel()), values);
     GenerateEntry(
-        GenerateSlotKey(bundleKey, slotType, KEY_SLOT_SHOW_BADGE), std::to_string(slot->IsShowBadge()), entries);
+        GenerateSlotKey(bundleKey, slotType, KEY_SLOT_SHOW_BADGE), std::to_string(slot->IsShowBadge()), values);
     GenerateEntry(
-        GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLE_LIGHT), std::to_string(slot->CanEnableLight()), entries);
+        GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLE_LIGHT), std::to_string(slot->CanEnableLight()), values);
     GenerateEntry(
-        GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLE_VRBRATION), std::to_string(slot->CanVibrate()), entries);
+        GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLE_VRBRATION), std::to_string(slot->CanVibrate()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_LED_LIGHT_COLOR),
-        std::to_string(slot->GetLedLightColor()),
-        entries);
+        std::to_string(slot->GetLedLightColor()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_LOCKSCREEN_VISIBLENESS),
-        std::to_string(static_cast<int>(slot->GetLockScreenVisibleness())),
-        entries);
-    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_SOUND), slot->GetSound().ToString(), entries);
+        std::to_string(static_cast<int>(slot->GetLockScreenVisibleness())), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_SOUND), slot->GetSound().ToString(), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLE_BYPASS_DND),
-        std::to_string(slot->IsEnableBypassDnd()),
-        entries);
+        std::to_string(slot->IsEnableBypassDnd()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_VIBRATION_STYLE),
-        VectorToString(slot->GetVibrationStyle()),
-        entries);
-    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLED), std::to_string(slot->GetEnable()), entries);
+        VectorToString(slot->GetVibrationStyle()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLED), std::to_string(slot->GetEnable()), values);
 }
 
 void NotificationPreferencesDatabase::ParseBundleFromDistureDB(
-    NotificationPreferencesInfo &info, const std::vector<DistributedKv::Entry> &entries)
+    NotificationPreferencesInfo &info, const std::unordered_map<std::string, std::string> &values)
 {
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return;
     }
-    for (auto item : entries) {
-        std::string bundleKey = item.value.ToString();
+    for (auto item : values) {
+        std::string bundleKey = item.second;
         ANS_LOGD("Bundle name is %{public}s.", bundleKey.c_str());
-        std::vector<DistributedKv::Entry> bundleEntries;
-        kvStorePtr_->GetEntries(DistributedKv::Key(GenerateBundleKey(bundleKey)), bundleEntries);
+        std::unordered_map<std::string, std::string> bundleEntries;
+        rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries);
         ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
         NotificationPreferencesInfo::BundleInfo bunldeInfo;
         for (auto bundleEntry : bundleEntries) {
-            if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.key.ToString())) {
+            if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
                 ParseSlotFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry);
             } else {
                 ParseBundlePropertyFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry);
@@ -968,9 +888,9 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(
 }
 
 void NotificationPreferencesDatabase::ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
-    const std::string &bundleKey, const DistributedKv::Entry &entry)
+    const std::string &bundleKey, const std::pair<std::string, std::string> &entry)
 {
-    std::string slotKey = entry.key.ToString();
+    std::string slotKey = entry.first;
     std::string typeStr = SubUniqueIdentifyFromString(GenerateSlotKey(bundleKey) + KEY_UNDER_LINE, slotKey);
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(StringToInt(typeStr));
     sptr<NotificationSlot> slot = nullptr;
@@ -984,11 +904,10 @@ void NotificationPreferencesDatabase::ParseSlotFromDisturbeDB(NotificationPrefer
 
 void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
-    const DistributedKv::Entry &entry)
+    const std::pair<std::string, std::string> &entry)
 {
-    std::string typeStr = FindLastString(GenerateBundleKey(bundleKey), entry.key.ToString());
-    std::string valueStr = entry.value.ToString();
-    ANS_LOGD("DB key = %{public}s , type str %{public}s", entry.key.ToString().c_str(), typeStr.c_str());
+    std::string typeStr = FindLastString(GenerateBundleKey(bundleKey), entry.first);
+    std::string valueStr = entry.second;
 
     auto iter = bundleMap_.find(typeStr);
     if (iter != bundleMap_.end()) {
@@ -998,14 +917,14 @@ void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
 }
 
 void NotificationPreferencesDatabase::ParseSlot(
-    const std::string &findString, sptr<NotificationSlot> &slot, const DistributedKv::Entry &entry)
+    const std::string &findString, sptr<NotificationSlot> &slot, const std::pair<std::string, std::string> &entry)
 {
-    std::string typeStr = FindLastString(findString, entry.key.ToString());
-    std::string valueStr = entry.value.ToString();
+    std::string typeStr = FindLastString(findString, entry.first);
+    std::string valueStr = entry.second;
     ANS_LOGD("db key = %{public}s , %{public}s : %{public}s ",
-        entry.key.ToString().c_str(),
+        entry.first.c_str(),
         typeStr.c_str(),
-        entry.value.ToString().c_str());
+        entry.second.c_str());
 
     auto iter = slotMap_.find(typeStr);
     if (iter != slotMap_.end()) {
@@ -1015,7 +934,7 @@ void NotificationPreferencesDatabase::ParseSlot(
 
     if (!typeStr.compare(KEY_SLOT_VIBRATION_STYLE)) {
         GetValueFromDisturbeDB(findString + KEY_SLOT_ENABLE_VRBRATION,
-            [&](DistributedKv::Value &value) { ParseSlotEnableVrbration(slot, value.ToString()); });
+            [&](std::string &value) { ParseSlotEnableVrbration(slot, value); });
     }
 }
 
@@ -1334,17 +1253,17 @@ void NotificationPreferencesDatabase::GetDoNotDisturbType(NotificationPreference
     std::string key =
         std::string().append(KEY_DO_NOT_DISTURB_TYPE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
+        key, [&](const int32_t &status, std::string &value) {
             sptr<NotificationDoNotDisturbDate> disturbDate =
                         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             info.GetDoNotDisturbDate(userId, disturbDate);
-            if (status == DistributedKv::Status::KEY_NOT_FOUND) {
+            if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
                 PutDoNotDisturbDate(userId, disturbDate);
-            } else if (status == DistributedKv::Status::SUCCESS) {
-                if (!value.ToString().empty()) {
+            } else if (status == NativeRdb::E_OK) {
+                if (!value.empty()) {
                     if (disturbDate != nullptr) {
                         disturbDate->SetDoNotDisturbType(
-                            (NotificationConstant::DoNotDisturbType)StringToInt(value.ToString()));
+                            (NotificationConstant::DoNotDisturbType)StringToInt(value));
                     }
                 }
             } else {
@@ -1359,16 +1278,16 @@ void NotificationPreferencesDatabase::GetDoNotDisturbBeginDate(NotificationPrefe
     std::string key =
         std::string().append(KEY_DO_NOT_DISTURB_BEGIN_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
+        key, [&](const int32_t &status, std::string &value) {
             sptr<NotificationDoNotDisturbDate> disturbDate =
                         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             info.GetDoNotDisturbDate(userId, disturbDate);
-            if (status == DistributedKv::Status::KEY_NOT_FOUND) {
+            if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
                 PutDoNotDisturbDate(userId, disturbDate);
-            } else if (status == DistributedKv::Status::SUCCESS) {
-                if (!value.ToString().empty()) {
+            } else if (status == NativeRdb::E_OK) {
+                if (!value.empty()) {
                     if (disturbDate != nullptr) {
-                        disturbDate->SetBeginDate(StringToInt64(value.ToString()));
+                        disturbDate->SetBeginDate(StringToInt64(value));
                     }
                 }
             } else {
@@ -1383,16 +1302,16 @@ void NotificationPreferencesDatabase::GetDoNotDisturbEndDate(NotificationPrefere
     std::string key =
         std::string().append(KEY_DO_NOT_DISTURB_END_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
+        key, [&](const int32_t &status, std::string &value) {
             sptr<NotificationDoNotDisturbDate> disturbDate =
                         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             info.GetDoNotDisturbDate(userId, disturbDate);
-            if (status == DistributedKv::Status::KEY_NOT_FOUND) {
+            if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
                 PutDoNotDisturbDate(userId, disturbDate);
-            } else if (status == DistributedKv::Status::SUCCESS) {
-                if (!value.ToString().empty()) {
+            } else if (status == NativeRdb::E_OK) {
+                if (!value.empty()) {
                     if (disturbDate != nullptr) {
-                        disturbDate->SetEndDate(StringToInt64(value.ToString()));
+                        disturbDate->SetEndDate(StringToInt64(value));
                     }
                 }
             } else {
@@ -1407,17 +1326,17 @@ void NotificationPreferencesDatabase::GetEnableAllNotification(NotificationPrefe
     std::string key =
         std::string().append(KEY_ENABLE_ALL_NOTIFICATION).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
-        key, [&](const DistributedKv::Status &status, DistributedKv::Value &value) {
-            if (status == DistributedKv::Status::KEY_NOT_FOUND) {
+        key, [&](const int32_t &status, std::string &value) {
+            if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
                 bool enable = true;
                 if (!info.GetEnabledAllNotification(userId, enable)) {
                     info.SetEnabledAllNotification(userId, enable);
                     ANS_LOGW("Enable setting not found, default true.");
                 }
                 PutNotificationsEnabled(userId, enable);
-            } else if (status == DistributedKv::Status::SUCCESS) {
-                if (!value.ToString().empty()) {
-                    info.SetEnabledAllNotification(userId, static_cast<bool>(StringToInt(value.ToString())));
+            } else if (status == NativeRdb::E_OK) {
+                if (!value.empty()) {
+                    info.SetEnabledAllNotification(userId, static_cast<bool>(StringToInt(value)));
                 }
             } else {
                 ANS_LOGW("Parse enable all notification failed, use default value.");
@@ -1428,17 +1347,15 @@ void NotificationPreferencesDatabase::GetEnableAllNotification(NotificationPrefe
 bool NotificationPreferencesDatabase::RemoveNotificationEnable(const int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
     std::string key =
         std::string(KEY_ENABLE_ALL_NOTIFICATION).append(KEY_UNDER_LINE).append(std::to_string(userId));
-    DistributedKv::Key enableKey(key);
-    DistributedKv::Status status = kvStorePtr_->Delete(enableKey);
-    CloseKvStore();
-    if (status != DistributedKv::Status::SUCCESS) {
+    int32_t result = rdbDataManager_->DeleteData(key);
+    if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
     }
@@ -1450,8 +1367,8 @@ bool NotificationPreferencesDatabase::RemoveNotificationEnable(const int32_t use
 bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
@@ -1462,15 +1379,14 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userI
     std::string endDateKey =
         std::string(KEY_DO_NOT_DISTURB_END_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
 
-    std::vector<DistributedKv::Key> keys = {
-        DistributedKv::Key(typeKey),
-        DistributedKv::Key(beginDateKey),
-        DistributedKv::Key(endDateKey)
+    std::vector<std::string> keys = {
+        typeKey,
+        beginDateKey,
+        endDateKey
     };
-
-    DistributedKv::Status status = kvStorePtr_->DeleteBatch(keys);
-    CloseKvStore();
-    if (status != DistributedKv::Status::SUCCESS) {
+    
+    int32_t result = rdbDataManager_->DeleteBathchData(keys);
+    if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete DoNotDisturb date failed.");
         return false;
     }
@@ -1481,16 +1397,14 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userI
 
 bool NotificationPreferencesDatabase::RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid)
 {
-    if (!CheckKvStore()) {
-        ANS_LOGE("KvStore is nullptr.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
 
     std::string key = KEY_BUNDLE_LABEL + bundleName + std::to_string(uid);
-    DistributedKv::Key enableKey(key);
-    DistributedKv::Status status = kvStorePtr_->Delete(enableKey);
-    CloseKvStore();
-    if (status != DistributedKv::Status::SUCCESS) {
+    int32_t result = rdbDataManager_->DeleteData(key);
+    if (result != NativeRdb::E_OK) {
         ANS_LOGE("Delete ans bundle db info failed, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
         return false;
     }

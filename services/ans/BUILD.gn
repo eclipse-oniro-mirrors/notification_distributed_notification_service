@@ -35,6 +35,7 @@ ohos_shared_library("libans") {
     "src/notification_preferences.cpp",
     "src/notification_preferences_database.cpp",
     "src/notification_preferences_info.cpp",
+    "src/notification_rdb_data_mgr.cpp",
     "src/notification_slot_filter.cpp",
     "src/notification_subscriber_manager.cpp",
     "src/permission_filter.cpp",
