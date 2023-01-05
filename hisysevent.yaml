@@ -25,14 +25,14 @@ SUBSCRIBE_ERROR:
 ENABLE_NOTIFICATION_ERROR:
   __BASE: {type: FAULT, level: MINOR, desc: enable notification error}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
-  UID: {type: INT32, desc: uid}
+  UID: {type: INT32, desc: uid of application}
   ENABLE: {type: BOOL, desc: enable state}
   ERROR_CODE: {type: INT32, desc: error code}
 
 ENABLE_NOTIFICATION_SLOT_ERROR:
   __BASE: {type: FAULT, level: MINOR, desc: enable notification slot error}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
-  UID: {type: INT32, desc: uid}
+  UID: {type: INT32, desc: uid of application}
   SLOT_TYPE: {type: INT32, desc: slot type}
   ENABLE: {type: BOOL, desc: enable state}
   ERROR_CODE: {type: INT32, desc: error code}
@@ -49,7 +49,7 @@ FLOW_CONTROL_OCCUR:
   __BASE: {type: FAULT, level: MINOR, desc: flow control occured}
   NOTIFICATION_ID: {type: INT32, desc: notification Id}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
-  UID: {type: INT32, desc: uid}
+  UID: {type: INT32, desc: uid of application}
 
 # behavior event
 SUBSCRIBE:
@@ -69,13 +69,13 @@ UNSUBSCRIBE:
 ENABLE_NOTIFICATION:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: enable notification}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
-  UID: {type: INT32, desc: uid}
+  UID: {type: INT32, desc: uid of application}
   ENABLE: {type: BOOL, desc: enable state}
 
 ENABLE_NOTIFICATION_SLOT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: enable notification slot}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
-  UID: {type: INT32, desc: uid}
+  UID: {type: INT32, desc: uid of application}
   SLOT_TYPE: {type: INT32, desc: slot type}
   ENABLE: {type: BOOL, desc: enable state}
 
@@ -92,14 +92,14 @@ CANCEL:
   NOTIFICATION_ID: {type: INT32, desc: notification Id}
   NOTIFICATION_LABEL: {type: STRING, desc: notification label}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
-  UID: {type: INT32, desc: uid}
+  UID: {type: INT32, desc: uid of application}
 
 REMOVE:
   __BASE: {type: STATISTIC, level: MINOR, desc: cancel notification}
   NOTIFICATION_ID: {type: INT32, desc: notification Id}
   NOTIFICATION_LABEL: {type: STRING, desc: notification label}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
-  UID: {type: INT32, desc: uid}
+  UID: {type: INT32, desc: uid of application}
 
 ALARM_TRIGGER:
   __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: alarm trigger}
