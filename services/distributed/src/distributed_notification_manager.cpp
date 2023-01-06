@@ -64,7 +64,6 @@ DistributedNotificationManager::DistributedNotificationManager()
         ANS_LOGE("database_ is nullptr.");
         return;
     }
-    database_->RecreateDistributedDB();
 }
 
 DistributedNotificationManager::~DistributedNotificationManager()
