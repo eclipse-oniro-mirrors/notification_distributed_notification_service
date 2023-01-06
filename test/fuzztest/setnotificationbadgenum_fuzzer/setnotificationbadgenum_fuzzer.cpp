@@ -21,8 +21,7 @@ namespace OHOS {
     {
         // test RequestEnableNotification function
         std::string deviceId(data);
-        sptr<IRemoteObject> callbackInfo;
-        Notification::NotificationHelper::RequestEnableNotification(deviceId, callbackInfo);
+        Notification::NotificationHelper::RequestEnableNotification(deviceId);
         // test AreNotificationsSuspended function
         bool suspended = true;
         Notification::NotificationHelper::AreNotificationsSuspended(suspended);

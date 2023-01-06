@@ -283,10 +283,9 @@ public:
      *
      * @param deviceId Indicates the ID of the device running the application. At present, this parameter can
      *                 only be null or an empty string, indicating the current device.
-     * @param callbackInfo Indicates the callbackInfo.
      * @return Returns set notifications enabled for default bundle result.
      */
-    static ErrCode RequestEnableNotification(std::string &deviceId, const sptr<IRemoteObject> &callbackInfo);
+    static ErrCode RequestEnableNotification(std::string &deviceId);
 
     /**
      * @brief Checks whether this application is in the suspended state.Applications in this state cannot publish

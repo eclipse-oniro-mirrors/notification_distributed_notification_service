@@ -25,7 +25,6 @@ struct NotificationDialog {
   @State private want: any = undefined
   @State private uid: any = undefined
   @State private style: any = {}
-  @State callBackImp_: any = {}
   @State token_: any = undefined
   @State popWidth: any = undefined
   @State popHeight: any = undefined
@@ -114,37 +113,14 @@ struct NotificationDialog {
         console.error('Start enableNotification failed. ErrCode: ' + JSON.stringify(err.code));
         return
       }
-      let option = new rpc.MessageOption()
-      let data = rpc.MessageParcel.create()
-      let reply = rpc.MessageParcel.create()
-      data.writeInterfaceToken("OHOS.Notification.AnsCallbackInterface")
-      data.writeBoolean(flag)
-      console.info("before send request")
-      this.callBackImp_.sendRequest(0, data, reply, option)
-        .then(function (result) {
-          console.info("start to send request")
-          if (result.errCode != 0) {
-            console.error("send request failed, errCode: " + result.errCode)
-            return
-          }
-        })
-        .catch(function (err) {
-          console.error(this.TAG + "send request got exception: " + err)
-        })
-        .finally(() => {
-          data.reclaim()
-          reply.reclaim()
-          globalThis.closeDialog()
-        })
     })
-    console.info("after send request")
+    globalThis.closeDialog()
   }
 
   aboutToAppear() {
     console.log(this.TAG, "dialog page appears")
     this.want = globalThis.abilityWant
     this.style = globalThis.style
-    this.callBackImp_ = globalThis.abilityWant.parameters['callbackStubImpl'].value
     this.token_ = globalThis.abilityWant.parameters['tokenId'].value
     globalThis.bundleName = globalThis.abilityWant.parameters['from']
   }

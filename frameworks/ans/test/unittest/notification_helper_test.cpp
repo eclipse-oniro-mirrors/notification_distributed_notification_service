@@ -417,9 +417,8 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
 {
     std::string deviceId = "DeviceId";
     NotificationHelper notificationHelper;
-    sptr<IRemoteObject> callbackInfo;
-    ErrCode ret = notificationHelper.RequestEnableNotification(deviceId, callbackInfo);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+    ErrCode ret = notificationHelper.RequestEnableNotification(deviceId);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**

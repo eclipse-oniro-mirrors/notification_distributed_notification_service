@@ -942,12 +942,7 @@ ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, Mes
         ANS_LOGE("[HandleRequestEnableNotification] fail: read deviceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    sptr<IRemoteObject> callbackInfo = data.ReadRemoteObject();
-    if (callbackInfo == nullptr) {
-        ANS_LOGE("[HandleRequestEnableNotification] fail: read callbackInfo failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    ErrCode result = RequestEnableNotification(deviceId, callbackInfo);
+    ErrCode result = RequestEnableNotification(deviceId);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1997,7 +1992,7 @@ ErrCode AnsManagerStub::UpdateSlots(
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId,  const sptr<IRemoteObject> &callbackInfo)
+ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId)
 {
     ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
     return ERR_INVALID_OPERATION;

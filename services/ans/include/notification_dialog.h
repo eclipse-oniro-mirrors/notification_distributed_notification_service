@@ -37,7 +37,7 @@ public:
      * @param callbackInfo The callbackInfo.
      * @return ERR_OK if success, else not.
      */
-    ErrCode StartEnableNotificationDialogAbility(const sptr<IRemoteObject> &callbackInfo);
+    ErrCode StartEnableNotificationDialogAbility();
 };
 }  // namespace Notification
 }  // namespace OHOS

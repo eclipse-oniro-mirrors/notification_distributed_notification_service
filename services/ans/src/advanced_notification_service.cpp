@@ -1440,7 +1440,7 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
 }
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(
-    const std::string &deviceId, const sptr<IRemoteObject> &callbackInfo)
+    const std::string &deviceId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1471,7 +1471,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(
     ANS_LOGI("hasPopped = %{public}d, allowedNotify = %{public}d", hasPopped, allowedNotify);
     if (!hasPopped && !allowedNotify) {
         auto notificationDialog = std::make_shared<NotificationDialog>();
-        result = notificationDialog->StartEnableNotificationDialogAbility(callbackInfo);
+        result = notificationDialog->StartEnableNotificationDialogAbility();
         if (result != ERR_OK) {
             ANS_LOGD("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
             return result;
