@@ -17,7 +17,6 @@
 
 #include "ability_manager_client.h"
 #include "advanced_notification_service.h"
-#include "ans_callback_stub.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 
@@ -34,7 +33,7 @@ bool NotificationDialog::JudgeSelfCalled(const std::shared_ptr<AAFwk::AbilityRec
     return true;
 }
 
-ErrCode NotificationDialog::StartEnableNotificationDialogAbility(const sptr<IRemoteObject> &callbackInfo)
+ErrCode NotificationDialog::StartEnableNotificationDialogAbility()
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
     sptr<IRemoteObject> token;
@@ -51,7 +50,6 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(const sptr<IRem
     AAFwk::Want want;
     std::string bundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
-    want.SetParam("callbackStubImpl", callbackInfo);
     want.SetParam("tokenId", token);
     want.SetParam("from", bundleName);
     result = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token, -1);

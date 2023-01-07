@@ -347,11 +347,10 @@ public:
      * @brief Allow notifications to be sent based on the deviceId.
      *
      * @param deviceId Indicates the device Id.
-     * @param callbackInfo Indicates the callbackInfo.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestEnableNotification(
-        const std::string &deviceId, const sptr<IRemoteObject> &callbackInfo) override;
+        const std::string &deviceId) override;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.

@@ -17,7 +17,6 @@
 
 #include <utility>
 
-#include "ans_callback_stub.h"
 #include "common.h"
 
 namespace OHOS {
@@ -43,19 +42,6 @@ struct AsyncCallbackInfoIsEnable {
     bool allowed = false;
 };
 
-class CallbackStubImpl : public AnsCallbackStub {
-public:
-    explicit CallbackStubImpl(AsyncCallbackInfoIsEnable *task) : task_(task) {};
-    ~CallbackStubImpl() override = default;
-    bool OnEnableNotification(bool isAllow) override;
-
-private:
-    AsyncCallbackInfoIsEnable *task_;
-};
-
-static std::mutex callbackMutex_;
-static sptr<IRemoteObject> callbackStubImpl_;
-
 struct EnableParams {
     NotificationBundleOption option;
     bool enable = false;
@@ -76,8 +62,6 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnableParams &params);
 
-bool CreateCallbackStubImpl(AsyncCallbackInfoIsEnable *callbackInfo);
-void ResetCallbackStubImpl();
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_ENABLE_NOTIFICATION_H

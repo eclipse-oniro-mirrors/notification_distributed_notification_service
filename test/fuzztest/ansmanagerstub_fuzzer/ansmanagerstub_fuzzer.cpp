@@ -160,8 +160,7 @@ namespace OHOS {
         ansManagerStub.DeleteAll();
         ansManagerStub.GetSlotsByBundle(bundleOption, slots);
         ansManagerStub.UpdateSlots(bundleOption, slots);
-        sptr<IRemoteObject> callbackInfo;
-        ansManagerStub.RequestEnableNotification(deviceId, callbackInfo);
+        ansManagerStub.RequestEnableNotification(deviceId);
         const std::string bundle = "this is a notification bundle";
         bool enabled = true;
         ansManagerStub.SetNotificationsEnabledForBundle(bundle, enabled);
