@@ -344,24 +344,14 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 std::string deviceId {""};
-                bool popFlag = false;
-                asynccallbackinfo->info.errorCode = NotificationHelper::RequestEnableNotification(deviceId, popFlag);
-                asynccallbackinfo->params.allowToPop = popFlag;
-                ANS_LOGI("errorCode = %{public}d, allowToPop = %{public}d",
-                    asynccallbackinfo->info.errorCode, asynccallbackinfo->params.allowToPop);
-                if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop) {
-                    ANS_LOGI("Begin to start notification dialog");
-                    auto *callbackInfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-                    StartNotificationDialog(callbackInfo);
-                }
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::RequestEnableNotification(deviceId);
             }
         },
         [](napi_env env, napi_status status, void *data) {
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
-                if (!(asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->params.allowToPop)) {
-                    AsyncCompleteCallbackIsNotificationEnabled(env, status, data);
-                }
+                AsyncCompleteCallbackIsNotificationEnabled(env, status, data);
             }
         },
         (void *)asynccallbackinfo,
@@ -375,98 +365,5 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         return promise;
     }
 }
-
-void StartNotificationDialog(AsyncCallbackInfoIsEnable *callbackInfo)
-{
-    ANS_LOGD("%{public}s, Begin Calling StartNotificationDialog.", __func__);
-    if (CreateCallbackStubImpl(callbackInfo)) {
-        sptr<IRemoteObject> token;
-        auto result = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
-        if (result == ERR_OK) {
-            AAFwk::Want want;
-            want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
-            want.SetParam("callbackStubImpl_", callbackStubImpl_);
-            want.SetParam("tokenId", token);
-            want.SetParam("from", AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
-            ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token, -1);
-            ANS_LOGD("%{public}s, End Calling StartNotificationDialog. ret=%{public}d", __func__, err);
-        } else {
-            ANS_LOGE("%{public}s, show notification dialog failed", __func__);
-            ResetCallbackStubImpl();
-        }
-    }
-}
-
-bool CreateCallbackStubImpl(AsyncCallbackInfoIsEnable *callbackInfo)
-{
-    std::lock_guard<std::mutex> lock(callbackMutex_);
-    if (callbackStubImpl_ != nullptr) {
-        return false;
-    }
-    callbackStubImpl_ = new (std::nothrow) CallbackStubImpl(callbackInfo);
-    return true;
-}
-
-void ResetCallbackStubImpl()
-{
-    std::lock_guard<std::mutex> lock(callbackMutex_);
-    callbackStubImpl_ = nullptr;
-}
-
-bool CallbackStubImpl::OnEnableNotification(bool isAllow)
-{
-    ANS_LOGI("isAllow: %{public}d", isAllow);
-    if (!task_ || !task_->env) {
-        ANS_LOGW("invalid task.");
-        return false;
-    }
-
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(task_->env, &loop);
-    if (!loop) {
-        ANS_LOGW("failed to get loop from env.");
-        delete task_;
-        task_ = nullptr;
-        return false;
-    }
-
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGW("uv_work_t instance is nullptr");
-        delete task_;
-        task_ = nullptr;
-        return false;
-    }
-    task_->allowed = isAllow;
-    work->data = reinterpret_cast<void *>(task_);
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
-        [](uv_work_t *work, int status) {
-            auto task_ = static_cast<AsyncCallbackInfoIsEnable*>(work->data);
-            napi_value result = nullptr;
-            napi_get_boolean(task_->env, task_->allowed, &result);
-            if (task_->newInterface) {
-                Common::CreateReturnValue(task_->env, task_->info, result);
-            } else {
-                Common::ReturnCallbackPromise(task_->env, task_->info, result);
-            }
-            if (task_->info.callback != nullptr) {
-                napi_delete_reference(task_->env, task_->info.callback);
-            }
-            delete task_;
-            task_ = nullptr;
-            delete work;
-            work = nullptr;
-        });
-    if (ret != 0) {
-        ANS_LOGW("failed to insert work into queue");
-        delete task_;
-        task_ = nullptr;
-        delete work;
-        work = nullptr;
-        return false;
-    }
-    return true;
-}
-
 }  // namespace NotificationNapi
 }  // namespace OHOS

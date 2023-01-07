@@ -3786,9 +3786,7 @@ HWTEST_F(AnsManagerStubTest, UpdateSlots01, Function | SmallTest | Level1)
 HWTEST_F(AnsManagerStubTest, RequestEnableNotification01, Function | SmallTest | Level1)
 {
     std::string deviceId = "this is deviceId";
-    bool popFlag = true;
-
-    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, popFlag);
+    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

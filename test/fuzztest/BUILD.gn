@@ -18,7 +18,6 @@ group("fuzztest") {
     "addnotificationslot_fuzzer:AddNotificationSlotFuzzTest",
     "addnotificationslots_fuzzer:AddNotificationSlotsFuzzTest",
     "addslotbytype_fuzzer:AddSlotByTypeFuzzTest",
-    "anscallbackstub_fuzzer:AnsCallbackStubFuzzTest",
     "ansmanagerstub_fuzzer:AnsManagerStubFuzzTest",
     "ansmanagerstubannex_fuzzer:AnsManagerStubAnnexFuzzTest",
     "ansmanagerstubannexthree_fuzzer:AnsManagerStubAnnexThreeFuzzTest",

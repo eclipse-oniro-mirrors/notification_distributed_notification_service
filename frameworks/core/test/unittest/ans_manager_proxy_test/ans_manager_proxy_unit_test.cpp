@@ -1035,8 +1035,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0100, Function |
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "Device";
-    bool popFlag = false;
-    int32_t result = proxy->RequestEnableNotification(deviceId, popFlag);
+    int32_t result = proxy->RequestEnableNotification(deviceId);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -1056,8 +1055,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0200, Function |
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "";
-    bool popFlag = false;
-    int32_t result = proxy->RequestEnableNotification(deviceId, popFlag);
+    int32_t result = proxy->RequestEnableNotification(deviceId);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -1079,10 +1077,8 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0300, Function |
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "Device";
-    bool popFlag = false;
-    int32_t result = proxy->RequestEnableNotification(deviceId, popFlag);
+    int32_t result = proxy->RequestEnableNotification(deviceId);
     EXPECT_EQ(ERR_OK, result);
-    EXPECT_EQ(true, popFlag);
 }
 
 /*
@@ -1102,55 +1098,8 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0400, Function |
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "Device";
-    bool popFlag = false;
-    int32_t result = proxy->RequestEnableNotification(deviceId, popFlag);
+    int32_t result = proxy->RequestEnableNotification(deviceId);
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
-}
-
-/*
- * @tc.name: RequestEnableNotificationTest_0500
- * @tc.desc: test RequestEnableNotification function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, RequestEnableNotificationTest_0500, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, false, true, true)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::string deviceId = "Device";
-    bool popFlag = false;
-    int32_t result = proxy->RequestEnableNotification(deviceId, popFlag);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: RequestEnableNotificationTest_0600
- * @tc.desc: test RequestEnableNotification function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0600, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, RequestEnableNotificationTest_0600, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, true, true, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::string deviceId = "Device";
-    bool popFlag = false;
-    int32_t result = proxy->RequestEnableNotification(deviceId, popFlag);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
 /*
