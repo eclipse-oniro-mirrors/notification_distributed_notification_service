@@ -7620,5 +7620,90 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0500, Function | MediumTest | Le
     int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
+
+/*
+ * @tc.name: PublishReminder_0100
+ * @tc.desc: test AnsManagerProxy's PublishReminder function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, PublishReminder_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, PublishReminder_0100, TestSize.Level1";
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    
+    sptr<ReminderRequest> reminder = new ReminderRequest();
+    ErrCode res = proxy->PublishReminder(reminder);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+}
+
+/*
+ * @tc.name: PublishReminder_0200
+ * @tc.desc: test AnsManagerProxy's PublishReminder function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, PublishReminder_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, PublishReminder_0200, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    
+    sptr<ReminderRequest> reminder = nullptr;
+    ErrCode res = proxy->PublishReminder(reminder);
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, res);
+}
+
+/*
+ * @tc.name: PublishReminder_0300
+ * @tc.desc: test AnsManagerProxy's PublishReminder function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, PublishReminder_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, PublishReminder_0300, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    
+    sptr<ReminderRequest> reminder = new ReminderRequest();
+    ErrCode res = proxy->PublishReminder(reminder);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+}
+
+/*
+ * @tc.name: ReadReminders_0100
+ * @tc.desc: test AnsManagerProxy's ReadReminders function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, ReadReminders_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, ReadReminders_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    
+    uint8_t count = 10;
+    MessageParcel reply;
+    std::vector<sptr<ReminderRequest>> reminders;
+    ErrCode res = proxy->ReadReminders(count, reply, reminders);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -4361,5 +4361,33 @@ HWTEST_F(AnsManagerStubTest, GetSyncNotificationEnabledWithoutApp01, Function | 
     ErrCode result = ansManagerStub_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
+
+/**
+ * @tc.name: Subscribe01
+ * @tc.desc: Test Subscribe return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, Subscribe01, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+
+    ErrCode result = ansManagerStub_->Subscribe(nullptr, info);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: Unsubscribe01
+ * @tc.desc: Test Unsubscribe return.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, Unsubscribe01, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+
+    ErrCode result = ansManagerStub_->Unsubscribe(nullptr, info);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
 }
 }
