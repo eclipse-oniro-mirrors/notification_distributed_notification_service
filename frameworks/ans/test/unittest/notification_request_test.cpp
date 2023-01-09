@@ -383,6 +383,45 @@ HWTEST_F(NotificationRequestTest, GetNotificationHashCode_0100, Level1)
 }
 
 /**
+ * @tc.name: GetNotificationHashCode_0200
+ * @tc.desc: GetNotificationHashCode
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, GetNotificationHashCode_0200, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    notificationRequest.SetCreatorBundleName("creatorName");
+    int32_t uid = 0;
+    notificationRequest.SetCreatorUid(uid);
+    std::string result3 = notificationRequest.GetNotificationHashCode();
+    std::string creatorName = "";
+    EXPECT_EQ(result3, creatorName);
+}
+
+/**
+ * @tc.name: GetNotificationHashCode_0300
+ * @tc.desc: GetNotificationHashCode
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, GetNotificationHashCode_0300, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    notificationRequest.SetCreatorBundleName("creatorName");
+    notificationRequest.SetCreatorUid(2);
+
+    std::string ownerName = "";
+    notificationRequest.SetOwnerBundleName(ownerName);
+    std::string result1 = notificationRequest.GetNotificationHashCode();
+    EXPECT_EQ(result1, ownerName);
+}
+
+/**
  * @tc.name: SetDevicesSupportDisplay_0100
  * @tc.desc: SetDevicesSupportDisplay
  * @tc.type: FUNC
@@ -398,6 +437,9 @@ HWTEST_F(NotificationRequestTest, SetDevicesSupportDisplay_0100, Level1)
     notificationRequest.SetDevicesSupportOperate(devices);
     nlohmann::json jsonObject;
     notificationRequest.ConvertJsonToNum(nullptr, jsonObject);
+
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    notificationRequest.ConvertJsonToNum(target, jsonObject);
     notificationRequest.ConvertJsonToString(nullptr, jsonObject);
     notificationRequest.ConvertJsonToEnum(nullptr, jsonObject);
     notificationRequest.ConvertJsonToBool(nullptr, jsonObject);

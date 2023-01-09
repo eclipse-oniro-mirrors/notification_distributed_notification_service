@@ -69,6 +69,31 @@ HWTEST_F(NotificationUserInputTest, ToJson_00001, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: ToJson_00002
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationUserInputTest, ToJson_00002, Function | SmallTest | Level1)
+{
+    std::string inputKey = "InputKey";
+    std::string tag = "Tag";
+    std::vector<std::string> options;
+    bool permitFreeFormInput = true;
+    std::set<std::string> permitMimeTypes;
+    std::shared_ptr<AAFwk::WantParams> additional = std::make_shared<AAFwk::WantParams>();;
+    Notification::NotificationConstant::InputEditType editType =
+        Notification::NotificationConstant::InputEditType(1);
+    auto rrc = std::make_shared<NotificationUserInput>(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+    additional, editType);
+    std::shared_ptr<AAFwk::WantParams> ret = rrc->GetAdditionalData();
+
+    nlohmann::json jsonObject;
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrc->ToJson(jsonObject), true);
+}
+
+/**
  * @tc.name: FromJson_00001
  * @tc.desc: Test FromJson parameters.
  * @tc.type: FUNC
@@ -210,6 +235,56 @@ HWTEST_F(NotificationUserInputTest, Create_00004, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: Create_00005
+ * @tc.desc: Test NotificationUserInput parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationUserInputTest, Create_00005, Function | SmallTest | Level1)
+{
+    std::string inputKey = "this is inputKey";
+    std::string tag = "Tag";
+    std::vector<std::string> options;
+    std::string option = "this is option";
+    options.emplace_back(option);
+    bool permitFreeFormInput = true;
+    std::set<std::string> permitMimeTypes;
+    std::string permitMimeType = "this is permitMimeType";
+    permitMimeTypes.insert(permitMimeType);
+    std::shared_ptr<AAFwk::WantParams> additional = nullptr;
+    Notification::NotificationConstant::InputEditType editType =
+        Notification::NotificationConstant::InputEditType::EDIT_DISABLED;
+    auto rrc = std::make_shared<NotificationUserInput>();
+    rrc->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+        additional, editType);
+}
+
+/**
+ * @tc.name: Create_00006
+ * @tc.desc: Test NotificationUserInput parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationUserInputTest, Create_00006, Function | SmallTest | Level1)
+{
+    std::string inputKey = "this is inputKey";
+    std::string tag = "Tag";
+    std::vector<std::string> options;
+    std::string option = "this is option";
+    options.emplace_back(option);
+    bool permitFreeFormInput = true;
+    std::set<std::string> permitMimeTypes;
+    std::string permitMimeType = "this is permitMimeType";
+    permitMimeTypes.insert(permitMimeType);
+    std::shared_ptr<AAFwk::WantParams> additional = std::make_shared<AAFwk::WantParams>();
+    Notification::NotificationConstant::InputEditType editType =
+        Notification::NotificationConstant::InputEditType::EDIT_DISABLED;
+    auto rrc = std::make_shared<NotificationUserInput>();
+    rrc->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+        additional, editType);
+}
+
+/**
  * @tc.name: SetPermitMimeTypes_00001
  * @tc.desc: Test SetPermitMimeTypes parameters.
  * @tc.type: FUNC
@@ -223,6 +298,62 @@ HWTEST_F(NotificationUserInputTest, SetPermitMimeTypes_00001, Function | SmallTe
     rrc->SetPermitMimeTypes(mimeType, doPermit);
     auto result = rrc->GetPermitMimeTypes();
     EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: AddAdditionalData_00001
+ * @tc.desc: Test AddAdditionalData parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationUserInputTest, AddAdditionalData_00001, Function | SmallTest | Level1)
+{
+    std::string inputKey = "InputKey";
+    std::string tag = "Tag";
+    std::vector<std::string> options;
+    bool permitFreeFormInput = true;
+    std::set<std::string> permitMimeTypes;
+    std::shared_ptr<AAFwk::WantParams> additional = nullptr;
+    Notification::NotificationConstant::InputEditType editType =
+        Notification::NotificationConstant::InputEditType(1);
+    auto rrc = std::make_shared<NotificationUserInput>(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+    additional, editType);
+    std::shared_ptr<AAFwk::WantParams> ret = rrc->GetAdditionalData();
+    EXPECT_EQ(ret, nullptr);
+    AAFwk::WantParams aitional;
+    rrc->AddAdditionalData(aitional);
+}
+
+/**
+ * @tc.name: Dump_00002
+ * @tc.desc: Test Dump parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationUserInputTest, Dump_00002, Function | SmallTest | Level1)
+{
+    std::string inputKey = "InputKey";
+    std::string tag = "Tag";
+    std::vector<std::string> options;
+    std::string option1 = "this is option1";
+    std::string option2 = "this is option2";
+    options.emplace_back(option1);
+    options.emplace_back(option2);
+    bool permitFreeFormInput = true;
+    std::set<std::string> permitMimeTypes;
+    std::string permitMimeType1 = "this is permitMimeType1";
+    std::string permitMimeType2 = "this is permitMimeType2";
+    permitMimeTypes.insert(permitMimeType1);
+    permitMimeTypes.insert(permitMimeType2);
+    std::shared_ptr<AAFwk::WantParams> additional = nullptr;
+    Notification::NotificationConstant::InputEditType editType =
+        Notification::NotificationConstant::InputEditType(1);
+    auto rrc = std::make_shared<NotificationUserInput>(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+    additional, editType);
+    std::string ret = rrc->Dump();
+    std::string dump = "NotificationUserInput{ inputKey = InputKey, tag = Tag, options = [this is option1, this is option2], "
+    "permitFreeFormInput = true, permitMimeTypes = [this is permitMimeType1, this is permitMimeType2], editType = 1 }";
+    EXPECT_EQ(ret, dump);
 }
 }
 }
