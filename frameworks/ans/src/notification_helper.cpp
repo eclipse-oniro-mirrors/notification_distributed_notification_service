@@ -154,9 +154,9 @@ ErrCode NotificationHelper::IsAllowedNotifySelf(bool &allowed)
     return DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
 }
 
-ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId, bool &popFlag)
+ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(deviceId, popFlag);
+    return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(deviceId);
 }
 
 ErrCode NotificationHelper::AreNotificationsSuspended(bool &suspended)

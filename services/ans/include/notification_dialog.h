@@ -13,23 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_CALLBACK_STUB_H
-#define BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_CALLBACK_STUB_H
-
-#include "ans_callback_interface.h"
-#include "iremote_stub.h"
+#include "ability_record.h"
+#include "iremote_object.h"
 
 namespace OHOS {
 namespace Notification {
-class AnsCallbackStub : public IRemoteStub<AnsCallbackInterface> {
+class NotificationDialog {
 public:
-    AnsCallbackStub() = default;
-    virtual ~AnsCallbackStub() override = default;
-    DISALLOW_COPY_AND_MOVE(AnsCallbackStub);
+    NotificationDialog() = default;
+    ~NotificationDialog() = default;
 
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    /**
+     * @brief  To judge whether the caller is current application.
+     *
+     * @param abilityRecord The abilityRecord of comparison.
+     * @return true if it is selfcalled, else not.
+     */
+    bool JudgeSelfCalled(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief To start the enableNotificationDialog ability.
+     *
+     * @param callbackInfo The callbackInfo.
+     * @return ERR_OK if success, else not.
+     */
+    ErrCode StartEnableNotificationDialogAbility();
 };
 }  // namespace Notification
 }  // namespace OHOS
-
-#endif  // BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_CALLBACK_STUB_H

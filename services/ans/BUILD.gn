@@ -31,6 +31,7 @@ ohos_shared_library("libans") {
     "src/advanced_notification_service_ability.cpp",
     "src/bundle_manager_helper.cpp",
     "src/event_report.cpp",
+    "src/notification_dialog.cpp",
     "src/notification_preferences.cpp",
     "src/notification_preferences_database.cpp",
     "src/notification_preferences_info.cpp",
@@ -53,6 +54,7 @@ ohos_shared_library("libans") {
   cflags = []
 
   deps = [
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${core_path}:ans_core",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
   ]
@@ -68,6 +70,7 @@ ohos_shared_library("libans") {
   }
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",

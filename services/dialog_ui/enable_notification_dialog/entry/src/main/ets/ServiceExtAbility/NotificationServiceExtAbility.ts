@@ -22,7 +22,6 @@ export default class NotificationDialogServiceExtensionAbility extends extension
     onCreate(want) {
         console.debug(TAG, "onCreate, want: " + JSON.stringify(want));
         globalThis.notificationExtensionContext = this.context;
-        globalThis.callbackImp = want.parameters.callbackStubImpl_;
         globalThis.closeDialog = () => {
             console.info(TAG, 'click waiting for a response');
             globalThis.notificationExtensionContext.terminateSelf();
