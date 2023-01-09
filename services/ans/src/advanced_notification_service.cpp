@@ -2054,7 +2054,7 @@ inline void RemoveExpired(
 {
     auto iter = list.begin();
     while (iter != list.end()) {
-        if (now - *iter > std::chrono::seconds(1)) {
+        if (abs(now - *iter) > std::chrono::seconds(1)) {
             iter = list.erase(iter);
         } else {
             break;
