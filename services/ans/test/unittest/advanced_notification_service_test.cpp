@@ -2772,7 +2772,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18600,
 
     advancedNotificationService_->OnScreenOn();
     advancedNotificationService_->OnScreenOff();
-    advancedNotificationService_->OnDistributedKvStoreDeathRecipient();
 
     GTEST_LOG_(INFO) << "OnScreenOn_1000 test end";
 }
