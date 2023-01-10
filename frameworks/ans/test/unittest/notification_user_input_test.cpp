@@ -351,8 +351,9 @@ HWTEST_F(NotificationUserInputTest, Dump_00002, Function | SmallTest | Level1)
     auto rrc = std::make_shared<NotificationUserInput>(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
     additional, editType);
     std::string ret = rrc->Dump();
-    std::string dump = "NotificationUserInput{ inputKey = InputKey, tag = Tag, options = [this is option1, this is option2], "
-    "permitFreeFormInput = true, permitMimeTypes = [this is permitMimeType1, this is permitMimeType2], editType = 1 }";
+    std::string dump = "NotificationUserInput{ inputKey = InputKey, tag = Tag, "
+    "options = [this is option1, this is option2], permitFreeFormInput = true, "
+    "permitMimeTypes = [this is permitMimeType1, this is permitMimeType2], editType = 1 }";
     EXPECT_EQ(ret, dump);
 }
 }

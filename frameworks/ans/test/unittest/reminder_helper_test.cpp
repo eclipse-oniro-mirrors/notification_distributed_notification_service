@@ -101,7 +101,7 @@ HWTEST_F(ReminderHelperTest, AddNotificationSlot_00001, Function | SmallTest | L
     NotificationSlot slot;
     ReminderHelper reminderHelper;
     ErrCode ret = reminderHelper.AddNotificationSlot(slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
