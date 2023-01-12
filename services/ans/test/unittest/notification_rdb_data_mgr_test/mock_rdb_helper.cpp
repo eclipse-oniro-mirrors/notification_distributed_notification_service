@@ -18,7 +18,8 @@
 
 namespace OHOS {
 namespace NativeRdb {
-std::shared_ptr<RdbStore> RdbStoreManager::GetRdbStore(const RdbStoreConfig &config, int &errCode)
+std::shared_ptr<RdbStore> RdbStoreManager::GetRdbStore(
+    const RdbStoreConfig &config, int &errCode, int version, RdbOpenCallback &openCallback)
 {
     return nullptr;
 }
