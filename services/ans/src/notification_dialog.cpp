@@ -48,7 +48,8 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility()
         return result;
     }
     AAFwk::Want want;
-    std::string bundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    std::string bundleName = IN_PROCESS_CALL(
+        AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
     want.SetParam("tokenId", token);
     want.SetParam("from", bundleName);
