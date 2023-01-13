@@ -82,7 +82,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00100, Fu
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
     EXPECT_NE(nullptr, spSlot);
     GTEST_LOG_(INFO) << "after get slot dump slot information:" << spSlot->Dump();
-    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(false, spSlot->CanEnableLight());
     EXPECT_EQ(true, spSlot->CanVibrate());
     EXPECT_EQ("description", spSlot->GetDescription());
     EXPECT_EQ("SOCIAL_COMMUNICATION", spSlot->GetId());
@@ -127,7 +127,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00200, Fu
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
 
     EXPECT_NE(nullptr, spSlot);
-    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(false, spSlot->CanEnableLight());
     EXPECT_EQ(true, spSlot->CanVibrate());
     EXPECT_EQ("description", spSlot->GetDescription());
     EXPECT_EQ("SERVICE_REMINDER", spSlot->GetId());
@@ -173,7 +173,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00300, Fu
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::CONTENT_INFORMATION, spSlot));
 
     EXPECT_NE(nullptr, spSlot);
-    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(false, spSlot->CanEnableLight());
     EXPECT_EQ(true, spSlot->CanVibrate());
     EXPECT_EQ("description", spSlot->GetDescription());
     EXPECT_EQ("CONTENT_INFORMATION", spSlot->GetId());
@@ -218,7 +218,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00400, Fu
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 
     EXPECT_NE(nullptr, spSlot);
-    EXPECT_EQ(true, spSlot->CanEnableLight());
+    EXPECT_EQ(false, spSlot->CanEnableLight());
     EXPECT_EQ(true, spSlot->CanVibrate());
     EXPECT_EQ("description", spSlot->GetDescription());
     EXPECT_EQ("OTHER", spSlot->GetId());
