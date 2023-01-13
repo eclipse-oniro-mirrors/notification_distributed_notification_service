@@ -61,6 +61,21 @@ HWTEST_F(NotificationLongTextContentTest, ToJson_00001, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLongTextContentTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLongTextContent>();
+    nlohmann::json jsonObject = nlohmann::json{"processName", "longText", "name", "arrivedTime1"};
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Marshalling_00001
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC

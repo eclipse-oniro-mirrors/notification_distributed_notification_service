@@ -48,6 +48,23 @@ HWTEST_F(NotificationConversationalContentTest, ToJson_00001, Function | SmallTe
 }
 
 /**
+ * @tc.name: FromJson_00001
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConversationalContentTest, FromJson_00001, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    auto rrc = std::make_shared<NotificationConversationalContent>(messageUser);
+
+    nlohmann::json jsonObject = nlohmann::json{"processName", "process6", "messageUser", "arrivedTime1"};
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Marshalling_00001
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC

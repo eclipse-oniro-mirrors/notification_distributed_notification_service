@@ -1429,5 +1429,109 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00004, Function | SmallTest | 
     EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0);
     rrc->UpdateActionButtons(setSnooze);
 }
+
+/**
+ * @tc.name: UpdateNotificationContent_00300
+ * @tc.desc: Test UpdateNotificationContent parameters.
+ * @tc.type: FUNC
+ * @tc.require: AR000GNF1T
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00300, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+    sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
+    uint32_t minTimeIntervalInSecond = 5 * 60;
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+
+    bool setSnooze = true;
+    rrc->UpdateNotificationContent(setSnooze);
+}
+
+
+/**
+ * @tc.name: UpdateNotificationContent_00400
+ * @tc.desc: Test UpdateNotificationContent parameters.
+ * @tc.type: FUNC
+ * @tc.require: AR000GNF1T
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00400, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+    sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
+
+    bool deSet = true;
+    uint8_t newState = 2;
+    std::string function = "this is function";
+    rrc->SetState(deSet, newState, function);
+    uint8_t result1 = rrc->GetState();
+    EXPECT_EQ(result1, 2);
+    EXPECT_EQ(rrc->IsAlerting(), true);
+    bool setSnooze = false;
+    rrc->UpdateNotificationContent(setSnooze);
+}
+
+/**
+ * @tc.name: UpdateNotificationContent_00500
+ * @tc.desc: Test UpdateNotificationContent parameters.
+ * @tc.type: FUNC
+ * @tc.require: AR000GNF1T
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00500, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+    sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
+
+    bool deSet = false;
+    uint8_t newState = 0;
+    std::string function = "this is function";
+    rrc->SetState(deSet, newState, function);
+    uint8_t result1 = rrc->GetState();
+    EXPECT_EQ(result1, 0);
+    EXPECT_EQ(rrc->IsAlerting(), false);
+
+    rrc->SetSnoozeTimes(0);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 0);
+    rrc->SetSnoozeTimesDynamic(1);
+    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1);
+
+    bool setSnooze = false;
+    rrc->UpdateNotificationContent(setSnooze);
+}
+
+/**
+ * @tc.name: GetCTime_00001
+ * @tc.desc: Test GetCTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, GetCTime_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    Notification::ReminderRequest::TimeTransferType type = Notification::ReminderRequest::TimeTransferType(3);
+    int32_t actualTime = 1;
+    int32_t result = rrc->GetCTime(type, actualTime);
+    int32_t ret = -1;
+    EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: GetActualTime_00001
+ * @tc.desc: Test GetActualTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, GetActualTime_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    Notification::ReminderRequest::TimeTransferType type = Notification::ReminderRequest::TimeTransferType(3);
+    int32_t actualTime = 1;
+    int32_t result = rrc->GetActualTime(type, actualTime);
+    int32_t ret = -1;
+    EXPECT_EQ(result, ret);
+}
 }
 }
