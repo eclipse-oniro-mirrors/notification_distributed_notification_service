@@ -68,5 +68,11 @@ bool AccessTokenHelper::IsDlpHap(const AccessTokenID &callerToken)
     }
     return false;
 }
+
+bool AccessTokenHelper::VerifyShellToken(const AccessTokenID &callerToken)
+{
+    ATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(callerToken);
+    return (tokenType == ATokenTypeEnum::TOKEN_SHELL);
+}
 }  // namespace Notification
 }  // namespace OHOS
