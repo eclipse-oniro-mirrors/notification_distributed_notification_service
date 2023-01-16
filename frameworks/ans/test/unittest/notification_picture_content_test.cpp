@@ -104,6 +104,22 @@ HWTEST_F(NotificationPictureContentTest, ToJson_00001, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: FromJson_00001
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationPictureContentTest, FromJson_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationPictureContent>();
+
+    nlohmann::json jsonObject = nlohmann::json{"processName", "process6", "expandedTitle", "arrivedTime1"};
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Marshalling_00001
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC

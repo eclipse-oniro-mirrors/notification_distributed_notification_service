@@ -46,6 +46,21 @@ HWTEST_F(MessageUserTest, FromJson_00001, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    nlohmann::json jsonObject = nlohmann::json{"processName", "process6", "name", "arrivedTime1"};
+    messageUser.FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    EXPECT_EQ(messageUser.FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Unmarshalling_00001
  * @tc.desc: Test Unmarshalling parameters.
  * @tc.type: FUNC

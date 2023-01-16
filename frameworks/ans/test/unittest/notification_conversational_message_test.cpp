@@ -160,5 +160,24 @@ HWTEST_F(NotificationConversationalMessageTest, ReadFromParcel_00001, Function |
     auto rrc = std::make_shared<NotificationConversationalMessage>(text, timestamp, sender);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: FromJson_00001
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W15B
+ */
+HWTEST_F(NotificationConversationalMessageTest, FromJson_00001, Function | SmallTest | Level1)
+{
+    std::string text = "Text";
+    int64_t timestamp = 10;
+    MessageUser sender;
+    auto rrc = std::make_shared<NotificationConversationalMessage>(text, timestamp, sender);
+
+    nlohmann::json jsonObject = nlohmann::json{"processName", "process6", "arrivedTime", "arrivedTime1"};
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
+    EXPECT_EQ(jsonObject.is_object(), false);
+}
 }
 }

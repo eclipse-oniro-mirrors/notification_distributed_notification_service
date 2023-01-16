@@ -248,5 +248,21 @@ HWTEST_F(NotificationContentTest, ConvertJsonToContent_0100, Level1)
     auto result1 = notificationContent.ConvertJsonToContent(nullptr, jsonObject);
     EXPECT_EQ(result1, false);
 }
+
+/**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationContentTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    NotificationContent notificationContent(mediaContent);
+    nlohmann::json jsonObject = nlohmann::json{"processName", "soundEnabled", "name", "arrivedTime1"};
+    notificationContent.FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    EXPECT_EQ(notificationContent.FromJson(jsonObject), nullptr);
+}
 }
 }

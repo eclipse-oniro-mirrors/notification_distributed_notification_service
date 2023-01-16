@@ -453,6 +453,32 @@ HWTEST_F(NotificationRequestTest, SetDevicesSupportDisplay_0100, Level1)
 }
 
 /**
+ * @tc.name: ConvertJsonToString_0100
+ * @tc.desc: ConvertJsonToString when target not null
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToString_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    nlohmann::json jsonObject;
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    
+    notificationRequest.ConvertJsonToString(target, jsonObject);
+    notificationRequest.ConvertJsonToEnum(target, jsonObject);
+    notificationRequest.ConvertJsonToBool(target, jsonObject);
+    notificationRequest.ConvertJsonToPixelMap(target, jsonObject);
+    bool result1 = notificationRequest.ConvertJsonToNotificationContent(target, jsonObject);
+    bool result2 = notificationRequest.ConvertJsonToNotificationActionButton(target, jsonObject);
+    bool result3 = notificationRequest.ConvertJsonToNotificationFlags(target, jsonObject);
+    EXPECT_EQ(result1, true);
+    EXPECT_EQ(result2, true);
+    EXPECT_EQ(result3, true);
+}
+
+/**
  * @tc.name: ConvertJsonToNotificationDistributedOptions_0100
  * @tc.desc: ConvertJsonToNotificationDistributedOptions
  * @tc.type: FUNC
@@ -466,6 +492,23 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationDistributedOptions_01
     nlohmann::json jsonObject;
     bool result1 = notificationRequest.ConvertJsonToNotificationDistributedOptions(nullptr, jsonObject);
     EXPECT_EQ(result1, false);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationDistributedOptions_0200
+ * @tc.desc: ConvertJsonToNotificationDistributedOptions
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationDistributedOptions_0200, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    nlohmann::json jsonObject;
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    bool result1 = notificationRequest.ConvertJsonToNotificationDistributedOptions(target, jsonObject);
+    EXPECT_EQ(result1, true);
 }
 }
 }
