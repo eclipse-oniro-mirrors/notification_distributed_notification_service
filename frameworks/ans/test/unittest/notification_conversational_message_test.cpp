@@ -179,5 +179,27 @@ HWTEST_F(NotificationConversationalMessageTest, FromJson_00001, Function | Small
     EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
     EXPECT_EQ(jsonObject.is_object(), false);
 }
+
+/**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W15B
+ */
+HWTEST_F(NotificationConversationalMessageTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    std::string text = "Text";
+    int64_t timestamp = 10;
+    MessageUser sender;
+    auto rrc = std::make_shared<NotificationConversationalMessage>(text, timestamp, sender);
+
+    nlohmann::json jsonObject = nlohmann::json{
+        {"processName", "process6"}, {"APL", 1},
+        {"version", 2}, {"tokenId", 685266937},
+        {"tokenAttr", 0},
+        {"dcaps", {"AT_CAP", "ST_CAP"}}};
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), true);
+}
 }
 }

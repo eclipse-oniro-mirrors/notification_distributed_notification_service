@@ -163,5 +163,23 @@ HWTEST_F(NotificationActionButtontTest, FromJson_00002, Function | SmallTest | L
     EXPECT_EQ(jsonObject.is_object(), false);
     EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
 }
+
+/**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationActionButtontTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationActionButton>();
+    nlohmann::json jsonObject = nlohmann::json{
+        {"processName", "process6"}, {"APL", 1},
+        {"version", 2}, {"tokenId", 685266937},
+        {"tokenAttr", 0},
+        {"dcaps", {"AT_CAP", "ST_CAP"}}};
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), true);
+}
 }
 }
