@@ -212,10 +212,9 @@ int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &ke
     }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
-        int32_t rowId = -1;
         for (auto key : keys) {
             NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
-            rowId = -1;
+            int32_t rowId = -1;
             absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
             int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
             if (ret != NativeRdb::E_OK) {
