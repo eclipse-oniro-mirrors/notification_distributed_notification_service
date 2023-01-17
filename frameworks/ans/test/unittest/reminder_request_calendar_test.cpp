@@ -380,6 +380,27 @@ HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_01000, F
 }
 
 /**
+ * @tc.name: PreGetNextTriggerTimeIgnoreSnooze_03000
+ * @tc.desc: Test PreGetNextTriggerTimeIgnoreSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_03000, Function | SmallTest | Level1)
+{
+    bool ignoreRepeat = false;
+    bool forceToGetNext = true;
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+        std::make_shared<NativeRdb::AbsSharedResultSet>();
+    calendar->RecoverFromDb(resultSet);
+
+    EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext),
+    calendar->GetNextTriggerTime());
+}
+
+/**
  * @tc.name: PreGetNextTriggerTimeIgnoreSnooze_02000
  * @tc.desc: Test PreGetNextTriggerTimeIgnoreSnooze parameters.
  * @tc.type: FUNC

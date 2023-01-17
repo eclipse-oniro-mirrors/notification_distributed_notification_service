@@ -61,6 +61,24 @@ HWTEST_F(MessageUserTest, FromJson_00002, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    nlohmann::json jsonObject = nlohmann::json{
+        {"processName", "process6"}, {"APL", 1},
+        {"version", 2}, {"tokenId", 685266937},
+        {"tokenAttr", 0},
+        {"dcaps", {"AT_CAP", "ST_CAP"}}};
+    messageUser.FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), true);
+}
+
+/**
  * @tc.name: Unmarshalling_00001
  * @tc.desc: Test Unmarshalling parameters.
  * @tc.type: FUNC
