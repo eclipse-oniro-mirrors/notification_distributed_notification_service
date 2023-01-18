@@ -38,7 +38,18 @@ RdbStoreDataCallBackNotificationStorage::~RdbStoreDataCallBackNotificationStorag
 int32_t RdbStoreDataCallBackNotificationStorage::OnCreate(NativeRdb::RdbStore &rdbStore)
 {
     ANS_LOGD("OnCreate");
-    return NativeRdb::E_OK;
+    int ret = NativeRdb::E_OK;
+    if (hasTableInit_) {
+        return ret;
+    }
+    std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + notificationRdbConfig_.tableName
+        + " (KEY TEXT NOT NULL PRIMARY KEY, VALUE TEXT NOT NULL);";
+    ret = rdbStore.ExecuteSql(createTableSql);
+    if (ret == NativeRdb::E_OK) {
+        hasTableInit_ = true;
+        ANS_LOGD("createTable succeed");
+    }
+    return ret;
 }
 
 int32_t RdbStoreDataCallBackNotificationStorage::OnUpgrade(
@@ -60,18 +71,7 @@ int32_t RdbStoreDataCallBackNotificationStorage::OnDowngrade(
 int32_t RdbStoreDataCallBackNotificationStorage::OnOpen(NativeRdb::RdbStore &rdbStore)
 {
     ANS_LOGD("OnOpen");
-    int ret = NativeRdb::E_OK;
-    if (hasTableInit_) {
-        return ret;
-    }
-    std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + notificationRdbConfig_.tableName
-        + " (KEY TEXT NOT NULL PRIMARY KEY, VALUE TEXT NOT NULL);";
-    ret = rdbStore.ExecuteSql(createTableSql);
-    if (ret == NativeRdb::E_OK) {
-        hasTableInit_ = true;
-        ANS_LOGD("createTable succeed");
-    }
-    return ret;
+    return NativeRdb::E_OK;
 }
 
 int32_t RdbStoreDataCallBackNotificationStorage::onCorruption(std::string databaseFile)
@@ -254,6 +254,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &valu
             ANS_LOGE("GetString value failed");
             return NativeRdb::E_ERROR;
         }
+        absSharedResultSet->Close();
     }
     return NativeRdb::E_OK;
 }
@@ -299,6 +300,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 
             values.emplace(resultKey, resultValue);
         } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
+        absSharedResultSet->Close();
     }
 
     return NativeRdb::E_OK;
@@ -343,6 +345,7 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
 
             datas.emplace(resultKey, resultValue);
         } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
+        absSharedResultSet->Close();
     }
     return NativeRdb::E_OK;
 }

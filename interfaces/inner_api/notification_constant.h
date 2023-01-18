@@ -185,8 +185,8 @@ public:
     constexpr static const char* NOTIFICATION_RDB_NAME = "/notificationdb.db";
     constexpr static const char* NOTIFICATION_RDB_TABLE_NAME = "notification_table";
     constexpr static const char* NOTIFICATION_RDB_PATH = "/data/service/el1/public/database/notification_service";
-    constexpr static const char* NOTIFICATION_JOURNAL_MODE = "DELETE";
-    constexpr static const char* NOTIFICATION_SYNC_MODE = "MODE_OFF";
+    constexpr static const char* NOTIFICATION_JOURNAL_MODE = "WAL";
+    constexpr static const char* NOTIFICATION_SYNC_MODE = "FULL";
     constexpr static int32_t NOTIFICATION_RDB_VERSION = 1;
 };
 }  // namespace Notification
