@@ -3632,7 +3632,8 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    if (!AccessTokenHelper::VerifyShellToken(callerToken) && !AccessTokenHelper::VerifyNativeToken(callerToken)) {
         ANS_LOGE("Not subsystem or shell request");
         return ERR_ANS_NON_SYSTEM_APP;
     }

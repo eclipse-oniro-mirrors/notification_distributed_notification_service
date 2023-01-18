@@ -36,6 +36,7 @@ public:
     static bool VerifyNativeToken(const Security::AccessToken::AccessTokenID &callerToken);
     static bool IsSystemHap();
     static bool IsDlpHap(const Security::AccessToken::AccessTokenID &callerToken);
+    static bool VerifyShellToken(const Security::AccessToken::AccessTokenID &callerToken);
 };
 }  // namespace Notification
 }  // namespace OHOS
