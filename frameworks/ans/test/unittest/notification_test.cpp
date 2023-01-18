@@ -380,5 +380,52 @@ HWTEST_F(NotificationTest, GetSound_00003, Function | SmallTest | Level1)
     rrc->SetEnableSound(enable);
     EXPECT_EQ(rrc->GetSound(), Uri(""));
 }
+
+/**
+ * @tc.name: EnableLight_00001
+ * @tc.desc: Test EnableLight parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, EnableLight_00001, Function | SmallTest | Level1)
+{
+    bool enable = true;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetEnableLight(enable);
+    EXPECT_EQ(rrc->EnableLight(), enable);
+}
+
+/**
+ * @tc.name: EnableSound_00001
+ * @tc.desc: Test EnableSound parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, EnableSound_00001, Function | SmallTest | Level1)
+{
+    bool enable = true;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetEnableSound(enable);
+    EXPECT_EQ(rrc->EnableSound(), enable);
+    Parcel parcel;
+    rrc->ReadFromParcelString(parcel);
+}
+
+/**
+ * @tc.name: EnableVibrate_00001
+ * @tc.desc: Test EnableVibrate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, EnableVibrate_00001, Function | SmallTest | Level1)
+{
+    bool enable = true;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetEnableVibration(enable);
+    EXPECT_EQ(rrc->EnableVibrate(), enable);
+}
 }
 }
