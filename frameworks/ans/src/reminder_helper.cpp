@@ -25,8 +25,7 @@ namespace Notification {
 ErrCode ReminderHelper::PublishReminder(ReminderRequest &reminder)
 {
     ANSR_LOGI("PublishReminder start");
-    NotificationSlot slot(reminder.GetSlotType());
-    NotificationHelper::AddNotificationSlot(slot);
+    NotificationHelper::AddSlotByType(reminder.GetSlotType());
     return DelayedSingleton<AnsNotification>::GetInstance()->PublishReminder(reminder);
 }
 
