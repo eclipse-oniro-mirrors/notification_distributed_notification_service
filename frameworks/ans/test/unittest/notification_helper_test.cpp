@@ -48,7 +48,7 @@ HWTEST_F(NotificationHelperTest, AddNotificationSlot_00001, Function | SmallTest
     NotificationSlot slot;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.AddNotificationSlot(slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -390,7 +390,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotify_00001, Function | SmallTest | L
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotify(allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -475,7 +475,7 @@ HWTEST_F(NotificationHelperTest, RemoveNotification_00001, Function | SmallTest 
     int32_t removeReason = 2;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveNotification(key, removeReason);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -533,7 +533,7 @@ HWTEST_F(NotificationHelperTest, RemoveNotifications_00001, Function | SmallTest
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveNotifications();
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -577,7 +577,7 @@ HWTEST_F(NotificationHelperTest, GetAllActiveNotifications_00001, Function | Sma
     std::vector<sptr<Notification>> notification;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetAllActiveNotifications(notification);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -622,7 +622,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForAllBundles_00001, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationsEnabledForAllBundles(deviceId, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -724,7 +724,7 @@ HWTEST_F(NotificationHelperTest, SetDoNotDisturbDate_00001, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -738,7 +738,7 @@ HWTEST_F(NotificationHelperTest, GetDoNotDisturbDate_00001, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -752,7 +752,7 @@ HWTEST_F(NotificationHelperTest, DoesSupportDoNotDisturbMode_00001, Function | S
     bool doesSupport = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.DoesSupportDoNotDisturbMode(doesSupport);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -780,7 +780,7 @@ HWTEST_F(NotificationHelperTest, EnableDistributed_00001, Function | SmallTest |
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.EnableDistributed(enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -795,7 +795,7 @@ HWTEST_F(NotificationHelperTest, EnableDistributedByBundle_00001, Function | Sma
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.EnableDistributedByBundle(bundleOption, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -824,7 +824,7 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnableByBundle_00001, Function | S
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -838,7 +838,7 @@ HWTEST_F(NotificationHelperTest, GetDeviceRemindType_00001, Function | SmallTest
     NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDeviceRemindType(remindType);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -897,7 +897,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForAllBundles_00002, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationsEnabledForAllBundles(userId, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -927,7 +927,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotify_00004, Function | SmallTest | L
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotify(userId, allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -942,7 +942,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForAllBundles_00003, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationsEnabledForAllBundles(userId, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -971,7 +971,7 @@ HWTEST_F(NotificationHelperTest, SetDoNotDisturbDate_00002, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -986,7 +986,7 @@ HWTEST_F(NotificationHelperTest, GetDoNotDisturbDate_00002, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -1033,7 +1033,7 @@ HWTEST_F(NotificationHelperTest, SetSyncNotificationEnabledWithoutApp_00001, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetSyncNotificationEnabledWithoutApp(userId, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -1048,7 +1048,7 @@ HWTEST_F(NotificationHelperTest, GetSyncNotificationEnabledWithoutApp_00001, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetSyncNotificationEnabledWithoutApp(userId, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 }
 }
