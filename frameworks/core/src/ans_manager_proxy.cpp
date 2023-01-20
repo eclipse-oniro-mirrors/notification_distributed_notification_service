@@ -361,8 +361,7 @@ ErrCode AnsManagerProxy::GetSlotByType(const NotificationConstant::SlotType &slo
     if (result == ERR_OK) {
         slot = reply.ReadParcelable<NotificationSlot>();
         if (slot == nullptr) {
-            ANS_LOGE("[GetSlotByType] fail: read slot failed");
-            return ERR_ANS_PARCELABLE_FAILED;
+            ANS_LOGE("[GetSlotByType] slot is null");
         }
     }
 

@@ -99,8 +99,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00100, Fu
     EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
     EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
-        NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
+    EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
 }
 
 /**
@@ -144,8 +143,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00200, Fu
     EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
     EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::SERVICE_REMINDER));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
-        NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
+    EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
 }
 
 /**
@@ -190,8 +188,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00300, Fu
     EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
     EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::CONTENT_INFORMATION));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
-        NotificationHelper::GetNotificationSlot(NotificationConstant::CONTENT_INFORMATION, spSlot));
+    EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::CONTENT_INFORMATION, spSlot));
 }
 
 /**
@@ -235,8 +232,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00400, Fu
     EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
     EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::OTHER));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
-        NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
+    EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 }
 
 /**
@@ -284,8 +280,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00500, Fu
     EXPECT_EQ(true, spSlot->IsEnableBypassDnd());
     EXPECT_EQ(true, spSlot->IsShowBadge());
     EXPECT_EQ(0, NotificationHelper::RemoveNotificationSlot(NotificationConstant::OTHER));
-    EXPECT_EQ((int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST,
-        NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
+    EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 }
 
 /**
