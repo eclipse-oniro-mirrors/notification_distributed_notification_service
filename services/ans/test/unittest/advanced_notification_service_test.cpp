@@ -790,8 +790,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05200,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05300, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    EXPECT_EQ((int)advancedNotificationService_->RemoveSlotByType(NotificationConstant::CUSTOM),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveSlotByType(NotificationConstant::CUSTOM), 0);
 }
 
 /**

@@ -664,9 +664,7 @@ void AsyncCompleteCallbackGetSlot(napi_env env, napi_status status, void *data)
     if (asynccallbackinfo) {
         napi_value result = Common::NapiGetNull(env);
         if (asynccallbackinfo->info.errorCode == ERR_OK) {
-            if (asynccallbackinfo->slot == nullptr) {
-                asynccallbackinfo->info.errorCode = ERROR;
-            } else {
+            if (asynccallbackinfo->slot != nullptr) {
                 napi_create_object(env, &result);
                 if (!Common::SetNotificationSlot(env, *asynccallbackinfo->slot, result)) {
                     asynccallbackinfo->info.errorCode = ERROR;

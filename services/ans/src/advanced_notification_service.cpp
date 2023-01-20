@@ -1345,14 +1345,11 @@ ErrCode AdvancedNotificationService::GetSlotByType(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    ErrCode result = ERR_OK;
     handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
-        }
+        NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
     }));
-    return result;
+    // if get slot failed, it still return ok.
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RemoveSlotByType(const NotificationConstant::SlotType &slotType)
@@ -1364,14 +1361,11 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(const NotificationConstant
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    ErrCode result = ERR_OK;
     handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().RemoveNotificationSlot(bundleOption, slotType);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
-        }
+        NotificationPreferences::GetInstance().RemoveNotificationSlot(bundleOption, slotType);
     }));
-    return result;
+    // if remove slot failed, it still return ok.
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications)
