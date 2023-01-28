@@ -17,6 +17,7 @@
 
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "device_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -57,11 +58,10 @@ void DistributedScreenStatusManager::OnDeviceDisconnected(const std::string &dev
         return;
     }
 
-    std::vector<DistributedKv::DeviceInfo> devInfoList;
-    DistributedKv::Status status =
-        kvDataManager_->GetDeviceList(devInfoList, DistributedKv::DeviceFilterStrategy::NO_FILTER);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager GetDeviceList() failed ret = 0x%{public}x", status);
+    std::vector<DistributedHardware::DmDeviceInfo> devInfoList;
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList(APP_ID, "", devInfoList);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get trust device list failed ret = %{public}d", ret);
         kvDataManager_.reset();
         return;
     }
@@ -85,16 +85,25 @@ void DistributedScreenStatusManager::OnDeviceDisconnected(const std::string &dev
 
 void DistributedScreenStatusManager::GetKvDataManager(void)
 {
-    kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    if (kvDataManager_ != nullptr) {
-        DistributedKv::Status status = kvDataManager_->StartWatchDeviceChange(deviceCb_);
-        if (status != DistributedKv::Status::SUCCESS) {
-            ANS_LOGW("kvDataManager StartWatchDeviceChange failed ret = 0x%{public}x", status);
-            kvDataManager_.reset();
-        }
+    initCallback_ = std::make_shared<DeviceInitCallBack>();
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().InitDeviceManager(APP_ID + STORE_ID, initCallback_);
+    if (ret != 0) {
+        ANS_LOGE("init device manager failed, ret:%{public}d", ret);
+        return;
+    }
+    ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID + STORE_ID, "", deviceCb_);
+    if (ret != 0) {
+        ANS_LOGE("register devStateCallback failed, ret:%{public}d", ret);
+        return;
     }
 
+    kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     KvManagerFlowControlClear();
+}
+
+void DistributedScreenStatusManager::DeviceInitCallBack::OnRemoteDied()
+{
+    ANS_LOGW("DeviceInitCallBack OnRemoteDied");
 }
 
 bool DistributedScreenStatusManager::CheckKvDataManager(void)
@@ -127,7 +136,7 @@ void DistributedScreenStatusManager::GetKvStore(void)
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvDataManager GetSingleKvStore failed ret = 0x%{public}x", status);
         kvStore_.reset();
-        kvDataManager_->StopWatchDeviceChange(deviceCb_);
+        DistributedHardware::DeviceManager::GetInstance().UnRegisterDevStateCallback(APP_ID + STORE_ID);
         kvDataManager_.reset();
         return;
     }
@@ -164,18 +173,17 @@ ErrCode DistributedScreenStatusManager::CheckRemoteDevicesIsUsing(bool &isUsing)
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
 
-    std::vector<DistributedKv::DeviceInfo> devInfoList;
-    DistributedKv::Status status =
-        kvDataManager_->GetDeviceList(devInfoList, DistributedKv::DeviceFilterStrategy::NO_FILTER);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager GetDeviceList() failed ret = 0x%{public}x", status);
+    std::vector<DistributedHardware::DmDeviceInfo> devInfoList;
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList(APP_ID, "", devInfoList);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get trust device list failed ret = %{public}d", ret);
         kvDataManager_.reset();
         return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     DistributedKv::Key prefixKey("");
     std::vector<DistributedKv::Entry> entries;
-    status = kvStore_->GetEntries(prefixKey, entries);
+    DistributedKv::Status status = kvStore_->GetEntries(prefixKey, entries);
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore GetEntries() failed ret = 0x%{public}x", status);
         kvStore_.reset();
@@ -187,7 +195,7 @@ ErrCode DistributedScreenStatusManager::CheckRemoteDevicesIsUsing(bool &isUsing)
         std::string deviceId = key.substr(0, key.find_first_of(DELIMITER));
         ANS_LOGD("value:%{public}s", entry.value.ToString().c_str());
         for (auto devInfo : devInfoList) {
-            if (devInfo.deviceId == deviceId) {
+            if (strcmp(devInfo.deviceId, deviceId.c_str()) == 0) {
                 isUsing = isUsing || (entry.value.ToString() == SCREEN_STATUS_VALUE_ON);
                 break;
             }
@@ -215,16 +223,16 @@ ErrCode DistributedScreenStatusManager::SetLocalScreenStatus(bool screenOn)
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
 
-    DistributedKv::DeviceInfo localDevice;
-    DistributedKv::Status status = kvDataManager_->GetLocalDevice(localDevice);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager GetLocalDevice() failed ret = 0x%{public}x", status);
+    DistributedHardware::DmDeviceInfo localDevice;
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(APP_ID, localDevice);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get trust local device info failed ret = %{public}d", ret);
         return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     DistributedKv::Key kvStoreKey = GenerateDistributedKey(localDevice.deviceId);
     DistributedKv::Value kvStoreValue = screenOn ? SCREEN_STATUS_VALUE_ON : SCREEN_STATUS_VALUE_OFF;
-    status = kvStore_->Put(kvStoreKey, kvStoreValue);
+    DistributedKv::Status status = kvStore_->Put(kvStoreKey, kvStoreValue);
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore Put() failed ret = 0x%{public}x", status);
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;

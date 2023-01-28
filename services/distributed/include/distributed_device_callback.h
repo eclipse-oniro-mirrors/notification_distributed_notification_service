@@ -18,11 +18,12 @@
 
 #include <string>
 
-#include "device_status_change_listener.h"
+#include "device_manager.h"
+#include "dm_device_info.h"
 
 namespace OHOS {
 namespace Notification {
-class DistributedDeviceCallback : public DistributedKv::DeviceStatusChangeListener {
+class DistributedDeviceCallback : public DistributedHardware::DeviceStateCallback {
 public:
     /**
      * @brief Device connection status changed callback function structure.
@@ -45,9 +46,10 @@ public:
     ~DistributedDeviceCallback();
 
 private:
-    void OnDeviceChanged(
-        const DistributedKv::DeviceInfo &info, const DistributedKv::DeviceChangeType &type) const override;
-    DistributedKv::DeviceFilterStrategy GetFilterStrategy() const override;
+    void OnDeviceOnline(const DistributedHardware::DmDeviceInfo &deviceInfo) override;
+    void OnDeviceOffline(const DistributedHardware::DmDeviceInfo &deviceInfo) override;
+    void OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo) override;
+    void OnDeviceReady(const DistributedHardware::DmDeviceInfo &deviceInfo) override;
 
 private:
     IDeviceChange callback_;

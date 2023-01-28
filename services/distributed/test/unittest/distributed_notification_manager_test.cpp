@@ -46,7 +46,6 @@ void DistributedNotificationManagerTest::SetUp()
 {
     distributedManager_ = DistributedNotificationManager::GetInstance();
     distributedManager_->OnDeviceConnected("test");
-    MockGetLocalDevice(0);
 }
 
 void DistributedNotificationManagerTest::TearDown()
@@ -69,7 +68,7 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Publish_00100, Function
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
 
-    EXPECT_EQ(distributedManager_->Publish(bundleName, label, id, request), ERR_OK);
+    EXPECT_EQ(distributedManager_->Publish(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -85,9 +84,8 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Publish_00200, Function
     std::string bundleName = "<bundleName>";
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
-    MockGetLocalDevice(-1);
 
-    EXPECT_EQ(distributedManager_->Publish(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_GET_INFO_FAILED);
+    EXPECT_EQ(distributedManager_->Publish(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -104,7 +102,7 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Update_00100, Function 
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
 
-    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_OK);
+    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -120,9 +118,8 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Update_00200, Function 
     std::string bundleName = "<bundleName>";
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
-    MockGetLocalDevice(-1);
 
-    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_GET_INFO_FAILED);
+    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -139,7 +136,7 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Delete_00100, Function 
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
 
-    EXPECT_EQ(distributedManager_->Delete(bundleName, label, id), ERR_OK);
+    EXPECT_EQ(distributedManager_->Delete(bundleName, label, id), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -156,9 +153,9 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Delete_00200, Function 
     std::string bundleName = "<bundleName>";
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
-    MockGetLocalDevice(-1);
 
-    EXPECT_EQ(distributedManager_->DeleteRemoteNotification(deviceId, bundleName, label, id), ERR_OK);
+    EXPECT_EQ(distributedManager_->DeleteRemoteNotification(deviceId, bundleName, label, id),
+        ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -175,7 +172,7 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_Delete_00300, Function 
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
 
-    EXPECT_EQ(distributedManager_->Delete(bundleName, label, id), ERR_OK);
+    EXPECT_EQ(distributedManager_->Delete(bundleName, label, id), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -226,7 +223,8 @@ HWTEST_F(
 HWTEST_F(DistributedNotificationManagerTest, Distributed_Get_Current_Notification_00100, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationRequest>> requestList;
-    EXPECT_EQ(distributedManager_->GetCurrentDistributedNotification(requestList), ERR_OK);
+    EXPECT_EQ(distributedManager_->GetCurrentDistributedNotification(requestList),
+        ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**

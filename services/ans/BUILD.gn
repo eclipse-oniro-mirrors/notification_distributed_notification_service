@@ -74,6 +74,7 @@ ohos_shared_library("libans") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "hitrace_native:hitrace_meter",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",

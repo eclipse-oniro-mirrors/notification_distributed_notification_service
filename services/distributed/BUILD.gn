@@ -48,6 +48,7 @@ ohos_shared_library("libans_distributed") {
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",

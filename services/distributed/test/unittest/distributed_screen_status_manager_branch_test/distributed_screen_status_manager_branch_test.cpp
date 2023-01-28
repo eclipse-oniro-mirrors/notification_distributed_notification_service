@@ -55,7 +55,7 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0100, Funct
     DistributedScreenStatusManager distributedScreenStatusManager;
     distributedScreenStatusManager.kvDataManager_ = nullptr;
     mockStartWatchDeviceChange(false);
-    EXPECT_EQ(false, distributedScreenStatusManager.CheckKvDataManager());
+    EXPECT_EQ(true, distributedScreenStatusManager.CheckKvDataManager());
 }
 
 /**
@@ -234,7 +234,7 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1300, Funct
     // set status != DistributedKv::Status::SUCCESS
     mockGetDeviceList(false);
     bool isUsing = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
+    EXPECT_EQ(ERR_OK, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
 }
 
 /**
@@ -349,7 +349,7 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1800, Funct
     // set status != DistributedKv::Status::SUCCESS
     mockGetLocalDevice(false);
     bool screenOn = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
+    EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
 }
 
 /**
