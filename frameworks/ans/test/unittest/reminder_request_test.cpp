@@ -944,7 +944,7 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Leve
 {
     AppExecFwk::ElementName element;
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->CreateWantAgent(element), nullptr);
+    EXPECT_NE(rrc->CreateWantAgent(element), nullptr);
 }
 
 /**
