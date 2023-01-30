@@ -16,45 +16,52 @@
 #include "notification_dialog.h"
 
 #include "ability_manager_client.h"
-#include "advanced_notification_service.h"
+#include "ans_inner_errors.h"
+#include "ans_log_wrapper.h"
+#include "bundle_manager_helper.h"
 #include "in_process_call_wrapper.h"
-#include "ipc_skeleton.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace Notification {
-bool NotificationDialog::JudgeSelfCalled(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord)
+int32_t NotificationDialog::GetActiveUserId()
 {
-    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
-    if (callingTokenId != tokenID) {
-        ANS_LOGE("Is not self, not enabled");
-        return false;
+    std::vector<int32_t> activeUserId;
+    auto errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+    if (errCode != ERR_OK) {
+        ANS_LOGE("Query active accountIds failed with %{public}d.", errCode);
+        return AppExecFwk::Constants::ANY_USERID;
     }
-    return true;
+
+    if (activeUserId.empty()) {
+        ANS_LOGE("Active accountIds is empty.");
+        return AppExecFwk::Constants::ANY_USERID;
+    }
+
+    return activeUserId.front();
 }
 
-ErrCode NotificationDialog::StartEnableNotificationDialogAbility()
+int32_t NotificationDialog::GetUidByBundleName(const std::string &bundleName)
+{
+    auto userId = GetActiveUserId();
+    return IN_PROCESS_CALL(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId));
+}
+
+ErrCode NotificationDialog::StartEnableNotificationDialogAbility(int32_t uid)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
-    sptr<IRemoteObject> token;
-    int result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token));
-    std::shared_ptr<AAFwk::AbilityRecord> ability = AAFwk::Token::GetAbilityRecordByToken(token);
-    if (result != ERR_OK) {
-        ANS_LOGD("%{public}s, GetTopAbility failed. result=%{public}d", __func__, result);
-        return result;
+    auto bundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    auto topUid = GetUidByBundleName(bundleName);
+    if (topUid != uid) {
+        ANS_LOGE("Current application isn't in foreground, top is %{private}s.", bundleName.c_str());
+        return ERR_ANS_INVALID_BUNDLE;
     }
-    if (!JudgeSelfCalled(ability)) {
-        ANS_LOGD("%{public}s, if it is not selfcalled.", __func__);
-        return result;
-    }
+
     AAFwk::Want want;
-    std::string bundleName = IN_PROCESS_CALL(
-        AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
-    want.SetParam("tokenId", token);
     want.SetParam("from", bundleName);
-    result = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token, -1);
-    ANS_LOGD("%{public}s, End Calling StartNotificationDialog. result=%{public}d", __func__, result);
+    auto result = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
+    ANS_LOGD("End, result = %{public}d", result);
     return result;
 }
 }  // namespace Notification
