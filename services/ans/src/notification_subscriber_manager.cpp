@@ -382,5 +382,20 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
         record->subscriber->OnEnabledNotificationChanged(callbackData);
     }
 }
+
+void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
+{
+    if (handler_ == nullptr) {
+        ANS_LOGE("handler is nullptr");
+        return;
+    }
+
+    std::function<void()> setBadgeNumberFunc = [badgeData] () {
+        for (auto record : NotificationSubscriberManager::GetInstance()->subscriberRecordList_) {
+            record->subscriber->OnBadgeChanged(badgeData);
+        }
+    };
+    handler_->PostTask(setBadgeNumberFunc);
+}
 }  // namespace Notification
 }  // namespace OHOS

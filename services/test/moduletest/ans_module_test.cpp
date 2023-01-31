@@ -73,6 +73,8 @@ public:
             consumedCb_(request, sortingMap);
         }
     }
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
 
     ConsumedFunc consumedCb_ = nullptr;
     CanceledFunc canceledCb_ = nullptr;

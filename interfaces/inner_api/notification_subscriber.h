@@ -101,6 +101,13 @@ public:
      **/
     virtual void OnEnabledNotificationChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) = 0;
 
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    virtual void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) = 0;
+
 private:
     class SubscriberImpl final : public AnsSubscriberStub {
     public:
@@ -139,6 +146,8 @@ private:
         void OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
 
         void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 
         bool GetAnsManagerProxy();
 

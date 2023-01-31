@@ -105,6 +105,12 @@ void NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     subscriber_.OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
 }
 
+void NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    subscriber_.OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
+}
+
 bool NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()
 {
     if (proxy_ == nullptr) {

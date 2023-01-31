@@ -115,6 +115,7 @@ const int32_t ERROR_USER_NOT_EXIST               = 1600008;    // The user is no
 const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;    // Over max number notifications per second.
 const int32_t ERROR_DISTRIBUTED_OPERATION_FAILED = 1600010;    // Distributed operation failed.
 const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Read template config failed.
+const int32_t ERROR_NO_MEMORY                    = 1600012;    // No memory space.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification
 }  // namespace OHOS

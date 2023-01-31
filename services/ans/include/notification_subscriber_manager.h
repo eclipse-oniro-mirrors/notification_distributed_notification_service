@@ -99,6 +99,15 @@ public:
      */
     void OnRemoteDied(const wptr<IRemoteObject> &object);
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param uid The application's uid.
+     * @param bundleName The application's bundle name.
+     * @param badgeNumber The badge number.
+     */
+    void SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData);
+
 private:
     struct SubscriberRecord;
 

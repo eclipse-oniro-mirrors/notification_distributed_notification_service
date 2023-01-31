@@ -1347,5 +1347,15 @@ ErrCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32_t user
 
     return ansManagerProxy_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
 }
+
+ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("SetBadgeNumber fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetBadgeNumber(badgeNumber);
+}
 }  // namespace Notification
 }  // namespace OHOS

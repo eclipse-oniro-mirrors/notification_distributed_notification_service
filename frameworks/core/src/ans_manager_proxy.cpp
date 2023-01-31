@@ -2659,5 +2659,34 @@ ErrCode AnsManagerProxy::ShellDump(const std::string &cmd, const std::string &bu
     }
     return result;
 }
+
+ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[SetBadgeNumber] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(badgeNumber)) {
+        ANS_LOGE("[SetBadgeNumber] fail:: write userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(SET_BADGE_NUMBER, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[SetBadgeNumber] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[SetBadgeNumber] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

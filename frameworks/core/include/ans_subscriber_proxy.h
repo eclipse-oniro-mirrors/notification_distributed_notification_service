@@ -92,6 +92,13 @@ public:
      */
     void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
+
 private:
     ErrCode InnerTransact(uint32_t code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
     static inline BrokerDelegator<AnsSubscriberProxy> delegator_;

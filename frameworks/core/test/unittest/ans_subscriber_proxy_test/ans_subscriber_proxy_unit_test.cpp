@@ -639,3 +639,43 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnDisconnected_0200, Function | MediumTest 
     ASSERT_NE(nullptr, proxy);
     proxy->OnDisconnected();
 }
+
+/*
+ * @tc.name: OnBadgeChanged_0100
+ * @tc.desc: test AnsSubscriberProxy's OnBadgeChanged function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnBadgeChanged_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyUnitTest, OnBadgeChanged_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData();
+    ASSERT_NE(nullptr, badgeData);
+    proxy->OnBadgeChanged(badgeData);
+}
+
+/*
+ * @tc.name: OnBadgeChanged_0200
+ * @tc.desc: test AnsSubscriberProxy's OnBadgeChanged function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnBadgeChanged_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyUnitTest, OnBadgeChanged_0200, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData();
+    ASSERT_NE(nullptr, badgeData);
+    proxy->OnBadgeChanged(badgeData);
+}

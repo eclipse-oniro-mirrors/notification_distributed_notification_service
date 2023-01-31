@@ -341,6 +341,10 @@ public:
         events_.push_back(event);
     }
 
+    void SubscriberInstance::OnBadgeChanged(
+        const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
+
     std::list<std::shared_ptr<SubscriberEvent>> GetEvents()
     {
         std::unique_lock<std::mutex> lck(mtx_);

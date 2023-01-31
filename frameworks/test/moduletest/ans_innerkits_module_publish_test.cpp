@@ -38,6 +38,7 @@ static sptr<ISystemAbilityManager> systemAbilityManager =
 bool OnConsumedReceived = false;
 bool OnCanceledReceived = false;
 bool OnWantReceived = false;
+bool OnBadgeNumberReceived = false;
 const int32_t SLEEP_TIME = 5;
 const uint64_t ACTIVE_NUMS = 2;
 const int32_t CASE_ONE = 1;
@@ -62,6 +63,7 @@ const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
 
 const int32_t CANCELGROUP_NID = 10101;
+const int32_t BADGE_NUMBER = 100;
 
 std::mutex g_subscribe_mtx;
 std::mutex g_consumed_mtx;
@@ -156,6 +158,13 @@ public:
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
+
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {
+        GTEST_LOG_(INFO) << "ANS_Interface_MT::OnBadgeChanged badgeData : " << badgeData->Dump();
+        OnBadgeNumberReceived = true;
+        EXPECT_EQ(badgeData->GetBadgeNumber(), BADGE_NUMBER);
+    }
 
 private:
     void CheckCaseOneResult(NotificationRequest notificationRequest)
@@ -1576,6 +1585,41 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    WaitOnUnsubscribeResult();
+}
+
+/**
+ * @tc.name: ANS_Interface_MT_SetBadgeNumber_00100
+ * @tc.desc: check SetBadgeNumber interface return value.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00100, Function | MediumTest | Level1)
+{
+    EXPECT_EQ(NotificationHelper::SetBadgeNumber(BADGE_NUMBER), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: ANS_Interface_MT_SetBadgeNumber_00200
+ * @tc.desc: check SetBadgeNumber interface return value.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00200, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    NotificationSubscribeInfo info = NotificationSubscribeInfo();
+    info.AddAppName("bundleName");
+    info.AddAppUserId(SUBSCRIBE_USER_ALL);
+    g_subscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    WaitOnSubscribeResult();
+
+    EXPECT_EQ(NotificationHelper::SetBadgeNumber(BADGE_NUMBER), (int)ERR_OK);
+    sleep(SLEEP_TIME);
+    EXPECT_EQ(OnBadgeNumberReceived, true);
+
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
     WaitOnUnsubscribeResult();
 }

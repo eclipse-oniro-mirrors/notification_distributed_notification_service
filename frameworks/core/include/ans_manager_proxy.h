@@ -681,6 +681,14 @@ public:
      */
     ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) override;
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    ErrCode SetBadgeNumber(int32_t badgeNumber) override;
+
 private:
     ErrCode InnerTransact(uint32_t code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
 

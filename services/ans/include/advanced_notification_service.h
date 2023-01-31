@@ -714,6 +714,14 @@ public:
     ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
         std::vector<std::string> &dumpInfo) override;
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    ErrCode SetBadgeNumber(int32_t badgeNumber) override;
+
 private:
     struct RecentInfo;
     AdvancedNotificationService();

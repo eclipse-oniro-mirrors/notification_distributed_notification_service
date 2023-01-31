@@ -18,6 +18,7 @@
 
 #include "iremote_broker.h"
 
+#include "badge_number_callback_data.h"
 #include "enabled_notification_callback_data.h"
 #include "notification.h"
 #include "notification_constant.h"
@@ -100,6 +101,13 @@ public:
      */
     virtual void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) = 0;
 
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    virtual void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) = 0;
+
 protected:
     enum TransactId : uint32_t {
         ON_CONNECTED = FIRST_CALL_TRANSACTION,
@@ -111,6 +119,7 @@ protected:
         ON_UPDATED,
         ON_DND_DATE_CHANGED,
         ON_ENABLED_NOTIFICATION_CHANGED,
+        ON_BADGE_CHANGED,
     };
 };
 }  // namespace Notification

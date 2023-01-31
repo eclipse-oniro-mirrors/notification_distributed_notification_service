@@ -57,6 +57,8 @@ public:
     void OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
 };
 
 class BenchmarkNotificationService : public benchmark::Fixture {
