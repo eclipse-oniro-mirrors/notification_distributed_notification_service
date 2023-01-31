@@ -67,6 +67,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", NapiSetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", NapiGetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", NapiSupportDoNotDisturbMode),
+        DECLARE_NAPI_FUNCTION("isSupportDoNotDisturbMode", NapiSupportDoNotDisturbMode),
         DECLARE_NAPI_FUNCTION("isDistributedEnabled", NapiIsDistributedEnabled),
         DECLARE_NAPI_FUNCTION("setDistributedEnable", NapiEnableDistributed),
         DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", NapiEnableDistributedByBundle),
