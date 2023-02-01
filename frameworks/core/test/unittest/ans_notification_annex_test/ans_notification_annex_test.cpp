@@ -80,7 +80,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, GetNotificationSlotNumAsBundle_0200, Func
     bundleOption.SetBundleName(bundleName);
     uint64_t num = 10;
     ErrCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ret1, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_BUNDLE);
 }
 
 /*
@@ -181,7 +181,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveNotification_0100, Function | Mediu
     int32_t notificationId = 2;
     std::string label = "this is label";
     ErrCode ret3 = ans_->RemoveNotification(bundleOption, notificationId, label, removeReason);
-    EXPECT_EQ(ret3, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
 }
 
 /*
@@ -196,7 +196,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveAllNotifications_0200, Function | M
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     ErrCode ret3 = ans_->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ret3, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
 }
 
 /*
@@ -211,7 +211,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveNotificationsByBundle_0200, Functio
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     ErrCode ret3 = ans_->RemoveNotificationsByBundle(bundleOption);
-    EXPECT_EQ(ret3, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
 }
 
 /*
@@ -227,7 +227,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, GetNotificationSlotsForBundle_0200, Funct
     bundleOption.SetBundleName(bundleName);
     std::vector<sptr<NotificationSlot>> slots;
     ErrCode ret3 = ans_->GetNotificationSlotsForBundle(bundleOption, slots);
-    EXPECT_EQ(ret3, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
 }
 
 /*

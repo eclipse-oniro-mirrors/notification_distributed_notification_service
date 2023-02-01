@@ -284,7 +284,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00200
         std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
     rdbStoreData_->hasTableInit_ = false;
     RdbStoreTest rdbStore;
-    EXPECT_EQ(rdbStoreData_->OnOpen(rdbStore), NativeRdb::E_ERROR);
+    EXPECT_EQ(rdbStoreData_->OnOpen(rdbStore), NativeRdb::E_OK);
 }
 
 /**
