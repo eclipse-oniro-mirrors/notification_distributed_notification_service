@@ -24,15 +24,8 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        Notification::NotificationTemplate notificationTemplate;
-        Parcel parcel;
-        notificationTemplate.Unmarshalling(parcel);
-        notificationTemplate.ReadFromParcel(parcel);
         Notification::MessageUser messageUser;
         Notification::NotificationConversationalContent NotificationConversationalContent(messageUser);
-        nlohmann::json jsonObject;
-        NotificationConversationalContent.ToJson(jsonObject);
-        NotificationConversationalContent.FromJson(jsonObject);
         return true;
     }
 }

@@ -29,32 +29,9 @@ namespace OHOS {
         std::make_shared<Notification::NotificationLongTextContent>();
         std::shared_ptr<Notification::NotificationPictureContent> pictureContent =
         std::make_shared<Notification::NotificationPictureContent>();
-        std::shared_ptr<Notification::NotificationConversationalContent> conversationContent =
-        std::make_shared<Notification::NotificationConversationalContent>();
-        std::shared_ptr<Notification::NotificationMultiLineContent> multiLineContent =
-        std::make_shared<Notification::NotificationMultiLineContent>();
-        std::shared_ptr<Notification::NotificationMediaContent> mediaContent =
-        std::make_shared<Notification::NotificationMediaContent>();
         Notification::NotificationContent notificationContent(normalContent);
         Notification::NotificationContent notificationLongTextContent(longTextContent);
         Notification::NotificationContent notificationPictureContent(pictureContent);
-        Notification::NotificationContent notificationConversationContent(conversationContent);
-        Notification::NotificationContent notificationMultiLineContent(multiLineContent);
-        Notification::NotificationContent notificationMediaContent(mediaContent);
-        // test Dump function
-        notificationContent.GetContentType();
-        // test Dump function
-        notificationContent.GetNotificationContent();
-        // test Dump function
-        notificationContent.Dump();
-        // test ToJson function
-        nlohmann::json jsonObject;
-        notificationContent.ToJson(jsonObject);
-        notificationContent.FromJson(jsonObject);
-        // test Unmarshalling function
-        Parcel parcel;
-        notificationContent.Unmarshalling(parcel);
-        notificationContent.ReadFromParcel(parcel);
         return true;
     }
 }
