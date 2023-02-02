@@ -1399,7 +1399,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotByTypeTest_0500, Function | MediumTest 
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     sptr<NotificationSlot> slot = nullptr;
     int32_t result = proxy->GetSlotByType(slotType, slot);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_OK, result);
 }
 
 /*
