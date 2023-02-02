@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -331,7 +331,15 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "${services_path}/ans/test/unittest/mock/include",
   ]
 
-  sources = [ "notification_subscriber_manager_branch_test/notification_subscriber_manager_branch_test.cpp" ]
+  defines = []
+
+  sources = [
+    "mock/mock_bundle_manager_helper.cpp",
+    "mock/mock_ipc.cpp",
+    "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
+    "notification_subscriber_manager_branch_test/mock_notification.cpp",
+    "notification_subscriber_manager_branch_test/notification_subscriber_manager_branch_test.cpp",
+  ]
 
   deps = [
     "${core_path}:ans_core",
@@ -340,6 +348,12 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]
+
+  if (distributed_notification_supported) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
 
   external_deps = [
     "ability_base:want",
