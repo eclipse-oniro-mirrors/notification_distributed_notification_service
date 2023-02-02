@@ -93,7 +93,7 @@ ohos_shared_library("ans_core") {
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "samgr:samgr_proxy",
-    "time_service:time_service",
+    "time_service:time_client",
   ]
   install_images = [ system_base_dir ]
   relative_install_dir = "platformsdk"
