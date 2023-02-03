@@ -25,7 +25,6 @@ struct NotificationDialog {
   @State private want: any = undefined
   @State private uid: any = undefined
   @State private style: any = {}
-  @State token_: any = undefined
   @State popWidth: any = undefined
   @State popHeight: any = undefined
   @State bundleName: any = undefined
@@ -121,7 +120,6 @@ struct NotificationDialog {
     console.log(this.TAG, "dialog page appears")
     this.want = globalThis.abilityWant
     this.style = globalThis.style
-    this.token_ = globalThis.abilityWant.parameters['tokenId'].value
     globalThis.bundleName = globalThis.abilityWant.parameters['from']
   }
 }

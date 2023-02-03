@@ -1453,7 +1453,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(
         ANS_LOGD("Already granted permission");
         return result;
     }
-    
+
     // Check to see if it has been popover before
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
@@ -1461,11 +1461,11 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(
         ANS_LOGD("Already shown dialog");
         return result;
     }
-    
+
     ANS_LOGI("hasPopped = %{public}d, allowedNotify = %{public}d", hasPopped, allowedNotify);
     if (!hasPopped && !allowedNotify) {
         auto notificationDialog = std::make_shared<NotificationDialog>();
-        result = notificationDialog->StartEnableNotificationDialogAbility();
+        result = notificationDialog->StartEnableNotificationDialogAbility(bundleOption->GetUid());
         if (result != ERR_OK) {
             ANS_LOGD("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
             return result;

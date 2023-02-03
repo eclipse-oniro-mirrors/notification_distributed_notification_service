@@ -15,7 +15,6 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_DIALOG_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_DIALOG_H
 
-#include "ability_record.h"
 #include "iremote_object.h"
 
 namespace OHOS {
@@ -26,20 +25,16 @@ public:
     ~NotificationDialog() = default;
 
     /**
-     * @brief  To judge whether the caller is current application.
-     *
-     * @param abilityRecord The abilityRecord of comparison.
-     * @return true if it is selfcalled, else not.
-     */
-    bool JudgeSelfCalled(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord);
-
-    /**
      * @brief To start the enableNotificationDialog ability.
      *
-     * @param callbackInfo The callbackInfo.
+     * @param uid The uid of application that want launch notification dialog.
      * @return ERR_OK if success, else not.
      */
-    ErrCode StartEnableNotificationDialogAbility();
+    ErrCode StartEnableNotificationDialogAbility(int32_t uid);
+
+private:
+    int32_t GetActiveUserId();
+    int32_t GetUidByBundleName(const std::string &bundleName);
 };
 }  // namespace Notification
 }  // namespace OHOS
