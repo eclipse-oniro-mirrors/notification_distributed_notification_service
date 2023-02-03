@@ -17,6 +17,7 @@
 
 #include "ans_log_wrapper.h"
 #include "bundle_mgr_interface.h"
+#include "bundle_mgr_proxy.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -1536,7 +1537,15 @@ int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundle
         return -1;
     }
     sptr<IRemoteObject> remoteObject  = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        ANSR_LOGE("Fail to get bundle manager proxy");
+        return -1;
+    }
     sptr<AppExecFwk::IBundleMgr> bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (bundleMgr == nullptr) {
+        ANSR_LOGE("Bundle mgr proxy is nullptr");
+        return -1;
+    }
     bundleMgr->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, info);
     ANSR_LOGD("uid=%{public}d", info.uid);
     return static_cast<int32_t>(info.uid);
