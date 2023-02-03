@@ -199,7 +199,7 @@ ohos_unittest("ans_unit_test") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "time_service:time_service",
+    "time_service:time_client",
   ]
 
   if (device_usage) {
