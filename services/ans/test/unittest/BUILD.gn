@@ -310,6 +310,8 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "mock/mock_ipc.cpp",
     "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
     "notification_subscriber_manager_branch_test/mock_notification.cpp",
+    "notification_subscriber_manager_branch_test/mock_notification_preferences.cpp",
+    "notification_subscriber_manager_branch_test/mock_os_account_manager.cpp",
     "notification_subscriber_manager_branch_test/notification_subscriber_manager_branch_test.cpp",
   ]
 
