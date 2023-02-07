@@ -4674,7 +4674,6 @@ napi_value Common::SetNotificationTemplateInfo(
     napi_create_string_utf8(env, templ->GetTemplateName().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "name", value);
 
-    // data?: {[key: string]: object};
     std::shared_ptr<AAFwk::WantParams> data = templ->GetTemplateData();
     if (data) {
         value = OHOS::AppExecFwk::WrapWantParams(env, *data);
