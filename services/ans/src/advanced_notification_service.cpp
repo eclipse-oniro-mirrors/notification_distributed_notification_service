@@ -3947,5 +3947,26 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     return result;
 }
+ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    std::string bundleName = GetClientBundleName();
+    sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
+        bundleName, callingUid, badgeNumber);
+    if (badgeData == nullptr) {
+        ANS_LOGE("Failed to create BadgeNumberCallbackData.");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    if (!handler_) {
+        ANS_LOGE("handler_ is null.");
+        return ERR_ANS_TASK_ERR;
+    }
+    handler_->PostSyncTask(std::bind([&]() {
+        NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
+    }));
+    return ERR_OK;
+}
 }  // namespace Notification
 }  // namespace OHOS

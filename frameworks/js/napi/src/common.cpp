@@ -1430,6 +1430,28 @@ napi_value Common::SetEnabledNotificationCallbackData(const napi_env &env, const
     return NapiGetBoolean(env, true);
 }
 
+napi_value Common::SetBadgeCallbackData(const napi_env &env, const BadgeNumberCallbackData &data,
+    napi_value &result)
+{
+    ANS_LOGI("enter");
+    // bundle: string
+    napi_value bundleNapi = nullptr;
+    napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
+
+    // uid: int32_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, data.GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
+
+    // badgeNumber: int32_t
+    napi_value badgeNapi = nullptr;
+    napi_create_int32(env, data.GetBadgeNumber(), &badgeNapi);
+    napi_set_named_property(env, result, "badgeNumber", badgeNapi);
+
+    return NapiGetBoolean(env, true);
+}
+
 napi_value Common::GetNotificationSubscriberInfo(
     const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo)
 {
@@ -4743,6 +4765,8 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
             ExternalCode = ERROR_PARAM_INVALID;
             break;
         case ERR_ANS_NO_MEMORY:
+            ExternalCode = ERROR_NO_MEMORY;
+            break;
         case ERR_ANS_TASK_ERR:
             ExternalCode = ERROR_INTERNAL_ERROR;
             break;

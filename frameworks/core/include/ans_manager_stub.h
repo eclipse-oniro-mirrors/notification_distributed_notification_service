@@ -703,6 +703,14 @@ public:
      */
     virtual ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) override;
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    virtual ErrCode SetBadgeNumber(int32_t badgeNumber) override;
+
 private:
     static const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -781,6 +789,7 @@ private:
     ErrCode HandleGetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedSetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedGetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result);

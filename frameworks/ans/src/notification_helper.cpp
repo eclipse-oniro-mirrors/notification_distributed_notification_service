@@ -404,5 +404,10 @@ ErrCode NotificationHelper::GetSyncNotificationEnabledWithoutApp(const int32_t u
     return DelayedSingleton<AnsNotification>::GetInstance()->GetSyncNotificationEnabledWithoutApp(
         userId, enabled);
 }
+
+ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -98,7 +98,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest02, Function | SmallTest | Le
     data.WriteInterfaceToken(AnsSubscriberStub::GetDescriptor());
 
 
-    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_ENABLED_NOTIFICATION_CHANGED + 1);
+    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_BADGE_CHANGED + 1);
 
     ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_TRUE(res != NO_ERROR);
@@ -484,6 +484,39 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnEnabledNotificationChanged02, Functi
     data.WriteParcelable(notifcallbackDataication);
 
     ErrCode res = stub_->HandleOnEnabledNotificationChanged(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: HandleOnBadgeChanged01
+ * @tc.desc: test callbackData failed
+ * @tc.type: Fun
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnBadgeChanged01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    ErrCode res = stub_->HandleOnBadgeChanged(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleOnBadgeChanged02
+ * @tc.desc: test HandleOnBadgeChanged success
+ * @tc.type: Fun
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnBadgeChanged02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<BadgeNumberCallbackData> badgeData = new BadgeNumberCallbackData();
+    data.WriteParcelable(badgeData);
+
+    ErrCode res = stub_->HandleOnBadgeChanged(data, reply);
     EXPECT_EQ(res, ERR_OK);
 }
 }

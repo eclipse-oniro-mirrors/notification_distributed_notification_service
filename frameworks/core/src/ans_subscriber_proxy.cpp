@@ -296,5 +296,27 @@ void AnsSubscriberProxy::OnEnabledNotificationChanged(const sptr<EnabledNotifica
         return;
     }
 }
+
+void AnsSubscriberProxy::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
+        ANS_LOGE("[OnBadgeChanged] fail: write interface token failed.");
+        return;
+    }
+
+    if (!data.WriteParcelable(badgeData)) {
+        ANS_LOGE("[OnBadgeChanged] fail: write badgeData failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_ASYNC};
+    ErrCode result = InnerTransact(ON_BADGE_CHANGED, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[OnBadgeChanged] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
+        return;
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS

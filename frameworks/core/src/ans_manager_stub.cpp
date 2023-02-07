@@ -254,6 +254,9 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
         {AnsManagerStub::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
             std::bind(&AnsManagerStub::HandleDistributedGetEnabledWithoutApp, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {AnsManagerStub::SET_BADGE_NUMBER,
+            std::bind(&AnsManagerStub::HandleSetBadgeNumber, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -1795,6 +1798,23 @@ ErrCode AnsManagerStub::HandleDistributedGetEnabledWithoutApp(MessageParcel &dat
     return ERR_OK;
 }
 
+ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply)
+{
+    ANSR_LOGI("HandleSetBadgeNumber");
+    int32_t badgeNumber = -1;
+    if (!data.ReadInt32(badgeNumber)) {
+        ANSR_LOGE("Read badge number failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetBadgeNumber(badgeNumber);
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write badge number failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
 ErrCode AnsManagerStub::Publish(const std::string &label, const sptr<NotificationRequest> &notification)
 {
     ANS_LOGE("AnsManagerStub::Publish called!");
@@ -2249,6 +2269,12 @@ ErrCode AnsManagerStub::SetSyncNotificationEnabledWithoutApp(const int32_t userI
 ErrCode AnsManagerStub::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
 {
     ANS_LOGE("AnsManagerStub::GetSyncNotificationEnabledWithoutApp called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
+{
+    ANS_LOGE("AnsManagerStub::SetBadgeNumber called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

@@ -812,6 +812,14 @@ public:
      */
     ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled);
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    ErrCode SetBadgeNumber(int32_t badgeNumber);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.

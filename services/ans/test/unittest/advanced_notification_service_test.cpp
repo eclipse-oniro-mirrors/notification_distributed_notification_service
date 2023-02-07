@@ -116,6 +116,8 @@ public:
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
 };
 
 void AdvancedNotificationServiceTest::TestAddSlot(NotificationConstant::SlotType type)

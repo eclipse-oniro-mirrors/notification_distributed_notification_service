@@ -4389,5 +4389,46 @@ HWTEST_F(AnsManagerStubTest, Unsubscribe01, Function | SmallTest | Level1)
     ErrCode result = ansManagerStub_->Unsubscribe(nullptr, info);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
+
+/**
+ * @tc.name: HandleSetBadgeNumber01
+ * @tc.desc: Test HandleSetBadgeNumber succeed.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t badgeNumber = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(badgeNumber);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumber02
+ * @tc.desc: Test badgeNumber in data is null.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
 }
 }

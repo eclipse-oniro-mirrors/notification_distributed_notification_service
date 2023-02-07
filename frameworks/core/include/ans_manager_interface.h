@@ -693,6 +693,14 @@ public:
      */
     virtual ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) = 0;
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    virtual ErrCode SetBadgeNumber(int32_t badgeNumber) = 0;
+
 protected:
     enum TransactId : uint32_t {
         PUBLISH_NOTIFICATION = FIRST_CALL_TRANSACTION,
@@ -773,7 +781,8 @@ protected:
         SET_ENABLED_FOR_BUNDLE_SLOT,
         GET_ENABLED_FOR_BUNDLE_SLOT,
         SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
-        GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP
+        GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
+        SET_BADGE_NUMBER
     };
 };
 }  // namespace Notification

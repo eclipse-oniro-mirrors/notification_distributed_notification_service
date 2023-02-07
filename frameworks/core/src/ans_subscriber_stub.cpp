@@ -46,6 +46,8 @@ AnsSubscriberStub::AnsSubscriberStub()
     interfaces_.emplace(ON_ENABLED_NOTIFICATION_CHANGED,
         std::bind(&AnsSubscriberStub::HandleOnEnabledNotificationChanged, this, std::placeholders::_1,
             std::placeholders::_2));
+    interfaces_.emplace(ON_BADGE_CHANGED,
+        std::bind(&AnsSubscriberStub::HandleOnBadgeChanged, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 AnsSubscriberStub::~AnsSubscriberStub()
@@ -207,6 +209,17 @@ ErrCode AnsSubscriberStub::HandleOnEnabledNotificationChanged(MessageParcel &dat
     return ERR_OK;
 }
 
+ErrCode AnsSubscriberStub::HandleOnBadgeChanged(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<BadgeNumberCallbackData> callbackData = data.ReadParcelable<BadgeNumberCallbackData>();
+    if (!callbackData) {
+        ANS_LOGW("[HandleOnBadgeChanged] fail: callbackData ReadParcelable failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    OnBadgeChanged(callbackData);
+    return ERR_OK;
+}
+
 void AnsSubscriberStub::OnConnected()
 {}
 
@@ -234,6 +247,9 @@ void AnsSubscriberStub::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDis
 {}
 
 void AnsSubscriberStub::OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
+{}
+
+void AnsSubscriberStub::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {}
 }  // namespace Notification
 }  // namespace OHOS

@@ -763,6 +763,14 @@ public:
      * @return Returns get enabled result.
      */
     static ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled);
+
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    static ErrCode SetBadgeNumber(int32_t badgeNumber);
 };
 }  // namespace Notification
 }  // namespace OHOS
