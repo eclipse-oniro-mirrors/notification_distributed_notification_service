@@ -165,7 +165,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value argv[SET_BADGE_NUMBER_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < SET_BADGE_NUMBER_MAX_PARA) {
+    if (argc < SET_BADGE_NUMBER_MAX_PARA - 1) {
         ANS_LOGW("Wrong number of arguments.");
         return nullptr;
     }
