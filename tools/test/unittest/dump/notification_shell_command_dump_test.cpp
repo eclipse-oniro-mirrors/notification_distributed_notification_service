@@ -78,6 +78,41 @@ static char g_enableObjectNull[] =
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
 " -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
 
+static char g_unknownOption[] =
+"error: unknown option.\n"
+"usage: anm dump [<options>]\n"
+"options list:\n"
+"  --help, -h                   help menu\n"
+"  --active,  -A                 list all active notifications\n"
+"  --recent,  -R                 list recent notifications\n"
+"  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+
+static char g_dumpActiveCount[] =
+"error: option 'c' requires a value.\n"
+"usage: anm setting [<options>]\n"
+"options list:\n"
+"  --help, -h                   help menu\n"
+"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+
+static char g_helpMsg[] =
+"error: unknown option.\n"
+"usage: anm dump [<options>]\n"
+"options list:\n"
+"  --help, -h                   help menu\n"
+"  --active,  -A                 list all active notifications\n"
+"  --recent,  -R                 list recent notifications\n"
+"  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+"usage: anm dump [<options>]\n"
+"options list:\n"
+"  --help, -h                   help menu\n"
+"  --active,  -A                 list all active notifications\n"
+"  --recent,  -R                 list recent notifications\n"
+"  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+
 static char g_bundleName[] = "example";
 static char g_commandActive[] = "active";
 static char g_commandRecent[] = "recent";
@@ -585,5 +620,90 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_2100, Function | Medium
     NotificationShellCommand cmd(argc, argv);
 
     EXPECT_EQ(cmd.ExecCommand(), "set notification enabled success\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2200
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "anm dump -A -s" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_2200, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-A",
+        (char *)"-s",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), g_unknownOption);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2300
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -e" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_2300, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-c",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), g_dumpActiveCount);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2400
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "anm dump -D" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0240, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-D",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    cmd.ExecCommand();
+ 
+    EXPECT_EQ(cmd.ExecCommand(), g_helpMsg);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2500
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "anm dump -D" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0250, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)cmd_.c_str(),
+        (char *)"-p",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    cmd.ExecCommand();
+ 
+    EXPECT_EQ(cmd.ExecCommand(), g_helpMsg);
 }
 }  // namespace
