@@ -65,8 +65,13 @@ private:
     std::unique_ptr<DistributedKv::DistributedKvDataManager> kvDataManager_ = nullptr;
     std::shared_ptr<DistributedKv::SingleKvStore> kvStore_ = nullptr;
     std::shared_ptr<DistributedDeviceCallback> deviceCb_ = nullptr;
+    std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
 
     bool localScreenOn_ = false;
+
+class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
+    void OnRemoteDied() override;
+};
 
     DECLARE_DELAYED_SINGLETON(DistributedScreenStatusManager);
     DISALLOW_COPY_AND_MOVE(DistributedScreenStatusManager);

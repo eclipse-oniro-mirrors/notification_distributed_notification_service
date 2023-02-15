@@ -16,6 +16,7 @@
 #include "distributed_database.h"
 
 #include "ans_log_wrapper.h"
+#include "device_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -37,16 +38,25 @@ DistributedDatabase::~DistributedDatabase()
 
 void DistributedDatabase::GetKvDataManager(void)
 {
-    kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    if (kvDataManager_ != nullptr) {
-        DistributedKv::Status status = kvDataManager_->StartWatchDeviceChange(deviceCb_);
-        if (status != DistributedKv::Status::SUCCESS) {
-            ANS_LOGW("kvDataManager StartWatchDeviceChange failed ret = 0x%{public}x", status);
-            kvDataManager_.reset();
-        }
+    initCallback_ = std::make_shared<DeviceInitCallBack>();
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().InitDeviceManager(APP_ID + STORE_ID, initCallback_);
+    if (ret != ERR_OK) {
+        ANS_LOGE("init device manager failed, ret:%{public}d", ret);
+        return;
+    }
+    ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID + STORE_ID, "", deviceCb_);
+    if (ret != ERR_OK) {
+        ANS_LOGE("register devStateCallback failed, ret:%{public}d", ret);
+        return;
     }
 
+    kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     KvManagerFlowControlClear();
+}
+
+void DistributedDatabase::DeviceInitCallBack::OnRemoteDied()
+{
+    ANS_LOGW("DeviceInitCallBack OnRemoteDied");
 }
 
 bool DistributedDatabase::CheckKvDataManager(void)
@@ -81,7 +91,7 @@ void DistributedDatabase::GetKvStore(void)
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvDataManager GetSingleKvStore failed ret = 0x%{public}x", status);
         kvStore_.reset();
-        kvDataManager_->StopWatchDeviceChange(deviceCb_);
+        DistributedHardware::DeviceManager::GetInstance().UnRegisterDevStateCallback(APP_ID + STORE_ID);
         kvDataManager_.reset();
         return;
     }
@@ -246,13 +256,12 @@ bool DistributedDatabase::GetLocalDeviceId(std::string &deviceId)
     }
 
     if (KvManagerFlowControl()) {
-        DistributedKv::DeviceInfo deviceInfo;
-        DistributedKv::Status status = kvDataManager_->GetLocalDevice(deviceInfo);
-        if (status != DistributedKv::Status::SUCCESS) {
-            ANS_LOGE("kvDataManager GetLocalDevice() failed ret = 0x%{public}x", status);
+        DistributedHardware::DmDeviceInfo deviceInfo;
+        int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(APP_ID, deviceInfo);
+        if (ret != ERR_OK) {
+            ANS_LOGE("Get trust local device info failed ret = %{public}d", ret);
             return false;
         }
-
         localDeviceId_ = deviceInfo.deviceId;
     }
 
@@ -277,9 +286,9 @@ bool DistributedDatabase::GetLocalDeviceInfo(DeviceInfo &localInfo)
         return false;
     }
 
-    DistributedKv::Status status = kvDataManager_->GetLocalDevice(localInfo);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager GetLocalDevice() failed ret = 0x%{public}x", status);
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(APP_ID, localInfo);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get trust local device info failed ret = %{public}d", ret);
         return false;
     }
 
@@ -298,10 +307,9 @@ bool DistributedDatabase::GetDeviceInfoList(std::vector<DeviceInfo> &deviceList)
         return false;
     }
 
-    DistributedKv::Status status =
-        kvDataManager_->GetDeviceList(deviceList, DistributedKv::DeviceFilterStrategy::NO_FILTER);
-    if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager GetDeviceList() failed ret = 0x%{public}x", status);
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList(APP_ID, "", deviceList);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get trust device list failed ret = %{public}d", ret);
         return false;
     }
 

@@ -33,7 +33,7 @@ namespace Notification {
 class DistributedDatabase : private DistributedFlowControl {
 public:
     using Entry = DistributedKv::Entry;
-    using DeviceInfo = DistributedKv::DeviceInfo;
+    using DeviceInfo = DistributedHardware::DmDeviceInfo;
 
     /**
      * @brief The constructor.
@@ -137,8 +137,13 @@ private:
     std::shared_ptr<DistributedKv::SingleKvStore> kvStore_;
     std::shared_ptr<DistributedDatabaseCallback> databaseCb_;
     std::shared_ptr<DistributedDeviceCallback> deviceCb_;
+    std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
 
     std::string localDeviceId_;
+
+class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
+    void OnRemoteDied() override;
+};
 
     DISALLOW_COPY_AND_MOVE(DistributedDatabase);
 };

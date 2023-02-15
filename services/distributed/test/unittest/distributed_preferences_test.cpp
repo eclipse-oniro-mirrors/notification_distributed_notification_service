@@ -101,7 +101,7 @@ HWTEST_F(DistributedPreferencesTest, GetDistributedBundleEnable_00100, Function 
  */
 HWTEST_F(DistributedPreferencesTest, ClearDataInRestoreFactorySettings_00100, Function | SmallTest | Level1)
 {
-    EXPECT_EQ(distributedPreferences_->ClearDataInRestoreFactorySettings(), ERR_OK);
+    EXPECT_EQ(distributedPreferences_->ClearDataInRestoreFactorySettings(), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**

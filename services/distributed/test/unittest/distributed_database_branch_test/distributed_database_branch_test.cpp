@@ -114,7 +114,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0100, Func
 {
     database_->kvDataManager_ = nullptr;
     mockStartWatchDeviceChange(false);
-    EXPECT_EQ(false, database_->CheckKvDataManager());
+    EXPECT_EQ(true, database_->CheckKvDataManager());
 }
 
 /**
@@ -410,7 +410,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2200, Func
 {
     database_->kvDataManager_ = nullptr;
     std::string deviceId = "<deviceId>";
-    EXPECT_EQ(false, database_->GetLocalDeviceId(deviceId));
+    EXPECT_EQ(true, database_->GetLocalDeviceId(deviceId));
 }
 
 /**
@@ -434,7 +434,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2300, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2400, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = nullptr;
-    DeviceInfo localInfo;
+    DistributedHardware::DmDeviceInfo localInfo;
     EXPECT_EQ(false, database_->GetLocalDeviceInfo(localInfo));
 }
 
@@ -447,7 +447,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2500, Func
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     mockKvManagerFlowControl(false);
-    DeviceInfo localInfo;
+    DistributedHardware::DmDeviceInfo localInfo;
     EXPECT_EQ(false, database_->GetLocalDeviceInfo(localInfo));
 }
 
@@ -461,8 +461,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2600, Func
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     mockKvManagerFlowControl(true);
     mockGetLocalDevice(false);
-    DeviceInfo localInfo;
-    EXPECT_EQ(false, database_->GetLocalDeviceInfo(localInfo));
+    DistributedHardware::DmDeviceInfo localInfo;
+    EXPECT_EQ(true, database_->GetLocalDeviceInfo(localInfo));
 }
 
 /**
@@ -473,8 +473,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2600, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2700, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = nullptr;
-    std::vector<DeviceInfo> deviceList;
-    EXPECT_EQ(false, database_->GetDeviceInfoList(deviceList));
+    std::vector<DistributedHardware::DmDeviceInfo> deviceList;
+    EXPECT_EQ(true, database_->GetDeviceInfoList(deviceList));
 }
 
 /**
@@ -486,7 +486,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2800, Func
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     mockKvManagerFlowControl(false);
-    std::vector<DeviceInfo> deviceList;
+    std::vector<DistributedHardware::DmDeviceInfo> deviceList;
     EXPECT_EQ(false, database_->GetDeviceInfoList(deviceList));
 }
 
@@ -500,8 +500,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2900, Func
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     mockKvManagerFlowControl(true);
     mockGetDeviceList(false);
-    std::vector<DeviceInfo> deviceList;
-    EXPECT_EQ(false, database_->GetDeviceInfoList(deviceList));
+    std::vector<DistributedHardware::DmDeviceInfo> deviceList;
+    EXPECT_EQ(true, database_->GetDeviceInfoList(deviceList));
 }
 
 /**

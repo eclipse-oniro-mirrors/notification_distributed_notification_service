@@ -2911,7 +2911,7 @@ bool AdvancedNotificationService::CheckDistributedNotificationType(const sptr<No
     DistributedDatabase::DeviceInfo localDeviceInfo;
     DistributedNotificationManager::GetInstance()->GetLocalDeviceInfo(localDeviceInfo);
     for (auto device : deviceTypeList) {
-        if (device == localDeviceInfo.deviceType) {
+        if (atoi(device.c_str()) == localDeviceInfo.deviceTypeId) {
             return true;
         }
     }
@@ -3070,7 +3070,7 @@ void AdvancedNotificationService::OnDistributedDelete(
         std::string recordDeviceId;
         DistributedDatabase::DeviceInfo localDeviceInfo;
         if (DistributedNotificationManager::GetInstance()->GetLocalDeviceInfo(localDeviceInfo) == ERR_OK &&
-            deviceId == localDeviceInfo.deviceId) {
+            strcmp(deviceId.c_str(), localDeviceInfo.deviceId) == 0) {
             recordDeviceId = "";
         } else {
             recordDeviceId = deviceId;
