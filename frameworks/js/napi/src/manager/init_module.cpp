@@ -73,7 +73,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setDistributedEnable", NapiEnableDistributed),
         DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", NapiEnableDistributedByBundle),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", NapiEnableDistributedSelf),
-        DECLARE_NAPI_FUNCTION("isDistributedEnableByBundle", NapiIsDistributedEnableByBundle),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", NapiIsDistributedEnableByBundle),
         DECLARE_NAPI_FUNCTION("getDeviceRemindType", NapiGetDeviceRemindType),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),
