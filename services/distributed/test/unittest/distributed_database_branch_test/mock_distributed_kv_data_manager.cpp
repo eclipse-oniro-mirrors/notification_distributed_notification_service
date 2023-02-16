@@ -69,14 +69,6 @@ Status DistributedKvDataManager::GetSingleKvStore(const Options &options, const 
     return Status::SUCCESS;
 }
 
-Status DistributedKvDataManager::StartWatchDeviceChange(std::shared_ptr<DeviceStatusChangeListener> observer)
-{
-    if (false == g_mockStartWatchDeviceChangeRet) {
-        return Status::INVALID_ARGUMENT;
-    }
-    return Status::SUCCESS;
-}
-
 Status DistributedKvDataManager::GetLocalDevice(DeviceInfo &localDevice)
 {
     if (false == g_mockGetLocalDeviceRet) {

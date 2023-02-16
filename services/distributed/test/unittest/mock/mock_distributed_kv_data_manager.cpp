@@ -34,11 +34,6 @@ DistributedKvDataManager::DistributedKvDataManager()
 DistributedKvDataManager::~DistributedKvDataManager()
 {}
 
-Status DistributedKvDataManager::StartWatchDeviceChange(std::shared_ptr<DeviceStatusChangeListener> observer)
-{
-    return Status::SUCCESS;
-}
-
 Status DistributedKvDataManager::StopWatchDeviceChange(std::shared_ptr<DeviceStatusChangeListener> observer)
 {
     return Status::SUCCESS;
