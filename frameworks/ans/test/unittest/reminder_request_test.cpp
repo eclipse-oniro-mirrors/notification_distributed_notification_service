@@ -565,7 +565,7 @@ HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
 {
-    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive, nextTriggerTime=1970-01-01 ";
+    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive', nextTriggerTime=1970-01-01 ";
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string res = rrc->Dump();
     EXPECT_EQ(res.substr(0, res.size()-9), ret);
