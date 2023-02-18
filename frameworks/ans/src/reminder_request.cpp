@@ -654,8 +654,7 @@ ReminderRequest& ReminderRequest::SetTimeInterval(const uint64_t timeIntervalInS
         timeIntervalInMilli_ = 0;
     } else {
         uint64_t timeIntervalInMilli = timeIntervalInSeconds * MILLI_SECONDS;
-        // if (timeIntervalInMilli > 0 && timeIntervalInMilli < MIN_TIME_INTERVAL_IN_MILLI) {
-        if (timeIntervalInMilli > 0 && timeIntervalInMilli < 60 * 1000) {
+        if (timeIntervalInMilli > 0 && timeIntervalInMilli < MIN_TIME_INTERVAL_IN_MILLI) {
             ANSR_LOGW("SetTimeInterval, replace to set %{public}u, for the given is 0<%{public}" PRIu64 "<%{public}u",
                 MIN_TIME_INTERVAL_IN_MILLI / MILLI_SECONDS, timeIntervalInSeconds,
                 MIN_TIME_INTERVAL_IN_MILLI / MILLI_SECONDS);
