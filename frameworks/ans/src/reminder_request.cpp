@@ -1199,10 +1199,8 @@ std::string ReminderRequest::GetTimeInfoInner(const time_t &timeInSecond, const 
     struct tm timeInfo;
     (void)localtime_r(&timeInSecond, &timeInfo);
     bool is24HourClock = OHOS::Global::I18n::LocaleConfig::Is24HourClock();
-    if (!is24HourClock) {
-        if (timeInfo.tm_hour > 12) {
-            timeInfo.tm_hour -= 12;
-        }
+    if (!is24HourClock && timeInfo.tm_hour > 12) {
+        timeInfo.tm_hour -= 12;
     }
     switch (format) {
         case TimeFormat::YMDHMS: {
