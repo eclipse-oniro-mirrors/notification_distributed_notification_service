@@ -76,7 +76,7 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("enableDistributed", EnableDistributed),
         DECLARE_NAPI_FUNCTION("enableDistributedByBundle", EnableDistributedByBundle),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", EnableDistributedSelf),
-        DECLARE_NAPI_FUNCTION("isDistributedEnableByBundle", IsDistributedEnableByBundle),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", IsDistributedEnableByBundle),
         DECLARE_NAPI_FUNCTION("getDeviceRemindType", GetDeviceRemindType),
         DECLARE_NAPI_FUNCTION("show", ShowNotification),
         DECLARE_NAPI_FUNCTION("enableNotificationSlot", EnableNotificationSlot),
