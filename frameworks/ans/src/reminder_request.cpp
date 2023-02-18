@@ -21,6 +21,7 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "locale_config.h"
 #include "os_account_manager.h"
 #include "reminder_store.h"
 #include "system_ability_definition.h"
@@ -365,6 +366,7 @@ bool ReminderRequest::OnSnooze()
     if ((state_ & REMINDER_STATUS_ALERTING) != 0) {
         SetState(false, REMINDER_STATUS_ALERTING, "onSnooze()");
     }
+    SetSnoozeTimesDynamic(GetSnoozeTimes());
     if (!UpdateNextReminder(true)) {
         return false;
     }
@@ -652,7 +654,8 @@ ReminderRequest& ReminderRequest::SetTimeInterval(const uint64_t timeIntervalInS
         timeIntervalInMilli_ = 0;
     } else {
         uint64_t timeIntervalInMilli = timeIntervalInSeconds * MILLI_SECONDS;
-        if (timeIntervalInMilli > 0 && timeIntervalInMilli < MIN_TIME_INTERVAL_IN_MILLI) {
+        // if (timeIntervalInMilli > 0 && timeIntervalInMilli < MIN_TIME_INTERVAL_IN_MILLI) {
+        if (timeIntervalInMilli > 0 && timeIntervalInMilli < 60 * 1000) {
             ANSR_LOGW("SetTimeInterval, replace to set %{public}u, for the given is 0<%{public}" PRIu64 "<%{public}u",
                 MIN_TIME_INTERVAL_IN_MILLI / MILLI_SECONDS, timeIntervalInSeconds,
                 MIN_TIME_INTERVAL_IN_MILLI / MILLI_SECONDS);
@@ -1196,6 +1199,12 @@ std::string ReminderRequest::GetTimeInfoInner(const time_t &timeInSecond, const 
     char dateTimeBuffer[dateTimeLen];
     struct tm timeInfo;
     (void)localtime_r(&timeInSecond, &timeInfo);
+    bool is24HourClock = OHOS::Global::I18n::LocaleConfig::Is24HourClock();
+    if (!is24HourClock) {
+        if (timeInfo.tm_hour > 12) {
+            timeInfo.tm_hour -= 12;
+        }
+    }
     switch (format) {
         case TimeFormat::YMDHMS: {
             (void)strftime(dateTimeBuffer, dateTimeLen, "%Y-%m-%d %H:%M:%S", &timeInfo);
@@ -1245,8 +1254,8 @@ std::string ReminderRequest::GetState(const uint8_t state) const
             }
             stateInfo += "Snooze";
         }
-        stateInfo += "'";
     }
+    stateInfo += "'";
     return stateInfo;
 }
 

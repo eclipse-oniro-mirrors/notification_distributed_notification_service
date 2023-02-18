@@ -89,6 +89,7 @@ ohos_shared_library("ans_core") {
     "hicollie_native:libhicollie",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
+    "i18n:intl_util",
     "ipc:ipc_core",
     "multimedia_image_framework:image_native",
     "os_account:os_account_innerkits",
