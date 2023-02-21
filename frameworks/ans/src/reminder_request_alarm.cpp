@@ -161,7 +161,7 @@ int8_t ReminderRequestAlarm::GetNextAlarm(const time_t now, const time_t target)
         return INVALID_INT_VALUE;
     }
     struct tm nowTime;
-    (void)gmtime_r(&now, &nowTime);
+    (void)localtime_r(&now, &nowTime);
     int32_t today = GetActualTime(TimeTransferType::WEEK, nowTime.tm_wday);
     int32_t dayCount = now >= target ? 1 : 0;
     for (; dayCount <= DAYS_PER_WEEK; dayCount++) {

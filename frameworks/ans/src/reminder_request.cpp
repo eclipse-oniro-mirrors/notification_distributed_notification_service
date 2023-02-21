@@ -21,6 +21,7 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "locale_config.h"
 #include "os_account_manager.h"
 #include "reminder_store.h"
 #include "system_ability_definition.h"
@@ -44,6 +45,7 @@ const uint8_t ReminderRequest::REMINDER_STATUS_ACTIVE = 1;
 const uint8_t ReminderRequest::REMINDER_STATUS_ALERTING = 2;
 const uint8_t ReminderRequest::REMINDER_STATUS_SHOWING = 4;
 const uint8_t ReminderRequest::REMINDER_STATUS_SNOOZE = 8;
+const uint8_t ReminderRequest::TIME_HOUR_OFFSET = 12;
 const std::string ReminderRequest::NOTIFICATION_LABEL = "REMINDER_AGENT";
 const std::string ReminderRequest::REMINDER_EVENT_ALARM_ALERT = "ohos.event.notification.reminder.ALARM_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_CLOSE_ALERT = "ohos.event.notification.reminder.CLOSE_ALERT";
@@ -365,6 +367,7 @@ bool ReminderRequest::OnSnooze()
     if ((state_ & REMINDER_STATUS_ALERTING) != 0) {
         SetState(false, REMINDER_STATUS_ALERTING, "onSnooze()");
     }
+    SetSnoozeTimesDynamic(GetSnoozeTimes());
     if (!UpdateNextReminder(true)) {
         return false;
     }
@@ -1196,6 +1199,10 @@ std::string ReminderRequest::GetTimeInfoInner(const time_t &timeInSecond, const 
     char dateTimeBuffer[dateTimeLen];
     struct tm timeInfo;
     (void)localtime_r(&timeInSecond, &timeInfo);
+    bool is24HourClock = OHOS::Global::I18n::LocaleConfig::Is24HourClock();
+    if (!is24HourClock && timeInfo.tm_hour > TIME_HOUR_OFFSET) {
+        timeInfo.tm_hour -= TIME_HOUR_OFFSET;
+    }
     switch (format) {
         case TimeFormat::YMDHMS: {
             (void)strftime(dateTimeBuffer, dateTimeLen, "%Y-%m-%d %H:%M:%S", &timeInfo);
@@ -1245,8 +1252,8 @@ std::string ReminderRequest::GetState(const uint8_t state) const
             }
             stateInfo += "Snooze";
         }
-        stateInfo += "'";
     }
+    stateInfo += "'";
     return stateInfo;
 }
 
