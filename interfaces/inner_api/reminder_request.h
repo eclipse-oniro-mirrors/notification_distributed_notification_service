@@ -607,6 +607,7 @@ public:
     static const uint8_t REMINDER_STATUS_ALERTING;
     static const uint8_t REMINDER_STATUS_SHOWING;
     static const uint8_t REMINDER_STATUS_SNOOZE;
+    static const uint8_t TIME_HOUR_OFFSET;
 
     // For database recovery.
     static void InitDbColumns();
