@@ -45,6 +45,7 @@ const uint8_t ReminderRequest::REMINDER_STATUS_ACTIVE = 1;
 const uint8_t ReminderRequest::REMINDER_STATUS_ALERTING = 2;
 const uint8_t ReminderRequest::REMINDER_STATUS_SHOWING = 4;
 const uint8_t ReminderRequest::REMINDER_STATUS_SNOOZE = 8;
+const uint8_t ReminderRequest::TIME_HOUR_OFFSET = 12;
 const std::string ReminderRequest::NOTIFICATION_LABEL = "REMINDER_AGENT";
 const std::string ReminderRequest::REMINDER_EVENT_ALARM_ALERT = "ohos.event.notification.reminder.ALARM_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_CLOSE_ALERT = "ohos.event.notification.reminder.CLOSE_ALERT";
@@ -1199,8 +1200,8 @@ std::string ReminderRequest::GetTimeInfoInner(const time_t &timeInSecond, const 
     struct tm timeInfo;
     (void)localtime_r(&timeInSecond, &timeInfo);
     bool is24HourClock = OHOS::Global::I18n::LocaleConfig::Is24HourClock();
-    if (!is24HourClock && timeInfo.tm_hour > 12) {
-        timeInfo.tm_hour -= 12;
+    if (!is24HourClock && timeInfo.tm_hour > TIME_HOUR_OFFSET) {
+        timeInfo.tm_hour -= TIME_HOUR_OFFSET;
     }
     switch (format) {
         case TimeFormat::YMDHMS: {
