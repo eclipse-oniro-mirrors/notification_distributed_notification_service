@@ -58,6 +58,7 @@ ohos_shared_library("notificationmanager") {
     "napi_enable_notification.cpp",
     "napi_get_active.cpp",
     "napi_publish.cpp",
+    "napi_remove_group.cpp",
     "napi_slot.cpp",
     "napi_template.cpp",
   ]

@@ -67,7 +67,7 @@ void AnsNotificationUnitAnnexTest::TearDown() {}
 
 /*
  * @tc.name: GetNotificationSlotNumAsBundle_0200
- * @tc.desc: test GetNotificationSlotNumAsBundle return false.
+ * @tc.desc: test GetNotificationSlotNumAsBundle return ERR_ANS_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -80,7 +80,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, GetNotificationSlotNumAsBundle_0200, Func
     bundleOption.SetBundleName(bundleName);
     uint64_t num = 10;
     ErrCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret1, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /*
@@ -168,7 +168,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishNotificationAsBundle_0200, Functio
 
 /*
  * @tc.name: RemoveNotification_0100
- * @tc.desc: test RemoveNotification ErrCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: test RemoveNotification ErrCode ERR_ANS_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -181,12 +181,12 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveNotification_0100, Function | Mediu
     int32_t notificationId = 2;
     std::string label = "this is label";
     ErrCode ret3 = ans_->RemoveNotification(bundleOption, notificationId, label, removeReason);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: RemoveAllNotifications_0200
- * @tc.desc: test RemoveAllNotifications ErrCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: test RemoveAllNotifications ErrCode ERR_ANS_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -196,12 +196,12 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveAllNotifications_0200, Function | M
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     ErrCode ret3 = ans_->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: RemoveNotificationsByBundle_0200
- * @tc.desc: test RemoveNotificationsByBundle ErrCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: test RemoveNotificationsByBundle ErrCode ERR_ANS_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -211,12 +211,12 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveNotificationsByBundle_0200, Functio
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     ErrCode ret3 = ans_->RemoveNotificationsByBundle(bundleOption);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: GetNotificationSlotsForBundle_0200
- * @tc.desc: test GetNotificationSlotsForBundle ErrCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: test GetNotificationSlotsForBundle ErrCode ERR_ANS_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -227,7 +227,7 @@ HWTEST_F(AnsNotificationUnitAnnexTest, GetNotificationSlotsForBundle_0200, Funct
     bundleOption.SetBundleName(bundleName);
     std::vector<sptr<NotificationSlot>> slots;
     ErrCode ret3 = ans_->GetNotificationSlotsForBundle(bundleOption, slots);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /*

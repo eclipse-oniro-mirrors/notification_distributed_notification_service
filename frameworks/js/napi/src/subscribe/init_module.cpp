@@ -34,7 +34,6 @@ napi_value NotificationSubscribeInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("unsubscribe", NapiUnsubscribe),
         DECLARE_NAPI_FUNCTION("remove", NapiRemove),
         DECLARE_NAPI_FUNCTION("removeAll", NapiRemoveAll),
-        DECLARE_NAPI_FUNCTION("removeGroupByBundle", NapiRemoveGroupByBundle),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

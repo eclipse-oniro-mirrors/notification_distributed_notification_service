@@ -28,7 +28,7 @@ bool AccessTokenHelper::VerifyNativeToken(const Security::AccessToken::AccessTok
     return true;
 }
 
-bool AccessTokenHelper::IsSystemHap()
+bool AccessTokenHelper::IsSystemApp()
 {
     return true;
 }

@@ -16,6 +16,8 @@
 #ifndef REMOTE_NATIVE_TOKEN_H
 #define REMOTE_NATIVE_TOKEN_H
 
+#include <string>
+
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
@@ -23,7 +25,7 @@ namespace OHOS {
 namespace Notification {
 class RemoteNativeToken {
 public:
-    static void SetNativeToken();
+    static void SetNativeToken(std::string testName);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

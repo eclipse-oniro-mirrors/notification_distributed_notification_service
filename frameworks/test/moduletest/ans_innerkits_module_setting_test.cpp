@@ -42,7 +42,7 @@ public:
 
 void AnsInnerKitsModuleSettingTest::SetUpTestCase()
 {
-    RemoteNativeToken::SetNativeToken();
+    RemoteNativeToken::SetNativeToken("ans_innerkits_module_setting_test");
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);

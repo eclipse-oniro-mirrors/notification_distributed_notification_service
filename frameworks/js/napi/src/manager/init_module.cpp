@@ -22,6 +22,7 @@
 #include "napi_enable_notification.h"
 #include "napi_get_active.h"
 #include "napi_publish.h"
+#include "napi_remove_group.h"
 #include "napi_slot.h"
 #include "napi_template.h"
 #include "pixel_map_napi.h"
@@ -44,6 +45,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("cancelAll", NapiCancelAll),
         DECLARE_NAPI_FUNCTION("cancelGroup", NapiCancelGroup),
         DECLARE_NAPI_FUNCTION("cancelAsBundle", NapiCancelAsBundle),
+        DECLARE_NAPI_FUNCTION("removeGroupByBundle", NapiRemoveGroupByBundle),
         DECLARE_NAPI_FUNCTION("addSlot", NapiAddSlot),
         DECLARE_NAPI_FUNCTION("addSlots", NapiAddSlots),
         DECLARE_NAPI_FUNCTION("setSlotByBundle", NapiSetSlotByBundle),
