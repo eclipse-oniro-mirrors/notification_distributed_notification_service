@@ -22,7 +22,7 @@
 #include "napi_enable_notification.h"
 #include "napi_get_active.h"
 #include "napi_publish.h"
-#include "napi_remove.h"
+#include "napi_remove_group.h"
 #include "napi_slot.h"
 #include "napi_template.h"
 #include "pixel_map_napi.h"
