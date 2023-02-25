@@ -33,6 +33,7 @@ ohos_shared_library("notificationmanager") {
     "//foundation/multimedia/image_framework/interfaces/kits/js/common/include/",
     "../../include",
     "../../include/manager",
+    "../../include/subscribe",
     "//third_party/node/src",
   ]
 
@@ -50,6 +51,8 @@ ohos_shared_library("notificationmanager") {
     "../get_active.cpp",
     "../publish.cpp",
     "../slot.cpp",
+    "../subscribe/napi_remove.cpp",
+    "../remove.cpp",
     "init_module.cpp",
     "napi_cancel.cpp",
     "napi_display_badge.cpp",
