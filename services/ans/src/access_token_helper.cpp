@@ -17,6 +17,7 @@
 
 #include "ans_log_wrapper.h"
 #include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 
 using namespace OHOS::Security::AccessToken;
 
@@ -35,23 +36,15 @@ bool AccessTokenHelper::VerifyNativeToken(const AccessTokenID &callerToken)
     return (tokenType == ATokenTypeEnum::TOKEN_NATIVE);
 }
 
-bool AccessTokenHelper::IsSystemHap()
+bool AccessTokenHelper::IsSystemApp()
 {
     AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (type == ATokenTypeEnum::TOKEN_NATIVE) {
-        return true;
-    }
     if (type == ATokenTypeEnum::TOKEN_HAP) {
-        HapTokenInfo info;
-        AccessTokenKit::GetHapTokenInfo(tokenId, info);
-        if (info.apl == ATokenAplEnum::APL_SYSTEM_CORE || info.apl == ATokenAplEnum::APL_SYSTEM_BASIC) {
+        uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+        if (Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId)) {
             return true;
         }
-        pid_t pid = IPCSkeleton::GetCallingPid();
-        pid_t uid = IPCSkeleton::GetCallingUid();
-        ANS_LOGW("apl not match, info.apl=%{public}d, type=%{public}d, pid=%{public}d, uid=%{public}d",
-            info.apl, type, pid, uid);
     }
     return false;
 }

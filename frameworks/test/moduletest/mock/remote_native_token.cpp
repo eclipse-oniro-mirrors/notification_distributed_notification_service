@@ -17,11 +17,11 @@
 
 namespace OHOS {
 namespace Notification {
-void RemoteNativeToken::SetNativeToken()
+void RemoteNativeToken::SetNativeToken(std::string testName)
 {
     uint64_t tokenId;
     const char **perms = new const char *[1];
-    perms[0] = "ohos.permission.DISTRIBUTED_DATASYNC"; // system_core
+    perms[0] = "ohos.permission.NOTIFICATION_CONTROLLER"; // system_core
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 1,
@@ -32,7 +32,7 @@ void RemoteNativeToken::SetNativeToken()
         .aplStr = "system_basic",
     };
 
-    infoInstance.processName = "SetUpTestCase";
+    infoInstance.processName = testName.c_str();
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
     delete[] perms;

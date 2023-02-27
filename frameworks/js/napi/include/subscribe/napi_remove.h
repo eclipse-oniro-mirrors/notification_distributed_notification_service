@@ -25,7 +25,6 @@ using namespace OHOS::Notification;
 napi_value NapiRemove(napi_env env, napi_callback_info info);
 napi_value NapiRemoveAsBundle(napi_env env, napi_callback_info info);
 napi_value NapiRemoveAll(napi_env env, napi_callback_info info);
-napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_REMOVE_H

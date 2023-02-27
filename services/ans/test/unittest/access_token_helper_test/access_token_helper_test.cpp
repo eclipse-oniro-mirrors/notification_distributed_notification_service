@@ -85,37 +85,24 @@ HWTEST_F(AccessTokenHelperTest, VerifyNativeToken_00100, Function | SmallTest | 
 
 /**
  * @tc.number    : AccessTokenHelperTest
- * @tc.name      : IsSystemHap_00100
- * @tc.desc      : IsSystemHap Token Type TOKEN_NATIVE
+ * @tc.name      : IsSystemApp_00100
+ * @tc.desc      : IsSystemApp Token Type TOKEN_NATIVE
  */
-HWTEST_F(AccessTokenHelperTest, IsSystemHap_00100, Function | SmallTest | Level1)
+HWTEST_F(AccessTokenHelperTest, IsSystemApp_00100, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    EXPECT_TRUE(stub_->IsSystemHap());
+    EXPECT_FALSE(stub_->IsSystemApp());
 }
 
 /**
  * @tc.number    : AccessTokenHelperTest
- * @tc.name      : IsSystemHap_00200
- * @tc.desc      : IsSystemHap Token Type TOKEN_HAP
+ * @tc.name      : IsSystemApp_00200
+ * @tc.desc      : IsSystemApp Token Type TOKEN_HAP
  */
-HWTEST_F(AccessTokenHelperTest, IsSystemHap_00200, Function | SmallTest | Level1)
+HWTEST_F(AccessTokenHelperTest, IsSystemApp_00200, Function | SmallTest | Level1)
 {
-    MockApl(ATokenAplEnum::APL_SYSTEM_CORE);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    EXPECT_TRUE(stub_->IsSystemHap());
-}
-
-/**
- * @tc.number    : AccessTokenHelperTest
- * @tc.name      : IsSystemHap_00300
- * @tc.desc      : IsSystemHap Token Type TOKEN_HAP
- */
-HWTEST_F(AccessTokenHelperTest, IsSystemHap_00300, Function | SmallTest | Level1)
-{
-    MockApl(ATokenAplEnum::APL_NORMAL);
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    EXPECT_FALSE(stub_->IsSystemHap());
+    EXPECT_TRUE(stub_->IsSystemApp());
 }
 
 /**

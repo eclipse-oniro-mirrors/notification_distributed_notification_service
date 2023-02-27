@@ -425,7 +425,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.PrepareNotificationRequest(req), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -445,7 +445,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.CancelAsBundle(notificationId, representativeBundle, userId),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -462,7 +462,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.AddSlots(slots), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.AddSlots(slots), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -480,7 +480,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.Delete(key, removeReason), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.Delete(key, removeReason), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -497,7 +497,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.DeleteByBundle(bundleOption), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.DeleteByBundle(bundleOption), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -512,7 +512,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.DeleteAll(), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.DeleteAll(), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -530,7 +530,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetSlotsByBundle(bundleOption, slots), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.GetSlotsByBundle(bundleOption, slots), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -548,7 +548,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.UpdateSlots(bundleOption, slots), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.UpdateSlots(bundleOption, slots), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -567,7 +567,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetShowBadgeEnabledForBundle(bundleOption, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -586,7 +586,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetShowBadgeEnabledForBundle(bundleOption, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -604,7 +604,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.Unsubscribe(subscriber, info), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.Unsubscribe(subscriber, info), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -621,7 +621,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetAllActiveNotifications(notifications), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.GetAllActiveNotifications(notifications), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -640,7 +640,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(
-        advancedNotificationService.GetSpecialActiveNotifications(key, notifications), ERR_ANS_PERMISSION_DENIED);
+        advancedNotificationService.GetSpecialActiveNotifications(key, notifications), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -659,7 +659,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledForAllBundles(deviceId, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -697,7 +697,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledForSpecialBundle(deviceId, bundleOption, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -714,7 +714,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -747,7 +747,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(
-        advancedNotificationService.IsSpecialBundleAllowedNotify(bundleOption, allowed), ERR_ANS_PERMISSION_DENIED);
+        advancedNotificationService.IsSpecialBundleAllowedNotify(bundleOption, allowed), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -803,7 +803,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.RemoveNotification(bundleOption, notificationId, label, removeReason),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -842,7 +842,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.RemoveAllNotifications(bundleOption), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.RemoveAllNotifications(bundleOption), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -879,7 +879,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetSlotNumAsBundle(bundleOption, num), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.GetSlotNumAsBundle(bundleOption, num), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -917,7 +917,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -970,7 +970,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1003,7 +1003,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1036,7 +1036,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1053,7 +1053,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.EnableDistributed(enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.EnableDistributed(enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1071,7 +1071,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1108,7 +1108,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1144,7 +1144,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetDeviceRemindType(remindType), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.GetDeviceRemindType(remindType), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1162,7 +1162,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.IsSpecialUserAllowedNotify(userId, allowed), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.IsSpecialUserAllowedNotify(userId, allowed), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1180,7 +1180,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledByUser(userId, allowed), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledByUser(userId, allowed), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1198,7 +1198,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.SetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1216,7 +1216,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService.GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1236,7 +1236,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1277,7 +1277,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1360,7 +1360,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetSyncNotificationEnabledWithoutApp(userId, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1379,7 +1379,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_NON_SYSTEM_APP);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -330,7 +330,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             ANS_LOGW("Wrong argument type. Function expected.");
             return nullptr;
         }
-        napi_create_reference(env, argv[PARAM2], 1, &paras.callback);
+        napi_create_reference(env, argv[PARAM3], 1, &paras.callback);
     }
 
     return Common::NapiGetNull(env);
