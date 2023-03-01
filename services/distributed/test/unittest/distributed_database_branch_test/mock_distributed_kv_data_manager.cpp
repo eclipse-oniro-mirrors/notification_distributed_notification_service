@@ -52,26 +52,10 @@ DistributedKvDataManager::DistributedKvDataManager()
 DistributedKvDataManager::~DistributedKvDataManager()
 {}
 
-Status DistributedKvDataManager::GetDeviceList(std::vector<DeviceInfo> &deviceInfoList, DeviceFilterStrategy strategy)
-{
-    if (false == g_mockGetDeviceListRet) {
-        return Status::INVALID_ARGUMENT;
-    }
-    return Status::SUCCESS;
-}
-
 Status DistributedKvDataManager::GetSingleKvStore(const Options &options, const AppId &appId, const StoreId &storeId,
     std::shared_ptr<SingleKvStore> &singleKvStore)
 {
     if (false == g_mockGetSingleKvStoreRet) {
-        return Status::INVALID_ARGUMENT;
-    }
-    return Status::SUCCESS;
-}
-
-Status DistributedKvDataManager::GetLocalDevice(DeviceInfo &localDevice)
-{
-    if (false == g_mockGetLocalDeviceRet) {
         return Status::INVALID_ARGUMENT;
     }
     return Status::SUCCESS;
