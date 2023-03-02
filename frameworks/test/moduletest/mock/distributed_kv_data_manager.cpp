@@ -52,27 +52,6 @@ Status DistributedKvDataManager::DeleteKvStore(const AppId &appId, const StoreId
     return Status::SUCCESS;
 }
 
-Status DistributedKvDataManager::GetLocalDevice(DeviceInfo &localDevice)
-{
-    localDevice.deviceId = "<localDeviceId>";
-    localDevice.deviceName = "<localDeviceName>";
-    localDevice.deviceType = "<localDeviceType>";
-    return Status::SUCCESS;
-}
-
-Status DistributedKvDataManager::GetDeviceList(std::vector<DeviceInfo> &deviceInfoList, DeviceFilterStrategy strategy)
-{
-    DeviceInfo remoteDevice = {
-        .deviceId = "<remoteDeviceId>",
-        .deviceName = "<remoteDeviceName>",
-        .deviceType = "<remoteDeviceType>",
-    };
-    deviceInfoList.clear();
-    deviceInfoList.push_back(remoteDevice);
-
-    return Status::SUCCESS;
-}
-
 void DistributedKvDataManager::RegisterKvStoreServiceDeathRecipient(
     std::shared_ptr<KvStoreDeathRecipient> kvStoreDeathRecipient)
 {}
