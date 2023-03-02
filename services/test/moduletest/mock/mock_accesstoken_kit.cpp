@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,20 @@
 
 #include "accesstoken_kit.h"
 
+using namespace OHOS::Security::AccessToken;
+namespace OHOS {
+namespace Notification {
+namespace {
+ATokenTypeEnum g_mockGetTokenTypeFlagRet = ATokenTypeEnum::TOKEN_HAP;
+}
+
+void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
+{
+    g_mockGetTokenTypeFlagRet = mockRet;
+}
+}
+}
+
 namespace OHOS {
 namespace Security {
 namespace AccessToken {
@@ -25,7 +39,7 @@ int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& 
 
 ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
 {
-    return TOKEN_HAP;
+    return Notification::g_mockGetTokenTypeFlagRet;
 }
 } // namespace AccessToken
 } // namespace Security
