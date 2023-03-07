@@ -45,9 +45,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (!HasNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo)) {
         ANS_LOGW("Subscriber not found");
     }
-
     paras.objectInfo = subscriberInstancesInfo.subscriber;
-    ANS_LOGI("ObjectInfo = %{public}p start", paras.objectInfo);
 
     // argv[1]:callback
     if (argc >= UNSUBSCRIBE_MAX_PARA) {
