@@ -140,10 +140,12 @@ int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle
     Connect();
 
     if (bundleMgr_ != nullptr) {
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
         uid = bundleMgr_->GetUidByBundleName(bundle, userId);
         if (uid < 0) {
             ANS_LOGW("get invalid uid of bundle %{public}s in userId %{public}d", bundle.c_str(), userId);
         }
+        IPCSkeleton::SetCallingIdentity(identity);
     }
 
     return uid;
