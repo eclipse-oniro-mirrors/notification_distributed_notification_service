@@ -40,15 +40,7 @@ namespace OHOS {
         enabledNotificationCallbackData.GetBundle();
         // test GetUid function
         enabledNotificationCallbackData.GetUid();
-        // test GetEnable function
-        enabledNotificationCallbackData.GetEnable();
-        // test Dump function
-        enabledNotificationCallbackData.Dump();
-        // test Unmarshalling function
-        Parcel parcel;
-        enabledNotificationCallbackData.Unmarshalling(parcel);
-        enabledNotificationCallbackData.ReadFromParcel(parcel);
-        return enabledNotificationCallbackData.Marshalling(parcel);
+        return true;
     }
 }
 

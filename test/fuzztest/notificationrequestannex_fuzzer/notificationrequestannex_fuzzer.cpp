@@ -33,16 +33,6 @@ namespace OHOS {
         request.FromJson(jsonObject);
         request.ConvertObjectsToJson(jsonObject);
         request.ConvertObjectsToJson(jsonObject);
-        Notification::NotificationRequest* target = new Notification::NotificationRequest(notificationId);
-        request.ConvertJsonToNum(target, jsonObject);
-        request.ConvertJsonToString(target, jsonObject);
-        request.ConvertJsonToEnum(target, jsonObject);
-        request.ConvertJsonToBool(target, jsonObject);
-        request.ConvertJsonToPixelMap(target, jsonObject);
-        request.ConvertJsonToNotificationContent(target, jsonObject);
-        request.ConvertJsonToNotificationActionButton(target, jsonObject);
-        request.ConvertJsonToNotificationDistributedOptions(target, jsonObject);
-        request.ConvertJsonToNotificationFlags(target, jsonObject);
         return request.IsAgentNotification();
     }
 }

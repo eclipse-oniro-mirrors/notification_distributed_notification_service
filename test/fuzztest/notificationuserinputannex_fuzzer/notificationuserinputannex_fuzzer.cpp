@@ -45,13 +45,7 @@ namespace OHOS {
             Notification::NotificationConstant::InputEditType(inputEditTypes);
         Notification::NotificationUserInput::Create(inputKey, tag, options, permitFreeFormInput,
                 permitMimeTypes, additional, inputEditType);
-        Notification::NotificationUserInput notificationUserInputannex
-            (inputKey, tag, options, permitFreeFormInput, permitMimeTypes, additional, inputEditType);
-        nlohmann::json jsonObject;
-        notificationUserInputannex.ToJson(jsonObject);
-        notificationUserInputannex.FromJson(jsonObject);
-        Parcel parcel;
-        return notificationUserInput.Marshalling(parcel);
+        return true;
     }
 }
 

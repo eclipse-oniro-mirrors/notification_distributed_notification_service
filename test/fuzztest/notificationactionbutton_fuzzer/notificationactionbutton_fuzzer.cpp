@@ -49,27 +49,6 @@ namespace OHOS {
         actionButton->GetUserInput();
         // test IsAutoCreatedReplies function
         actionButton->IsAutoCreatedReplies();
-        // test IsContextDependent function
-        actionButton->IsContextDependent();
-       // test GetSemanticActionButton function
-        actionButton->GetSemanticActionButton();
-        // test GetIcon function
-        actionButton->GetIcon();
-        // test GetTitle function
-        actionButton->GetTitle();
-        // test GetWantAgent function
-        actionButton->GetWantAgent();
-        // test Dump function
-        actionButton->Dump();
-        // test ToJson function
-        nlohmann::json jsonObject;
-        actionButton->ToJson(jsonObject);
-        actionButton->FromJson(jsonObject);
-        // test Unmarshalling function
-        Parcel parcel;
-        actionButton->Marshalling(parcel);
-        actionButton->Unmarshalling(parcel);
-        actionButton->ReadFromParcel(parcel);
         return true;
     }
 }

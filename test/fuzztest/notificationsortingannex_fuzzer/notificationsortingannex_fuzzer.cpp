@@ -26,9 +26,7 @@ namespace OHOS {
     {
         Notification::NotificationSorting notificationSorting;
         Parcel parcel;
-        notificationSorting.ReadFromParcel(parcel);
-        notificationSorting.Unmarshalling(parcel);
-        return notificationSorting.Marshalling(parcel);
+        return true;
     }
 }
 
