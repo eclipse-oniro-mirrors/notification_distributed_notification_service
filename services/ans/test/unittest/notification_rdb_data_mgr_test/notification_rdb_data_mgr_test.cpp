@@ -154,7 +154,7 @@ class RdbStoreTest : public RdbStore {
             return nullptr;
         };
         virtual std::shared_ptr<ResultSet> RemoteQuery(const std::string &device,
-            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns)
+            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns, int &errCode)
         {
             return nullptr;
         };
@@ -231,7 +231,7 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
-        virtual std::string ObtainDistributedTableName(const std::string& device, const std::string& table)
+        virtual std::string ObtainDistributedTableName(const std::string& device, const std::string& table， int &errCode)
         {
             return "";
         }
