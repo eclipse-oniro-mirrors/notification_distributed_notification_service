@@ -231,9 +231,10 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
-        virtual std::string ObtainDistributedTableName(const std::string &device, const std::string &table, int &errCode)
-        {
-            return "";
+        virtual std::string
+        ObtainDistributedTableName(const std::string &device,
+                                   const std::string &table, int &errCode) {
+          return "";
         }
 
         virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const SyncCallback& callback)
