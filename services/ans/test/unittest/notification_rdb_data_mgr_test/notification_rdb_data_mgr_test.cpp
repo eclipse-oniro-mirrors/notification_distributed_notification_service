@@ -231,7 +231,7 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
-        virtual std::string ObtainDistributedTableName(const std::string& device, const std::string& table， int &errCode)
+        virtual std::string ObtainDistributedTableName(const std::string &device, const std::string &table, int &errCode)
         {
             return "";
         }
