@@ -59,6 +59,9 @@ const char* TIMER_COUNT_DOWN_TIME = "triggerTimeInSeconds";
 const char* WANT_AGENT = "wantAgent";
 const char* WANT_AGENT_PKG = "pkgName";
 const char* WANT_AGENT_ABILITY = "abilityName";
+const char* BUTTON_WANT_AGENT = "wantAgent";
+const char* BUTTON_WANT_AGENT_PKG = "pkgName";
+const char* BUTTON_WANT_AGENT_ABILITY = "abilityName";
 }
 
 struct CallbackPromiseInfo {
@@ -143,6 +146,10 @@ private:
     static std::string FindErrMsg(const napi_env &env, const int32_t errCode);
 
     static napi_value GetCallbackErrorValue(napi_env env, const int32_t errCode, const std::string errMsg);
+
+    static void GetButtonWantAgent(const napi_env &env, const napi_value &value,
+        std::shared_ptr<ReminderRequest::ButtonWantAgent>& wantAgent);
+    static bool IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder);
 };
 }  // namespace OHOS
 }  // namespace ReminderAgentNapi

@@ -164,6 +164,11 @@ public:
     void StartRecentReminder();
 
     /**
+     * Handle custom button click event.
+     */
+    void HandleCustomButtonClick(const OHOS::EventFwk::Want &want);
+
+    /**
      * @brief Terminate the alerting reminder.
      *
      * 1. Stop sound and vibrate.
@@ -221,7 +226,8 @@ private:
      * @param bundleName Indicates the target bundle.
      * @return true if number limit is exceeded.
      */
-    bool CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption) const;
+    bool CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<ReminderRequest> &reminder) const;
     void CloseReminder(const sptr<ReminderRequest> &reminder, bool cancelNotification);
 
     /**
@@ -449,6 +455,11 @@ private:
      * Max number of reminders limit for the whole system.
      */
     static const int16_t MAX_NUM_REMINDER_LIMIT_SYSTEM;
+
+    /**
+     * Max number of reminders limit for one system application.
+     */
+    static const int16_t MAX_NUM_REMINDER_LIMIT_SYS_APP;
 
     /**
      * Max number of reminders limit for one application.

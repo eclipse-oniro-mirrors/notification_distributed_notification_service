@@ -67,6 +67,12 @@ public:
          *
          */
         SNOOZE,
+
+        /**
+         * @brief Indicates that this action button is custom.
+         *
+         */
+        CUSTOM,
         INVALID
     };
 
@@ -99,6 +105,11 @@ public:
         HM
     };
 
+    struct ButtonWantAgent {
+        std::string pkgName = "";
+        std::string abilityName = "";
+    };
+
     /**
      * @brief Attributes of action button.
      */
@@ -112,6 +123,11 @@ public:
          * Content show on the button.
          */
         std::string title = "";
+
+        /**
+         * The ability that is redirected to when the button is clicked.
+         */
+        std::shared_ptr<ButtonWantAgent> wantAgent;
     };
 
     /**
@@ -272,6 +288,19 @@ public:
     int32_t GetUid() const;
 
     /**
+     * @brief Set the app system.
+     *
+     */
+    void SetSystemApp(bool isSystem);
+
+    /**
+     * @brief Check the app is system or not.
+     *
+     * @return true is the app is system.
+     */
+    bool IsSystemApp() const;
+
+    /**
      * @brief Obtains want agent information.
      *
      * @return want agent information.
@@ -419,7 +448,8 @@ public:
      * @param type Indicates the type of the button.
      * @return Current reminder self.
      */
-    ReminderRequest& SetActionButton(const std::string &title, const ActionButtonType &type);
+    ReminderRequest& SetActionButton(const std::string &title, const ActionButtonType &type,
+        const std::shared_ptr<ButtonWantAgent> &buttonWantAgent);
 
     /**
      * @brief Sets reminder content.
@@ -592,6 +622,8 @@ public:
      */
     static const std::string REMINDER_EVENT_SNOOZE_ALERT;
 
+    static const std::string REMINDER_EVENT_CUSTOM_ALERT;
+
     /**
      * @brief Used to control ring duration.
      */
@@ -615,6 +647,7 @@ public:
     static const std::string PKG_NAME;
     static const std::string USER_ID;
     static const std::string UID;
+    static const std::string SYS_APP;
     static const std::string APP_LABEL;
     static const std::string REMINDER_TYPE;
     static const std::string REMINDER_TIME;
@@ -729,6 +762,7 @@ private:
     int32_t reminderId_ {-1};
     int32_t userId_ {-1};
     int32_t uid_ {-1};
+    bool isSystemApp_ {false};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.

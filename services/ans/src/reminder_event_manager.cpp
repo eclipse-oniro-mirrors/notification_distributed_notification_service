@@ -40,6 +40,7 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
     matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
     matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
+    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
@@ -102,6 +103,10 @@ void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFw
     }
     if (action == ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT) {
         reminderDataManager_->SnoozeReminder(want);
+        return;
+    }
+    if (action == ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT) {
+        reminderDataManager_->HandleCustomButtonClick(want);
         return;
     }
     if (action == ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION) {

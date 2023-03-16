@@ -31,6 +31,12 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const int32_t BASE_YEAR = 1900;
+const int32_t SINGLE_BUTTON_MIN_LEN = 2;
+const int32_t SINGLE_BUTTON_MAX_LEN = 4;
+const int32_t BUTTON_TYPE_INDEX = 0;
+const int32_t BUTTON_TITLE_INDEX = 1;
+const int32_t BUTTON_PKG_INDEX = 2;
+const int32_t BUTTON_ABILITY_INDEX = 3;
 }
 
 int32_t ReminderRequest::GLOBAL_ID = 0;
@@ -50,6 +56,7 @@ const std::string ReminderRequest::NOTIFICATION_LABEL = "REMINDER_AGENT";
 const std::string ReminderRequest::REMINDER_EVENT_ALARM_ALERT = "ohos.event.notification.reminder.ALARM_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_CLOSE_ALERT = "ohos.event.notification.reminder.CLOSE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT = "ohos.event.notification.reminder.SNOOZE_ALERT";
+const std::string ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT = "ohos.event.notification.reminder.COSTUM_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT = "ohos.event.notification.reminder.ALERT_TIMEOUT";
 const std::string ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION =
     "ohos.event.notification.reminder.REMOVE_NOTIFICATION";
@@ -64,6 +71,7 @@ const std::string ReminderRequest::REMINDER_ID = "reminder_id";
 const std::string ReminderRequest::PKG_NAME = "package_name";
 const std::string ReminderRequest::USER_ID = "user_id";
 const std::string ReminderRequest::UID = "uid";
+const std::string ReminderRequest::SYS_APP = "system_app";
 const std::string ReminderRequest::APP_LABEL = "app_label";
 const std::string ReminderRequest::REMINDER_TYPE = "reminder_type";
 const std::string ReminderRequest::REMINDER_TIME = "reminder_time";
@@ -104,6 +112,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->displayContent_ = other.displayContent_;
     this->title_ = other.title_;
     this->isExpired_ = other.isExpired_;
+    this->isSystemApp_ = other.isSystemApp_;
     this->snoozeTimes_ = other.snoozeTimes_;
     this->snoozeTimesDynamic_ = other.snoozeTimesDynamic_;
     this->state_ = other.state_;
@@ -168,16 +177,18 @@ std::string ReminderRequest::Dump() const
            "]";
 }
 
-ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, const ActionButtonType &type)
+ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, const ActionButtonType &type,
+    const std::shared_ptr<ButtonWantAgent> &buttonWantAgent)
 {
-    if ((type != ActionButtonType::CLOSE) && (type != ActionButtonType::SNOOZE)) {
-        ANSR_LOGI("Button type only support: %{public}d or %{public}d",
-            static_cast<uint8_t>(ActionButtonType::CLOSE), static_cast<uint8_t>(ActionButtonType::SNOOZE));
+    if ((type != ActionButtonType::CLOSE) && (type != ActionButtonType::SNOOZE) && (type != ActionButtonType::CUSTOM)) {
+        ANSR_LOGI("Button type is not support: %{public}d.", static_cast<uint8_t>(type));
         return *this;
     }
     ActionButtonInfo actionButtonInfo;
     actionButtonInfo.type = type;
     actionButtonInfo.title = title;
+    actionButtonInfo.wantAgent = buttonWantAgent;
+
     actionButtonMap_.insert(std::pair<ActionButtonType, ActionButtonInfo>(type, actionButtonInfo));
     return *this;
 }
@@ -470,6 +481,11 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     // uid
     resultSet->GetInt(ReminderStore::GetColumnIndex(UID), uid_);
 
+    // isSystemApp
+    std::string isSysApp;
+    resultSet->GetString(ReminderStore::GetColumnIndex(SYS_APP), isSysApp);
+    isSystemApp_ = isSysApp == "true" ? true : false;
+
     // reminderType
     int32_t reminderType;
     resultSet->GetInt(ReminderStore::GetColumnIndex(REMINDER_TYPE), reminderType);
@@ -541,7 +557,7 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     // maxScreenWantAgent
     std::string maxScreenWantAgent;
     resultSet->GetString(ReminderStore::GetColumnIndex(MAX_SCREEN_AGENT), maxScreenWantAgent);
-    RecoverWantAgent(wantAgent, 1);
+    RecoverWantAgent(maxScreenWantAgent, 1);
 }
 
 void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
@@ -555,7 +571,20 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSh
     std::vector<std::string> multiButton = StringSplit(actionButtonInfo, SEP_BUTTON_MULTI);
     for (auto button : multiButton) {
         std::vector<std::string> singleButton = StringSplit(button, SEP_BUTTON_SINGLE);
-        SetActionButton(singleButton.at(1), ActionButtonType(std::stoi(singleButton.at(0), nullptr)));
+        if (singleButton.size() < SINGLE_BUTTON_MIN_LEN) {
+            ANSR_LOGW("RecoverButton fail");
+            return;
+        }
+        auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+        if (singleButton.size() == SINGLE_BUTTON_MAX_LEN) {
+            buttonWantAgent->pkgName = singleButton.at(BUTTON_PKG_INDEX);
+            buttonWantAgent->abilityName = singleButton.at(BUTTON_ABILITY_INDEX);
+        }
+        SetActionButton(singleButton.at(BUTTON_TITLE_INDEX),
+            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)), buttonWantAgent);
+        ANSR_LOGI("RecoverButton title:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
+            singleButton.at(BUTTON_TITLE_INDEX).c_str(), buttonWantAgent->pkgName.c_str(),
+            buttonWantAgent->abilityName.c_str());
     }
 }
 
@@ -808,6 +837,16 @@ int32_t ReminderRequest::GetUid() const
     return uid_;
 }
 
+void ReminderRequest::SetSystemApp(bool isSystem)
+{
+    isSystemApp_ = isSystem;
+}
+
+bool ReminderRequest::IsSystemApp() const
+{
+    return isSystemApp_;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
@@ -913,6 +952,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write isExpired");
         return false;
     }
+    if (!parcel.WriteBool(isSystemApp_)) {
+        ANSR_LOGE("Failed to write isSystemApp");
+        return false;
+    }
 
     // write int
     if (!parcel.WriteInt32(reminderId_)) {
@@ -976,6 +1019,18 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
             ANSR_LOGE("Failed to write action button title");
             return false;
         }
+        if (button.second.wantAgent == nullptr) {
+            ANSR_LOGE("button wantAgent is null");
+            return false;
+        }
+        if (!parcel.WriteString(button.second.wantAgent->pkgName)) {
+            ANSR_LOGE("Failed to write action button pkgName");
+            return false;
+        }
+        if (!parcel.WriteString(button.second.wantAgent->abilityName)) {
+            ANSR_LOGE("Failed to write action button abilityName");
+            return false;
+        }
     }
     return true;
 }
@@ -1033,6 +1088,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     // read bool
     if (!parcel.ReadBool(isExpired_)) {
         ANSR_LOGE("Failed to read isExpired");
+        return false;
+    }
+    if (!parcel.ReadBool(isSystemApp_)) {
+        ANSR_LOGE("Failed to read isSystemApp");
         return false;
     }
 
@@ -1106,9 +1165,14 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         }
         ActionButtonType type = static_cast<ActionButtonType>(buttonType);
         std::string title = parcel.ReadString();
+        std::string pkgName = parcel.ReadString();
+        std::string abilityName = parcel.ReadString();
         ActionButtonInfo info;
         info.type = type;
         info.title = title;
+        info.wantAgent = std::make_shared<ButtonWantAgent>();
+        info.wantAgent->pkgName = pkgName;
+        info.wantAgent->abilityName = abilityName;
         actionButtonMap_.insert(std::pair<ActionButtonType, ActionButtonInfo>(type, info));
     }
     if (!InitNotificationRequest()) {
@@ -1169,6 +1233,11 @@ std::string ReminderRequest::GetButtonInfo() const
         }
         ActionButtonInfo buttonInfo = button.second;
         info += std::to_string(static_cast<uint8_t>(button.first)) + SEP_BUTTON_SINGLE + buttonInfo.title;
+        if (buttonInfo.wantAgent == nullptr) {
+            continue;
+        }
+        info += (SEP_BUTTON_SINGLE + buttonInfo.wantAgent->pkgName + SEP_BUTTON_SINGLE
+            + buttonInfo.wantAgent->abilityName);
         isFirst = false;
     }
     return info;
@@ -1262,21 +1331,40 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
+    int32_t customButton = 0;
     for (auto button : actionButtonMap_) {
         auto want = std::make_shared<OHOS::AAFwk::Want>();
         auto type = button.first;
-        if (type == ActionButtonType::CLOSE) {
-            want->SetAction(REMINDER_EVENT_CLOSE_ALERT);
-            ANSR_LOGD("Add action button, type is close");
-        }
-        if (type == ActionButtonType::SNOOZE)  {
-            if (includeSnooze) {
-                want->SetAction(REMINDER_EVENT_SNOOZE_ALERT);
-                ANSR_LOGD("Add action button, type is snooze");
-            } else {
-                ANSR_LOGD("Not add action button, type is snooze, as includeSnooze is false");
-                continue;
-            }
+        switch (type) {
+            case ActionButtonType::CLOSE:
+                want->SetAction(REMINDER_EVENT_CLOSE_ALERT);
+                ANSR_LOGD("Add action button, type is close");
+                break;
+            case ActionButtonType::SNOOZE:
+                if (includeSnooze) {
+                    want->SetAction(REMINDER_EVENT_SNOOZE_ALERT);
+                    ANSR_LOGD("Add action button, type is snooze");
+                } else {
+                    ANSR_LOGD("Not add action button, type is snooze, as includeSnooze is false");
+                    continue;
+                }
+                break;
+            case ActionButtonType::CUSTOM:
+                if (customButton > 0) {
+                    ANSR_LOGD("Not add action button, type is custom, as only allow one custom button");
+                }
+                want->SetAction(REMINDER_EVENT_CUSTOM_ALERT);
+                if (button.second.wantAgent == nullptr) {
+                    ANSR_LOGE("wantAgent null");
+                    return;
+                }
+                want->SetParam("PkgName", button.second.wantAgent->pkgName);
+                want->SetParam("AbilityName", button.second.wantAgent->abilityName);
+                ++customButton;
+                ANSR_LOGD("Add action button, type is custom");
+                break;
+            default:
+                break;
         }
         want->SetParam(PARAM_REMINDER_ID, reminderId_);
         std::vector<std::shared_ptr<AAFwk::Want>> wants;
@@ -1573,6 +1661,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(PKG_NAME, bundleOption->GetBundleName());
     values.PutInt(USER_ID, reminder->GetUserId());
     values.PutInt(UID, reminder->GetUid());
+    values.PutString(SYS_APP, reminder->IsSystemApp() ? "true" : "false");
     values.PutString(APP_LABEL, "");  // no use, compatible with old version.
     values.PutInt(REMINDER_TYPE, static_cast<int32_t>(reminder->GetReminderType()));
     values.PutLong(REMINDER_TIME, reminder->GetReminderTimeInMilli());
@@ -1619,6 +1708,7 @@ void ReminderRequest::InitDbColumns()
     AddColumn(PKG_NAME, "TEXT NOT NULL", false);
     AddColumn(USER_ID, "INT NOT NULL", false);
     AddColumn(UID, "INT NOT NULL", false);
+    AddColumn(SYS_APP, "TEXT NOT NULL", false);
     AddColumn(APP_LABEL, "TEXT", false);
     AddColumn(REMINDER_TYPE, "INT NOT NULL", false);
     AddColumn(REMINDER_TIME, "BIGINT NOT NULL", false);
