@@ -71,8 +71,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_002, Level1)
     sptr<NotificationBundleOption> option = new NotificationBundleOption();
     std::vector<sptr<ReminderRequest>> vec;
     manager->GetValidReminders(option, vec);
-    manager->CheckReminderLimitExceededLocked(option);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    manager->CheckReminderLimitExceededLocked(option, reminder);
     manager->CancelNotification(reminder);
     reminder->SetReminderId(10);
     manager->AddToShowedReminders(reminder);

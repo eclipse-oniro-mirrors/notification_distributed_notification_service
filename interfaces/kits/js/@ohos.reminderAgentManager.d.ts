@@ -303,6 +303,12 @@ declare namespace reminderAgentManager {
      */
     reminderType: ReminderType;
 
+     /**
+     * Action button displayed on the reminder notification.
+     * (The parameter is optional. Up to two buttons are supported).
+     * @since 9
+     * @syscap SystemCapability.Notification.ReminderAgent
+     */
     /**
      * Action button displayed on the reminder notification.
      * (The parameter is optional. Up to three buttons are supported).
