@@ -1351,7 +1351,7 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
                 break;
             case ActionButtonType::CUSTOM:
                 if (customButton > 0) {
-                    ANSR_LOGD("Not add action button, type is custom, as only allow one custom button");
+                    ANSR_LOGI("Not add action button, type is custom, as only allow one custom button");
                 }
                 want->SetAction(REMINDER_EVENT_CUSTOM_ALERT);
                 if (button.second.wantAgent == nullptr) {
@@ -1361,7 +1361,7 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
                 want->SetParam("PkgName", button.second.wantAgent->pkgName);
                 want->SetParam("AbilityName", button.second.wantAgent->abilityName);
                 ++customButton;
-                ANSR_LOGD("Add action button, type is custom");
+                ANSR_LOGI("Add action button, type is custom");
                 break;
             default:
                 break;

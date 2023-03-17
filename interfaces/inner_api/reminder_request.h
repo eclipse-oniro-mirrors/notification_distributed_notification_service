@@ -449,7 +449,7 @@ public:
      * @return Current reminder self.
      */
     ReminderRequest& SetActionButton(const std::string &title, const ActionButtonType &type,
-        const std::shared_ptr<ButtonWantAgent> &buttonWantAgent);
+        const std::shared_ptr<ButtonWantAgent> &buttonWantAgent = nullptr);
 
     /**
      * @brief Sets reminder content.
