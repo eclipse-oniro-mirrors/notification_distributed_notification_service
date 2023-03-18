@@ -78,9 +78,9 @@ void DistributedDatabase::GetKvStore(void)
     }
     DistributedKv::Options options {
         .createIfMissing = true,
-        .securityLevel = DistributedKv::SecurityLevel::S1,
-        .autoSync = true,
         .encrypt = false,
+        .autoSync = true,
+        .securityLevel = DistributedKv::SecurityLevel::S1,
         .area = DistributedKv::EL1,
         .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
         .baseDir = KV_STORE_PATH

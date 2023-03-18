@@ -52,7 +52,9 @@ std::string BundleManagerHelper::GetBundleNameByUid(int32_t uid)
     Connect();
 
     if (bundleMgr_ != nullptr) {
-        bundleMgr_->GetBundleNameForUid(uid, bundle);
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        bundleMgr_->GetNameForUid(uid, bundle);
+        IPCSkeleton::SetCallingIdentity(identity);
     }
 
     return bundle;

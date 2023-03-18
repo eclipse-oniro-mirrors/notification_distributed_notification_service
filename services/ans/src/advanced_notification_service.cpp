@@ -3164,6 +3164,9 @@ ErrCode AdvancedNotificationService::PrepareContinuousTaskNotificationRequest(
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
     request->SetCreatorPid(pid);
+    if (request->GetDeliveryTime() <= 0) {
+        request->SetDeliveryTime(GetCurrentTime());
+    }
 
     ErrCode result = CheckPictureSize(request);
     return result;
@@ -3939,6 +3942,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     int32_t userId = SUBSCRIBE_USER_INIT;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
     request->SetCreatorUserId(userId);
+    if (request->GetDeliveryTime() <= 0) {
+        request->SetDeliveryTime(GetCurrentTime());
+    }
     ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid, userId, bundle.c_str());
 
     ErrCode result = CheckPictureSize(request);
