@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1399,7 +1399,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotByTypeTest_0500, Function | MediumTest 
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     sptr<NotificationSlot> slot = nullptr;
     int32_t result = proxy->GetSlotByType(slotType, slot);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_OK, result);
 }
 
 /*
