@@ -21,6 +21,8 @@
 #undef private
 #undef protected
 
+extern void MockNowInstantMilli(bool mockRet);
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
@@ -404,6 +406,7 @@ HWTEST_F(ReminderRequestTest, IsShowing_00200, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnDateTimeChange_00100, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->OnDateTimeChange(), true);
 }
@@ -416,6 +419,7 @@ HWTEST_F(ReminderRequestTest, OnDateTimeChange_00100, Function | SmallTest | Lev
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00100, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->OnSnooze(), true);
 }
@@ -440,6 +444,7 @@ HWTEST_F(ReminderRequestTest, OnTerminate_00100, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, ShouldShowImmediately_00100, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->ShouldShowImmediately(), true);
 }
@@ -553,6 +558,7 @@ HWTEST_F(ReminderRequestTest, Marshalling_00100, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->CanShow(), true);
 }
@@ -649,6 +655,22 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00001, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: HandleTimeZoneChange_00002
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetExpired(false);
+    uint64_t oriTriggerTime = 10;
+    uint64_t optTriggerTime = 20;
+    MockNowInstantMilli(false);
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+}
+
+/**
  * @tc.name: OnSnooze_00001
  * @tc.desc: Test OnSnooze parameters.
  * @tc.type: FUNC
@@ -656,6 +678,7 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00001, Function | SmallTest | 
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00001, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->OnShow(false, false, true);
     EXPECT_EQ(rrc->OnSnooze(), true);
@@ -669,6 +692,7 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00002, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->UpdateNextReminder(false);
     EXPECT_EQ(rrc->OnSnooze(), true);
@@ -682,6 +706,7 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00002, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00003, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetTimeInterval(100);
     EXPECT_EQ(rrc->OnSnooze(), true);
@@ -713,6 +738,7 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00004, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00005, Function | SmallTest | Level1)
 {
+    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     bool deSet = true;
     uint8_t newState = 1;
@@ -1133,6 +1159,24 @@ HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: RecoverInt64FromDb_00003
+ * @tc.desc: Test RecoverInt64FromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+        std::make_shared<NativeRdb::AbsSharedResultSet>();
+    std::string columnName = "this is columnName";
+
+    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType(3);
+    int64_t result2 = rrc->RecoverInt64FromDb(resultSet, columnName, columnType);
+    EXPECT_EQ(result2, 0);
+}
+
+/**
  * @tc.name: RecoverWantAgent_00002
  * @tc.desc: Test RecoverWantAgent parameters.
  * @tc.type: FUNC
@@ -1233,6 +1277,24 @@ HWTEST_F(ReminderRequestTest, OnClose_00100, Function | SmallTest | Level1)
     rrc->SetState(deSet, newState, function);
     uint8_t result1 = rrc->GetState();
     EXPECT_EQ(result1, 4);
+    rrc->OnClose(true);
+}
+
+/**
+ * @tc.name: OnClose_00200
+ * @tc.desc: Test OnClose parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5QVYA
+ */
+HWTEST_F(ReminderRequestTest, OnClose_00200, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    bool deSet = true;
+    uint8_t newState = 2;
+    std::string function = "this is function";
+    rrc->SetState(deSet, newState, function);
+    uint8_t result1 = rrc->GetState();
+    EXPECT_EQ(result1, 2);
     rrc->OnClose(true);
 }
 

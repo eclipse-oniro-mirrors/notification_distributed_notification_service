@@ -204,6 +204,9 @@ HWTEST_F(NotificationRequestTest, AddActionButton_0100, Level1)
     notificationRequest.AddActionButton(actionButton3);
     std::vector<std::shared_ptr<NotificationActionButton>> result =
         notificationRequest.GetActionButtons();
+    std::shared_ptr<NotificationActionButton> actionButton4 =
+        NotificationActionButton::Create(nullptr, "title4", wantAgent);
+    notificationRequest.AddActionButton(actionButton4);
     notificationRequest.ClearActionButtons();
     EXPECT_EQ(result.size(), 3);
 }

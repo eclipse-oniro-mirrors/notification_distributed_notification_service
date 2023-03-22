@@ -231,6 +231,7 @@ HWTEST_F(NotificationContentTest, NotificationContentReadFromParcel_0600, Level1
     Parcel parcel;
     auto result1 = notificationContent.ReadFromParcel(parcel);
     EXPECT_EQ(result1, true);
+    notificationContent.Unmarshalling(parcel);
 }
 
 /**
@@ -282,6 +283,27 @@ HWTEST_F(NotificationContentTest, FromJson_00003, Function | SmallTest | Level1)
         {"dcaps", {"AT_CAP", "ST_CAP"}}};
     notificationContent.FromJson(jsonObject);
     EXPECT_EQ(jsonObject.is_object(), true);
+}
+
+/**
+ * @tc.name: ToJson_00001
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationContentTest, ToJson_00001, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationMediaContent> mediaContent = nullptr;
+    NotificationContent notificationContent(mediaContent);
+    std::shared_ptr<NotificationBasicContent> result = notificationContent.GetNotificationContent();
+    EXPECT_EQ(result, nullptr);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"processName", "process6"}, {"APL", 1},
+        {"version", 2}, {"tokenId", 685266937},
+        {"tokenAttr", 0},
+        {"dcaps", {"AT_CAP", "ST_CAP"}}};
+    bool result2 = notificationContent.ToJson(jsonObject);
+    EXPECT_EQ(result2, false);
 }
 }
 }
