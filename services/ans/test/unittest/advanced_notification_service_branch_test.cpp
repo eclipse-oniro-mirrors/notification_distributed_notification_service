@@ -1,0 +1,1055 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <chrono>
+#include <functional>
+#include <thread>
+
+#include "gtest/gtest.h"
+
+#define private public
+
+#include "advanced_notification_service.h"
+#include "ans_const_define.h"
+#include "ans_inner_errors.h"
+#include "ans_log_wrapper.h"
+#include "ans_ut_constant.h"
+#include "iremote_object.h"
+#include "want_agent_info.h"
+#include "want_agent_helper.h"
+#include "want_params.h"
+#include "mock_ipc_skeleton.h"
+#include "notification_preferences.h"
+#include "notification_constant.h"
+#include "notification_subscriber.h"
+
+extern void MockVerifyNativeToken(bool mockRet);
+extern void MockVerifyCallerPermission(bool mockRet);
+extern void MockVerifyShellToken(bool mockRet);
+
+using namespace testing::ext;
+using namespace OHOS::Media;
+using namespace OHOS::Security::AccessToken;
+
+namespace OHOS {
+namespace Notification {
+
+extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
+class AnsBranchTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+private:
+    void TestAddSlot(NotificationConstant::SlotType type);
+
+private:
+    static sptr<AdvancedNotificationService> advancedNotificationService_;
+};
+
+sptr<AdvancedNotificationService> AnsBranchTest::advancedNotificationService_ = nullptr;
+
+void AnsBranchTest::SetUpTestCase() {}
+
+void AnsBranchTest::TearDownTestCase() {}
+
+void AnsBranchTest::SetUp() {}
+
+void AnsBranchTest::TearDown()
+{
+    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+    advancedNotificationService_ = nullptr;
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
+inline void SleepForFC()
+{
+    // For ANS Flow Control
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+class TestAnsSubscriber : public NotificationSubscriber {
+public:
+    void OnConnected() override
+    {}
+    void OnDisconnected() override
+    {}
+    void OnDied() override
+    {}
+    void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+    {}
+    void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
+    {}
+    void OnEnabledNotificationChanged(
+        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
+    {}
+    void OnCanceled(const std::shared_ptr<Notification> &request) override
+    {}
+    void OnCanceled(const std::shared_ptr<Notification> &request,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
+    {}
+    void OnConsumed(const std::shared_ptr<Notification> &request) override
+    {}
+    void OnConsumed(const std::shared_ptr<Notification> &request,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+    {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
+};
+
+void AnsBranchTest::TestAddSlot(NotificationConstant::SlotType type)
+{
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot(type);
+    slots.push_back(slot);
+    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_221
+ * @tc.name      : CheckPermission_1000
+ * @tc.desc      : Test permission function result is false.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_221, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockVerifyCallerPermission(false);
+    std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
+    bool result = advancedNotificationService_->CheckPermission(permission);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_222000
+ * @tc.name      : PrepareNotificationRequest_1000
+ * @tc.desc      : Test PrepareNotificationRequest function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_222000, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+
+    req->SetIsAgentNotification(true);
+    MockVerifyNativeToken(false);
+    MockVerifyCallerPermission(false);
+    std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
+    bool result = advancedNotificationService_->CheckPermission(permission);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_223000
+ * @tc.name      : PrepareNotificationRequest_2000
+ * @tc.desc      : Test PrepareNotificationRequest function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_223000, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+
+    req->SetIsAgentNotification(true);
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+    EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_224000
+ * @tc.name      : Publish_1000
+ * @tc.desc      : Test Publish function req is false.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_224000, Function | SmallTest | Level1)
+{
+    std::string label = "publish's label";
+    EXPECT_EQ(advancedNotificationService_->Publish(label, nullptr), ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_225000
+ * @tc.name      : CancelAsBundle_1000
+ * @tc.desc      : Test CancelAsBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_225000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 1;
+    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(
+        notificationId, representativeBundle, userId), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_226000
+ * @tc.name      : CancelAsBundle_2000
+ * @tc.desc      : Test CancelAsBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_226000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 1;
+    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(
+        notificationId, representativeBundle, userId), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_227000
+ * @tc.name      : AddSlots_2000
+ * @tc.desc      : Test AddSlots function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_227000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::OTHER);
+    sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::OTHER);
+    slots.push_back(slot0);
+    slots.push_back(slot1);
+    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_228000
+ * @tc.name      : Delete_1000
+ * @tc.desc      : Test Delete function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_228000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    const std::string key = "key";
+    EXPECT_EQ(advancedNotificationService_->Delete(
+        key, NotificationConstant::CANCEL_REASON_DELETE), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_229000
+ * @tc.name      : DeleteByBundle_1000
+ * @tc.desc      : Test DeleteByBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_229000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    EXPECT_EQ(advancedNotificationService_->DeleteByBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID)), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_230000
+ * @tc.name      : DeleteByBundle_2000
+ * @tc.desc      : Test DeleteByBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_230000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    EXPECT_EQ(advancedNotificationService_->DeleteByBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID)), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_231000
+ * @tc.name      : DeleteAll_1000
+ * @tc.desc      : Test DeleteAll function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_231000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    EXPECT_EQ(advancedNotificationService_->DeleteAll(), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_232000
+ * @tc.name      : GetSlotsByBundle_1000
+ * @tc.desc      : Test GetSlotsByBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_232000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    EXPECT_EQ(advancedNotificationService_->GetSlotsByBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_233000
+ * @tc.name      : GetSlotsByBundle_2000
+ * @tc.desc      : Test GetSlotsByBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_233000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    EXPECT_EQ(advancedNotificationService_->GetSlotsByBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_234000
+ * @tc.name      : UpdateSlots_1000
+ * @tc.desc      : Test UpdateSlots function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_234000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::OTHER);
+    slots.push_back(slot0);
+    EXPECT_EQ(advancedNotificationService_->UpdateSlots(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_235000
+ * @tc.name      : UpdateSlots_1000
+ * @tc.desc      : Test UpdateSlots function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_235000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::OTHER);
+    slots.push_back(slot0);
+    EXPECT_EQ(advancedNotificationService_->UpdateSlots(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_236000
+ * @tc.name      : SetShowBadgeEnabledForBundle_1000
+ * @tc.desc      : Test SetShowBadgeEnabledForBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_236000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    EXPECT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), true), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_237000
+ * @tc.name      : GetShowBadgeEnabledForBundle_1000
+ * @tc.desc      : Test GetShowBadgeEnabledForBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_237000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    bool allow = false;
+    EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_238000
+ * @tc.name      : GetShowBadgeEnabledForBundle_2000
+ * @tc.desc      : Test GetShowBadgeEnabledForBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_238000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    bool allow = false;
+    EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_239000
+ * @tc.name      : Subscribe_1000
+ * @tc.desc      : Test Subscribe function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_239000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_240000
+ * @tc.name      : Subscribe_1000
+ * @tc.desc      : Test Subscribe function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_240000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_241000
+ * @tc.name      : Unsubscribe_1000
+ * @tc.desc      : Test Unsubscribe function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    EXPECT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_242000
+ * @tc.name      : GetAllActiveNotifications_1000
+ * @tc.desc      : Test GetAllActiveNotifications function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_242000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    std::vector<sptr<Notification>> allNotifications;
+    EXPECT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_243000
+ * @tc.name      : GetSpecialActiveNotifications_1000
+ * @tc.desc      : Test GetSpecialActiveNotifications function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_243000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    std::vector<std::string> keys;
+    std::vector<sptr<Notification>> specialActiveNotifications;
+    EXPECT_EQ(advancedNotificationService_->GetSpecialActiveNotifications(
+        keys, specialActiveNotifications), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_244000
+ * @tc.name      : GetSpecialActiveNotifications_2000
+ * @tc.desc      : Test GetSpecialActiveNotifications function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_244000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    std::vector<std::string> keys;
+    std::vector<sptr<Notification>> specialActiveNotifications;
+    EXPECT_EQ(advancedNotificationService_->GetSpecialActiveNotifications(
+        keys, specialActiveNotifications), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_245000
+ * @tc.name      : SetNotificationsEnabledForAllBundles_2000
+ * @tc.desc      : Test SetNotificationsEnabledForAllBundles function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_245000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForAllBundles(
+        std::string(), true), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_246000
+ * @tc.name      : SetNotificationsEnabledForAllBundles_1000
+ * @tc.desc      : Test SetNotificationsEnabledForAllBundles function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_246000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForAllBundles(
+        std::string(), true), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_247000
+ * @tc.name      : SetNotificationsEnabledForSpecialBundle_1000
+ * @tc.desc      : Test SetNotificationsEnabledForSpecialBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_247000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
+        std::string(), new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false),
+            ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_248000
+ * @tc.name      : IsAllowedNotify_1000
+ * @tc.desc      : Test IsAllowedNotify function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_248000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    bool allowed = false;
+    EXPECT_EQ(advancedNotificationService_->IsAllowedNotify(allowed), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_249000
+ * @tc.name      : IsAllowedNotify_2000
+ * @tc.desc      : Test IsAllowedNotify function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_249000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    bool allowed = false;
+    EXPECT_EQ(advancedNotificationService_->IsAllowedNotify(allowed), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_250000
+ * @tc.name      : GetAppTargetBundle_1000
+ * @tc.desc      : Test GetAppTargetBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_250000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    bundleOption->SetBundleName("test");
+    EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_251000
+ * @tc.name      : IsSpecialBundleAllowedNotify_1000
+ * @tc.desc      : Test IsSpecialBundleAllowedNotify function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_251000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    bool allowed = true;
+    EXPECT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), allowed), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_252000
+ * @tc.name      : IsSpecialBundleAllowedNotify_2000
+ * @tc.desc      : Test IsSpecialBundleAllowedNotify function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_252000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    bool allowed = true;
+    EXPECT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), allowed), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_254000
+ * @tc.name      : IsSpecialBundleAllowedNotify_4000
+ * @tc.desc      : Test IsSpecialBundleAllowedNotify function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_254000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(true);
+
+    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    bool allowed = true;
+    EXPECT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), allowed), ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_255000
+ * @tc.name      : RemoveNotification_1000
+ * @tc.desc      : Test RemoveNotification function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_255000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    int32_t notificationId = 1;
+    std::string label = "testRemove";
+    auto result = advancedNotificationService_->RemoveNotification(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
+        notificationId, label, NotificationConstant::CANCEL_REASON_DELETE);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_256000
+ * @tc.name      : RemoveAllNotifications_1000
+ * @tc.desc      : Test RemoveAllNotifications function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_256000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->RemoveAllNotifications(bundleOption), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_257000
+ * @tc.name      : GetSlotNumAsBundle_1000
+ * @tc.desc      : Test GetSlotNumAsBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_257000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    uint64_t num = 1;
+    EXPECT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_258000
+ * @tc.name      : GetSlotNumAsBundle_2000
+ * @tc.desc      : Test GetSlotNumAsBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_258000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    uint64_t num = 1;
+    EXPECT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_259000
+ * @tc.name      : RemoveGroupByBundle_2000
+ * @tc.desc      : Test RemoveGroupByBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_259000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    std::string groupName = "group";
+    EXPECT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_260000
+ * @tc.name      : SetDoNotDisturbDate_1000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_260000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    sptr<NotificationDoNotDisturbDate> date =
+        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_261000
+ * @tc.name      : SetDoNotDisturbDate_2000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_261000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    sptr<NotificationDoNotDisturbDate> date =
+        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_262000
+ * @tc.name      : DoesSupportDoNotDisturbMode_1000
+ * @tc.desc      : Test DoesSupportDoNotDisturbMode function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_262000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    bool doesSupport = true;
+    EXPECT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_263000
+ * @tc.name      : DoesSupportDoNotDisturbMode_2000
+ * @tc.desc      : Test DoesSupportDoNotDisturbMode function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_263000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    bool doesSupport = true;
+    EXPECT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_264000
+ * @tc.name      : EnableDistributed_1000
+ * @tc.desc      : Test EnableDistributed function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_264000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    bool enabled = true;
+    sptr<NotificationBundleOption> bundleOption =
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->EnableDistributed(enabled), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_284000
+ * @tc.name      : EnableDistributed_2000
+ * @tc.desc      : Test EnableDistributed function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_284000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    bool enabled = true;
+    sptr<NotificationBundleOption> bundleOption =
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->EnableDistributed(enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(
+        bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(
+        bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_265000
+ * @tc.name      : GetDeviceRemindType_1000
+ * @tc.desc      : Test GetDeviceRemindType function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_265000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_266000
+ * @tc.name      : GetDeviceRemindType_2000
+ * @tc.desc      : Test GetDeviceRemindType function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_266000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_267000
+ * @tc.name      : IsSpecialUserAllowedNotify_1000
+ * @tc.desc      : Test IsSpecialUserAllowedNotify function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_267000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    int32_t userId = 3;
+    bool allowed = true;
+    bool enable = true;
+    EXPECT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(
+        userId, allowed), (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(
+        userId, enable), (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_267100
+ * @tc.name      : IsSpecialUserAllowedNotify_1000
+ * @tc.desc      : Test IsSpecialUserAllowedNotify function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_267100, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    int32_t userId = 3;
+    bool allowed = true;
+    bool enable = true;
+    EXPECT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(
+        userId, allowed), (int)ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(
+        userId, enable), (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_268000
+ * @tc.name      : SetDoNotDisturbDate_1000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_268000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    int32_t userId = 3;
+    sptr<NotificationDoNotDisturbDate> date = nullptr;
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_269000
+ * @tc.name      : SetDoNotDisturbDate_2000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_269000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    int32_t userId = 3;
+    sptr<NotificationDoNotDisturbDate> date = nullptr;
+    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_270000
+ * @tc.name      : SetEnabledForBundleSlot_1000
+ * @tc.desc      : Test SetEnabledForBundleSlot function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_270000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    bool enabled = false;
+    auto result = advancedNotificationService_->SetEnabledForBundleSlot(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
+            NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    auto result1 = advancedNotificationService_->GetEnabledForBundleSlot(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
+            NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled);
+    EXPECT_EQ(result1, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_271000
+ * @tc.name      : SetEnabledForBundleSlot_1000
+ * @tc.desc      : Test SetEnabledForBundleSlot function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_271000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockVerifyShellToken(false);
+
+    std::string cmd = "CMD";
+    std::string bundle = "Bundle";
+    int32_t userId = 4;
+    std::vector<std::string> dumpInfo;
+    EXPECT_EQ(advancedNotificationService_->ShellDump(
+        cmd, bundle, userId, dumpInfo), (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_272000
+ * @tc.name      : SetSyncNotificationEnabledWithoutApp_1000
+ * @tc.desc      : Test SetSyncNotificationEnabledWithoutApp function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_272000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+
+    int32_t userId = 3;
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(
+        userId, enabled), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(
+        userId, enabled), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_273000
+ * @tc.name      : SetSyncNotificationEnabledWithoutApp_2000
+ * @tc.desc      : Test SetSyncNotificationEnabledWithoutApp function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_273000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyCallerPermission(false);
+
+    int32_t userId = 3;
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(
+        userId, enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(
+        userId, enabled), ERR_ANS_PERMISSION_DENIED);
+}
+}  // namespace Notification
+}  // namespace OHOS
