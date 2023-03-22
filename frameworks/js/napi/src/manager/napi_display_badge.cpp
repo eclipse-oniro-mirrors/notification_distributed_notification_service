@@ -251,6 +251,7 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
         ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        return Common::NapiGetNull(env);
     }
 
     if (asynccallbackinfo->info.isCallback) {
