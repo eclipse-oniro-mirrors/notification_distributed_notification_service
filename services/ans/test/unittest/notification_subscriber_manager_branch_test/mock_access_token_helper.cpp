@@ -18,6 +18,7 @@
 namespace {
     bool g_mockVerifyNativeTokenRet = true;
     bool g_mockVerifyCallerPermissionRet = true;
+    bool g_mockVerifyShellTokenRet = true;
 }
 
 void MockVerifyNativeToken(bool mockRet)
@@ -28,6 +29,11 @@ void MockVerifyNativeToken(bool mockRet)
 void MockVerifyCallerPermission(bool mockRet)
 {
     g_mockVerifyCallerPermissionRet = mockRet;
+}
+
+void MockVerifyShellToken(bool mockRet)
+{
+    g_mockVerifyShellTokenRet = mockRet;
 }
 
 using namespace OHOS::Security::AccessToken;
@@ -43,6 +49,11 @@ bool AccessTokenHelper::VerifyCallerPermission(
     const AccessTokenID &tokenCaller, const std::string &permission)
 {
     return g_mockVerifyCallerPermissionRet;
+}
+
+bool AccessTokenHelper::VerifyShellToken(const AccessTokenID &callerToken)
+{
+    return g_mockVerifyShellTokenRet;
 }
 }  // namespace Notification
 }  // namespace OHOS
