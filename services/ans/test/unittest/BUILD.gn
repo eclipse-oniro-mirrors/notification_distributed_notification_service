@@ -425,16 +425,20 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "${services_path}/ans/test/unittest/mock/include",
   ]
 
+  defines = []
+
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_branch_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
+    "mock/mock_advanced_notification_service.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
   ]
 
@@ -444,6 +448,12 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
   ]
+
+  if (distributed_notification_supported) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
 
   external_deps = [
     "ability_base:want",

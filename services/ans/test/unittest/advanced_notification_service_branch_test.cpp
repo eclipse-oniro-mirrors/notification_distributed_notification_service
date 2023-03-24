@@ -38,6 +38,8 @@
 extern void MockVerifyNativeToken(bool mockRet);
 extern void MockVerifyCallerPermission(bool mockRet);
 extern void MockVerifyShellToken(bool mockRet);
+extern void MockGetDistributedEnableInApplicationInfo(bool mockRet, uint8_t mockCase = 0);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -1050,6 +1052,84 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_273000, Function | SmallTest | Level1)
         userId, enabled), ERR_ANS_PERMISSION_DENIED);
     EXPECT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(
         userId, enabled), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_274000
+ * @tc.name      : EnableDistributedByBundle_3000
+ * @tc.desc      : Test EnableDistributedByBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_274000, Function | SmallTest | Level1)
+{
+    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
+    MockGetDistributedEnableInApplicationInfo(false, 2);
+
+    bool enabled = true;
+    sptr<NotificationBundleOption> bundleOption =
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(
+        bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_275000
+ * @tc.name      : EnableDistributedSelf_2000
+ * @tc.desc      : Test EnableDistributedSelf function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_275000, Function | SmallTest | Level1)
+{
+    MockGetDistributedEnableInApplicationInfo(true, 2);
+    bool enabled = true;
+    EXPECT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_276000
+ * @tc.name      : IsDistributedEnableByBundle_3000
+ * @tc.desc      : Test IsDistributedEnableByBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(true);
+    MockGetDistributedEnableInApplicationInfo(true, 2);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
+        TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bool enabled = false;
+    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_277000
+ * @tc.name      : DoDistributedPublish_3000
+ * @tc.desc      : Test DoDistributedPublish function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_277000, Function | SmallTest | Level1)
+{
+    MockGetDistributedEnableInApplicationInfo(false, 2);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
+        TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    std::shared_ptr<NotificationRecord> record = nullptr;
+    EXPECT_EQ(advancedNotificationService_->DoDistributedPublish(bundleOption, record), ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_278000
+ * @tc.name      : GetDistributedEnableInApplicationInfo_3000
+ * @tc.desc      : Test GetDistributedEnableInApplicationInfo function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
+{
+    MockGetOsAccountLocalIdFromUid(false, 3);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
+        TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bool enabled = false;;
+    EXPECT_EQ(advancedNotificationService_->GetDistributedEnableInApplicationInfo(
+        bundleOption, enabled), ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS
