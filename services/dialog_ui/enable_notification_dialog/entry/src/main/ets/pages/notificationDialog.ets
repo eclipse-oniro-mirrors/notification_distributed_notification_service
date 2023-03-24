@@ -22,12 +22,6 @@ class Proxy extends rpc.RemoteProxy {
 @Entry
 @Component
 struct NotificationDialog {
-  @State private want: any = undefined
-  @State private uid: any = undefined
-  @State private style: any = {}
-  @State popWidth: any = undefined
-  @State popHeight: any = undefined
-  @State bundleName: any = undefined
   controller: CustomDialogController
   private TAG = "[NotificationDialog_Service]"
 
@@ -104,7 +98,7 @@ struct NotificationDialog {
   async privacyChose(flag) {
     let enable = flag;
     let bundleOption = {
-      bundle: globalThis.bundleName
+      bundle: globalThis.abilityWant.parameters['from']
     }
     console.info("before enableNotification")
     await notification.enableNotification(bundleOption, enable, (err) => {
@@ -118,8 +112,5 @@ struct NotificationDialog {
 
   aboutToAppear() {
     console.log(this.TAG, "dialog page appears")
-    this.want = globalThis.abilityWant
-    this.style = globalThis.style
-    globalThis.bundleName = globalThis.abilityWant.parameters['from']
   }
 }
