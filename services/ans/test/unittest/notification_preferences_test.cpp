@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "notification_preferences.h"
+#include "advanced_notification_service.h"
 #undef private
 #undef protected
 
@@ -39,6 +40,9 @@ public:
     static sptr<NotificationBundleOption> bundleOption_;
     static sptr<NotificationBundleOption> noExsitbundleOption_;
     static sptr<NotificationBundleOption> bundleEmptyOption_;
+
+protected:
+    static sptr<AdvancedNotificationService> advancedNotificationService_;
 };
 
 sptr<NotificationBundleOption> NotificationPreferencesTest::bundleOption_ =
@@ -47,6 +51,8 @@ sptr<NotificationBundleOption> NotificationPreferencesTest::noExsitbundleOption_
     new NotificationBundleOption(std::string("notExsitBundleName"), NON_SYSTEM_APP_UID);
 sptr<NotificationBundleOption> NotificationPreferencesTest::bundleEmptyOption_ =
     new NotificationBundleOption(std::string(), NON_SYSTEM_APP_UID);
+sptr<AdvancedNotificationService> NotificationPreferencesTest::advancedNotificationService_ =
+    AdvancedNotificationService::GetInstance();
 
 void NotificationPreferencesTest::TearDown()
 {
@@ -229,6 +235,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00100, Functio
 {
     TestAddNotificationSlot();
     EXPECT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationForBundle(bundleOption_), (int)ERR_OK);
+    advancedNotificationService_->OnBundleRemoved(bundleOption_);
 }
 
 /**
@@ -489,6 +496,8 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | 
     EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlots(noExsitbundleOption_, slotsResult),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
     EXPECT_EQ((int)slotsResult.size(), 0);
+    ErrCode result = advancedNotificationService_->GetSlots(slotsResult);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -524,6 +533,19 @@ HWTEST_F(NotificationPreferencesTest, SetShowBadge_00200, Function | SmallTest |
 {
     EXPECT_EQ(
         (int)NotificationPreferences::GetInstance().SetShowBadge(bundleEmptyOption_, true), (int)ERR_ANS_INVALID_PARAM);
+    auto result = bundleEmptyOption_->GetBundleName();
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.number    : SetShowBadge_00300
+ * @tc.name      :
+ * @tc.desc      : Set bundle show badge into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(NotificationPreferencesTest, SetShowBadge_00300, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(
+        (int)NotificationPreferences::GetInstance().SetShowBadge(nullptr, true), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -658,6 +680,18 @@ HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00200, Function | SmallT
 {
     int num = 1;
     EXPECT_EQ((int)NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleEmptyOption_, num),
+        (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : SetTotalBadgeNums_00300
+ * @tc.name      :
+ * @tc.desc      : Set total badge nums into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00300, Function | SmallTest | Level1)
+{
+    int num = 1;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().SetTotalBadgeNums(nullptr, num),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1296,6 +1330,21 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00400, Function | S
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : GetTemplateSupported_00100
+ * @tc.name      : GetTemplateSupported
+ * @tc.desc      : Test GetTemplateSupported function
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, GetTemplateSupported_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferences::GetInstance().OnDistributedKvStoreDeathRecipient();
+    std::string templateName = "";
+    bool support = true;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetTemplateSupported(templateName, support),
+        (int)ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS
