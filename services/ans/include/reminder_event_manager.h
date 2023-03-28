@@ -47,6 +47,16 @@ private:
     std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
 };
 
+class ReminderEventCustomSubscriber : public EventFwk::CommonEventSubscriber {
+public:
+    ReminderEventCustomSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo,
+        std::shared_ptr<ReminderDataManager> &reminderDataManager);
+    virtual void OnReceiveEvent(const EventFwk::CommonEventData &data);
+
+private:
+    std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
+};
+
 class SystemAbilityStatusChangeListener : public OHOS::SystemAbilityStatusChangeStub {
 public:
     explicit SystemAbilityStatusChangeListener(std::shared_ptr<ReminderDataManager> &reminderDataManager);
