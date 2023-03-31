@@ -29,7 +29,7 @@ void MockGetDistributedEnableInApplicationInfo(bool mockRet, uint8_t mockCase = 
             g_mockAppInfoEnableRet = true;
             break;
         }
-        case 2: { // mock for appInfoEnable
+        default:{
             g_mockAppInfoEnableRet = false;
             break;
         }
