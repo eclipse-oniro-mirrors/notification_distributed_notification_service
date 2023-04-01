@@ -30,13 +30,6 @@ public:
      * @brief Called back when a notification is canceled.
      *
      * @param request Indicates the canceled NotificationRequest object.
-     */
-    virtual void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request) override;
-
-    /**
-     * @brief Called back when a notification is canceled.
-     *
-     * @param request Indicates the canceled NotificationRequest object.
      * @param sortingMap Indicates the sorting map used by the current subscriber to obtain notification ranking
      * information.
      * @param deleteReason Indicates the reason for the deletion. For details, see NotificationConstant.

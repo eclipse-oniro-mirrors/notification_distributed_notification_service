@@ -34,13 +34,6 @@ public:
      * @brief Called back when a notification is canceled.
      *
      * @param request Indicates the canceled Notification object.
-     **/
-    virtual void OnCanceled(const std::shared_ptr<Notification> &request) = 0;
-
-    /**
-     * @brief Called back when a notification is canceled.
-     *
-     * @param request Indicates the canceled Notification object.
      * @param sortingMap Indicates the sorting map used by the current subscriber
      * to obtain notification ranking information.
      * @param deleteReason Indicates the reason for the deletion. For details, see NotificationConstant.
@@ -135,8 +128,6 @@ private:
 
         void OnConsumed(
             const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
-
-        void OnCanceled(const sptr<Notification> &notification) override;
 
         void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
             int32_t deleteReason) override;

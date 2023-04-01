@@ -351,7 +351,6 @@ void NotificationSubscriberManager::NotifyCanceledInner(
             IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
             IsSystemUser(sendUserId))) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
-            record->subscriber->OnCanceled(notification);
         }
     }
 }

@@ -428,11 +428,6 @@ void NotificationFuzzTestManager::RegisterNotificationSubscribeInfo()
 // RegisterNotificationSubscriber
 void NotificationFuzzTestManager::RegisterNotificationSubscriber()
 {
-    callFunctionMap_.emplace("NotificationSubscriberOnCanceledNotification", []() {
-        std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
-        temp->OnCanceled(GetParamNotification());
-    });
-
     callFunctionMap_.emplace("NotificationSubscriberOnCanceledNotificationNotificationSortingMapdeleteReason", []() {
         std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
         const std::shared_ptr<OHOS::Notification::Notification> request = GetParamNotification();
