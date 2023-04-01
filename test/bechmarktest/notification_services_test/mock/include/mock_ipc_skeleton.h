@@ -37,6 +37,8 @@ public:
 
     static pid_t GetCallingUid();
 
+    static uint32_t GetCallingTokenID();
+
     static std::string GetLocalDeviceID();
 
     static std::string GetCallingDeviceID();
@@ -56,6 +58,8 @@ public:
     static bool SetCallingIdentity(std::string &identity);
 
     static void SetCallingUid(pid_t uid);
+
+    static uint32_t SetCallingTokenID(pid_t tokenId);
 };
 } // namespace OHOS
 #endif // OHOS_MOCK_IPC_SKELETON_H

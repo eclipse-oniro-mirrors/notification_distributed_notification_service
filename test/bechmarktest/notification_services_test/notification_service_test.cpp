@@ -32,6 +32,8 @@ using namespace OHOS::Notification;
 using namespace OHOS::AbilityRuntime;
 
 namespace {
+const uint32_t TOKEN_ID = 0x08000000;
+
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
     void OnConnected() override
@@ -73,7 +75,9 @@ public:
     ~BenchmarkNotificationService() override = default;
 
     void SetUp(const ::benchmark::State &state) override
-    {}
+    {
+        IPCSkeleton::SetCallingTokenID(TOKEN_ID);
+    }
     void TearDown(const ::benchmark::State &state) override
     {}
  
@@ -155,6 +159,7 @@ BENCHMARK_F(BenchmarkNotificationService, SubscribeTestCase)(benchmark::State &s
  */
 BENCHMARK_F(BenchmarkNotificationService, PublishNotificationTestCase001)(benchmark::State &state)
 {
+    IPCSkeleton::SetCallingTokenID(0);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -184,6 +189,7 @@ BENCHMARK_F(BenchmarkNotificationService, PublishNotificationTestCase001)(benchm
  */
 BENCHMARK_F(BenchmarkNotificationService, CancelNotificationTestCase001)(benchmark::State &state)
 {
+    IPCSkeleton::SetCallingTokenID(0);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(0);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
