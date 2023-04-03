@@ -48,8 +48,6 @@ private:
         void OnEnabledNotificationChanged(
             const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
         {}
-        void OnCanceled(const std::shared_ptr<Notification> &request) override
-        {}
         void OnCanceled(const std::shared_ptr<Notification> &request,
             const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
         {}

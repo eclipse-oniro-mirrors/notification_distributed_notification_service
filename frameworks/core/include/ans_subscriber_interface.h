@@ -66,13 +66,6 @@ public:
      * @brief The callback function on a notification canceled.
      *
      * @param notification Indicates the canceled notification.
-     */
-    virtual void OnCanceled(const sptr<Notification> &notification) = 0;
-
-    /**
-     * @brief The callback function on a notification canceled.
-     *
-     * @param notification Indicates the canceled notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      * @param deleteReason Indicates the delete reason.
      */
@@ -106,7 +99,6 @@ protected:
         ON_DISCONNECTED,
         ON_CONSUMED,
         ON_CONSUMED_MAP,
-        ON_CANCELED,
         ON_CANCELED_MAP,
         ON_UPDATED,
         ON_DND_DATE_CHANGED,

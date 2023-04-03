@@ -44,8 +44,6 @@ namespace OHOS {
         sptr<Notification::NotificationSortingMap> notificationMap = new Notification::NotificationSortingMap();
         ansSubscriberProxy.OnConsumed(notification, notificationMap);
         // test OnCanceled function
-        ansSubscriberProxy.OnCanceled(notification);
-        // test OnCanceled function
         int32_t deleteReason = 1;
         ansSubscriberProxy.OnCanceled(notification, notificationMap, deleteReason);
         // test OnCanceled function

@@ -58,13 +58,6 @@ public:
      * @brief The callback function on a notification canceled.
      *
      * @param notification Indicates the canceled notification.
-     */
-    void OnCanceled(const sptr<Notification> &notification) override;
-
-    /**
-     * @brief The callback function on a notification canceled.
-     *
-     * @param notification Indicates the canceled notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      * @param deleteReason Indicates the delete reason.
      */

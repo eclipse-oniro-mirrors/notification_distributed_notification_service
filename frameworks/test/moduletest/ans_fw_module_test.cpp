@@ -311,12 +311,6 @@ public:
         std::unique_lock<std::mutex> lck(mtx_);
         events_.push_back(event);
     }
-    void OnCanceled(const std::shared_ptr<Notification> &request) override
-    {
-        std::shared_ptr<OnOnCanceledEvent> event = std::make_shared<OnOnCanceledEvent>(request);
-        std::unique_lock<std::mutex> lck(mtx_);
-        events_.push_back(event);
-    }
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {

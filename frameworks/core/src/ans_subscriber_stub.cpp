@@ -34,8 +34,6 @@ AnsSubscriberStub::AnsSubscriberStub()
         std::bind(&AnsSubscriberStub::HandleOnConsumed, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_CONSUMED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnConsumedMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_CANCELED,
-        std::bind(&AnsSubscriberStub::HandleOnCanceled, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_CANCELED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnCanceledMap, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(
@@ -128,18 +126,6 @@ ErrCode AnsSubscriberStub::HandleOnConsumedMap(MessageParcel &data, MessageParce
     return ERR_OK;
 }
 
-ErrCode AnsSubscriberStub::HandleOnCanceled(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<Notification> notification = data.ReadParcelable<Notification>();
-    if (!notification) {
-        ANS_LOGW("[HandleOnCanceled] fail: notification ReadParcelable failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    OnCanceled(notification);
-    return ERR_OK;
-}
-
 ErrCode AnsSubscriberStub::HandleOnCanceledMap(MessageParcel &data, MessageParcel &reply)
 {
     sptr<Notification> notification = data.ReadParcelable<Notification>();
@@ -218,9 +204,6 @@ void AnsSubscriberStub::OnConsumed(const sptr<Notification> &notification)
 
 void AnsSubscriberStub::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
-{}
-
-void AnsSubscriberStub::OnCanceled(const sptr<Notification> &notification)
 {}
 
 void AnsSubscriberStub::OnCanceled(
