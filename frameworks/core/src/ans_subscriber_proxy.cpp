@@ -154,33 +154,6 @@ void AnsSubscriberProxy::OnConsumed(
     }
 }
 
-void AnsSubscriberProxy::OnCanceled(const sptr<Notification> &notification)
-{
-    if (notification == nullptr) {
-        ANS_LOGE("[OnCanceled] fail: notification is nullptr.");
-        return;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
-        ANS_LOGE("[OnCanceled] fail: write interface token failed.");
-        return;
-    }
-
-    if (!data.WriteParcelable(notification)) {
-        ANS_LOGE("[OnCanceled] fail: write notification failed.");
-        return;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_CANCELED, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[OnCanceled] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
-        return;
-    }
-}
-
 void AnsSubscriberProxy::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {

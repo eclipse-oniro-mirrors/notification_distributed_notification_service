@@ -73,12 +73,6 @@ void NotificationSubscriber::SubscriberImpl::OnConsumed(
         std::make_shared<Notification>(*notification), std::make_shared<NotificationSortingMap>(*notificationMap));
 }
 
-void NotificationSubscriber::SubscriberImpl::OnCanceled(const sptr<Notification> &notification)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    subscriber_.OnCanceled(std::make_shared<Notification>(*notification));
-}
-
 void NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {

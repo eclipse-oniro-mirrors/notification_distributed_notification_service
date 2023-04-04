@@ -285,64 +285,6 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumed_0700, Function | MediumTest | Le
 }
 
 /*
- * @tc.name: OnCanceled_0100
- * @tc.desc: test AnsSubscriberProxy's OnCanceled function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, OnCanceled_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, OnCanceled_0100, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
-    ASSERT_NE(nullptr, notification);
-    proxy->OnCanceled(notification);
-}
-
-/*
- * @tc.name: OnCanceled_0200
- * @tc.desc: test AnsSubscriberProxy's OnCanceled function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, OnCanceled_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, OnCanceled_0200, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
-    ASSERT_NE(nullptr, notification);
-    proxy->OnCanceled(notification);
-}
-
-/*
- * @tc.name: OnCanceled_0300
- * @tc.desc: test AnsSubscriberProxy's OnCanceled function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, OnCanceled_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, OnCanceled_0300, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    proxy->OnCanceled(nullptr);
-}
-
-/*
  * @tc.name: OnCanceled_0400
  * @tc.desc: test AnsSubscriberProxy's OnCanceled function
  * @tc.type: FUNC
