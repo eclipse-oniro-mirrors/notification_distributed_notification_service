@@ -97,12 +97,6 @@ public:
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
 
-    void OnCanceled(const std::shared_ptr<Notification> &request) override
-    {
-        GTEST_LOG_(INFO) << "ANS_Interface_MT::OnCanceled request : " << request->GetNotificationRequest().Dump();
-        OnCanceledReceived = true;
-    }
-
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
