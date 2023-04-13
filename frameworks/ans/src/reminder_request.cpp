@@ -95,6 +95,8 @@ const std::string ReminderRequest::SNOOZE_CONTENT = "snooze_content";
 const std::string ReminderRequest::EXPIRED_CONTENT = "expired_content";
 const std::string ReminderRequest::AGENT = "agent";
 const std::string ReminderRequest::MAX_SCREEN_AGENT = "maxScreen_agent";
+const std::string ReminderRequest::TAP_DISMISSED = "tapDismissed";
+const std::string ReminderRequest::AUTO_DELETED_TIME = "autoDeletedTime";
 
 std::string ReminderRequest::sqlOfAddColumns = "";
 std::vector<std::string> ReminderRequest::columns;
@@ -128,6 +130,8 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->wantAgentInfo_ = other.wantAgentInfo_;
     this->maxScreenWantAgentInfo_ = other.maxScreenWantAgentInfo_;
     this->actionButtonMap_ = other.actionButtonMap_;
+    this->tapDismissed_= other.tapDismissed_;
+    this->autoDeletedTime_ = other.autoDeletedTime_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -558,6 +562,15 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     std::string maxScreenWantAgent;
     resultSet->GetString(ReminderStore::GetColumnIndex(MAX_SCREEN_AGENT), maxScreenWantAgent);
     RecoverWantAgent(maxScreenWantAgent, 1);
+
+    // tapDismissed
+    std::string tapDismissed;
+    resultSet->GetString(ReminderStore::GetColumnIndex(TAP_DISMISSED), tapDismissed);
+    tapDismissed_ = tapDismissed == "true" ? true : false;
+
+    // autoDeletedTime
+    autoDeletedTime_ =
+        static_cast<int64_t>(RecoverInt64FromDb(resultSet, AUTO_DELETED_TIME, DbRecoveryType::LONG));
 }
 
 void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
@@ -847,6 +860,26 @@ bool ReminderRequest::IsSystemApp() const
     return isSystemApp_;
 }
 
+void ReminderRequest::SetTapDismissed(const bool tapDismissed)
+{
+    tapDismissed_ = tapDismissed;
+}
+
+bool ReminderRequest::IsTapDismissed() const
+{
+    return tapDismissed_;
+}
+
+void ReminderRequest::SetAutoDeletedTime(const int64_t autoDeletedTime)
+{
+    autoDeletedTime_ = autoDeletedTime;
+}
+
+int64_t ReminderRequest::GetAutoDeletedTime() const
+{
+    return autoDeletedTime_;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
@@ -956,8 +989,16 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write isSystemApp");
         return false;
     }
+    if (!parcel.WriteBool(tapDismissed_)) {
+        ANSR_LOGE("Failed to write tapDismissed");
+        return false;
+    }
 
     // write int
+    if (!parcel.WriteInt64(autoDeletedTime_)) {
+        ANSR_LOGE("Failed to write autoDeletedTime");
+        return false;
+    }
     if (!parcel.WriteInt32(reminderId_)) {
         ANSR_LOGE("Failed to write reminderId");
         return false;
@@ -1094,8 +1135,16 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         ANSR_LOGE("Failed to read isSystemApp");
         return false;
     }
+    if (!parcel.ReadBool(tapDismissed_)) {
+        ANSR_LOGE("Failed to read tapDismissed");
+        return false;
+    }
 
     // read int
+    if (!parcel.ReadInt64(autoDeletedTime_)) {
+        ANSR_LOGE("Failed to read autoDeletedTime");
+        return false;
+    }
     int32_t tempReminderId = -1;
     if (!parcel.ReadInt32(tempReminderId)) {
         ANSR_LOGE("Failed to read tempReminderId");
@@ -1509,6 +1558,8 @@ void ReminderRequest::UpdateNotificationCommon()
     notificationRequest_->SetShowDeliveryTime(true);
     notificationRequest_->SetTapDismissed(true);
     notificationRequest_->SetSlotType(slotType_);
+    notificationRequest_->SetTapDismissed(tapDismissed_);
+    notificationRequest_->SetAutoDeletedTime(autoDeletedTime_);
     auto notificationNormalContent = std::make_shared<NotificationNormalContent>();
     notificationNormalContent->SetText(displayContent_);
     notificationNormalContent->SetTitle(title_);
@@ -1700,6 +1751,8 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         values.PutString(MAX_SCREEN_AGENT, maxScreenWantAgentInfo->pkgName
             + ReminderRequest::SEP_WANT_AGENT + maxScreenWantAgentInfo->abilityName);
     }
+    values.PutString(TAP_DISMISSED, reminder->IsTapDismissed() ? "true" : "false");
+    values.PutLong(AUTO_DELETED_TIME, reminder->GetAutoDeletedTime());
 }
 
 void ReminderRequest::InitDbColumns()
@@ -1732,6 +1785,8 @@ void ReminderRequest::InitDbColumns()
     AddColumn(EXPIRED_CONTENT, "TEXT", false);
     AddColumn(AGENT, "TEXT", false);
     AddColumn(MAX_SCREEN_AGENT, "TEXT", false);
+    AddColumn(TAP_DISMISSED, "TEXT", false);
+    AddColumn(AUTO_DELETED_TIME, "BIGINT", false);
 }
 
 void ReminderRequest::AddColumn(

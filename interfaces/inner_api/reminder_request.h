@@ -579,6 +579,34 @@ public:
     virtual bool SetNextTriggerTime();
 
     /**
+     * @brief Sets tapDismissed.
+     *
+     * @param tapDismissed Indicates tapDismissed.
+     */
+    void SetTapDismissed(const bool tapDismissed);
+
+    /**
+     * @brief Gets tapDismissed.
+     *
+     * @return True if tapDismissed.
+     */
+    bool IsTapDismissed() const;
+
+    /**
+     * @brief Sets autoDeletedTime.
+     *
+     * @param autoDeletedTime Indicates autoDeletedTime.
+     */
+    void SetAutoDeletedTime(const int64_t autoDeletedTime);
+
+    /**
+     * @brief Gets autoDeletedTime.
+     *
+     * @return AutoDeletedTime.
+     */
+    int64_t GetAutoDeletedTime() const;
+
+    /**
      * @brief Update notification attributes.
      *
      * Some attributes need to be updated after the reminder published or before the notification publish.
@@ -671,6 +699,8 @@ public:
     static const std::string EXPIRED_CONTENT;
     static const std::string AGENT;
     static const std::string MAX_SCREEN_AGENT;
+    static const std::string TAP_DISMISSED;
+    static const std::string AUTO_DELETED_TIME;
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
 
@@ -763,6 +793,8 @@ private:
     int32_t userId_ {-1};
     int32_t uid_ {-1};
     bool isSystemApp_ {false};
+    bool tapDismissed_ {false};
+    int64_t autoDeletedTime_ {0};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.

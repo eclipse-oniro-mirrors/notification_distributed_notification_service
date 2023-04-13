@@ -607,6 +607,15 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     napi_create_int32(env, reminder.GetSnoozeTimes(), &value);
     napi_set_named_property(env, result, SNOOZE_TIMES, value);
 
+    // tapDismissed
+    std::string tapDismissed = reminder.IsTapDismissed() ? "true" : "false";
+    napi_create_string_utf8(env, tapDismissed.c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, TAPDISMISSED, value);
+
+    // autoDeletedTime
+    napi_create_int64(env, reminder.GetAutoDeletedTime(), &value);
+    napi_set_named_property(env, result, AUTODELETEDTIME, value);
+
     // slotType
     NotificationNapi::SlotType jsSlotType;
     NotificationNapi::Common::SlotTypeCToJS(reminder.GetSlotType(), jsSlotType);

@@ -62,6 +62,8 @@ const char* WANT_AGENT_ABILITY = "abilityName";
 const char* BUTTON_WANT_AGENT = "wantAgent";
 const char* BUTTON_WANT_AGENT_PKG = "pkgName";
 const char* BUTTON_WANT_AGENT_ABILITY = "abilityName";
+const char* TAPDISMISSED = "tapDismissed";
+const char* AUTODELETEDTIME = "autoDeletedTime";
 }
 
 struct CallbackPromiseInfo {
@@ -83,6 +85,9 @@ public:
 
     static bool GetStringUtf8(const napi_env &env, const napi_value &value,
         const char* propertyName, char* propertyVal, const int32_t size);
+
+    static bool GetBool(const napi_env &env, const napi_value &value,
+        const char* propertyName, bool& propertyVal);
 
     static bool GetInt32(const napi_env &env, const napi_value &value,
         const char* propertyName, int32_t& propertyVal, bool isNecessary);

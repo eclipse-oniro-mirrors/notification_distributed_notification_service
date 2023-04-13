@@ -275,6 +275,20 @@ napi_value ReminderCommon::GenReminder(
         reminder->SetSlotType(actureType);
     }
 
+    // tapDismissed
+    bool tapDismissed = false;
+    if (GetBool(env, value, ReminderAgentNapi::TAPDISMISSED, tapDismissed)) {
+        reminder->SetTapDismissed(tapDismissed);
+    }
+
+    //autoDeletedTime
+    int64_t autoDeletedTime = 0;
+    if (GetInt64(env, value, ReminderAgentNapi::AUTODELETEDTIME, autoDeletedTime)) {
+        if (autoDeletedTime > 0) {
+            reminder->SetAutoDeletedTime(autoDeletedTime);
+        }
+    }
+
     // wantAgent
     GenWantAgent(env, value, reminder);
 
@@ -307,6 +321,27 @@ bool ReminderCommon::GetStringUtf8(const napi_env &env, const napi_value &value,
         NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, result, propertyVal, size - 1, &strLen), false);
     }
     return hasProperty;
+}
+
+bool ReminderCommon::GetBool(const napi_env &env, const napi_value &value,
+    const char* propertyName, bool& propertyVal)
+{
+    bool hasProperty = false;
+    napi_value result = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, value, propertyName, &hasProperty), false);
+    if (!hasProperty) {
+        ANSR_LOGW("Does not have argument type:%{public}s.", propertyName);
+        return false;
+    }
+    napi_get_named_property(env, value, propertyName, &result);
+    NAPI_CALL_BASE(env, napi_typeof(env, result, &valuetype), false);
+    if (valuetype != napi_boolean) {
+        ANSR_LOGW("Wrong argument type:%{public}s. boolean expected.", propertyName);
+        return false;
+    }
+    napi_get_value_bool(env, result, &propertyVal);
+    return true;
 }
 
 bool ReminderCommon::GetInt32(const napi_env &env, const napi_value &value,
