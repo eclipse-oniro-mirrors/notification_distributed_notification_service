@@ -2784,6 +2784,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18500,
     GTEST_LOG_(INFO) << "OnBundleRemoved_1000 test start";
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnBundleRemoved(bundleOption);
 
     GTEST_LOG_(INFO) << "OnBundleRemoved_1000 test end";
@@ -2799,6 +2800,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18600,
 {
     GTEST_LOG_(INFO) << "OnScreenOn_1000 test start";
 
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnScreenOn();
     advancedNotificationService_->OnScreenOff();
 
@@ -2965,6 +2967,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19600,
     GTEST_LOG_(INFO) << "GetLocalNotificationKeys_0100 test start";
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->GetLocalNotificationKeys(bundleOption);
 
     GTEST_LOG_(INFO) << "GetLocalNotificationKeys_0100 test end";
@@ -3021,6 +3024,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900,
     std::string bundleName = "BundleName";
     sptr<NotificationRequest> request = new NotificationRequest();
 
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
 
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test end";
@@ -3040,6 +3044,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
     std::string bundleName = "BundleName";
     sptr<NotificationRequest> request = new NotificationRequest();
 
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request);
 
     GTEST_LOG_(INFO) << "OnDistributedUpdate_0100 test end";
@@ -3060,6 +3065,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20100,
     std::string label = "testLabel";
     int32_t id = 1;
 
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnDistributedDelete(deviceId, bundleName, label, id);
 
     GTEST_LOG_(INFO) << "OnDistributedDelete_0100 test end";
@@ -3115,6 +3121,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20400,
         AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(paramsInfo);
 
     request->SetRemovalWantAgent(wantAgent);
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->TriggerRemoveWantAgent(request);
 
     GTEST_LOG_(INFO) << "TriggerRemoveWantAgent_0100 test end";
@@ -3151,6 +3158,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20600,
     GTEST_LOG_(INFO) << "OnResourceRemove_0100 test start";
 
     int32_t userId = -2;
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnResourceRemove(userId);
 
     GTEST_LOG_(INFO) << "OnResourceRemove_0100 test end";
@@ -3167,6 +3175,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20700,
     GTEST_LOG_(INFO) << "OnBundleDataCleared_0100 test start";
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnBundleDataCleared(bundleOption);
 
     GTEST_LOG_(INFO) << "OnBundleDataCleared_0100 test end";
@@ -3187,6 +3196,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20800,
     int width = 1;
     int height = 1;
     bool wideScreen = 1;
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->GetDisplayPosition(offsetX, offsetY, width, height, wideScreen);
 
     GTEST_LOG_(INFO) << "GetDisplayPosition_0100 test end";
@@ -3205,6 +3215,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20900,
     std::vector<std::u16string> args;
     args.push_back(Str8ToStr16("args"));
     std::string result = "result";
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->GetDumpInfo(args, result);
 
     GTEST_LOG_(INFO) << "GetDumpInfo_0100 test end";
@@ -3223,6 +3234,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21000,
     std::vector<std::u16string> args;
     args.push_back(Str8ToStr16("-h"));
     std::string result = "result";
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->GetDumpInfo(args, result);
 
     GTEST_LOG_(INFO) << "GetDumpInfo_0200 test end";
@@ -3239,6 +3251,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21100,
     GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0100 test start";
 
     std::shared_ptr<NotificationRecord> record = nullptr;
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->SendFlowControlOccurHiSysEvent(record);
 
     GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0100 test end";
@@ -3257,6 +3270,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21200,
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = new NotificationRequest();
     record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->SendFlowControlOccurHiSysEvent(record);
 
     GTEST_LOG_(INFO) << "SendFlowControlOccurHiSysEvent_0200 test end";

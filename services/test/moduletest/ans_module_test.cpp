@@ -1090,7 +1090,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0049, Function | SmallTest | Level1)
     slots.push_back(reminderSlot);
     slots.push_back(contentSlot);
     slots.push_back(otherSlot);
-
+    
+    ASSERT_NE(nullptr, g_advancedNotificationService);
     g_advancedNotificationService->AddSlots(slots);
 }
 

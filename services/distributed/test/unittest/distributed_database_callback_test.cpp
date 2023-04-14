@@ -75,6 +75,7 @@ HWTEST_F(DistributedDatabaseCallbackTest, DistributedDatabaseCallback_00100, Fun
     };
     std::shared_ptr<DistributedDatabaseCallback> databaseCallback_ =
         std::make_shared<DistributedDatabaseCallback>(databaseCallback);
+    ASSERT_NE(nullptr, databaseCallback_);
     databaseCallback_->callback_.OnInsert = nullptr;
     std::vector<DistributedKv::Entry> insertEntries;
     std::vector<DistributedKv::Entry> updateEntries;
@@ -110,6 +111,7 @@ HWTEST_F(DistributedDatabaseCallbackTest, DistributedDatabaseCallback_00200, Fun
     };
     std::shared_ptr<DistributedDatabaseCallback> databaseCallback_ =
         std::make_shared<DistributedDatabaseCallback>(databaseCallback);
+    ASSERT_NE(nullptr, databaseCallback_);
     databaseCallback_->callback_.OnUpdate = nullptr;
     std::vector<DistributedKv::Entry> insertEntries;
     std::vector<DistributedKv::Entry> updateEntries;
@@ -145,6 +147,7 @@ HWTEST_F(DistributedDatabaseCallbackTest, DistributedDatabaseCallback_00300, Fun
     };
     std::shared_ptr<DistributedDatabaseCallback> databaseCallback_ =
         std::make_shared<DistributedDatabaseCallback>(databaseCallback);
+    ASSERT_NE(nullptr, databaseCallback_);
     databaseCallback_->callback_.OnDelete = nullptr;
     std::vector<DistributedKv::Entry> insertEntries;
     std::vector<DistributedKv::Entry> updateEntries;
