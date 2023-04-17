@@ -62,8 +62,10 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0010
  */
 HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_00200, Function | SmallTest | Level1)
 {
-    DistributedPreferencesDatabase distributedPreferencesDatabase;
-    distributedPreferencesDatabase.GetKvStore();
+    std::shared_ptr<DistributedPreferencesDatabase> distributedPreferencesDatabase =
+        std::make_shared<DistributedPreferencesDatabase>();
+    ASSERT_NE(nullptr, distributedPreferencesDatabase);
+    distributedPreferencesDatabase->GetKvStore();
 }
 
 /**

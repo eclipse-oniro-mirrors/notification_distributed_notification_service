@@ -309,6 +309,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0150
     MockInit(false);
     // test GetValueFromDisturbeDB function
     std::string key = "<key>";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->GetValueFromDisturbeDB(key, [&](std::string &value) {});
 }
 
@@ -325,6 +326,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0160
     MockQueryData(true);
     // test GetValueFromDisturbeDB function
     std::string key = "<key>";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->GetValueFromDisturbeDB(key, [&](std::string &value) {});
 }
 
@@ -339,6 +341,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0170
     MockInit(false);
     // test GetValueFromDisturbeDB function
     std::string key = "<key>";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {});
 }
 
@@ -353,6 +356,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0180
     MockInit(false);
     // test PutBundlePropertyValueToDisturbeDB function
     NotificationPreferencesInfo::BundleInfo bundleInfo;
+    ASSERT_NE(nullptr, preferncesDB_);
     EXPECT_EQ(preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo), false);
 }
 
@@ -762,6 +766,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0430
     MockInit(false);
     NotificationPreferencesInfo info;
     std::unordered_map<std::string, std::string> values;
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundleFromDistureDB(info, values);
 }
 
@@ -813,6 +818,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0470
     // test GetDoNotDisturbType function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->GetDoNotDisturbType(info, userId);
 }
 
@@ -830,6 +836,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0480
     // test GetDoNotDisturbBeginDate function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->GetDoNotDisturbBeginDate(info, userId);
 }
 
@@ -847,6 +854,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0490
     // test GetDoNotDisturbEndDate function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->GetDoNotDisturbEndDate(info, userId);
 }
 
@@ -864,6 +872,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0500
     // test GetEnableAllNotification function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->GetEnableAllNotification(info, userId);
 }
 

@@ -63,6 +63,7 @@ void DistributedNotificationManagerBranchTest::TearDown()
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_0100, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, distributedManager_);
     distributedManager_->database_ = nullptr;
     distributedManager_->OnDeviceConnected("test");
 }
@@ -74,6 +75,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_00200, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, distributedManager_);
     mockOnDeviceConnected(false);
     distributedManager_->OnDeviceConnected("test");
 }
@@ -85,6 +87,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_00300, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, distributedManager_);
     mockGetEntriesFromDistributedDB(false);
     distributedManager_->OnDeviceDisconnected("test");
 }
@@ -96,6 +99,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_00400, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, distributedManager_);
     mockGetEntriesFromDistributedDB(true);
     distributedManager_->OnDeviceDisconnected("test");
 }

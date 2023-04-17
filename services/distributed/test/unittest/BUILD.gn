@@ -428,6 +428,7 @@ ohos_unittest("distributed_notification_manager_branch_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitracechain",

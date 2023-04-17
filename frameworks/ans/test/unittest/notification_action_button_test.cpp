@@ -118,8 +118,9 @@ HWTEST_F(NotificationActionButtontTest, Create_00001, Function | SmallTest | Lev
     std::vector<std::shared_ptr<NotificationUserInput>> mimeTypeOnlyInputs;
     std::shared_ptr<NotificationUserInput> userInput;
     bool isContextual = true;
-    auto rrc = std::make_shared<NotificationActionButton>();
-    std::shared_ptr<NotificationActionButton> result = rrc->Create
+    std::shared_ptr<NotificationActionButton> notificationActionButton = std::make_shared<NotificationActionButton>();
+    ASSERT_NE(nullptr, notificationActionButton);
+    std::shared_ptr<NotificationActionButton> result = notificationActionButton->Create
     (icon, title, wantAgent, extras, semanticActionButton,
     autoCreatedReplies, mimeTypeOnlyInputs, userInput, isContextual);
 }

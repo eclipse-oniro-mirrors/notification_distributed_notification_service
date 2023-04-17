@@ -1036,11 +1036,12 @@ HWTEST_F(ReminderRequestTest, GetUserId_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, SetActionButton_00001, Function | SmallTest | Level1)
 {
-    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
     Notification::ReminderRequest::ActionButtonType type =
             Notification::ReminderRequest::ActionButtonType::INVALID;
-    rrc->SetActionButton(title, type);
+    reminderRequestChild->SetActionButton(title, type);
 }
 
 /**
@@ -1051,11 +1052,12 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00001, Function | SmallTest | Leve
  */
 HWTEST_F(ReminderRequestTest, SetActionButton_00002, Function | SmallTest | Level1)
 {
-    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
     Notification::ReminderRequest::ActionButtonType type2 =
             Notification::ReminderRequest::ActionButtonType::CLOSE;
-    rrc->SetActionButton(title, type2);
+    reminderRequestChild->SetActionButton(title, type2);
 }
 
 /**
@@ -1066,11 +1068,12 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00002, Function | SmallTest | Leve
  */
 HWTEST_F(ReminderRequestTest, SetActionButton_00003, Function | SmallTest | Level1)
 {
-    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
     Notification::ReminderRequest::ActionButtonType type3 =
             Notification::ReminderRequest::ActionButtonType::SNOOZE;
-    rrc->SetActionButton(title, type3);
+    reminderRequestChild->SetActionButton(title, type3);
 }
 
 /**
@@ -1081,9 +1084,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00003, Function | SmallTest | Leve
  */
 HWTEST_F(ReminderRequestTest, AddActionButtons_00001, Function | SmallTest | Level1)
 {
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->AddActionButtons(true);
-    rrc->AddActionButtons(false);
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
+    reminderRequestChild->AddActionButtons(true);
+    reminderRequestChild->AddActionButtons(false);
 }
 
 /**
@@ -1094,21 +1098,22 @@ HWTEST_F(ReminderRequestTest, AddActionButtons_00001, Function | SmallTest | Lev
  */
 HWTEST_F(ReminderRequestTest, InitUserId_00001, Function | SmallTest | Level1)
 {
-    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
     bool deSet = true;
     uint8_t newState = 2;
     std::string function = "this is function";
     int32_t userId = 1;
     int32_t uid = 2;
-    rrc->InitUserId(userId);
-    rrc->InitUid(uid);
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
+    reminderRequestChild->InitUserId(userId);
+    reminderRequestChild->InitUid(uid);
+    reminderRequestChild->SetState(deSet, newState, function);
+    uint8_t result1 = reminderRequestChild->GetState();
     EXPECT_EQ(result1, 2);
-    bool result = rrc->IsShowing();
+    bool result = reminderRequestChild->IsShowing();
     EXPECT_EQ(result, false);
-    rrc->OnShow(true, true, true);
-    rrc->OnShowFail();
+    reminderRequestChild->OnShow(true, true, true);
+    reminderRequestChild->OnShowFail();
 }
 
 /**
@@ -1119,19 +1124,20 @@ HWTEST_F(ReminderRequestTest, InitUserId_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnStart_00001, Function | SmallTest | Level1)
 {
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->OnStart();
-    rrc->OnStop();
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
+    reminderRequestChild->OnStart();
+    reminderRequestChild->OnStop();
     bool deSet = true;
     uint8_t newState = 2;
     std::string function = "this is function";
     int32_t userId = 1;
     int32_t uid = 2;
-    rrc->InitUserId(userId);
-    rrc->InitUid(uid);
-    rrc->SetState(deSet, newState, function);
-    rrc->OnStart();
-    rrc->OnStop();
+    reminderRequestChild->InitUserId(userId);
+    reminderRequestChild->InitUid(uid);
+    reminderRequestChild->SetState(deSet, newState, function);
+    reminderRequestChild->OnStart();
+    reminderRequestChild->OnStop();
 }
 
 /**
@@ -1239,9 +1245,10 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00002, Function | SmallT
 HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Level1)
 {
     AppExecFwk::ElementName element;
-    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
-        rrc->CreateWantAgent(element);
+        reminderRequestChild->CreateWantAgent(element);
 }
 
 /**

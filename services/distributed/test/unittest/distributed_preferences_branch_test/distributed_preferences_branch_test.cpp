@@ -112,6 +112,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0050
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::string key = "DistributedPreferencesBranchTest";
+    ASSERT_NE(nullptr, distributedPreferences_);
     distributedPreferences_->GetDistributedBundleKey(bundleOption, key);
 }
 
