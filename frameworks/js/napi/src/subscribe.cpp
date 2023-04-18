@@ -242,9 +242,6 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
     }
 }
 
-void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request)
-{}
-
 void UvQueueWorkOnConsumed(uv_work_t *work, int status)
 {
     ANS_LOGI("OnConsumed uv_work_t start");

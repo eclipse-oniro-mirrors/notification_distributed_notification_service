@@ -39,8 +39,6 @@ namespace OHOS {
         ansSubscriberProxy.OnDisconnected();
         // test InnerTransact function
         sptr<Notification::Notification> notification = new Notification::Notification();
-        ansSubscriberProxy.OnConsumed(notification);
-        // test InnerTransact function
         sptr<Notification::NotificationSortingMap> notificationMap = new Notification::NotificationSortingMap();
         ansSubscriberProxy.OnConsumed(notification, notificationMap);
         // test OnCanceled function

@@ -319,12 +319,6 @@ public:
         std::unique_lock<std::mutex> lck(mtx_);
         events_.push_back(event);
     }
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {
-        std::shared_ptr<OnConsumedEvent> event = std::make_shared<OnConsumedEvent>(request);
-        std::unique_lock<std::mutex> lck(mtx_);
-        events_.push_back(event);
-    }
 
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override

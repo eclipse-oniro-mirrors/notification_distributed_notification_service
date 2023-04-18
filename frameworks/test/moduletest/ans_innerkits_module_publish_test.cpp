@@ -105,7 +105,8 @@ public:
         OnCanceledReceived = true;
     }
 
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
+    void OnConsumed(const std::shared_ptr<Notification> &request,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {
         OnConsumedReceived = true;
         g_consumed_mtx.unlock();
@@ -150,10 +151,6 @@ public:
             GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish::OnConsumed do nothing!!!!!";
         }
     }
-
-    void OnConsumed(const std::shared_ptr<Notification> &request,
-        const std::shared_ptr<NotificationSortingMap> &sortingMap) override
-    {}
 
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {

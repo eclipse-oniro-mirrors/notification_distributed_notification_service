@@ -80,7 +80,6 @@ namespace OHOS {
         ansManagerStub.HandleSubscribe(datas, reply);
         ansManagerStub.HandleUnsubscribe(datas, reply);
         ansManagerStub.HandleAreNotificationsSuspended(datas, reply);
-        ansManagerStub.HandleGetCurrentAppSorting(datas, reply);
         ansManagerStub.HandleIsAllowedNotify(datas, reply);
         ansManagerStub.HandleIsAllowedNotifySelf(datas, reply);
         ansManagerStub.HandleIsSpecialBundleAllowedNotify(datas, reply);
@@ -170,8 +169,6 @@ namespace OHOS {
         ansManagerStub.GetShowBadgeEnabled(enabled);
         bool suspended = true;
         ansManagerStub.AreNotificationsSuspended(suspended);
-        sptr<Notification::NotificationSortingMap> sortingMap = new Notification::NotificationSortingMap();
-        ansManagerStub.GetCurrentAppSorting(sortingMap);
         bool allowed = true;
         ansManagerStub.IsAllowedNotify(allowed);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allowed);

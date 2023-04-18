@@ -328,7 +328,6 @@ void NotificationSubscriberManager::NotifyConsumedInner(
             IsSystemUser(record->userId) ||  // Delete this, When the systemui subscribe carry the user ID.
             IsSystemUser(sendUserId))) {
             record->subscriber->OnConsumed(notification, notificationMap);
-            record->subscriber->OnConsumed(notification);
         }
     }
 }

@@ -66,8 +66,6 @@ public:
             canceledCb_(request, sortingMap, deleteReason);
         }
     }
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {

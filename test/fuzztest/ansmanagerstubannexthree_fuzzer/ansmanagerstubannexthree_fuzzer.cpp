@@ -48,8 +48,6 @@ namespace OHOS {
         ansManagerStub.GetShowBadgeEnabledForBundle(bundleOption, allow);
         ansManagerStub.GetShowBadgeEnabled(allow);
         ansManagerStub.AreNotificationsSuspended(allow);
-        sptr<Notification::NotificationSortingMap> sortingMap = new Notification::NotificationSortingMap();
-        ansManagerStub.GetCurrentAppSorting(sortingMap);
         ansManagerStub.IsAllowedNotify(allow);
         ansManagerStub.IsAllowedNotifySelf(allow);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allow);

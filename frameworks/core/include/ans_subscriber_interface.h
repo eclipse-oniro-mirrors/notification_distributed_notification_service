@@ -51,13 +51,6 @@ public:
      * @brief The callback function on a notification published.
      *
      * @param notification Indicates the consumed notification.
-     */
-    virtual void OnConsumed(const sptr<Notification> &notification) = 0;
-
-    /**
-     * @brief The callback function on a notification published.
-     *
-     * @param notification Indicates the consumed notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      */
     virtual void OnConsumed(
@@ -105,7 +98,7 @@ protected:
     enum TransactId : uint32_t {
         ON_CONNECTED = FIRST_CALL_TRANSACTION,
         ON_DISCONNECTED,
-        ON_CONSUMED,
+        ON_CONSUMED, // Obsolete
         ON_CONSUMED_MAP,
         ON_CANCELED_MAP,
         ON_UPDATED,

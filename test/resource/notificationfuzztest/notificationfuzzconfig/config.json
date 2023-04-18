@@ -46,7 +46,6 @@
         "CancelAllNotifications": [],
         "GetActiveNotificationNums": [],
         "GetActiveNotifications": [],
-        "GetCurrentAppSorting": [],
         "SetNotificationAgent": [],
         "GetNotificationAgent": [],
         "CanPublishNotificationAsBundle": [],

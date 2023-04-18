@@ -59,12 +59,6 @@ void NotificationSubscriber::SubscriberImpl::OnDisconnected()
     subscriber_.OnDisconnected();
 }
 
-void NotificationSubscriber::SubscriberImpl::OnConsumed(const sptr<Notification> &notification)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    subscriber_.OnConsumed(std::make_shared<Notification>(*notification));
-}
-
 void NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {

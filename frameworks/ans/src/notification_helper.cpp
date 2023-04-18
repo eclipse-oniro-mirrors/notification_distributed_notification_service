@@ -107,11 +107,6 @@ ErrCode NotificationHelper::GetActiveNotifications(std::vector<sptr<Notification
     return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(request);
 }
 
-ErrCode NotificationHelper::GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->GetCurrentAppSorting(sortingMap);
-}
-
 ErrCode NotificationHelper::SetNotificationAgent(const std::string &agent)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationAgent(agent);

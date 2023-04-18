@@ -253,15 +253,6 @@ ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationReq
     return ansManagerProxy_->GetActiveNotifications(request);
 }
 
-ErrCode AnsNotification::GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ansManagerProxy_->GetCurrentAppSorting(sortingMap);
-}
-
 ErrCode AnsNotification::SetNotificationAgent(const std::string &agent)
 {
     if (!GetAnsManagerProxy()) {

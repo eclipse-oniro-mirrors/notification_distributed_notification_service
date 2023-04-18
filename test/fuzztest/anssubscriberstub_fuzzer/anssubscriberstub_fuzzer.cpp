@@ -35,8 +35,6 @@ namespace OHOS {
         ansSubscriberStub.HandleOnConnected(datas, reply);
         // test HandleOnDisconnected function
         ansSubscriberStub.HandleOnDisconnected(datas, reply);
-        // test HandleOnConsumed function
-        ansSubscriberStub.HandleOnConsumed(datas, reply);
         // test HandleOnConsumedMap function
         ansSubscriberStub.HandleOnConsumedMap(datas, reply);
         // test HandleOnCanceledMap function
@@ -53,8 +51,6 @@ namespace OHOS {
         ansSubscriberStub.OnDisconnected();
         // test OnConsumed function
         sptr<Notification::Notification> notification = new Notification::Notification();
-        ansSubscriberStub.OnConsumed(notification);
-        // test OnConsumed function
         sptr<Notification::NotificationSortingMap> notificationMap = new Notification::NotificationSortingMap();
         ansSubscriberStub.OnConsumed(notification, notificationMap);
         // test OnCanceled function

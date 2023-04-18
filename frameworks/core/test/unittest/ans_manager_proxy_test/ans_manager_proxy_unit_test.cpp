@@ -119,8 +119,6 @@ public:
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
@@ -4832,91 +4830,6 @@ HWTEST_F(AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0500, Function |
     ASSERT_NE(nullptr, proxy);
     bool suspended = false;
     int32_t result = proxy->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetCurrentAppSortingTest_0100
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0100, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetCurrentAppSortingTest_0200
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0200, TestSize.Level1";
-    MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, true, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-/*
- * @tc.name: GetCurrentAppSortingTest_0300
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0300, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
-}
-
-/*
- * @tc.name: GetCurrentAppSortingTest_0400
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0400, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, false, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 

@@ -430,14 +430,6 @@ public:
     virtual ErrCode AreNotificationsSuspended(bool &suspended) = 0;
 
     /**
-     * @brief Get the notification sorting status of the current app.
-     *
-     * @param sortingMap Indicates the NotificationSortingMap object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap) = 0;
-
-    /**
      * @brief Checks whether this device is allowed to publish notifications.
      *
      * @param allowed Indicates the flag that allows notification.
@@ -750,7 +742,7 @@ protected:
         SUBSCRIBE_NOTIFICATION,
         UNSUBSCRIBE_NOTIFICATION,
         ARE_NOTIFICATION_SUSPENDED,
-        GET_CURRENT_APP_SORTING,
+        GET_CURRENT_APP_SORTING,    // Obsolete
         IS_ALLOWED_NOTIFY,
         IS_ALLOWED_NOTIFY_SELF,
         IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY,

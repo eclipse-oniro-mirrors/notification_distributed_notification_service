@@ -41,7 +41,6 @@ namespace OHOS {
         ansManagerStub.HandleSubscribe(datas, reply);
         ansManagerStub.HandleUnsubscribe(datas, reply);
         ansManagerStub.HandleAreNotificationsSuspended(datas, reply);
-        ansManagerStub.HandleGetCurrentAppSorting(datas, reply);
         ansManagerStub.HandleIsAllowedNotify(datas, reply);
         ansManagerStub.HandleIsAllowedNotifySelf(datas, reply);
         ansManagerStub.HandleIsSpecialBundleAllowedNotify(datas, reply);

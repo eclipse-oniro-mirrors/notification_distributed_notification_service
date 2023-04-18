@@ -42,13 +42,6 @@ public:
      * @brief The callback function on a notification published.
      *
      * @param notification Indicates the consumed notification.
-     */
-    void OnConsumed(const sptr<Notification> &notification) override;
-
-    /**
-     * @brief The callback function on a notification published.
-     *
-     * @param notification Indicates the consumed notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      */
     void OnConsumed(
