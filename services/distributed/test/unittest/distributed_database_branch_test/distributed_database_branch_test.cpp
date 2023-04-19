@@ -112,6 +112,7 @@ void DistributedDatabaseBranchTest::OnDisconnected(const std::string &deviceId)
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0100, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = nullptr;
     mockStartWatchDeviceChange(false);
     EXPECT_EQ(true, database_->CheckKvDataManager());
@@ -124,6 +125,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0100, Func
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0200, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = nullptr;
     mockStartWatchDeviceChange(false);
     database_->GetKvStore();
@@ -136,6 +138,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0200, Func
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0300, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     mockGetSingleKvStore(false);
     database_->GetKvStore();
@@ -161,6 +164,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0400, Func
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0500, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     // set GetSingleKvStore is Status::SUCCESS
     mockGetSingleKvStore(true);

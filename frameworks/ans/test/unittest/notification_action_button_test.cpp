@@ -146,6 +146,7 @@ HWTEST_F(NotificationActionButtontTest, Create_00002, Function | SmallTest | Lev
     std::shared_ptr<NotificationUserInput> userInput;
     bool isContextual = true;
     auto rrc = std::make_shared<NotificationActionButton>();
+    ASSERT_NE(nullptr, rrc);
     rrc->Create(icon, title, wantAgent, extras, semanticActionButton,
     autoCreatedReplies, mimeTypeOnlyInputs, userInput, isContextual);
 }
