@@ -62,6 +62,7 @@ const char* WANT_AGENT_ABILITY = "abilityName";
 const char* BUTTON_WANT_AGENT = "wantAgent";
 const char* BUTTON_WANT_AGENT_PKG = "pkgName";
 const char* BUTTON_WANT_AGENT_ABILITY = "abilityName";
+const char* BUTTON_WANT_AGENT_URI = "uri";
 const char* TAPDISMISSED = "tapDismissed";
 const char* AUTODELETEDTIME = "autoDeletedTime";
 }
@@ -153,7 +154,7 @@ private:
     static napi_value GetCallbackErrorValue(napi_env env, const int32_t errCode, const std::string errMsg);
 
     static void GetButtonWantAgent(const napi_env &env, const napi_value &value,
-        std::shared_ptr<ReminderRequest::ButtonWantAgent>& wantAgent);
+        std::shared_ptr<ReminderRequest>& reminder, std::shared_ptr<ReminderRequest::ButtonWantAgent>& wantAgent);
     static bool IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder);
 };
 }  // namespace OHOS

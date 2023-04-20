@@ -462,5 +462,23 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_003, Level1)
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
+
+/**
+ * @tc.name: ReminderEventManagerTest_004
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
+{
+    EventFwk::Want want;
+    manager->HandleCustomButtonClick(want);
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    manager->reminderVector_.push_back(reminder);
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 10);
+    manager->HandleCustomButtonClick(want);
+    system("rm -rf /data/service/el1/public/notification/");
+    EXPECT_TRUE(manager != nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

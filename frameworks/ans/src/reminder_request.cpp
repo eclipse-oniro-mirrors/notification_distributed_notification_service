@@ -87,6 +87,7 @@ const std::string ReminderRequest::STATE = "state";
 const std::string ReminderRequest::ZONE_ID = "zone_id";
 const std::string ReminderRequest::HAS_SCHEDULED_TIMEOUT = "has_ScheduledTimeout";
 const std::string ReminderRequest::ACTION_BUTTON_INFO = "button_info";
+const std::string ReminderRequest::CUSTOM_BUTTON_URI = "custom_button_uri";
 const std::string ReminderRequest::SLOT_ID = "slot_id";
 const std::string ReminderRequest::NOTIFICATION_ID = "notification_id";
 const std::string ReminderRequest::TITLE = "title";
@@ -132,6 +133,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->actionButtonMap_ = other.actionButtonMap_;
     this->tapDismissed_= other.tapDismissed_;
     this->autoDeletedTime_ = other.autoDeletedTime_;
+    this->customButtonUri_ = other.customButtonUri_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -571,6 +573,9 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     // autoDeletedTime
     autoDeletedTime_ =
         static_cast<int64_t>(RecoverInt64FromDb(resultSet, AUTO_DELETED_TIME, DbRecoveryType::LONG));
+
+    // customButtonUri
+    resultSet->GetString(ReminderStore::GetColumnIndex(CUSTOM_BUTTON_URI), customButtonUri_);
 }
 
 void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
@@ -880,6 +885,16 @@ int64_t ReminderRequest::GetAutoDeletedTime() const
     return autoDeletedTime_;
 }
 
+void ReminderRequest::SetCustomButtonUri(const std::string &uri)
+{
+    customButtonUri_ = uri;
+}
+
+std::string ReminderRequest::GetCustomButtonUri() const
+{
+    return customButtonUri_;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
@@ -977,6 +992,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
     }
     if (!parcel.WriteString(maxScreenWantAgentInfo_->pkgName)) {
         ANSR_LOGE("Failed to write maxScreenWantAgentInfo`s pkgName");
+        return false;
+    }
+    if (!parcel.WriteString(customButtonUri_)) {
+        ANSR_LOGE("Failed to write customButtonUri");
         return false;
     }
 
@@ -1123,6 +1142,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     }
     if (!parcel.ReadString(maxScreenWantAgentInfo_->pkgName)) {
         ANSR_LOGE("Failed to read maxScreenWantAgentInfo`s pkgName");
+        return false;
+    }
+    if (!parcel.ReadString(customButtonUri_)) {
+        ANSR_LOGE("Failed to read customButtonUri");
         return false;
     }
 
@@ -1380,7 +1403,6 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
-    int32_t customButton = 0;
     for (auto button : actionButtonMap_) {
         auto want = std::make_shared<OHOS::AAFwk::Want>();
         auto type = button.first;
@@ -1399,9 +1421,6 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
                 }
                 break;
             case ActionButtonType::CUSTOM:
-                if (customButton > 0) {
-                    ANSR_LOGI("Not add action button, type is custom, as only allow one custom button");
-                }
                 want->SetAction(REMINDER_EVENT_CUSTOM_ALERT);
                 if (button.second.wantAgent == nullptr) {
                     ANSR_LOGE("wantAgent null");
@@ -1409,7 +1428,6 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
                 }
                 want->SetParam("PkgName", button.second.wantAgent->pkgName);
                 want->SetParam("AbilityName", button.second.wantAgent->abilityName);
-                ++customButton;
                 ANSR_LOGI("Add action button, type is custom");
                 break;
             default:
@@ -1729,6 +1747,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ZONE_ID, "");  // no use, compatible with old version.
     values.PutString(HAS_SCHEDULED_TIMEOUT, "");  // no use, compatible with old version.
     values.PutString(ACTION_BUTTON_INFO, reminder->GetButtonInfo());
+    values.PutString(CUSTOM_BUTTON_URI, reminder->GetCustomButtonUri());
     values.PutInt(SLOT_ID, reminder->GetSlotType());
     values.PutInt(NOTIFICATION_ID, reminder->GetNotificationId());
     values.PutString(TITLE, reminder->GetTitle());
@@ -1777,6 +1796,7 @@ void ReminderRequest::InitDbColumns()
     AddColumn(ZONE_ID, "TEXT", false);
     AddColumn(HAS_SCHEDULED_TIMEOUT, "TEXT", false);
     AddColumn(ACTION_BUTTON_INFO, "TEXT", false);
+    AddColumn(CUSTOM_BUTTON_URI, "TEXT", false);
     AddColumn(SLOT_ID, "INT", false);
     AddColumn(NOTIFICATION_ID, "INT NOT NULL", false);
     AddColumn(TITLE, "TEXT", false);

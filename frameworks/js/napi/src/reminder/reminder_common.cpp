@@ -86,7 +86,7 @@ bool ReminderCommon::GenActionButtons(
             std::string title(str);
             auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
             if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
-                GetButtonWantAgent(env, actionButton, buttonWantAgent);
+                GetButtonWantAgent(env, actionButton, reminder, buttonWantAgent);
             }
             reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType),
                 buttonWantAgent);
@@ -110,7 +110,7 @@ bool ReminderCommon::IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder)
 }
 
 void ReminderCommon::GetButtonWantAgent(const napi_env &env, const napi_value &value,
-    std::shared_ptr<ReminderRequest::ButtonWantAgent>& buttonWantAgent)
+    std::shared_ptr<ReminderRequest>& reminder, std::shared_ptr<ReminderRequest::ButtonWantAgent>& buttonWantAgent)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
@@ -122,6 +122,10 @@ void ReminderCommon::GetButtonWantAgent(const napi_env &env, const napi_value &v
         if (GetStringUtf8(env, wantAgent,
             ReminderAgentNapi::BUTTON_WANT_AGENT_ABILITY, str, NotificationNapi::STR_MAX_SIZE)) {
             buttonWantAgent->abilityName = str;
+        }
+        if (GetStringUtf8(env, wantAgent,
+            ReminderAgentNapi::BUTTON_WANT_AGENT_URI, str, NotificationNapi::STR_MAX_SIZE)) {
+            reminder->SetCustomButtonUri(str);
         }
     }
 }

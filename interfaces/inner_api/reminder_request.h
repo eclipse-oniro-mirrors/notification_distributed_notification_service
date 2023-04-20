@@ -607,6 +607,20 @@ public:
     int64_t GetAutoDeletedTime() const;
 
     /**
+     * @brief Sets custom button uri.
+     *
+     * @param uri Indicates uri.
+     */
+    void SetCustomButtonUri(const std::string &uri);
+
+    /**
+     * @brief Gets custom button uri.
+     *
+     * @return custom button uri.
+     */
+    std::string GetCustomButtonUri() const;
+
+    /**
      * @brief Update notification attributes.
      *
      * Some attributes need to be updated after the reminder published or before the notification publish.
@@ -691,6 +705,7 @@ public:
     static const std::string ZONE_ID;
     static const std::string HAS_SCHEDULED_TIMEOUT;
     static const std::string ACTION_BUTTON_INFO;
+    static const std::string CUSTOM_BUTTON_URI;
     static const std::string SLOT_ID;
     static const std::string NOTIFICATION_ID;
     static const std::string TITLE;
@@ -795,6 +810,7 @@ private:
     bool isSystemApp_ {false};
     bool tapDismissed_ {false};
     int64_t autoDeletedTime_ {0};
+    std::string customButtonUri_ {};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.
