@@ -64,10 +64,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
         OHOS::Notification::NotificationHelper::PublishNotification(GetStringParam(), *GetParamNotificationRequest());
     });
 
-    callFunctionMap_.emplace("NotificationHelperPublishNotificationNotificationRequeststring", []() {
-        OHOS::Notification::NotificationHelper::PublishNotification(*GetParamNotificationRequest(), GetStringParam());
-    });
-
     callFunctionMap_.emplace("NotificationHelperCancelNotificationint32_t",
         []() { OHOS::Notification::NotificationHelper::CancelNotification(GetS32Param()); });
 
@@ -116,11 +112,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
     callFunctionMap_.emplace("NotificationHelperIsAllowedNotify", []() {
         bool allowed = GetBoolParam();
         OHOS::Notification::NotificationHelper::IsAllowedNotify(allowed);
-    });
-
-    callFunctionMap_.emplace("NotificationHelperAreNotificationsSuspended", []() {
-        bool suspended = GetBoolParam();
-        OHOS::Notification::NotificationHelper::AreNotificationsSuspended(suspended);
     });
 
     callFunctionMap_.emplace("NotificationHelperHasNotificationPolicyAccessPermission", []() {

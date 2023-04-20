@@ -186,21 +186,6 @@ HWTEST_F(NotificationHelperTest, PublishNotification_00001, Function | SmallTest
 }
 
 /**
- * @tc.name: PublishNotification_00002
- * @tc.desc: Test PublishNotification parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, PublishNotification_00002, Function | SmallTest | Level1)
-{
-    NotificationRequest request;
-    std::string deviceId = "DeviceId";
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.PublishNotification(request, deviceId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
  * @tc.name: PublishNotification_00003
  * @tc.desc: Test PublishNotification parameters.
  * @tc.type: FUNC
@@ -426,20 +411,6 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RequestEnableNotification(deviceId);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
-}
-
-/**
- * @tc.name: AreNotificationsSuspended_00001
- * @tc.desc: Test AreNotificationsSuspended parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, AreNotificationsSuspended_00001, Function | SmallTest | Level1)
-{
-    bool suspended = true;
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
 /**

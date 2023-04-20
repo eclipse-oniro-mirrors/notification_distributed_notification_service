@@ -100,41 +100,6 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishNotification_0100, Function | Medi
 }
 
 /*
- * @tc.name: PublishNotification_0200
- * @tc.desc: test PublishNotification ErrCode ERR_ANS_INVALID_PARAM.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitAnnexTest, PublishNotification_0200, Function | MediumTest | Level1)
-{
-    std::string deviceId = "this is deviceId";
-    NotificationRequest request;
-    request.SetContent(nullptr);
-
-    ErrCode ret1 = ans_->PublishNotification(request, deviceId);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: PublishNotification_0300
- * @tc.desc: test PublishNotification ErrCode ERR_ANS_INVALID_PARAM.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitAnnexTest, PublishNotification_0300, Function | MediumTest | Level1)
-{
-    std::string deviceId = "";
-    NotificationRequest request;
-    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
-    request.SetContent(content);
-    bool res = ans_->CanPublishMediaContent(request);
-    EXPECT_EQ(res, true);
-    ErrCode ret1 = ans_->PublishNotification(request, deviceId);
-    EXPECT_EQ(ret1, ERR_INVALID_OPERATION);
-}
-
-/*
  * @tc.name: PublishNotificationAsBundle_0100
  * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_INVALID_PARAM.
  * @tc.type: FUNC

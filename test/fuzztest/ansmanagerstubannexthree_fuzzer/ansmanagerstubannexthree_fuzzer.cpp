@@ -47,7 +47,6 @@ namespace OHOS {
         ansManagerStub.SetShowBadgeEnabledForBundle(bundleOption, allow);
         ansManagerStub.GetShowBadgeEnabledForBundle(bundleOption, allow);
         ansManagerStub.GetShowBadgeEnabled(allow);
-        ansManagerStub.AreNotificationsSuspended(allow);
         ansManagerStub.IsAllowedNotify(allow);
         ansManagerStub.IsAllowedNotifySelf(allow);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allow);

@@ -41,19 +41,6 @@ public:
     ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &notification) override;
 
     /**
-     * @brief Publishes a notification on a specified remote device.
-     * @note If a notification with the same ID has been published by the current application and has not been deleted,
-     *       this method will update the notification.
-     *
-     * @param notification Indicates the NotificationRequest object for setting the notification content.
-     *                This parameter must be specified.
-     * @param deviceId Indicates the ID of the remote device. If this parameter is null or an empty string,
-     *                 the notification will be published on the local device.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode PublishToDevice(const sptr<NotificationRequest> &notification, const std::string &deviceId) override;
-
-    /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
      * @param notificationId Indicates the ID of the notification to cancel.
@@ -408,14 +395,6 @@ public:
      */
     ErrCode Unsubscribe(const sptr<AnsSubscriberInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
-
-    /**
-     * @brief Obtains whether notifications are suspended.
-     *
-     * @param suspended Indicates the suspended status.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode AreNotificationsSuspended(bool &suspended) override;
 
     /**
      * @brief Checks whether this device is allowed to publish notifications.
