@@ -87,11 +87,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
         OHOS::Notification::NotificationHelper::GetActiveNotifications(param);
     });
 
-    callFunctionMap_.emplace("NotificationHelperGetCurrentAppSorting", []() {
-        sptr<OHOS::Notification::NotificationSortingMap> sortingMap = GetParamNotificationSortingMapSptr();
-        OHOS::Notification::NotificationHelper::GetCurrentAppSorting(sortingMap);
-    });
-
     callFunctionMap_.emplace("NotificationHelperSetNotificationAgent",
         []() { OHOS::Notification::NotificationHelper::SetNotificationAgent(GetStringParam()); });
 
@@ -439,12 +434,6 @@ void NotificationFuzzTestManager::RegisterNotificationSubscriber()
     callFunctionMap_.emplace("NotificationSubscriberOnSubscribeResult", []() {
         std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
         temp->OnConnected();
-    });
-
-    callFunctionMap_.emplace("NotificationSubscriberOnConsumedNotification", []() {
-        std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
-        const std::shared_ptr<OHOS::Notification::Notification> request = GetParamNotification();
-        temp->OnConsumed(request);
     });
 
     callFunctionMap_.emplace("NotificationSubscriberOnConsumedNotificationNotificationSortingMap", []() {

@@ -358,14 +358,6 @@ public:
      * @brief Override OnConsumed.
      *
      * @param request The Notification type point input parameter.
-     */
-    void OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request) override
-    {}
-
-    /**
-     * @brief Override OnConsumed.
-     *
-     * @param request The Notification type point input parameter.
      * @param sortingMap The NotificationSortingMap type point input parameter.
      */
     void OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request,

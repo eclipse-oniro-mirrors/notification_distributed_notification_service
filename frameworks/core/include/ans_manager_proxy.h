@@ -418,14 +418,6 @@ public:
     ErrCode AreNotificationsSuspended(bool &suspended) override;
 
     /**
-     * @brief Get the notification sorting status of the current app.
-     *
-     * @param sortingMap Indicates the NotificationSortingMap object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap) override;
-
-    /**
      * @brief Checks whether this device is allowed to publish notifications.
      *
      * @param allowed Indicates the flag that allows notification.

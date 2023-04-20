@@ -30,8 +30,6 @@ AnsSubscriberStub::AnsSubscriberStub()
         std::bind(&AnsSubscriberStub::HandleOnConnected, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_DISCONNECTED,
         std::bind(&AnsSubscriberStub::HandleOnDisconnected, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_CONSUMED,
-        std::bind(&AnsSubscriberStub::HandleOnConsumed, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_CONSUMED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnConsumedMap, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_CANCELED_MAP,
@@ -86,18 +84,6 @@ ErrCode AnsSubscriberStub::HandleOnConnected(MessageParcel &data, MessageParcel 
 ErrCode AnsSubscriberStub::HandleOnDisconnected(MessageParcel &data, MessageParcel &reply)
 {
     OnDisconnected();
-    return ERR_OK;
-}
-
-ErrCode AnsSubscriberStub::HandleOnConsumed(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<Notification> notification = data.ReadParcelable<Notification>();
-    if (!notification) {
-        ANS_LOGW("[HandleOnConsumed] fail: notification ReadParcelable failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    OnConsumed(notification);
     return ERR_OK;
 }
 
@@ -210,9 +196,6 @@ void AnsSubscriberStub::OnConnected()
 {}
 
 void AnsSubscriberStub::OnDisconnected()
-{}
-
-void AnsSubscriberStub::OnConsumed(const sptr<Notification> &notification)
 {}
 
 void AnsSubscriberStub::OnConsumed(

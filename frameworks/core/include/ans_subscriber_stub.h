@@ -52,13 +52,6 @@ public:
      * @brief The callback function on a notification published.
      *
      * @param notification Indicates the consumed notification.
-     */
-    void OnConsumed(const sptr<Notification> &notification) override;
-
-    /**
-     * @brief The callback function on a notification published.
-     *
-     * @param notification Indicates the consumed notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      */
     void OnConsumed(
@@ -107,7 +100,6 @@ private:
 
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDisconnected(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleOnConsumed(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnConsumedMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnCanceledMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnUpdated(MessageParcel &data, MessageParcel &reply);

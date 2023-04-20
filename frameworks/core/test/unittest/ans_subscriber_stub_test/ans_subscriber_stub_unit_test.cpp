@@ -168,36 +168,6 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnDisconnected, Function | SmallTest |
 }
 
 /**
-* @tc.name: HandleOnConsumed01
-* @tc.desc: test notification failed
-* @tc.type: Fun
-*/
-HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumed01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    ErrCode res = stub_->HandleOnConsumed(data, reply);
-    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
-* @tc.name: HandleOnConsumed02
-* @tc.desc: test notification success
-* @tc.type: Fun
-*/
-HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumed02, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    sptr<Notification> notification = new Notification();
-    data.WriteParcelable(notification);
-    ErrCode res = stub_->HandleOnConsumed(data, reply);
-    EXPECT_EQ(res, ERR_OK);
-}
-
-/**
 * @tc.name: HandleOnConsumedMap01
 * @tc.desc: test notification failed
 * @tc.type: Fun

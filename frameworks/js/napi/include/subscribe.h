@@ -41,13 +41,6 @@ public:
      * @brief Called back when a notification is canceled.
      *
      * @param request Indicates the received NotificationRequest object.
-     */
-    virtual void OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request) override;
-
-    /**
-     * @brief Called back when a notification is canceled.
-     *
-     * @param request Indicates the received NotificationRequest object.
      * @param sortingMap Indicates the sorting map used by the current subscriber to obtain notification ranking
      * information.
      */

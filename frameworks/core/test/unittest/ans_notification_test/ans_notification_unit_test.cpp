@@ -89,8 +89,6 @@ public:
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
@@ -260,9 +258,6 @@ HWTEST_F(AnsNotificationUnitTest, GetActiveNotificationNums_0100, Function | Med
     std::vector<sptr<NotificationRequest>> request;
     ErrCode ret2 = ans_->GetActiveNotifications(request);
     EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
-    sptr<NotificationSortingMap> sortingMap = new NotificationSortingMap();
-    ErrCode ret3 = ans_->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
     std::string agent = "this is agent";
     ErrCode ret4 = ans_->SetNotificationAgent(agent);
     EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);

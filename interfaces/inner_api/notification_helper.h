@@ -193,14 +193,6 @@ public:
     static ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request);
 
     /**
-     * @brief Obtains the map for sorting notifications of the current application.
-     *
-     * @param sortingMap Indicates the NotificationSortingMap object for the current application.
-     * @return Returns get current app sorting result.
-     */
-    static ErrCode GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap);
-
-    /**
      * @brief Allows another application to act as an agent to publish notifications in the name of your application
      * bundle.
      *

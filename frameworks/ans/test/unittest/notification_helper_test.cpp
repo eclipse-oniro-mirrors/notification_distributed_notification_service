@@ -302,20 +302,6 @@ HWTEST_F(NotificationHelperTest, GetActiveNotifications_00001, Function | SmallT
 }
 
 /**
- * @tc.name: GetCurrentAppSorting_00001
- * @tc.desc: Test GetCurrentAppSorting parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, GetCurrentAppSorting_00001, Function | SmallTest | Level1)
-{
-    sptr<NotificationSortingMap> sortingMap = nullptr;
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
  * @tc.name: SetNotificationAgent_00001
  * @tc.desc: Test SetNotificationAgent parameters.
  * @tc.type: FUNC

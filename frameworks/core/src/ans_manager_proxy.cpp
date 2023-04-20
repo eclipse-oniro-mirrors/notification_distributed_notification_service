@@ -1476,36 +1476,6 @@ ErrCode AnsManagerProxy::AreNotificationsSuspended(bool &suspended)
     return result;
 }
 
-ErrCode AnsManagerProxy::GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_CURRENT_APP_SORTING, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    sortingMap = reply.ReadParcelable<NotificationSortingMap>();
-    if (sortingMap == nullptr) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: read sortingMap failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::IsAllowedNotify(bool &allowed)
 {
     MessageParcel data;

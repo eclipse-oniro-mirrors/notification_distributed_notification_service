@@ -2188,25 +2188,6 @@ HWTEST_F(AnsManagerStubTest, HandleAreNotificationsSuspended01, Function | Small
 }
 
 /**
- * @tc.name: HandleGetCurrentAppSorting01
- * @tc.desc: Test HandleGetCurrentAppSorting succeed.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, HandleGetCurrentAppSorting01, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_CURRENT_APP_SORTING);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_OK);
-}
-
-/**
  * @tc.name: HandleIsAllowedNotify01
  * @tc.desc: Test HandleIsAllowedNotify succeed.
  * @tc.type: FUNC
@@ -3891,21 +3872,6 @@ HWTEST_F(AnsManagerStubTest, AreNotificationsSuspended01, Function | SmallTest |
     bool suspended = true;
 
     ErrCode result = ansManagerStub_->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
-}
-
-/**
- * @tc.name: GetCurrentAppSorting01
- * @tc.desc: Test GetCurrentAppSorting return.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, GetCurrentAppSorting01, Function | SmallTest | Level1)
-{
-    std::vector<NotificationSorting> sortingList;
-    sptr<NotificationSortingMap> sortingMap = new NotificationSortingMap(sortingList);
-
-    ErrCode result = ansManagerStub_->GetCurrentAppSorting(sortingMap);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

@@ -154,9 +154,6 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
         {AnsManagerStub::ARE_NOTIFICATION_SUSPENDED,
             std::bind(&AnsManagerStub::HandleAreNotificationsSuspended, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
-        {AnsManagerStub::GET_CURRENT_APP_SORTING,
-            std::bind(&AnsManagerStub::HandleGetCurrentAppSorting, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
         {AnsManagerStub::IS_ALLOWED_NOTIFY,
             std::bind(&AnsManagerStub::HandleIsAllowedNotify, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
@@ -1164,22 +1161,6 @@ ErrCode AnsManagerStub::HandleAreNotificationsSuspended(MessageParcel &data, Mes
     return ERR_OK;
 }
 
-ErrCode AnsManagerStub::HandleGetCurrentAppSorting(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<NotificationSortingMap> sortingMap;
-    ErrCode result = GetCurrentAppSorting(sortingMap);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleGetCurrentAppSorting] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.WriteParcelable(sortingMap)) {
-        ANS_LOGE("[HandleGetCurrentAppSorting] fail: write sortingMap failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
 ErrCode AnsManagerStub::HandleIsAllowedNotify(MessageParcel &data, MessageParcel &reply)
 {
     bool allowed = false;
@@ -2072,12 +2053,6 @@ ErrCode AnsManagerStub::Unsubscribe(const sptr<AnsSubscriberInterface> &subscrib
 ErrCode AnsManagerStub::AreNotificationsSuspended(bool &suspended)
 {
     ANS_LOGE("AnsManagerStub::AreNotificationsSuspended called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap)
-{
-    ANS_LOGE("AnsManagerStub::GetCurrentAppSorting called!");
     return ERR_INVALID_OPERATION;
 }
 

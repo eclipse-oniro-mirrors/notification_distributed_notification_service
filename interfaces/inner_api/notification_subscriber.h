@@ -50,13 +50,6 @@ public:
      * @brief Called back when the subscriber receives a new notification.
      *
      * @param request Indicates the received Notification object.
-     **/
-    virtual void OnConsumed(const std::shared_ptr<Notification> &request) = 0;
-
-    /**
-     * @brief Called back when the subscriber receives a new notification.
-     *
-     * @param request Indicates the received Notification object.
      * @param sortingMap Indicates the sorting map used by the current subscriber to obtain
      * notification ranking information.
      **/
@@ -123,8 +116,6 @@ private:
         void OnConnected() override;
 
         void OnDisconnected() override;
-
-        void OnConsumed(const sptr<Notification> &notification) override;
 
         void OnConsumed(
             const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
