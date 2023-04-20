@@ -19,7 +19,7 @@ group("ans_client") {
 }
 
 config("ans_innerkits_public_config") {
-  visibility = [ ":*" ]
+  visibility = [ "./../../*" ]
 
   include_dirs = [
     "${inner_api_path}",
