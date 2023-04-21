@@ -99,6 +99,43 @@
           "//base/notification/distributed_notification_service/tools:tools_shell"
         ]
       },
+      "inner_kits": [
+        {
+          "header": {
+            "header_base": "//base/notification/distributed_notification_service/interfaces/inner_api",
+            "header_files": [
+                "badge_number_callback_data.h",
+                "enabled_notification_callback_data.h",
+                "message_user.h",
+                "notification.h",
+                "notification_action_button.h",
+                "notification_basic_content.h",
+                "notification_bundle_option.h",
+                "notification_content.h",
+                "notification_conversational_content.h",
+                "notification_conversational_message.h",
+                "notification_distributed_options.h",
+                "notification_do_not_disturb_date.h",
+                "notification_flags.h",
+                "notification_helper.h",
+                "notification_long_text_content.h",
+                "notification_media_content.h",
+                "notification_multiline_content.h",
+                "notification_normal_content.h",
+                "notification_picture_content.h",
+                "notification_request.h",
+                "notification_slot.h",
+                "notification_sorting.h",
+                "notification_sorting_map.h",
+                "notification_subscribe_info.h",
+                "notification_subscriber.h",
+                "notification_template.h",
+                "notification_user_input.h"
+            ]
+          },
+          "name": "//base/notification/distributed_notification_service/frameworks/ans:ans_innerkits"
+        }
+      ],
       "test": [
         "//base/notification/distributed_notification_service/services/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/services/distributed/test/unittest:ans_unit_test",
