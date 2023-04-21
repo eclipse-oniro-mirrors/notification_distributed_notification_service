@@ -31,9 +31,6 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
         {AnsManagerStub::PUBLISH_NOTIFICATION,
             std::bind(
                 &AnsManagerStub::HandlePublish, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {AnsManagerStub::PUBLISH_NOTIFICATION_TO_DEVICE,
-            std::bind(&AnsManagerStub::HandlePublishToDevice, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
         {AnsManagerStub::CANCEL_NOTIFICATION,
             std::bind(
                 &AnsManagerStub::HandleCancel, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
@@ -150,9 +147,6 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
                 &AnsManagerStub::HandleSubscribe, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
         {AnsManagerStub::UNSUBSCRIBE_NOTIFICATION,
             std::bind(&AnsManagerStub::HandleUnsubscribe, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {AnsManagerStub::ARE_NOTIFICATION_SUSPENDED,
-            std::bind(&AnsManagerStub::HandleAreNotificationsSuspended, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
         {AnsManagerStub::IS_ALLOWED_NOTIFY,
             std::bind(&AnsManagerStub::HandleIsAllowedNotify, std::placeholders::_1, std::placeholders::_2,
@@ -309,28 +303,6 @@ ErrCode AnsManagerStub::HandlePublish(MessageParcel &data, MessageParcel &reply)
     ErrCode result = Publish(label, notification);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandlePublish] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AnsManagerStub::HandlePublishToDevice(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<NotificationRequest> notification = data.ReadParcelable<NotificationRequest>();
-    if (!notification) {
-        ANS_LOGE("[HandlePublishToDevice] fail: notification ReadParcelable failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    std::string deviceId;
-    if (!data.ReadString(deviceId)) {
-        ANS_LOGE("[HandlePublishToDevice] fail: read deviceId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = PublishToDevice(notification, deviceId);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandlePublishToDevice] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -1145,22 +1117,6 @@ ErrCode AnsManagerStub::HandleUnsubscribe(MessageParcel &data, MessageParcel &re
     return ERR_OK;
 }
 
-ErrCode AnsManagerStub::HandleAreNotificationsSuspended(MessageParcel &data, MessageParcel &reply)
-{
-    bool suspended = false;
-    ErrCode result = AreNotificationsSuspended(suspended);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleAreNotificationsSuspended] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.WriteBool(suspended)) {
-        ANS_LOGE("[HandleAreNotificationsSuspended] fail: write suspended failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
 ErrCode AnsManagerStub::HandleIsAllowedNotify(MessageParcel &data, MessageParcel &reply)
 {
     bool allowed = false;
@@ -1802,12 +1758,6 @@ ErrCode AnsManagerStub::Publish(const std::string &label, const sptr<Notificatio
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::PublishToDevice(const sptr<NotificationRequest> &notification, const std::string &deviceId)
-{
-    ANS_LOGE("AnsManagerStub::PublishToDevice called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::Cancel(int notificationId, const std::string &label)
 {
     ANS_LOGE("AnsManagerStub::Cancel called!");
@@ -2047,12 +1997,6 @@ ErrCode AnsManagerStub::Unsubscribe(const sptr<AnsSubscriberInterface> &subscrib
     const sptr<NotificationSubscribeInfo> &info)
 {
     ANS_LOGE("AnsManagerStub::Unsubscribe called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::AreNotificationsSuspended(bool &suspended)
-{
-    ANS_LOGE("AnsManagerStub::AreNotificationsSuspended called!");
     return ERR_INVALID_OPERATION;
 }
 

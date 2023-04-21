@@ -125,19 +125,6 @@ public:
     static ErrCode PublishNotification(const std::string &label, const NotificationRequest &request);
 
     /**
-     * @brief Publishes a notification on a specified remote device.
-     * @note If a notification with the same ID has been published by the current application and has not been deleted,
-     *       this method will update the notification.
-     *
-     * @param request Indicates the NotificationRequest object for setting the notification content.
-     *                This parameter must be specified.
-     * @param deviceId Indicates the ID of the remote device. If this parameter is null or an empty string,
-     *                 the notification will be published on the local device.
-     * @return Returns publish notification result.
-     */
-    static ErrCode PublishNotification(const NotificationRequest &request, const std::string &deviceId);
-
-    /**
      * @brief Cancels a published notification.
      *
      * @param notificationId Indicates the unique notification ID in the application.
@@ -278,15 +265,6 @@ public:
      * @return Returns set notifications enabled for default bundle result.
      */
     static ErrCode RequestEnableNotification(std::string &deviceId);
-
-    /**
-     * @brief Checks whether this application is in the suspended state.Applications in this state cannot publish
-     * notifications.
-     *
-     * @param suspended True if this application is suspended; false otherwise.
-     * @return Returns are notifications suspended.
-     */
-    static ErrCode AreNotificationsSuspended(bool &suspended);
 
     /**
      * @brief Checks whether this application has permission to modify the Do Not Disturb (DND) notification policy.

@@ -34,7 +34,6 @@ namespace OHOS {
         MessageOption flags;
         ansManagerStub.OnRemoteRequest(code, datas, reply, flags);
         ansManagerStub.HandlePublish(datas, reply);
-        ansManagerStub.HandlePublishToDevice(datas, reply);
         ansManagerStub.HandleCancel(datas, reply);
         ansManagerStub.HandleCancelAll(datas, reply);
         ansManagerStub.HandleCancelAsBundle(datas, reply);
@@ -79,7 +78,6 @@ namespace OHOS {
         ansManagerStub.HandleGetShowBadgeEnabled(datas, reply);
         ansManagerStub.HandleSubscribe(datas, reply);
         ansManagerStub.HandleUnsubscribe(datas, reply);
-        ansManagerStub.HandleAreNotificationsSuspended(datas, reply);
         ansManagerStub.HandleIsAllowedNotify(datas, reply);
         ansManagerStub.HandleIsAllowedNotifySelf(datas, reply);
         ansManagerStub.HandleIsSpecialBundleAllowedNotify(datas, reply);
@@ -110,7 +108,6 @@ namespace OHOS {
         const std::string label = "this is a notification label";
         ansManagerStub.Publish(label, notification);
         const std::string deviceId = "this is a notification deviceId";
-        ansManagerStub.PublishToDevice(notification, deviceId);
         int notificationId = 1;
         ansManagerStub.Cancel(notificationId, label);
         ansManagerStub.CancelAll();
@@ -167,8 +164,6 @@ namespace OHOS {
         ansManagerStub.SetShowBadgeEnabledForBundle(bundleOption, enabled);
         ansManagerStub.GetShowBadgeEnabledForBundle(bundleOption, enabled);
         ansManagerStub.GetShowBadgeEnabled(enabled);
-        bool suspended = true;
-        ansManagerStub.AreNotificationsSuspended(suspended);
         bool allowed = true;
         ansManagerStub.IsAllowedNotify(allowed);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allowed);

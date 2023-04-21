@@ -40,7 +40,6 @@ namespace OHOS {
         ansManagerStub.HandleGetShowBadgeEnabled(datas, reply);
         ansManagerStub.HandleSubscribe(datas, reply);
         ansManagerStub.HandleUnsubscribe(datas, reply);
-        ansManagerStub.HandleAreNotificationsSuspended(datas, reply);
         ansManagerStub.HandleIsAllowedNotify(datas, reply);
         ansManagerStub.HandleIsAllowedNotifySelf(datas, reply);
         ansManagerStub.HandleIsSpecialBundleAllowedNotify(datas, reply);

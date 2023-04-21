@@ -75,8 +75,6 @@ namespace OHOS {
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(types);
         request.SetSlotType(slotType);
 
-        Notification::NotificationHelper::PublishNotification(request, stringData);
-
         Notification::NotificationHelper::PublishNotification(request);
         // test GetActiveNotifications function
         sptr<Notification::NotificationRequest> requester = new Notification::NotificationRequest(request);

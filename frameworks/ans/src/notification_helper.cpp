@@ -70,11 +70,6 @@ ErrCode NotificationHelper::PublishNotification(const std::string &label, const 
     return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(label, request);
 }
 
-ErrCode NotificationHelper::PublishNotification(const NotificationRequest &request, const std::string &deviceId)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(request, deviceId);
-}
-
 ErrCode NotificationHelper::CancelNotification(int32_t notificationId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(notificationId);
@@ -152,11 +147,6 @@ ErrCode NotificationHelper::IsAllowedNotifySelf(bool &allowed)
 ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(deviceId);
-}
-
-ErrCode NotificationHelper::AreNotificationsSuspended(bool &suspended)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->AreNotificationsSuspended(suspended);
 }
 
 ErrCode NotificationHelper::HasNotificationPolicyAccessPermission(bool &hasPermission)
