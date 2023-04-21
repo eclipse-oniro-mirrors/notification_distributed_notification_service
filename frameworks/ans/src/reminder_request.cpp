@@ -15,6 +15,7 @@
 
 #include "reminder_request.h"
 
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_mgr_proxy.h"
@@ -1098,6 +1099,8 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         ANSR_LOGE("Failed to read buttonMapSize");
         return false;
     }
+
+    buttonMapSize = (buttonMapSize < MAX_ACTION_BUTTON_NUM) ? buttonMapSize : MAX_ACTION_BUTTON_NUM;
     for (uint64_t i = 0; i < buttonMapSize; i++) {
         uint8_t buttonType = static_cast<uint8_t>(ActionButtonType::INVALID);
         if (!parcel.ReadUint8(buttonType)) {

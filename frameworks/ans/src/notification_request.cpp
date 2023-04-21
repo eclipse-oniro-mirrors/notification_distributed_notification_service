@@ -44,6 +44,7 @@ const uint32_t NotificationRequest::COLOR_DEFAULT {0};
 const uint32_t NotificationRequest::COLOR_MASK {0xFF000000};
 const std::size_t NotificationRequest::MAX_USER_INPUT_HISTORY {5};
 const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
+const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
 
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
@@ -1357,6 +1358,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     }
 
     auto vsize = parcel.ReadUint64();
+    vsize = (vsize < NotificationRequest::MAX_ACTION_BUTTONS) ? vsize : NotificationRequest::MAX_ACTION_BUTTONS;
     for (uint64_t it = 0; it < vsize; ++it) {
         auto member = parcel.ReadParcelable<NotificationActionButton>();
         if (member == nullptr) {
@@ -1368,6 +1370,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     }
 
     vsize = parcel.ReadUint64();
+    vsize = (vsize < NotificationRequest::MAX_MESSAGE_USERS) ? vsize : NotificationRequest::MAX_MESSAGE_USERS;
     for (uint64_t it = 0; it < vsize; ++it) {
         auto member = parcel.ReadParcelable<MessageUser>();
         if (member == nullptr) {
@@ -1389,6 +1392,8 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         return false;
     }
     distributedOptions_ = *pOpt;
+    delete pOpt;
+    pOpt = nullptr;
 
     valid = parcel.ReadBool();
     if (valid) {

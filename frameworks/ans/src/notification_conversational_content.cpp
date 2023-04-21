@@ -14,6 +14,8 @@
  */
 
 #include "notification_conversational_content.h"
+
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 
 namespace OHOS {
@@ -253,8 +255,11 @@ bool NotificationConversationalContent::ReadFromParcel(Parcel &parcel)
         return false;
     }
     messageUser_ = *pUser;
+    delete pUser;
+    pUser = nullptr;
 
     auto vsize = parcel.ReadUint64();
+    vsize = (vsize < MAX_CONVERSATIONAL_NUM) ? vsize : MAX_CONVERSATIONAL_NUM;
     for (uint64_t it = 0; it < vsize; ++it) {
         auto valid = parcel.ReadBool();
         if (!valid) {
