@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+const int SET_BADGE_NUMBER_MAX_PARA = 2;
+
 napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
@@ -72,8 +74,21 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -147,8 +162,131 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
+        return Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetBadgeNumberParams &params)
+{
+    ANS_LOGI("enter");
+
+    size_t argc = SET_BADGE_NUMBER_MAX_PARA;
+    napi_value argv[SET_BADGE_NUMBER_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < SET_BADGE_NUMBER_MAX_PARA - 1) {
+        ANS_LOGW("Wrong number of arguments.");
+        return nullptr;
+    }
+
+    // argv[0]: badgeNumber
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype != napi_number) {
+        ANS_LOGW("Wrong argument type. Number expected.");
+        return nullptr;
+    }
+    napi_get_value_int32(env, argv[PARAM0], &params.badgeNumber);
+
+    // argv[1]:callback
+    if (argc >= SET_BADGE_NUMBER_MAX_PARA) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+        if (valuetype != napi_function) {
+            ANS_LOGW("Wrong argument type. Function expected.");
+            return nullptr;
+        }
+        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
+    }
+
+    return Common::NapiGetNull(env);
+}
+
+void AsyncCompleteCallbackNapiSetBadgeNumber(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGI("enter");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    AsyncCallbackSetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
+    Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+    if (asynccallbackinfo->info.callback != nullptr) {
+        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    }
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
+}
+
+napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
+{
+    ANS_LOGI("enter");
+    SetBadgeNumberParams params {};
+    if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackSetBadgeNumber *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackSetBadgeNumber {.env = env, .asyncWork = nullptr, .params = params};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "setBadgeNumber", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGI("SetBadgeNumber napi_create_async_work start");
+            AsyncCallbackSetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
+            if (asynccallbackinfo) {
+                ANS_LOGI("option.badgeNumber: %{public}d", asynccallbackinfo->params.badgeNumber);
+                asynccallbackinfo->info.errorCode = NotificationHelper::SetBadgeNumber(
+                    asynccallbackinfo->params.badgeNumber);
+            }
+        },
+        AsyncCompleteCallbackNapiSetBadgeNumber,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;

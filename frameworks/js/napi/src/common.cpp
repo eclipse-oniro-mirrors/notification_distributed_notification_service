@@ -25,6 +25,7 @@ std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> Common::wantAgen
 namespace {
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_PERMISSION_DENIED, "Permission denied"},
+    {ERROR_NOT_SYSTEM_APP, "The application isn't system application"},
     {ERROR_PARAM_INVALID, "Invalid parameter"},
     {ERROR_SYSTEM_CAP_ERROR, "SystemCapability not found"},
     {ERROR_INTERNAL_ERROR, "Internal error"},
@@ -38,6 +39,7 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_OVER_MAX_NUM_PER_SECOND, "Over max number notifications per second"},
     {ERROR_DISTRIBUTED_OPERATION_FAILED, "Distributed operation failed"},
     {ERROR_READ_TEMPLATE_CONFIG_FAILED, "Read template config failed"},
+    {ERROR_NO_MEMORY, "No memory space"},
     {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
 };
 }
@@ -1426,6 +1428,28 @@ napi_value Common::SetEnabledNotificationCallbackData(const napi_env &env, const
     napi_value enableNapi = nullptr;
     napi_get_boolean(env, data.GetEnable(), &enableNapi);
     napi_set_named_property(env, result, "enable", enableNapi);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetBadgeCallbackData(const napi_env &env, const BadgeNumberCallbackData &data,
+    napi_value &result)
+{
+    ANS_LOGI("enter");
+    // bundle: string
+    napi_value bundleNapi = nullptr;
+    napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
+
+    // uid: int32_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, data.GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
+
+    // badgeNumber: int32_t
+    napi_value badgeNapi = nullptr;
+    napi_create_int32(env, data.GetBadgeNumber(), &badgeNapi);
+    napi_set_named_property(env, result, "badgeNumber", badgeNapi);
 
     return NapiGetBoolean(env, true);
 }
@@ -4652,7 +4676,6 @@ napi_value Common::SetNotificationTemplateInfo(
     napi_create_string_utf8(env, templ->GetTemplateName().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "name", value);
 
-    // data?: {[key: string]: object};
     std::shared_ptr<AAFwk::WantParams> data = templ->GetTemplateData();
     if (data) {
         value = OHOS::AppExecFwk::WrapWantParams(env, *data);
@@ -4733,8 +4756,11 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
     int32_t ExternalCode = ERROR_INTERNAL_ERROR;
     switch (errCode) {
         case ERR_ANS_PERMISSION_DENIED:
-        case ERR_ANS_NON_SYSTEM_APP:
             ExternalCode = ERROR_PERMISSION_DENIED;
+            break;
+        case ERR_ANS_NON_SYSTEM_APP:
+        case ERR_ANS_NOT_SYSTEM_SERVICE:
+            ExternalCode = ERROR_NOT_SYSTEM_APP;
             break;
         case ERR_ANS_INVALID_PARAM:
         case ERR_ANS_INVALID_UID:
@@ -4743,6 +4769,8 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
             ExternalCode = ERROR_PARAM_INVALID;
             break;
         case ERR_ANS_NO_MEMORY:
+            ExternalCode = ERROR_NO_MEMORY;
+            break;
         case ERR_ANS_TASK_ERR:
             ExternalCode = ERROR_INTERNAL_ERROR;
             break;

@@ -31,9 +31,6 @@ namespace OHOS {
         std::string uri(data);
         std::shared_ptr<Uri> uriPtr = std::make_shared<Uri>(uri);
         notificationConversationalMessage.SetData(stringData, uriPtr);
-        nlohmann::json jsonObject;
-        notificationConversationalMessage.ToJson(jsonObject);
-        notificationConversationalMessage.FromJson(jsonObject);
         return true;
     }
 }

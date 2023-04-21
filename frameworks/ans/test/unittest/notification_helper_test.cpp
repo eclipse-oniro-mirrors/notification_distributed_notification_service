@@ -25,13 +25,34 @@
 #include "ans_inner_errors.h"
 #include "errors.h"
 #include "notification_helper.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
 class NotificationHelperTest : public testing::Test {
 public:
-    static void SetUpTestCase() {}
+    static void SetUpTestCase()
+    {
+        uint64_t tokenId;
+        const char **perms = new const char *[1];
+        perms[0] = "ohos.permission.NOTIFICATION_CONTROLLER";
+        NativeTokenInfoParams infoInstance = {
+            .dcapsNum = 0,
+            .permsNum = 1,
+            .aclsNum = 0,
+            .dcaps = nullptr,
+            .perms = perms,
+            .acls = nullptr,
+            .aplStr = "system_basic",
+        };
+
+        infoInstance.processName = "ans_reminder_unit_test";
+        tokenId = GetAccessTokenId(&infoInstance);
+        SetSelfTokenID(tokenId);
+        delete[] perms;
+    }
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
@@ -165,21 +186,6 @@ HWTEST_F(NotificationHelperTest, PublishNotification_00001, Function | SmallTest
 }
 
 /**
- * @tc.name: PublishNotification_00002
- * @tc.desc: Test PublishNotification parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, PublishNotification_00002, Function | SmallTest | Level1)
-{
-    NotificationRequest request;
-    std::string deviceId = "DeviceId";
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.PublishNotification(request, deviceId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
  * @tc.name: PublishNotification_00003
  * @tc.desc: Test PublishNotification parameters.
  * @tc.type: FUNC
@@ -249,7 +255,7 @@ HWTEST_F(NotificationHelperTest, CancelAsBundle_00001, Function | SmallTest | Le
     int32_t userId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_UID);
 }
 
 /**
@@ -278,20 +284,6 @@ HWTEST_F(NotificationHelperTest, GetActiveNotifications_00001, Function | SmallT
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetActiveNotifications(request);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
-}
-
-/**
- * @tc.name: GetCurrentAppSorting_00001
- * @tc.desc: Test GetCurrentAppSorting parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, GetCurrentAppSorting_00001, Function | SmallTest | Level1)
-{
-    sptr<NotificationSortingMap> sortingMap = nullptr;
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -419,20 +411,6 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RequestEnableNotification(deviceId);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
-}
-
-/**
- * @tc.name: AreNotificationsSuspended_00001
- * @tc.desc: Test AreNotificationsSuspended parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, AreNotificationsSuspended_00001, Function | SmallTest | Level1)
-{
-    bool suspended = true;
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
 /**
@@ -867,7 +845,7 @@ HWTEST_F(NotificationHelperTest, CancelContinuousTaskNotification_00001, Functio
     int32_t notificationId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelContinuousTaskNotification(label, notificationId);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**

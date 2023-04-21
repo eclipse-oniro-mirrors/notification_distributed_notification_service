@@ -30,7 +30,7 @@ bool AccessTokenHelper::VerifyNativeToken(const Security::AccessToken::AccessTok
     return callerToken == NATIVE_TOKEN;
 }
 
-bool AccessTokenHelper::IsSystemHap()
+bool AccessTokenHelper::IsSystemApp()
 {
     Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     if (tokenId == NATIVE_TOKEN) {

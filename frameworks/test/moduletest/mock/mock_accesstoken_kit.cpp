@@ -25,7 +25,7 @@ int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& 
 
 ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
 {
-    return TOKEN_INVALID;
+    return TOKEN_HAP;
 }
 } // namespace AccessToken
 } // namespace Security

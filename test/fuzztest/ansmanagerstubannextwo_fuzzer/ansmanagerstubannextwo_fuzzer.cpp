@@ -36,7 +36,6 @@ namespace OHOS {
         std::string stringData(data);
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
         ansManagerStub.Publish(stringData, notification);
-        ansManagerStub.PublishToDevice(notification, stringData);
         int notificationId = 1;
         ansManagerStub.Cancel(notificationId, stringData);
         ansManagerStub.CancelAll();

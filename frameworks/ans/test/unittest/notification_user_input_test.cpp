@@ -262,8 +262,9 @@ HWTEST_F(NotificationUserInputTest, Create_00004, Function | SmallTest | Level1)
     std::shared_ptr<AAFwk::WantParams> additional = nullptr;
     Notification::NotificationConstant::InputEditType editType =
         Notification::NotificationConstant::InputEditType::EDIT_ENABLED;
-    auto rrc = std::make_shared<NotificationUserInput>();
-    rrc->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+    std::shared_ptr<NotificationUserInput> notificationUserInput = std::make_shared<NotificationUserInput>();
+    ASSERT_NE(nullptr, notificationUserInput);
+    notificationUserInput->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
         additional, editType);
 }
 
@@ -287,8 +288,9 @@ HWTEST_F(NotificationUserInputTest, Create_00005, Function | SmallTest | Level1)
     std::shared_ptr<AAFwk::WantParams> additional = nullptr;
     Notification::NotificationConstant::InputEditType editType =
         Notification::NotificationConstant::InputEditType::EDIT_DISABLED;
-    auto rrc = std::make_shared<NotificationUserInput>();
-    rrc->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+    std::shared_ptr<NotificationUserInput> notificationUserInput = std::make_shared<NotificationUserInput>();
+    ASSERT_NE(nullptr, notificationUserInput);
+    notificationUserInput->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
         additional, editType);
 }
 
@@ -312,8 +314,9 @@ HWTEST_F(NotificationUserInputTest, Create_00006, Function | SmallTest | Level1)
     std::shared_ptr<AAFwk::WantParams> additional = std::make_shared<AAFwk::WantParams>();
     Notification::NotificationConstant::InputEditType editType =
         Notification::NotificationConstant::InputEditType::EDIT_DISABLED;
-    auto rrc = std::make_shared<NotificationUserInput>();
-    rrc->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+    std::shared_ptr<NotificationUserInput> notificationUserInput = std::make_shared<NotificationUserInput>();
+    ASSERT_NE(nullptr, notificationUserInput);
+    notificationUserInput->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
         additional, editType);
 }
 

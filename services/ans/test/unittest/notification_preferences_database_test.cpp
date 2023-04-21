@@ -402,6 +402,23 @@ HWTEST_F(NotificationPreferencesDatabaseTest, CheckKvStore_00100, Function | Sma
 }
 
 /**
+ * @tc.name      : CheckKvStore_00200
+ * @tc.number    :
+ * @tc.desc      : Check disturbe DB is exsit, return is false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, CheckKvStore_00300, Function | SmallTest | Level1)
+{
+    preferncesDB_->StoreDeathRecipient();
+    EXPECT_FALSE(preferncesDB_->CheckRdbStore());
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationSlot> slot2 = new NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
+    slots.push_back(slot1);
+    slots.push_back(slot2);
+    EXPECT_FALSE(preferncesDB_->PutSlotsToDisturbeDB(bundleName_, bundleUid_, slots));
+}
+
+/**
  * @tc.name      : PutBundlePropertyValueToDisturbeDB_00100
  * @tc.number    :
  * @tc.desc      : Put bundle property value to disturbeDB, return is true.
@@ -497,6 +514,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_name";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -513,6 +531,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_importance";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -529,6 +548,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_showBadge";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -545,6 +565,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_badgeTotalNum";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -561,6 +582,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_privateAllowed";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -577,6 +599,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_enabledNotification";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -593,6 +616,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_poppedDialog";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -609,6 +633,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_uid";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -625,6 +650,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00100, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_id";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -641,6 +667,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00200, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_name";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -657,6 +684,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00300, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_description";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -673,6 +701,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00400, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_level";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -689,6 +718,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00500, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_showBadge";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -705,6 +735,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00600, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_enableLight";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -721,6 +752,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00700, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_enableVibration";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -737,6 +769,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00800, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_ledLightColor";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -753,6 +786,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00900, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_lockscreenVisibleness";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -769,6 +803,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01000, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_sound";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -785,6 +820,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01100, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_vibrationSytle";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -801,6 +837,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01200, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_enableBypassDnd";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 
@@ -817,6 +854,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01300, Fun
     std::pair<std::string, std::string> entry;
     entry.first = "ans_bundle_bundleKey_slot_type_1_enabled";
     entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
 }
 

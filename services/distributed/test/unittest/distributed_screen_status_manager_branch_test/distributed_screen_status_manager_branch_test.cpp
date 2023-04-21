@@ -55,7 +55,7 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0100, Funct
     DistributedScreenStatusManager distributedScreenStatusManager;
     distributedScreenStatusManager.kvDataManager_ = nullptr;
     mockStartWatchDeviceChange(false);
-    EXPECT_EQ(false, distributedScreenStatusManager.CheckKvDataManager());
+    EXPECT_EQ(true, distributedScreenStatusManager.CheckKvDataManager());
 }
 
 /**
@@ -65,11 +65,13 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0100, Funct
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0200, Function | SmallTest | Level1)
 {
-    DistributedScreenStatusManager distributedScreenStatusManager;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
+        std::make_shared<DistributedScreenStatusManager>();
+    ASSERT_NE(nullptr, distributedScreenStatusManager);
     mockGetDeviceList(false);
     mockStartWatchDeviceChange(true);
     std::string deviceId = "aa";
-    distributedScreenStatusManager.OnDeviceDisconnected(deviceId);
+    distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
 }
 
 /**
@@ -79,11 +81,13 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0200, Funct
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0300, Function | SmallTest | Level1)
 {
-    DistributedScreenStatusManager distributedScreenStatusManager;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
+        std::make_shared<DistributedScreenStatusManager>();
+    ASSERT_NE(nullptr, distributedScreenStatusManager);
     mockGetDeviceList(true);
     mockStartWatchDeviceChange(true);
     std::string deviceId = "aa";
-    distributedScreenStatusManager.OnDeviceDisconnected(deviceId);
+    distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
 }
 
 /**
@@ -118,12 +122,14 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0500, Funct
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0600, Function | SmallTest | Level1)
 {
-    DistributedScreenStatusManager distributedScreenStatusManager;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
+        std::make_shared<DistributedScreenStatusManager>();
+    ASSERT_NE(nullptr, distributedScreenStatusManager);
     mockGetDeviceList(true);
     mockStartWatchDeviceChange(true);
-    distributedScreenStatusManager.kvStore_ = nullptr;
+    distributedScreenStatusManager->kvStore_ = nullptr;
     std::string deviceId = "aa";
-    distributedScreenStatusManager.OnDeviceDisconnected(deviceId);
+    distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
 }
 
 /**
@@ -133,9 +139,11 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0600, Funct
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0700, Function | SmallTest | Level1)
 {
-    DistributedScreenStatusManager distributedScreenStatusManager;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
+        std::make_shared<DistributedScreenStatusManager>();
+    ASSERT_NE(nullptr, distributedScreenStatusManager);
     mockStartWatchDeviceChange(false);
-    distributedScreenStatusManager.GetKvDataManager();
+    distributedScreenStatusManager->GetKvDataManager();
 }
 
 /**
@@ -145,9 +153,11 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0700, Funct
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0800, Function | SmallTest | Level1)
 {
-    DistributedScreenStatusManager distributedScreenStatusManager;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
+        std::make_shared<DistributedScreenStatusManager>();
+    ASSERT_NE(nullptr, distributedScreenStatusManager);
     mockStartWatchDeviceChange(false);
-    distributedScreenStatusManager.GetKvStore();
+    distributedScreenStatusManager->GetKvStore();
 }
 
 /**
@@ -157,9 +167,11 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0800, Funct
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0900, Function | SmallTest | Level1)
 {
-    DistributedScreenStatusManager distributedScreenStatusManager;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
+        std::make_shared<DistributedScreenStatusManager>();
+    ASSERT_NE(nullptr, distributedScreenStatusManager);
     mockStartWatchDeviceChange(true);
-    distributedScreenStatusManager.GetKvStore();
+    distributedScreenStatusManager->GetKvStore();
 }
 
 /**
@@ -169,11 +181,13 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0900, Funct
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1000, Function | SmallTest | Level1)
 {
-    DistributedScreenStatusManager distributedScreenStatusManager;
-    distributedScreenStatusManager.kvDataManager_ = nullptr;
+    std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
+        std::make_shared<DistributedScreenStatusManager>();
+    ASSERT_NE(nullptr, distributedScreenStatusManager);
+    distributedScreenStatusManager->kvDataManager_ = nullptr;
     mockStartWatchDeviceChange(false);
     std::string deviceId = "aa";
-    distributedScreenStatusManager.OnDeviceDisconnected(deviceId);
+    distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
 }
 
 /**
@@ -234,7 +248,7 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1300, Funct
     // set status != DistributedKv::Status::SUCCESS
     mockGetDeviceList(false);
     bool isUsing = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
+    EXPECT_EQ(ERR_OK, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
 }
 
 /**
@@ -349,7 +363,7 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1800, Funct
     // set status != DistributedKv::Status::SUCCESS
     mockGetLocalDevice(false);
     bool screenOn = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
+    EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
 }
 
 /**

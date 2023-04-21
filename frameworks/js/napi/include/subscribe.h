@@ -30,26 +30,12 @@ public:
      * @brief Called back when a notification is canceled.
      *
      * @param request Indicates the canceled NotificationRequest object.
-     */
-    virtual void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request) override;
-
-    /**
-     * @brief Called back when a notification is canceled.
-     *
-     * @param request Indicates the canceled NotificationRequest object.
      * @param sortingMap Indicates the sorting map used by the current subscriber to obtain notification ranking
      * information.
      * @param deleteReason Indicates the reason for the deletion. For details, see NotificationConstant.
      */
     virtual void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
-
-    /**
-     * @brief Called back when a notification is canceled.
-     *
-     * @param request Indicates the received NotificationRequest object.
-     */
-    virtual void OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request) override;
 
     /**
      * @brief Called back when a notification is canceled.
@@ -102,6 +88,13 @@ public:
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
 
     /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override;
+
+    /**
      * @brief Sets the callback information by type.
      *
      * @param env Indicates the environment that the API is invoked under.
@@ -129,6 +122,8 @@ private:
 
     void SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref);
+
 private:
     struct CallbackInfo {
         napi_env env = nullptr;
@@ -144,6 +139,7 @@ private:
     CallbackInfo disturbModeCallbackInfo_;
     CallbackInfo disturbDateCallbackInfo_;
     CallbackInfo enabledNotificationCallbackInfo_;
+    CallbackInfo setBadgeCallbackInfo_;
 };
 
 struct SubscriberInstancesInfo {

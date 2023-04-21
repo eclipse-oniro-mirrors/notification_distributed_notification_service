@@ -328,7 +328,6 @@ void NotificationSubscriberManager::NotifyConsumedInner(
             IsSystemUser(record->userId) ||  // Delete this, When the systemui subscribe carry the user ID.
             IsSystemUser(sendUserId))) {
             record->subscriber->OnConsumed(notification, notificationMap);
-            record->subscriber->OnConsumed(notification);
         }
     }
 }
@@ -351,7 +350,6 @@ void NotificationSubscriberManager::NotifyCanceledInner(
             IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
             IsSystemUser(sendUserId))) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
-            record->subscriber->OnCanceled(notification);
         }
     }
 }
@@ -381,6 +379,21 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     for (auto record : subscriberRecordList_) {
         record->subscriber->OnEnabledNotificationChanged(callbackData);
     }
+}
+
+void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
+{
+    if (handler_ == nullptr) {
+        ANS_LOGE("handler is nullptr");
+        return;
+    }
+
+    std::function<void()> setBadgeNumberFunc = [badgeData] () {
+        for (auto record : NotificationSubscriberManager::GetInstance()->subscriberRecordList_) {
+            record->subscriber->OnBadgeChanged(badgeData);
+        }
+    };
+    handler_->PostTask(setBadgeNumberFunc);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -18,6 +18,7 @@
 
 #include "iremote_broker.h"
 
+#include "badge_number_callback_data.h"
 #include "enabled_notification_callback_data.h"
 #include "notification.h"
 #include "notification_constant.h"
@@ -50,24 +51,10 @@ public:
      * @brief The callback function on a notification published.
      *
      * @param notification Indicates the consumed notification.
-     */
-    virtual void OnConsumed(const sptr<Notification> &notification) = 0;
-
-    /**
-     * @brief The callback function on a notification published.
-     *
-     * @param notification Indicates the consumed notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      */
     virtual void OnConsumed(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) = 0;
-
-    /**
-     * @brief The callback function on a notification canceled.
-     *
-     * @param notification Indicates the canceled notification.
-     */
-    virtual void OnCanceled(const sptr<Notification> &notification) = 0;
 
     /**
      * @brief The callback function on a notification canceled.
@@ -100,17 +87,24 @@ public:
      */
     virtual void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) = 0;
 
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    virtual void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) = 0;
+
 protected:
     enum TransactId : uint32_t {
         ON_CONNECTED = FIRST_CALL_TRANSACTION,
         ON_DISCONNECTED,
-        ON_CONSUMED,
+        ON_CONSUMED, // Obsolete
         ON_CONSUMED_MAP,
-        ON_CANCELED,
         ON_CANCELED_MAP,
         ON_UPDATED,
         ON_DND_DATE_CHANGED,
         ON_ENABLED_NOTIFICATION_CHANGED,
+        ON_BADGE_CHANGED,
     };
 };
 }  // namespace Notification

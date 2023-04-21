@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,8 +70,21 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
         (void *)asyncCallbackinfo,
         &asyncCallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asyncCallbackinfo->asyncWork));
-    if (asyncCallbackinfo->info.isCallback) {
+    bool isCallback = asyncCallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asyncCallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asyncCallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asyncCallbackinfo->info, Common::NapiGetNull(env));
+        if (asyncCallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asyncCallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asyncCallbackinfo->asyncWork);
+        delete asyncCallbackinfo;
+        asyncCallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;

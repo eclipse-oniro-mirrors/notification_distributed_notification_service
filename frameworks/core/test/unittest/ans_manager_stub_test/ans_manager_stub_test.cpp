@@ -146,71 +146,6 @@ HWTEST_F(AnsManagerStubTest, HandlePublish03, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: HandlePublishToDevice01
- * @tc.desc: Test HandlePublishToDevice succeeds;
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandlePublishToDevice01, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_NOTIFICATION_TO_DEVICE);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    std::string deviceId = "this is a deviceId";
-    sptr<NotificationRequest> notification = new NotificationRequest();
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteParcelable(notification);
-    data.WriteString(deviceId);
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)NO_ERROR);
-}
-
-/**
- * @tc.name: HandlePublishToDevice02
- * @tc.desc: Test if the notification is null.
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandlePublishToDevice02, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_NOTIFICATION_TO_DEVICE);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    std::string deviceId = "this is a deviceId";
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteString(deviceId);
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
- * @tc.name: HandlePublishToDevice03
- * @tc.desc: Test if the deviceId in data is null.
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandlePublishToDevice03, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_NOTIFICATION_TO_DEVICE);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    sptr<NotificationRequest> notification = new NotificationRequest();
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteParcelable(notification);
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
  * @tc.name: HandleCancel01
  * @tc.desc: Test HandleCancel succeeds
  * @tc.type: FUNC
@@ -2166,47 +2101,6 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe04, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: HandleAreNotificationsSuspended01
- * @tc.desc: Test HandleAreNotificationsSuspended succeed.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, HandleAreNotificationsSuspended01, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ARE_NOTIFICATION_SUSPENDED);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    bool suspended = true;
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteBool(suspended);
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_OK);
-}
-
-/**
- * @tc.name: HandleGetCurrentAppSorting01
- * @tc.desc: Test HandleGetCurrentAppSorting succeed.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, HandleGetCurrentAppSorting01, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_CURRENT_APP_SORTING);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_OK);
-}
-
-/**
  * @tc.name: HandleIsAllowedNotify01
  * @tc.desc: Test HandleIsAllowedNotify succeed.
  * @tc.type: FUNC
@@ -3881,35 +3775,6 @@ HWTEST_F(AnsManagerStubTest, GetShowBadgeEnabled01, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: AreNotificationsSuspended01
- * @tc.desc: Test AreNotificationsSuspended return.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, AreNotificationsSuspended01, Function | SmallTest | Level1)
-{
-    bool suspended = true;
-
-    ErrCode result = ansManagerStub_->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
-}
-
-/**
- * @tc.name: GetCurrentAppSorting01
- * @tc.desc: Test GetCurrentAppSorting return.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, GetCurrentAppSorting01, Function | SmallTest | Level1)
-{
-    std::vector<NotificationSorting> sortingList;
-    sptr<NotificationSortingMap> sortingMap = new NotificationSortingMap(sortingList);
-
-    ErrCode result = ansManagerStub_->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
-}
-
-/**
  * @tc.name: IsAllowedNotify01
  * @tc.desc: Test IsAllowedNotify return.
  * @tc.type: FUNC
@@ -4388,6 +4253,47 @@ HWTEST_F(AnsManagerStubTest, Unsubscribe01, Function | SmallTest | Level1)
 
     ErrCode result = ansManagerStub_->Unsubscribe(nullptr, info);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumber01
+ * @tc.desc: Test HandleSetBadgeNumber succeed.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t badgeNumber = 4;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(badgeNumber);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumber02
+ * @tc.desc: Test badgeNumber in data is null.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 }
 }

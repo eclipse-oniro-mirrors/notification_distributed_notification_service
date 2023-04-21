@@ -311,23 +311,11 @@ public:
         std::unique_lock<std::mutex> lck(mtx_);
         events_.push_back(event);
     }
-    void OnCanceled(const std::shared_ptr<Notification> &request) override
-    {
-        std::shared_ptr<OnOnCanceledEvent> event = std::make_shared<OnOnCanceledEvent>(request);
-        std::unique_lock<std::mutex> lck(mtx_);
-        events_.push_back(event);
-    }
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {
         std::shared_ptr<OnOnCanceledWithSortingMapAndDeleteReasonEvent> event =
             std::make_shared<OnOnCanceledWithSortingMapAndDeleteReasonEvent>(request, sortingMap, deleteReason);
-        std::unique_lock<std::mutex> lck(mtx_);
-        events_.push_back(event);
-    }
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {
-        std::shared_ptr<OnConsumedEvent> event = std::make_shared<OnConsumedEvent>(request);
         std::unique_lock<std::mutex> lck(mtx_);
         events_.push_back(event);
     }
@@ -340,6 +328,10 @@ public:
         std::unique_lock<std::mutex> lck(mtx_);
         events_.push_back(event);
     }
+
+    void SubscriberInstance::OnBadgeChanged(
+        const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
 
     std::list<std::shared_ptr<SubscriberEvent>> GetEvents()
     {

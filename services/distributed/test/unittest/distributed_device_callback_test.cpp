@@ -40,15 +40,19 @@ void DistributedDeviceCallbackTest::TearDown()
 {}
 
 void DistributedDeviceCallbackTest::OnConnected(const std::string &deviceId)
-{}
+{
+    EXPECT_EQ(deviceId, "device1");
+}
 
 void DistributedDeviceCallbackTest::OnDisconnected(const std::string &deviceId)
-{}
+{
+    EXPECT_EQ(deviceId, "device2");
+}
 
 /**
  * @tc.name      : DistributedDeviceCallback_00100
  * @tc.number    : DistributedDeviceCallback_00100
- * @tc.desc      : test OnDeviceChanged function and callback_.OnConnected is nullptr .
+ * @tc.desc      : test OnDeviceOnline function and callback_.OnConnected is nullptr .
  */
 HWTEST_F(DistributedDeviceCallbackTest, DistributedDeviceCallback_00100, Function | SmallTest | Level1)
 {
@@ -58,15 +62,15 @@ HWTEST_F(DistributedDeviceCallbackTest, DistributedDeviceCallback_00100, Functio
     };
     std::shared_ptr<DistributedDeviceCallback> deviceCallback_ =
         std::make_shared<DistributedDeviceCallback>(deviceCallback);
-    deviceCallback_->callback_.OnConnected = nullptr;
-    DistributedKv::DeviceInfo info;
-    deviceCallback_->OnDeviceChanged(info, DistributedKv::DeviceChangeType::DEVICE_ONLINE);
+    DistributedHardware::DmDeviceInfo info;
+    strcpy_s(info.deviceId, sizeof(info.deviceId) - 1, "device1");
+    deviceCallback_->OnDeviceOnline(info);
 }
 
 /**
  * @tc.name      : DistributedDeviceCallback_00200
  * @tc.number    : DistributedDeviceCallback_00200
- * @tc.desc      : test OnDeviceChanged function and callback_.OnDisconnected is nullptr .
+ * @tc.desc      : test OnDeviceOffline function and callback_.OnDisconnected is nullptr .
  */
 HWTEST_F(DistributedDeviceCallbackTest, DistributedDeviceCallback_00200, Function | SmallTest | Level1)
 {
@@ -76,9 +80,9 @@ HWTEST_F(DistributedDeviceCallbackTest, DistributedDeviceCallback_00200, Functio
     };
     std::shared_ptr<DistributedDeviceCallback> deviceCallback_ =
         std::make_shared<DistributedDeviceCallback>(deviceCallback);
-    deviceCallback_->callback_.OnDisconnected = nullptr;
-    DistributedKv::DeviceInfo info;
-    deviceCallback_->OnDeviceChanged(info, DistributedKv::DeviceChangeType::DEVICE_OFFLINE);
+    DistributedHardware::DmDeviceInfo info;
+    strcpy_s(info.deviceId, sizeof(info.deviceId) - 1, "device2");
+    deviceCallback_->OnDeviceOffline(info);
 }
 }  // namespace Notification
 }  // namespace OHOS

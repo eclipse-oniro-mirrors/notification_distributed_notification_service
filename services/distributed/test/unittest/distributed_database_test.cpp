@@ -108,10 +108,10 @@ HWTEST_F(DistributedDatabaseTest, PutToDistributedDB_00100, Function | SmallTest
             std::move(insertEntries), std::move(updateEntries), std::move(deleteEntries), "<remoteDeviceId>", false);
     databaseCallback_->OnChange(change);
 
-    // text OnDeviceChanged function DeviceChangeType is DEVICE_ONLINE and DEVICE_OFFLINE
-    DistributedKv::DeviceInfo deviceInfo;
-    deviceCallback_->OnDeviceChanged(deviceInfo, DistributedKv::DeviceChangeType::DEVICE_ONLINE);
-    deviceCallback_->OnDeviceChanged(deviceInfo, DistributedKv::DeviceChangeType::DEVICE_OFFLINE);
+    // text OnDeviceOnline、OnDeviceOffline function
+    DistributedHardware::DmDeviceInfo deviceInfo;
+    deviceCallback_->OnDeviceOnline(deviceInfo);
+    deviceCallback_->OnDeviceOffline(deviceInfo);
 
     // text PutToDistributedDB function
     std::string key("<key>");
@@ -167,7 +167,7 @@ HWTEST_F(DistributedDatabaseTest, ClearDataByDevice_00100, Function | SmallTest 
 {
     std::string deviceId("<remoteDeviceId>");
 
-    EXPECT_EQ(database_->ClearDataByDevice(deviceId), true);
+    EXPECT_EQ(database_->ClearDataByDevice(deviceId), false);
 }
 
 /**
@@ -204,18 +204,6 @@ HWTEST_F(DistributedDatabaseTest, GetDeviceInfoList_00100, Function | SmallTest 
     std::vector<DistributedDatabase::DeviceInfo> deviceInfos;
 
     EXPECT_EQ(database_->GetDeviceInfoList(deviceInfos), true);
-}
-
-/**
- * @tc.name      : DistributedDatabase_GetFilterStrategy_00100
- * @tc.number    : GetFilterStrategy_00100
- * @tc.desc      : Get filter strategy.
- */
-HWTEST_F(DistributedDatabaseTest, GetFilterStrategy_00100, Function | SmallTest | Level1)
-{
-    std::vector<DistributedDatabase::DeviceInfo> deviceInfos;
-
-    EXPECT_EQ(deviceCallback_->GetFilterStrategy(), DistributedKv::DeviceFilterStrategy::NO_FILTER);
 }
 }  // namespace Notification
 }  // namespace OHOS

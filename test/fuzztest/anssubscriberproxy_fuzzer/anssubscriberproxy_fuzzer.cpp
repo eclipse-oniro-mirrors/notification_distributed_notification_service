@@ -39,12 +39,8 @@ namespace OHOS {
         ansSubscriberProxy.OnDisconnected();
         // test InnerTransact function
         sptr<Notification::Notification> notification = new Notification::Notification();
-        ansSubscriberProxy.OnConsumed(notification);
-        // test InnerTransact function
         sptr<Notification::NotificationSortingMap> notificationMap = new Notification::NotificationSortingMap();
         ansSubscriberProxy.OnConsumed(notification, notificationMap);
-        // test OnCanceled function
-        ansSubscriberProxy.OnCanceled(notification);
         // test OnCanceled function
         int32_t deleteReason = 1;
         ansSubscriberProxy.OnCanceled(notification, notificationMap, deleteReason);

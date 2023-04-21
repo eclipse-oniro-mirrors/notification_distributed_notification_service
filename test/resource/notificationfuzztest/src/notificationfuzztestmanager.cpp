@@ -64,10 +64,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
         OHOS::Notification::NotificationHelper::PublishNotification(GetStringParam(), *GetParamNotificationRequest());
     });
 
-    callFunctionMap_.emplace("NotificationHelperPublishNotificationNotificationRequeststring", []() {
-        OHOS::Notification::NotificationHelper::PublishNotification(*GetParamNotificationRequest(), GetStringParam());
-    });
-
     callFunctionMap_.emplace("NotificationHelperCancelNotificationint32_t",
         []() { OHOS::Notification::NotificationHelper::CancelNotification(GetS32Param()); });
 
@@ -85,11 +81,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
     callFunctionMap_.emplace("NotificationHelperGetActiveNotifications", []() {
         std::vector<sptr<OHOS::Notification::NotificationRequest>> param = GetParamNotificationRequestVector();
         OHOS::Notification::NotificationHelper::GetActiveNotifications(param);
-    });
-
-    callFunctionMap_.emplace("NotificationHelperGetCurrentAppSorting", []() {
-        sptr<OHOS::Notification::NotificationSortingMap> sortingMap = GetParamNotificationSortingMapSptr();
-        OHOS::Notification::NotificationHelper::GetCurrentAppSorting(sortingMap);
     });
 
     callFunctionMap_.emplace("NotificationHelperSetNotificationAgent",
@@ -121,11 +112,6 @@ void NotificationFuzzTestManager::RegisterNotificationHelper()
     callFunctionMap_.emplace("NotificationHelperIsAllowedNotify", []() {
         bool allowed = GetBoolParam();
         OHOS::Notification::NotificationHelper::IsAllowedNotify(allowed);
-    });
-
-    callFunctionMap_.emplace("NotificationHelperAreNotificationsSuspended", []() {
-        bool suspended = GetBoolParam();
-        OHOS::Notification::NotificationHelper::AreNotificationsSuspended(suspended);
     });
 
     callFunctionMap_.emplace("NotificationHelperHasNotificationPolicyAccessPermission", []() {
@@ -428,11 +414,6 @@ void NotificationFuzzTestManager::RegisterNotificationSubscribeInfo()
 // RegisterNotificationSubscriber
 void NotificationFuzzTestManager::RegisterNotificationSubscriber()
 {
-    callFunctionMap_.emplace("NotificationSubscriberOnCanceledNotification", []() {
-        std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
-        temp->OnCanceled(GetParamNotification());
-    });
-
     callFunctionMap_.emplace("NotificationSubscriberOnCanceledNotificationNotificationSortingMapdeleteReason", []() {
         std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
         const std::shared_ptr<OHOS::Notification::Notification> request = GetParamNotification();
@@ -444,12 +425,6 @@ void NotificationFuzzTestManager::RegisterNotificationSubscriber()
     callFunctionMap_.emplace("NotificationSubscriberOnSubscribeResult", []() {
         std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
         temp->OnConnected();
-    });
-
-    callFunctionMap_.emplace("NotificationSubscriberOnConsumedNotification", []() {
-        std::shared_ptr<OHOS::Notification::NotificationSubscriber> temp = GetParamNotificationSubscriber();
-        const std::shared_ptr<OHOS::Notification::Notification> request = GetParamNotification();
-        temp->OnConsumed(request);
     });
 
     callFunctionMap_.emplace("NotificationSubscriberOnConsumedNotificationNotificationSortingMap", []() {

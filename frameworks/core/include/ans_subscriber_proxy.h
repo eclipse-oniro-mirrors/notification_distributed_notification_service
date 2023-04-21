@@ -42,24 +42,10 @@ public:
      * @brief The callback function on a notification published.
      *
      * @param notification Indicates the consumed notification.
-     */
-    void OnConsumed(const sptr<Notification> &notification) override;
-
-    /**
-     * @brief The callback function on a notification published.
-     *
-     * @param notification Indicates the consumed notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      */
     void OnConsumed(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
-
-    /**
-     * @brief The callback function on a notification canceled.
-     *
-     * @param notification Indicates the canceled notification.
-     */
-    void OnCanceled(const sptr<Notification> &notification) override;
 
     /**
      * @brief The callback function on a notification canceled.
@@ -91,6 +77,13 @@ public:
      * @param callbackData Indicates the EnabledNotificationCallbackData object.
      */
     void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 
 private:
     ErrCode InnerTransact(uint32_t code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);

@@ -18,13 +18,17 @@
 #include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
 #define private public
+#include "accesstoken_kit.h"
 #include "advanced_notification_service.h"
 #include "notification_subscriber.h"
 
 using namespace testing::ext;
+using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
+extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
+
 typedef std::function<void(const std::shared_ptr<Notification>, const std::shared_ptr<NotificationSortingMap>)>
     ConsumedFunc;
 typedef std::function<void(const std::shared_ptr<Notification>, const std::shared_ptr<NotificationSortingMap>, int)>
@@ -55,8 +59,6 @@ public:
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
-    void OnCanceled(const std::shared_ptr<Notification> &request) override
-    {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {
@@ -64,8 +66,6 @@ public:
             canceledCb_(request, sortingMap, deleteReason);
         }
     }
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {
@@ -73,6 +73,8 @@ public:
             consumedCb_(request, sortingMap);
         }
     }
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
 
     ConsumedFunc consumedCb_ = nullptr;
     CanceledFunc canceledCb_ = nullptr;
@@ -93,7 +95,6 @@ void AnsModuleTest::SetUpTestCase()
     passed = false;
     g_advancedNotificationService = new AdvancedNotificationService();
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
-    IPCSkeleton::SetCallingTokenID(1);
 }
 
 void AnsModuleTest::TearDownTestCase()
@@ -1087,7 +1088,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0049, Function | SmallTest | Level1)
     slots.push_back(reminderSlot);
     slots.push_back(contentSlot);
     slots.push_back(otherSlot);
-
+    
+    ASSERT_NE(nullptr, g_advancedNotificationService);
     g_advancedNotificationService->AddSlots(slots);
 }
 
@@ -1272,6 +1274,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0060, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundleName", 1);
     ASSERT_NE(bundleOption, nullptr);
 
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     // not allow publish notification
     g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle("", bundleOption, false);
     g_advancedNotificationService->Publish(label, req);
@@ -1320,6 +1323,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0061, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundleName", 1);
     ASSERT_NE(bundleOption, nullptr);
 
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     // allow publish notification
     g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle("", bundleOption, true);
     g_advancedNotificationService->Publish(label, req);

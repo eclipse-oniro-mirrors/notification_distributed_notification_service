@@ -163,44 +163,6 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     return ansManagerProxy_->Publish(label, reqPtr);
 }
 
-ErrCode AnsNotification::PublishNotification(const NotificationRequest &request, const std::string &deviceId)
-{
-    if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
-        ANS_LOGE("Refuse to publish the notification without valid content");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    if (!deviceId.empty() &&
-        (IsNonDistributedNotificationType(request.GetNotificationType()))) {
-        ANS_LOGE("Refuse to publish the conversational and picture notification to the remote device");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    if (!CanPublishMediaContent(request)) {
-        ANS_LOGE("Refuse to publish the notification because the sequence numbers actions not match those assigned to "
-                 "added action buttons.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode checkErr = CheckImageSize(request);
-    if (checkErr != ERR_OK) {
-        ANS_LOGE("The size of one picture exceeds the limit");
-        return checkErr;
-    }
-
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<NotificationRequest> reqPtr = new (std::nothrow) NotificationRequest(request);
-    if (reqPtr == nullptr) {
-        ANS_LOGE("Failed to create NotificationRequest ptr");
-        return ERR_ANS_NO_MEMORY;
-    }
-    return ansManagerProxy_->PublishToDevice(reqPtr, deviceId);
-}
-
 ErrCode AnsNotification::CancelNotification(int32_t notificationId)
 {
     return CancelNotification("", notificationId);
@@ -251,15 +213,6 @@ ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationReq
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return ansManagerProxy_->GetActiveNotifications(request);
-}
-
-ErrCode AnsNotification::GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ansManagerProxy_->GetCurrentAppSorting(sortingMap);
 }
 
 ErrCode AnsNotification::SetNotificationAgent(const std::string &agent)
@@ -381,15 +334,6 @@ ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId)
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return ansManagerProxy_->RequestEnableNotification(deviceId);
-}
-
-ErrCode AnsNotification::AreNotificationsSuspended(bool &suspended)
-{
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return ansManagerProxy_->AreNotificationsSuspended(suspended);
 }
 
 ErrCode AnsNotification::HasNotificationPolicyAccessPermission(bool &hasPermission)
@@ -1346,6 +1290,16 @@ ErrCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32_t user
     }
 
     return ansManagerProxy_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
+}
+
+ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("SetBadgeNumber fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetBadgeNumber(badgeNumber);
 }
 }  // namespace Notification
 }  // namespace OHOS

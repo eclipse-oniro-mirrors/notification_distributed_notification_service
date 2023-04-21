@@ -34,7 +34,7 @@ public:
     static bool VerifyCallerPermission(
         const Security::AccessToken::AccessTokenID &tokenCaller, const std::string &permission);
     static bool VerifyNativeToken(const Security::AccessToken::AccessTokenID &callerToken);
-    static bool IsSystemHap();
+    static bool IsSystemApp();
     static bool IsDlpHap(const Security::AccessToken::AccessTokenID &callerToken);
     static bool VerifyShellToken(const Security::AccessToken::AccessTokenID &callerToken);
 };

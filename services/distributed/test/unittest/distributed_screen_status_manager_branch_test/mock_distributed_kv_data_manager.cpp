@@ -46,34 +46,10 @@ DistributedKvDataManager::DistributedKvDataManager()
 DistributedKvDataManager::~DistributedKvDataManager()
 {}
 
-Status DistributedKvDataManager::GetDeviceList(std::vector<DeviceInfo> &deviceInfoList, DeviceFilterStrategy strategy)
-{
-    if (false == g_mockGetDeviceListRet) {
-        return Status::INVALID_ARGUMENT;
-    }
-    return Status::SUCCESS;
-}
-
 Status DistributedKvDataManager::GetSingleKvStore(const Options &options, const AppId &appId, const StoreId &storeId,
     std::shared_ptr<SingleKvStore> &singleKvStore)
 {
     return Status::INVALID_ARGUMENT;
-}
-
-Status DistributedKvDataManager::StartWatchDeviceChange(std::shared_ptr<DeviceStatusChangeListener> observer)
-{
-    if (false == g_mockStartWatchDeviceChangeRet) {
-        return Status::INVALID_ARGUMENT;
-    }
-    return Status::SUCCESS;
-}
-
-Status DistributedKvDataManager::GetLocalDevice(DeviceInfo &localDevice)
-{
-    if (false == g_mockGetLocalDeviceRet) {
-        return Status::INVALID_ARGUMENT;
-    }
-    return Status::SUCCESS;
 }
 }  // namespace DistributedKv
 }  // namespace OHOS

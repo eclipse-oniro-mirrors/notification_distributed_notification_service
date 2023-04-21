@@ -139,9 +139,10 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00700, Function | Sm
  */
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00800, Function | SmallTest | Level1)
 {
-    BundleManagerHelper bundleManagerHelper;
+    std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
+    ASSERT_NE(nullptr, bundleManagerHelper);
     mockGetSystemAbilityManager(true);
-    bundleManagerHelper.Connect();
+    bundleManagerHelper->Connect();
 }
 
 /**
@@ -151,10 +152,11 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00800, Function | Sm
  */
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00900, Function | SmallTest | Level1)
 {
-    BundleManagerHelper bundleManagerHelper;
+    std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
+    ASSERT_NE(nullptr, bundleManagerHelper);
     mockGetSystemAbilityManager(false);
     // test Connect and bundleMgr_ == nullptr
-    bundleManagerHelper.Connect();
+    bundleManagerHelper->Connect();
 }
 
 /**
@@ -164,11 +166,12 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00900, Function | Sm
  */
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01000, Function | SmallTest | Level1)
 {
-    BundleManagerHelper bundleManagerHelper;
+    std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
+    ASSERT_NE(nullptr, bundleManagerHelper);
     mockGetSystemAbilityManager(false);
-    bundleManagerHelper.Connect();
+    bundleManagerHelper->Connect();
     // test Connect and bundleMgr_ != nullptr
-    bundleManagerHelper.Connect();
+    bundleManagerHelper->Connect();
 }
 
 /**
@@ -178,10 +181,11 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01000, Function | Sm
  */
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01100, Function | SmallTest | Level1)
 {
-    BundleManagerHelper bundleManagerHelper;
+    std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
+    ASSERT_NE(nullptr, bundleManagerHelper);
     mockGetSystemAbilityManager(false);
-    bundleManagerHelper.Connect();
-    bundleManagerHelper.Disconnect();
+    bundleManagerHelper->Connect();
+    bundleManagerHelper->Disconnect();
 }
 
 /**
@@ -191,8 +195,9 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01100, Function | Sm
  */
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01200, Function | SmallTest | Level1)
 {
-    BundleManagerHelper bundleManagerHelper;
-    bundleManagerHelper.Disconnect();
+    std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
+    ASSERT_NE(nullptr, bundleManagerHelper);
+    bundleManagerHelper->Disconnect();
 }
 
 /**

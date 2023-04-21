@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ const std::string DIE = "onDestroy";
 const std::string DISTURB_MODE_CHANGE = "onDisturbModeChange";
 const std::string DISTURB_DATE_CHANGE = "onDoNotDisturbDateChange";
 const std::string ENABLE_NOTIFICATION_CHANGED = "OnEnabledNotificationChanged";
+const std::string BADGE_CHANGED = "OnBadgeChanged";
 
 struct NotificationReceiveDataWorker {
     napi_env env = nullptr;
@@ -39,6 +40,7 @@ struct NotificationReceiveDataWorker {
     std::shared_ptr<NotificationSortingMap> sortingMap;
     NotificationDoNotDisturbDate date;
     EnabledNotificationCallbackData callbackData;
+    BadgeNumberCallbackData badge;
     int32_t deleteReason = 0;
     int32_t result = 0;
     int32_t disturbMode = 0;
@@ -146,9 +148,6 @@ SubscriberInstance::~SubscriberInstance()
     }
 }
 
-void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request)
-{}
-
 void UvQueueWorkOnCanceled(uv_work_t *work, int status)
 {
     ANS_LOGI("OnCanceled uv_work_t start");
@@ -242,9 +241,6 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         work = nullptr;
     }
 }
-
-void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request)
-{}
 
 void UvQueueWorkOnConsumed(uv_work_t *work, int status)
 {
@@ -787,6 +783,89 @@ void SubscriberInstance::OnEnabledNotificationChanged(
     }
 }
 
+void UvQueueWorkOnBadgeChanged(uv_work_t *work, int status)
+{
+    ANS_LOGI("UvQueueWorkOnBadgeChanged uv_work_t start");
+
+    if (work == nullptr) {
+        ANS_LOGE("work is null");
+        return;
+    }
+
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    if (dataWorkerData == nullptr) {
+        ANS_LOGE("dataWorkerData is null");
+        delete work;
+        work = nullptr;
+        return;
+    }
+
+    napi_value result = nullptr;
+    napi_create_object(dataWorkerData->env, &result);
+
+    if (!Common::SetBadgeCallbackData(dataWorkerData->env, dataWorkerData->badge, result)) {
+        result = Common::NapiGetNull(dataWorkerData->env);
+    }
+
+    Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
+
+    delete dataWorkerData;
+    dataWorkerData = nullptr;
+    delete work;
+    work = nullptr;
+}
+
+void SubscriberInstance::OnBadgeChanged(
+    const std::shared_ptr<BadgeNumberCallbackData> &badgeData)
+{
+    ANS_LOGI("enter");
+
+    if (setBadgeCallbackInfo_.ref == nullptr) {
+        ANS_LOGI("setBadgeCallbackInfo_ callback unset");
+        return;
+    }
+
+    if (badgeData == nullptr) {
+        ANS_LOGE("badgeData is null");
+        return;
+    }
+
+    uv_loop_s *loop = nullptr;
+    napi_get_uv_event_loop(setBadgeCallbackInfo_.env, &loop);
+    if (loop == nullptr) {
+        ANS_LOGE("loop instance is nullptr");
+        return;
+    }
+
+    NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
+    if (dataWorker == nullptr) {
+        ANS_LOGE("new dataWorker failed");
+        return;
+    }
+
+    dataWorker->badge = *badgeData;
+    dataWorker->env = setBadgeCallbackInfo_.env;
+    dataWorker->ref = setBadgeCallbackInfo_.ref;
+
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        ANS_LOGE("new work failed");
+        delete dataWorker;
+        dataWorker = nullptr;
+        return;
+    }
+
+    work->data = reinterpret_cast<void *>(dataWorker);
+
+    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnBadgeChanged);
+    if (ret != 0) {
+        delete dataWorker;
+        dataWorker = nullptr;
+        delete work;
+        work = nullptr;
+    }
+}
+
 void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     canceCallbackInfo_.env = env;
@@ -841,6 +920,12 @@ void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const n
     disturbDateCallbackInfo_.ref = ref;
 }
 
+void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref)
+{
+    setBadgeCallbackInfo_.env = env;
+    setBadgeCallbackInfo_.ref = ref;
+}
+
 void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string &type, const napi_ref &ref)
 {
     if (type == CONSUME) {
@@ -861,6 +946,8 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
         SetDisturbDateCallbackInfo(env, ref);
     } else if (type == ENABLE_NOTIFICATION_CHANGED) {
         SetEnabledNotificationCallbackInfo(env, ref);
+    } else if (type == BADGE_CHANGED) {
+        SetBadgeCallbackInfo(env, ref);
     } else {
         ANS_LOGW("type is error");
     }
@@ -1016,6 +1103,20 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnEnabledNotificationChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, ENABLE_NOTIFICATION_CHANGED, result);
+    }
+
+    // onBadgeChanged?:(data: BadgeNumberCallbackData) => void
+    NAPI_CALL(env, napi_has_named_property(env, value, "onBadgeChanged", &hasProperty));
+    if (hasProperty) {
+        napi_value nOnBadgeChanged = nullptr;
+        napi_get_named_property(env, value, "onBadgeChanged", &nOnBadgeChanged);
+        NAPI_CALL(env, napi_typeof(env, nOnBadgeChanged, &valuetype));
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
+        napi_create_reference(env, nOnBadgeChanged, 1, &result);
+        subscriberInfo.subscriber->SetCallbackInfo(env, BADGE_CHANGED, result);
     }
 
     return Common::NapiGetNull(env);
@@ -1212,7 +1313,17 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return Common::JSParaError(env, callback);
+    }
 
     if (asynccallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);

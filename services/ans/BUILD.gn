@@ -23,6 +23,8 @@ config("public_ans_config") {
 }
 
 ohos_shared_library("libans") {
+  shlib_type = "sa"
+  version_script = "libans.map"
   include_dirs = [ "include" ]
 
   sources = [
@@ -54,7 +56,6 @@ ohos_shared_library("libans") {
   cflags = []
 
   deps = [
-    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${core_path}:ans_core",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
   ]
@@ -73,7 +74,9 @@ ohos_shared_library("libans") {
     "ability_runtime:ability_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "hitrace_native:hitrace_meter",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",

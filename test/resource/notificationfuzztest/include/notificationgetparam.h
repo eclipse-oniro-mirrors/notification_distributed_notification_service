@@ -347,27 +347,11 @@ public:
      * @brief Override OnCanceled.
      *
      * @param request The Notification type point input parameter.
-     */
-    void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request) override
-    {}
-
-    /**
-     * @brief Override OnCanceled.
-     *
-     * @param request The Notification type point input parameter.
      * @param request The NotificationSortingMap type point input parameter.
      * @param deleteReason The int type input parameter.
      */
     void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
         const std::shared_ptr<OHOS::Notification::NotificationSortingMap> &sortingMap, int deleteReason) override
-    {}
-
-    /**
-     * @brief Override OnConsumed.
-     *
-     * @param request The Notification type point input parameter.
-     */
-    void OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request) override
     {}
 
     /**

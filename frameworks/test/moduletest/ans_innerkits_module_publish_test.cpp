@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,8 @@ static sptr<ISystemAbilityManager> systemAbilityManager =
 bool OnConsumedReceived = false;
 bool OnCanceledReceived = false;
 bool OnWantReceived = false;
-const int32_t SLEEP_TIME = 5;
+bool OnBadgeNumberReceived = false;
+const int32_t SLEEP_TIME = 1;
 const uint64_t ACTIVE_NUMS = 2;
 const int32_t CASE_ONE = 1;
 const int32_t CASE_TWO = 2;
@@ -62,6 +63,7 @@ const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
 
 const int32_t CANCELGROUP_NID = 10101;
+const int32_t BADGE_NUMBER = 100;
 
 std::mutex g_subscribe_mtx;
 std::mutex g_consumed_mtx;
@@ -97,17 +99,14 @@ public:
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
 
-    void OnCanceled(const std::shared_ptr<Notification> &request) override
+    void OnCanceled(const std::shared_ptr<Notification> &request,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {
-        GTEST_LOG_(INFO) << "ANS_Interface_MT::OnCanceled request : " << request->GetNotificationRequest().Dump();
         OnCanceledReceived = true;
     }
 
-    void OnCanceled(const std::shared_ptr<Notification> &request,
-        const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
-    {}
-
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
+    void OnConsumed(const std::shared_ptr<Notification> &request,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {
         OnConsumedReceived = true;
         g_consumed_mtx.unlock();
@@ -153,9 +152,12 @@ public:
         }
     }
 
-    void OnConsumed(const std::shared_ptr<Notification> &request,
-        const std::shared_ptr<NotificationSortingMap> &sortingMap) override
-    {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {
+        GTEST_LOG_(INFO) << "ANS_Interface_MT::OnBadgeChanged badgeData : " << badgeData->Dump();
+        OnBadgeNumberReceived = true;
+        EXPECT_EQ(badgeData->GetBadgeNumber(), BADGE_NUMBER);
+    }
 
 private:
     void CheckCaseOneResult(NotificationRequest notificationRequest)
@@ -431,7 +433,7 @@ public:
 
 void AnsInnerKitsModulePublishTest::SetUpTestCase()
 {
-    RemoteNativeToken::SetNativeToken();
+    RemoteNativeToken::SetNativeToken("ans_innerkits_module_publish_test");
     sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
     systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
@@ -1479,6 +1481,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
     bool enable = false;
     NotificationBundleOption bo("bundleName", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, enable));
+    sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, enable));
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00100::end:" << enable;
     EXPECT_EQ(enable, false);
@@ -1513,12 +1516,14 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
     NotificationBundleOption bo("bundleName", 1);
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00200::end:" << enable;
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
+    sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, false);
     EXPECT_EQ((uint32_t)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, NotificationHelper::PublishNotification(req));
 
     enable = true;
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
+    sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, true);
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
@@ -1576,6 +1581,41 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    WaitOnUnsubscribeResult();
+}
+
+/**
+ * @tc.name: ANS_Interface_MT_SetBadgeNumber_00100
+ * @tc.desc: check SetBadgeNumber interface return value.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00100, Function | MediumTest | Level1)
+{
+    EXPECT_EQ(NotificationHelper::SetBadgeNumber(BADGE_NUMBER), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: ANS_Interface_MT_SetBadgeNumber_00200
+ * @tc.desc: check SetBadgeNumber interface return value.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00200, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    NotificationSubscribeInfo info = NotificationSubscribeInfo();
+    info.AddAppName("bundleName");
+    info.AddAppUserId(SUBSCRIBE_USER_ALL);
+    g_subscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    WaitOnSubscribeResult();
+
+    EXPECT_EQ(NotificationHelper::SetBadgeNumber(BADGE_NUMBER), (int)ERR_OK);
+    sleep(SLEEP_TIME);
+    EXPECT_EQ(OnBadgeNumberReceived, true);
+
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
     WaitOnUnsubscribeResult();
 }

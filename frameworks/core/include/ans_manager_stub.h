@@ -54,20 +54,6 @@ public:
     virtual ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &notification) override;
 
     /**
-     * @brief Publishes a notification on a specified remote device.
-     * @note If a notification with the same ID has been published by the current application and has not been deleted,
-     *       this method will update the notification.
-     *
-     * @param notification Indicates the NotificationRequest object for setting the notification content.
-     *                This parameter must be specified.
-     * @param deviceId Indicates the ID of the remote device. If this parameter is null or an empty string,
-     *                 the notification will be published on the local device.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode PublishToDevice(
-        const sptr<NotificationRequest> &notification, const std::string &deviceId) override;
-
-    /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
      * @param notificationId Indicates the ID of the notification to cancel.
@@ -429,22 +415,6 @@ public:
         const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
 
     /**
-     * @brief Obtains whether notifications are suspended.
-     *
-     * @param suspended Indicates the suspended status.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode AreNotificationsSuspended(bool &suspended) override;
-
-    /**
-     * @brief Get the notification sorting status of the current app.
-     *
-     * @param sortingMap Indicates the NotificationSortingMap object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap) override;
-
-    /**
      * @brief Checks whether this device is allowed to publish notifications.
      *
      * @param allowed Indicates the flag that allows notification.
@@ -703,12 +673,19 @@ public:
      */
     virtual ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) override;
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    virtual ErrCode SetBadgeNumber(int32_t badgeNumber) override;
+
 private:
     static const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandlePublishToDevice(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancel(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAll(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAsBundle(MessageParcel &data, MessageParcel &reply);
@@ -748,8 +725,6 @@ private:
     ErrCode HandleGetShowBadgeEnabled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSubscribe(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUnsubscribe(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleAreNotificationsSuspended(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetCurrentAppSorting(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsAllowedNotify(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsAllowedNotifySelf(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSpecialBundleAllowedNotify(MessageParcel &data, MessageParcel &reply);
@@ -781,6 +756,7 @@ private:
     ErrCode HandleGetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedSetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedGetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result);

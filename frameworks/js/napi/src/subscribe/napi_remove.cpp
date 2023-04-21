@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,24 +141,11 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-
-    if (asynccallbackinfo->info.isCallback) {
-        return Common::NapiGetNull(env);
-    } else {
-        return promise;
-    }
-}
-
-void AsyncCompleteCallbackNapiRemoveGroupByBundle(napi_env env, napi_status status, void *data)
-{
-    ANS_LOGI("enter");
-    if (!data) {
-        ANS_LOGE("Invalid async callback data");
-        return;
-    }
-    AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
-    if (asynccallbackinfo) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
@@ -167,50 +154,8 @@ void AsyncCompleteCallbackNapiRemoveGroupByBundle(napi_env env, napi_status stat
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
     }
-}
 
-napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
-{
-    ANS_LOGI("enter");
-    RemoveParamsGroupByBundle params {};
-    if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiGetUndefined(env);
-    }
-
-    AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoRemoveGroupByBundle {.env = env, .asyncWork = nullptr, .params = params};
-    if (!asynccallbackinfo) {
-        return Common::JSParaError(env, params.callback);
-    }
-    napi_value promise = nullptr;
-    Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
-
-    napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "removeGroupByBundle", NAPI_AUTO_LENGTH, &resourceName);
-    // Asynchronous function call
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
-            ANS_LOGI("RemoveGroupByBundle napi_create_async_work start");
-            AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
-                static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
-            if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle = %{public}s, option.uid = %{public}d, groupName = %{public}s",
-                    asynccallbackinfo->params.option.GetBundleName().c_str(),
-                    asynccallbackinfo->params.option.GetUid(),
-                    asynccallbackinfo->params.groupName.c_str());
-                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveGroupByBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.groupName);
-            }
-        },
-        AsyncCompleteCallbackNapiRemoveGroupByBundle,
-        (void *)asynccallbackinfo,
-        &asynccallbackinfo->asyncWork);
-
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;

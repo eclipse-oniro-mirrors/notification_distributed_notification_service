@@ -22,6 +22,7 @@
 #include "napi_enable_notification.h"
 #include "napi_get_active.h"
 #include "napi_publish.h"
+#include "napi_remove_group.h"
 #include "napi_slot.h"
 #include "napi_template.h"
 #include "pixel_map_napi.h"
@@ -44,6 +45,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("cancelAll", NapiCancelAll),
         DECLARE_NAPI_FUNCTION("cancelGroup", NapiCancelGroup),
         DECLARE_NAPI_FUNCTION("cancelAsBundle", NapiCancelAsBundle),
+        DECLARE_NAPI_FUNCTION("removeGroupByBundle", NapiRemoveGroupByBundle),
         DECLARE_NAPI_FUNCTION("addSlot", NapiAddSlot),
         DECLARE_NAPI_FUNCTION("addSlots", NapiAddSlots),
         DECLARE_NAPI_FUNCTION("setSlotByBundle", NapiSetSlotByBundle),
@@ -63,15 +65,17 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getActiveNotificationCount", NapiGetActiveNotificationCount),
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", NapiIsBadgeDisplayed),
+        DECLARE_NAPI_FUNCTION("setBadgeNumber", NapiSetBadgeNumber),
         DECLARE_NAPI_FUNCTION("isSupportTemplate", NapiIsSupportTemplate),
         DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", NapiSetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", NapiGetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", NapiSupportDoNotDisturbMode),
+        DECLARE_NAPI_FUNCTION("isSupportDoNotDisturbMode", NapiSupportDoNotDisturbMode),
         DECLARE_NAPI_FUNCTION("isDistributedEnabled", NapiIsDistributedEnabled),
         DECLARE_NAPI_FUNCTION("setDistributedEnable", NapiEnableDistributed),
         DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", NapiEnableDistributedByBundle),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", NapiEnableDistributedSelf),
-        DECLARE_NAPI_FUNCTION("isDistributedEnableByBundle", NapiIsDistributedEnableByBundle),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", NapiIsDistributedEnableByBundle),
         DECLARE_NAPI_FUNCTION("getDeviceRemindType", NapiGetDeviceRemindType),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),

@@ -19,7 +19,7 @@ group("ans_client") {
 }
 
 config("ans_innerkits_public_config") {
-  visibility = [ ":*" ]
+  visibility = [ "./../../*" ]
 
   include_dirs = [
     "${inner_api_path}",
@@ -41,6 +41,7 @@ ohos_shared_library("ans_innerkits") {
   ]
 
   sources = [
+    "src/badge_number_callback_data.cpp",
     "src/enabled_notification_callback_data.cpp",
     "src/message_user.cpp",
     "src/notification.cpp",

@@ -86,15 +86,13 @@ public:
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
-    void OnCanceled(const std::shared_ptr<Notification> &request) override
-    {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+    {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
 };
 
@@ -226,9 +224,6 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotification_0100, Function | MediumTes
     request.SetContent(content);
     ErrCode ret1 = ans_->PublishNotification(label, request);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    std::string deviceId = "this is deviceId";
-    ErrCode ret2 = ans_->PublishNotification(request, deviceId);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
     int32_t notificationId = 10;
     ErrCode ret3 = ans_->CancelNotification(label, notificationId);
     EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
@@ -260,9 +255,6 @@ HWTEST_F(AnsNotificationUnitTest, GetActiveNotificationNums_0100, Function | Med
     std::vector<sptr<NotificationRequest>> request;
     ErrCode ret2 = ans_->GetActiveNotifications(request);
     EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
-    sptr<NotificationSortingMap> sortingMap = new NotificationSortingMap();
-    ErrCode ret3 = ans_->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
     std::string agent = "this is agent";
     ErrCode ret4 = ans_->SetNotificationAgent(agent);
     EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
@@ -365,9 +357,6 @@ HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0100, Function | Med
     std::string deviceId = "this is deviceId";
     ErrCode ret1 = ans_->RequestEnableNotification(deviceId);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    bool suspended = true;
-    ErrCode ret2 = ans_->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
     bool hasPermission = true;
     ErrCode ret3 = ans_->HasNotificationPolicyAccessPermission(hasPermission);
     EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);

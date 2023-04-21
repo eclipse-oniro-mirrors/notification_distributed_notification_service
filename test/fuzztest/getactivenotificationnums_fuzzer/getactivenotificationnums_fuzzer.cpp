@@ -25,10 +25,6 @@ namespace OHOS {
         // test GetActiveNotificationNums function
         uint64_t num;
         Notification::NotificationHelper::GetActiveNotificationNums(num);
-        // test GetCurrentAppSorting function
-        const std::vector<Notification::NotificationSorting> sortingList;
-        sptr<Notification::NotificationSortingMap> map = new Notification::NotificationSortingMap(sortingList);
-        Notification::NotificationHelper::GetCurrentAppSorting(map);
         // test SetNotificationAgent function
         std::string stringData(data);
         Notification::NotificationHelper::SetNotificationAgent(stringData);

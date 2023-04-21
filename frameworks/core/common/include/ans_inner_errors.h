@@ -100,6 +100,7 @@ static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
 };
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
+const uint32_t ERROR_NOT_SYSTEM_APP    = 202;          // Not system application to call the interface.
 const uint32_t ERROR_PARAM_INVALID     = 401;          // Invalid input parameter.
 const uint32_t ERROR_SYSTEM_CAP_ERROR  = 801;          // The specified SystemCapability names was not found.
 
@@ -115,6 +116,7 @@ const int32_t ERROR_USER_NOT_EXIST               = 1600008;    // The user is no
 const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;    // Over max number notifications per second.
 const int32_t ERROR_DISTRIBUTED_OPERATION_FAILED = 1600010;    // Distributed operation failed.
 const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Read template config failed.
+const int32_t ERROR_NO_MEMORY                    = 1600012;    // No memory space.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification
 }  // namespace OHOS

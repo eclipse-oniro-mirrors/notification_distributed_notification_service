@@ -30,12 +30,8 @@ AnsSubscriberStub::AnsSubscriberStub()
         std::bind(&AnsSubscriberStub::HandleOnConnected, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_DISCONNECTED,
         std::bind(&AnsSubscriberStub::HandleOnDisconnected, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_CONSUMED,
-        std::bind(&AnsSubscriberStub::HandleOnConsumed, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_CONSUMED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnConsumedMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_CANCELED,
-        std::bind(&AnsSubscriberStub::HandleOnCanceled, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(ON_CANCELED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnCanceledMap, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(
@@ -46,6 +42,8 @@ AnsSubscriberStub::AnsSubscriberStub()
     interfaces_.emplace(ON_ENABLED_NOTIFICATION_CHANGED,
         std::bind(&AnsSubscriberStub::HandleOnEnabledNotificationChanged, this, std::placeholders::_1,
             std::placeholders::_2));
+    interfaces_.emplace(ON_BADGE_CHANGED,
+        std::bind(&AnsSubscriberStub::HandleOnBadgeChanged, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 AnsSubscriberStub::~AnsSubscriberStub()
@@ -89,18 +87,6 @@ ErrCode AnsSubscriberStub::HandleOnDisconnected(MessageParcel &data, MessageParc
     return ERR_OK;
 }
 
-ErrCode AnsSubscriberStub::HandleOnConsumed(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<Notification> notification = data.ReadParcelable<Notification>();
-    if (!notification) {
-        ANS_LOGW("[HandleOnConsumed] fail: notification ReadParcelable failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    OnConsumed(notification);
-    return ERR_OK;
-}
-
 ErrCode AnsSubscriberStub::HandleOnConsumedMap(MessageParcel &data, MessageParcel &reply)
 {
     sptr<Notification> notification = data.ReadParcelable<Notification>();
@@ -125,18 +111,6 @@ ErrCode AnsSubscriberStub::HandleOnConsumedMap(MessageParcel &data, MessageParce
     }
 
     OnConsumed(notification, notificationMap);
-    return ERR_OK;
-}
-
-ErrCode AnsSubscriberStub::HandleOnCanceled(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<Notification> notification = data.ReadParcelable<Notification>();
-    if (!notification) {
-        ANS_LOGW("[HandleOnCanceled] fail: notification ReadParcelable failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    OnCanceled(notification);
     return ERR_OK;
 }
 
@@ -207,20 +181,25 @@ ErrCode AnsSubscriberStub::HandleOnEnabledNotificationChanged(MessageParcel &dat
     return ERR_OK;
 }
 
+ErrCode AnsSubscriberStub::HandleOnBadgeChanged(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<BadgeNumberCallbackData> callbackData = data.ReadParcelable<BadgeNumberCallbackData>();
+    if (!callbackData) {
+        ANS_LOGW("[HandleOnBadgeChanged] fail: callbackData ReadParcelable failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    OnBadgeChanged(callbackData);
+    return ERR_OK;
+}
+
 void AnsSubscriberStub::OnConnected()
 {}
 
 void AnsSubscriberStub::OnDisconnected()
 {}
 
-void AnsSubscriberStub::OnConsumed(const sptr<Notification> &notification)
-{}
-
 void AnsSubscriberStub::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
-{}
-
-void AnsSubscriberStub::OnCanceled(const sptr<Notification> &notification)
 {}
 
 void AnsSubscriberStub::OnCanceled(
@@ -234,6 +213,9 @@ void AnsSubscriberStub::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDis
 {}
 
 void AnsSubscriberStub::OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
+{}
+
+void AnsSubscriberStub::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {}
 }  // namespace Notification
 }  // namespace OHOS

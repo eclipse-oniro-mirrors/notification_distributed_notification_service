@@ -35,12 +35,18 @@ ReminderEventManager::ReminderEventManager(std::shared_ptr<ReminderDataManager> 
 
 void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDataManager) const
 {
+    MatchingSkills customMatchingSkills;
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
+    CommonEventSubscribeInfo customSubscriberInfo(customMatchingSkills);
+    customSubscriberInfo.SetPermission("ohos.permission.GRANT_SENSITIVE_PERMISSIONS");
+    auto customSubscriber = std::make_shared<ReminderEventCustomSubscriber>(customSubscriberInfo, reminderDataManager);
+
     MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
@@ -53,7 +59,8 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     auto subscriber = std::make_shared<ReminderEventSubscriber>(subscriberInfo, reminderDataManager);
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    if (CommonEventManager::SubscribeCommonEvent(subscriber)) {
+    if (CommonEventManager::SubscribeCommonEvent(subscriber) &&
+        CommonEventManager::SubscribeCommonEvent(customSubscriber)) {
         ANSR_LOGD("SubscribeCommonEvent ok");
     } else {
         ANSR_LOGD("SubscribeCommonEvent fail");
@@ -84,7 +91,14 @@ ReminderEventManager::ReminderEventSubscriber::ReminderEventSubscriber(
     reminderDataManager_ = reminderDataManager;
 }
 
-void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
+ReminderEventManager::ReminderEventCustomSubscriber::ReminderEventCustomSubscriber(
+    const CommonEventSubscribeInfo &subscriberInfo,
+    std::shared_ptr<ReminderDataManager> &reminderDataManager) : CommonEventSubscriber(subscriberInfo)
+{
+    reminderDataManager_ = reminderDataManager;
+}
+
+void ReminderEventManager::ReminderEventCustomSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
     Want want = data.GetWant();
     std::string action = want.GetAction();
@@ -113,6 +127,13 @@ void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFw
         reminderDataManager_->CloseReminder(want, false);
         return;
     }
+}
+
+void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
+{
+    Want want = data.GetWant();
+    std::string action = want.GetAction();
+    ANSR_LOGI("Recieved common event:%{public}s", action.c_str());
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
         reminderDataManager_->Init(true);
         return;

@@ -24,26 +24,32 @@ DistributedDeviceCallback::DistributedDeviceCallback(const IDeviceChange &callba
 DistributedDeviceCallback::~DistributedDeviceCallback()
 {}
 
-void DistributedDeviceCallback::OnDeviceChanged(
-    const DistributedKv::DeviceInfo &info, const DistributedKv::DeviceChangeType &type) const
+void DistributedDeviceCallback::OnDeviceOnline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
-    if (type == DistributedKv::DeviceChangeType::DEVICE_ONLINE) {
-        ANS_LOGD("device %{public}s is ONLINE", info.deviceId.c_str());
-        if (callback_.OnConnected) {
-            callback_.OnConnected(info.deviceId);
-        }
-    }
-
-    if (type == DistributedKv::DeviceChangeType::DEVICE_OFFLINE) {
-        if (callback_.OnDisconnected) {
-            callback_.OnDisconnected(info.deviceId);
-        }
+    ANS_LOGI("start");
+    if (callback_.OnConnected) {
+        ANS_LOGI("device %{public}s is online", deviceInfo.deviceId);
+        callback_.OnConnected(deviceInfo.deviceId);
     }
 }
-DistributedKv::DeviceFilterStrategy DistributedDeviceCallback::GetFilterStrategy() const
+
+void DistributedDeviceCallback::OnDeviceOffline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
-    return DistributedKv::DeviceFilterStrategy::NO_FILTER;
+    ANS_LOGI("start");
+    if (callback_.OnConnected) {
+        ANS_LOGI("device %{public}s is offline", deviceInfo.deviceId);
+        callback_.OnDisconnected(deviceInfo.deviceId);
+    }
+}
+
+void DistributedDeviceCallback::OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo)
+{
+    ANS_LOGI("device %{public}s is changed", deviceInfo.deviceId);
+}
+
+void DistributedDeviceCallback::OnDeviceReady(const DistributedHardware::DmDeviceInfo &deviceInfo)
+{
+    ANS_LOGI("device %{public}s is ready", deviceInfo.deviceId);
 }
 }  // namespace Notification
 }  // namespace OHOS

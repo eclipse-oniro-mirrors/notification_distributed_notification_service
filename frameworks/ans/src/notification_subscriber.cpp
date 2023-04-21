@@ -59,24 +59,12 @@ void NotificationSubscriber::SubscriberImpl::OnDisconnected()
     subscriber_.OnDisconnected();
 }
 
-void NotificationSubscriber::SubscriberImpl::OnConsumed(const sptr<Notification> &notification)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    subscriber_.OnConsumed(std::make_shared<Notification>(*notification));
-}
-
 void NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnConsumed(
         std::make_shared<Notification>(*notification), std::make_shared<NotificationSortingMap>(*notificationMap));
-}
-
-void NotificationSubscriber::SubscriberImpl::OnCanceled(const sptr<Notification> &notification)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    subscriber_.OnCanceled(std::make_shared<Notification>(*notification));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnCanceled(
@@ -103,6 +91,12 @@ void NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+}
+
+void NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    subscriber_.OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
 }
 
 bool NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()

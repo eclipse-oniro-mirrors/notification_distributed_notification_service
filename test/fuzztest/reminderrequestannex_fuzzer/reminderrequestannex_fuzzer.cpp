@@ -63,9 +63,6 @@ namespace OHOS {
         reminderRequest.UpdateNextReminder();
         reminderRequest.SetNextTriggerTime();
         Parcel parcel;
-        reminderRequest.Marshalling(parcel);
-        reminderRequest.Unmarshalling(parcel);
-        reminderRequest.ReadFromParcel(parcel);
         reminderRequest.InitNotificationRequest();
         reminderRequest.InitServerObj();
         return reminderRequest.IsAlerting();

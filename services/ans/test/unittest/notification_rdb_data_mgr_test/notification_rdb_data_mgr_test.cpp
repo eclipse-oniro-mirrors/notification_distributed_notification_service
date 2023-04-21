@@ -154,7 +154,7 @@ class RdbStoreTest : public RdbStore {
             return nullptr;
         };
         virtual std::shared_ptr<ResultSet> RemoteQuery(const std::string &device,
-            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns)
+            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns, int &errCode)
         {
             return nullptr;
         };
@@ -226,29 +226,30 @@ class RdbStoreTest : public RdbStore {
             return NativeRdb::E_ERROR;
         };
 
-        virtual bool SetDistributedTables(const std::vector<std::string>& tables)
+        virtual int SetDistributedTables(const std::vector<std::string>& tables)
         {
-            return false;
+            return E_ERROR;
         };
 
-        virtual std::string ObtainDistributedTableName(const std::string& device, const std::string& table)
+        virtual std::string ObtainDistributedTableName(
+            const std::string &device, const std::string &table, int &errCode)
         {
             return "";
         }
 
-        virtual bool Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const SyncCallback& callback)
+        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const SyncCallback& callback)
         {
-            return false;
+            return E_ERROR;
         };
 
-        virtual bool Subscribe(const SubscribeOption& option, RdbStoreObserver *observer)
+        virtual int Subscribe(const SubscribeOption& option, RdbStoreObserver *observer)
         {
-            return false;
+            return E_ERROR;
         };
 
-        virtual bool UnSubscribe(const SubscribeOption& option, RdbStoreObserver *observer)
+        virtual int UnSubscribe(const SubscribeOption& option, RdbStoreObserver *observer)
         {
-            return false;
+            return E_ERROR;
         };
 
         virtual bool DropDeviceData(const std::vector<std::string>& devices, const DropOption& option)

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AsyncCallback } from './basic';
+import { AsyncCallback } from './@ohos.base';
 import notification from './@ohos.notification';
 import { NotificationSlot } from './notification/notificationSlot';
 

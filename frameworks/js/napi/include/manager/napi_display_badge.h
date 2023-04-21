@@ -21,8 +21,21 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
+struct SetBadgeNumberParams {
+    int32_t badgeNumber = 0;
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackSetBadgeNumber {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    SetBadgeNumberParams params;
+    CallbackPromiseInfo info;
+};
+
 napi_value NapiDisplayBadge(napi_env env, napi_callback_info info);
 napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info);
+napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_DISPLAY_BADGE_H

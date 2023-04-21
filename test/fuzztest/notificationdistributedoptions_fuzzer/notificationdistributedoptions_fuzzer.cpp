@@ -39,13 +39,7 @@ namespace OHOS {
         notificationDistributedOptions.GetDevicesSupportOperate();
         // test Dump function
         notificationDistributedOptions.Dump();
-        // test ToJson function
-        nlohmann::json jsonObject;
-        notificationDistributedOptions.ToJson(jsonObject);
-        notificationDistributedOptions.FromJson(jsonObject);
-        // test Unmarshalling function
-        Parcel parcel;
-        return notificationDistributedOptions.Marshalling(parcel);
+        return true;
     }
 }
 

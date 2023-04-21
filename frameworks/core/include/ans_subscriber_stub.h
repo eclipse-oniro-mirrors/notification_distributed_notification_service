@@ -52,24 +52,10 @@ public:
      * @brief The callback function on a notification published.
      *
      * @param notification Indicates the consumed notification.
-     */
-    void OnConsumed(const sptr<Notification> &notification) override;
-
-    /**
-     * @brief The callback function on a notification published.
-     *
-     * @param notification Indicates the consumed notification.
      * @param notificationMap Indicates the NotificationSortingMap object.
      */
     void OnConsumed(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
-
-    /**
-     * @brief The callback function on a notification canceled.
-     *
-     * @param notification Indicates the canceled notification.
-     */
-    void OnCanceled(const sptr<Notification> &notification) override;
 
     /**
      * @brief The callback function on a notification canceled.
@@ -102,18 +88,24 @@ public:
      */
     void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
+
 private:
     std::map<uint32_t, std::function<ErrCode(MessageParcel &, MessageParcel &)>> interfaces_;
 
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDisconnected(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleOnConsumed(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnConsumedMap(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleOnCanceled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnCanceledMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnUpdated(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDoNotDisturbDateChange(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnEnabledNotificationChanged(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleOnBadgeChanged(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace Notification
 }  // namespace OHOS

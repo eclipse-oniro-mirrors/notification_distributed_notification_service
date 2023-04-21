@@ -52,19 +52,6 @@ public:
     virtual ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &notification) = 0;
 
     /**
-     * @brief Publishes a notification on a specified remote device.
-     * @note If a notification with the same ID has been published by the current application and has not been deleted,
-     *       this method will update the notification.
-     *
-     * @param notification Indicates the NotificationRequest object for setting the notification content.
-     *                This parameter must be specified.
-     * @param deviceId Indicates the ID of the remote device. If this parameter is null or an empty string,
-     *                 the notification will be published on the local device.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode PublishToDevice(const sptr<NotificationRequest> &notification, const std::string &deviceId) = 0;
-
-    /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
      * @param notificationId Indicates the ID of the notification to cancel.
@@ -422,22 +409,6 @@ public:
         const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) = 0;
 
     /**
-     * @brief Obtains whether notifications are suspended.
-     *
-     * @param suspended Indicates the suspended status.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode AreNotificationsSuspended(bool &suspended) = 0;
-
-    /**
-     * @brief Get the notification sorting status of the current app.
-     *
-     * @param sortingMap Indicates the NotificationSortingMap object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap) = 0;
-
-    /**
      * @brief Checks whether this device is allowed to publish notifications.
      *
      * @param allowed Indicates the flag that allows notification.
@@ -693,10 +664,18 @@ public:
      */
     virtual ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) = 0;
 
+    /**
+     * @brief Set badge number.
+     *
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number result.
+     */
+    virtual ErrCode SetBadgeNumber(int32_t badgeNumber) = 0;
+
 protected:
     enum TransactId : uint32_t {
         PUBLISH_NOTIFICATION = FIRST_CALL_TRANSACTION,
-        PUBLISH_NOTIFICATION_TO_DEVICE,
+        PUBLISH_NOTIFICATION_TO_DEVICE, // Obsolete
         CANCEL_NOTIFICATION,
         CANCEL_ALL_NOTIFICATIONS,
         CANCEL_AS_BUNDLE,
@@ -741,8 +720,8 @@ protected:
         GET_SHOW_BADGE_ENABLED,
         SUBSCRIBE_NOTIFICATION,
         UNSUBSCRIBE_NOTIFICATION,
-        ARE_NOTIFICATION_SUSPENDED,
-        GET_CURRENT_APP_SORTING,
+        ARE_NOTIFICATION_SUSPENDED, // Obsolete
+        GET_CURRENT_APP_SORTING,    // Obsolete
         IS_ALLOWED_NOTIFY,
         IS_ALLOWED_NOTIFY_SELF,
         IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY,
@@ -773,7 +752,8 @@ protected:
         SET_ENABLED_FOR_BUNDLE_SLOT,
         GET_ENABLED_FOR_BUNDLE_SLOT,
         SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
-        GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP
+        GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
+        SET_BADGE_NUMBER
     };
 };
 }  // namespace Notification

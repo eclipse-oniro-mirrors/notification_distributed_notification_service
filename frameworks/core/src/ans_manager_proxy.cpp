@@ -73,45 +73,6 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
     return result;
 }
 
-ErrCode AnsManagerProxy::PublishToDevice(const sptr<NotificationRequest> &notification, const std::string &deviceId)
-{
-    if (notification == nullptr) {
-        ANS_LOGE("[PublishToDevice] fail: notification is null ptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[PublishToDevice] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteParcelable(notification)) {
-        ANS_LOGE("[PublishToDevice] fail: write notification parcelable failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteString(deviceId)) {
-        ANS_LOGE("[PublishToDevice] fail: write deviceId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(PUBLISH_NOTIFICATION_TO_DEVICE, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[PublishToDevice] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[PublishToDevice] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label)
 {
     MessageParcel data;
@@ -1447,65 +1408,6 @@ ErrCode AnsManagerProxy::Unsubscribe(
     return result;
 }
 
-ErrCode AnsManagerProxy::AreNotificationsSuspended(bool &suspended)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[AreNotificationsSuspended] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(ARE_NOTIFICATION_SUSPENDED, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[AreNotificationsSuspended] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[AreNotificationsSuspended] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.ReadBool(suspended)) {
-        ANS_LOGE("[AreNotificationsSuspended] fail: read suspended failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
-ErrCode AnsManagerProxy::GetCurrentAppSorting(sptr<NotificationSortingMap> &sortingMap)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_CURRENT_APP_SORTING, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    sortingMap = reply.ReadParcelable<NotificationSortingMap>();
-    if (sortingMap == nullptr) {
-        ANS_LOGE("[GetCurrentAppSorting] fail: read sortingMap failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::IsAllowedNotify(bool &allowed)
 {
     MessageParcel data;
@@ -2657,6 +2559,35 @@ ErrCode AnsManagerProxy::ShellDump(const std::string &cmd, const std::string &bu
         ANS_LOGE("[ShellDump] fail: read dumpInfo failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[SetBadgeNumber] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(badgeNumber)) {
+        ANS_LOGE("[SetBadgeNumber] fail:: write userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(SET_BADGE_NUMBER, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[SetBadgeNumber] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[SetBadgeNumber] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
     return result;
 }
 }  // namespace Notification

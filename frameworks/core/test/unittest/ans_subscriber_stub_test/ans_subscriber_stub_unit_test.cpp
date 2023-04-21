@@ -98,7 +98,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest02, Function | SmallTest | Le
     data.WriteInterfaceToken(AnsSubscriberStub::GetDescriptor());
 
 
-    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_ENABLED_NOTIFICATION_CHANGED + 1);
+    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_BADGE_CHANGED + 1);
 
     ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_TRUE(res != NO_ERROR);
@@ -164,36 +164,6 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnDisconnected, Function | SmallTest |
     MessageParcel reply;
 
     ErrCode res = stub_->HandleOnDisconnected(data, reply);
-    EXPECT_EQ(res, ERR_OK);
-}
-
-/**
-* @tc.name: HandleOnConsumed01
-* @tc.desc: test notification failed
-* @tc.type: Fun
-*/
-HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumed01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    ErrCode res = stub_->HandleOnConsumed(data, reply);
-    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
-* @tc.name: HandleOnConsumed02
-* @tc.desc: test notification success
-* @tc.type: Fun
-*/
-HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumed02, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    sptr<Notification> notification = new Notification();
-    data.WriteParcelable(notification);
-    ErrCode res = stub_->HandleOnConsumed(data, reply);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -266,37 +236,6 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedMap04, Function | SmallTest 
     data.WriteParcelable(notificationSortingMap);
 
     ErrCode res = stub_->HandleOnConsumedMap(data, reply);
-    EXPECT_EQ(res, ERR_OK);
-}
-
-/**
-* @tc.name: HandleOnCanceled01
-* @tc.desc: test notification failed
-* @tc.type: Fun
-*/
-HWTEST_F(AnsSubscriberStubUnitTest, HandleOnCanceled01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    ErrCode res = stub_->HandleOnCanceled(data, reply);
-    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
-* @tc.name: HandleOnCanceled02
-* @tc.desc: test HandleOnCanceled success
-* @tc.type: Fun
-*/
-HWTEST_F(AnsSubscriberStubUnitTest, HandleOnCanceled02, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    sptr<Notification> notification = new Notification();
-    data.WriteParcelable(notification);
-
-    ErrCode res = stub_->HandleOnCanceled(data, reply);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -484,6 +423,39 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnEnabledNotificationChanged02, Functi
     data.WriteParcelable(notifcallbackDataication);
 
     ErrCode res = stub_->HandleOnEnabledNotificationChanged(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: HandleOnBadgeChanged01
+ * @tc.desc: test callbackData failed
+ * @tc.type: Fun
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnBadgeChanged01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    ErrCode res = stub_->HandleOnBadgeChanged(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleOnBadgeChanged02
+ * @tc.desc: test HandleOnBadgeChanged success
+ * @tc.type: Fun
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnBadgeChanged02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<BadgeNumberCallbackData> badgeData = new BadgeNumberCallbackData();
+    data.WriteParcelable(badgeData);
+
+    ErrCode res = stub_->HandleOnBadgeChanged(data, reply);
     EXPECT_EQ(res, ERR_OK);
 }
 }

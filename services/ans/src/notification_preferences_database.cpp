@@ -293,10 +293,13 @@ NotificationPreferencesDatabase::~NotificationPreferencesDatabase()
 
 bool NotificationPreferencesDatabase::CheckRdbStore()
 {
-    int32_t result = rdbDataManager_->Init();
-    if (result == NativeRdb::E_OK) {
-        return true;
+    if (rdbDataManager_ != nullptr) {
+        int32_t result = rdbDataManager_->Init();
+        if (result == NativeRdb::E_OK) {
+            return true;
+        }
     }
+
     return false;
 }
 

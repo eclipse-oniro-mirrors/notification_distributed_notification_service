@@ -116,15 +116,13 @@ public:
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
-    void OnCanceled(const std::shared_ptr<Notification> &request) override
-    {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
-    void OnConsumed(const std::shared_ptr<Notification> &request) override
-    {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+    {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
 };
 
@@ -353,146 +351,6 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0600, Function | MediumTest | Leve
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->Publish(label, notification);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: PublishToDeviceTest_0100
- * @tc.desc: test PublishToDevice function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishToDeviceTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishToDeviceTest_0100, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationRequest> notification = nullptr;
-    std::string deviceId = "Device";
-    int32_t result = proxy->PublishToDevice(notification, deviceId);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
-}
-
-/*
- * @tc.name: PublishToDeviceTest_0200
- * @tc.desc: test PublishToDevice function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishToDeviceTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishToDeviceTest_0200, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    NotificationRequest request(1);
-    sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
-    ASSERT_NE(nullptr, notification);
-    std::string deviceId = "Device";
-    int32_t result = proxy->PublishToDevice(notification, deviceId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: PublishToDeviceTest_0300
- * @tc.desc: test PublishToDevice function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishToDeviceTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishToDeviceTest_0300, TestSize.Level1";
-    MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    NotificationRequest request(1);
-    sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
-    ASSERT_NE(nullptr, notification);
-    std::string deviceId = "";
-    int32_t result = proxy->PublishToDevice(notification, deviceId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: PublishToDeviceTest_0400
- * @tc.desc: test PublishToDevice function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishToDeviceTest_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishToDeviceTest_0400, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, true, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    NotificationRequest request(1);
-    sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
-    ASSERT_NE(nullptr, notification);
-    std::string deviceId = "Device";
-    int32_t result = proxy->PublishToDevice(notification, deviceId);
-    EXPECT_EQ(ERR_OK, result);
-}
-
-/*
- * @tc.name: PublishToDeviceTest_0500
- * @tc.desc: test PublishToDevice function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishToDeviceTest_0500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishToDeviceTest_0500, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    NotificationRequest request(1);
-    sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
-    ASSERT_NE(nullptr, notification);
-    std::string deviceId = "Device";
-    int32_t result = proxy->PublishToDevice(notification, deviceId);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
-}
-
-/*
- * @tc.name: PublishToDeviceTest_0600
- * @tc.desc: test PublishToDevice function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishToDeviceTest_0600, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishToDeviceTest_0600, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, false, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    NotificationRequest request(1);
-    sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
-    ASSERT_NE(nullptr, notification);
-    std::string deviceId = "Device";
-    int32_t result = proxy->PublishToDevice(notification, deviceId);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -1533,7 +1391,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotNumAsBundleTest_0100, Function | Medium
 
 /*
  * @tc.name: GetSlotNumAsBundleTest_0200
- * @tc.desc: test PublishToDevice function
+ * @tc.desc: test GetSlotNumAsBundle function
  * @tc.type: FUNC
  * @tc.require: #I5XO2O
  */
@@ -4727,200 +4585,6 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0500, Function | MediumTest | 
 }
 
 /*
- * @tc.name: AreNotificationsSuspendedTest_0100
- * @tc.desc: test AreNotificationsSuspended function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0100, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool suspended = false;
-    int32_t result = proxy->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: AreNotificationsSuspendedTest_0200
- * @tc.desc: test AreNotificationsSuspended function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0200, TestSize.Level1";
-        MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, true, true, true)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool suspended = false;
-    int32_t result = proxy->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ERR_OK, result);
-    EXPECT_EQ(true, suspended);
-}
-
-/*
- * @tc.name: AreNotificationsSuspendedTest_0300
- * @tc.desc: test AreNotificationsSuspended function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0300, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool suspended = false;
-    int32_t result = proxy->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
-}
-
-/*
- * @tc.name: AreNotificationsSuspendedTest_0400
- * @tc.desc: test AreNotificationsSuspended function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0400, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, false, true, true)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool suspended = false;
-    int32_t result = proxy->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: AreNotificationsSuspendedTest_0500
- * @tc.desc: test AreNotificationsSuspended function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, AreNotificationsSuspendedTest_0500, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, true, true, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool suspended = false;
-    int32_t result = proxy->AreNotificationsSuspended(suspended);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetCurrentAppSortingTest_0100
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0100, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetCurrentAppSortingTest_0200
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0200, TestSize.Level1";
-    MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, true, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-/*
- * @tc.name: GetCurrentAppSortingTest_0300
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0300, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
-}
-
-/*
- * @tc.name: GetCurrentAppSortingTest_0400
- * @tc.desc: test GetCurrentAppSorting function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetCurrentAppSortingTest_0400, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
-        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
-        ERR_OK, false, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSortingMap> sortingMap;
-    int32_t result = proxy->GetCurrentAppSorting(sortingMap);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
  * @tc.name: IsAllowedNotifyTest_0100
  * @tc.desc: test IsAllowedNotify function
  * @tc.type: FUNC
@@ -6136,7 +5800,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnableByBundleTest_0100, Function
 
 /*
  * @tc.name: IsDistributedEnableByBundleTest_0200
- * @tc.desc: test PublishToDevice function
+ * @tc.desc: test IsDistributedEnableByBundle function
  * @tc.type: FUNC
  * @tc.require: #I5XO2O
  */
@@ -7704,6 +7368,91 @@ HWTEST_F(AnsManagerProxyUnitTest, ReadReminders_0100, Function | MediumTest | Le
     std::vector<sptr<ReminderRequest>> reminders;
     ErrCode res = proxy->ReadReminders(count, reply, reminders);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+}
+
+/*
+ * @tc.name: SetBadgeNumberTest_0100
+ * @tc.desc: test SetBadgeNumber function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, SetBadgeNumberTest_0100, TestSize.Level1";
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    int32_t userId = 0;
+    int32_t result = proxy->SetBadgeNumber(userId);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/*
+ * @tc.name: SetBadgeNumberTest_0200
+ * @tc.desc: test SetBadgeNumber function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, SetBadgeNumberTest_0200, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, true, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    int32_t badgeNumber = 0;
+    int32_t result = proxy->SetBadgeNumber(badgeNumber);
+    EXPECT_EQ(ERR_OK, result);
+}
+/*
+ * @tc.name: SetBadgeNumberTest_0300
+ * @tc.desc: test SetBadgeNumber function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, SetBadgeNumberTest_0300, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    int32_t badgeNumber = 0;
+    int32_t result = proxy->SetBadgeNumber(badgeNumber);
+    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+}
+
+/*
+ * @tc.name: SetBadgeNumberTest_0400
+ * @tc.desc: test SetBadgeNumber function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, false, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    int32_t badgeNumber = 0;
+    int32_t result = proxy->SetBadgeNumber(badgeNumber);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 }  // namespace Notification
 }  // namespace OHOS
