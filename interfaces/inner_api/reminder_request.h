@@ -583,7 +583,7 @@ public:
      *
      * @param tapDismissed Indicates tapDismissed.
      */
-    void SetTapDismissed(const bool tapDismissed);
+    void SetTapDismissed(bool tapDismissed);
 
     /**
      * @brief Gets tapDismissed.
@@ -597,7 +597,7 @@ public:
      *
      * @param autoDeletedTime Indicates autoDeletedTime.
      */
-    void SetAutoDeletedTime(const int64_t autoDeletedTime);
+    void SetAutoDeletedTime(int64_t autoDeletedTime);
 
     /**
      * @brief Gets autoDeletedTime.

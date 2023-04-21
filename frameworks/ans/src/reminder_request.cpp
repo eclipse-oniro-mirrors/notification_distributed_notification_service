@@ -865,7 +865,7 @@ bool ReminderRequest::IsSystemApp() const
     return isSystemApp_;
 }
 
-void ReminderRequest::SetTapDismissed(const bool tapDismissed)
+void ReminderRequest::SetTapDismissed(bool tapDismissed)
 {
     tapDismissed_ = tapDismissed;
 }
@@ -875,7 +875,7 @@ bool ReminderRequest::IsTapDismissed() const
     return tapDismissed_;
 }
 
-void ReminderRequest::SetAutoDeletedTime(const int64_t autoDeletedTime)
+void ReminderRequest::SetAutoDeletedTime(int64_t autoDeletedTime)
 {
     autoDeletedTime_ = autoDeletedTime;
 }
