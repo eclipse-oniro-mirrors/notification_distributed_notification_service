@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,8 +76,21 @@ napi_value NapiAddSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -130,8 +143,21 @@ napi_value NapiAddSlots(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -185,8 +211,21 @@ napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -259,8 +298,21 @@ napi_value NapiGetSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -316,8 +368,21 @@ napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -403,9 +468,21 @@ napi_value NapiGetSlots(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -493,8 +570,21 @@ napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -548,8 +638,21 @@ napi_value NapiRemoveSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -601,8 +704,21 @@ napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -657,8 +773,21 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -714,8 +843,21 @@ napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;

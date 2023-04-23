@@ -132,8 +132,21 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
-    if (asynccallbackinfo->info.isCallback) {
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
