@@ -59,6 +59,12 @@ const char* TIMER_COUNT_DOWN_TIME = "triggerTimeInSeconds";
 const char* WANT_AGENT = "wantAgent";
 const char* WANT_AGENT_PKG = "pkgName";
 const char* WANT_AGENT_ABILITY = "abilityName";
+const char* BUTTON_WANT_AGENT = "wantAgent";
+const char* BUTTON_WANT_AGENT_PKG = "pkgName";
+const char* BUTTON_WANT_AGENT_ABILITY = "abilityName";
+const char* BUTTON_WANT_AGENT_URI = "uri";
+const char* TAPDISMISSED = "tapDismissed";
+const char* AUTODELETEDTIME = "autoDeletedTime";
 }
 
 struct CallbackPromiseInfo {
@@ -80,6 +86,9 @@ public:
 
     static bool GetStringUtf8(const napi_env &env, const napi_value &value,
         const char* propertyName, char* propertyVal, const int32_t size);
+
+    static bool GetBool(const napi_env &env, const napi_value &value,
+        const char* propertyName, bool& propertyVal);
 
     static bool GetInt32(const napi_env &env, const napi_value &value,
         const char* propertyName, int32_t& propertyVal, bool isNecessary);
@@ -143,6 +152,10 @@ private:
     static std::string FindErrMsg(const napi_env &env, const int32_t errCode);
 
     static napi_value GetCallbackErrorValue(napi_env env, const int32_t errCode, const std::string errMsg);
+
+    static void GetButtonWantAgent(const napi_env &env, const napi_value &value,
+        std::shared_ptr<ReminderRequest>& reminder, std::shared_ptr<ReminderRequest::ButtonWantAgent>& wantAgent);
+    static bool IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder);
 };
 }  // namespace OHOS
 }  // namespace ReminderAgentNapi

@@ -1602,5 +1602,65 @@ HWTEST_F(ReminderRequestTest, GetActualTime_00001, Function | SmallTest | Level1
     int32_t ret = -1;
     EXPECT_EQ(result, ret);
 }
+
+/**
+ * @tc.name: SetSystemApp_00001
+ * @tc.desc: Test SetSystemApp parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI6NQPJ
+ */
+HWTEST_F(ReminderRequestTest, SetSystemApp_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetSystemApp(true);
+    bool result = rrc->IsSystemApp();
+    bool ret = true;
+    EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: SetTapDismissed_00001
+ * @tc.desc: Test SetTapDismissed parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI6NQPJ
+ */
+HWTEST_F(ReminderRequestTest, SetTapDismissed_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetTapDismissed(true);
+    bool result = rrc->IsTapDismissed();
+    bool ret = true;
+    EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: SetAutoDeletedTime_00001
+ * @tc.desc: Test SetAutoDeletedTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI6NQPJ
+ */
+HWTEST_F(ReminderRequestTest, SetAutoDeletedTime_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetAutoDeletedTime(1);
+    int32_t result = rrc->GetAutoDeletedTime();
+    int32_t ret = 1;
+    EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: SetCustomButtonUri_00001
+ * @tc.desc: Test SetCustomButtonUri parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI6NQPJ
+ */
+HWTEST_F(ReminderRequestTest, SetCustomButtonUri_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetCustomButtonUri("test");
+    std::string result = rrc->GetCustomButtonUri();
+    std::string ret = "test";
+    EXPECT_EQ(result, ret);
+}
 }
 }

@@ -63,6 +63,9 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::ActionButtonType::SNOOZE), &prop) == napi_ok) {
         napi_set_named_property(env, objButtonType, "ACTION_BUTTON_TYPE_SNOOZE", prop);
     }
+    if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::ActionButtonType::CUSTOM), &prop) == napi_ok) {
+        napi_set_named_property(env, objButtonType, "ACTION_BUTTON_TYPE_CUSTOM", prop);
+    }
 
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("ReminderType", objReminderType),

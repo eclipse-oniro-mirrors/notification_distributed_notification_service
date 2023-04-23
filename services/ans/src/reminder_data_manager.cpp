@@ -15,6 +15,7 @@
 
 #include "reminder_data_manager.h"
 
+#include "ability_manager_client.h"
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
 #include "common_event_support.h"
@@ -32,7 +33,8 @@ const std::string ALL_PACKAGES = "allPackages";
 const int32_t MAIN_USER_ID = 100;
 }
 
-const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM = 2000;
+const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM = 12000;
+const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYS_APP = 10000;
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_APP = 30;
 const uint8_t ReminderDataManager::TIME_ZONE_CHANGE = 0;
 const uint8_t ReminderDataManager::DATE_TIME_CHANGE = 1;
@@ -45,7 +47,7 @@ std::mutex ReminderDataManager::TIMER_MUTEX;
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption)
 {
-    if (CheckReminderLimitExceededLocked(bundleOption)) {
+    if (CheckReminderLimitExceededLocked(bundleOption, reminder)) {
         return ERR_REMINDER_NUMBER_OVERLOAD;
     }
     UpdateAndSaveReminderLocked(reminder, bundleOption);
@@ -191,7 +193,8 @@ void ReminderDataManager::CancelNotification(const sptr<ReminderRequest> &remind
         notification->GetNotificationId(), ReminderRequest::NOTIFICATION_LABEL, bundleOption);
 }
 
-bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption) const
+bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<ReminderRequest> &reminder) const
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     if (totalCount_ >= ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM) {
@@ -213,9 +216,10 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<Notificati
             }
         }
     }
-    if (count >= ReminderDataManager::MAX_NUM_REMINDER_LIMIT_APP) {
+    auto maxReminderNum = reminder->IsSystemApp() ? MAX_NUM_REMINDER_LIMIT_SYS_APP : MAX_NUM_REMINDER_LIMIT_APP;
+    if (count >= maxReminderNum) {
         ANSR_LOGW("The number of validate reminders exceeds the application upper limit:%{public}d, and new \
-            reminder can not be published", MAX_NUM_REMINDER_LIMIT_APP);
+            reminder can not be published", maxReminderNum);
         return true;
     }
     return false;
@@ -740,10 +744,21 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
 
 void ReminderDataManager::UpdateNotification(const sptr<ReminderRequest> &reminder)
 {
+    int32_t reminderId = reminder->GetReminderId();
+    sptr<NotificationBundleOption> bundleOption = FindNotificationBundleOption(reminderId);
+    if (bundleOption == nullptr) {
+        ANSR_LOGE("Get bundle option fail, reminderId=%{public}d", reminderId);
+        return;
+    }
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::COMMON, "");
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::REMOVAL_WANT_AGENT, "");
-    reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::WANT_AGENT, "");
-    reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::MAX_SCREEN_WANT_AGENT, "");
+    if (reminder->GetWantAgentInfo() != nullptr &&
+        reminder->GetWantAgentInfo()->pkgName == bundleOption->GetBundleName()) {
+        reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::WANT_AGENT, "");
+    }
+    if (reminder->GetMaxScreenWantAgentInfo()->pkgName == bundleOption->GetBundleName()) {
+        reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::MAX_SCREEN_WANT_AGENT, "");
+    }
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::BUNDLE_INFO, "");
 }
 
@@ -1343,6 +1358,32 @@ void ReminderDataManager::ResetStates(TimerType type)
             ANSR_LOGE("TimerType not support");
             break;
         }
+    }
+}
+
+void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &want)
+{
+    int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    if (reminder == nullptr) {
+        ANSR_LOGE("Invalid reminder id: %{public}d", reminderId);
+        return;
+    }
+    CloseReminder(reminder, false);
+    std::string buttonPkgName = want.GetStringParam("PkgName");
+    std::string buttonAbilityName = want.GetStringParam("AbilityName");
+
+    AAFwk::Want abilityWant;
+    abilityWant.SetElementName(buttonPkgName, buttonAbilityName);
+    abilityWant.SetUri(reminder->GetCustomButtonUri());
+    auto client = AppExecFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        return;
+    }
+    int32_t result = client->StartAbility(abilityWant);
+    if (result != 0) {
+        ANSR_LOGE("Start ability failed, result = %{public}d", result);
+        return;
     }
 }
 }

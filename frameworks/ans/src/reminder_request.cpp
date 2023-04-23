@@ -31,6 +31,12 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const int32_t BASE_YEAR = 1900;
+const int32_t SINGLE_BUTTON_MIN_LEN = 2;
+const int32_t SINGLE_BUTTON_MAX_LEN = 4;
+const int32_t BUTTON_TYPE_INDEX = 0;
+const int32_t BUTTON_TITLE_INDEX = 1;
+const int32_t BUTTON_PKG_INDEX = 2;
+const int32_t BUTTON_ABILITY_INDEX = 3;
 }
 
 int32_t ReminderRequest::GLOBAL_ID = 0;
@@ -50,6 +56,7 @@ const std::string ReminderRequest::NOTIFICATION_LABEL = "REMINDER_AGENT";
 const std::string ReminderRequest::REMINDER_EVENT_ALARM_ALERT = "ohos.event.notification.reminder.ALARM_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_CLOSE_ALERT = "ohos.event.notification.reminder.CLOSE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT = "ohos.event.notification.reminder.SNOOZE_ALERT";
+const std::string ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT = "ohos.event.notification.reminder.COSTUM_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT = "ohos.event.notification.reminder.ALERT_TIMEOUT";
 const std::string ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION =
     "ohos.event.notification.reminder.REMOVE_NOTIFICATION";
@@ -64,6 +71,7 @@ const std::string ReminderRequest::REMINDER_ID = "reminder_id";
 const std::string ReminderRequest::PKG_NAME = "package_name";
 const std::string ReminderRequest::USER_ID = "user_id";
 const std::string ReminderRequest::UID = "uid";
+const std::string ReminderRequest::SYS_APP = "system_app";
 const std::string ReminderRequest::APP_LABEL = "app_label";
 const std::string ReminderRequest::REMINDER_TYPE = "reminder_type";
 const std::string ReminderRequest::REMINDER_TIME = "reminder_time";
@@ -79,6 +87,7 @@ const std::string ReminderRequest::STATE = "state";
 const std::string ReminderRequest::ZONE_ID = "zone_id";
 const std::string ReminderRequest::HAS_SCHEDULED_TIMEOUT = "has_ScheduledTimeout";
 const std::string ReminderRequest::ACTION_BUTTON_INFO = "button_info";
+const std::string ReminderRequest::CUSTOM_BUTTON_URI = "custom_button_uri";
 const std::string ReminderRequest::SLOT_ID = "slot_id";
 const std::string ReminderRequest::NOTIFICATION_ID = "notification_id";
 const std::string ReminderRequest::TITLE = "title";
@@ -87,6 +96,8 @@ const std::string ReminderRequest::SNOOZE_CONTENT = "snooze_content";
 const std::string ReminderRequest::EXPIRED_CONTENT = "expired_content";
 const std::string ReminderRequest::AGENT = "agent";
 const std::string ReminderRequest::MAX_SCREEN_AGENT = "maxScreen_agent";
+const std::string ReminderRequest::TAP_DISMISSED = "tapDismissed";
+const std::string ReminderRequest::AUTO_DELETED_TIME = "autoDeletedTime";
 
 std::string ReminderRequest::sqlOfAddColumns = "";
 std::vector<std::string> ReminderRequest::columns;
@@ -104,6 +115,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->displayContent_ = other.displayContent_;
     this->title_ = other.title_;
     this->isExpired_ = other.isExpired_;
+    this->isSystemApp_ = other.isSystemApp_;
     this->snoozeTimes_ = other.snoozeTimes_;
     this->snoozeTimesDynamic_ = other.snoozeTimesDynamic_;
     this->state_ = other.state_;
@@ -119,6 +131,9 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->wantAgentInfo_ = other.wantAgentInfo_;
     this->maxScreenWantAgentInfo_ = other.maxScreenWantAgentInfo_;
     this->actionButtonMap_ = other.actionButtonMap_;
+    this->tapDismissed_= other.tapDismissed_;
+    this->autoDeletedTime_ = other.autoDeletedTime_;
+    this->customButtonUri_ = other.customButtonUri_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -168,16 +183,18 @@ std::string ReminderRequest::Dump() const
            "]";
 }
 
-ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, const ActionButtonType &type)
+ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, const ActionButtonType &type,
+    const std::shared_ptr<ButtonWantAgent> &buttonWantAgent)
 {
-    if ((type != ActionButtonType::CLOSE) && (type != ActionButtonType::SNOOZE)) {
-        ANSR_LOGI("Button type only support: %{public}d or %{public}d",
-            static_cast<uint8_t>(ActionButtonType::CLOSE), static_cast<uint8_t>(ActionButtonType::SNOOZE));
+    if ((type != ActionButtonType::CLOSE) && (type != ActionButtonType::SNOOZE) && (type != ActionButtonType::CUSTOM)) {
+        ANSR_LOGI("Button type is not support: %{public}d.", static_cast<uint8_t>(type));
         return *this;
     }
     ActionButtonInfo actionButtonInfo;
     actionButtonInfo.type = type;
     actionButtonInfo.title = title;
+    actionButtonInfo.wantAgent = buttonWantAgent;
+
     actionButtonMap_.insert(std::pair<ActionButtonType, ActionButtonInfo>(type, actionButtonInfo));
     return *this;
 }
@@ -470,6 +487,11 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     // uid
     resultSet->GetInt(ReminderStore::GetColumnIndex(UID), uid_);
 
+    // isSystemApp
+    std::string isSysApp;
+    resultSet->GetString(ReminderStore::GetColumnIndex(SYS_APP), isSysApp);
+    isSystemApp_ = isSysApp == "true" ? true : false;
+
     // reminderType
     int32_t reminderType;
     resultSet->GetInt(ReminderStore::GetColumnIndex(REMINDER_TYPE), reminderType);
@@ -541,7 +563,19 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     // maxScreenWantAgent
     std::string maxScreenWantAgent;
     resultSet->GetString(ReminderStore::GetColumnIndex(MAX_SCREEN_AGENT), maxScreenWantAgent);
-    RecoverWantAgent(wantAgent, 1);
+    RecoverWantAgent(maxScreenWantAgent, 1);
+
+    // tapDismissed
+    std::string tapDismissed;
+    resultSet->GetString(ReminderStore::GetColumnIndex(TAP_DISMISSED), tapDismissed);
+    tapDismissed_ = tapDismissed == "true" ? true : false;
+
+    // autoDeletedTime
+    autoDeletedTime_ =
+        static_cast<int64_t>(RecoverInt64FromDb(resultSet, AUTO_DELETED_TIME, DbRecoveryType::LONG));
+
+    // customButtonUri
+    resultSet->GetString(ReminderStore::GetColumnIndex(CUSTOM_BUTTON_URI), customButtonUri_);
 }
 
 void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
@@ -555,7 +589,20 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSh
     std::vector<std::string> multiButton = StringSplit(actionButtonInfo, SEP_BUTTON_MULTI);
     for (auto button : multiButton) {
         std::vector<std::string> singleButton = StringSplit(button, SEP_BUTTON_SINGLE);
-        SetActionButton(singleButton.at(1), ActionButtonType(std::stoi(singleButton.at(0), nullptr)));
+        if (singleButton.size() < SINGLE_BUTTON_MIN_LEN) {
+            ANSR_LOGW("RecoverButton fail");
+            return;
+        }
+        auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+        if (singleButton.size() == SINGLE_BUTTON_MAX_LEN) {
+            buttonWantAgent->pkgName = singleButton.at(BUTTON_PKG_INDEX);
+            buttonWantAgent->abilityName = singleButton.at(BUTTON_ABILITY_INDEX);
+        }
+        SetActionButton(singleButton.at(BUTTON_TITLE_INDEX),
+            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)), buttonWantAgent);
+        ANSR_LOGI("RecoverButton title:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
+            singleButton.at(BUTTON_TITLE_INDEX).c_str(), buttonWantAgent->pkgName.c_str(),
+            buttonWantAgent->abilityName.c_str());
     }
 }
 
@@ -808,6 +855,46 @@ int32_t ReminderRequest::GetUid() const
     return uid_;
 }
 
+void ReminderRequest::SetSystemApp(bool isSystem)
+{
+    isSystemApp_ = isSystem;
+}
+
+bool ReminderRequest::IsSystemApp() const
+{
+    return isSystemApp_;
+}
+
+void ReminderRequest::SetTapDismissed(bool tapDismissed)
+{
+    tapDismissed_ = tapDismissed;
+}
+
+bool ReminderRequest::IsTapDismissed() const
+{
+    return tapDismissed_;
+}
+
+void ReminderRequest::SetAutoDeletedTime(int64_t autoDeletedTime)
+{
+    autoDeletedTime_ = autoDeletedTime;
+}
+
+int64_t ReminderRequest::GetAutoDeletedTime() const
+{
+    return autoDeletedTime_;
+}
+
+void ReminderRequest::SetCustomButtonUri(const std::string &uri)
+{
+    customButtonUri_ = uri;
+}
+
+std::string ReminderRequest::GetCustomButtonUri() const
+{
+    return customButtonUri_;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
@@ -907,14 +994,30 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write maxScreenWantAgentInfo`s pkgName");
         return false;
     }
+    if (!parcel.WriteString(customButtonUri_)) {
+        ANSR_LOGE("Failed to write customButtonUri");
+        return false;
+    }
 
     // write bool
     if (!parcel.WriteBool(isExpired_)) {
         ANSR_LOGE("Failed to write isExpired");
         return false;
     }
+    if (!parcel.WriteBool(isSystemApp_)) {
+        ANSR_LOGE("Failed to write isSystemApp");
+        return false;
+    }
+    if (!parcel.WriteBool(tapDismissed_)) {
+        ANSR_LOGE("Failed to write tapDismissed");
+        return false;
+    }
 
     // write int
+    if (!parcel.WriteInt64(autoDeletedTime_)) {
+        ANSR_LOGE("Failed to write autoDeletedTime");
+        return false;
+    }
     if (!parcel.WriteInt32(reminderId_)) {
         ANSR_LOGE("Failed to write reminderId");
         return false;
@@ -976,6 +1079,18 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
             ANSR_LOGE("Failed to write action button title");
             return false;
         }
+        if (button.second.wantAgent == nullptr) {
+            ANSR_LOGE("button wantAgent is null");
+            return false;
+        }
+        if (!parcel.WriteString(button.second.wantAgent->pkgName)) {
+            ANSR_LOGE("Failed to write action button pkgName");
+            return false;
+        }
+        if (!parcel.WriteString(button.second.wantAgent->abilityName)) {
+            ANSR_LOGE("Failed to write action button abilityName");
+            return false;
+        }
     }
     return true;
 }
@@ -1029,14 +1144,30 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         ANSR_LOGE("Failed to read maxScreenWantAgentInfo`s pkgName");
         return false;
     }
+    if (!parcel.ReadString(customButtonUri_)) {
+        ANSR_LOGE("Failed to read customButtonUri");
+        return false;
+    }
 
     // read bool
     if (!parcel.ReadBool(isExpired_)) {
         ANSR_LOGE("Failed to read isExpired");
         return false;
     }
+    if (!parcel.ReadBool(isSystemApp_)) {
+        ANSR_LOGE("Failed to read isSystemApp");
+        return false;
+    }
+    if (!parcel.ReadBool(tapDismissed_)) {
+        ANSR_LOGE("Failed to read tapDismissed");
+        return false;
+    }
 
     // read int
+    if (!parcel.ReadInt64(autoDeletedTime_)) {
+        ANSR_LOGE("Failed to read autoDeletedTime");
+        return false;
+    }
     int32_t tempReminderId = -1;
     if (!parcel.ReadInt32(tempReminderId)) {
         ANSR_LOGE("Failed to read tempReminderId");
@@ -1106,9 +1237,14 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         }
         ActionButtonType type = static_cast<ActionButtonType>(buttonType);
         std::string title = parcel.ReadString();
+        std::string pkgName = parcel.ReadString();
+        std::string abilityName = parcel.ReadString();
         ActionButtonInfo info;
         info.type = type;
         info.title = title;
+        info.wantAgent = std::make_shared<ButtonWantAgent>();
+        info.wantAgent->pkgName = pkgName;
+        info.wantAgent->abilityName = abilityName;
         actionButtonMap_.insert(std::pair<ActionButtonType, ActionButtonInfo>(type, info));
     }
     if (!InitNotificationRequest()) {
@@ -1169,6 +1305,11 @@ std::string ReminderRequest::GetButtonInfo() const
         }
         ActionButtonInfo buttonInfo = button.second;
         info += std::to_string(static_cast<uint8_t>(button.first)) + SEP_BUTTON_SINGLE + buttonInfo.title;
+        if (buttonInfo.wantAgent == nullptr) {
+            continue;
+        }
+        info += (SEP_BUTTON_SINGLE + buttonInfo.wantAgent->pkgName + SEP_BUTTON_SINGLE
+            + buttonInfo.wantAgent->abilityName);
         isFirst = false;
     }
     return info;
@@ -1265,18 +1406,32 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
     for (auto button : actionButtonMap_) {
         auto want = std::make_shared<OHOS::AAFwk::Want>();
         auto type = button.first;
-        if (type == ActionButtonType::CLOSE) {
-            want->SetAction(REMINDER_EVENT_CLOSE_ALERT);
-            ANSR_LOGD("Add action button, type is close");
-        }
-        if (type == ActionButtonType::SNOOZE)  {
-            if (includeSnooze) {
-                want->SetAction(REMINDER_EVENT_SNOOZE_ALERT);
-                ANSR_LOGD("Add action button, type is snooze");
-            } else {
-                ANSR_LOGD("Not add action button, type is snooze, as includeSnooze is false");
-                continue;
-            }
+        switch (type) {
+            case ActionButtonType::CLOSE:
+                want->SetAction(REMINDER_EVENT_CLOSE_ALERT);
+                ANSR_LOGD("Add action button, type is close");
+                break;
+            case ActionButtonType::SNOOZE:
+                if (includeSnooze) {
+                    want->SetAction(REMINDER_EVENT_SNOOZE_ALERT);
+                    ANSR_LOGD("Add action button, type is snooze");
+                } else {
+                    ANSR_LOGD("Not add action button, type is snooze, as includeSnooze is false");
+                    continue;
+                }
+                break;
+            case ActionButtonType::CUSTOM:
+                want->SetAction(REMINDER_EVENT_CUSTOM_ALERT);
+                if (button.second.wantAgent == nullptr) {
+                    ANSR_LOGE("wantAgent null");
+                    return;
+                }
+                want->SetParam("PkgName", button.second.wantAgent->pkgName);
+                want->SetParam("AbilityName", button.second.wantAgent->abilityName);
+                ANSR_LOGI("Add action button, type is custom");
+                break;
+            default:
+                break;
         }
         want->SetParam(PARAM_REMINDER_ID, reminderId_);
         std::vector<std::shared_ptr<AAFwk::Want>> wants;
@@ -1421,6 +1576,8 @@ void ReminderRequest::UpdateNotificationCommon()
     notificationRequest_->SetShowDeliveryTime(true);
     notificationRequest_->SetTapDismissed(true);
     notificationRequest_->SetSlotType(slotType_);
+    notificationRequest_->SetTapDismissed(tapDismissed_);
+    notificationRequest_->SetAutoDeletedTime(autoDeletedTime_);
     auto notificationNormalContent = std::make_shared<NotificationNormalContent>();
     notificationNormalContent->SetText(displayContent_);
     notificationNormalContent->SetTitle(title_);
@@ -1573,6 +1730,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(PKG_NAME, bundleOption->GetBundleName());
     values.PutInt(USER_ID, reminder->GetUserId());
     values.PutInt(UID, reminder->GetUid());
+    values.PutString(SYS_APP, reminder->IsSystemApp() ? "true" : "false");
     values.PutString(APP_LABEL, "");  // no use, compatible with old version.
     values.PutInt(REMINDER_TYPE, static_cast<int32_t>(reminder->GetReminderType()));
     values.PutLong(REMINDER_TIME, reminder->GetReminderTimeInMilli());
@@ -1589,6 +1747,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ZONE_ID, "");  // no use, compatible with old version.
     values.PutString(HAS_SCHEDULED_TIMEOUT, "");  // no use, compatible with old version.
     values.PutString(ACTION_BUTTON_INFO, reminder->GetButtonInfo());
+    values.PutString(CUSTOM_BUTTON_URI, reminder->GetCustomButtonUri());
     values.PutInt(SLOT_ID, reminder->GetSlotType());
     values.PutInt(NOTIFICATION_ID, reminder->GetNotificationId());
     values.PutString(TITLE, reminder->GetTitle());
@@ -1611,6 +1770,8 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         values.PutString(MAX_SCREEN_AGENT, maxScreenWantAgentInfo->pkgName
             + ReminderRequest::SEP_WANT_AGENT + maxScreenWantAgentInfo->abilityName);
     }
+    values.PutString(TAP_DISMISSED, reminder->IsTapDismissed() ? "true" : "false");
+    values.PutLong(AUTO_DELETED_TIME, reminder->GetAutoDeletedTime());
 }
 
 void ReminderRequest::InitDbColumns()
@@ -1619,6 +1780,7 @@ void ReminderRequest::InitDbColumns()
     AddColumn(PKG_NAME, "TEXT NOT NULL", false);
     AddColumn(USER_ID, "INT NOT NULL", false);
     AddColumn(UID, "INT NOT NULL", false);
+    AddColumn(SYS_APP, "TEXT NOT NULL", false);
     AddColumn(APP_LABEL, "TEXT", false);
     AddColumn(REMINDER_TYPE, "INT NOT NULL", false);
     AddColumn(REMINDER_TIME, "BIGINT NOT NULL", false);
@@ -1634,6 +1796,7 @@ void ReminderRequest::InitDbColumns()
     AddColumn(ZONE_ID, "TEXT", false);
     AddColumn(HAS_SCHEDULED_TIMEOUT, "TEXT", false);
     AddColumn(ACTION_BUTTON_INFO, "TEXT", false);
+    AddColumn(CUSTOM_BUTTON_URI, "TEXT", false);
     AddColumn(SLOT_ID, "INT", false);
     AddColumn(NOTIFICATION_ID, "INT NOT NULL", false);
     AddColumn(TITLE, "TEXT", false);
@@ -1642,6 +1805,8 @@ void ReminderRequest::InitDbColumns()
     AddColumn(EXPIRED_CONTENT, "TEXT", false);
     AddColumn(AGENT, "TEXT", false);
     AddColumn(MAX_SCREEN_AGENT, "TEXT", false);
+    AddColumn(TAP_DISMISSED, "TEXT", false);
+    AddColumn(AUTO_DELETED_TIME, "BIGINT", false);
 }
 
 void ReminderRequest::AddColumn(

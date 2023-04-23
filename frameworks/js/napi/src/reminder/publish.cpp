@@ -525,6 +525,21 @@ void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_val
         napi_create_string_utf8(env, (it->second.title).c_str(), NAPI_AUTO_LENGTH, &buttonInfo);
         napi_set_named_property(env, actionButton, ACTION_BUTTON_TITLE, buttonInfo);
 
+        // create obj
+        napi_value wantAgentInfo = nullptr;
+        napi_create_object(env, &wantAgentInfo);
+        napi_set_named_property(env, actionButton, WANT_AGENT, wantAgentInfo);
+
+        if (it->second.type == ReminderRequest::ActionButtonType::CUSTOM) {
+            napi_value info = nullptr;
+            napi_create_string_utf8(env, (it->second.wantAgent->pkgName).c_str(), NAPI_AUTO_LENGTH, &info);
+            napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PKG, info);
+            napi_create_string_utf8(env, (it->second.wantAgent->abilityName).c_str(), NAPI_AUTO_LENGTH, &info);
+            napi_set_named_property(env, wantAgentInfo, WANT_AGENT_ABILITY, info);
+            napi_create_string_utf8(env, (reminder.GetCustomButtonUri()).c_str(), NAPI_AUTO_LENGTH, &info);
+            napi_set_named_property(env, wantAgentInfo, BUTTON_WANT_AGENT_URI, info);
+        }
+
         // add obj to array
         napi_set_element(env, array, index, actionButton);
         index++;
@@ -606,6 +621,14 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     // snoozeTimes
     napi_create_int32(env, reminder.GetSnoozeTimes(), &value);
     napi_set_named_property(env, result, SNOOZE_TIMES, value);
+
+    // tapDismissed
+    napi_get_boolean(env, reminder.IsTapDismissed(), &value);
+    napi_set_named_property(env, result, TAPDISMISSED, value);
+
+    // autoDeletedTime
+    napi_create_int64(env, reminder.GetAutoDeletedTime(), &value);
+    napi_set_named_property(env, result, AUTODELETEDTIME, value);
 
     // slotType
     NotificationNapi::SlotType jsSlotType;

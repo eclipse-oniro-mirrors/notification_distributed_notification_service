@@ -17,9 +17,11 @@
 
 #include "ans_log_wrapper.h"
 #include "common.h"
+#include "ipc_skeleton.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -74,13 +76,20 @@ bool ReminderCommon::GenActionButtons(
         if (GetStringUtf8(env, actionButton,
             ReminderAgentNapi::ACTION_BUTTON_TITLE, str, NotificationNapi::STR_MAX_SIZE) &&
             GetInt32(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_TYPE, buttonType, false)) {
-            if (ReminderRequest::ActionButtonType(buttonType) != ReminderRequest::ActionButtonType::CLOSE &&
-                ReminderRequest::ActionButtonType(buttonType) != ReminderRequest::ActionButtonType::SNOOZE) {
+            if (!(ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CLOSE ||
+                ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::SNOOZE ||
+                (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM &&
+                IsSelfSystemApp(reminder)))) {
                 ANSR_LOGW("Wrong argument type:%{public}s. buttonType not support.", ACTION_BUTTON);
                 return false;
             }
             std::string title(str);
-            reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType));
+            auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+            if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
+                GetButtonWantAgent(env, actionButton, reminder, buttonWantAgent);
+            }
+            reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType),
+                buttonWantAgent);
             ANSR_LOGD("button title=%{public}s, type=%{public}d", title.c_str(), buttonType);
         } else {
             ANSR_LOGW("Parse action button error.");
@@ -88,6 +97,37 @@ bool ReminderCommon::GenActionButtons(
         }
     }
     return true;
+}
+
+bool ReminderCommon::IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder) {
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        ANSR_LOGW("This application is not system-app, can not use system-api");
+        return false;
+    }
+    reminder->SetSystemApp(true);
+    return true;
+}
+
+void ReminderCommon::GetButtonWantAgent(const napi_env &env, const napi_value &value,
+    std::shared_ptr<ReminderRequest>& reminder, std::shared_ptr<ReminderRequest::ButtonWantAgent>& buttonWantAgent)
+{
+    char str[NotificationNapi::STR_MAX_SIZE] = {0};
+    napi_value wantAgent = nullptr;
+    if (GetObject(env, value, ReminderAgentNapi::BUTTON_WANT_AGENT, wantAgent)) {
+        if (GetStringUtf8(env, wantAgent,
+            ReminderAgentNapi::BUTTON_WANT_AGENT_PKG, str, NotificationNapi::STR_MAX_SIZE)) {
+            buttonWantAgent->pkgName = str;
+        }
+        if (GetStringUtf8(env, wantAgent,
+            ReminderAgentNapi::BUTTON_WANT_AGENT_ABILITY, str, NotificationNapi::STR_MAX_SIZE)) {
+            buttonWantAgent->abilityName = str;
+        }
+        if (GetStringUtf8(env, wantAgent,
+            ReminderAgentNapi::BUTTON_WANT_AGENT_URI, str, NotificationNapi::STR_MAX_SIZE)) {
+            reminder->SetCustomButtonUri(str);
+        }
+    }
 }
 
 void ReminderCommon::GenWantAgent(
@@ -239,6 +279,20 @@ napi_value ReminderCommon::GenReminder(
         reminder->SetSlotType(actureType);
     }
 
+    // tapDismissed
+    bool tapDismissed = false;
+    if (GetBool(env, value, ReminderAgentNapi::TAPDISMISSED, tapDismissed)) {
+        reminder->SetTapDismissed(tapDismissed);
+    }
+
+    //autoDeletedTime
+    int64_t autoDeletedTime = 0;
+    if (GetInt64(env, value, ReminderAgentNapi::AUTODELETEDTIME, autoDeletedTime)) {
+        if (autoDeletedTime > 0) {
+            reminder->SetAutoDeletedTime(autoDeletedTime);
+        }
+    }
+
     // wantAgent
     GenWantAgent(env, value, reminder);
 
@@ -271,6 +325,27 @@ bool ReminderCommon::GetStringUtf8(const napi_env &env, const napi_value &value,
         NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, result, propertyVal, size - 1, &strLen), false);
     }
     return hasProperty;
+}
+
+bool ReminderCommon::GetBool(const napi_env &env, const napi_value &value,
+    const char* propertyName, bool& propertyVal)
+{
+    bool hasProperty = false;
+    napi_value result = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, value, propertyName, &hasProperty), false);
+    if (!hasProperty) {
+        ANSR_LOGW("Does not have argument type:%{public}s.", propertyName);
+        return false;
+    }
+    napi_get_named_property(env, value, propertyName, &result);
+    NAPI_CALL_BASE(env, napi_typeof(env, result, &valuetype), false);
+    if (valuetype != napi_boolean) {
+        ANSR_LOGW("Wrong argument type:%{public}s. boolean expected.", propertyName);
+        return false;
+    }
+    napi_get_value_bool(env, result, &propertyVal);
+    return true;
 }
 
 bool ReminderCommon::GetInt32(const napi_env &env, const napi_value &value,

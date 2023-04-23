@@ -67,6 +67,12 @@ public:
          *
          */
         SNOOZE,
+
+        /**
+         * @brief Indicates that this action button is custom.
+         *
+         */
+        CUSTOM,
         INVALID
     };
 
@@ -99,6 +105,11 @@ public:
         HM
     };
 
+    struct ButtonWantAgent {
+        std::string pkgName = "";
+        std::string abilityName = "";
+    };
+
     /**
      * @brief Attributes of action button.
      */
@@ -112,6 +123,11 @@ public:
          * Content show on the button.
          */
         std::string title = "";
+
+        /**
+         * The ability that is redirected to when the button is clicked.
+         */
+        std::shared_ptr<ButtonWantAgent> wantAgent;
     };
 
     /**
@@ -272,6 +288,19 @@ public:
     int32_t GetUid() const;
 
     /**
+     * @brief Set the app system.
+     *
+     */
+    void SetSystemApp(bool isSystem);
+
+    /**
+     * @brief Check the app is system or not.
+     *
+     * @return true is the app is system.
+     */
+    bool IsSystemApp() const;
+
+    /**
      * @brief Obtains want agent information.
      *
      * @return want agent information.
@@ -419,7 +448,8 @@ public:
      * @param type Indicates the type of the button.
      * @return Current reminder self.
      */
-    ReminderRequest& SetActionButton(const std::string &title, const ActionButtonType &type);
+    ReminderRequest& SetActionButton(const std::string &title, const ActionButtonType &type,
+        const std::shared_ptr<ButtonWantAgent> &buttonWantAgent = nullptr);
 
     /**
      * @brief Sets reminder content.
@@ -549,6 +579,48 @@ public:
     virtual bool SetNextTriggerTime();
 
     /**
+     * @brief Sets tapDismissed.
+     *
+     * @param tapDismissed Indicates tapDismissed.
+     */
+    void SetTapDismissed(bool tapDismissed);
+
+    /**
+     * @brief Gets tapDismissed.
+     *
+     * @return True if tapDismissed.
+     */
+    bool IsTapDismissed() const;
+
+    /**
+     * @brief Sets autoDeletedTime.
+     *
+     * @param autoDeletedTime Indicates autoDeletedTime.
+     */
+    void SetAutoDeletedTime(int64_t autoDeletedTime);
+
+    /**
+     * @brief Gets autoDeletedTime.
+     *
+     * @return AutoDeletedTime.
+     */
+    int64_t GetAutoDeletedTime() const;
+
+    /**
+     * @brief Sets custom button uri.
+     *
+     * @param uri Indicates uri.
+     */
+    void SetCustomButtonUri(const std::string &uri);
+
+    /**
+     * @brief Gets custom button uri.
+     *
+     * @return custom button uri.
+     */
+    std::string GetCustomButtonUri() const;
+
+    /**
      * @brief Update notification attributes.
      *
      * Some attributes need to be updated after the reminder published or before the notification publish.
@@ -592,6 +664,8 @@ public:
      */
     static const std::string REMINDER_EVENT_SNOOZE_ALERT;
 
+    static const std::string REMINDER_EVENT_CUSTOM_ALERT;
+
     /**
      * @brief Used to control ring duration.
      */
@@ -615,6 +689,7 @@ public:
     static const std::string PKG_NAME;
     static const std::string USER_ID;
     static const std::string UID;
+    static const std::string SYS_APP;
     static const std::string APP_LABEL;
     static const std::string REMINDER_TYPE;
     static const std::string REMINDER_TIME;
@@ -630,6 +705,7 @@ public:
     static const std::string ZONE_ID;
     static const std::string HAS_SCHEDULED_TIMEOUT;
     static const std::string ACTION_BUTTON_INFO;
+    static const std::string CUSTOM_BUTTON_URI;
     static const std::string SLOT_ID;
     static const std::string NOTIFICATION_ID;
     static const std::string TITLE;
@@ -638,6 +714,8 @@ public:
     static const std::string EXPIRED_CONTENT;
     static const std::string AGENT;
     static const std::string MAX_SCREEN_AGENT;
+    static const std::string TAP_DISMISSED;
+    static const std::string AUTO_DELETED_TIME;
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
 
@@ -729,6 +807,10 @@ private:
     int32_t reminderId_ {-1};
     int32_t userId_ {-1};
     int32_t uid_ {-1};
+    bool isSystemApp_ {false};
+    bool tapDismissed_ {false};
+    int64_t autoDeletedTime_ {0};
+    std::string customButtonUri_ {};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.
