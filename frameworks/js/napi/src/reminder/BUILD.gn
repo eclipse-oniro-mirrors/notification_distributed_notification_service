@@ -28,9 +28,6 @@ config("native_module_config") {
 
 ohos_shared_library("reminderagent") {
   include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_napi_path}/inner/napi_common",
-    "//foundation/multimedia/image_framework/interfaces/kits/js/common/include/",
     "../../include",
     "//third_party/node/src",
     "//third_party/libuv/include",
@@ -46,19 +43,17 @@ ohos_shared_library("reminderagent") {
     "reminder_common.cpp",
   ]
 
-  deps = [
-    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${core_path}:ans_core",
-    "//foundation/multimedia/image_framework/interfaces/kits/js/common:image",
-  ]
+  deps = [ "${core_path}:ans_core" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_common",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
+    "multimedia_image_framework:image",
     "napi:ace_napi",
     "relational_store:native_rdb",
   ]
@@ -71,9 +66,6 @@ ohos_shared_library("reminderagent") {
 # used for error code
 ohos_shared_library("reminderagentmanager") {
   include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_napi_path}/inner/napi_common",
-    "//foundation/multimedia/image_framework/interfaces/kits/js/common/include/",
     "../../include",
     "../../include/manager",
     "//third_party/node/src",
@@ -91,16 +83,13 @@ ohos_shared_library("reminderagentmanager") {
     "reminder_common.cpp",
   ]
 
-  deps = [
-    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${core_path}:ans_core",
-    "//foundation/multimedia/image_framework/interfaces/kits/js/common:image",
-  ]
+  deps = [ "${core_path}:ans_core" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_common",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
