@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,9 +84,21 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -143,9 +155,21 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -201,9 +225,21 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -260,9 +296,21 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -332,9 +380,21 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -408,9 +468,21 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -468,18 +540,25 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    if (napi_queue_async_work(env, asynccallbackinfo->asyncWork) != napi_ok) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
     }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
+    } else {
+        return promise;
     }
-    return promise;
 }
 
 napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
@@ -540,18 +619,25 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    if (napi_queue_async_work(env, asynccallbackinfo->asyncWork) != napi_ok) {
-        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
     }
 
-    if (asynccallbackinfo->info.isCallback) {
+    if (isCallback) {
         return Common::NapiGetNull(env);
+    } else {
+        return promise;
     }
-    return promise;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS
