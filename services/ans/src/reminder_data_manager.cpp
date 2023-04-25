@@ -202,7 +202,7 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<Notificati
             and new reminder can not be published", MAX_NUM_REMINDER_LIMIT_SYSTEM);
         return true;
     }
-    int8_t count = 0;
+    int32_t count = 0;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         if ((*it)->IsExpired()) {
             continue;
