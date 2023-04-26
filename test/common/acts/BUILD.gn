@@ -16,12 +16,7 @@ import("//build/ohos.gni")
 config("ansfwk_kits_test_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
-    "${services_path}/include",
-    "//foundation/systemabilitymgr/safwk/services/safwk/include",
-  ]
+  include_dirs = [ "${services_path}/include" ]
 }
 
 group("actsnotificationtest") {

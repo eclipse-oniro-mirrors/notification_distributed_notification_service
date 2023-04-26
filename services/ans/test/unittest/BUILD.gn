@@ -22,8 +22,6 @@ ohos_unittest("reminder_unit_test") {
   include_dirs = [
     ".",
     "include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
   ]
@@ -41,13 +39,10 @@ ohos_unittest("reminder_unit_test") {
     "reminder_data_manager_test.cpp",
   ]
 
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
-
   deps = [
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -105,8 +100,6 @@ ohos_unittest("ans_unit_test") {
   include_dirs = [
     ".",
     "include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
   ]
@@ -135,13 +128,10 @@ ohos_unittest("ans_unit_test") {
     "system_event_observer_test.cpp",
   ]
 
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
-
   deps = [
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -198,8 +188,6 @@ ohos_unittest("access_token_helper_test") {
   include_dirs = [
     ".",
     "include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
   ]
@@ -249,8 +237,6 @@ ohos_unittest("bundle_manager_helper_branch_test") {
   include_dirs = [
     ".",
     "include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
   ]
@@ -264,7 +250,6 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -354,8 +339,6 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
   include_dirs = [
     ".",
     "include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
   ]
@@ -377,7 +360,6 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -491,8 +473,6 @@ ohos_unittest("notification_preferences_database_branch_test") {
   include_dirs = [
     ".",
     "include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
   ]
@@ -506,7 +486,6 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gtest_main",
   ]
 

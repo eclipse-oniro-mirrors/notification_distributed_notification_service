@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,6 @@ module_output_path = "${component_name}/moduletest"
 config("public_ans_config") {
   include_dirs = [
     "${core_path}/common/include",
-    "//commonlibrary/c_utils/base/include",
     "${services_path}/ans/include",
     "${core_path}/include",
   ]
@@ -34,15 +33,12 @@ ohos_moduletest("ans_fw_module_test") {
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "${component_path}/services/ans/include",
     "//third_party/json/include",
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "//commonlibrary/c_utils/base/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 
@@ -60,8 +56,6 @@ ohos_moduletest("ans_fw_module_test") {
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
   ]
-
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
 
   deps = [
     "${core_path}:ans_core",
@@ -107,15 +101,12 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "${component_path}/services/ans/include",
     "//third_party/json/include",
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "//commonlibrary/c_utils/base/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 
@@ -127,8 +118,6 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "mock/mock_ipc.cpp",
     "mock/remote_native_token.cpp",
   ]
-
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
 
   deps = [
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
@@ -178,15 +167,12 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${inner_api_path}",
     "${frameworks_path}/ans/core/common/include",
     "${frameworks_path}/ans/core/include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "${component_path}/services/ans/include",
     "//third_party/json/include",
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "//commonlibrary/c_utils/base/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 
@@ -198,8 +184,6 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "mock/mock_single_kv_store.cpp",
     "mock/remote_native_token.cpp",
   ]
-
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
 
   deps = [
     "${core_path}:ans_core",
@@ -247,15 +231,12 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${inner_api_path}",
     "${frameworks_path}/ans/core/common/include",
     "${frameworks_path}/ans/core/include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
     "${component_path}/services/ans/include",
     "//third_party/json/include",
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "//commonlibrary/c_utils/base/include",
     "${frameworks_path}/test/moduletest/mock/include",
   ]
 
@@ -267,8 +248,6 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "mock/mock_single_kv_store.cpp",
     "mock/remote_native_token.cpp",
   ]
-
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
 
   deps = [
     "${core_path}:ans_core",

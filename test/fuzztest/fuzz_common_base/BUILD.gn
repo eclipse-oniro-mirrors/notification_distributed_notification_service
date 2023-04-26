@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/notification/distributed_notification_service/notification.gni")
+
 static_library("fuzz_common_base") {
   sources = [ "fuzz_common_base.cpp" ]
   cflags = [
@@ -19,5 +21,5 @@ static_library("fuzz_common_base") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  public_deps = [ "//commonlibrary/c_utils/base:utils" ]
+  public_deps = [ "${commonlibrary_utils_path}/base:utils" ]
 }
