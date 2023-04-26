@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1300,6 +1300,26 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
     }
 
     return ansManagerProxy_->SetBadgeNumber(badgeNumber);
+}
+
+ErrCode AnsNotification::RegisterPushCallback(const sptr<IRemoteObject>& pushCallback)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("RegisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->RegisterPushCallback(pushCallback);
+}
+
+ErrCode AnsNotification::UnregisterPushCallback()
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->UnregisterPushCallback();
 }
 }  // namespace Notification
 }  // namespace OHOS

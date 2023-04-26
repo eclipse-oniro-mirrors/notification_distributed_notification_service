@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@
 #include "notification_bundle_option.h"
 #include "notification_record.h"
 #include "notification_sorting_map.h"
+#include "push_callback_interface.h"
 #include "system_event_observer.h"
 
 namespace OHOS {
@@ -722,6 +723,21 @@ public:
      */
     ErrCode SetBadgeNumber(int32_t badgeNumber) override;
 
+    /**
+     * @brief Register Push Callback.
+     *
+     * @param pushCallback PushCallBack.
+     * @return Returns register push Callback result.
+     */
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback) override;
+
+    /**
+     * @brief Unregister Push Callback.
+     *
+     * @return Returns unregister push Callback result.
+     */
+    ErrCode UnregisterPushCallback() override;
+
 private:
     struct RecentInfo;
     AdvancedNotificationService();
@@ -816,10 +832,12 @@ private:
         const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
     void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
-
+    bool IsNeedPushCheck(NotificationConstant::SlotType slotType);
+    ErrCode PushCheck(const sptr<NotificationRequest> &request);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
+    static sptr<IPushCallBack> pushCallBack_;
 
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,6 +247,12 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
                 std::placeholders::_2, std::placeholders::_3)},
         {AnsManagerStub::SET_BADGE_NUMBER,
             std::bind(&AnsManagerStub::HandleSetBadgeNumber, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {AnsManagerStub::REGISTER_PUSH_CALLBACK,
+            std::bind(&AnsManagerStub::HandleRegisterPushCallback, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {AnsManagerStub::UNREGISTER_PUSH_CALLBACK,
+            std::bind(&AnsManagerStub::HandleUnregisterPushCallback, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
 };
 
@@ -1752,6 +1758,37 @@ ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel 
     return result;
 }
 
+ErrCode AnsManagerStub::HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply)
+{
+    ANSR_LOGI("HandleRegisterPushCallback");
+    sptr<IRemoteObject> pushCallBack = data.ReadRemoteObject();
+    if (pushCallBack == nullptr) {
+        ANS_LOGE("[HandleRegisterPushCallback] fail: read JSPushCallBack failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = RegisterPushCallback(pushCallBack);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleRegisterPushCallback] fail: write result failed, ErrCode=%{public}d",
+            result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply)
+{
+    ANSR_LOGI("HandleUnregisterPushCallback");
+
+    ErrCode result = UnregisterPushCallback();
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleRegisterPushCallback] fail: write result failed, ErrCode=%{public}d",
+            result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
 ErrCode AnsManagerStub::Publish(const std::string &label, const sptr<NotificationRequest> &notification)
 {
     ANS_LOGE("AnsManagerStub::Publish called!");
@@ -2194,6 +2231,18 @@ ErrCode AnsManagerStub::GetSyncNotificationEnabledWithoutApp(const int32_t userI
 ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
 {
     ANS_LOGE("AnsManagerStub::SetBadgeNumber called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::RegisterPushCallback(const sptr<IRemoteObject>& pushCallback)
+{
+    ANS_LOGE("AnsManagerStub::RegisterPushCallback called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::UnregisterPushCallback()
+{
+    ANS_LOGE("AnsManagerStub::UnregisterPushCallback called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

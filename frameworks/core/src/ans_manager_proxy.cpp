@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2585,6 +2585,59 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
 
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("[SetBadgeNumber] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::RegisterPushCallback(const sptr<IRemoteObject>& pushCallback)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[RegisterPushCallback] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(pushCallback)) {
+        ANS_LOGE("[RegisterPushCallback] fail:: write pushCallback failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(REGISTER_PUSH_CALLBACK, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[RegisterPushCallback] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[RegisterPushCallback] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::UnregisterPushCallback()
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[UnregisterPushCallback] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(UNREGISTER_PUSH_CALLBACK, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[UnregisterPushCallback] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[UnregisterPushCallback] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

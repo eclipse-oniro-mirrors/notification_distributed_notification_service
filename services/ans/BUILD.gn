@@ -41,6 +41,7 @@ ohos_shared_library("libans") {
     "src/notification_slot_filter.cpp",
     "src/notification_subscriber_manager.cpp",
     "src/permission_filter.cpp",
+    "src/push_callback_stub.cpp",
     "src/reminder_data_manager.cpp",
     "src/reminder_event_manager.cpp",
     "src/reminder_timer_info.cpp",

@@ -65,6 +65,8 @@ ohos_shared_library("notification") {
     "src/get_active.cpp",
     "src/init.cpp",
     "src/publish.cpp",
+    "src/push.cpp",
+    "src/push_callback.cpp",
     "src/remove.cpp",
     "src/slot.cpp",
     "src/subscribe.cpp",
