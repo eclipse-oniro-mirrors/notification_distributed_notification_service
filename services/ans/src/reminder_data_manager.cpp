@@ -33,6 +33,11 @@ const std::string ALL_PACKAGES = "allPackages";
 const int32_t MAIN_USER_ID = 100;
 }
 
+/**
+ * Default reminder sound.
+ */
+const static Uri DEFAULT_REMINDER_SOUND("file://system/etc/capture.ogg");
+
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM = 12000;
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYS_APP = 10000;
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_APP = 30;
@@ -202,7 +207,7 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<Notificati
             and new reminder can not be published", MAX_NUM_REMINDER_LIMIT_SYSTEM);
         return true;
     }
-    int8_t count = 0;
+    int32_t count = 0;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         if ((*it)->IsExpired()) {
             continue;
@@ -1132,7 +1137,8 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     if (soundPlayer_ == nullptr) {
         soundPlayer_ = Media::PlayerFactory::CreatePlayer();
     }
-    std::string uri = GetSoundUri(reminder);
+    Uri soundUri = DEFAULT_REMINDER_SOUND;
+    std::string uri = soundUri.GetSchemeSpecificPart();
     ANSR_LOGD("uri:%{public}s", uri.c_str());
     soundPlayer_->SetSource(uri);
     soundPlayer_->SetLooping(true);

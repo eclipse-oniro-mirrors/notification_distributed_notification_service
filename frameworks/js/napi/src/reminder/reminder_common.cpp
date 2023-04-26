@@ -46,7 +46,7 @@ napi_value ReminderCommon::GetReminderRequest(
 }
 
 bool ReminderCommon::GenActionButtons(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_valuetype valuetype = napi_undefined;
@@ -79,7 +79,7 @@ bool ReminderCommon::GenActionButtons(
             if (!(ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CLOSE ||
                 ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::SNOOZE ||
                 (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM &&
-                IsSelfSystemApp(reminder)))) {
+                isSysApp))) {
                 ANSR_LOGW("Wrong argument type:%{public}s. buttonType not support.", ACTION_BUTTON);
                 return false;
             }
@@ -209,6 +209,7 @@ napi_value ReminderCommon::GenReminder(
     if (!CreateReminder(env, value, reminder)) {
         return nullptr;
     }
+    bool isSysApp = IsSelfSystemApp(reminder);
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
 
     // title
@@ -300,7 +301,7 @@ napi_value ReminderCommon::GenReminder(
     GenMaxScreenWantAgent(env, value, reminder);
 
     // actionButtons
-    if (!GenActionButtons(env, value, reminder)) {
+    if (!GenActionButtons(env, value, reminder, isSysApp)) {
         return nullptr;
     }
     return NotificationNapi::Common::NapiGetNull(env);

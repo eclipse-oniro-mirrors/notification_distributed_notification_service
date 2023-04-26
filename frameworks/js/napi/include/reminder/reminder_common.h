@@ -141,7 +141,7 @@ private:
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static bool GenActionButtons(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp);
 
     static napi_value GenReminder(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
