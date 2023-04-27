@@ -99,7 +99,8 @@ bool ReminderCommon::GenActionButtons(
     return true;
 }
 
-bool ReminderCommon::IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder) {
+bool ReminderCommon::IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder)
+{
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         ANSR_LOGW("This application is not system-app, can not use system-api");

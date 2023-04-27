@@ -1409,12 +1409,10 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
         switch (type) {
             case ActionButtonType::CLOSE:
                 want->SetAction(REMINDER_EVENT_CLOSE_ALERT);
-                ANSR_LOGD("Add action button, type is close");
                 break;
             case ActionButtonType::SNOOZE:
                 if (includeSnooze) {
                     want->SetAction(REMINDER_EVENT_SNOOZE_ALERT);
-                    ANSR_LOGD("Add action button, type is snooze");
                 } else {
                     ANSR_LOGD("Not add action button, type is snooze, as includeSnooze is false");
                     continue;
@@ -1423,12 +1421,10 @@ void ReminderRequest::AddActionButtons(const bool includeSnooze)
             case ActionButtonType::CUSTOM:
                 want->SetAction(REMINDER_EVENT_CUSTOM_ALERT);
                 if (button.second.wantAgent == nullptr) {
-                    ANSR_LOGE("wantAgent null");
                     return;
                 }
                 want->SetParam("PkgName", button.second.wantAgent->pkgName);
                 want->SetParam("AbilityName", button.second.wantAgent->abilityName);
-                ANSR_LOGI("Add action button, type is custom");
                 break;
             default:
                 break;
