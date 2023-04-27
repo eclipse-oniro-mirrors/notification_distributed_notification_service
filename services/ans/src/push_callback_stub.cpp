@@ -40,7 +40,7 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
         case IPushCallBack::ON_CHECK_NOTIFICATION: {
             auto notificationData = data.ReadString();
             bool ret = OnCheckNotification(notificationData);
-ANS_LOGI("PushCallBackStub::OnRemoteRequest ret:%{public}d", ret);
+            ANS_LOGI("PushCallBackStub::OnRemoteRequest ret:%{public}d", ret);
             if (!reply.WriteBool(ret)) {
                 ANS_LOGE("Failed to write reply ");
                 return ERR_INVALID_REPLY;
