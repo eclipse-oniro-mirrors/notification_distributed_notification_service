@@ -151,6 +151,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0300, Func
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0400, Function | SmallTest | Level1)
 {
+    ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     mockGetSingleKvStore(true);
     database_->kvStore_ = nullptr;
