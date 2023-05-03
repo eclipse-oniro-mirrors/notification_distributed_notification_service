@@ -22,9 +22,11 @@ namespace OHOS {
 namespace NotificationNapi {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_THR = 3;
 constexpr int32_t ERR_OK = 0;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t INDEX_TWO = 2;
 
 void NapiPush::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
@@ -48,7 +50,7 @@ NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const Native
 {
     ANS_LOGI("%{public}s is called", __FUNCTION__);
 
-    if (info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_TWO || info.argc > ARGC_THR) {
         ANS_LOGE("The param is invalid.");
         OHOS::AbilityRuntime::ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
@@ -73,9 +75,11 @@ NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const Native
         }
     };
 
+    auto callback = (info.argc == ARGC_TWO) ? nullptr : info.argv[INDEX_TWO];
+
     NativeValue *result = nullptr;
     AbilityRuntime::AsyncTask::Schedule("NapiPush::OnRegisterPushCallback", engine,
-        AbilityRuntime::CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
+        AbilityRuntime::CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -83,7 +87,7 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
 {
     ANS_LOGI("%{public}s is called", __FUNCTION__);
 
-    if (info.argc != ARGC_ONE) {
+    if (info.argc < ARGC_ONE || info.argc > ARGC_TWO) {
         ANS_LOGE("The param is invalid.");
         OHOS::AbilityRuntime::ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
@@ -105,9 +109,11 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
         }
     };
 
+    auto callback = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+
     NativeValue *result = nullptr;
     AbilityRuntime::AsyncTask::Schedule("NapiPush::OnUnregisterPushCallback", engine,
-        AbilityRuntime::CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
+        AbilityRuntime::CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
     return result;
 }
 } // namespace NotificationNapi
