@@ -99,6 +99,8 @@ NotificationSortingMap *NotificationSortingMap::Unmarshalling(Parcel &parcel)
         if (sorting != nullptr) {
             sortings.push_back(*sorting);
         }
+        delete sorting;
+        sorting = nullptr;
     }
 
     NotificationSortingMap *sortingMap = new (std::nothrow) NotificationSortingMap(sortings);

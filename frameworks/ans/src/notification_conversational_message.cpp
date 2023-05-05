@@ -200,6 +200,8 @@ bool NotificationConversationalMessage::ReadFromParcel(Parcel &parcel)
         return false;
     }
     sender_ = *pUser;
+    delete pUser;
+    pUser = nullptr;
 
     auto valid = parcel.ReadBool();
     if (valid) {

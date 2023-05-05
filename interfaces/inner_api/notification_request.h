@@ -1085,6 +1085,11 @@ private:
      */
     static const std::size_t MAX_ACTION_BUTTONS;
 
+    /**
+     * the maximum number of message users is 1000.
+     */
+    static const std::size_t MAX_MESSAGE_USERS;
+
 private:
     /**
      * @brief Read a NotificationRequest object from a Parcel.

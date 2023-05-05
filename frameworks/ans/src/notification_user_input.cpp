@@ -15,6 +15,7 @@
 
 #include "notification_user_input.h"
 
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "want_params_wrapper.h"
 
@@ -393,6 +394,7 @@ bool NotificationUserInput::ReadFromParcel(Parcel &parcel)
     }
 
     auto ssize = parcel.ReadUint64();
+    ssize = (ssize < MAX_PERMIT_MIME_TYPE_NUM) ? ssize : MAX_PERMIT_MIME_TYPE_NUM;
     for (uint64_t it = 0; it < ssize; ++it) {
         std::string member {};
         if (!parcel.ReadString(member)) {

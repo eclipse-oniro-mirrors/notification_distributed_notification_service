@@ -1487,6 +1487,7 @@ bool AnsManagerStub::ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos,
     }
 
     parcelableInfos.clear();
+    infoSize = (infoSize < MAX_PARCELABLE_VECTOR_NUM) ? infoSize : MAX_PARCELABLE_VECTOR_NUM;
     for (int32_t index = 0; index < infoSize; index++) {
         sptr<T> info = data.ReadStrongParcelable<T>();
         if (info == nullptr) {
