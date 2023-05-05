@@ -75,6 +75,7 @@ int32_t ReminderStore::Init()
 
     std::string dbConfig = REMINDER_DB_DIR + REMINDER_DB_NAME;
     NativeRdb::RdbStoreConfig config_(dbConfig);
+    config_.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     ReminderStoreDataCallBack rdbDataCallBack_;
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config_, REMINDER_RDB_VERSION, rdbDataCallBack_, errCode);
     if (rdbStore_ == nullptr) {
