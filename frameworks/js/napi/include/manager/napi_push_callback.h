@@ -37,10 +37,12 @@ public:
     ~JSPushCallBack();
     bool OnCheckNotification(const std::string &notificationData);
     void SetJsPushCallBackObject(NativeValue *pushCallBackObject);
+    bool IsEqualPushCallBackObject(NativeValue *pushCallBackObject);
 
 private:
     bool ConvertFunctionResult(NativeValue *funcResult);
-
+    void ConvertJsonStringToValue(
+        const std::string &notificationData, std::string &pkgName, int32_t &notifyId, int32_t &contentType);
     NativeEngine &engine_;
     std::unique_ptr<NativeReference> pushCallBackObject_;
 };

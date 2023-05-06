@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "push_callback.h"
+#include "napi_push_callback.h"
 
 #include "ans_log_wrapper.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace Notification {
@@ -30,6 +31,22 @@ JSPushCallBack::~JSPushCallBack() {}
 void JSPushCallBack::SetJsPushCallBackObject(NativeValue *pushCallBackObject)
 {
     pushCallBackObject_ = std::unique_ptr<NativeReference>(engine_.CreateReference(pushCallBackObject, 1));
+}
+
+bool JSPushCallBack::IsEqualPushCallBackObject(NativeValue *pushCallBackObject)
+{
+    if (pushCallBackObject_ == nullptr) {
+        ANS_LOGE("pushCallBackObject_ nullptr");
+        return false;
+    }
+
+    NativeValue *value = pushCallBackObject_->Get();
+    if (value == nullptr) {
+        ANS_LOGE("Failed to get value");
+        return false;
+    }
+
+    return value->StrictEquals(pushCallBackObject);
 }
 
 bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
@@ -53,12 +70,44 @@ bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
         return false;
     }
 
-    NativeValue *jsdata = AbilityRuntime::CreateJsValue(engine_, notificationData);
+    std::string pkgName;
+    int32_t notifyId, contentType;
+    ConvertJsonStringToValue(notificationData, pkgName, notifyId, contentType);
+    ANS_LOGI("OnCheckNotification pkgName=%{public}s, notifyId=%{public}d, contentType=%{public}d ", pkgName.c_str(),
+        notifyId, contentType);
+
+    NativeValue *jsResult = engine_.CreateObject();
+    NativeObject *result = AbilityRuntime::ConvertNativeValueTo<NativeObject>(jsResult);
+    result->SetProperty("bundleName", AbilityRuntime::CreateJsValue(engine_, pkgName));
+    result->SetProperty("notificationId", AbilityRuntime::CreateJsValue(engine_, notifyId));
+    result->SetProperty("contentType", AbilityRuntime::CreateJsValue(engine_, contentType));
+
     NativeValue *funcResult;
-    NativeValue *argv[] = { jsdata };
+    NativeValue *argv[] = { jsResult };
     funcResult = handleEscape.Escape(engine_.CallFunction(value, value, argv, ARGC_ONE));
 
     return ConvertFunctionResult(funcResult);
+}
+
+void JSPushCallBack::ConvertJsonStringToValue(
+    const std::string &notificationData, std::string &pkgName, int32_t &notifyId, int32_t &contentType)
+{
+    nlohmann::json jsonobj = nlohmann::json::parse(notificationData);
+    if (jsonobj.is_null() or !jsonobj.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return;
+    }
+
+    const auto &jsonEnd = jsonobj.cend();
+    if (jsonobj.find("pkgName") != jsonEnd) {
+        pkgName = jsonobj.at("pkgName").get<std::string>();
+    }
+    if (jsonobj.find("notifyId") != jsonEnd) {
+        notifyId = jsonobj.at("notifyId").get<int32_t>();
+    }
+    if (jsonobj.find("contentType") != jsonEnd) {
+        contentType = jsonobj.at("contentType").get<int32_t>();
+    }
 }
 
 bool JSPushCallBack::ConvertFunctionResult(NativeValue *funcResult)
@@ -80,7 +129,7 @@ bool JSPushCallBack::ConvertFunctionResult(NativeValue *funcResult)
         return false;
     }
 
-    uint32_t code = 1;
+    uint32_t code = -1;
     if (!AbilityRuntime::ConvertFromJsValue(engine_, codeJsvalue, code)) {
         ANS_LOGE("Parse code failed.");
         return false;

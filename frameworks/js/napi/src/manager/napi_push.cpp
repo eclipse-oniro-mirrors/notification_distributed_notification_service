@@ -12,21 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "push.h"
+#include "napi_push.h"
 
+#include "ans_inner_errors.h"
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
-#include "push_callback.h"
-
 namespace OHOS {
 namespace NotificationNapi {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
-constexpr size_t ARGC_THR = 3;
-constexpr int32_t ERR_OK = 0;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
-constexpr int32_t INDEX_TWO = 2;
 
 void NapiPush::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
@@ -50,37 +46,27 @@ NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const Native
 {
     ANS_LOGI("%{public}s is called", __FUNCTION__);
 
-    if (info.argc < ARGC_TWO || info.argc > ARGC_THR) {
+    if (info.argc != ARGC_TWO) {
         ANS_LOGE("The param is invalid.");
         OHOS::AbilityRuntime::ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
     }
 
     std::string type;
-    if (!OHOS::AbilityRuntime::ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "pushCheck") {
+    if (!OHOS::AbilityRuntime::ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
         ANS_LOGE("Parse type failed");
         OHOS::AbilityRuntime::ThrowError(engine, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return engine.CreateUndefined();
     }
 
-    sptr<OHOS::Notification::JSPushCallBack> jsPushCallBack = new OHOS::Notification::JSPushCallBack(engine);
-    jsPushCallBack->SetJsPushCallBackObject(info.argv[INDEX_ONE]);
+    if (!jsPushCallBack_) {
+        jsPushCallBack_ = new OHOS::Notification::JSPushCallBack(engine);
+    }
 
-    auto complete = [jsPushCallBack](NativeEngine &engine, AbilityRuntime::AsyncTask &task, int32_t status) {
-        auto ret = NotificationHelper::RegisterPushCallback(jsPushCallBack->AsObject());
-        if (ret == ERR_OK) {
-            task.Resolve(engine, engine.CreateUndefined());
-        } else {
-            task.Reject(engine, AbilityRuntime::CreateJsError(engine, ret, "Register push callback failed."));
-        }
-    };
+    jsPushCallBack_->SetJsPushCallBackObject(info.argv[INDEX_ONE]);
+    NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject());
 
-    auto callback = (info.argc == ARGC_TWO) ? nullptr : info.argv[INDEX_TWO];
-
-    NativeValue *result = nullptr;
-    AbilityRuntime::AsyncTask::Schedule("NapiPush::OnRegisterPushCallback", engine,
-        AbilityRuntime::CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
-    return result;
+    return engine.CreateUndefined();
 }
 
 NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info)
@@ -94,27 +80,30 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
     }
 
     std::string type;
-    if (!OHOS::AbilityRuntime::ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "pushCheck") {
+    if (!OHOS::AbilityRuntime::ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
         ANS_LOGE("Parse type failed");
         OHOS::AbilityRuntime::ThrowError(engine, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return engine.CreateUndefined();
     }
 
-    auto complete = [](NativeEngine &engine, AbilityRuntime::AsyncTask &task, int32_t status) {
-        auto ret = NotificationHelper::UnregisterPushCallback();
-        if (ret == ERR_OK) {
-            task.Resolve(engine, engine.CreateUndefined());
-        } else {
-            task.Reject(engine, AbilityRuntime::CreateJsError(engine, ret, "Unregister push callback failed."));
+    if (!jsPushCallBack_) {
+        OHOS::AbilityRuntime::ThrowError(engine, ERROR_INTERNAL_ERROR);
+        ANS_LOGE("Never registered.");
+        return engine.CreateUndefined();
+    }
+
+    if (info.argc == ARGC_TWO) {
+        if (!jsPushCallBack_->IsEqualPushCallBackObject(info.argv[INDEX_ONE])) {
+            ANS_LOGW("OnUnregisterPushCallback inconsistent with existing callback");
+            OHOS::AbilityRuntime::ThrowError(engine, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return engine.CreateUndefined();
         }
-    };
+    }
+    NotificationHelper::UnregisterPushCallback();
+    delete jsPushCallBack_;
+    jsPushCallBack_ = nullptr;
 
-    auto callback = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
-
-    NativeValue *result = nullptr;
-    AbilityRuntime::AsyncTask::Schedule("NapiPush::OnUnregisterPushCallback", engine,
-        AbilityRuntime::CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
-    return result;
+    return engine.CreateUndefined();
 }
 } // namespace NotificationNapi
 } // namespace OHOS

@@ -29,7 +29,7 @@
 #include "napi_slot.h"
 #include "napi_template.h"
 #include "pixel_map_napi.h"
-#include "push.h"
+#include "napi_push.h"
 
 namespace OHOS {
 namespace NotificationNapi {

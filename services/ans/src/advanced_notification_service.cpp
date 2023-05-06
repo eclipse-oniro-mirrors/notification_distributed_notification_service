@@ -4013,11 +4013,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
 
 ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
 {
-    if (pushCallBack_) {
-        ANS_LOGW("Duplicate register pushcallback.");
-        return ERR_ALREADY_EXISTS;
-    }
-
     if (!AccessTokenHelper::IsSystemApp()) {
         ANS_LOGW("Not system app!");
         return ERR_ANS_NON_SYSTEM_APP;
@@ -4028,19 +4023,19 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObje
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (pushCallBack_) {
+        ANS_LOGW("Duplicate register pushcallback.");
+        return ERR_ALREADY_EXISTS;
+    }
+
     pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
-    ANS_LOGI("RegisterPushCallback OK.");
+    ANS_LOGI("RegisterPushCallback OK");
 
     return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::UnregisterPushCallback()
 {
-    if (!pushCallBack_) {
-        ANS_LOGW("The registration callback has not been processed yet.");
-        return ERR_INVALID_OPERATION;
-    }
-
     if (!AccessTokenHelper::IsSystemApp()) {
         ANS_LOGW("Not system app!");
         return ERR_ANS_NON_SYSTEM_APP;
@@ -4051,8 +4046,13 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    ANS_LOGI("UnregisterPushCallback OK.");
+    if (!pushCallBack_) {
+        ANS_LOGW("The registration callback has not been processed yet.");
+        return ERR_INVALID_OPERATION;
+    }
+
     pushCallBack_ = nullptr;
+    ANS_LOGI("UnregisterPushCallback OK.");
 
     return ERR_OK;
 }

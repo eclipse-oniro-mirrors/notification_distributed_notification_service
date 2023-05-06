@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_PUSH_H
 
 #include "common.h"
+#include "napi_push_callback.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -33,6 +34,7 @@ public:
 private:
     NativeValue *OnRegisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info);
     NativeValue *OnUnregisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info);
+    sptr<OHOS::Notification::JSPushCallBack> jsPushCallBack_;
 };
 } // namespace NotificationNapi
 } // namespace OHOS
