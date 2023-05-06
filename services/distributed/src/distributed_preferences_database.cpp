@@ -60,6 +60,7 @@ void DistributedPreferencesDatabase::GetKvStore(void)
     DistributedKv::Options options = {
         .createIfMissing = true,
         .autoSync = false,
+        .securityLevel = DistributedKv::SecurityLevel::S1,
         .area = DistributedKv::EL1,
         .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
         .baseDir = KV_STORE_PATH
