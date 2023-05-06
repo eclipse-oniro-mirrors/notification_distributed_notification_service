@@ -164,7 +164,10 @@ void UvQueueWorkOnCanceled(uv_work_t *work, int status)
         work = nullptr;
         return;
     }
+
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
     napi_create_object(dataWorkerData->env, &result);
     if (!SetSubscribeCallbackData(dataWorkerData->env,
         dataWorkerData->request,
@@ -175,6 +178,7 @@ void UvQueueWorkOnCanceled(uv_work_t *work, int status)
     } else {
         Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
     }
+    napi_close_handle_scope(dataWorkerData->env, scope);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
@@ -259,6 +263,8 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
         return;
     }
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
     napi_create_object(dataWorkerData->env, &result);
     if (!SetSubscribeCallbackData(dataWorkerData->env,
         dataWorkerData->request,
@@ -269,6 +275,7 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
     } else {
         Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
     }
+    napi_close_handle_scope(dataWorkerData->env, scope);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
@@ -350,12 +357,15 @@ void UvQueueWorkOnUpdate(uv_work_t *work, int status)
         return;
     }
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
     napi_create_object(dataWorkerData->env, &result);
     if (!Common::SetNotificationSortingMap(dataWorkerData->env, dataWorkerData->sortingMap, result)) {
         ANS_LOGE("Failed to convert data to JS");
     } else {
         Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
     }
+    napi_close_handle_scope(dataWorkerData->env, scope);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
@@ -638,6 +648,8 @@ void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
     }
 
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetDoNotDisturbDate(dataWorkerData->env, dataWorkerData->date, result)) {
@@ -645,6 +657,7 @@ void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
     }
 
     Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
+    napi_close_handle_scope(dataWorkerData->env, scope);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
@@ -719,6 +732,8 @@ void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
     }
 
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetEnabledNotificationCallbackData(dataWorkerData->env, dataWorkerData->callbackData, result)) {
@@ -726,6 +741,7 @@ void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
     }
 
     Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
+    napi_close_handle_scope(dataWorkerData->env, scope);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
