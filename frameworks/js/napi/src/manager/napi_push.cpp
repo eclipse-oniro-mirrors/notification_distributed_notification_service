@@ -15,14 +15,18 @@
 #include "napi_push.h"
 
 #include "ans_inner_errors.h"
+#include "ipc_skeleton.h"
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
+#include "tokenid_kit.h"
+
 namespace OHOS {
 namespace NotificationNapi {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+using namespace OHOS::AbilityRuntime;
 
 void NapiPush::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
@@ -32,13 +36,13 @@ void NapiPush::Finalizer(NativeEngine *engine, void *data, void *hint)
 
 NativeValue *NapiPush::RegisterPushCallback(NativeEngine *engine, NativeCallbackInfo *info)
 {
-    NapiPush *me = OHOS::AbilityRuntime::CheckParamsAndGetThis<NapiPush>(engine, info);
+    NapiPush *me = CheckParamsAndGetThis<NapiPush>(engine, info);
     return (me != nullptr) ? me->OnRegisterPushCallback(*engine, *info) : nullptr;
 }
 
 NativeValue *NapiPush::UnregisterPushCallback(NativeEngine *engine, NativeCallbackInfo *info)
 {
-    NapiPush *me = OHOS::AbilityRuntime::CheckParamsAndGetThis<NapiPush>(engine, info);
+    NapiPush *me = CheckParamsAndGetThis<NapiPush>(engine, info);
     return (me != nullptr) ? me->OnUnregisterPushCallback(*engine, *info) : nullptr;
 }
 
@@ -48,19 +52,28 @@ NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const Native
 
     if (info.argc != ARGC_TWO) {
         ANS_LOGE("The param is invalid.");
-        OHOS::AbilityRuntime::ThrowTooFewParametersError(engine);
+        ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
     }
 
     std::string type;
-    if (!OHOS::AbilityRuntime::ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
+    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
         ANS_LOGE("Parse type failed");
-        OHOS::AbilityRuntime::ThrowError(engine, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        ThrowError(engine, ERROR_PARAM_INVALID);
+        return engine.CreateUndefined();
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        ThrowError(engine, ERROR_NOT_SYSTEM_APP);
         return engine.CreateUndefined();
     }
 
     if (!jsPushCallBack_) {
-        jsPushCallBack_ = new OHOS::Notification::JSPushCallBack(engine);
+        jsPushCallBack_ = new (std::nothrow) OHOS::Notification::JSPushCallBack(engine);
+        if (!jsPushCallBack_) {
+            ANS_LOGE("new JSPushCallBack failed");
+            ThrowError(engine, ERROR_INTERNAL_ERROR);
+        }
     }
 
     jsPushCallBack_->SetJsPushCallBackObject(info.argv[INDEX_ONE]);
@@ -75,19 +88,24 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
 
     if (info.argc < ARGC_ONE || info.argc > ARGC_TWO) {
         ANS_LOGE("The param is invalid.");
-        OHOS::AbilityRuntime::ThrowTooFewParametersError(engine);
+        ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
     }
 
     std::string type;
-    if (!OHOS::AbilityRuntime::ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
+    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
         ANS_LOGE("Parse type failed");
-        OHOS::AbilityRuntime::ThrowError(engine, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        ThrowError(engine, ERROR_PARAM_INVALID);
+        return engine.CreateUndefined();
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        ThrowError(engine, ERROR_NOT_SYSTEM_APP);
         return engine.CreateUndefined();
     }
 
     if (!jsPushCallBack_) {
-        OHOS::AbilityRuntime::ThrowError(engine, ERROR_INTERNAL_ERROR);
+        ThrowError(engine, ERROR_INTERNAL_ERROR);
         ANS_LOGE("Never registered.");
         return engine.CreateUndefined();
     }
@@ -95,15 +113,28 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
     if (info.argc == ARGC_TWO) {
         if (!jsPushCallBack_->IsEqualPushCallBackObject(info.argv[INDEX_ONE])) {
             ANS_LOGW("OnUnregisterPushCallback inconsistent with existing callback");
-            OHOS::AbilityRuntime::ThrowError(engine, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            ThrowError(engine, ERROR_PARAM_INVALID);
             return engine.CreateUndefined();
         }
     }
+
     NotificationHelper::UnregisterPushCallback();
     delete jsPushCallBack_;
     jsPushCallBack_ = nullptr;
 
     return engine.CreateUndefined();
+}
+
+bool NapiPush::CheckCallerIsSystemApp()
+{
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        ANS_LOGE("current app is not system app, not allow.");
+        return false;
+    }
+
+    return true;
 }
 } // namespace NotificationNapi
 } // namespace OHOS

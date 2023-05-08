@@ -34,6 +34,8 @@ public:
 private:
     NativeValue *OnRegisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info);
     NativeValue *OnUnregisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info);
+    bool CheckCallerIsSystemApp();
+
     sptr<OHOS::Notification::JSPushCallBack> jsPushCallBack_;
 };
 } // namespace NotificationNapi
