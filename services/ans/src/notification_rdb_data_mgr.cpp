@@ -102,6 +102,7 @@ int32_t NotificationDataMgr::Init()
             std::vector<uint8_t>(),
             notificationRdbConfig_.journalMode,
             notificationRdbConfig_.syncMode);
+    rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(
         rdbStoreConfig, notificationRdbConfig_.version, rdbDataCallBack_, ret);
