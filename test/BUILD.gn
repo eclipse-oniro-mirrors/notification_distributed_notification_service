@@ -25,7 +25,6 @@ group("systemtest") {
   testonly = true
 
   deps = [
-    #"common\acts:actsnotificationtest",
     #"resource\ansSTSlotGroupTest:ansSTSlotGroupTest",
     #"systemtest\acts\ansDump:ansDumpTest",
   ]
