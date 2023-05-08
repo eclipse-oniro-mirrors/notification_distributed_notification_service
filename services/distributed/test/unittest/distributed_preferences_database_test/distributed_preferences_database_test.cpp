@@ -22,10 +22,10 @@
 
 #include "mock_single_kv_store.h"
 
-extern void mockKvStoreFlowControl(bool mockRet);
-extern void mockGet(bool mockRet);
-extern void mockKvManagerFlowControl(bool mockRet);
-extern void mockCloseKvStore(bool mockRet);
+extern void MockKvStoreFlowControl(bool mockRet);
+extern void MockGet(bool mockRet);
+extern void MockKvManagerFlowControl(bool mockRet);
+extern void MockCloseKvStore(bool mockRet);
 
 using namespace testing::ext;
 using namespace OHOS::DistributedKv;
@@ -104,7 +104,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0050
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string key = "aa";
     std::string value = "bb";
     EXPECT_EQ(false, distributedPreferencesDatabase.PutToDistributedDB(key, value));
@@ -120,7 +120,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0060
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
+    MockKvStoreFlowControl(true);
     std::string key = "aa";
     std::string value = "bb";
     EXPECT_EQ(false, distributedPreferencesDatabase.PutToDistributedDB(key, value));
@@ -150,7 +150,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0080
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string key = "aa";
     std::string value = "bb";
     EXPECT_EQ(false, distributedPreferencesDatabase.GetFromDistributedDB(key, value));
@@ -166,8 +166,8 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0090
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
-    mockGet(true);
+    MockKvStoreFlowControl(true);
+    MockGet(true);
     std::string key = "aa";
     std::string value = "bb";
     EXPECT_EQ(false, distributedPreferencesDatabase.GetFromDistributedDB(key, value));
@@ -183,8 +183,8 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0100
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
-    mockGet(false);
+    MockKvStoreFlowControl(true);
+    MockGet(false);
     std::string key = "aa";
     std::string value = "bb";
     EXPECT_EQ(true, distributedPreferencesDatabase.GetFromDistributedDB(key, value));
@@ -214,7 +214,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0120
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string prefixKey = "aa";
     std::vector<Entry> entries;
     EXPECT_EQ(false, distributedPreferencesDatabase.GetEntriesFromDistributedDB(prefixKey, entries));
@@ -230,7 +230,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0130
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
+    MockKvStoreFlowControl(true);
     std::string prefixKey = "aa";
     std::vector<Entry> entries;
     EXPECT_EQ(false, distributedPreferencesDatabase.GetEntriesFromDistributedDB(prefixKey, entries));
@@ -259,7 +259,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0150
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string key = "aa";
     EXPECT_EQ(false, distributedPreferencesDatabase.DeleteToDistributedDB(key));
 }
@@ -274,7 +274,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0160
     DistributedPreferencesDatabase distributedPreferencesDatabase;
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedPreferencesDatabase.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
+    MockKvStoreFlowControl(true);
     std::string key = "aa";
     EXPECT_EQ(false, distributedPreferencesDatabase.DeleteToDistributedDB(key));
 }
@@ -287,7 +287,7 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0160
 HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_01700, Function | SmallTest | Level1)
 {
     DistributedPreferencesDatabase distributedPreferencesDatabase;
-    mockKvManagerFlowControl(false);
+    MockKvManagerFlowControl(false);
     EXPECT_EQ(false, distributedPreferencesDatabase.ClearDatabase());
 }
 
@@ -299,8 +299,8 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0170
 HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_01800, Function | SmallTest | Level1)
 {
     DistributedPreferencesDatabase distributedPreferencesDatabase;
-    mockKvManagerFlowControl(true);
-    mockCloseKvStore(false);
+    MockKvManagerFlowControl(true);
+    MockCloseKvStore(false);
     EXPECT_EQ(false, distributedPreferencesDatabase.ClearDatabase());
 }
 
@@ -312,8 +312,8 @@ HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_0180
 HWTEST_F(DistributedPreferencesDatabaseTest, DistributedPreferencesDatabase_01900, Function | SmallTest | Level1)
 {
     DistributedPreferencesDatabase distributedPreferencesDatabase;
-    mockKvManagerFlowControl(true);
-    mockCloseKvStore(true);
+    MockKvManagerFlowControl(true);
+    MockCloseKvStore(true);
     EXPECT_EQ(false, distributedPreferencesDatabase.ClearDatabase());
 }
 }  // namespace Notification

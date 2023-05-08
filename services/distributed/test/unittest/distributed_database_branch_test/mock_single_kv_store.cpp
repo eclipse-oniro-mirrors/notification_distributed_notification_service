@@ -21,12 +21,12 @@ namespace {
     bool g_mockRemoveDeviceDataRet = true;
 }
 
-void mockSubscribeKvStore(bool mockRet)
+void MockSubscribeKvStore(bool mockRet)
 {
     g_mockSubscribeKvStoreRet = mockRet;
 }
 
-void mockRemoveDeviceData(bool mockRet)
+void MockRemoveDeviceData(bool mockRet)
 {
     g_mockRemoveDeviceDataRet = mockRet;
 }
