@@ -34,8 +34,8 @@ napi_value GetCallback(const napi_env &env, const napi_value &value, ParametersI
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
     if (valuetype != napi_function) {
-        ANS_LOGW("Wrong argument type. Function expected.");
-        return nullptr;
+        ANS_LOGW("Callback is not function excute promise.");
+        return Common::NapiGetNull(env);
     }
     napi_create_reference(env, value, 1, &params.callback);
     ANS_LOGI("end");
@@ -70,8 +70,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= PUBLISH_NOTIFICATION_MAX - 1) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if ((valuetype != napi_number) && (valuetype != napi_function)) {
-            ANS_LOGW("Wrong argument type. Function or object expected.");
-            return nullptr;
+            ANS_LOGW("Wrong argument type. Function or object expected. Execute promise");
+            return Common::NapiGetNull(env);
         }
 
         if (valuetype == napi_number) {
