@@ -93,6 +93,7 @@ ohos_shared_library("reminderagentmanager") {
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
+    "multimedia_image_framework:image",
     "napi:ace_napi",
     "relational_store:native_rdb",
   ]
