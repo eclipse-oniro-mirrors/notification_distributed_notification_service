@@ -4023,6 +4023,11 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObje
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
     if (pushCallBack_) {
         ANS_LOGW("Duplicate register pushcallback.");
         return ERR_ALREADY_EXISTS;
@@ -4043,6 +4048,11 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER Permission!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 

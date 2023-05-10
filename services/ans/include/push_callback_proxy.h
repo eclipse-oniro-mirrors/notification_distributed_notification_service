@@ -22,8 +22,8 @@
 namespace OHOS {
 namespace Notification {
 /**
- * @class AbilityConnectProxy
- * AbilityConnect proxy.
+ * @class PushCallBackProxy
+ * PushCallBackProxy proxy.
  */
 class PushCallBackProxy : public IRemoteProxy<IPushCallBack> {
 public:
@@ -34,11 +34,10 @@ public:
     {}
 
     /**
-     * OnAbilityConnectDone, AbilityMs notify caller ability the result of connect.
+     * OnCheckNotification, check notification.
      *
-     * @param element,.service ability's ElementName.
-     * @param remoteObject,.the session proxy of service ability.
-     * @param resultCode, ERR_OK on success, others on failure.
+     * @param notificationData notification data.
+     * @return Returns true display, false no display.
      */
     virtual bool OnCheckNotification(const std::string &notificationData) override;
 

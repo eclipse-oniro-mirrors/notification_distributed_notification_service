@@ -32,6 +32,7 @@
 #include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
 #include "notification_subscriber.h"
+#include "mock_push_callback_stub.h"
 #include "system_event_observer.h"
 #include "notification_constant.h"
 #include "want_agent_info.h"
@@ -3339,65 +3340,182 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21500,
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_21600
- * @tc.name      : RegisterPushCallback_1000
+ * @tc.name      : RegisterPushCallback_0100
  * @tc.desc      : Test RegisterPushCallback function.
  * @tc.require   : #I6Z5OV
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21600, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "RegisterPushCallback_1000 test start";
+    GTEST_LOG_(INFO) << "RegisterPushCallback_0100 test start";
 
-    sptr<IRemoteObject> pushCallback = nullptr;
+    advancedNotificationService_->pushCallBack_ = nullptr;
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+
     EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback), ERR_OK);
+    advancedNotificationService_->pushCallBack_ = nullptr;
 
-    GTEST_LOG_(INFO) << "RegisterPushCallback_1000 test end";
+    GTEST_LOG_(INFO) << "RegisterPushCallback_0100 test end";
 }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_21700
- * @tc.name      : UnregisterPushCallback_1000
- * @tc.desc      : Test UnregisterPushCallback function.
+ * @tc.name      : RegisterPushCallback_0200
+ * @tc.desc      : Test RegisterPushCallback function.
  * @tc.require   : #I6Z5OV
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21700, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "UnregisterPushCallback_1000 test start";
+    GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test start";
 
-    EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), ERR_INVALID_OPERATION);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
 
-    GTEST_LOG_(INFO) << "UnregisterPushCallback_1000 test end";
+    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback), (int)ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";
 }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_21800
- * @tc.name      : IsNeedPushCheck_1000
- * @tc.desc      : Test IsNeedPushCheck function.
+ * @tc.name      : RegisterPushCallback_0200
+ * @tc.desc      : Test RegisterPushCallback function.
  * @tc.require   : #I6Z5OV
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21800, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_1000 test start";
+    GTEST_LOG_(INFO) << "RegisterPushCallback_0300 test start";
 
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
-    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(slotType), false);
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    advancedNotificationService_->pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
 
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_1000 test end";
+    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback), (int)ERR_ALREADY_EXISTS);
+    advancedNotificationService_->pushCallBack_ = nullptr;
+
+    GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";
 }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_21900
- * @tc.name      : PushCheck_1000
- * @tc.desc      : Test PushCheck function.
+ * @tc.name      : UnregisterPushCallback_0100
+ * @tc.desc      : Test UnregisterPushCallback function.
  * @tc.require   : #I6Z5OV
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21900, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "PushCheck_1000 test start";
+    GTEST_LOG_(INFO) << "UnregisterPushCallback_0100 test start";
+
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    advancedNotificationService_->pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+
+    EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), ERR_OK);
+
+    GTEST_LOG_(INFO) << "UnregisterPushCallback_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22000
+ * @tc.name      : UnregisterPushCallback_0200
+ * @tc.desc      : Test UnregisterPushCallback function.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "UnregisterPushCallback_0200 test start";
+
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "UnregisterPushCallback_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22100
+ * @tc.name      : UnregisterPushCallback_0300
+ * @tc.desc      : Test UnregisterPushCallback function.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "UnregisterPushCallback_0300 test start";
+
+    advancedNotificationService_->pushCallBack_ = nullptr;
+    EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_INVALID_OPERATION);
+
+    GTEST_LOG_(INFO) << "UnregisterPushCallback_0300 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22200
+ * @tc.name      : IsNeedPushCheck_0100
+ * @tc.desc      : Test IsNeedPushCheck function.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_0100 test start";
+
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(slotType), false);
+
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22300
+ * @tc.name      : IsNeedPushCheck_0200
+ * @tc.desc      : Test IsNeedPushCheck function.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_0200 test start";
+
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
+
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(slotType), false);
+
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_0200 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22400
+ * @tc.name      : IsNeedPushCheck_0300
+ * @tc.desc      : Test IsNeedPushCheck function.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_0300 test start";
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CONTENT_INFORMATION;
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(slotType), true);
+
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_0300 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22500
+ * @tc.name      : PushCheck_0100
+ * @tc.desc      : Test PushCheck function.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "PushCheck_0100 test start";
 
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
     EXPECT_EQ(advancedNotificationService_->PushCheck(req), ERR_OK);
 
-    GTEST_LOG_(INFO) << "PushCheck_1000 test end";
+    GTEST_LOG_(INFO) << "PushCheck_0100 test end";
 }
 
 /**
