@@ -61,8 +61,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= ENABLE_BADGE_DISPLAYED_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
     }
@@ -108,8 +108,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= IS_DISPLAY_BADGE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);
     }
