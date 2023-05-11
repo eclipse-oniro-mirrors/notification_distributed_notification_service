@@ -1226,8 +1226,9 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (argc >= SUBSRIBE_MAX_PARA - 1) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if ((valuetype != napi_function) && (valuetype != napi_object)) {
-            ANS_LOGE("Wrong argument type for arg1. Function or NotificationSubscribeInfo object expected.");
-            return nullptr;
+            ANS_LOGE("Wrong argument type for arg1."
+                "Function or NotificationSubscribeInfo object expected. Excute promise");
+            return Common::NapiGetNull(env);
         }
         if (valuetype == napi_function) {
             napi_create_reference(env, argv[PARAM1], 1, &callback);
@@ -1243,8 +1244,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (argc >= SUBSRIBE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &callback);
     }

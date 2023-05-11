@@ -197,8 +197,8 @@ napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_inf
     if (argc >= ADD_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
@@ -250,8 +250,8 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
     if (argc >= ADD_SLOTS_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
@@ -349,8 +349,8 @@ napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_inf
     if (argc >= GET_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
@@ -467,8 +467,8 @@ napi_value ParseParametersByRemoveSlot(
     if (argc >= REMOVE_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
