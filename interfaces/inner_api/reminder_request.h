@@ -752,7 +752,7 @@ private:
     std::string GetButtonInfo() const;
     uint64_t GetNowInstantMilli() const;
     std::string GetShowTime(const uint64_t showTime) const;
-    std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format) const;
+    std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;
     bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
     bool HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
