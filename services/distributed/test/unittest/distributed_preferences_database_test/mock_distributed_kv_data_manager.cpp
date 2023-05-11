@@ -19,7 +19,7 @@ namespace {
     bool g_mockCloseKvStoreRet = true;
 }
 
-void mockCloseKvStore(bool mockRet)
+void MockCloseKvStore(bool mockRet)
 {
     g_mockCloseKvStoreRet = mockRet;
 }

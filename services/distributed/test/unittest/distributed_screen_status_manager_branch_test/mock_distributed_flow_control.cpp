@@ -20,12 +20,12 @@ namespace {
     bool g_mockKvStoreFlowControlRet = true;
 }
 
-void mockKvManagerFlowControl(bool mockRet)
+void MockKvManagerFlowControl(bool mockRet)
 {
     g_mockKvManagerFlowControlRet = mockRet;
 }
 
-void mockKvStoreFlowControl(bool mockRet)
+void MockKvStoreFlowControl(bool mockRet)
 {
     g_mockKvStoreFlowControlRet = mockRet;
 }

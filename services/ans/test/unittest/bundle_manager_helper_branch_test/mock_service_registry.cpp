@@ -22,7 +22,7 @@ namespace {
     bool g_mockGetSystemAbilityManagerRet = true;
 }
 
-void mockGetSystemAbilityManager(bool mockRet)
+void MockGetSystemAbilityManager(bool mockRet)
 {
     g_mockGetSystemAbilityManagerRet = mockRet;
 }

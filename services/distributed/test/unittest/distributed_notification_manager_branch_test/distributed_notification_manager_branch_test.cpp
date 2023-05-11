@@ -21,10 +21,10 @@
 #include "distributed_notification_manager.h"
 
 using namespace testing::ext;
-extern void mockOnDeviceConnected(bool mockRet);
-extern void mockGetEntriesFromDistributedDB(bool mockRet);
-extern void mockGetDeviceInfoList(bool mockRet);
-extern void mockGetLocalDeviceId(bool mockRet);
+extern void MockOnDeviceConnected(bool mockRet);
+extern void MockGetEntriesFromDistributedDB(bool mockRet);
+extern void MockGetDeviceInfoList(bool mockRet);
+extern void MockGetLocalDeviceId(bool mockRet);
 
 namespace OHOS {
 namespace Notification {
@@ -76,7 +76,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_00200, Function | SmallTest | Level1)
 {
     ASSERT_NE(nullptr, distributedManager_);
-    mockOnDeviceConnected(false);
+    MockOnDeviceConnected(false);
     distributedManager_->OnDeviceConnected("test");
 }
 
@@ -88,7 +88,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_00300, Function | SmallTest | Level1)
 {
     ASSERT_NE(nullptr, distributedManager_);
-    mockGetEntriesFromDistributedDB(false);
+    MockGetEntriesFromDistributedDB(false);
     distributedManager_->OnDeviceDisconnected("test");
 }
 
@@ -100,7 +100,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_00400, Function | SmallTest | Level1)
 {
     ASSERT_NE(nullptr, distributedManager_);
-    mockGetEntriesFromDistributedDB(true);
+    MockGetEntriesFromDistributedDB(true);
     distributedManager_->OnDeviceDisconnected("test");
 }
 
@@ -208,7 +208,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01000, Function | SmallTest | Level1)
 {
-    mockGetLocalDeviceId(true);
+    MockGetLocalDeviceId(true);
     std::string bundleName = "aa";
     std::string label = "bb";
     int32_t id = 1;
@@ -223,7 +223,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01100, Function | SmallTest | Level1)
 {
-    mockGetLocalDeviceId(true);
+    MockGetLocalDeviceId(true);
     std::string bundleName = "aa";
     std::string label = "bb";
     int32_t id = 1;
@@ -238,7 +238,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01200, Function | SmallTest | Level1)
 {
-    mockGetLocalDeviceId(true);
+    MockGetLocalDeviceId(true);
     sptr<NotificationRequest> request = new NotificationRequest(1000);
     request->SetLabel("<label>");
 
@@ -256,7 +256,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01300, Function | SmallTest | Level1)
 {
-    mockGetLocalDeviceId(false);
+    MockGetLocalDeviceId(false);
     std::string bundleName = "aa";
     std::string label = "bb";
     int32_t id = 1;
@@ -284,7 +284,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01500, Function | SmallTest | Level1)
 {
-    mockGetEntriesFromDistributedDB(false);
+    MockGetEntriesFromDistributedDB(false);
     std::vector<sptr<NotificationRequest>> requestList;
     EXPECT_EQ(
         distributedManager_->GetCurrentDistributedNotification(requestList), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
@@ -297,7 +297,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
  */
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01600, Function | SmallTest | Level1)
 {
-    mockGetEntriesFromDistributedDB(true);
+    MockGetEntriesFromDistributedDB(true);
     std::vector<sptr<NotificationRequest>> requestList;
     EXPECT_EQ(
         distributedManager_->GetCurrentDistributedNotification(requestList), ERR_OK);

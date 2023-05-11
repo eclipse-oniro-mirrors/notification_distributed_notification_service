@@ -24,22 +24,22 @@ namespace {
     bool g_mockGetLocalDeviceIdRet = true;
 }
 
-void mockOnDeviceConnected(bool mockRet)
+void MockOnDeviceConnected(bool mockRet)
 {
     g_mockOnDeviceConnectedRet = mockRet;
 }
 
-void mockGetEntriesFromDistributedDB(bool mockRet)
+void MockGetEntriesFromDistributedDB(bool mockRet)
 {
     g_mockGetEntriesFromDistributedDBRet = mockRet;
 }
 
-void mockGetDeviceInfoList(bool mockRet)
+void MockGetDeviceInfoList(bool mockRet)
 {
     g_mockGetDeviceInfoListRet = mockRet;
 }
 
-void mockGetLocalDeviceId(bool mockRet)
+void MockGetLocalDeviceId(bool mockRet)
 {
     g_mockGetLocalDeviceIdRet = mockRet;
 }

@@ -20,7 +20,7 @@ namespace {
     bool g_mockGetRet = true;
 }
 
-void mockGet(bool mockRet)
+void MockGet(bool mockRet)
 {
     g_mockGetRet = mockRet;
 }

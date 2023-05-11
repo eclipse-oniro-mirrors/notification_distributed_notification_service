@@ -24,22 +24,22 @@ namespace {
     bool g_mockGetDeviceListRet = true;
 }
 
-void mockStartWatchDeviceChange(bool mockRet)
+void MockStartWatchDeviceChange(bool mockRet)
 {
     g_mockStartWatchDeviceChangeRet = mockRet;
 }
 
-void mockGetSingleKvStore(bool mockRet)
+void MockGetSingleKvStore(bool mockRet)
 {
     g_mockGetSingleKvStoreRet = mockRet;
 }
 
-void mockGetLocalDevice(bool mockRet)
+void MockGetLocalDevice(bool mockRet)
 {
     g_mockGetLocalDeviceRet = mockRet;
 }
 
-void mockGetDeviceList(bool mockRet)
+void MockGetDeviceList(bool mockRet)
 {
     g_mockGetDeviceListRet = mockRet;
 }

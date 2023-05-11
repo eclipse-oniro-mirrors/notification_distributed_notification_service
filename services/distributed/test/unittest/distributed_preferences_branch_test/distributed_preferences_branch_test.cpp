@@ -22,10 +22,10 @@
 #include "distributed_preferences.h"
 #include "distributed_preferences_info.h"
 
-extern void mockGetEntriesFromDistributedDB(bool mockRet);
-extern void mockPutToDistributedDB(bool mockRet);
-extern void mockDeleteToDistributedDB(bool mockRet);
-extern void mockClearDatabase(bool mockRet);
+extern void MockGetEntriesFromDistributedDB(bool mockRet);
+extern void MockPutToDistributedDB(bool mockRet);
+extern void MockDeleteToDistributedDB(bool mockRet);
+extern void MockClearDatabase(bool mockRet);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -88,7 +88,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0020
  */
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_00300, Function | SmallTest | Level1)
 {
-    mockGetEntriesFromDistributedDB(false);
+    MockGetEntriesFromDistributedDB(false);
     EXPECT_EQ(distributedPreferences_->InitDistributedAllInfo(), false);
 }
 
@@ -99,7 +99,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0030
  */
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_00400, Function | SmallTest | Level1)
 {
-    mockGetEntriesFromDistributedDB(true);
+    MockGetEntriesFromDistributedDB(true);
     EXPECT_EQ(distributedPreferences_->InitDistributedAllInfo(), true);
 }
 
@@ -124,7 +124,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0050
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_00600, Function | SmallTest | Level1)
 {
     bool isEnable = true;
-    mockPutToDistributedDB(false);
+    MockPutToDistributedDB(false);
     EXPECT_EQ(distributedPreferences_->SetDistributedEnable(isEnable), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
@@ -149,7 +149,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0080
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("<bundleName>", 783);
     bool isEnable = true;
-    mockPutToDistributedDB(false);
+    MockPutToDistributedDB(false);
     EXPECT_EQ(distributedPreferences_->SetDistributedBundleEnable(bundleOption, isEnable),
         ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
@@ -185,7 +185,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0100
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_01100, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("<bundleName>", 783);
-    mockDeleteToDistributedDB(false);
+    MockDeleteToDistributedDB(false);
     EXPECT_EQ(
         distributedPreferences_->DeleteDistributedBundleInfo(bundleOption), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
@@ -197,7 +197,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0110
  */
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_01200, Function | SmallTest | Level1)
 {
-    mockClearDatabase(false);
+    MockClearDatabase(false);
     EXPECT_EQ(distributedPreferences_->ClearDataInRestoreFactorySettings(), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
@@ -208,7 +208,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0120
  */
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_01300, Function | SmallTest | Level1)
 {
-    mockPutToDistributedDB(false);
+    MockPutToDistributedDB(false);
     int32_t userId = 1;
     bool enabled = true;
     EXPECT_EQ(distributedPreferences_->SetSyncEnabledWithoutApp(userId, enabled), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);

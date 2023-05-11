@@ -22,14 +22,14 @@
 #include "ans_inner_errors.h"
 #include "mock_single_kv_store.h"
 
-extern void mockStartWatchDeviceChange(bool mockRet);
-extern void mockGetSingleKvStore(bool mockRet);
-extern void mockSubscribeKvStore(bool mockRet);
-extern void mockKvStoreFlowControl(bool mockRet);
-extern void mockRemoveDeviceData(bool mockRet);
-extern void mockKvManagerFlowControl(bool mockRet);
-extern void mockGetLocalDevice(bool mockRet);
-extern void mockGetDeviceList(bool mockRet);
+extern void MockStartWatchDeviceChange(bool mockRet);
+extern void MockGetSingleKvStore(bool mockRet);
+extern void MockSubscribeKvStore(bool mockRet);
+extern void MockKvStoreFlowControl(bool mockRet);
+extern void MockRemoveDeviceData(bool mockRet);
+extern void MockKvManagerFlowControl(bool mockRet);
+extern void MockGetLocalDevice(bool mockRet);
+extern void MockGetDeviceList(bool mockRet);
 
 using namespace testing::ext;
 using namespace OHOS::DistributedKv;
@@ -114,7 +114,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0100, Func
 {
     ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = nullptr;
-    mockStartWatchDeviceChange(false);
+    MockStartWatchDeviceChange(false);
     EXPECT_EQ(true, database_->CheckKvDataManager());
 }
 
@@ -127,7 +127,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0200, Func
 {
     ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = nullptr;
-    mockStartWatchDeviceChange(false);
+    MockStartWatchDeviceChange(false);
     database_->GetKvStore();
 }
 
@@ -140,7 +140,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0300, Func
 {
     ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockGetSingleKvStore(false);
+    MockGetSingleKvStore(false);
     database_->GetKvStore();
 }
 
@@ -153,7 +153,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0400, Func
 {
     ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockGetSingleKvStore(true);
+    MockGetSingleKvStore(true);
     database_->kvStore_ = nullptr;
     database_->GetKvStore();
 }
@@ -168,12 +168,12 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0500, Func
     ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     // set GetSingleKvStore is Status::SUCCESS
-    mockGetSingleKvStore(true);
+    MockGetSingleKvStore(true);
     // set kvStore_ is not nullptr
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
     // set SubscribeKvStore != Status::SUCCESS
-    mockSubscribeKvStore(false);
+    MockSubscribeKvStore(false);
     database_->GetKvStore();
 }
 
@@ -209,7 +209,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0800, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string key = "<key>";
     std::string value = "<value>";
     EXPECT_EQ(false, database_->PutToDistributedDB(key, value));
@@ -224,7 +224,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0900, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
+    MockKvStoreFlowControl(true);
     std::string key = "<key>";
     std::string value = "<value>";
     EXPECT_EQ(false, database_->PutToDistributedDB(key, value));
@@ -252,7 +252,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_1100, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string key = "<key>";
     std::string value = "<value>";
     EXPECT_EQ(false, database_->GetFromDistributedDB(key, value));
@@ -267,7 +267,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_1200, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
+    MockKvStoreFlowControl(true);
     std::string key = "<key>";
     std::string value = "<value>";
     EXPECT_EQ(false, database_->GetFromDistributedDB(key, value));
@@ -297,7 +297,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_1400, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string prefixKey = "<prefixKey>";
     Entry entry;
     std::vector<Entry> entries;
@@ -314,7 +314,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_1500, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
+    MockKvStoreFlowControl(true);
     std::string prefixKey = "<prefixKey>";
     Entry entry;
     std::vector<Entry> entries;
@@ -331,7 +331,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_1600, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string key = "<key>";
     EXPECT_EQ(false, database_->DeleteToDistributedDB(key));
 }
@@ -345,7 +345,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_1700, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
+    MockKvStoreFlowControl(true);
     std::string key = "<key>";
     EXPECT_EQ(false, database_->DeleteToDistributedDB(key));
 }
@@ -371,7 +371,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_1900, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(false);
+    MockKvStoreFlowControl(false);
     std::string deviceId = "<deviceId>";
     EXPECT_EQ(false, database_->ClearDataByDevice(deviceId));
 }
@@ -385,8 +385,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2000, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
-    mockRemoveDeviceData(false);
+    MockKvStoreFlowControl(true);
+    MockRemoveDeviceData(false);
     std::string deviceId = "<deviceId>";
     EXPECT_EQ(false, database_->ClearDataByDevice(deviceId));
 }
@@ -400,8 +400,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2100, Func
 {
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     database_->kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
-    mockKvStoreFlowControl(true);
-    mockRemoveDeviceData(true);
+    MockKvStoreFlowControl(true);
+    MockRemoveDeviceData(true);
     std::string deviceId = "<deviceId>";
     EXPECT_EQ(true, database_->ClearDataByDevice(deviceId));
 }
@@ -426,7 +426,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2200, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2300, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockKvManagerFlowControl(false);
+    MockKvManagerFlowControl(false);
     std::string deviceId = "<deviceId>";
     EXPECT_EQ(false, database_->GetLocalDeviceId(deviceId));
 }
@@ -451,7 +451,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2400, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2500, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockKvManagerFlowControl(false);
+    MockKvManagerFlowControl(false);
     DistributedHardware::DmDeviceInfo localInfo;
     EXPECT_EQ(false, database_->GetLocalDeviceInfo(localInfo));
 }
@@ -464,8 +464,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2500, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2600, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockKvManagerFlowControl(true);
-    mockGetLocalDevice(false);
+    MockKvManagerFlowControl(true);
+    MockGetLocalDevice(false);
     DistributedHardware::DmDeviceInfo localInfo;
     EXPECT_EQ(true, database_->GetLocalDeviceInfo(localInfo));
 }
@@ -490,7 +490,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2700, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2800, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockKvManagerFlowControl(false);
+    MockKvManagerFlowControl(false);
     std::vector<DistributedHardware::DmDeviceInfo> deviceList;
     EXPECT_EQ(false, database_->GetDeviceInfoList(deviceList));
 }
@@ -503,8 +503,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2800, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2900, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockKvManagerFlowControl(true);
-    mockGetDeviceList(false);
+    MockKvManagerFlowControl(true);
+    MockGetDeviceList(false);
     std::vector<DistributedHardware::DmDeviceInfo> deviceList;
     EXPECT_EQ(true, database_->GetDeviceInfoList(deviceList));
 }
@@ -528,7 +528,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_3000, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_3100, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
-    mockKvManagerFlowControl(false);
+    MockKvManagerFlowControl(false);
     EXPECT_EQ(false, database_->RecreateDistributedDB());
 }
 }  // namespace Notification

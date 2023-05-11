@@ -22,22 +22,22 @@ namespace {
     bool g_mockClearDatabaseRet = true;
 }
 
-void mockGetEntriesFromDistributedDB(bool mockRet)
+void MockGetEntriesFromDistributedDB(bool mockRet)
 {
     g_mockGetEntriesFromDistributedDBRet = mockRet;
 }
 
-void mockPutToDistributedDB(bool mockRet)
+void MockPutToDistributedDB(bool mockRet)
 {
     g_mockPutToDistributedDBRet = mockRet;
 }
 
-void mockDeleteToDistributedDB(bool mockRet)
+void MockDeleteToDistributedDB(bool mockRet)
 {
     g_mockDeleteToDistributedDBRet = mockRet;
 }
 
-void mockClearDatabase(bool mockRet)
+void MockClearDatabase(bool mockRet)
 {
     g_mockClearDatabaseRet = mockRet;
 }

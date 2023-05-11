@@ -23,7 +23,7 @@
 #undef private
 #undef protected
 
-extern void mockGetSystemAbilityManager(bool mockRet);
+extern void MockGetSystemAbilityManager(bool mockRet);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -44,7 +44,7 @@ public:
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelperTest_00100, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(false);
+    MockGetSystemAbilityManager(false);
     int32_t uid = 1;
     EXPECT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
 }
@@ -57,7 +57,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelperTest_00100, Function 
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00200, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(true);
+    MockGetSystemAbilityManager(true);
     int32_t uid = 1;
     EXPECT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
 }
@@ -70,7 +70,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00200, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00300, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(false);
+    MockGetSystemAbilityManager(false);
     int32_t uid = 1;
     EXPECT_EQ(false, bundleManagerHelper.IsSystemApp(uid));
 }
@@ -83,7 +83,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00300, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00400, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(true);
+    MockGetSystemAbilityManager(true);
     int32_t uid = 1;
     EXPECT_EQ(false, bundleManagerHelper.IsSystemApp(uid));
 }
@@ -96,7 +96,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00400, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00500, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(true);
+    MockGetSystemAbilityManager(true);
     bundleManagerHelper.Connect();
     std::string bundle = "aa";
     int32_t userId = 1;
@@ -112,7 +112,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00500, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00600, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(false);
+    MockGetSystemAbilityManager(false);
     bundleManagerHelper.Connect();
     std::string bundle = "aa";
     int32_t userId = 1;
@@ -141,7 +141,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00800, Function | Sm
 {
     std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    mockGetSystemAbilityManager(true);
+    MockGetSystemAbilityManager(true);
     bundleManagerHelper->Connect();
 }
 
@@ -154,7 +154,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00900, Function | Sm
 {
     std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    mockGetSystemAbilityManager(false);
+    MockGetSystemAbilityManager(false);
     // test Connect and bundleMgr_ == nullptr
     bundleManagerHelper->Connect();
 }
@@ -168,7 +168,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01000, Function | Sm
 {
     std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    mockGetSystemAbilityManager(false);
+    MockGetSystemAbilityManager(false);
     bundleManagerHelper->Connect();
     // test Connect and bundleMgr_ != nullptr
     bundleManagerHelper->Connect();
@@ -183,7 +183,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01100, Function | Sm
 {
     std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    mockGetSystemAbilityManager(false);
+    MockGetSystemAbilityManager(false);
     bundleManagerHelper->Connect();
     bundleManagerHelper->Disconnect();
 }
@@ -208,7 +208,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01200, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01300, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(true);
+    MockGetSystemAbilityManager(true);
     std::string bundle = "aa";
     int32_t userId = 1;
     EXPECT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
@@ -222,7 +222,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01300, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01400, Function | SmallTest | Level1)
 {
     BundleManagerHelper bundleManagerHelper;
-    mockGetSystemAbilityManager(false);
+    MockGetSystemAbilityManager(false);
     std::string bundle = "aa";
     int32_t userId = 1;
     EXPECT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
