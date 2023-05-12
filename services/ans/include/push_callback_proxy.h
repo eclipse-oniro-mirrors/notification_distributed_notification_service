@@ -43,8 +43,6 @@ public:
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
-
-private:
     static inline BrokerDelegator<PushCallBackProxy> delegator_;
 };
 }  // namespace Notification

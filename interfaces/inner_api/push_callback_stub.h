@@ -33,7 +33,7 @@ public:
     PushCallBackStub();
     virtual ~PushCallBackStub();
 
-    virtual int OnRemoteRequest(
+    int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
@@ -46,13 +46,9 @@ private:
  */
 class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
-    using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
-    explicit PushCallbackRecipient(RemoteDiedHandler handler);
+    explicit PushCallbackRecipient();
     virtual ~PushCallbackRecipient();
     virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
-
-private:
-    RemoteDiedHandler handler_;
 };
 }  // namespace Notification
 }  // namespace OHOS

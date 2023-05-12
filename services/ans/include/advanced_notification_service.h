@@ -738,6 +738,11 @@ public:
      */
     ErrCode UnregisterPushCallback() override;
 
+    /**
+     * @brief Reset pushcallback proxy
+     */
+    void ResetPushCallbackProxy();
+
 private:
     struct RecentInfo;
     AdvancedNotificationService();
@@ -837,6 +842,7 @@ private:
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
+    static std::mutex pushMutex_;
     static sptr<IPushCallBack> pushCallBack_;
 
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
@@ -847,6 +853,7 @@ private:
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
     DistributedKv::DistributedKvDataManager dataManager_;
+    sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;

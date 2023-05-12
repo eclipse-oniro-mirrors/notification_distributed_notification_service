@@ -687,14 +687,14 @@ public:
      * @param pushCallback PushCallBack.
      * @return Returns register PushCallback result.
      */
-    virtual ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback) override;
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback) override;
 
     /**
      * @brief Unregister Push Callback.
      *
      * @return Returns unregister push Callback result.
      */
-    virtual ErrCode UnregisterPushCallback() override;
+    ErrCode UnregisterPushCallback() override;
 
 private:
     static const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>

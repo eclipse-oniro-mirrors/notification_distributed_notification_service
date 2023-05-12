@@ -1760,17 +1760,15 @@ ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel 
 
 ErrCode AnsManagerStub::HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply)
 {
-    ANSR_LOGI("HandleRegisterPushCallback");
     sptr<IRemoteObject> pushCallBack = data.ReadRemoteObject();
     if (pushCallBack == nullptr) {
-        ANS_LOGE("[HandleRegisterPushCallback] fail: read JSPushCallBack failed.");
+        ANS_LOGE("fail: read JSPushCallBack failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     ErrCode result = RegisterPushCallback(pushCallBack);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleRegisterPushCallback] fail: write result failed, ErrCode=%{public}d",
-            result);
+        ANS_LOGE("fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
@@ -1778,12 +1776,9 @@ ErrCode AnsManagerStub::HandleRegisterPushCallback(MessageParcel &data, MessageP
 
 ErrCode AnsManagerStub::HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply)
 {
-    ANSR_LOGI("HandleUnregisterPushCallback");
-
     ErrCode result = UnregisterPushCallback();
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleRegisterPushCallback] fail: write result failed, ErrCode=%{public}d",
-            result);
+        ANS_LOGE("fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
@@ -2236,13 +2231,13 @@ ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
 
 ErrCode AnsManagerStub::RegisterPushCallback(const sptr<IRemoteObject>& pushCallback)
 {
-    ANS_LOGE("AnsManagerStub::RegisterPushCallback called!");
+    ANS_LOGE("RegisterPushCallback called!");
     return ERR_INVALID_OPERATION;
 }
 
 ErrCode AnsManagerStub::UnregisterPushCallback()
 {
-    ANS_LOGE("AnsManagerStub::UnregisterPushCallback called!");
+    ANS_LOGE("UnregisterPushCallback called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

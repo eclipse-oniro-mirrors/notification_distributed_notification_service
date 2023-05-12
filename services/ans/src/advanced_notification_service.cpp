@@ -48,6 +48,7 @@
 #include "notification_subscriber_manager.h"
 #include "os_account_manager.h"
 #include "permission_filter.h"
+#include "push_callback_stub.h"
 #include "reminder_data_manager.h"
 #include "trigger_info.h"
 #include "ui_service_mgr_client.h"
@@ -114,6 +115,7 @@ struct AdvancedNotificationService::RecentInfo {
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
 std::mutex AdvancedNotificationService::instanceMutex_;
+std::mutex AdvancedNotificationService::pushMutex_;
 sptr<IPushCallBack> AdvancedNotificationService::pushCallBack_;
 
 static const std::shared_ptr<INotificationFilter> NOTIFICATION_FILTERS[] = {
@@ -4011,6 +4013,18 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
     return ERR_OK;
 }
 
+void AdvancedNotificationService::ResetPushCallbackProxy()
+{
+    ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(pushMutex_);
+    if ((pushCallBack_ == nullptr) || (pushCallBack_->AsObject() == nullptr)) {
+        ANS_LOGE("invalid proxy state");
+        return;
+    }
+    pushCallBack_->AsObject()->RemoveDeathRecipient(pushRecipient_);
+    pushCallBack_ = nullptr;
+}
+
 ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
 {
     if (!AccessTokenHelper::IsSystemApp()) {
@@ -4033,9 +4047,20 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObje
         return ERR_ALREADY_EXISTS;
     }
 
-    pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
-    ANS_LOGI("RegisterPushCallback OK");
+    if (pushCallback == nullptr) {
+        ANS_LOGW("pushCallback is null.");
+        return ERR_INVALID_VALUE;
+    }
 
+    pushRecipient_ = new (std::nothrow) PushCallbackRecipient();
+    if (!pushRecipient_) {
+        ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
+        return ERR_NO_INIT;
+    }
+    pushCallback->AddDeathRecipient(pushRecipient_);
+
+    pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+    ANS_LOGD("RegisterPushCallback OK");
     return ERR_OK;
 }
 
@@ -4062,24 +4087,22 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
     }
 
     pushCallBack_ = nullptr;
-    ANS_LOGI("UnregisterPushCallback OK.");
-
+    ANS_LOGD("UnregisterPushCallback OK.");
     return ERR_OK;
 }
 
 bool AdvancedNotificationService::IsNeedPushCheck(NotificationConstant::SlotType slotType)
 {
-    ANS_LOGI("IsNeedPushCheck slotType:%{public}d.", slotType);
+    ANS_LOGD("IsNeedPushCheck slotType:%{public}d.", slotType);
     if (AccessTokenHelper::IsSystemApp()) {
         ANS_LOGI("System applications do not require push check.");
         return false;
     }
 
-    if (!(slotType == NotificationConstant::SlotType::CONTENT_INFORMATION)) {
+    if (slotType != NotificationConstant::SlotType::CONTENT_INFORMATION) {
         ANS_LOGI("SlotType: CONTENT_INFORMATION except do not require push check.");
         return false;
     }
-
     return true;
 }
 
@@ -4091,11 +4114,10 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
         jsonObject["notifyId"] = request->GetNotificationId();
         jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
         if (!(pushCallBack_->OnCheckNotification(jsonObject.dump()))) {
-            ANS_LOGW("Notification push check failed.");
+            ANS_LOGE("Notification push check failed.");
             return ERR_ANS_NOTIFICATION_PUSH_CHECK_FAILED;
         }
     }
-
     return ERR_OK;
 }
 }  // namespace Notification

@@ -2595,12 +2595,12 @@ ErrCode AnsManagerProxy::RegisterPushCallback(const sptr<IRemoteObject>& pushCal
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[RegisterPushCallback] fail: write interface token failed.");
+        ANS_LOGE("write interface token failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (!data.WriteRemoteObject(pushCallback)) {
-        ANS_LOGE("[RegisterPushCallback] fail:: write pushCallback failed.");
+        ANS_LOGE("write pushCallback failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2608,12 +2608,12 @@ ErrCode AnsManagerProxy::RegisterPushCallback(const sptr<IRemoteObject>& pushCal
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(REGISTER_PUSH_CALLBACK, option, data, reply);
     if (result != ERR_OK) {
-        ANS_LOGE("[RegisterPushCallback] fail: transact ErrCode=%{public}d", result);
+        ANS_LOGE("transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
     }
 
     if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[RegisterPushCallback] fail: read result failed.");
+        ANS_LOGE("fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2624,7 +2624,7 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[UnregisterPushCallback] fail: write interface token failed.");
+        ANS_LOGE("write interface token failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2632,12 +2632,12 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(UNREGISTER_PUSH_CALLBACK, option, data, reply);
     if (result != ERR_OK) {
-        ANS_LOGE("[UnregisterPushCallback] fail: transact ErrCode=%{public}d", result);
+        ANS_LOGE("transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
     }
 
     if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[UnregisterPushCallback] fail: read result failed.");
+        ANS_LOGE("read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

@@ -39,7 +39,7 @@ EXTERN_C_START
 
 static NativeValue *NapiPushInit(NativeEngine *engine, NativeValue *exports)
 {
-    ANS_LOGI("NapiPushInit is called");
+    ANS_LOGD("called");
     if (engine == nullptr || exports == nullptr) {
         ANS_LOGE("Invalid input parameters");
         return nullptr;

@@ -22,15 +22,17 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+} // namespace
 using namespace OHOS::AbilityRuntime;
 
 void NapiPush::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
-    ANS_LOGI("NapiPush::Finalizer is called");
+    ANS_LOGD("called");
     std::unique_ptr<NapiPush>(static_cast<NapiPush *>(data));
 }
 
@@ -48,9 +50,9 @@ NativeValue *NapiPush::UnregisterPushCallback(NativeEngine *engine, NativeCallba
 
 NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info)
 {
-    ANS_LOGI("%{public}s is called", __FUNCTION__);
+    ANS_LOGD("called");
 
-    if (info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_TWO) {
         ANS_LOGE("The param is invalid.");
         ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
@@ -84,9 +86,9 @@ NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const Native
 
 NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info)
 {
-    ANS_LOGI("%{public}s is called", __FUNCTION__);
+    ANS_LOGD("called");
 
-    if (info.argc < ARGC_ONE || info.argc > ARGC_TWO) {
+    if (info.argc < ARGC_ONE) {
         ANS_LOGE("The param is invalid.");
         ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
@@ -112,7 +114,7 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
 
     if (info.argc == ARGC_TWO) {
         if (!jsPushCallBack_->IsEqualPushCallBackObject(info.argv[INDEX_ONE])) {
-            ANS_LOGW("OnUnregisterPushCallback inconsistent with existing callback");
+            ANS_LOGE("inconsistent with existing callback");
             ThrowError(engine, ERROR_PARAM_INVALID);
             return engine.CreateUndefined();
         }

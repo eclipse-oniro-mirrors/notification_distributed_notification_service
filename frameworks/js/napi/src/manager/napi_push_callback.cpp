@@ -73,7 +73,7 @@ bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
     std::string pkgName;
     int32_t notifyId, contentType;
     ConvertJsonStringToValue(notificationData, pkgName, notifyId, contentType);
-    ANS_LOGI("OnCheckNotification pkgName=%{public}s, notifyId=%{public}d, contentType=%{public}d ", pkgName.c_str(),
+    ANS_LOGI("pkgName=%{public}s, notifyId=%{public}d, contentType=%{public}d ", pkgName.c_str(),
         notifyId, contentType);
 
     NativeValue *jsResult = engine_.CreateObject();
@@ -129,7 +129,7 @@ bool JSPushCallBack::ConvertFunctionResult(NativeValue *funcResult)
         return false;
     }
 
-    uint32_t code = -1;
+    int32_t code = -1;
     if (!AbilityRuntime::ConvertFromJsValue(engine_, codeJsvalue, code)) {
         ANS_LOGE("Parse code failed.");
         return false;
@@ -147,7 +147,7 @@ bool JSPushCallBack::ConvertFunctionResult(NativeValue *funcResult)
 
     ANS_LOGI("code : %{public}d ,message : %{public}s", code, message.c_str());
 
-    return code == 0 ? true : false;
+    return code == 0;
 }
 } // namespace Notification
 } // namespace OHOS

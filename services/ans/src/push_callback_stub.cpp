@@ -15,32 +15,31 @@
 
 #include "push_callback_stub.h"
 
+#include "advanced_notification_service.h"
 #include "ans_log_wrapper.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "push_callback_proxy.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace Notification {
-
 PushCallBackStub::PushCallBackStub() {}
 
 PushCallBackStub::~PushCallBackStub() {}
 
 int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    ANS_LOGI("PushCallBackStub::OnRemoteRequest called.");
-    std::u16string descriptor = PushCallBackStub::GetDescriptor();
-    std::u16string remoteDescriptor = data.ReadInterfaceToken();
-    if (descriptor != remoteDescriptor) {
-        ANS_LOGI("Local descriptor is not equal to remote");
+    ANS_LOGD("called.");
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        ANS_LOGE("local descriptor is not equal to remote");
         return ERR_INVALID_STATE;
     }
     switch (code) {
         case IPushCallBack::ON_CHECK_NOTIFICATION: {
             auto notificationData = data.ReadString();
             bool ret = OnCheckNotification(notificationData);
-            ANS_LOGI("PushCallBackStub::OnRemoteRequest ret:%{public}d", ret);
+            ANS_LOGI("ret:%{public}d", ret);
             if (!reply.WriteBool(ret)) {
                 ANS_LOGE("Failed to write reply ");
                 return ERR_INVALID_REPLY;
@@ -64,7 +63,6 @@ bool PushCallBackProxy::WriteInterfaceToken(MessageParcel &data)
 
 bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
 {
-    int error;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -85,7 +83,7 @@ bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
         return false;
     }
 
-    error = remote->SendRequest(IPushCallBack::ON_CHECK_NOTIFICATION, data, reply, option);
+    int error = remote->SendRequest(IPushCallBack::ON_CHECK_NOTIFICATION, data, reply, option);
     if (error != NO_ERROR) {
         ANS_LOGE("Connect done fail, error: %{public}d", error);
         return false;
@@ -94,15 +92,14 @@ bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
     return reply.ReadBool();
 }
 
-void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
+void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    ANS_LOGE("On remote died.");
-    if (handler_) {
-        handler_(remote);
-    }
+    (void) remote;
+    ANS_LOGE("Push Callback died, remove the proxy object");
+    AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
 }
 
-PushCallbackRecipient::PushCallbackRecipient(RemoteDiedHandler handler) : handler_(handler) {}
+PushCallbackRecipient::PushCallbackRecipient() {}
 
 PushCallbackRecipient::~PushCallbackRecipient() {}
 } // namespace Notification
