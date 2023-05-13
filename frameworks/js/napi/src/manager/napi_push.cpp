@@ -33,7 +33,7 @@ using namespace OHOS::AbilityRuntime;
 void NapiPush::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
     ANS_LOGD("called");
-    std::unique_ptr<NapiPush>(static_cast<NapiPush *>(data));
+    delete static_cast<NapiPush *>(data);
 }
 
 NativeValue *NapiPush::RegisterPushCallback(NativeEngine *engine, NativeCallbackInfo *info)
@@ -70,17 +70,17 @@ NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const Native
         return engine.CreateUndefined();
     }
 
-    if (!jsPushCallBack_) {
+    if (jsPushCallBack_ == nullptr) {
         jsPushCallBack_ = new (std::nothrow) OHOS::Notification::JSPushCallBack(engine);
-        if (!jsPushCallBack_) {
+        if (jsPushCallBack_ == nullptr) {
             ANS_LOGE("new JSPushCallBack failed");
             ThrowError(engine, ERROR_INTERNAL_ERROR);
+            return engine.CreateUndefined();
         }
     }
 
     jsPushCallBack_->SetJsPushCallBackObject(info.argv[INDEX_ONE]);
     NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject());
-
     return engine.CreateUndefined();
 }
 
@@ -106,7 +106,7 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
         return engine.CreateUndefined();
     }
 
-    if (!jsPushCallBack_) {
+    if (jsPushCallBack_ == nullptr) {
         ThrowError(engine, ERROR_INTERNAL_ERROR);
         ANS_LOGE("Never registered.");
         return engine.CreateUndefined();
@@ -123,19 +123,16 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
     NotificationHelper::UnregisterPushCallback();
     delete jsPushCallBack_;
     jsPushCallBack_ = nullptr;
-
     return engine.CreateUndefined();
 }
 
 bool NapiPush::CheckCallerIsSystemApp()
 {
     auto selfToken = IPCSkeleton::GetSelfTokenID();
-
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         ANS_LOGE("current app is not system app, not allow.");
         return false;
     }
-
     return true;
 }
 } // namespace NotificationNapi

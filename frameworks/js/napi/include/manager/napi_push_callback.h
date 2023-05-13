@@ -34,7 +34,7 @@ namespace Notification {
 class JSPushCallBack : public PushCallBackStub {
 public:
     JSPushCallBack(NativeEngine &engine);
-    ~JSPushCallBack();
+    virtual ~JSPushCallBack();
     bool OnCheckNotification(const std::string &notificationData);
     void SetJsPushCallBackObject(NativeValue *pushCallBackObject);
     bool IsEqualPushCallBackObject(NativeValue *pushCallBackObject);

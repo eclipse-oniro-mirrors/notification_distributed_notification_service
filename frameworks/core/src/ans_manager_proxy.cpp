@@ -2591,7 +2591,7 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
     return result;
 }
 
-ErrCode AnsManagerProxy::RegisterPushCallback(const sptr<IRemoteObject>& pushCallback)
+ErrCode AnsManagerProxy::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -2605,7 +2605,7 @@ ErrCode AnsManagerProxy::RegisterPushCallback(const sptr<IRemoteObject>& pushCal
     }
 
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     ErrCode result = InnerTransact(REGISTER_PUSH_CALLBACK, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("transact ErrCode=%{public}d", result);
@@ -2629,7 +2629,7 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
     }
 
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     ErrCode result = InnerTransact(UNREGISTER_PUSH_CALLBACK, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("transact ErrCode=%{public}d", result);

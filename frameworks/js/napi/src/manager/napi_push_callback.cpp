@@ -22,8 +22,9 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
 constexpr size_t ARGC_ONE = 1;
-
+}
 JSPushCallBack::JSPushCallBack(NativeEngine &engine) : engine_(engine) {}
 
 JSPushCallBack::~JSPushCallBack() {}
@@ -52,13 +53,6 @@ bool JSPushCallBack::IsEqualPushCallBackObject(NativeValue *pushCallBackObject)
 bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
 {
     AbilityRuntime::HandleEscape handleEscape(engine_);
-    wptr<JSPushCallBack> pushCallBack = this;
-    sptr<JSPushCallBack> pushCallBackSptr = pushCallBack.promote();
-    if (pushCallBackSptr == nullptr) {
-        ANS_LOGE("pushCallBackSptr nullptr");
-        return false;
-    }
-
     if (pushCallBackObject_ == nullptr) {
         ANS_LOGE("pushCallBackObject_ nullptr");
         return false;
@@ -73,8 +67,8 @@ bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
     std::string pkgName;
     int32_t notifyId, contentType;
     ConvertJsonStringToValue(notificationData, pkgName, notifyId, contentType);
-    ANS_LOGI("pkgName=%{public}s, notifyId=%{public}d, contentType=%{public}d ", pkgName.c_str(),
-        notifyId, contentType);
+    ANS_LOGI(
+        "pkgName=%{public}s, notifyId=%{public}d, contentType=%{public}d ", pkgName.c_str(), notifyId, contentType);
 
     NativeValue *jsResult = engine_.CreateObject();
     NativeObject *result = AbilityRuntime::ConvertNativeValueTo<NativeObject>(jsResult);
@@ -100,12 +94,24 @@ void JSPushCallBack::ConvertJsonStringToValue(
 
     const auto &jsonEnd = jsonobj.cend();
     if (jsonobj.find("pkgName") != jsonEnd) {
+        if(!jsonobj.at("pkgName").is_string()){
+            ANS_LOGE("Invalid JSON object pkgName");
+            return;
+        }
         pkgName = jsonobj.at("pkgName").get<std::string>();
     }
     if (jsonobj.find("notifyId") != jsonEnd) {
+        if(!jsonobj.at("notifyId").is_number()){
+            ANS_LOGE("Invalid JSON object notifyId");
+            return;
+        }
         notifyId = jsonobj.at("notifyId").get<int32_t>();
     }
     if (jsonobj.find("contentType") != jsonEnd) {
+        if(!jsonobj.at("contentType").is_number()){
+            ANS_LOGE("Invalid JSON object contentType");
+            return;
+        }
         contentType = jsonobj.at("contentType").get<int32_t>();
     }
 }
@@ -146,7 +152,6 @@ bool JSPushCallBack::ConvertFunctionResult(NativeValue *funcResult)
     }
 
     ANS_LOGI("code : %{public}d ,message : %{public}s", code, message.c_str());
-
     return code == 0;
 }
 } // namespace Notification

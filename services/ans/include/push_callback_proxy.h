@@ -39,10 +39,9 @@ public:
      * @param notificationData notification data.
      * @return Returns true display, false no display.
      */
-    virtual bool OnCheckNotification(const std::string &notificationData) override;
+    bool OnCheckNotification(const std::string &notificationData) override;
 
 private:
-    bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<PushCallBackProxy> delegator_;
 };
 }  // namespace Notification

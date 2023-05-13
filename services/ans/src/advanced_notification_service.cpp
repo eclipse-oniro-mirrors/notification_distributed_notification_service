@@ -4057,10 +4057,10 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObje
         ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
         return ERR_NO_INIT;
     }
-    pushCallback->AddDeathRecipient(pushRecipient_);
 
+    pushCallback->AddDeathRecipient(pushRecipient_);
     pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
-    ANS_LOGD("RegisterPushCallback OK");
+    ANS_LOGD("end");
     return ERR_OK;
 }
 
@@ -4081,19 +4081,19 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (!pushCallBack_) {
+    if (pushCallBack_ == nullptr) {
         ANS_LOGW("The registration callback has not been processed yet.");
         return ERR_INVALID_OPERATION;
     }
 
     pushCallBack_ = nullptr;
-    ANS_LOGD("UnregisterPushCallback OK.");
+    ANS_LOGD("end");
     return ERR_OK;
 }
 
 bool AdvancedNotificationService::IsNeedPushCheck(NotificationConstant::SlotType slotType)
 {
-    ANS_LOGD("IsNeedPushCheck slotType:%{public}d.", slotType);
+    ANS_LOGD("slotType:%{public}d.", slotType);
     if (AccessTokenHelper::IsSystemApp()) {
         ANS_LOGI("System applications do not require push check.");
         return false;

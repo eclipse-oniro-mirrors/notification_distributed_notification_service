@@ -52,22 +52,13 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
     }
 }
 
-bool PushCallBackProxy::WriteInterfaceToken(MessageParcel &data)
-{
-    if (!data.WriteInterfaceToken(PushCallBackProxy::GetDescriptor())) {
-        ANS_LOGE("Write interface token failed.");
-        return false;
-    }
-    return true;
-}
-
 bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
-    if (!WriteInterfaceToken(data)) {
+    if (!data.WriteInterfaceToken(PushCallBackProxy::GetDescriptor())) {
         ANS_LOGE("Write interface token failed.");
         return false;
     }
@@ -94,7 +85,6 @@ bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    (void) remote;
     ANS_LOGE("Push Callback died, remove the proxy object");
     AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
 }
