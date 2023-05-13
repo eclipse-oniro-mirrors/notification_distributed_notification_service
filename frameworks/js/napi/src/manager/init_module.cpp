@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,10 @@
  */
 
 #include "init_module.h"
+
 #include "constant.h"
+#include "js_runtime_utils.h"
+#include "napi/native_api.h"
 #include "napi_cancel.h"
 #include "napi_display_badge.h"
 #include "napi_distributed.h"
@@ -26,12 +29,37 @@
 #include "napi_slot.h"
 #include "napi_template.h"
 #include "pixel_map_napi.h"
+#include "napi_push.h"
 
 namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
 EXTERN_C_START
+
+static NativeValue *NapiPushInit(NativeEngine *engine, NativeValue *exports)
+{
+    ANS_LOGD("called");
+    if (engine == nullptr || exports == nullptr) {
+        ANS_LOGE("Invalid input parameters");
+        return nullptr;
+    }
+
+    NativeObject *object = OHOS::AbilityRuntime::ConvertNativeValueTo<NativeObject>(exports);
+    if (object == nullptr) {
+        ANS_LOGE("object is nullptr");
+        return nullptr;
+    }
+
+    std::unique_ptr<NapiPush> napiPush = std::make_unique<NapiPush>();
+    object->SetNativePointer(napiPush.release(), NapiPush::Finalizer, nullptr);
+
+    const char *moduleName = "NapiPush";
+    OHOS::AbilityRuntime::BindNativeFunction(*engine, *object, "on", moduleName, NapiPush::RegisterPushCallback);
+    OHOS::AbilityRuntime::BindNativeFunction(*engine, *object, "off", moduleName, NapiPush::UnregisterPushCallback);
+
+    return exports;
+}
 
 napi_value NotificationManagerInit(napi_env env, napi_value exports)
 {
@@ -83,7 +111,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
 
-    return exports;
+    return reinterpret_cast<napi_value>(
+        NapiPushInit(reinterpret_cast<NativeEngine *>(env), reinterpret_cast<NativeValue *>(exports)));
 }
 
 /*

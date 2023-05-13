@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -393,6 +393,16 @@ ErrCode NotificationHelper::GetSyncNotificationEnabledWithoutApp(const int32_t u
 ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber);
+}
+
+ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RegisterPushCallback(pushCallback);
+}
+
+ErrCode NotificationHelper::UnregisterPushCallback()
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -672,6 +672,21 @@ public:
      */
     virtual ErrCode SetBadgeNumber(int32_t badgeNumber) = 0;
 
+    /**
+     * @brief Register Push Callback.
+     *
+     * @param pushCallback PushCallBack.
+     * @return Returns register PushCallback result.
+     */
+    virtual ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback) = 0;
+
+    /**
+     * @brief Unregister Push Callback.
+     *
+     * @return Returns unregister push Callback result.
+     */
+    virtual ErrCode UnregisterPushCallback() = 0;
+
 protected:
     enum TransactId : uint32_t {
         PUBLISH_NOTIFICATION = FIRST_CALL_TRANSACTION,
@@ -753,7 +768,9 @@ protected:
         GET_ENABLED_FOR_BUNDLE_SLOT,
         SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
         GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
-        SET_BADGE_NUMBER
+        SET_BADGE_NUMBER,
+        REGISTER_PUSH_CALLBACK,
+        UNREGISTER_PUSH_CALLBACK,
     };
 };
 }  // namespace Notification

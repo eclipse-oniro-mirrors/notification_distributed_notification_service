@@ -57,12 +57,18 @@ ohos_shared_library("notificationmanager") {
     "napi_enable_notification.cpp",
     "napi_get_active.cpp",
     "napi_publish.cpp",
+    "napi_push.cpp",
+    "napi_push_callback.cpp",
     "napi_remove_group.cpp",
     "napi_slot.cpp",
     "napi_template.cpp",
   ]
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [
+    "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
+  ]
 
   external_deps = [
     "ability_base:want",
@@ -71,7 +77,9 @@ ohos_shared_library("notificationmanager") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
     "ability_runtime:napi_common",
+    "ability_runtime:runtime",
     "ability_runtime:wantagent_innerkits",
+    "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "multimedia_image_framework:image",

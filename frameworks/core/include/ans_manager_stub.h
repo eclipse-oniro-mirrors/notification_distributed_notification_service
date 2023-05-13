@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -681,6 +681,21 @@ public:
      */
     virtual ErrCode SetBadgeNumber(int32_t badgeNumber) override;
 
+    /**
+     * @brief Register Push Callback.
+     *
+     * @param pushCallback PushCallBack.
+     * @return Returns register PushCallback result.
+     */
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback) override;
+
+    /**
+     * @brief Unregister Push Callback.
+     *
+     * @return Returns unregister push Callback result.
+     */
+    ErrCode UnregisterPushCallback() override;
+
 private:
     static const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -757,6 +772,8 @@ private:
     ErrCode HandleDistributedSetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedGetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result);

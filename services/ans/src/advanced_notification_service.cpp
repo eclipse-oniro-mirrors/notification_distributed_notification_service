@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@
 #include "event_report.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
+#include "nlohmann/json.hpp"
 #include "notification_constant.h"
 #include "notification_dialog.h"
 #include "notification_filter.h"
@@ -47,6 +48,7 @@
 #include "notification_subscriber_manager.h"
 #include "os_account_manager.h"
 #include "permission_filter.h"
+#include "push_callback_stub.h"
 #include "reminder_data_manager.h"
 #include "trigger_info.h"
 #include "ui_service_mgr_client.h"
@@ -113,6 +115,8 @@ struct AdvancedNotificationService::RecentInfo {
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
 std::mutex AdvancedNotificationService::instanceMutex_;
+std::mutex AdvancedNotificationService::pushMutex_;
+sptr<IPushCallBack> AdvancedNotificationService::pushCallBack_;
 
 static const std::shared_ptr<INotificationFilter> NOTIFICATION_FILTERS[] = {
     std::make_shared<PermissionFilter>(),
@@ -516,6 +520,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
+        if (IsNeedPushCheck(request->GetSlotType())) {
+            result = PushCheck(request);
+        }
+        if (result != ERR_OK) {
+            break;
+        }
         result = PublishPreparedNotification(request, bundleOption);
         if (result != ERR_OK) {
             break;
@@ -4000,6 +4010,114 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
     handler_->PostSyncTask(std::bind([&]() {
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     }));
+    return ERR_OK;
+}
+
+void AdvancedNotificationService::ResetPushCallbackProxy()
+{
+    ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(pushMutex_);
+    if ((pushCallBack_ == nullptr) || (pushCallBack_->AsObject() == nullptr)) {
+        ANS_LOGE("invalid proxy state");
+        return;
+    }
+    pushCallBack_->AsObject()->RemoveDeathRecipient(pushRecipient_);
+    pushCallBack_ = nullptr;
+}
+
+ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
+{
+    if (!AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER Permission!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (pushCallBack_) {
+        ANS_LOGW("Duplicate register pushcallback.");
+        return ERR_ALREADY_EXISTS;
+    }
+
+    if (pushCallback == nullptr) {
+        ANS_LOGW("pushCallback is null.");
+        return ERR_INVALID_VALUE;
+    }
+
+    pushRecipient_ = new (std::nothrow) PushCallbackRecipient();
+    if (!pushRecipient_) {
+        ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
+        return ERR_NO_INIT;
+    }
+
+    pushCallback->AddDeathRecipient(pushRecipient_);
+    pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+    ANS_LOGD("end");
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::UnregisterPushCallback()
+{
+    if (!AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER Permission!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (pushCallBack_ == nullptr) {
+        ANS_LOGW("The registration callback has not been processed yet.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    pushCallBack_ = nullptr;
+    ANS_LOGD("end");
+    return ERR_OK;
+}
+
+bool AdvancedNotificationService::IsNeedPushCheck(NotificationConstant::SlotType slotType)
+{
+    ANS_LOGD("slotType:%{public}d.", slotType);
+    if (AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGI("System applications do not require push check.");
+        return false;
+    }
+
+    if (slotType != NotificationConstant::SlotType::CONTENT_INFORMATION) {
+        ANS_LOGI("SlotType: CONTENT_INFORMATION except do not require push check.");
+        return false;
+    }
+    return true;
+}
+
+ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
+{
+    if (pushCallBack_) {
+        nlohmann::json jsonObject;
+        jsonObject["pkgName"] = request->GetCreatorBundleName();
+        jsonObject["notifyId"] = request->GetNotificationId();
+        jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
+        if (!(pushCallBack_->OnCheckNotification(jsonObject.dump()))) {
+            ANS_LOGE("Notification push check failed.");
+            return ERR_ANS_NOTIFICATION_PUSH_CHECK_FAILED;
+        }
+    }
     return ERR_OK;
 }
 }  // namespace Notification

@@ -118,6 +118,7 @@ ohos_unittest("ans_unit_test") {
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
     "notification_hisysevent_test.cpp",
     "notification_preferences_database_test.cpp",
