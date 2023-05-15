@@ -82,11 +82,11 @@ HWTEST_F(DistributedPreferencesTest, SetDistributedBundleEnable_00100, Function 
 }
 
 /**
- * @tc.name      : DistributedPreferences_GetDistributedBundleEnable_00100
- * @tc.number    : GetDistributedBundleEnable_00100
- * @tc.desc      : Get distributed notification enable of a bundle.
+ * @tc.name      : DistributedPreferences_SetDistributedBundleEnable_00200
+ * @tc.number    : SetDistributedBundleEnable_00200
+ * @tc.desc      : Set distributed notification enable of a bundle.
  */
-HWTEST_F(DistributedPreferencesTest, GetDistributedBundleEnable_00100, Function | SmallTest | Level1)
+HWTEST_F(DistributedPreferencesTest, SetDistributedBundleEnable_00200, Function | SmallTest | Level1)
 {
     bool enable = true;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("<bundleName>", 783);
@@ -188,6 +188,43 @@ HWTEST_F(DistributedPreferencesTest, GetSyncEnabledWithoutApp_00100, Function | 
     bool enabled = true;
     DistributedPreferencesInfo distributedPreferencesInfo_;
     distributedPreferencesInfo_.GetSyncEnabledWithoutApp(0, enabled);
+    EXPECT_EQ(enabled, false);
+}
+
+/**
+ * @tc.name      : DistributedPreferencesInfo_GetDistributedBundleEnable_00100
+ * @tc.number    : GetDistributedBundleEnable_00100
+ * @tc.desc      : text GetDistributedBundleEnable function.
+ */
+HWTEST_F(DistributedPreferencesTest, GetDistributedBundleEnable_00100, Function | SmallTest | Level1)
+{
+    DistributedPreferencesInfo distributedPreferencesInfo_;
+    bool res = distributedPreferencesInfo_.GetDistributedBundleEnable("bundle", 0);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name      : DistributedPreferencesInfo_GetDistributedBundleEnable_00200
+ * @tc.number    : GetDistributedBundleEnable_00200
+ * @tc.desc      : text GetDistributedBundleEnable function.
+ */
+HWTEST_F(DistributedPreferencesTest, GetDistributedBundleEnable_00200, Function | SmallTest | Level1)
+{
+    DistributedPreferencesInfo distributedPreferencesInfo_;
+    bool res = distributedPreferencesInfo_.GetDistributedBundleEnable("com.ohos.mms", 0);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name      : DistributedPreferencesInfo_GetSyncEnabledWithoutApp_00200
+ * @tc.number    : GetSyncEnabledWithoutApp_00200
+ * @tc.desc      : text GetSyncEnabledWithoutApp function.
+ */
+HWTEST_F(DistributedPreferencesTest, GetSyncEnabledWithoutApp_00200, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    DistributedPreferencesInfo distributedPreferencesInfo_;
+    distributedPreferencesInfo_.GetSyncEnabledWithoutApp(100, enabled);
     EXPECT_EQ(enabled, false);
 }
 }  // namespace Notification

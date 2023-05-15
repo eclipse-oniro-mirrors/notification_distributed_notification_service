@@ -127,5 +127,38 @@ HWTEST_F(MessageUserTest, ReadFromParcel_00002, Function | SmallTest | Level1)
     parcel.WriteInt32(empty);
     EXPECT_EQ(messageUser.ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    nlohmann::json jsonObject = nlohmann::json{
+        {"key", "key"},
+        {"name", "test"},
+        {"uri", "/data/log/"},
+        {"isMachine", true},
+        {"isUserImportant", true}};
+    auto res = messageUser.FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: Marshalling_00001
+ * @tc.desc: Test Marshalling.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, Marshalling_00001, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+    auto res = messageUser.Marshalling(parcel);
+    EXPECT_NE(res, false);
+}
 }
 }

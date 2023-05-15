@@ -184,5 +184,41 @@ HWTEST_F(NotificationPictureContentTest, ReadFromParcel_00001, Function | SmallT
     auto rrc = std::make_shared<NotificationPictureContent>();
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationPictureContentTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationPictureContent>();
+
+    nlohmann::json jsonObject = nlohmann::json{
+        {"expandedTitle", "title"},
+        {"briefText", "test"}, 
+        {"bigPicture", "/data/image/1.jpeg"}};
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: Marshalling_00002
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationPictureContentTest, Marshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto rrc = std::make_shared<NotificationPictureContent>();
+    auto data = std::make_shared<Media::PixelMap>();
+    rrc->SetBigPicture(data);
+    rrc->SetExpandedTitle("title");
+    rrc->SetBriefText("test");
+    EXPECT_EQ(rrc->Marshalling(parcel), false);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
 }
 }

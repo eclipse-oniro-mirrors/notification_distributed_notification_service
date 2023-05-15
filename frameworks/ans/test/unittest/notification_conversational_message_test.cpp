@@ -201,5 +201,59 @@ HWTEST_F(NotificationConversationalMessageTest, FromJson_00002, Function | Small
     rrc->FromJson(jsonObject);
     EXPECT_EQ(jsonObject.is_object(), true);
 }
+
+/**
+ * @tc.name: ToJson_00002
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W15B
+ */
+HWTEST_F(NotificationConversationalMessageTest, ToJson_00002, Function | SmallTest | Level1)
+{
+    std::string text = "Text";
+    int64_t timestamp = 10;
+    MessageUser sender;
+    nlohmann::json jsonObject;
+    auto rrc = std::make_shared<NotificationConversationalMessage>(text, timestamp, sender);
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrc->ToJson(jsonObject), true);
+}
+
+/**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationConversationalMessageTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"arrivedTime", 1},
+        {"text", "test"},
+        {"uri", "/data/log"},
+        {"mimeType", "test"}};
+    auto rrc = std::make_shared<NotificationConversationalMessage>();
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationConversationalMessageTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"arrivedTime", 1},
+        {"text", "test"},
+        {"uri", ""}};
+    auto rrc = std::make_shared<NotificationConversationalMessage>();
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
+
+
 }
 }

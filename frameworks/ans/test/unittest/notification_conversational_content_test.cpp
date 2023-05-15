@@ -193,5 +193,25 @@ HWTEST_F(NotificationConversationalContentTest, ToJson_00002, Function | SmallTe
     rrc->FromJson(jsonObject);
     EXPECT_EQ(rrc->ToJson(jsonObject), true);
 }
+
+/**
+ * @tc.name: Dump_00001
+ * @tc.desc: Test Dump.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConversationalContentTest, Dump_00001, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    auto rrc = std::make_shared<NotificationConversationalContent>(messageUser);
+    MessageUser sender;
+    int64_t timestamp = 0;
+    auto messagePtr = std::make_shared<NotificationConversationalMessage>("test", timestamp, sender);
+    rrc->AddConversationalMessage(messagePtr);
+    messagePtr = nullptr;
+    EXPECT_EQ(rrc->GetAllConversationalMessages().size(), 1);
+    std::string result = rrc->Dump();
+}
+
 }
 }

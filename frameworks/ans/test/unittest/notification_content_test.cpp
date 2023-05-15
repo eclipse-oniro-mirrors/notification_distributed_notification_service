@@ -305,5 +305,71 @@ HWTEST_F(NotificationContentTest, ToJson_00001, Function | SmallTest | Level1)
     bool result2 = notificationContent.ToJson(jsonObject);
     EXPECT_EQ(result2, false);
 }
+
+/**
+ * @tc.name: NotificationContentMarshalling_0200
+ * @tc.desc: Marshalling
+ * @tc.type: FUNC
+ * @tc.require: issueI5S0ZS
+ */
+HWTEST_F(NotificationContentTest, NotificationContentMarshalling_0200, Level1)
+{
+    std::shared_ptr<NotificationNormalContent> normalContent = nullptr;
+    auto sptr1 = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(sptr1, nullptr);
+    std::shared_ptr<NotificationLongTextContent> longTextContent = nullptr;
+    auto sptr2 = std::make_shared<NotificationContent>(longTextContent);
+    EXPECT_NE(sptr2, nullptr);
+    std::shared_ptr<NotificationPictureContent> pictureContent = nullptr;
+    auto sptr3 = std::make_shared<NotificationContent>(pictureContent);
+    EXPECT_NE(sptr3, nullptr);
+    std::shared_ptr<NotificationConversationalContent> conversationContent = nullptr;
+    auto sptr4 = std::make_shared<NotificationContent>(conversationContent);
+    EXPECT_NE(sptr4, nullptr);
+    std::shared_ptr<NotificationMultiLineContent> multiLineContent = nullptr;
+    auto sptr5 = std::make_shared<NotificationContent>(multiLineContent);
+    EXPECT_NE(sptr5, nullptr);
+    std::shared_ptr<NotificationMediaContent> mediaContent = nullptr;
+    auto sptr6 = std::make_shared<NotificationContent>(mediaContent);
+    EXPECT_NE(sptr6, nullptr);
+}
+
+/**
+ * @tc.name: ToJson_00002
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationContentTest, ToJson_00002, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    NotificationContent notificationContent(normalContent);
+
+    nlohmann::json jsonObject = nlohmann::json{
+        {"processName", "process6"}, {"APL", 1},
+        {"version", 2}, {"tokenId", 685266937},
+        {"tokenAttr", 0},
+        {"dcaps", {"AT_CAP", "ST_CAP"}}};
+    bool result2 = notificationContent.ToJson(jsonObject);
+    EXPECT_EQ(result2, true);
+}
+
+/**
+ * @tc.name: NotificationBasicContentReadFromJson_00001
+ * @tc.desc: GetAdditionalText
+ * @tc.type: FUNC
+ * @tc.require: issueI5S0ZS
+ */
+HWTEST_F(NotificationContentTest, NotificationBasicContentReadFromJson_00001, Level1)
+{
+    auto notificationBasicContent = std::make_shared<NotificationBasicContent>();
+    nlohmann::json jsonObject = nlohmann::json{
+        {"text", "test"}, 
+        {"title", "test"},
+        {"additionalText", "test"}};
+    notificationBasicContent->ReadFromJson(jsonObject);
+    EXPECT_NE(notificationBasicContent, nullptr);
+}
 }
 }
