@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_PUSH_CALLBACK_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_PUSH_CALLBACK_H
 
+#include <chrono>
 #include <iremote_object.h>
 
 #include "native_engine/native_engine.h"
@@ -40,11 +41,14 @@ public:
     bool IsEqualPushCallBackObject(NativeValue *pushCallBackObject);
 
 private:
+    bool HandleCheckNotificationTask(const std::string &notificationData);
     bool ConvertFunctionResult(NativeValue *funcResult);
     void ConvertJsonStringToValue(
         const std::string &notificationData, std::string &pkgName, int32_t &notifyId, int32_t &contentType);
     NativeEngine &engine_;
     std::unique_ptr<NativeReference> pushCallBackObject_;
+    std::mutex mutexlock;
+    std::condition_variable condition;
 };
 } // namespace Notification
 } // namespace OHOS
