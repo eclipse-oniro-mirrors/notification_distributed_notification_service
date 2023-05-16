@@ -23,8 +23,9 @@
 namespace OHOS {
 namespace Notification {
 namespace {
+constexpr int32_t NOTIFICATION_TIME_OUT = 500; // 500ms
 constexpr size_t ARGC_ONE = 1;
-}
+} // namespace
 JSPushCallBack::JSPushCallBack(NativeEngine &engine) : engine_(engine) {}
 
 JSPushCallBack::~JSPushCallBack() {}
@@ -51,6 +52,34 @@ bool JSPushCallBack::IsEqualPushCallBackObject(NativeValue *pushCallBackObject)
 }
 
 bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
+{
+    wptr<JSPushCallBack> weakPush = this;
+    bool retval = false;
+    auto complete = [weakPush, &retval, notificationData](
+                        NativeEngine &engine, AbilityRuntime::AsyncTask &task, int32_t status) {
+        auto pushCallback = weakPush.promote();
+        if (pushCallback == nullptr) {
+            ANS_LOGE("push call back is nullptr!");
+            retval = false;
+            return;
+        }
+        retval = pushCallback->HandleCheckNotificationTask(notificationData);
+        std::unique_lock<std::mutex> lock(pushCallback->mutexlock);
+        pushCallback->condition.notify_all();
+    };
+
+    std::unique_lock<std::mutex> lock(mutexlock);
+    NativeValue *result;
+    AbilityRuntime::AsyncTask::Schedule("JSPushCallBack::OnCheckNotification", engine_,
+        AbilityRuntime::CreateAsyncTaskWithLastParam(engine_, nullptr, nullptr, std::move(complete), &result));
+    if (condition.wait_for(lock, std::chrono::milliseconds(NOTIFICATION_TIME_OUT)) == std::cv_status::timeout) {
+        ANS_LOGE("wait for check notification task time out!");
+        return false;
+    }
+    return retval;
+}
+
+bool JSPushCallBack::HandleCheckNotificationTask(const std::string &notificationData)
 {
     AbilityRuntime::HandleEscape handleEscape(engine_);
     if (pushCallBackObject_ == nullptr) {
@@ -94,21 +123,21 @@ void JSPushCallBack::ConvertJsonStringToValue(
 
     const auto &jsonEnd = jsonobj.cend();
     if (jsonobj.find("pkgName") != jsonEnd) {
-        if(!jsonobj.at("pkgName").is_string()){
+        if (!jsonobj.at("pkgName").is_string()) {
             ANS_LOGE("Invalid JSON object pkgName");
             return;
         }
         pkgName = jsonobj.at("pkgName").get<std::string>();
     }
     if (jsonobj.find("notifyId") != jsonEnd) {
-        if(!jsonobj.at("notifyId").is_number()){
+        if (!jsonobj.at("notifyId").is_number()) {
             ANS_LOGE("Invalid JSON object notifyId");
             return;
         }
         notifyId = jsonobj.at("notifyId").get<int32_t>();
     }
     if (jsonobj.find("contentType") != jsonEnd) {
-        if(!jsonobj.at("contentType").is_number()){
+        if (!jsonobj.at("contentType").is_number()) {
             ANS_LOGE("Invalid JSON object contentType");
             return;
         }
