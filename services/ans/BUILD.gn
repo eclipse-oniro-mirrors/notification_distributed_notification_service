@@ -95,7 +95,7 @@ ohos_shared_library("libans") {
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
     external_deps += [ "hisysevent_native:libhisysevent" ]
   }
-
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
