@@ -270,6 +270,7 @@ bool NotificationConversationalContent::ReadFromParcel(Parcel &parcel)
         auto member = parcel.ReadParcelable<NotificationConversationalMessage>();
         if (member == nullptr) {
             ANS_LOGE("Failed to read message");
+            messages_.clear();
             return false;
         }
 

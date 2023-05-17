@@ -867,8 +867,8 @@ napi_value AddSlotInner(napi_env env, napi_callback_info info, bool isThrow)
             AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
             if (asynccallbackinfo) {
                 std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
-                ReminderCommon::ReturnCallbackPromise(
-                    env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
+                ReminderCommon::ReturnCallbackPromise(env, asynccallbackinfo->info,
+                    NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
                 ANSR_LOGD("AddSlot napi_create_async_work complete end.");
             }
         },

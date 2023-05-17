@@ -90,14 +90,14 @@ void DistributedDatabaseBranchTest::TearDown()
     deviceCallback_ = nullptr;
 }
 
-void DistributedDatabaseBranchTest::OnInsert(const std::string &deviceId, const std::string &key, const std::string &value)
-{}
+void DistributedDatabaseBranchTest::OnInsert(
+    const std::string &deviceId, const std::string &key, const std::string &value) {}
 
-void DistributedDatabaseBranchTest::OnUpdate(const std::string &deviceId, const std::string &key, const std::string &value)
-{}
+void DistributedDatabaseBranchTest::OnUpdate(
+    const std::string &deviceId, const std::string &key, const std::string &value) {}
 
-void DistributedDatabaseBranchTest::OnDelete(const std::string &deviceId, const std::string &key, const std::string &value)
-{}
+void DistributedDatabaseBranchTest::OnDelete(
+    const std::string &deviceId, const std::string &key, const std::string &value) {}
 
 void DistributedDatabaseBranchTest::OnConnected(const std::string &deviceId)
 {}
