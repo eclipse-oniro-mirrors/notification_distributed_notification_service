@@ -146,13 +146,15 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANS_LOGI("GetDoNotDisturbDate napi_create_async_work start");
-            AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
+            AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo =
+                static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(
                         asynccallbackinfo->params.userId, asynccallbackinfo->date);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(asynccallbackinfo->date);
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::GetDoNotDisturbDate(asynccallbackinfo->date);
                 }
 
                 ANS_LOGI("GetDoNotDisturbDate errorCode=%{public}d date=%{public}s, hasUserId=%{public}d",

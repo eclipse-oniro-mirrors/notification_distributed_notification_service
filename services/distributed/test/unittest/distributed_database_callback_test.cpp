@@ -40,14 +40,14 @@ void DistributedDatabaseCallbackTest::SetUp()
 void DistributedDatabaseCallbackTest::TearDown()
 {}
 
-void DistributedDatabaseCallbackTest::OnInsert(const std::string &deviceId, const std::string &key, const std::string &value)
-{}
+void DistributedDatabaseCallbackTest::OnInsert(
+    const std::string &deviceId, const std::string &key, const std::string &value) {}
 
-void DistributedDatabaseCallbackTest::OnUpdate(const std::string &deviceId, const std::string &key, const std::string &value)
-{}
+void DistributedDatabaseCallbackTest::OnUpdate(
+    const std::string &deviceId, const std::string &key, const std::string &value) {}
 
-void DistributedDatabaseCallbackTest::OnDelete(const std::string &deviceId, const std::string &key, const std::string &value)
-{}
+void DistributedDatabaseCallbackTest::OnDelete(
+    const std::string &deviceId, const std::string &key, const std::string &value) {}
 
 /**
  * @tc.name      : DistributedDatabaseCallback_00100
