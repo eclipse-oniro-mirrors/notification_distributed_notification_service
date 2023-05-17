@@ -35,21 +35,31 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     // argv[0]: name: string
     NAPI_CALL(env, napi_typeof(env, argv[0], &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+    if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
+        ANS_LOGE("Wrong argument type. String number boolean expected.");
         return nullptr;
     }
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[0], str, STR_MAX_SIZE - 1, &strLen));
-    params.templateName = str;
+    if (valuetype == napi_string) {
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        NAPI_CALL(env, napi_get_value_string_utf8(env, argv[0], str, STR_MAX_SIZE - 1, &strLen));
+        params.templateName = str;
+    } else if (valuetype == napi_number) {
+        int64_t number = 0;
+        NAPI_CALL(env, napi_get_value_int64(env, argv[0], &number));
+        params.templateName = std::to_string(number);
+    } else {
+        bool result = false;
+        NAPI_CALL(env, napi_get_value_bool(env, argv[0], &result));
+        params.templateName = std::to_string(result);
+    }
 
     // argv[1]: callback
     if (argc >= IS_TEMPLATE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[1], 1, &params.callback);
     }

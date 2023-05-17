@@ -113,8 +113,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= SET_DISTURB_MAX_PARA - 1) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if ((valuetype != napi_number) && (valuetype != napi_function)) {
-            ANS_LOGW("Wrong argument type. Function or object expected.");
-            return nullptr;
+            ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
+            return Common::NapiGetNull(env);
         }
 
         if (valuetype == napi_number) {
@@ -129,8 +129,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= SET_DISTURB_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
     }
@@ -250,8 +250,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= GET_DISTURB_MAX_PARA - 1) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
         if ((valuetype != napi_number) && (valuetype != napi_function)) {
-            ANS_LOGW("Wrong argument type. Function or object expected.");
-            return nullptr;
+            ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
+            return Common::NapiGetNull(env);
         }
         if (valuetype == napi_number) {
             params.hasUserId = true;
@@ -265,8 +265,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= GET_DISTURB_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGE("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);
     }
