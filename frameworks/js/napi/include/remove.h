@@ -62,7 +62,8 @@ napi_value RemoveAll(napi_env env, napi_callback_info info);
 napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info);
 
 bool ParseBundleOptionTypeParams(const napi_env &env, napi_value* argv, size_t argc, RemoveParams &params);
-bool ParseHashcodeTypeParams(const napi_env &env, napi_value* argv, size_t argc, RemoveParams &params);
+bool ParseHashcodeTypeParams(
+    const napi_env &env, napi_value* argv, size_t argc, napi_valuetype valueType, RemoveParams &params);
 bool ParseCallbackFunc(const napi_env &env, const napi_value &value, RemoveParams &params);
 bool ParseRemoveReason(const napi_env &env, const napi_value &value, RemoveParams &params);
 bool ParseParameters(const napi_env &env, const napi_callback_info &info, RemoveParams &params);

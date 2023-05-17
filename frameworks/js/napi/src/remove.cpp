@@ -53,20 +53,31 @@ bool ParseCallbackFunc(const napi_env &env, const napi_value &value,
     napi_valuetype valueType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, value, &valueType), false);
     if (valueType != napi_function) {
-        ANS_LOGW("Wrong argument type. Function expected.");
-        return false;
+        ANS_LOGW("Callback is not function excute promise.");
+        return true;
     }
     napi_create_reference(env, value, 1, &params.callback);
     return true;
 }
 
-bool ParseHashcodeTypeParams(const napi_env &env, napi_value* argv, size_t argc, RemoveParams &params)
+bool ParseHashcodeTypeParams(
+    const napi_env &env, napi_value* argv, size_t argc, napi_valuetype valueType, RemoveParams &params)
 {
     // argv[0]: hashCode
-    size_t strLen = 0;
-    char str[STR_MAX_SIZE] = {0};
-    NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen), false);
-    params.hashcode = str;
+    if (valueType == napi_string) {
+        size_t strLen = 0;
+        char str[STR_MAX_SIZE] = {0};
+        NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen), false);
+        params.hashcode = str;
+    } else if (valueType == napi_number) {
+        int64_t number = 0;
+        NAPI_CALL_BASE(env, napi_get_value_int64(env, argv[PARAM0], &number), false);
+        params.hashcode = std::to_string(number);
+    } else {
+        bool result = false;
+        NAPI_CALL_BASE(env, napi_get_value_bool(env, argv[PARAM0], &result), false);
+        params.hashcode = std::to_string(result);
+    }
     // argv[1]:removeReason
     if (!ParseRemoveReason(env, argv[PARAM1], params)) {
         return false;
@@ -120,12 +131,13 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
     }
     napi_valuetype valueType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, argv[PARAM0], &valueType), false);
-    if ((valueType != napi_string) && (valueType != napi_object)) {
+    if ((valueType != napi_string) && (valueType != napi_object) &&
+        (valueType != napi_number) && (valueType != napi_boolean)) {
         ANS_LOGW("Wrong argument type. String or object expected.");
         return false;
     }
-    if (valueType == napi_string) {
-        return ParseHashcodeTypeParams(env, argv, argc, params);
+    if ((valueType == napi_string) || (valueType == napi_number) || (valueType == napi_boolean)) {
+        return ParseHashcodeTypeParams(env, argv, argc, valueType, params);
     }
     return ParseBundleOptionTypeParams(env, argv, argc, params);
 }
@@ -147,8 +159,8 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if ((valuetype != napi_object) && (valuetype != napi_number) && (valuetype != napi_function)) {
-        ANS_LOGW("Wrong argument type. Function or object expected.");
-        return nullptr;
+        ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
+        return Common::NapiGetNull(env);
     }
     if (valuetype == napi_object) {
         BundleAndKeyInfo bundleandKeyInfo {};
@@ -169,8 +181,8 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
     if (argc >= REMOVE_ALL_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);
     }
@@ -207,20 +219,30 @@ napi_value ParseParameters(
 
     // argv[1]: groupName: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGW("Wrong argument type. String expected.");
+    if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
+        ANS_LOGW("Wrong argument type. String number boolean expected.");
         return nullptr;
     }
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
-    params.groupName = str;
+    if (valuetype == napi_string) {
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
+        params.groupName = str;
+    } else if (valuetype == napi_number) {
+        int64_t number = 0;
+        NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
+        params.groupName = std::to_string(number);
+    } else {
+        bool result = false;
+        NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
+        params.groupName = std::to_string(result);
+    }
     // argv[2]:callback
     if (argc >= REMOVE_GROUP_BY_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
     }
