@@ -29,7 +29,6 @@ namespace OHOS {
     {
         Notification::AnsManagerStub ansManagerStub;
         bool allow = *data % ENABLE;
-        ansManagerStub.GetPrivateNotificationsAllowed(allow);
         sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
         int notificationId = 1;
         std::string stringData(data);

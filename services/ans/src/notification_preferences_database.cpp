@@ -79,11 +79,6 @@ const static std::string KEY_BUNDLE_SHOW_BADGE = "showBadge";
 const static std::string KEY_BUNDLE_BADGE_TOTAL_NUM = "badgeTotalNum";
 
 /**
- * Indicates that disturbe key which bundle private allowed.
- */
-const static std::string KEY_BUNDLE_PRIVATE_ALLOWED = "privateAllowed";
-
-/**
  * Indicates that disturbe key which bundle enable notification.
  */
 const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
@@ -258,11 +253,6 @@ const std::map<std::string,
                 std::placeholders::_2, std::placeholders::_3),
         },
         {
-            KEY_BUNDLE_PRIVATE_ALLOWED,
-            std::bind(&NotificationPreferencesDatabase::ParseBundlePrivateAllowed, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
             KEY_BUNDLE_ENABLE_NOTIFICATION,
             std::bind(&NotificationPreferencesDatabase::ParseBundleEnableNotification, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3),
@@ -416,24 +406,6 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t result =
         PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, totalBadgeNum);
-    return (result == NativeRdb::E_OK);
-}
-
-bool NotificationPreferencesDatabase::PutPrivateNotificationsAllowed(
-    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &allow)
-{
-    if (bundleInfo.GetBundleName().empty()) {
-        ANS_LOGE("Bundle name is null.");
-        return false;
-    }
-
-    if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
-        return false;
-    }
-    std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result =
-        PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE, allow);
-
     return (result == NativeRdb::E_OK);
 }
 
@@ -599,9 +571,6 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
         GenerateBundleKey(bundleKey, KEY_BUNDLE_IMPORTANCE), std::to_string(bundleInfo.GetImportance()), values);
     GenerateEntry(
         GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE), std::to_string(bundleInfo.GetIsShowBadge()), values);
-    GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_PRIVATE_ALLOWED),
-        std::to_string(bundleInfo.GetIsPrivateAllowed()),
-        values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_ENABLE_NOTIFICATION),
         std::to_string(bundleInfo.GetEnableNotification()),
         values);
@@ -771,9 +740,6 @@ int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
             break;
         case BundleType::BUNDLE_SHOW_BADGE_TYPE:
             keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
-            break;
-        case BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE:
-            keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_PRIVATE_ALLOWED);
             break;
         case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
             keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_ENABLE_NOTIFICATION);
@@ -1128,13 +1094,6 @@ void NotificationPreferencesDatabase::ParseBundleBadgeNum(
 {
     ANS_LOGD("SetBundleBadgeNum bundle badge num is %{public}s.", value.c_str());
     bundleInfo.SetBadgeTotalNum(StringToInt(value));
-}
-
-void NotificationPreferencesDatabase::ParseBundlePrivateAllowed(
-    NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
-{
-    ANS_LOGD("SetBundlePrivateAllowed bundle private allowed is %{public}s.", value.c_str());
-    bundleInfo.SetIsPrivateAllowed(static_cast<bool>(StringToInt(value)));
 }
 
 void NotificationPreferencesDatabase::ParseBundleEnableNotification(

@@ -90,20 +90,6 @@ public:
         int32_t GetBadgeTotalNum() const;
 
         /**
-         * @brief Set bundle Whether to private allowed.
-         *
-         * @param name Indicates the set Whether to private allowed.
-         */
-        void SetIsPrivateAllowed(const bool &isPrivateAllowed);
-
-        /**
-         * @brief Get bundle Whether to private allowed.
-         *
-         * @return Return true on success, false on failure.
-         */
-        bool GetIsPrivateAllowed() const;
-
-        /**
          * @brief Set bundle enable notification.
          *
          * @param enable Indicates the set enable notification.
@@ -203,7 +189,6 @@ public:
         int32_t importance_ = BUNDLE_IMPORTANCE;
         bool isShowBadge_ = BUNDLE_SHOW_BADGE;
         int32_t badgeTotalNum_ = BUNDLE_BADGE_TOTAL_NUM;
-        bool isPrivateAllowed_ = BUNDLE_PRIVATE_ALLOWED;
         bool isEnabledNotification_ = BUNDLE_ENABLE_NOTIFICATION;
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;

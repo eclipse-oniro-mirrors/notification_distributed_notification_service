@@ -60,8 +60,6 @@ namespace OHOS {
         ansManagerStub.HandlePublishContinuousTaskNotification(datas, reply);
         ansManagerStub.HandleCancelContinuousTaskNotification(datas, reply);
         ansManagerStub.HandleIsNotificationPolicyAccessGranted(datas, reply);
-        ansManagerStub.HandleSetPrivateNotificationsAllowed(datas, reply);
-        ansManagerStub.HandleGetPrivateNotificationsAllowed(datas, reply);
         ansManagerStub.HandleRemoveNotification(datas, reply);
         ansManagerStub.HandleRemoveAllNotifications(datas, reply);
         ansManagerStub.HandleDelete(datas, reply);
@@ -145,8 +143,6 @@ namespace OHOS {
         ansManagerStub.GetBundleImportance(importance);
         bool granted = true;
         ansManagerStub.HasNotificationPolicyAccessPermission(granted);
-        bool allow = true;
-        ansManagerStub.SetPrivateNotificationsAllowed(allow);
         int32_t removeReason = 1;
         ansManagerStub.RemoveNotification(bundleOption, notificationId, label, removeReason);
         ansManagerStub.RemoveAllNotifications(bundleOption);
