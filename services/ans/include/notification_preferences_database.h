@@ -78,15 +78,6 @@ public:
     bool PutTotalBadgeNums(const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &totalBadgeNum);
 
     /**
-     * @brief Put private notification allowed in the of  bundle into disturbe DB.
-     *
-     * @param bundleInfo Indicates bundle info.
-     * @param allow Indicates to whether to allow
-     * @return Return true on success, false on failure.
-     */
-    bool PutPrivateNotificationsAllowed(const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &allow);
-
-    /**
      * @brief Put enable notification in the of  bundle into disturbe DB.
      *
      * @param bundleInfo Indicates bundle info.
@@ -213,8 +204,6 @@ private:
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleShowBadge(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleBadgeNum(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
-    void ParseBundlePrivateAllowed(
-        NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleEnableNotification(
         NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundlePoppedDialog(

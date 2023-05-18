@@ -247,22 +247,6 @@ public:
     virtual ErrCode HasNotificationPolicyAccessPermission(bool &granted) = 0;
 
     /**
-     * @brief Set whether to allow private notifications.
-     *
-     * @param allow Indicates the flag that allows private notification.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode SetPrivateNotificationsAllowed(bool allow) = 0;
-
-    /**
-     * @brief Get whether to allow private notifications.
-     *
-     * @param allow Indicates the flag that allows private notification.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetPrivateNotificationsAllowed(bool &allow) = 0;
-
-    /**
      * @brief Delete notification based on key.
      *
      * @param key Indicates the key to delete notification.
@@ -716,8 +700,6 @@ protected:
         SET_NOTIFICATION_BADGE_NUM,
         GET_BUNDLE_IMPORTANCE,
         IS_NOTIFICATION_POLICY_ACCESS_GRANTED,
-        SET_PRIVATIVE_NOTIFICATIONS_ALLOWED,
-        GET_PRIVATIVE_NOTIFICATIONS_ALLOWED,
         REMOVE_NOTIFICATION,
         REMOVE_ALL_NOTIFICATIONS,
         DELETE_NOTIFICATION,

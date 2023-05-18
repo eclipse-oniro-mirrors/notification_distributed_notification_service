@@ -61,16 +61,6 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBadgeTotalNum() const
     return badgeTotalNum_;
 }
 
-void NotificationPreferencesInfo::BundleInfo::SetIsPrivateAllowed(const bool &isPrivateAllowed)
-{
-    isPrivateAllowed_ = isPrivateAllowed;
-}
-
-bool NotificationPreferencesInfo::BundleInfo::GetIsPrivateAllowed() const
-{
-    return isPrivateAllowed_;
-}
-
 void NotificationPreferencesInfo::BundleInfo::SetEnableNotification(const bool &enable)
 {
     isEnabledNotification_ = enable;
