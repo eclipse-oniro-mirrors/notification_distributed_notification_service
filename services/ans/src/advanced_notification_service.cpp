@@ -2332,8 +2332,8 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
                 continue;
             }
 
-            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+            if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+                (record->bundleOption->GetUid() == bundle->GetUid()) &&
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 record->deviceId.empty() &&
 #endif
