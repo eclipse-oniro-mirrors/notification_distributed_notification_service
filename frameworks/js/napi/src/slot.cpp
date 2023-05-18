@@ -510,7 +510,8 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
                 if (asynccallbackinfo->isAddSlotByType) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::AddSlotByType(asynccallbackinfo->inType);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::AddNotificationSlot(asynccallbackinfo->slot);
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::AddNotificationSlot(asynccallbackinfo->slot);
                 }
             }
         },
@@ -1060,7 +1061,8 @@ napi_value RemoveSlot(napi_env env, napi_callback_info info)
             ANS_LOGI("removeSlot napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveSlot *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveNotificationSlot(asynccallbackinfo->outType);
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::RemoveNotificationSlot(asynccallbackinfo->outType);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -1250,7 +1252,9 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoEnableSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetEnabledForBundleSlot(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.outType, asynccallbackinfo->params.enable);
+                    asynccallbackinfo->params.option,
+                    asynccallbackinfo->params.outType,
+                    asynccallbackinfo->params.enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {

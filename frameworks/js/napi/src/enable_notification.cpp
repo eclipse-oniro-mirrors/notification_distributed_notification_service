@@ -315,7 +315,8 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
                 if (asynccallbackinfo->params.hasBundleOption) {
                     ANS_LOGE("Not allowed to query another application");
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
                 }
                 ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);

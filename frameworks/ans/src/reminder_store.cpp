@@ -243,7 +243,8 @@ bool ReminderStore::IsReminderExist(const sptr<ReminderRequest> &reminder)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
     absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminder->GetReminderId()));
-    std::unique_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    std::unique_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(
+        absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
         ANSR_LOGE("QueryResultSet is null.");
         return false;

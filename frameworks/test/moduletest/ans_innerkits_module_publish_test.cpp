@@ -35,10 +35,10 @@ namespace OHOS {
 namespace Notification {
 static sptr<ISystemAbilityManager> systemAbilityManager =
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-bool OnConsumedReceived = false;
-bool OnCanceledReceived = false;
-bool OnWantReceived = false;
-bool OnBadgeNumberReceived = false;
+bool g_onConsumedReceived = false;
+bool g_onCanceledReceived = false;
+bool g_onWantReceived = false;
+bool g_onBadgeNumberReceived = false;
 const int32_t SLEEP_TIME = 1;
 const uint64_t ACTIVE_NUMS = 2;
 const int32_t CASE_ONE = 1;
@@ -102,13 +102,13 @@ public:
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {
-        OnCanceledReceived = true;
+        g_onCanceledReceived = true;
     }
 
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {
-        OnConsumedReceived = true;
+        g_onConsumedReceived = true;
         g_consumed_mtx.unlock();
         NotificationRequest notificationRequest = request->GetNotificationRequest();
         GTEST_LOG_(INFO) << "OnConsumed notificationId : " << notificationRequest.GetNotificationId();
@@ -155,7 +155,7 @@ public:
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {
         GTEST_LOG_(INFO) << "ANS_Interface_MT::OnBadgeChanged badgeData : " << badgeData->Dump();
-        OnBadgeNumberReceived = true;
+        g_onBadgeNumberReceived = true;
         EXPECT_EQ(badgeData->GetBadgeNumber(), BADGE_NUMBER);
     }
 
@@ -415,7 +415,7 @@ class CompletedCallbackTest : public AbilityRuntime::WantAgent::CompletedCallbac
         (void)resultExtras;
 
         g_send_finished_mtx.unlock();
-        OnWantReceived = true;
+        g_onWantReceived = true;
     }
 };
 
@@ -447,7 +447,7 @@ void AnsInnerKitsModulePublishTest::SetUp()
 
 void AnsInnerKitsModulePublishTest::TearDown()
 {
-    OnConsumedReceived = false;
+    g_onConsumedReceived = false;
     g_subscribe_mtx.unlock();
     g_consumed_mtx.unlock();
     g_unsubscribe_mtx.unlock();
@@ -485,7 +485,7 @@ void AnsInnerKitsModulePublishTest::WaitOnConsumed()
             break;
         }
     }
-    EXPECT_EQ(OnConsumedReceived, true);
+    EXPECT_EQ(g_onConsumedReceived, true);
 }
 
 void AnsInnerKitsModulePublishTest::WaitOnUnsubscribeResult()
@@ -1154,7 +1154,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_
     EXPECT_NE(content, nullptr);
     EXPECT_EQ((int)ERR_OK, (int)NotificationHelper::CancelAllNotifications());
     sleep(SLEEP_TIME);
-    EXPECT_EQ(OnCanceledReceived, true);
+    EXPECT_EQ(g_onCanceledReceived, true);
     uint64_t countBefor = 0;
     EXPECT_EQ((int)ERR_OK, NotificationHelper::GetActiveNotificationNums(countBefor));
     EXPECT_EQ(0, countBefor);
@@ -1166,7 +1166,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req1));
     WaitOnConsumed();
-    OnConsumedReceived = false;
+    g_onConsumedReceived = false;
     g_consumed_mtx.unlock();
     std::string label2 = "Label2";
     NotificationRequest req2(0);
@@ -1185,13 +1185,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_
     EXPECT_EQ("Label2", requests[1]->GetLabel());
     EXPECT_EQ((int)ERR_OK, (int)NotificationHelper::RemoveNotifications(SUBSCRIBE_USER_SYSTEM_BEGIN));
     sleep(SLEEP_TIME);
-    EXPECT_EQ(OnCanceledReceived, true);
+    EXPECT_EQ(g_onCanceledReceived, true);
     EXPECT_EQ((int)ERR_OK, NotificationHelper::GetActiveNotificationNums(countAfter));
     EXPECT_EQ(0, countAfter);
     g_unsubscribe_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
     WaitOnUnsubscribeResult();
-    OnCanceledReceived = false;
+    g_onCanceledReceived = false;
 }
 
 /**
@@ -1227,19 +1227,19 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Func
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
-    OnConsumedReceived = false;
+    g_onConsumedReceived = false;
 
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call CancelGroup : effective parameters";
     EXPECT_EQ(0, NotificationHelper::CancelGroup("group10100"));
 
     sleep(SLEEP_TIME);
-    OnCanceledReceived = false;
+    g_onCanceledReceived = false;
 
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call CancelGroup : invalid parameters";
     EXPECT_EQ(0, NotificationHelper::CancelGroup("ngroup"));
 
     sleep(SLEEP_TIME);
-    OnCanceledReceived = false;
+    g_onCanceledReceived = false;
 
     req.SetOwnerBundleName("mybundlename");
     req.SetCreatorBundleName("mybundlename");
@@ -1247,20 +1247,20 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Func
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
-    OnConsumedReceived = false;
+    g_onConsumedReceived = false;
 
     NotificationBundleOption bo("bundlename", 0);
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call RemoveGroupByBundle : effective parameters";
     EXPECT_EQ(0, NotificationHelper::RemoveGroupByBundle(bo, "group10100"));
 
     sleep(SLEEP_TIME);
-    OnCanceledReceived = false;
+    g_onCanceledReceived = false;
 
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call RemoveGroupByBundle : invalid parameters";
     EXPECT_EQ(0, NotificationHelper::RemoveGroupByBundle(bo, "ngroup"));
 
     sleep(SLEEP_TIME);
-    OnCanceledReceived = false;
+    g_onCanceledReceived = false;
 
     g_unsubscribe_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
@@ -1614,7 +1614,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00200, F
 
     EXPECT_EQ(NotificationHelper::SetBadgeNumber(BADGE_NUMBER), (int)ERR_OK);
     sleep(SLEEP_TIME);
-    EXPECT_EQ(OnBadgeNumberReceived, true);
+    EXPECT_EQ(g_onBadgeNumberReceived, true);
 
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
     WaitOnUnsubscribeResult();
