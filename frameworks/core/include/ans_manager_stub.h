@@ -250,22 +250,6 @@ public:
     virtual ErrCode HasNotificationPolicyAccessPermission(bool &granted) override;
 
     /**
-     * @brief Set whether to allow private notifications.
-     *
-     * @param allow Indicates the flag that allows private notification.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode SetPrivateNotificationsAllowed(bool allow) override;
-
-    /**
-     * @brief Get whether to allow private notifications.
-     *
-     * @param allow Indicates the flag that allows private notification.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetPrivateNotificationsAllowed(bool &allow) override;
-
-    /**
      * @brief Delete notification.
      *
      * @param bundleOption Indicates the NotificationBundleOption of the notification.
@@ -722,8 +706,6 @@ private:
     ErrCode HandleSetNotificationBadgeNum(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetBundleImportance(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsNotificationPolicyAccessGranted(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleSetPrivateNotificationsAllowed(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetPrivateNotificationsAllowed(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveNotification(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveAllNotifications(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDelete(MessageParcel &data, MessageParcel &reply);

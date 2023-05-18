@@ -94,12 +94,6 @@ const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &
         {AnsManagerStub::IS_NOTIFICATION_POLICY_ACCESS_GRANTED,
             std::bind(&AnsManagerStub::HandleIsNotificationPolicyAccessGranted, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
-        {AnsManagerStub::SET_PRIVATIVE_NOTIFICATIONS_ALLOWED,
-            std::bind(&AnsManagerStub::HandleSetPrivateNotificationsAllowed, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {AnsManagerStub::GET_PRIVATIVE_NOTIFICATIONS_ALLOWED,
-            std::bind(&AnsManagerStub::HandleGetPrivateNotificationsAllowed, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
         {AnsManagerStub::REMOVE_NOTIFICATION,
             std::bind(&AnsManagerStub::HandleRemoveNotification, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
@@ -743,33 +737,6 @@ ErrCode AnsManagerStub::HandleIsNotificationPolicyAccessGranted(MessageParcel &d
 
     if (!reply.WriteBool(granted)) {
         ANS_LOGE("[HandleIsNotificationPolicyAccessGranted] fail: write granted failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AnsManagerStub::HandleSetPrivateNotificationsAllowed(MessageParcel &data, MessageParcel &reply)
-{
-    bool allow = false;
-    if (!reply.ReadBool(allow)) {
-        ANS_LOGE("[HandleSetPrivateNotificationsAllowed] fail: read allow failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = SetPrivateNotificationsAllowed(allow);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleSetPrivateNotificationsAllowed] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AnsManagerStub::HandleGetPrivateNotificationsAllowed(MessageParcel &data, MessageParcel &reply)
-{
-    bool allow = false;
-    ErrCode result = GetPrivateNotificationsAllowed(allow);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleGetPrivateNotificationsAllowed] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -1916,18 +1883,6 @@ ErrCode AnsManagerStub::GetBundleImportance(int &importance)
 ErrCode AnsManagerStub::HasNotificationPolicyAccessPermission(bool &granted)
 {
     ANS_LOGE("AnsManagerStub::HasNotificationPolicyAccessPermission called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::SetPrivateNotificationsAllowed(bool allow)
-{
-    ANS_LOGE("AnsManagerStub::SetPrivateNotificationsAllowed called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::GetPrivateNotificationsAllowed(bool &allow)
-{
-    ANS_LOGE("AnsManagerStub::GetPrivateNotificationsAllowed called!");
     return ERR_INVALID_OPERATION;
 }
 

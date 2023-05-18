@@ -39,11 +39,6 @@ const static int BUNDLE_IMPORTANCE = 3;
 const static int BUNDLE_BADGE_TOTAL_NUM = 0;
 
 /**
- * Default params that bundle private allowed is false.
- */
-const static int BUNDLE_PRIVATE_ALLOWED = false;
-
-/**
  * Default params that bundle enable notification is true.
  */
 const static int BUNDLE_ENABLE_NOTIFICATION = true;
@@ -62,7 +57,6 @@ enum class BundleType {
     BUNDLE_IMPORTANCE_TYPE,
     BUNDLE_SHOW_BADGE_TYPE,
     BUNDLE_BADGE_TOTAL_NUM_TYPE,
-    BUNDLE_PRIVATE_ALLOWED_TYPE,
     BUNDLE_ENABLE_NOTIFICATION_TYPE,
     BUNDLE_POPPED_DIALOG_TYPE,
 };

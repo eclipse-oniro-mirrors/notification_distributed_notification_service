@@ -939,44 +939,6 @@ HWTEST_F(AnsManagerStubTest, HandleIsNotificationPolicyAccessGranted01, Function
 }
 
 /**
- * @tc.name: HandleSetPrivateNotificationsAllowed02
- * @tc.desc: Test if the allow in data is null.
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandleSetPrivateNotificationsAllowed02, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_PRIVATIVE_NOTIFICATIONS_ALLOWED);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
- * @tc.name: HandleGetPrivateNotificationsAllowed01
- * @tc.desc: Test HandleGetPrivateNotificationsAllowed succeed.
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandleGetPrivateNotificationsAllowed01, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_PRIVATIVE_NOTIFICATIONS_ALLOWED);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)NO_ERROR);
-}
-
-/**
  * @tc.name: HandleRemoveNotification01
  * @tc.desc: Test HandleRemoveNotification succeed.
  * @tc.type: FUNC
@@ -3540,32 +3502,6 @@ HWTEST_F(AnsManagerStubTest, HasNotificationPolicyAccessPermission01, Function |
 {
     bool granted = true;
     ErrCode result = ansManagerStub_->HasNotificationPolicyAccessPermission(granted);
-    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
-}
-
-/**
- * @tc.name: SetPrivateNotificationsAllowed01
- * @tc.desc: Test SetPrivateNotificationsAllowed return.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, SetPrivateNotificationsAllowed01, Function | SmallTest | Level1)
-{
-    bool allow = true;
-    ErrCode result = ansManagerStub_->SetPrivateNotificationsAllowed(allow);
-    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
-}
-
-/**
- * @tc.name: GetPrivateNotificationsAllowed01
- * @tc.desc: Test GetPrivateNotificationsAllowed return.
- * @tc.type: FUNC
- * @tc.require: issueI620XB
- */
-HWTEST_F(AnsManagerStubTest, GetPrivateNotificationsAllowed01, Function | SmallTest | Level1)
-{
-    bool allow = true;
-    ErrCode result = ansManagerStub_->GetPrivateNotificationsAllowed(allow);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

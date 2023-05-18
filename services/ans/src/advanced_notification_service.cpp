@@ -220,6 +220,10 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     if (bundle.empty()) {
         return ERR_ANS_INVALID_BUNDLE;
     }
+    if (!request) {
+        ANSR_LOGE("NotificationRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
 
     if (request->IsAgentNotification()) {
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -877,42 +881,6 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
 ErrCode AdvancedNotificationService::HasNotificationPolicyAccessPermission(bool &granted)
 {
     return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::SetPrivateNotificationsAllowed(bool allow)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().SetPrivateNotificationsAllowed(bundleOption, allow);
-    }));
-    return result;
-}
-
-ErrCode AdvancedNotificationService::GetPrivateNotificationsAllowed(bool &allow)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().GetPrivateNotificationsAllowed(bundleOption, allow);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_OK;
-            allow = false;
-        }
-    }));
-    return result;
 }
 
 ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t removeReason)

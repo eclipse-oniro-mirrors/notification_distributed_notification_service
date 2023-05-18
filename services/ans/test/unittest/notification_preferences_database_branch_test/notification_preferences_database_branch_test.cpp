@@ -176,26 +176,6 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0070
 }
 
 /**
- * @tc.name      : NotificationPreferences_00800
- * @tc.number    :
- * @tc.desc      : test PutPrivateNotificationsAllowed function and CheckBundle is false
- */
-HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_00800, Function | SmallTest | Level1)
-{
-    // set GetBundleName is not empty
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    std::string name = "<SetBundleName>";
-    bundleInfo.SetBundleName(name);
-    // set CheckRdbStore is true
-    MockInit(true);
-    // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
-    // test PutPrivateNotificationsAllowed function
-    bool allow = true;
-    EXPECT_EQ(preferncesDB_->PutPrivateNotificationsAllowed(bundleInfo, allow), false);
-}
-
-/**
  * @tc.name      : NotificationPreferences_00900
  * @tc.number    :
  * @tc.desc      : test PutNotificationsEnabledForBundle function and CheckBundle is false
@@ -590,22 +570,6 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0330
     MockInit(false);
     // set type is BUNDLE_SHOW_BADGE_TYPE
     BundleType type = BundleType::BUNDLE_SHOW_BADGE_TYPE;
-    // test PutBundlePropertyToDisturbeDB function
-    std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);
-}
-
-/**
- * @tc.name      : NotificationPreferences_03400
- * @tc.number    :
- * @tc.desc      : test PutBundlePropertyToDisturbeDB function and type is BUNDLE_PRIVATE_ALLOWED_TYPE
- */
-HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_03400, Function | SmallTest | Level1)
-{
-    // set CheckRdbStore is false
-    MockInit(false);
-    // set type is BUNDLE_PRIVATE_ALLOWED_TYPE
-    BundleType type = BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);

@@ -738,64 +738,6 @@ ErrCode AnsManagerProxy::HasNotificationPolicyAccessPermission(bool &granted)
     return result;
 }
 
-ErrCode AnsManagerProxy::SetPrivateNotificationsAllowed(bool allow)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[SetPrivateNotificationsAllowed] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteBool(allow)) {
-        ANS_LOGE("[SetPrivateNotificationsAllowed] fail: write allow failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_PRIVATIVE_NOTIFICATIONS_ALLOWED, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[SetPrivateNotificationsAllowed] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[SetPrivateNotificationsAllowed] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
-ErrCode AnsManagerProxy::GetPrivateNotificationsAllowed(bool &allow)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[GetPrivateNotificationsAllowed] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_PRIVATIVE_NOTIFICATIONS_ALLOWED, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[GetPrivateNotificationsAllowed] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[GetPrivateNotificationsAllowed] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.ReadBool(allow)) {
-        ANS_LOGE("[GetPrivateNotificationsAllowed] fail: read allow failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
     int32_t notificationId, const std::string &label, int32_t removeReason)
 {

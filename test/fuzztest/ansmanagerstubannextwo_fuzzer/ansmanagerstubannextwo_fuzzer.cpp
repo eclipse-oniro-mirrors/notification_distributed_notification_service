@@ -76,7 +76,7 @@ namespace OHOS {
         ansManagerStub.SetNotificationBadgeNum(notificationId);
         ansManagerStub.GetBundleImportance(notificationId);
         ansManagerStub.HasNotificationPolicyAccessPermission(canPublish);
-        return ansManagerStub.SetPrivateNotificationsAllowed(canPublish);
+        return true;
     }
 }
 

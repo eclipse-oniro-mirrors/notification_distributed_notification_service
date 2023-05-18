@@ -173,33 +173,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutTotalBadgeNums_00200, Function 
 }
 
 /**
- * @tc.name      : PutPrivateNotificationsAllowed_00100
- * @tc.number    :
- * @tc.desc      : Put bundle private notification allowed into disturbe DB, return is true.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, PutPrivateNotificationsAllowed_00100, Function | SmallTest | Level1)
-{
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.SetBundleName(bundleName_);
-    bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_TRUE(preferncesDB_->PutPrivateNotificationsAllowed(bundleInfo, true));
-    EXPECT_TRUE(preferncesDB_->PutPrivateNotificationsAllowed(bundleInfo, true));
-}
-
-/**
- * @tc.name      : PutPrivateNotificationsAllowed_00200
- * @tc.number    :
- * @tc.desc      : Put bundle private notification allowed into disturbe DB when bundle name is null, return is false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, PutPrivateNotificationsAllowed_00200, Function | SmallTest | Level1)
-{
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.SetBundleName(std::string());
-    bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_FALSE(preferncesDB_->PutPrivateNotificationsAllowed(bundleInfo, false));
-}
-
-/**
  * @tc.name      : PutNotificationsEnabledForBundle_00100
  * @tc.number    :
  * @tc.desc      : Put bundle enable into disturbe DB, return is true.
@@ -303,21 +276,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDoNotDisturbDate_00400, Functio
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::CLEARLY, beginDate, endDate);
 
     EXPECT_TRUE(preferncesDB_->PutDoNotDisturbDate(userId, date));
-}
-
-/**
- * @tc.number    : ParseFromDisturbeDB_00100
- * @tc.name      :
- * @tc.desc      : Parse store date from disturbe DB, return is true.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseFromDisturbeDB_00100, Function | SmallTest | Level1)
-{
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.SetBundleName(bundleName_);
-    bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_TRUE(preferncesDB_->PutPrivateNotificationsAllowed(bundleInfo, true));
-    NotificationPreferencesInfo info;
-    EXPECT_TRUE(preferncesDB_->ParseFromDisturbeDB(info));
 }
 
 /**
