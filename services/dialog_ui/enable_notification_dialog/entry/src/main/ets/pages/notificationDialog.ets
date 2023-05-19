@@ -31,12 +31,13 @@ struct NotificationDialog {
         Flex({ alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center }) {
           Text($r("app.string.if_allow_to_publish_notification"))
             .width("350vp")
-            .height("22vp")
+            .height("50vp")
             .margin({ top: 32 })
             .fontSize(21)
             .fontColor("#182431")
             .fontWeight(400)
             .opacity(1)
+            .maxLines(2)
             .textAlign(TextAlign.Center)
         }
 

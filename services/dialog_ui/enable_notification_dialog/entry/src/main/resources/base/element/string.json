@@ -18,11 +18,11 @@
     },
     {
       "name": "allow",
-      "value": "allow"
+      "value": "ALLOW"
     },
     {
       "name": "ban",
-      "value": "ban"
+      "value": "BAN"
     }
   ]
 }
