@@ -396,15 +396,25 @@ napi_value ParsePublishAsBundleParameters(
 
     // argv[1] : bundleName
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGW("Wrong argument type. String expected.");
+    if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
+        ANS_LOGW("Wrong argument type. String number boolean expected.");
         return nullptr;
     }
 
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
-    params.request.SetOwnerBundleName(str);
+   if (valuetype == napi_string) {
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
+        params.request.SetOwnerBundleName(str);
+    } else if (valuetype == napi_number) {
+        int64_t number = 0;
+        NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
+        params.request.SetOwnerBundleName(std::to_string(number));
+    } else {
+        bool result = false;
+        NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
+        params.request.SetOwnerBundleName(std::to_string(result));
+    }
 
     // argv[2] : userId
     NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));

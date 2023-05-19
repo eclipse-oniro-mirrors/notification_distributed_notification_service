@@ -1215,8 +1215,8 @@ napi_value ParseParametersEnableSlot(
     if (argc >= SET_ENABLE_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM3], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM3], 1, &params.callback);
     }
@@ -1335,8 +1335,8 @@ napi_value ParseParametersIsEnableSlot(
     if (argc >= GET_ENABLE_SLOT_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
     }

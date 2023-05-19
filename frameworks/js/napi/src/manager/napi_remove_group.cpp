@@ -53,20 +53,30 @@ napi_value ParseParameters(
 
     // argv[1]: groupName: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGW("Wrong argument type. String expected.");
+    if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
+        ANS_LOGW("Wrong argument type. String number boolean expected.");
         return nullptr;
     }
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
-    params.groupName = str;
+    if (valuetype == napi_string) {
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
+        params.groupName = str;
+    } else if (valuetype == napi_number) {
+        int64_t number = 0;
+        NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
+        params.groupName = std::to_string(number);
+    } else {
+        bool result = false;
+        NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
+        params.groupName = std::to_string(result);
+    }
     // argv[2]:callback
     if (argc >= REMOVE_GROUP_BY_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Wrong argument type. Function expected.");
-            return nullptr;
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
     }
