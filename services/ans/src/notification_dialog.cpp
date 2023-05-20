@@ -60,7 +60,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(int32_t uid)
     AAFwk::Want want;
     want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
     want.SetParam("from", bundleName);
-    auto result = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
+    auto result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want));
     ANS_LOGD("End, result = %{public}d", result);
     return result;
 }
