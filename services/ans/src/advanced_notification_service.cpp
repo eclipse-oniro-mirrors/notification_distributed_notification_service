@@ -483,6 +483,10 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         }
 #endif
     }));
+
+    if (record->request->IsTapDismissed()) {
+        StartAutoDelete(record);
+    }
     return result;
 }
 
@@ -4119,6 +4123,34 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
         }
     }
     return ERR_OK;
+}
+
+void AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<NotificationRecord> &record)
+{
+    ANS_LOGD("enter");
+    auto triggerFunc = std::bind(&AdvancedNotificationService::TriggerAutoDelete,
+        this, record->notification->GetKey());
+    int64_t autoDeleteTime = record->request->GetAutoDeletedTime() - GetCurrentTime();
+    handler_->PostTask(triggerFunc, autoDeleteTime);
+}
+
+void AdvancedNotificationService::TriggerAutoDelete(std::string hashCode)
+{
+    ANS_LOGD("enter");
+    for (auto record : notificationList_) {
+        if (!record->request) {
+            continue;
+        }
+
+        if (record->notification->GetKey() == hashCode) {
+            int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
+            UpdateRecentNotification(record->notification, true, reason);
+            sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
+            notificationList_.remove(record);
+            break;
+        }
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS
