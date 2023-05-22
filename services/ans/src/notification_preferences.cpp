@@ -314,29 +314,6 @@ ErrCode NotificationPreferences::SetTotalBadgeNums(
     return result;
 }
 
-ErrCode NotificationPreferences::GetPrivateNotificationsAllowed(
-    const sptr<NotificationBundleOption> &bundleOption, bool &allow)
-{
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
-    }
-    return GetBundleProperty(bundleOption, BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE, allow);
-}
-
-ErrCode NotificationPreferences::SetPrivateNotificationsAllowed(
-    const sptr<NotificationBundleOption> &bundleOption, const bool allow)
-{
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
-    }
-    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE, allow);
-    if (result == ERR_OK) {
-        preferencesInfo_ = preferencesInfo;
-    }
-    return result;
-}
-
 ErrCode NotificationPreferences::GetNotificationsEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
 {
@@ -572,10 +549,6 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             bundleInfo.SetIsShowBadge(value);
             storeDBResult = preferncesDB_->PutShowBadge(bundleInfo, value);
             break;
-        case BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE:
-            bundleInfo.SetIsPrivateAllowed(value);
-            storeDBResult = preferncesDB_->PutPrivateNotificationsAllowed(bundleInfo, value);
-            break;
         case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
             bundleInfo.SetEnableNotification(value);
             storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, value);
@@ -606,9 +579,6 @@ ErrCode NotificationPreferences::GetBundleProperty(
                 break;
             case BundleType::BUNDLE_SHOW_BADGE_TYPE:
                 value = bundleInfo.GetIsShowBadge();
-                break;
-            case BundleType::BUNDLE_PRIVATE_ALLOWED_TYPE:
-                value = bundleInfo.GetIsPrivateAllowed();
                 break;
             case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
                 value = bundleInfo.GetEnableNotification();

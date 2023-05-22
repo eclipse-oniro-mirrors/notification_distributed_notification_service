@@ -244,44 +244,6 @@ BENCHMARK_F(BenchmarkNotificationService, GetBundleImportanceTestCase)(benchmark
 }
 
 /**
- * @tc.name: SetPrivateNotificationsAllowedTestCase
- * @tc.desc: SetPrivateNotificationsAllowed
- * @tc.type: FUNC
- * @tc.require:
- */
-BENCHMARK_F(BenchmarkNotificationService, SetPrivateNotificationsAllowedTestCase)(benchmark::State &state)
-{
-    while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->SetPrivateNotificationsAllowed(true);
-        if (errCode != ERR_OK) {
-            state.SkipWithError("SetPrivateNotificationsAllowedTestCase failed.");
-        }
-    }
-}
-
-/**
- * @tc.name: GetPrivateNotificationsAllowedTestCase
- * @tc.desc: GetPrivateNotificationsAllowed
- * @tc.type: FUNC
- * @tc.require:
- */
-BENCHMARK_F(BenchmarkNotificationService, GetPrivateNotificationsAllowedTestCase)(benchmark::State &state)
-{
-    while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->SetPrivateNotificationsAllowed(true);
-        if (errCode != ERR_OK) {
-            state.SkipWithError("GetPrivateNotificationsAllowed set failed.");
-        }
-
-        bool allow = false;
-        errCode = advancedNotificationService_->GetPrivateNotificationsAllowed(allow);
-        if (!allow || errCode != ERR_OK) {
-            state.SkipWithError("GetPrivateNotificationsAllowed get failed.");
-        }
-    }
-}
-
-/**
  * @tc.name: SetShowBadgeEnabledForBundleTestCase
  * @tc.desc: SetShowBadgeEnabledForBundle
  * @tc.type: FUNC

@@ -504,31 +504,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01900,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_02000
- * @tc.name      : ANS_SetPrivateNotificationsAllowed_0100
- * @tc.desc      : Test SetPrivateNotificationsAllowed function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02000, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::OTHER);
-    EXPECT_EQ((int)advancedNotificationService_->SetPrivateNotificationsAllowed(true), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_02100
- * @tc.name      : ANS_GetPrivateNotificationsAllowed_0100
- * @tc.desc      : Test GetPrivateNotificationsAllowed function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02100, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::OTHER);
-    EXPECT_EQ((int)advancedNotificationService_->SetPrivateNotificationsAllowed(true), (int)ERR_OK);
-    bool allow = false;
-    EXPECT_EQ((int)advancedNotificationService_->GetPrivateNotificationsAllowed(allow), (int)ERR_OK);
-    EXPECT_TRUE(allow);
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_02200
  * @tc.name      : ANS_UpdateSlots_0100
  * @tc.desc      : Test UpdateSlots function when no slot
@@ -850,31 +825,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06000,
     TestAddSlot(NotificationConstant::SlotType::OTHER);
     int importance = 0;
     EXPECT_EQ((int)advancedNotificationService_->GetBundleImportance(importance), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_06100
- * @tc.name      : ANS_SetPrivateNotificationsAllowed_0100
- * @tc.desc      : Test SetPrivateNotificationsAllowed function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06100, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::OTHER);
-    EXPECT_EQ((int)advancedNotificationService_->SetPrivateNotificationsAllowed(true), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_06200
- * @tc.name      : ANS_GetPrivateNotificationsAllowed_0100
- * @tc.desc      : Test GetPrivateNotificationsAllowed function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06200, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::OTHER);
-    EXPECT_EQ((int)advancedNotificationService_->SetPrivateNotificationsAllowed(true), (int)ERR_OK);
-    bool allow = false;
-    EXPECT_EQ((int)advancedNotificationService_->GetPrivateNotificationsAllowed(allow), (int)ERR_OK);
-    EXPECT_TRUE(allow);
 }
 
 /**
@@ -2363,8 +2313,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     int32_t importance = 2;
     EXPECT_EQ(advancedNotificationService_->GetBundleImportance(importance), ERR_ANS_INVALID_BUNDLE);
     bool allow = true;
-    EXPECT_EQ(advancedNotificationService_->SetPrivateNotificationsAllowed(allow), ERR_ANS_INVALID_BUNDLE);
-    EXPECT_EQ(advancedNotificationService_->GetPrivateNotificationsAllowed(allow), ERR_ANS_INVALID_BUNDLE);
     EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabled(allow), ERR_ANS_INVALID_BUNDLE);
 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);

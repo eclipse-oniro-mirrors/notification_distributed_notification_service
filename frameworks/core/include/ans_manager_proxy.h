@@ -235,22 +235,6 @@ public:
     ErrCode HasNotificationPolicyAccessPermission(bool &granted) override;
 
     /**
-     * @brief Set whether to allow private notifications.
-     *
-     * @param allow Indicates the flag that allows private notification.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetPrivateNotificationsAllowed(bool allow) override;
-
-    /**
-     * @brief Get whether to allow private notifications.
-     *
-     * @param allow Indicates the flag that allows private notification.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetPrivateNotificationsAllowed(bool &allow) override;
-
-    /**
      * @brief Delete notification.
      *
      * @param bundleOption Indicates the NotificationBundleOption of the notification.

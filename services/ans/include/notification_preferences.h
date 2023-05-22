@@ -174,24 +174,6 @@ public:
     ErrCode SetTotalBadgeNums(const sptr<NotificationBundleOption> &bundleOption, const int32_t num);
 
     /**
-     * @brief Get private notification allowed in the of bunlde from DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @param allow Indicates to whether to allow.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode GetPrivateNotificationsAllowed(const sptr<NotificationBundleOption> &bundleOption, bool &allow);
-
-    /**
-     * @brief Set private notification allowed in the of bunlde from DB.
-     *
-     * @param bundleOption Indicates bunlde info label.
-     * @param allow Indicates to set allow.
-     * @return Return ERR_OK on success, others on failure.
-     */
-    ErrCode SetPrivateNotificationsAllowed(const sptr<NotificationBundleOption> &bundleOption, const bool allow);
-
-    /**
      * @brief Get private notification enable in the of bunlde from DB.
      *
      * @param bundleOption Indicates bunlde info label.
