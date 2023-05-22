@@ -274,7 +274,8 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
     std::string bundleName = "aa";
     std::string label = "bb";
     int32_t id = 1;
-    EXPECT_EQ(distributedManager_->DeleteRemoteNotification(deviceId, bundleName, label, id), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedManager_->DeleteRemoteNotification(deviceId, bundleName, label, id),
+        ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**

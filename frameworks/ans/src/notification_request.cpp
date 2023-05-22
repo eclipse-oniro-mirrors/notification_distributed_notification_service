@@ -1375,6 +1375,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         auto member = parcel.ReadParcelable<MessageUser>();
         if (member == nullptr) {
             ANS_LOGE("Failed to read messageUser");
+            messageUsers_.clear();
             return false;
         }
 
