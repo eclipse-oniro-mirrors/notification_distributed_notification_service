@@ -220,7 +220,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     if (bundle.empty()) {
         return ERR_ANS_INVALID_BUNDLE;
     }
-    if (!request) {
+    if (request == nullptr) {
         ANSR_LOGE("NotificationRequest object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
