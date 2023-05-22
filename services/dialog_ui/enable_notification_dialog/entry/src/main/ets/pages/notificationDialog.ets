@@ -27,70 +27,72 @@ struct NotificationDialog {
 
   build() {
     Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center}) {
-      Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Flex({ alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center }) {
-          Text($r("app.string.if_allow_to_publish_notification"))
-            .width("350vp")
-            .height("50vp")
-            .margin({ top: 32 })
-            .fontSize(21)
-            .fontColor("#182431")
-            .fontWeight(400)
-            .opacity(1)
-            .maxLines(2)
-            .textAlign(TextAlign.Center)
-        }
+      Column() {
+        Text($r("app.string.if_allow_to_publish_notification"))
+          .width("350vp")
+          .fontSize(21)
+          .fontColor("#182431")
+          .fontWeight(400)
+          .opacity(1)
+          .maxLines(2)
+          .textAlign(TextAlign.Center)
+          .margin({ bottom: 8 })
 
-        Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.Center }) {
-          Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.Center }) {
-            Button() {
-              Row() {
-                Text($r("app.string.allow"))
-                  .textAlign(TextAlign.Center)
-                  .fontSize("22fp")
-                  .fontWeight(500)
-                  .fontColor("#0D81F2")
-              }
-            }
-            .onClick(() => {
-              let popFlag = true
-              this.privacyChose(popFlag)
-              console.info("after privacyChose")
-            })
-            .width("116vp")
-            .height("40vp")
-            .margin({ top: "9vp", right: "8vp", bottom: "9vp", left: "8vp" })
-            .backgroundColor("#FFFFFF")
-          }
-          .margin({ top: 15, right: 5, bottom: 8, left: 8 })
 
-          Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.Center }) {
-            Button() {
-              Row() {
-                Text($r("app.string.ban"))
-                  .textAlign(TextAlign.Center)
-                  .fontSize("22fp")
-                  .fontWeight(500)
-                  .fontColor("#0D81F2")
-              }
+        Row() {
+          Button() {
+            Row() {
+              Text($r("app.string.ban"))
+                .textAlign(TextAlign.Center)
+                .fontSize("22fp")
+                .fontWeight(500)
+                .fontColor("#0D81F2")
             }
-            .onClick(() => {
-              let popFlag = false
-              this.privacyChose(popFlag)
-              console.info("after privacyChose")
-            })
-            .width("116vp")
-            .height("40vp")
-            .margin({ top: "9vp", right: "8vp", bottom: "9vp", left: "8vp" })
-            .backgroundColor("#FFFFFF")
           }
-          .margin({ top: 15, right: 8, bottom: 8, left: 5 })
+          .onClick(() => {
+            let popFlag = false
+            this.privacyChose(popFlag)
+            console.info("after privacyChose")
+          })
+          .width("116vp")
+          .height("40vp")
+          .margin({
+            top: "9vp",
+            right: "8vp",
+            bottom: "9vp"
+          })
+          .backgroundColor("#FFFFFF")
+
+          Text()
+            .backgroundColor('#e1e1e1')
+            .height('22fp')
+            .width('1px')
+
+          Button() {
+            Row() {
+              Text($r("app.string.allow"))
+                .textAlign(TextAlign.Center)
+                .fontSize("22fp")
+                .fontWeight(500)
+                .fontColor("#0D81F2")
+            }
+          }
+          .onClick(() => {
+            let popFlag = true
+            this.privacyChose(popFlag)
+            console.info("after privacyChose")
+          })
+          .width("116vp")
+          .height("40vp")
+          .margin({ top: "9vp", bottom: "9vp", left: "8vp" })
+          .backgroundColor("#FFFFFF")
         }
+        .height(56)
       }
-      .width(px2vp(globalThis.width))
-      .height(px2vp(globalThis.height))
-      .borderRadius(32)
+      .borderRadius(24)
+      .alignItems(HorizontalAlign.Center)
       .backgroundColor("#FFFFFF")
+      .padding({left:24, top:24, right:24})
     }
     .width("100%")
     .height("100%")
