@@ -3479,5 +3479,36 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_220000
     std::string result = advancedNotificationService_->TimeToString(time);
     EXPECT_EQ(result.substr(0, result.size() - 8), ret);
 }
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22100
+ * @tc.name      : StartAutoDelete
+ * @tc.desc      : Test StartAutoDelete function.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_221000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_221000 test start";
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    request->SetCreatorUid(0);
+    request->SetCreatorUserId(0);
+    request->SetLabel("label");
+    request->SetTapDismissed(true);
+    request->SetAutoDeletedTime(clock() + 1000);  // 1000ms
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    advancedNotificationService_->StartAutoDelete(record);
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));   // 2ms
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_221000 test end";
+}
 }  // namespace Notification
 }  // namespace OHOS

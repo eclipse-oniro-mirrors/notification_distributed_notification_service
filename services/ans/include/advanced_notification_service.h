@@ -823,6 +823,8 @@ private:
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(NotificationConstant::SlotType slotType);
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
+    void StartAutoDelete(const std::shared_ptr<NotificationRecord> &record);
+    void TriggerAutoDelete(std::string hashCode);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
