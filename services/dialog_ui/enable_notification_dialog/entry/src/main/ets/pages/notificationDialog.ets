@@ -15,6 +15,10 @@
 
 import notification from '@ohos.notification'
 import rpc from '@ohos.rpc';
+import mediaquery from '@ohos.mediaquery'
+import deviceInfo from '@ohos.deviceInfo';
+import emitter from '@ohos.events.emitter'
+import { NotificationDialogBody } from '../pages/notifybody'
 
 class Proxy extends rpc.RemoteProxy {
 }
@@ -24,86 +28,41 @@ class Proxy extends rpc.RemoteProxy {
 struct NotificationDialog {
   controller: CustomDialogController
   private TAG = "[NotificationDialog_Service]"
+  listener = mediaquery.matchMediaSync('(orientation: landscape)')
+  @State isLand: boolean = false
+  onLand = (mediaQueryResult) => {
+    if (mediaQueryResult.matches) {
+      this.isLand = true
+    } else {
+      this.isLand = false
+    }
+  }
 
   build() {
-    Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center}) {
-      Column() {
-        Text($r("app.string.if_allow_to_publish_notification"))
-          .width("350vp")
-          .fontSize(21)
-          .fontColor("#182431")
-          .fontWeight(400)
-          .opacity(1)
-          .maxLines(2)
-          .textAlign(TextAlign.Center)
-          .margin({ bottom: 8 })
-
-
-        Row() {
-          Button() {
-            Row() {
-              Text($r("app.string.ban"))
-                .textAlign(TextAlign.Center)
-                .fontSize("22fp")
-                .fontWeight(500)
-                .fontColor("#0D81F2")
-            }
-          }
-          .onClick(() => {
-            let popFlag = false
-            this.privacyChose(popFlag)
-            console.info("after privacyChose")
-          })
-          .width("116vp")
-          .height("40vp")
-          .margin({
-            top: "9vp",
-            right: "8vp",
-            bottom: "9vp"
-          })
-          .backgroundColor("#FFFFFF")
-
-          Text()
-            .backgroundColor('#e1e1e1')
-            .height('22fp')
-            .width('1px')
-
-          Button() {
-            Row() {
-              Text($r("app.string.allow"))
-                .textAlign(TextAlign.Center)
-                .fontSize("22fp")
-                .fontWeight(500)
-                .fontColor("#0D81F2")
-            }
-          }
-          .onClick(() => {
-            let popFlag = true
-            this.privacyChose(popFlag)
-            console.info("after privacyChose")
-          })
-          .width("116vp")
-          .height("40vp")
-          .margin({ top: "9vp", bottom: "9vp", left: "8vp" })
-          .backgroundColor("#FFFFFF")
-        }
-        .height(56)
+    if (this.isLand || deviceInfo.deviceType !== 'default') {
+      //horizontal
+      Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
+        NotificationDialogBody()
       }
-      .borderRadius(24)
-      .alignItems(HorizontalAlign.Center)
-      .backgroundColor("#FFFFFF")
-      .padding({left:24, top:24, right:24})
+      .width("100%")
+      .height("100%")
+    } else {
+      //vertical
+      Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.Center, alignItems: ItemAlign.End }) {
+        NotificationDialogBody()
+      }
+      .width("100%")
+      .height("100%")
     }
-    .width("100%")
-    .height("100%")
   }
 
   async privacyChose(flag) {
+    console.info("NotificationDialog privacyChose: " + flag)
     let enable = flag;
     let bundleOption = {
       bundle: globalThis.abilityWant.parameters['from']
     }
-    console.info("before enableNotification")
+    console.info("NotificationDialog before enableNotification")
     await notification.enableNotification(bundleOption, enable, (err) => {
       if (err.code) {
         console.error('Start enableNotification failed. ErrCode: ' + JSON.stringify(err.code));
@@ -115,5 +74,17 @@ struct NotificationDialog {
 
   aboutToAppear() {
     console.log(this.TAG, "dialog page appears")
+    this.listener.on('change', this.onLand)
+
+    var innerEvent = {
+      eventId: 99
+    };
+    var callback = (eventData) => {
+      console.info('NotificationDialog callback:' + JSON.stringify(eventData));
+      if (eventData) {
+        this.privacyChose(eventData.data.agree)
+      }
+    };
+    emitter.on(innerEvent, callback);
   }
 }
