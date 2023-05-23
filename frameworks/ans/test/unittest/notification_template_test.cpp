@@ -119,5 +119,23 @@ HWTEST_F(NotificationTemplateTest, ReadFromParcel_00001, Function | SmallTest | 
     auto rrc = std::make_shared<NotificationTemplate>();
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: Marshalling_00002
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationTemplateTest, Marshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto rrc = std::make_shared<NotificationTemplate>();
+    auto data = std::make_shared<AAFwk::WantParams>();
+    rrc->SetTemplateData(data);
+    rrc->SetTemplateName("test");
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
+}
 }
 }

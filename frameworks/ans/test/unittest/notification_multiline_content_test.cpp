@@ -149,5 +149,88 @@ HWTEST_F(NotificationMultiLineContentTest, ReadFromParcel_00001, Function | Smal
     auto rrc = std::make_shared<NotificationMultiLineContent>();
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: AddSingleLine_00002
+ * @tc.desc: Test AddSingleLine parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationMultiLineContentTest, AddSingleLine_00002, Function | SmallTest | Level1)
+{
+    std::string oneLine = "OneLine";
+    auto rrc = std::make_shared<NotificationMultiLineContent>();
+    int max = 7;
+    for (int i = 0; i < max; i++) {
+        rrc->AddSingleLine(oneLine);
+    }
+    std::vector<std::string> result = rrc->GetAllLines();
+    EXPECT_EQ(result.size(), max);
+}
+
+/**
+ * @tc.name: FromJson_00001
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationMultiLineContentTest, FromJson_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"expandedTitle", "test"},
+        {"briefText", "test"},
+        {"allLines", {"a", "b", "c"}}};
+    auto rrc = std::make_shared<NotificationMultiLineContent>();
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationMultiLineContentTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"briefText", "test"},
+        {"allLines", {"a", "b", "c"}}};
+    auto rrc = std::make_shared<NotificationMultiLineContent>();
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationMultiLineContentTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"expandedTitle", "test"},
+        {"allLines", {"a", "b", "c"}}};
+    auto rrc = std::make_shared<NotificationMultiLineContent>();
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationMultiLineContentTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"expandedTitle", "test"},
+        {"briefText", "test"}};
+    auto rrc = std::make_shared<NotificationMultiLineContent>();
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
 }
 }

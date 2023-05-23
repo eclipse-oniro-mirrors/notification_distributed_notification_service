@@ -139,5 +139,38 @@ HWTEST_F(NotificationLongTextContentTest, ReadFromParcel_00001, Function | Small
     auto rrc = std::make_shared<NotificationLongTextContent>();
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLongTextContentTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLongTextContent>();
+    nlohmann::json jsonObject = nlohmann::json{
+        {"longText", "test"},
+        {"expandedTitle", "test"},
+        {"briefText", "test"}};
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00002
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLongTextContentTest, ReadFromParcel_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto rrc = std::make_shared<NotificationLongTextContent>();
+    rrc->SetExpandedTitle("test");
+    rrc->SetBriefText("test");
+    rrc->SetLongText("test");
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
+}
 }
 }

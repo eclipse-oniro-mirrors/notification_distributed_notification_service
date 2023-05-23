@@ -99,5 +99,55 @@ HWTEST_F(NotificationSortingMapTest, Dump_00001, Function | SmallTest | Level1)
     std::string ret = "NotificationSortingMap{ sortedkey = [Key, ] }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
+
+/**
+ * @tc.name: SetKey_00002
+ * @tc.desc: Test SetKey parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationSortingMapTest, SetKey_00002, Function | SmallTest | Level1)
+{
+    std::vector<NotificationSorting> sortingList;
+    std::string key = "";
+
+    auto rrc = std::make_shared<NotificationSortingMap>(sortingList);
+    EXPECT_NE(rrc, nullptr);
+    rrc->SetKey(key);
+}
+
+/**
+ * @tc.name: SetKey_00003
+ * @tc.desc: Test SetKey parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationSortingMapTest, SetKey_00003, Function | SmallTest | Level1)
+{
+    std::vector<NotificationSorting> sortingList;
+    std::string key = "Key";
+    auto rrc = std::make_shared<NotificationSortingMap>(sortingList);
+    NotificationSorting sorting;
+    sortingList.emplace_back(sorting);
+    rrc->SetNotificationSorting(sortingList);
+    EXPECT_EQ(rrc->GetNotificationSorting(key, sorting), false);
+}
+
+/**
+ * @tc.name: SetKey_00004
+ * @tc.desc: Test SetKey parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationSortingMapTest, SetKey_00004, Function | SmallTest | Level1)
+{
+    std::vector<NotificationSorting> sortingList;
+    std::string key = "Key";
+    auto rrc = std::make_shared<NotificationSortingMap>(sortingList);
+    NotificationSorting sorting;
+    sortingList.emplace_back(sorting);
+    rrc->SetNotificationSorting(sortingList);
+    EXPECT_EQ(rrc->GetNotificationSorting("test", sorting), false);
+}
 }
 }

@@ -427,5 +427,96 @@ HWTEST_F(NotificationTest, EnableVibrate_00001, Function | SmallTest | Level1)
     rrc->SetEnableVibration(enable);
     EXPECT_EQ(rrc->EnableVibrate(), enable);
 }
+
+/**
+ * @tc.name: GetBundleName_00002
+ * @tc.desc: Test when request_ is nullptr get parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, GetBundleName_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    auto rrc = std::make_shared<Notification>(request);
+    std::string ret = "";
+    EXPECT_EQ(rrc->GetBundleName(), ret);
+    EXPECT_EQ(rrc->GetCreateBundle(), ret);
+}
+
+/**
+ * @tc.name: GetSound_00004
+ * @tc.desc: Test GetSound parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetSound_00004, Function | SmallTest | Level1)
+{
+    Uri sound = Uri("sound");
+    bool enable = false;
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetSound(sound);
+    rrc->SetEnableSound(enable);
+    EXPECT_EQ(rrc->GetSound(), Uri(""));
+}
+
+/**
+ * @tc.name: GetSound_00005
+ * @tc.desc: Test GetSound parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetSound_00005, Function | SmallTest | Level1)
+{
+    Uri sound = Uri("sound");
+    bool enable = true;
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetSound(sound);
+    rrc->SetEnableSound(enable);
+    EXPECT_EQ(rrc->GetSound(), Uri("sound"));
+}
+
+/**
+ * @tc.name: Marshalling_00002
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationTest, Marshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::string deviceId = "DeviceId";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto rrc = std::make_shared<Notification>(deviceId, request);
+
+    bool enable = true;
+    auto sound = std::make_shared<Uri>("sound");
+    rrc->SetSound(*sound);
+    rrc->SetEnableSound(enable);
+
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+}
+
+/**
+ * @tc.name: Marshalling_00003
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBHI
+ */
+HWTEST_F(NotificationTest, Marshalling_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::string deviceId = "DeviceId";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto rrc = std::make_shared<Notification>(deviceId, request);
+
+    bool enable = false;
+    auto sound = std::make_shared<Uri>("sound");
+    rrc->SetSound(*sound);
+    rrc->SetEnableSound(enable);
+
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+}
 }
 }

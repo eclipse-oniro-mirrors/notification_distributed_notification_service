@@ -135,5 +135,20 @@ HWTEST_F(NotificationMediaContentTest, ReadFromParcel_00001, Function | SmallTes
     auto rrc = std::make_shared<NotificationMediaContent>();
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: ToJson_00002
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationMediaContentTest, ToJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"teset", "test"}};
+    auto rrc = std::make_shared<NotificationMediaContent>();
+    auto res = rrc->FromJson(jsonObject);
+    EXPECT_NE(res, nullptr);
+}
 }
 }

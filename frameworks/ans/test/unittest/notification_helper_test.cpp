@@ -1028,5 +1028,30 @@ HWTEST_F(NotificationHelperTest, GetSyncNotificationEnabledWithoutApp_00001, Fun
     ErrCode ret = notificationHelper.GetSyncNotificationEnabledWithoutApp(userId, enabled);
     EXPECT_EQ(ret, (int)ERR_OK);
 }
+
+/**
+ * @tc.name: SetType_00001
+ * @tc.desc: Test SetType_00001 parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationHelperTest, SetType_00001, Function | SmallTest | Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    auto slot1 = std::make_shared<NotificationSlot>(slotType);
+    EXPECT_NE(slot1, nullptr);
+
+    slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
+    auto slot2 = std::make_shared<NotificationSlot>(slotType);
+    EXPECT_NE(slot2, nullptr);
+
+    slotType = NotificationConstant::SlotType::CONTENT_INFORMATION;
+    auto slot3 = std::make_shared<NotificationSlot>(slotType);
+    EXPECT_NE(slot3, nullptr);
+
+    slotType = NotificationConstant::SlotType::OTHER;
+    auto slot4 = std::make_shared<NotificationSlot>(slotType);
+    EXPECT_NE(slot4, nullptr);
+}
 }
 }
