@@ -18,7 +18,7 @@
     },
     {
       "name": "ban",
-      "value": "取消"
+      "value": "禁止"
     },
     {
       "name": "if_allow_to_publish_notification",
