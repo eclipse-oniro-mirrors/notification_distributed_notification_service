@@ -36,7 +36,7 @@ constexpr uint32_t SYSTEM_SERVICE_UID = 1000;
 constexpr uint32_t MAX_CONVERSATIONAL_NUM = 10000;
 constexpr uint32_t MAX_PERMIT_MIME_TYPE_NUM = 10000;
 constexpr uint32_t MAX_ACTION_BUTTON_NUM = 3;
-constexpr uint32_t MAX_PARCELABLE_VECTOR_NUM = 10000;
+constexpr int32_t MAX_PARCELABLE_VECTOR_NUM = 10000;
 
 
 constexpr int32_t SUBSCRIBE_USER_INIT = -1;
