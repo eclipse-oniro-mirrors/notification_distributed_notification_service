@@ -267,7 +267,8 @@ bool NotificationConversationalContent::ReadFromParcel(Parcel &parcel)
             return false;
         }
 
-        auto member = parcel.ReadParcelable<NotificationConversationalMessage>();
+        auto member = std::shared_ptr<NotificationConversationalMessage>(
+            parcel.ReadParcelable<NotificationConversationalMessage>());
         if (member == nullptr) {
             ANS_LOGE("Failed to read message");
             messages_.clear();

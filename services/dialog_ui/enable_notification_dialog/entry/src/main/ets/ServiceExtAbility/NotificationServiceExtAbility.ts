@@ -16,19 +16,19 @@
 import extension from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
 import display from '@ohos.display';
-const TAG = "NotificationDialog_Service";
+const TAG = 'NotificationDialog_Service';
 
 export default class NotificationDialogServiceExtensionAbility extends extension {
-  onCreate(want) {
+  onCreate(want): void {
     console.debug(TAG, 'onCreate, want: ' + JSON.stringify(want));
     globalThis.notificationExtensionContext = this.context;
-    globalThis.closeDialog = () => {
+    globalThis.closeDialog = (): void => {
       console.info(TAG, 'click waiting for a response');
       globalThis.notificationExtensionContext.terminateSelf();
     };
   }
 
-  onRequest(want, startId) {
+  onRequest(want, startId): void {
     globalThis.abilityWant = want;
     console.log(TAG, 'globalThis.resolution' + JSON.stringify(globalThis.resolution));
     display.getDefaultDisplay().then(dis => {
@@ -47,8 +47,8 @@ export default class NotificationDialogServiceExtensionAbility extends extension
       }
 
       let navigationBarRect = {
-        left: (dis.width - thisWidth) / 2,
-        top: (dis.height - thisHeight) / 2,
+        left: (dis.width - thisWidth) / 2,   // 2:calculated length
+        top: (dis.height - thisHeight) / 2,  // 2:calculated height
         width: thisWidth,
         height: thisHeight
       };

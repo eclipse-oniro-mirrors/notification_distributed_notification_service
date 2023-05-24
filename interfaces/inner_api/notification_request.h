@@ -1156,7 +1156,7 @@ private:
     NotificationContent::Type notificationContentType_ {NotificationContent::Type::NONE};
 
     bool showDeliveryTime_ {false};
-    bool tapDismissed_ {true};
+    bool tapDismissed_ {false};
     bool colorEnabled_ {false};
     bool alertOneTime_ {false};
     bool showStopwatch_ {false};
