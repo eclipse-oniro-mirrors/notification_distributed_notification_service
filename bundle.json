@@ -73,7 +73,7 @@
         "hisysevent_native",
         "access_token",
         "ipc",
-        "multimedia_player_framework",
+        "player_framework",
         "multimedia_image_framework",
         "eventhandler",
         "utils_base"
