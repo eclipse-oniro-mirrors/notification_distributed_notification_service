@@ -41,7 +41,6 @@ public:
     bool IsEqualPushCallBackObject(NativeValue *pushCallBackObject);
 
 private:
-    bool HandleCheckNotificationTask(const std::string &notificationData);
     bool ConvertFunctionResult(NativeValue *funcResult);
     void ConvertJsonStringToValue(
         const std::string &notificationData, std::string &pkgName, int32_t &notifyId, int32_t &contentType);
