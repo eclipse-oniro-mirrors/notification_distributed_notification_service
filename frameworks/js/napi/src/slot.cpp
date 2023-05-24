@@ -828,7 +828,6 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
         return Common::JSParaError(env, params.callback);
     }
 
-
     if (asynccallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {

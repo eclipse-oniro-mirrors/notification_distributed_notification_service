@@ -1372,7 +1372,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     vsize = parcel.ReadUint64();
     vsize = (vsize < NotificationRequest::MAX_MESSAGE_USERS) ? vsize : NotificationRequest::MAX_MESSAGE_USERS;
     for (uint64_t it = 0; it < vsize; ++it) {
-        auto member = parcel.ReadParcelable<MessageUser>();
+        auto member = std::shared_ptr<MessageUser>(parcel.ReadParcelable<MessageUser>());
         if (member == nullptr) {
             ANS_LOGE("Failed to read messageUser");
             messageUsers_.clear();
