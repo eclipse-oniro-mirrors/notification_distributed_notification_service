@@ -45,7 +45,7 @@ export default class NotificationDialogServiceExtensionAbility extends extension
     try {
       const win = await window.create(globalThis.notificationExtensionContext, name, windowType);
       await win.show();
-      await win.setWindowLayoutFullScreen(false);
+      await win.setWindowLayoutFullScreen(true);
       await win.loadContent('pages/notificationDialog');
       await win.setBackgroundColor('#00000000');
     } catch {
