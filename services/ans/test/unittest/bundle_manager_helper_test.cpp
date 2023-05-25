@@ -78,6 +78,22 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00300, Level1)
 }
 
 /**
+ * @tc.number    : BundleManagerHelperTest_00301
+ * @tc.name      : CheckApiCompatibility
+ * @tc.desc      : Test CheckApiCompatibility function when the  bundleOption is nullptr,return is true
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00301, Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t uid = 10;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    BundleManagerHelper bundleManagerHelper;
+    bool result = bundleManagerHelper.CheckApiCompatibility(bundleOption);
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.number    : BundleManagerHelperTest_00400
  * @tc.name      : GetBundleInfoByBundleName
  * @tc.desc      : get bundleinfo by bundlename when the parameeter are normal, return is true
@@ -120,6 +136,24 @@ HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00100, Level
     int32_t userId = 1;
     BundleManagerHelper bundleManagerHelper;
     bool result = bundleManagerHelper.GetDistributedNotificationEnabled(bundle, userId);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.number    : GetDistributedNotificationEnabled_00101
+ * @tc.name      : GetDistributedNotificationEnabled
+ * @tc.desc      : Test GetDistributedNotificationEnabled function  when the parameeter are normal
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00101, Level1)
+{
+    std::string bundle = "Bundle";
+    int32_t userId = 1;
+    std::shared_ptr<BundleManagerHelper> bundleManagerHelper = std::make_shared<BundleManagerHelper>();
+    ASSERT_NE(nullptr, bundleManagerHelper);
+    sptr<IRemoteObject> remoteObject;
+    bundleManagerHelper->bundleMgr_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    bool result = bundleManagerHelper->GetDistributedNotificationEnabled(bundle, userId);
     EXPECT_EQ(result, true);
 }
 }  // namespace Notification
