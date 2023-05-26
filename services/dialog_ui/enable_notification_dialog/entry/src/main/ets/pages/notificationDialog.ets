@@ -13,15 +13,10 @@
  * limitations under the License.
  */
 
-import notification from '@ohos.notification'
 import rpc from '@ohos.rpc';
 import mediaquery from '@ohos.mediaquery'
 import deviceInfo from '@ohos.deviceInfo';
-import emitter from '@ohos.events.emitter'
 import { NotificationDialogBody } from '../pages/notifybody'
-
-class Proxy extends rpc.RemoteProxy {
-}
 
 @Entry
 @Component
@@ -55,37 +50,5 @@ struct NotificationDialog {
       .height("100%")
       .padding({bottom: 48})
     }
-  }
-
-  async privacyChose(flag) {
-    console.info("NotificationDialog privacyChose: " + flag)
-    let enable = flag;
-    let bundleOption = {
-      bundle: globalThis.abilityWant.parameters['from']
-    }
-    console.info("NotificationDialog before enableNotification")
-    await notification.enableNotification(bundleOption, enable, (err) => {
-      if (err.code) {
-        console.error('Start enableNotification failed. ErrCode: ' + JSON.stringify(err.code));
-        return
-      }
-    })
-    globalThis.closeDialog()
-  }
-
-  aboutToAppear() {
-    console.log(this.TAG, "dialog page appears")
-    this.listener.on('change', this.onLand)
-
-    var innerEvent = {
-      eventId: 99
-    };
-    var callback = (eventData) => {
-      console.info('NotificationDialog callback:' + JSON.stringify(eventData));
-      if (eventData) {
-        this.privacyChose(eventData.data.agree)
-      }
-    };
-    emitter.on(innerEvent, callback);
   }
 }
