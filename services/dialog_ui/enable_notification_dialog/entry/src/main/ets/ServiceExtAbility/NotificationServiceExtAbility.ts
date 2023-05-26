@@ -19,42 +19,20 @@ import display from '@ohos.display';
 const TAG = 'NotificationDialog_Service';
 
 export default class NotificationDialogServiceExtensionAbility extends extension {
-  onCreate(want): void {
-    console.debug(TAG, 'onCreate, want: ' + JSON.stringify(want));
-    globalThis.notificationExtensionContext = this.context;
-    globalThis.closeDialog = (): void => {
-      console.info(TAG, 'click waiting for a response');
-      globalThis.notificationExtensionContext.terminateSelf();
-    };
-  }
+  onCreate(want) {
+      console.debug(TAG, "onCreate, want: " + JSON.stringify(want));
+      globalThis.notificationExtensionContext = this.context;
+      globalThis.closeDialog = () => {
+          console.info(TAG, 'click waiting for a response');
+          globalThis.notificationExtensionContext.terminateSelf();
+      }
+  };
 
-  onRequest(want, startId): void {
+  onRequest(want, startId) {
     globalThis.abilityWant = want;
     console.log(TAG, 'globalThis.resolution' + JSON.stringify(globalThis.resolution));
-    display.getDefaultDisplay().then(dis => {
-      let thisWidth;
-      let thisHeight;
-      if (dis.width < dis.height) {
-        let widthRatio = 0.75;
-        let heightRatio = 5;
-        thisWidth = widthRatio * dis.width;
-        thisHeight = dis.height / heightRatio;
-      } else {
-        let widthRatio = 3;
-        let heightRatio = 4;
-        thisWidth = dis.width / widthRatio;
-        thisHeight = dis.height / heightRatio;
-      }
-
-      let navigationBarRect = {
-        left: (dis.width - thisWidth) / 2,   // 2:calculated length
-        top: (dis.height - thisHeight) / 2,  // 2:calculated height
-        width: thisWidth,
-        height: thisHeight
-      };
-      globalThis.width = navigationBarRect.width;
-      globalThis.height = navigationBarRect.height;
-      this.createWindow('EnableNotificationDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
+    display.getDefaultDisplay().then(() => {
+      this.createWindow('EnableNotificationDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT);
     });
   }
 
@@ -62,13 +40,14 @@ export default class NotificationDialogServiceExtensionAbility extends extension
     console.info(TAG, 'onDestroy.');
   }
 
-  private async createWindow(name: string, windowType: number, rect) {
+  private async createWindow(name: string, windowType: number) {
     console.info(TAG, 'create window');
     try {
       const win = await window.create(globalThis.notificationExtensionContext, name, windowType);
+      await win.show();
+      await win.setWindowLayoutFullScreen(false);
       await win.loadContent('pages/notificationDialog');
       await win.setBackgroundColor('#00000000');
-      await win.show();
     } catch {
       console.error(TAG, 'window create failed!');
     }
