@@ -488,7 +488,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
 #endif
     }));
 
-    if (record->request->IsTapDismissed()) {
+    if (record->request->GetAutoDeletedTime() > GetCurrentTime()) {
         StartAutoDelete(record);
     }
     return result;
