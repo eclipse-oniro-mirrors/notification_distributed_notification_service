@@ -365,7 +365,7 @@ HWTEST_F(NotificationContentTest, NotificationBasicContentReadFromJson_00001, Le
 {
     auto notificationBasicContent = std::make_shared<NotificationBasicContent>();
     nlohmann::json jsonObject = nlohmann::json{
-        {"text", "test"}, 
+        {"text", "test"},
         {"title", "test"},
         {"additionalText", "test"}};
     notificationBasicContent->ReadFromJson(jsonObject);

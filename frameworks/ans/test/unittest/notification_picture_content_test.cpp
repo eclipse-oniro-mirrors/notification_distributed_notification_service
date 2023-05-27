@@ -197,7 +197,7 @@ HWTEST_F(NotificationPictureContentTest, FromJson_00003, Function | SmallTest | 
 
     nlohmann::json jsonObject = nlohmann::json{
         {"expandedTitle", "title"},
-        {"briefText", "test"}, 
+        {"briefText", "test"},
         {"bigPicture", "/data/image/1.jpeg"}};
     auto res = rrc->FromJson(jsonObject);
     EXPECT_NE(res, nullptr);
