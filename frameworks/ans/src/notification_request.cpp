@@ -1362,6 +1362,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     for (uint64_t it = 0; it < vsize; ++it) {
         auto member = parcel.ReadParcelable<NotificationActionButton>();
         if (member == nullptr) {
+            actionButtons_.clear();
             ANS_LOGE("Failed to read actionButton");
             return false;
         }

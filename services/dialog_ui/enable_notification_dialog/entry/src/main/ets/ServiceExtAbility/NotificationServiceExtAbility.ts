@@ -19,16 +19,16 @@ import display from '@ohos.display';
 const TAG = 'NotificationDialog_Service';
 
 export default class NotificationDialogServiceExtensionAbility extends extension {
-  onCreate(want) {
+  onCreate(want): void {
       console.debug(TAG, "onCreate, want: " + JSON.stringify(want));
       globalThis.notificationExtensionContext = this.context;
-      globalThis.closeDialog = () => {
-          console.info(TAG, 'click waiting for a response');
-          globalThis.notificationExtensionContext.terminateSelf();
+      globalThis.closeDialog = (): void => {
+        console.info(TAG, 'click waiting for a response');
+        globalThis.notificationExtensionContext.terminateSelf();
       }
   };
 
-  onRequest(want, startId) {
+  onRequest(want, startId): void {
     globalThis.abilityWant = want;
     console.log(TAG, 'globalThis.resolution' + JSON.stringify(globalThis.resolution));
     display.getDefaultDisplay().then(() => {
@@ -36,7 +36,7 @@ export default class NotificationDialogServiceExtensionAbility extends extension
     });
   }
 
-  onDestroy() {
+  onDestroy(): void {
     console.info(TAG, 'onDestroy.');
   }
 
