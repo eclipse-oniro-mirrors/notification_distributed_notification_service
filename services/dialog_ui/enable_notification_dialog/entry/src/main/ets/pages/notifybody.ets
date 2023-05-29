@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import emitter from '@ohos.events.emitter'
+import notification from '@ohos.notification'
 
 @Component
 export struct NotificationDialogBody {
@@ -41,15 +41,7 @@ export struct NotificationDialogBody {
               }
             }
             .onClick(() => {
-              var eventData = {
-                data: {
-                  "agree": false,
-                }};
-              var innerEvent = {
-                eventId: 99,
-                priority: emitter.EventPriority.HIGH
-              };
-              emitter.emit(innerEvent, eventData);
+              this.privacyChose(false)
               console.info("after privacyChose")
             })
             .width("116vp")
@@ -72,16 +64,8 @@ export struct NotificationDialogBody {
               }
             }
             .onClick(() => {
+              this.privacyChose(true)
               console.info("after privacyChose")
-              var eventData = {
-                data: {
-                  "agree": true,
-                }};
-              var innerEvent = {
-                eventId: 99,
-                priority: emitter.EventPriority.HIGH
-              };
-              emitter.emit(innerEvent, eventData);
             })
             .width("116vp")
             .height("40vp")
@@ -98,6 +82,20 @@ export struct NotificationDialogBody {
         .borderWidth('1px')
         .padding({left:24, top:24, right:24})
   }
-  aboutToAppear(): void {
+
+  async privacyChose(flag) {
+    console.info("NotificationDialog privacyChose: " + flag)
+    let enable = flag;
+    let bundleOption = {
+      bundle: globalThis.abilityWant.parameters['from']
+    }
+    console.info("NotificationDialog before enableNotification")
+    await notification.enableNotification(bundleOption, enable, (err) => {
+      if (err.code) {
+        console.error('Start enableNotification failed. ErrCode: ' + JSON.stringify(err.code));
+        return
+      }
+    })
+    globalThis.closeDialog()
   }
 }
