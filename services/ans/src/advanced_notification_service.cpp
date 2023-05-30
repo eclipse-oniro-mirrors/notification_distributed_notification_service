@@ -49,7 +49,6 @@
 #include "permission_filter.h"
 #include "reminder_data_manager.h"
 #include "trigger_info.h"
-#include "ui_service_mgr_client.h"
 #include "want_agent_helper.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
