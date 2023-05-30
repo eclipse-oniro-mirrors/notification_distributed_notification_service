@@ -76,7 +76,11 @@
         "player_framework",
         "multimedia_image_framework",
         "eventhandler",
-        "utils_base"
+        "utils_base",
+        "c_utils",
+        "i18n",
+        "device_manager",
+        "kv_store"
       ],
       "third_party": [
         "libuv"
