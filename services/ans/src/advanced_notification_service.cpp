@@ -51,7 +51,6 @@
 #include "push_callback_proxy.h"
 #include "reminder_data_manager.h"
 #include "trigger_info.h"
-#include "ui_service_mgr_client.h"
 #include "want_agent_helper.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -488,7 +487,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
 #endif
     }));
 
-    if (record->request->IsTapDismissed()) {
+    if (record->request->GetAutoDeletedTime() > GetCurrentTime()) {
         StartAutoDelete(record);
     }
     return result;

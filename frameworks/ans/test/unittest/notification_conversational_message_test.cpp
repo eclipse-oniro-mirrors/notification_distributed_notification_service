@@ -253,7 +253,5 @@ HWTEST_F(NotificationConversationalMessageTest, FromJson_00004, Function | Small
     auto res = rrc->FromJson(jsonObject);
     EXPECT_NE(res, nullptr);
 }
-
-
 }
 }

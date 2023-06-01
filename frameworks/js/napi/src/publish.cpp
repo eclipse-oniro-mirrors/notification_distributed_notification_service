@@ -401,7 +401,7 @@ napi_value ParsePublishAsBundleParameters(
         return nullptr;
     }
 
-   if (valuetype == napi_string) {
+    if (valuetype == napi_string) {
         char str[STR_MAX_SIZE] = {0};
         size_t strLen = 0;
         napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
