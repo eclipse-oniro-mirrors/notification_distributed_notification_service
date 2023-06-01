@@ -64,6 +64,7 @@ ohos_shared_library("ans_innerkits") {
     "src/notification_subscriber.cpp",
     "src/notification_template.cpp",
     "src/notification_user_input.cpp",
+    "src/push_callback_stub.cpp",
   ]
 
   configs = [ "${core_path}:public_ans_core_config" ]
@@ -77,6 +78,7 @@ ohos_shared_library("ans_innerkits") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

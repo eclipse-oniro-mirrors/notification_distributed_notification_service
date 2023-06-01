@@ -845,6 +845,17 @@ private:
     bool localScreenOn_ = true;
 #endif
 };
+
+/**
+ * @class PushCallbackRecipient
+ * PushCallbackRecipient notices IRemoteBroker died.
+ */
+class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
+public:
+    explicit PushCallbackRecipient();
+    virtual ~PushCallbackRecipient();
+    virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
+};
 }  // namespace Notification
 }  // namespace OHOS
 

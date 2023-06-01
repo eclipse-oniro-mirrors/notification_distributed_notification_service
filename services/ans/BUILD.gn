@@ -41,7 +41,6 @@ ohos_shared_library("libans") {
     "src/notification_slot_filter.cpp",
     "src/notification_subscriber_manager.cpp",
     "src/permission_filter.cpp",
-    "src/push_callback_stub.cpp",
     "src/reminder_data_manager.cpp",
     "src/reminder_event_manager.cpp",
     "src/reminder_timer_info.cpp",
@@ -56,6 +55,7 @@ ohos_shared_library("libans") {
   deps = [
     "${arkui_ace_engine_path}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
   ]
 
   if (is_double_framework) {

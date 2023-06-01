@@ -48,7 +48,7 @@
 #include "notification_subscriber_manager.h"
 #include "os_account_manager.h"
 #include "permission_filter.h"
-#include "push_callback_stub.h"
+#include "push_callback_proxy.h"
 #include "reminder_data_manager.h"
 #include "trigger_info.h"
 #include "ui_service_mgr_client.h"
@@ -4029,8 +4029,8 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObje
         ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
         return ERR_NO_INIT;
     }
-
     pushCallback->AddDeathRecipient(pushRecipient_);
+
     pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
     ANS_LOGD("end");
     return ERR_OK;
@@ -4080,6 +4080,7 @@ bool AdvancedNotificationService::IsNeedPushCheck(NotificationConstant::SlotType
 
 ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
 {
+    ANS_LOGD("start.");
     if (pushCallBack_) {
         nlohmann::json jsonObject;
         jsonObject["pkgName"] = request->GetCreatorBundleName();
@@ -4120,5 +4121,15 @@ void AdvancedNotificationService::TriggerAutoDelete(std::string hashCode)
         }
     }
 }
+
+void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    ANS_LOGE("Push Callback died, remove the proxy object");
+    AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
+}
+
+PushCallbackRecipient::PushCallbackRecipient() {}
+
+PushCallbackRecipient::~PushCallbackRecipient() {}
 }  // namespace Notification
 }  // namespace OHOS

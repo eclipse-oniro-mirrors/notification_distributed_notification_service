@@ -39,17 +39,6 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(PushCallBackStub);
 };
-
-/**
- * @class PushCallbackRecipient
- * PushCallbackRecipient notices IRemoteBroker died.
- */
-class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
-public:
-    explicit PushCallbackRecipient();
-    virtual ~PushCallbackRecipient();
-    virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
-};
 }  // namespace Notification
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_PUSH_CALLBACK_STUB_H

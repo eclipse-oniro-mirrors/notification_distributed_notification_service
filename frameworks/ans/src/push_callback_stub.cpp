@@ -15,7 +15,6 @@
 
 #include "push_callback_stub.h"
 
-#include "advanced_notification_service.h"
 #include "ans_log_wrapper.h"
 #include "event_handler.h"
 #include "ipc_types.h"
@@ -97,15 +96,5 @@ bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
 
     return reply.ReadBool();
 }
-
-void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
-{
-    ANS_LOGE("Push Callback died, remove the proxy object");
-    AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
-}
-
-PushCallbackRecipient::PushCallbackRecipient() {}
-
-PushCallbackRecipient::~PushCallbackRecipient() {}
 } // namespace Notification
 } // namespace OHOS

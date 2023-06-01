@@ -47,7 +47,6 @@ private:
     NativeEngine &engine_;
     std::unique_ptr<NativeReference> pushCallBackObject_;
     std::mutex mutexlock;
-    std::condition_variable condition;
 };
 } // namespace Notification
 } // namespace OHOS
