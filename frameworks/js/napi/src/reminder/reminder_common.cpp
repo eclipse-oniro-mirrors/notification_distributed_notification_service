@@ -383,14 +383,14 @@ bool ReminderCommon::GetPropertyValIfExist(const napi_env &env, const napi_value
         propertyVal = value;
     } else {
         bool hasProperty = false;
-        NAPI_CALL_BASE(env, napi_has_named_property(env, value, propertyName, &hasProperty), false);
-        if (!hasProperty) {
+        napi_status status = napi_has_named_property(env, value, propertyName, &hasProperty);
+        if (status != napi_ok || !hasProperty) {
             return false;
         }
         napi_get_named_property(env, value, propertyName, &propertyVal);
     }
-    NAPI_CALL_BASE(env, napi_typeof(env, propertyVal, &valuetype), false);
-    if (valuetype != napi_number) {
+    napi_status status = napi_typeof(env, propertyVal, &valuetype);
+    if (status != napi_ok || valuetype != napi_number) {
         if (propertyName == nullptr) {
             ANSR_LOGW("Wrong argument type. number expected.");
         } else {
