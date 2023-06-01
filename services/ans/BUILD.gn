@@ -53,10 +53,7 @@ ohos_shared_library("libans") {
   defines = []
   cflags = []
 
-  deps = [
-    "${arkui_ace_engine_path}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "${core_path}:ans_core",
-  ]
+  deps = [ "${core_path}:ans_core" ]
 
   if (is_double_framework) {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
