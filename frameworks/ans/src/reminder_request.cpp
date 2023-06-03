@@ -175,7 +175,7 @@ bool ReminderRequest::CanShow() const
 std::string ReminderRequest::Dump() const
 {
     const time_t nextTriggerTime = static_cast<time_t>(triggerTimeInMilli_ / MILLI_SECONDS);
-    std::string dateTimeInfo = GetTimeInfoInner(nextTriggerTime, TimeFormat::YMDHMS);
+    std::string dateTimeInfo = GetTimeInfoInner(nextTriggerTime, TimeFormat::YMDHMS, true);
     return "Reminder["
            "reminderId=" + std::to_string(reminderId_) +
            ", type=" + std::to_string(static_cast<uint8_t>(reminderType_)) +
@@ -1295,7 +1295,7 @@ uint64_t ReminderRequest::GetDurationSinceEpochInMilli(const time_t target)
 
 std::string ReminderRequest::GetDateTimeInfo(const time_t &timeInSecond) const
 {
-    return GetTimeInfoInner(timeInSecond, TimeFormat::YMDHMS);
+    return GetTimeInfoInner(timeInSecond, TimeFormat::YMDHMS, true);
 }
 
 std::string ReminderRequest::GetButtonInfo() const
@@ -1334,17 +1334,18 @@ std::string ReminderRequest::GetShowTime(const uint64_t showTime) const
     if (reminderType_ == ReminderType::TIMER) {
         return "";
     }
-    return GetTimeInfoInner(static_cast<time_t>(showTime / MILLI_SECONDS), TimeFormat::HM);
+    return GetTimeInfoInner(static_cast<time_t>(showTime / MILLI_SECONDS), TimeFormat::HM, false);
 }
 
-std::string ReminderRequest::GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format) const
+std::string ReminderRequest::GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format,
+    bool keep24Hour) const
 {
     const uint8_t dateTimeLen = 80;
     char dateTimeBuffer[dateTimeLen];
     struct tm timeInfo;
     (void)localtime_r(&timeInSecond, &timeInfo);
     bool is24HourClock = OHOS::Global::I18n::LocaleConfig::Is24HourClock();
-    if (!is24HourClock && timeInfo.tm_hour > TIME_HOUR_OFFSET) {
+    if (!is24HourClock && timeInfo.tm_hour > TIME_HOUR_OFFSET && !keep24Hour) {
         timeInfo.tm_hour -= TIME_HOUR_OFFSET;
     }
     switch (format) {

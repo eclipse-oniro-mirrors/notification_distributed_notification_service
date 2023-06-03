@@ -70,6 +70,7 @@ HWTEST_F(
     bool runOnCreate = true;
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     test.OnStop();
+    test.OnStart();
 }
 }  // namespace Notification
 }  // namespace OHOS

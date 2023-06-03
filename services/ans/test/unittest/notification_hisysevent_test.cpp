@@ -395,6 +395,7 @@ HWTEST_F(NotificationHisyseventTest, SendRemoveSysEvent_0100, Level1)
     notificationTest.SetVibrationStyle(style);
     auto result = notificationTest.GetVibrationStyle();
     EXPECT_EQ(result, style);
+    EventReport::SendHiSysEvent("", eventInfo);
 
     GTEST_LOG_(INFO) << "SendRemoveSysEvent_0100 end";
 }

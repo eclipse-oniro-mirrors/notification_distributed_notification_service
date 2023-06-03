@@ -3510,5 +3510,232 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_221000
     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_221000 test end";
 }
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00001
+ * @tc.name      : PrepareNotificationRequest
+ * @tc.desc      : Test PrepareNotificationRequest function.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00001 test start";
+    EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(nullptr), ERR_ANS_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00001 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00002
+ * @tc.name      : IsNotificationExists
+ * @tc.desc      : Test IsNotificationExists function.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00002, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00002 test start";
+    std::string key = "aa";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key), false);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00002 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00003
+ * @tc.name      : UpdateInNotificationList
+ * @tc.desc      : Test UpdateInNotificationList function and notificationList_ is not empty.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00003, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00003 test start";
+    std::string key = "aa";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    advancedNotificationService_->UpdateInNotificationList(record);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00003 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00004
+ * @tc.name      : SetBadgeNumber
+ * @tc.desc      : Test SetBadgeNumber function and handler_ is nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00004, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00004 test start";
+    int32_t badgeNumber = 1;
+    advancedNotificationService_->handler_ = nullptr;
+    EXPECT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber), ERR_ANS_TASK_ERR);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00004 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00005
+ * @tc.name      : SetBadgeNumber
+ * @tc.desc      : Test SetBadgeNumber function and handler_ is not nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00005, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00005 test start";
+    int32_t badgeNumber = 1;
+    advancedNotificationService_->runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationSvrMain");
+    advancedNotificationService_->handler_ =
+        std::make_shared<OHOS::AppExecFwk::EventHandler>(advancedNotificationService_->runner_);
+    EXPECT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber), ERR_OK);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00005 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00006
+ * @tc.name      : ResetPushCallbackProxy
+ * @tc.desc      : Test ResetPushCallbackProxy function and pushCallBack_ is nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00006, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00006 test start";
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->pushCallBack_ = nullptr;
+    advancedNotificationService_->ResetPushCallbackProxy();
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00006 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00007
+ * @tc.name      : ResetPushCallbackProxy
+ * @tc.desc      : Test ResetPushCallbackProxy function and pushCallBack_ is not nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00007, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00007 test start";
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    advancedNotificationService_->pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+    advancedNotificationService_->ResetPushCallbackProxy();
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00007 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00008
+ * @tc.name      : SendEnableNotificationSlotHiSysEvent
+ * @tc.desc      : Test SendEnableNotificationSlotHiSysEvent function and bundleOption is nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00008, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00008 test start";
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CONTENT_INFORMATION;
+    bool enabled = false;
+    ErrCode errCode = ERR_OK;
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, errCode);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00008 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00009
+ * @tc.name      : SendEnableNotificationSlotHiSysEvent
+ * @tc.desc      : Test SendEnableNotificationSlotHiSysEvent function and errCode != ERR_OK.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00009, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00009 test start";
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CONTENT_INFORMATION;
+    bool enabled = false;
+    ErrCode errCode = ERR_ANS_TASK_ERR;
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, errCode);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00009 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00010
+ * @tc.name      : SendRemoveHiSysEvent
+ * @tc.desc      : Test SendRemoveHiSysEvent function and errCode is ERR_OK bundleOption is not nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00010, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00010 test start";
+    int32_t notificationId = 1;
+    std::string label = "aa";
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    ErrCode errCode = ERR_OK;
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SendRemoveHiSysEvent(notificationId, label, bundleOption, errCode);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00010 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00011
+ * @tc.name      : SendEnableNotificationHiSysEvent
+ * @tc.desc      : Test SendEnableNotificationHiSysEvent function andbundleOption is nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00011, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00011 test start";
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    bool enabled = false;
+    ErrCode errCode = ERR_ANS_TASK_ERR;
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SendEnableNotificationHiSysEvent(bundleOption, enabled, errCode);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00011 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00012
+ * @tc.name      : SendCancelHiSysEvent
+ * @tc.desc      : Test SendCancelHiSysEvent function and errCode is ERR_OK bundleOption is not nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00012, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00012 test start";
+    int32_t notificationId = 1;
+    std::string label = "aa";
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    ErrCode errCode = ERR_OK;
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SendCancelHiSysEvent(notificationId, label, bundleOption, errCode);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00012 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00013
+ * @tc.name      : SendPublishHiSysEvent
+ * @tc.desc      : Test SendPublishHiSysEvent function and request is nullptr.
+ * @tc.require   : #I6Z5I4
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00013, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00013 test start";
+    sptr<NotificationRequest> request = nullptr;
+    ErrCode errCode = ERR_OK;
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SendPublishHiSysEvent(request, errCode);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00013 test end";
+}
 }  // namespace Notification
 }  // namespace OHOS

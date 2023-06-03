@@ -53,7 +53,6 @@ ohos_shared_library("libans") {
   cflags = []
 
   deps = [
-    "${arkui_ace_engine_path}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
   ]
@@ -78,8 +77,8 @@ ohos_shared_library("libans") {
     "hitrace_native:hitrace_meter",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",
-    "multimedia_player_framework:media_client",
     "os_account:os_account_innerkits",
+    "player_framework:media_client",
     "relational_store:native_rdb",
     "time_service:time_client",
     "window_manager:libdm",

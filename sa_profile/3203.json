@@ -1,0 +1,17 @@
+{
+    "process": "foundation",
+    "systemability": [
+        {
+            "name": 3203,
+            "libpath": "libans.z.so",
+            "run-on-create": true,
+            "depend": [
+                1301,
+                3299
+            ],
+            "depend_time_out": 60000,
+            "distributed": false,
+            "dump_level": 1
+        }
+    ]
+}

@@ -56,7 +56,6 @@ ohos_moduletest("ans_module_test") {
   ]
 
   deps = [
-    "${arkui_ace_engine_path}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
@@ -83,8 +82,8 @@ ohos_moduletest("ans_module_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",
-    "multimedia_player_framework:media_client",
     "os_account:os_account_innerkits",
+    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

@@ -109,8 +109,36 @@ HWTEST_F(SystemEventObserverTest, OnReceiveEvent_004, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.number    : OnReceiveEvent_005
+ * @tc.name      : OnReceiveEvent
+ * @tc.desc      : Test OnReceiveEvent function, return is void.
+ */
+HWTEST_F(SystemEventObserverTest, OnReceiveEvent_005, Function | SmallTest | Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON));
+    stub_->OnReceiveEvent(data);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_006
+ * @tc.name      : OnReceiveEvent
+ * @tc.desc      : Test OnReceiveEvent function, return is void.
+ */
+HWTEST_F(SystemEventObserverTest, OnReceiveEvent_006, Function | SmallTest | Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF));
+    stub_->OnReceiveEvent(data);
+}
+
+/**
  * @tc.number    : GetBundleOption_001
- * @tc.name      : 
+ * @tc.name      : GetBundleOption
  * @tc.desc      : Test GetBundleOption function.
  * @tc.require   : issueI5S4VP
  */
