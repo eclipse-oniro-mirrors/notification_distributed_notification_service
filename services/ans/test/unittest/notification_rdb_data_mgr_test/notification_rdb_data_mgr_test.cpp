@@ -226,7 +226,7 @@ class RdbStoreTest : public RdbStore {
             return NativeRdb::E_ERROR;
         };
 
-        virtual int SetDistributedTables(const std::vector<std::string>& tables)
+        virtual int SetDistributedTables(const std::vector<std::string>& tables, int type = 0)
         {
             return E_ERROR;
         };
@@ -237,7 +237,12 @@ class RdbStoreTest : public RdbStore {
             return "";
         }
 
-        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const SyncCallback& callback)
+        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const AsyncBrief& async) = 0;
+        {
+            return E_ERROR;
+        };
+        
+        virtual int Sync(const SyncOption& option, const std::vector<std::string>& tables, const AsyncDetail& async) = 0;
         {
             return E_ERROR;
         };
