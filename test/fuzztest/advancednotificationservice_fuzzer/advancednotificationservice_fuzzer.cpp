@@ -26,10 +26,11 @@ constexpr uint8_t SLOT_TYPE_NUM = 5;
 
 namespace OHOS {
 
+    static Notification::AdvancedNotificationService advancedNotificationService;
+
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         std::string stringData(data);
-        Notification::AdvancedNotificationService advancedNotificationService;
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
         const std::string label = "this is a notification label";
         const std::string deviceId = "this is a notification deviceId";
@@ -108,6 +109,7 @@ namespace OHOS {
         advancedNotificationService.IsDistributedEnabled(enabled);
         advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled);
         advancedNotificationService.EnableDistributedSelf(enabled);
+        advancedNotificationService.EnableDistributed(enabled);
         advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled);
         Notification::NotificationConstant::RemindType remindType;
         advancedNotificationService.GetDeviceRemindType(remindType);
