@@ -237,12 +237,12 @@ class RdbStoreTest : public RdbStore {
             return "";
         }
 
-        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const AsyncBrief& async) = 0;
+        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const AsyncBrief& async)
         {
             return E_ERROR;
         };
         
-        virtual int Sync(const SyncOption& option, const std::vector<std::string>& tables, const AsyncDetail& async) = 0;
+        virtual int Sync(const SyncOption& option, const std::vector<std::string>& tables, const AsyncDetail& async)
         {
             return E_ERROR;
         };
