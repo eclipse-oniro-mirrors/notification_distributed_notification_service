@@ -1794,12 +1794,6 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         ANSR_LOGW("PrepareNotificationInfo fail");
         return result;
     }
-    bool allowedNotify = false;
-    result = IsAllowedNotifySelf(bundleOption, allowedNotify);
-    if (result != ERR_OK || !allowedNotify) {
-        ANSR_LOGW("The application does not request enable notification");
-        return ERR_REMINDER_NOTIFICATION_NOT_ENABLE;
-    }
     auto rdm = ReminderDataManager::GetInstance();
     if (rdm == nullptr) {
         return ERR_NO_INIT;

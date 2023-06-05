@@ -1536,7 +1536,7 @@ void ReminderRequest::UpdateActionButtons(const bool &setSnooze)
         return;
     }
     notificationRequest_->ClearActionButtons();
-    if (setSnooze || snoozeTimesDynamic_ == snoozeTimes_) {
+    if (setSnooze) {
         AddActionButtons(false);
     } else {
         AddActionButtons(true);
@@ -1574,7 +1574,6 @@ void ReminderRequest::UpdateNotificationCommon()
     notificationRequest_->SetDeliveryTime(GetDurationSinceEpochInMilli(now));
     notificationRequest_->SetLabel(NOTIFICATION_LABEL);
     notificationRequest_->SetShowDeliveryTime(true);
-    notificationRequest_->SetTapDismissed(true);
     notificationRequest_->SetSlotType(slotType_);
     notificationRequest_->SetTapDismissed(tapDismissed_);
     notificationRequest_->SetAutoDeletedTime(autoDeletedTime_);
@@ -1591,6 +1590,9 @@ void ReminderRequest::UpdateNotificationCommon()
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
     notificationRequest_->SetFlags(flags);
+    if (isSystemApp_ && wantAgentInfo_ != nullptr) {
+        notificationRequest_->SetOwnerBundleName(wantAgentInfo_->pkgName);
+    }
 }
 
 void ReminderRequest::UpdateNotificationBundleInfo()
@@ -1624,7 +1626,6 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
             // snooze the reminder by manual
             extendContent = GetShowTime(triggerTimeInMilli_) +
                 (snoozeContent_ == "" ? "" : (" (" + snoozeContent_ + ")"));
-            notificationRequest_->SetTapDismissed(false);
         } else {
             // the reminder is expired now, when timeInterval is 0
             extendContent = GetShowTime(reminderTimeInMilli_) +
@@ -1632,12 +1633,10 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
         }
     } else if (IsAlerting()) {
         // the reminder is alerting, or ring duration is 0
-        extendContent = GetShowTime(reminderTimeInMilli_);
     } else if (snoozeTimesDynamic_ != snoozeTimes_) {
         // the reminder is snoozing by period artithmetic, when the ring duration is over.
         extendContent = GetShowTime(triggerTimeInMilli_) +
             (snoozeContent_ == "" ? "" : (" (" + snoozeContent_ + ")"));
-        notificationRequest_->SetTapDismissed(false);
     } else {
         // the reminder has already snoozed by period arithmetic, when the ring duration is over.
         extendContent = GetShowTime(reminderTimeInMilli_) +
