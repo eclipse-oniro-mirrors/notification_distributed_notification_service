@@ -451,6 +451,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     auto record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->notification = new (std::nothrow) Notification(request);
+
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
         return ERR_ANS_NO_MEMORY;
@@ -502,6 +503,13 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         ANSR_LOGE("ReminderRequest object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
+
+    if (!request->IsRemoveAllowed()) {
+        if (!AccessTokenHelper::IsSystemApp() || !CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            request->SetRemoveAllowed(true);
+        }
+    }
+
     ErrCode result = ERR_OK;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (isSubsystem) {
@@ -3944,6 +3952,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     record->request = request;
     record->bundleOption = bundleOption;
     record->notification = new (std::nothrow) Notification(request);
+
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
         return ERR_ANS_NO_MEMORY;

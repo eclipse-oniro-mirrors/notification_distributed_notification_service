@@ -846,6 +846,10 @@ public:
     static napi_value GetNotificationShowDeliveryTime(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
+
+    static napi_value GetNotificationIsRemoveAllowed(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
     /**
      * @brief Gets the content of NotificationRequest object from specified js object
      *

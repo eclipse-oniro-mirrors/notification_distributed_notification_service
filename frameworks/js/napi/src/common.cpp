@@ -1602,6 +1602,9 @@ napi_value Common::GetNotificationRequestByBool(
     if (GetNotificationShowDeliveryTime(env, value, request) == nullptr) {
         return nullptr;
     }
+
+    GetNotificationIsRemoveAllowed(env, value, request);
+
     return NapiGetNull(env);
 }
 
@@ -2315,6 +2318,31 @@ napi_value Common::GetNotificationShowDeliveryTime(
         }
         napi_get_value_bool(env, result, &showDeliveryTime);
         request.SetShowDeliveryTime(showDeliveryTime);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationIsRemoveAllowed(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGI("enter");
+
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    bool isRemoveAllowed = true;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "isRemoveAllowed", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "isRemoveAllowed", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Bool expected.");
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &isRemoveAllowed);
+        request.SetRemoveAllowed(isRemoveAllowed);
     }
 
     return NapiGetNull(env);

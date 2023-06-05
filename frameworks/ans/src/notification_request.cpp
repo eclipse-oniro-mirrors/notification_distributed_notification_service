@@ -686,6 +686,7 @@ std::string NotificationRequest::Dump()
             ", isCountdown = " + (isCountdown_ ? "true" : "false") +
             ", inProgress = " + (inProgress_ ? "true" : "false") +
             ", groupOverview = " + (groupOverview_ ? "true" : "false") +
+            ", isRemoveAllowed = " + (isRemoveAllowed_ ? "true" : "false") +
             ", progressIndeterminate = " + (progressIndeterminate_ ? "true" : "false") +
             ", unremovable = " + (unremovable_ ? "true" : "false") +
             ", floatingIcon = " + (floatingIcon_ ? "true" : "false") +
@@ -1036,6 +1037,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(isRemoveAllowed_)) {
+        ANS_LOGE("Failed to write flag isRemoveAllowed");
+        return false;
+    }
+
     // write objects which managed by std::shared_ptr
     bool valid {false};
 
@@ -1288,6 +1294,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     onlyLocal_ = parcel.ReadBool();
     permitted_ = parcel.ReadBool();
     isAgent_ = parcel.ReadBool();
+    isRemoveAllowed_ = parcel.ReadBool();
 
     bool valid {false};
 
@@ -1457,6 +1464,16 @@ int32_t NotificationRequest::GetReceiverUserId() const
     return receiverUserId_;
 }
 
+bool NotificationRequest::IsRemoveAllowed() const
+{
+    return isRemoveAllowed_;
+}
+
+void NotificationRequest::SetRemoveAllowed(bool isRemoveAllowed)
+{
+    isRemoveAllowed_ = isRemoveAllowed;
+}
+
 void NotificationRequest::CopyBase(const NotificationRequest &other)
 {
     this->notificationId_ = other.notificationId_;
@@ -1475,6 +1492,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->ownerUserId_ = other.ownerUserId_;
     this->receiverUserId_ = other.receiverUserId_;
     this->isAgent_ = other.isAgent_;
+    this->isRemoveAllowed_ = other.isRemoveAllowed_;
 
     this->slotType_ = other.slotType_;
     this->settingsText_ = other.settingsText_;
