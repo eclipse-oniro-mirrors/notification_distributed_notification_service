@@ -287,6 +287,12 @@ public:
     int32_t GetUserId() const;
     int32_t GetUid() const;
 
+    void SetOwnerUid(int32_t uid);
+    int32_t GetOwnerUid() const;
+
+    void SetOwnerBundleName(const std::string& bundleName);
+    std::string GetBundleName() const;
+
     /**
      * @brief Set the app system.
      *
@@ -799,6 +805,7 @@ private:
     std::string displayContent_ {};
     std::string title_ {};
     std::string bundleName_ {};
+    std::string ownerBundleName_ {};
     bool isExpired_ {false};
     uint8_t snoozeTimes_ {0};
     uint8_t snoozeTimesDynamic_ {0};
@@ -807,8 +814,9 @@ private:
     int32_t reminderId_ {-1};
     int32_t userId_ {-1};
     int32_t uid_ {-1};
+    int32_t ownerUid_ {-1};
     bool isSystemApp_ {false};
-    bool tapDismissed_ {false};
+    bool tapDismissed_ {true};
     int64_t autoDeletedTime_ {0};
     std::string customButtonUri_ {};
 

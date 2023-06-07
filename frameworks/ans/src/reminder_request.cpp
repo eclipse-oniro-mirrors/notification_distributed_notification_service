@@ -886,6 +886,26 @@ int64_t ReminderRequest::GetAutoDeletedTime() const
     return autoDeletedTime_;
 }
 
+void ReminderRequest::SetOwnerUid(int32_t uid)
+{
+    ownerUid_ = uid;
+}
+
+int32_t ReminderRequest::GetOwnerUid() const
+{
+    return ownerUid_;
+}
+
+void ReminderRequest::SetOwnerBundleName(const std::string& bundleName)
+{
+    ownerBundleName_ = bundleName;
+}
+
+std::string ReminderRequest::GetBundleName() const
+{
+    return ownerBundleName_;
+}
+
 void ReminderRequest::SetCustomButtonUri(const std::string &uri)
 {
     customButtonUri_ = uri;
@@ -1590,22 +1610,15 @@ void ReminderRequest::UpdateNotificationCommon()
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
     notificationRequest_->SetFlags(flags);
-    if (isSystemApp_ && wantAgentInfo_ != nullptr) {
-        notificationRequest_->SetOwnerBundleName(wantAgentInfo_->pkgName);
-    }
 }
 
 void ReminderRequest::UpdateNotificationBundleInfo()
 {
-    std::string ownerBundleName = notificationRequest_->GetOwnerBundleName();
-    if (!(ownerBundleName.empty())) {
-        return;
-    }
-    ANSR_LOGD("ownerBundleName=%{public}s, bundleName_=%{public}s",
-        ownerBundleName.c_str(), bundleName_.c_str());
-    notificationRequest_->SetOwnerBundleName(bundleName_);
-    notificationRequest_->SetCreatorBundleName(bundleName_);
-    notificationRequest_->SetCreatorUid(uid_);
+    notificationRequest_->SetOwnerBundleName(ownerBundleName_);
+    notificationRequest_->SetOwnerUid(ownerUid_);
+    notificationRequest_->SetCreatorBundleName(ownerBundleName_);
+    notificationRequest_->SetCreatorUid(ownerUid_);
+
     ErrCode errCode = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid_, userId_);
     if (errCode != ERR_OK) {
         ANSR_LOGE("GetOsAccountLocalIdFromUid fail.");

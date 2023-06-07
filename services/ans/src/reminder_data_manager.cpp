@@ -18,6 +18,7 @@
 #include "ability_manager_client.h"
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
+#include "bundle_manager_helper.h"
 #include "common_event_support.h"
 #include "ipc_skeleton.h"
 #include "notification_slot.h"
@@ -547,6 +548,15 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     reminder->InitReminderId();
     reminder->InitUserId(ReminderRequest::GetUserId(bundleOption->GetUid()));
     reminder->InitUid(bundleOption->GetUid());
+    if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr) {
+        auto bundleManager = BundleManagerHelper::GetInstance();
+        int32_t uid = -1;
+        if (bundleManager != nullptr) {
+            uid = bundleManager->GetDefaultUidByBundleName(reminder->GetWantAgentInfo()->pkgName, reminder->GetUserId());
+        }
+        reminder->SetOwnerUid(uid);
+        reminder->SetOwnerBundleName(reminder->GetWantAgentInfo()->pkgName);
+    }
     int32_t reminderId = reminder->GetReminderId();
     ANSR_LOGD("Containers(map) add. reminderId=%{public}d", reminderId);
     auto ret = notificationBundleOptionMap_.insert(
