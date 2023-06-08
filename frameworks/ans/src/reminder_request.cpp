@@ -886,26 +886,6 @@ int64_t ReminderRequest::GetAutoDeletedTime() const
     return autoDeletedTime_;
 }
 
-void ReminderRequest::SetOwnerUid(int32_t uid)
-{
-    ownerUid_ = uid;
-}
-
-int32_t ReminderRequest::GetOwnerUid() const
-{
-    return ownerUid_;
-}
-
-void ReminderRequest::SetOwnerBundleName(const std::string& bundleName)
-{
-    ownerBundleName_ = bundleName;
-}
-
-std::string ReminderRequest::GetBundleName() const
-{
-    return ownerBundleName_;
-}
-
 void ReminderRequest::SetCustomButtonUri(const std::string &uri)
 {
     customButtonUri_ = uri;
@@ -1623,7 +1603,6 @@ void ReminderRequest::UpdateNotificationBundleInfo()
     notificationRequest_->SetOwnerBundleName(bundleName_);
     notificationRequest_->SetCreatorBundleName(bundleName_);
     notificationRequest_->SetCreatorUid(uid_);
-
     ErrCode errCode = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid_, userId_);
     if (errCode != ERR_OK) {
         ANSR_LOGE("GetOsAccountLocalIdFromUid fail.");

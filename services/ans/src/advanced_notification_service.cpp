@@ -1787,7 +1787,9 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         return ERR_REMINDER_PERMISSION_DENIED;
     }
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
-    if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr) {
+    std::string bundle = GetClientBundleName();
+    if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr &&
+        reminder->GetWantAgentInfo()->pkgName != bundle) {
         SetAgentNotification(notificationRequest, reminder->GetWantAgentInfo()->pkgName);
     }
     sptr<NotificationBundleOption> bundleOption = nullptr;
@@ -1822,9 +1824,6 @@ void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>
     notificationRequest->SetIsAgentNotification(true);
     notificationRequest->SetOwnerUserId(activeUserId);
     notificationRequest->SetOwnerBundleName(bundleName);
-    notificationRequest->SetCreatorBundleName(bundleName);
-
-    notificationRequest->SetCreatorUserId(activeUserId);
 }
 
 ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
