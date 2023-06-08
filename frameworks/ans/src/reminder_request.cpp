@@ -1631,6 +1631,7 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
         }
     } else if (IsAlerting()) {
         // the reminder is alerting, or ring duration is 0
+        extendContent = GetShowTime(reminderTimeInMilli_);
     } else if (snoozeTimesDynamic_ != snoozeTimes_) {
         // the reminder is snoozing by period artithmetic, when the ring duration is over.
         extendContent = GetShowTime(triggerTimeInMilli_) +
