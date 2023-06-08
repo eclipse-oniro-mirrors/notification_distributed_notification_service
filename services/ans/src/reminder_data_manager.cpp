@@ -18,7 +18,6 @@
 #include "ability_manager_client.h"
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
-#include "bundle_manager_helper.h"
 #include "common_event_support.h"
 #include "ipc_skeleton.h"
 #include "notification_slot.h"

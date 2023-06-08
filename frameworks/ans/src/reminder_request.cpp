@@ -1623,6 +1623,7 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
             // snooze the reminder by manual
             extendContent = GetShowTime(triggerTimeInMilli_) +
                 (snoozeContent_ == "" ? "" : (" (" + snoozeContent_ + ")"));
+            notificationRequest_->SetTapDismissed(false);
         } else {
             // the reminder is expired now, when timeInterval is 0
             extendContent = GetShowTime(reminderTimeInMilli_) +
@@ -1634,6 +1635,7 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
         // the reminder is snoozing by period artithmetic, when the ring duration is over.
         extendContent = GetShowTime(triggerTimeInMilli_) +
             (snoozeContent_ == "" ? "" : (" (" + snoozeContent_ + ")"));
+        notificationRequest_->SetTapDismissed(false);
     } else {
         // the reminder has already snoozed by period arithmetic, when the ring duration is over.
         extendContent = GetShowTime(reminderTimeInMilli_) +

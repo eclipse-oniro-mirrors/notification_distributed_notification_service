@@ -1786,6 +1786,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
+
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     std::string bundle = GetClientBundleName();
     if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr &&
