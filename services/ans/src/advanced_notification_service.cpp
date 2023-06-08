@@ -1786,8 +1786,10 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
-
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
+    if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr) {
+        SetAgentNotification(notificationRequest, reminder->GetWantAgentInfo()->pkgName);
+    }
     sptr<NotificationBundleOption> bundleOption = nullptr;
     result = PrepareNotificationInfo(notificationRequest, bundleOption);
     if (result != ERR_OK) {
@@ -1805,6 +1807,24 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         return ERR_NO_INIT;
     }
     return rdm->PublishReminder(reminder, bundleOption);
+}
+
+void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>& notificationRequest,
+    std::string& bundleName)
+{
+    auto bundleManager = BundleManagerHelper::GetInstance();
+    int32_t activeUserId = -1;
+    if (!GetActiveUserId(activeUserId)) {
+        ANSR_LOGW("Failed to get active user id!");
+        return;
+    }
+
+    notificationRequest->SetIsAgentNotification(true);
+    notificationRequest->SetOwnerUserId(activeUserId);
+    notificationRequest->SetOwnerBundleName(bundleName);
+    notificationRequest->SetCreatorBundleName(bundleName);
+
+    notificationRequest->SetCreatorUserId(activeUserId);
 }
 
 ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)

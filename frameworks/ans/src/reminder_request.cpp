@@ -1614,10 +1614,15 @@ void ReminderRequest::UpdateNotificationCommon()
 
 void ReminderRequest::UpdateNotificationBundleInfo()
 {
-    notificationRequest_->SetOwnerBundleName(ownerBundleName_);
-    notificationRequest_->SetOwnerUid(ownerUid_);
-    notificationRequest_->SetCreatorBundleName(ownerBundleName_);
-    notificationRequest_->SetCreatorUid(ownerUid_);
+    std::string ownerBundleName = notificationRequest_->GetOwnerBundleName();
+    if (!(ownerBundleName.empty())) {
+        return;
+    }
+    ANSR_LOGD("ownerBundleName=%{public}s, bundleName_=%{public}s",
+        ownerBundleName.c_str(), bundleName_.c_str());
+    notificationRequest_->SetOwnerBundleName(bundleName_);
+    notificationRequest_->SetCreatorBundleName(bundleName_);
+    notificationRequest_->SetCreatorUid(uid_);
 
     ErrCode errCode = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid_, userId_);
     if (errCode != ERR_OK) {
