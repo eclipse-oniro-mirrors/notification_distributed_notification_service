@@ -1796,6 +1796,11 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     }
 
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
+    std::string bundle = GetClientBundleName();
+    if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr &&
+        reminder->GetWantAgentInfo()->pkgName != bundle) {
+        SetAgentNotification(notificationRequest, reminder->GetWantAgentInfo()->pkgName);
+    }
     sptr<NotificationBundleOption> bundleOption = nullptr;
     result = PrepareNotificationInfo(notificationRequest, bundleOption);
     if (result != ERR_OK) {
@@ -1804,7 +1809,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     }
     bool allowedNotify = false;
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
-    if (result != ERR_OK || !allowedNotify) {
+    if (!reminder->IsSystemApp() && (result != ERR_OK || !allowedNotify)) {
         ANSR_LOGW("The application does not request enable notification");
         return ERR_REMINDER_NOTIFICATION_NOT_ENABLE;
     }
@@ -1813,6 +1818,21 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         return ERR_NO_INIT;
     }
     return rdm->PublishReminder(reminder, bundleOption);
+}
+
+void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>& notificationRequest,
+    std::string& bundleName)
+{
+    auto bundleManager = BundleManagerHelper::GetInstance();
+    int32_t activeUserId = -1;
+    if (!GetActiveUserId(activeUserId)) {
+        ANSR_LOGW("Failed to get active user id!");
+        return;
+    }
+
+    notificationRequest->SetIsAgentNotification(true);
+    notificationRequest->SetOwnerUserId(activeUserId);
+    notificationRequest->SetOwnerBundleName(bundleName);
 }
 
 ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)

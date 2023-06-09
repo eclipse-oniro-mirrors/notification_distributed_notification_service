@@ -1536,7 +1536,7 @@ void ReminderRequest::UpdateActionButtons(const bool &setSnooze)
         return;
     }
     notificationRequest_->ClearActionButtons();
-    if (setSnooze || snoozeTimesDynamic_ == snoozeTimes_) {
+    if (setSnooze) {
         AddActionButtons(false);
     } else {
         AddActionButtons(true);
@@ -1574,7 +1574,6 @@ void ReminderRequest::UpdateNotificationCommon()
     notificationRequest_->SetDeliveryTime(GetDurationSinceEpochInMilli(now));
     notificationRequest_->SetLabel(NOTIFICATION_LABEL);
     notificationRequest_->SetShowDeliveryTime(true);
-    notificationRequest_->SetTapDismissed(true);
     notificationRequest_->SetSlotType(slotType_);
     notificationRequest_->SetTapDismissed(tapDismissed_);
     notificationRequest_->SetAutoDeletedTime(autoDeletedTime_);

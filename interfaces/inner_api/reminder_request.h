@@ -808,7 +808,7 @@ private:
     int32_t userId_ {-1};
     int32_t uid_ {-1};
     bool isSystemApp_ {false};
-    bool tapDismissed_ {false};
+    bool tapDismissed_ {true};
     int64_t autoDeletedTime_ {0};
     std::string customButtonUri_ {};
 
