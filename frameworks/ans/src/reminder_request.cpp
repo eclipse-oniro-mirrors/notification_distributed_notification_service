@@ -284,7 +284,7 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
         return false;
     }
     bool showImmediately = false;
-    if (optTriggerTime != INVALID_LONG_LONG_VALUE && optTriggerTime <= oriTriggerTime) {
+    if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
         // case1. switch to a previous time
         SetTriggerTimeInMilli(optTriggerTime);
         snoozeTimesDynamic_ = snoozeTimes_;
