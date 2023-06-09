@@ -283,16 +283,18 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
     if (isExpired_) {
         return false;
     }
+    uint64_t now = GetNowInstantMilli();
+    if (now == 0) {
+        return false;
+    }
     bool showImmediately = false;
     if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
-        // case1. switch to a previous time
-        SetTriggerTimeInMilli(optTriggerTime);
-        snoozeTimesDynamic_ = snoozeTimes_;
-    } else {
-        uint64_t now = GetNowInstantMilli();
-        if (now == 0) {
-            return false;
+        if (optTriggerTime >= now) {
+            // case1. switch to a previous time
+            SetTriggerTimeInMilli(optTriggerTime);
+            snoozeTimesDynamic_ = snoozeTimes_;
         }
+    } else {
         if (oriTriggerTime <= now) {
             // case2. switch to a future time, trigger time is less than now time.
             // when the reminder show immediately, trigger time will update in onShow function.
