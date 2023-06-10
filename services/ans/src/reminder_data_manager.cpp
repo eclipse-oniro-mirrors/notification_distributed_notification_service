@@ -400,7 +400,6 @@ sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(
     if (reminder == nullptr) {
         return nullptr;
     }
-    // auto bundleOption = FindNotificationBundleOption(reminderId);
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     if (notificationRequest == nullptr) {
         ANSR_LOGW("Not find the reminder due to notification request is null");
