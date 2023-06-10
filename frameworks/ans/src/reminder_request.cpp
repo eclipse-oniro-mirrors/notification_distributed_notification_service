@@ -287,13 +287,14 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
     if (now == 0) {
         return false;
     }
+    if (oriTriggerTime == 0 && optTriggerTime < now) {
+        return false;
+    }
     bool showImmediately = false;
     if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
-        if (optTriggerTime >= now) {
-            // case1. switch to a previous time
-            SetTriggerTimeInMilli(optTriggerTime);
-            snoozeTimesDynamic_ = snoozeTimes_;
-        }
+        // case1. switch to a previous time
+        SetTriggerTimeInMilli(optTriggerTime);
+        snoozeTimesDynamic_ = snoozeTimes_;
     } else {
         if (oriTriggerTime <= now) {
             // case2. switch to a future time, trigger time is less than now time.

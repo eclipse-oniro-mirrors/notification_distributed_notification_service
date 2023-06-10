@@ -400,12 +400,13 @@ sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(
     if (reminder == nullptr) {
         return nullptr;
     }
-    auto bundleOption = FindNotificationBundleOption(reminderId);
-    if (bundleOption == nullptr) {
-        ANSR_LOGW("Not find the reminder due to bundle info is null");
+    // auto bundleOption = FindNotificationBundleOption(reminderId);
+    sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
+    if (notificationRequest == nullptr) {
+        ANSR_LOGW("Not find the reminder due to notification request is null");
         return nullptr;
     }
-    if (bundleOption -> GetBundleName() != pkgName) {
+    if (notificationRequest->GetCreatorBundleName() != pkgName) {
         ANSR_LOGW("Not find the reminder due to package name not match");
         return nullptr;
     }
