@@ -392,7 +392,7 @@ HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_03000, F
     struct tm nowTime;
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+    std::shared_ptr<NativeRdb::ResultSet> resultSet =
         std::make_shared<NativeRdb::AbsSharedResultSet>();
     calendar->RecoverFromDb(resultSet);
 
@@ -848,7 +848,7 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
 
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+    std::shared_ptr<NativeRdb::ResultSet> resultSet =
         std::make_shared<NativeRdb::AbsSharedResultSet>();
     calendar->RecoverFromDb(resultSet);
     bool result = calendar->IsRepeatDay(1);

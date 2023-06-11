@@ -442,7 +442,7 @@ bool ReminderRequest::OnTimeZoneChange()
         triggerTimeInMilli_, GetDurationSinceEpochInMilli(newZoneTriggerTime), nextTriggerTime);
 }
 
-int64_t ReminderRequest::RecoverInt64FromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet,
+int64_t ReminderRequest::RecoverInt64FromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
     const std::string &columnName, const DbRecoveryType &columnType)
 {
     if (resultSet == nullptr) {
@@ -469,7 +469,7 @@ int64_t ReminderRequest::RecoverInt64FromDb(const std::shared_ptr<NativeRdb::Abs
     return 0;
 }
 
-void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     if (resultSet == nullptr) {
         ANSR_LOGE("ResultSet is null");
@@ -579,7 +579,7 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     resultSet->GetString(ReminderStore::GetColumnIndex(CUSTOM_BUTTON_URI), customButtonUri_);
 }
 
-void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     if (resultSet == nullptr) {
         ANSR_LOGE("ResultSet is null");

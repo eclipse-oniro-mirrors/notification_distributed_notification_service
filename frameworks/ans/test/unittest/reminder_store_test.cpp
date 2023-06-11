@@ -158,7 +158,7 @@ HWTEST_F(ReminderStoreTest, Query_00001, Function | SmallTest | Level1)
     std::string name = "it";
     ReminderStore reminderStore;
     reminderStore.GetColumnIndex(name);
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> ret = reminderStore.Query(queryCondition);
+    std::shared_ptr<NativeRdb::ResultSet> ret = reminderStore.Query(queryCondition);
     EXPECT_EQ(ret, nullptr);
 }
 
