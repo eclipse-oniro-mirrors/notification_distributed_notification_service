@@ -226,7 +226,8 @@ class RdbStoreTest : public RdbStore {
             return NativeRdb::E_ERROR;
         };
 
-        virtual int SetDistributedTables(const std::vector<std::string>& tables, int type = 0)
+        virtual int SetDistributedTables(const std::vector<std::string>& tables, int type,
+            const DistributedRdb::DistributedConfig &distributedConfig)
         {
             return E_ERROR;
         };
