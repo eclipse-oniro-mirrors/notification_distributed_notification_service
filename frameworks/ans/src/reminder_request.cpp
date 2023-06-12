@@ -285,9 +285,11 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
     }
     uint64_t now = GetNowInstantMilli();
     if (now == 0) {
+        ANSR_LOGE("get now time failed.");
         return false;
     }
     if (oriTriggerTime == 0 && optTriggerTime < now) {
+        ANSR_LOGW("trigger time is less than now time.");
         return false;
     }
     bool showImmediately = false;
