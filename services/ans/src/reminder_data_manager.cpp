@@ -78,8 +78,8 @@ ErrCode ReminderDataManager::CancelReminder(
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
     int32_t id = reminderId;
-    RemoveReminderLocked(id);
     CancelNotification(reminder);
+    RemoveReminderLocked(id);
     StartRecentReminder();
     return ERR_OK;
 }
