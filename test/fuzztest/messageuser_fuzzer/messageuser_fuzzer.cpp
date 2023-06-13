@@ -34,8 +34,7 @@ namespace OHOS {
         std::string name(data);
         messageUser.SetName(name);
         // test SetPixelMap function
-        std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
-        messageUser.SetPixelMap(pixelMap);
+        messageUser.SetPixelMap(nullptr);
         // test SetUri function
         Uri uri(key);
         messageUser.SetUri(uri);
