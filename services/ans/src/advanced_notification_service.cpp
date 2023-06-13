@@ -1798,7 +1798,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     std::string bundle = GetClientBundleName();
     if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr &&
-        reminder->GetWantAgentInfo()->pkgName != bundle) {
+        reminder->GetWantAgentInfo()->pkgName != "" && reminder->GetWantAgentInfo()->pkgName != bundle) {
         SetAgentNotification(notificationRequest, reminder->GetWantAgentInfo()->pkgName);
     }
     sptr<NotificationBundleOption> bundleOption = nullptr;
