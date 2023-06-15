@@ -78,7 +78,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest01, Function | MediumTest | L
 
     bool bRet = data.WriteInterfaceToken(u"error descriptor");
     EXPECT_TRUE(bRet) << "write token error";
-    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_CONNECTED);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ON_CONNECTED);
 
     ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, OBJECT_NULL) << "descriptor error";
@@ -98,7 +98,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest02, Function | SmallTest | Le
     data.WriteInterfaceToken(AnsSubscriberStub::GetDescriptor());
 
 
-    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_BADGE_CHANGED + 1);
+    uint32_t code = static_cast<uint32_t>(static_cast<int>(NotificationInterfaceCode::ON_BADGE_CHANGED) + 1);
 
     ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_TRUE(res != NO_ERROR);
@@ -116,8 +116,8 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest03, Function | SmallTest | Le
     MessageOption option;
 
     data.WriteInterfaceToken(AnsSubscriberStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_ENABLED_NOTIFICATION_CHANGED);
-    stub_->interfaces_[AnsSubscriberInterface::TransactId::ON_ENABLED_NOTIFICATION_CHANGED] = nullptr;
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED);
+    stub_->interfaces_[NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED] = nullptr;
     ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_TRUE(res != NO_ERROR);
 }
@@ -134,7 +134,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest04, Function | SmallTest | Le
     MessageOption option;
 
     data.WriteInterfaceToken(AnsSubscriberStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(AnsSubscriberInterface::TransactId::ON_CONNECTED);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ON_CONNECTED);
     ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, NO_ERROR);
 }

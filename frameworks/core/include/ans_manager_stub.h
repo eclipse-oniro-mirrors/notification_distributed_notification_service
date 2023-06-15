@@ -20,6 +20,7 @@
 #include <map>
 
 #include "ans_manager_interface.h"
+#include "distributed_notification_service_ipc_interface_code.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -681,7 +682,7 @@ public:
     ErrCode UnregisterPushCallback() override;
 
 private:
-    static const std::map<uint32_t, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
+    static const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);

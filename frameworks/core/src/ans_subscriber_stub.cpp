@@ -26,23 +26,23 @@ namespace OHOS {
 namespace Notification {
 AnsSubscriberStub::AnsSubscriberStub()
 {
-    interfaces_.emplace(ON_CONNECTED,
+    interfaces_.emplace(NotificationInterfaceCode::ON_CONNECTED,
         std::bind(&AnsSubscriberStub::HandleOnConnected, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_DISCONNECTED,
+    interfaces_.emplace(NotificationInterfaceCode::ON_DISCONNECTED,
         std::bind(&AnsSubscriberStub::HandleOnDisconnected, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_CONSUMED_MAP,
+    interfaces_.emplace(NotificationInterfaceCode::ON_CONSUMED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnConsumedMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_CANCELED_MAP,
+    interfaces_.emplace(NotificationInterfaceCode::ON_CANCELED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnCanceledMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(
-        ON_UPDATED, std::bind(&AnsSubscriberStub::HandleOnUpdated, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_DND_DATE_CHANGED,
+    interfaces_.emplace(NotificationInterfaceCode::ON_UPDATED,
+        std::bind(&AnsSubscriberStub::HandleOnUpdated, this, std::placeholders::_1, std::placeholders::_2));
+    interfaces_.emplace(NotificationInterfaceCode::ON_DND_DATE_CHANGED,
         std::bind(
             &AnsSubscriberStub::HandleOnDoNotDisturbDateChange, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(ON_ENABLED_NOTIFICATION_CHANGED,
+    interfaces_.emplace(NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED,
         std::bind(&AnsSubscriberStub::HandleOnEnabledNotificationChanged, this, std::placeholders::_1,
             std::placeholders::_2));
-    interfaces_.emplace(ON_BADGE_CHANGED,
+    interfaces_.emplace(NotificationInterfaceCode::ON_BADGE_CHANGED,
         std::bind(&AnsSubscriberStub::HandleOnBadgeChanged, this, std::placeholders::_1, std::placeholders::_2));
 }
 
@@ -59,16 +59,16 @@ int32_t AnsSubscriberStub::OnRemoteRequest(
         return OBJECT_NULL;
     }
 
-    auto it = interfaces_.find(code);
+    auto it = interfaces_.find(static_cast<NotificationInterfaceCode>(code));
     if (it == interfaces_.end()) {
         ANS_LOGW("[OnRemoteRequest] fail: unknown code!");
-        return IRemoteStub<AnsSubscriberInterface>::OnRemoteRequest(code, data, reply, flags);
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
     }
 
     auto fun = it->second;
     if (fun == nullptr) {
         ANS_LOGW("[OnRemoteRequest] fail: not find function!");
-        return IRemoteStub<AnsSubscriberInterface>::OnRemoteRequest(code, data, reply, flags);
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
     }
 
     fun(data, reply);

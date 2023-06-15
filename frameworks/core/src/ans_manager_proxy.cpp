@@ -18,6 +18,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "distributed_notification_service_ipc_interface_code.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
@@ -59,7 +60,7 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(PUBLISH_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::PUBLISH_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[Publish] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -93,7 +94,7 @@ ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CANCEL_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[Cancel] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -117,7 +118,7 @@ ErrCode AnsManagerProxy::CancelAll()
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CANCEL_ALL_NOTIFICATIONS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CancelAll] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -157,7 +158,7 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CANCEL_AS_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CancelAsBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -186,7 +187,7 @@ ErrCode AnsManagerProxy::AddSlotByType(NotificationConstant::SlotType slotType)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(ADD_SLOT_BY_TYPE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ADD_SLOT_BY_TYPE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[AddSlotByType] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -226,7 +227,7 @@ ErrCode AnsManagerProxy::AddSlots(const std::vector<sptr<NotificationSlot>> &slo
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(ADD_SLOTS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ADD_SLOTS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[AddSlots] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -255,7 +256,7 @@ ErrCode AnsManagerProxy::RemoveSlotByType(const NotificationConstant::SlotType &
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(REMOVE_SLOT_BY_TYPE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_SLOT_BY_TYPE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[RemoveSlotByType] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -279,7 +280,7 @@ ErrCode AnsManagerProxy::RemoveAllSlots()
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(REMOVE_ALL_SLOTS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_ALL_SLOTS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[RemoveAllSlots] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -308,7 +309,7 @@ ErrCode AnsManagerProxy::GetSlotByType(const NotificationConstant::SlotType &slo
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SLOT_BY_TYPE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SLOT_BY_TYPE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetSlotByType] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -339,7 +340,7 @@ ErrCode AnsManagerProxy::GetSlots(std::vector<sptr<NotificationSlot>> &slots)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SLOTS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SLOTS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetSlots] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -373,7 +374,7 @@ ErrCode AnsManagerProxy::GetSlotNumAsBundle(const sptr<NotificationBundleOption>
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SLOT_NUM_AS_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SLOT_NUM_AS_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetShowBadgeEnabledForBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -402,7 +403,7 @@ ErrCode AnsManagerProxy::GetActiveNotifications(std::vector<sptr<NotificationReq
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_ACTIVE_NOTIFICATIONS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetActiveNotifications] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -426,7 +427,7 @@ ErrCode AnsManagerProxy::GetActiveNotificationNums(uint64_t &num)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_ACTIVE_NOTIFICATION_NUMS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_NUMS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetActiveNotificationNums] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -455,7 +456,7 @@ ErrCode AnsManagerProxy::GetAllActiveNotifications(std::vector<sptr<Notification
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_ALL_ACTIVE_NOTIFICATIONS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_ACTIVE_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetAllActiveNotifications] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -490,7 +491,7 @@ ErrCode AnsManagerProxy::GetSpecialActiveNotifications(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SPECIAL_ACTIVE_NOTIFICATIONS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SPECIAL_ACTIVE_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetSpecialActiveNotifications] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -524,7 +525,7 @@ ErrCode AnsManagerProxy::SetNotificationAgent(const std::string &agent)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_NOTIFICATION_AGENT, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_AGENT, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetNotificationAgent] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -548,7 +549,7 @@ ErrCode AnsManagerProxy::GetNotificationAgent(std::string &agent)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_NOTIFICATION_AGENT, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_NOTIFICATION_AGENT, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetNotificationAgent] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -587,7 +588,7 @@ ErrCode AnsManagerProxy::CanPublishAsBundle(const std::string &representativeBun
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CAN_PUBLISH_AS_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CAN_PUBLISH_AS_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CanPublishAsBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -637,7 +638,7 @@ ErrCode AnsManagerProxy::PublishAsBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(PUBLISH_AS_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::PUBLISH_AS_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[PublishAsBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -666,7 +667,7 @@ ErrCode AnsManagerProxy::SetNotificationBadgeNum(int32_t num)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_NOTIFICATION_BADGE_NUM, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_BADGE_NUM, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetNotificationBadgeNum] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -690,7 +691,7 @@ ErrCode AnsManagerProxy::GetBundleImportance(int32_t &importance)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_BUNDLE_IMPORTANCE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_BUNDLE_IMPORTANCE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetBundleImportance] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -719,7 +720,7 @@ ErrCode AnsManagerProxy::HasNotificationPolicyAccessPermission(bool &granted)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_NOTIFICATION_POLICY_ACCESS_GRANTED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_NOTIFICATION_POLICY_ACCESS_GRANTED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[HasNotificationPolicyAccessPermission] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -774,7 +775,7 @@ ErrCode AnsManagerProxy::RemoveNotification(const sptr<NotificationBundleOption>
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(REMOVE_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[RemoveNotification] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -808,7 +809,7 @@ ErrCode AnsManagerProxy::RemoveAllNotifications(const sptr<NotificationBundleOpt
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(REMOVE_ALL_NOTIFICATIONS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_ALL_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[RemoveNotification] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -847,7 +848,7 @@ ErrCode AnsManagerProxy::Delete(const std::string &key, int32_t removeReason)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(DELETE_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DELETE_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[Delete] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -881,7 +882,7 @@ ErrCode AnsManagerProxy::DeleteByBundle(const sptr<NotificationBundleOption> &bu
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(DELETE_NOTIFICATION_BY_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DELETE_NOTIFICATION_BY_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[DeleteByBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -905,7 +906,7 @@ ErrCode AnsManagerProxy::DeleteAll()
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(DELETE_ALL_NOTIFICATIONS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[DeleteAll] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -940,7 +941,7 @@ ErrCode AnsManagerProxy::GetSlotsByBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SLOTS_BY_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SLOTS_BY_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetSlotsByBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -991,7 +992,7 @@ ErrCode AnsManagerProxy::UpdateSlots(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(UPDATE_SLOTS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::UPDATE_SLOTS, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[UpdateSlots] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1021,7 +1022,7 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(REQUEST_ENABLE_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[RequestEnableNotification] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1054,7 +1055,7 @@ ErrCode AnsManagerProxy::SetNotificationsEnabledForBundle(const std::string &dev
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_NOTIFICATION_ENABLED_FOR_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetNotificationsEnabledForBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1088,7 +1089,7 @@ ErrCode AnsManagerProxy::SetNotificationsEnabledForAllBundles(const std::string 
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetNotificationsEnabledForAllBundles] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1133,7 +1134,7 @@ ErrCode AnsManagerProxy::SetNotificationsEnabledForSpecialBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetNotificationsEnabledForSpecialBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1172,7 +1173,7 @@ ErrCode AnsManagerProxy::SetShowBadgeEnabledForBundle(const sptr<NotificationBun
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_SHOW_BADGE_ENABLED_FOR_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetShowBadgeEnabledForBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1206,7 +1207,7 @@ ErrCode AnsManagerProxy::GetShowBadgeEnabledForBundle(const sptr<NotificationBun
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SHOW_BADGE_ENABLED_FOR_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetShowBadgeEnabledForBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1235,7 +1236,7 @@ ErrCode AnsManagerProxy::GetShowBadgeEnabled(bool &enabled)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SHOW_BADGE_ENABLED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetShowBadgeEnabled] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1288,7 +1289,7 @@ ErrCode AnsManagerProxy::Subscribe(const sptr<AnsSubscriberInterface> &subscribe
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SUBSCRIBE_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[Subscribe] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1336,7 +1337,7 @@ ErrCode AnsManagerProxy::Unsubscribe(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(UNSUBSCRIBE_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::UNSUBSCRIBE_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[Unsubscribe] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1360,7 +1361,7 @@ ErrCode AnsManagerProxy::IsAllowedNotify(bool &allowed)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_ALLOWED_NOTIFY, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_ALLOWED_NOTIFY, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[IsAllowedNotify] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1389,7 +1390,7 @@ ErrCode AnsManagerProxy::IsAllowedNotifySelf(bool &allowed)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_ALLOWED_NOTIFY_SELF, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_ALLOWED_NOTIFY_SELF, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[IsAllowedNotifySelf] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1428,7 +1429,7 @@ ErrCode AnsManagerProxy::IsSpecialBundleAllowedNotify(const sptr<NotificationBun
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[IsSpecialBundleAllowedNotify] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1462,7 +1463,7 @@ ErrCode AnsManagerProxy::CancelGroup(const std::string &groupName)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CANCEL_GROUP, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_GROUP, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CancelGroup] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1497,7 +1498,7 @@ ErrCode AnsManagerProxy::RemoveGroupByBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(REMOVE_GROUP_BY_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_GROUP_BY_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[RemoveGroupByBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1531,7 +1532,7 @@ ErrCode AnsManagerProxy::SetDoNotDisturbDate(const sptr<NotificationDoNotDisturb
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_DO_NOT_DISTURB_DATE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetDoNotDisturbDate] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1555,7 +1556,7 @@ ErrCode AnsManagerProxy::GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> 
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_DO_NOT_DISTURB_DATE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetDoNotDisturbDate] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1587,7 +1588,7 @@ ErrCode AnsManagerProxy::DoesSupportDoNotDisturbMode(bool &doesSupport)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(DOES_SUPPORT_DO_NOT_DISTURB_MODE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DOES_SUPPORT_DO_NOT_DISTURB_MODE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[DoesSupportDoNotDisturbMode] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1616,7 +1617,7 @@ ErrCode AnsManagerProxy::IsDistributedEnabled(bool &enabled)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_DISTRIBUTED_ENABLED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[IsDistributedEnabled] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1650,7 +1651,7 @@ ErrCode AnsManagerProxy::EnableDistributed(bool enabled)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(ENABLE_DISTRIBUTED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ENABLE_DISTRIBUTED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[EnableDistributed] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1689,7 +1690,7 @@ ErrCode AnsManagerProxy::EnableDistributedByBundle(const sptr<NotificationBundle
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(ENABLE_DISTRIBUTED_BY_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ENABLE_DISTRIBUTED_BY_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[EnableDistributedByBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1718,7 +1719,7 @@ ErrCode AnsManagerProxy::EnableDistributedSelf(bool enabled)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(ENABLE_DISTRIBUTED_SELF, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ENABLE_DISTRIBUTED_SELF, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[EnableDistributedSelf] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1752,7 +1753,7 @@ ErrCode AnsManagerProxy::IsDistributedEnableByBundle(const sptr<NotificationBund
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_DISTRIBUTED_ENABLED_BY_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED_BY_BUNDLE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[IsDistributedEnableByBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1781,7 +1782,7 @@ ErrCode AnsManagerProxy::GetDeviceRemindType(NotificationConstant::RemindType &r
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_DEVICE_REMIND_TYPE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_DEVICE_REMIND_TYPE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetDeviceRemindType] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1825,7 +1826,7 @@ ErrCode AnsManagerProxy::PublishContinuousTaskNotification(const sptr<Notificati
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(PUBLISH_CONTINUOUS_TASK_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::PUBLISH_CONTINUOUS_TASK_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[PublishContinuousTaskNotification] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1858,7 +1859,7 @@ ErrCode AnsManagerProxy::CancelContinuousTaskNotification(const std::string &lab
     }
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CANCEL_CONTINUOUS_TASK_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_CONTINUOUS_TASK_NOTIFICATION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CancelContinuousTaskNotification] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1895,7 +1896,7 @@ ErrCode AnsManagerProxy::PublishReminder(sptr<ReminderRequest> &reminder)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(PUBLISH_REMINDER, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::PUBLISH_REMINDER, option, data, reply);
     if (result != ERR_OK) {
         ANSR_LOGE("[PublishReminder] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1929,7 +1930,7 @@ ErrCode AnsManagerProxy::CancelReminder(const int32_t reminderId)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CANCEL_REMINDER, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_REMINDER, option, data, reply);
     if (result != ERR_OK) {
         ANSR_LOGE("[CancelReminder] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1952,7 +1953,7 @@ ErrCode AnsManagerProxy::CancelAllReminders()
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(CANCEL_ALL_REMINDERS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_ALL_REMINDERS, option, data, reply);
     if (result != ERR_OK) {
         ANSR_LOGE("[CancelAllReminders] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1975,7 +1976,7 @@ ErrCode AnsManagerProxy::GetValidReminders(std::vector<sptr<ReminderRequest>> &r
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_ALL_VALID_REMINDERS, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_VALID_REMINDERS, option, data, reply);
     if (result != ERR_OK) {
         ANSR_LOGE("[GetValidReminders] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2034,14 +2035,14 @@ ErrCode AnsManagerProxy::ReadReminders(
     return ERR_OK;
 }
 
-ErrCode AnsManagerProxy::InnerTransact(uint32_t code, MessageOption &flags, MessageParcel &data, MessageParcel &reply)
+ErrCode AnsManagerProxy::InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply)
 {
     auto remote = Remote();
     if (remote == nullptr) {
         ANS_LOGE("[InnerTransact] fail: get Remote fail code %{public}u", code);
         return ERR_DEAD_OBJECT;
     }
-    int32_t err = remote->SendRequest(code, data, reply, flags);
+    int32_t err = remote->SendRequest(static_cast<uint32_t>(code), data, reply, flags);
     switch (err) {
         case NO_ERROR: {
             return ERR_OK;
@@ -2117,7 +2118,7 @@ ErrCode AnsManagerProxy::IsSupportTemplate(const std::string &templateName, bool
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_SUPPORT_TEMPLATE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_SUPPORT_TEMPLATE, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[IsSupportTemplate] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2151,7 +2152,7 @@ ErrCode AnsManagerProxy::IsSpecialUserAllowedNotify(const int32_t &userId, bool 
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(IS_SPECIAL_USER_ALLOWED_NOTIFY, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_SPECIAL_USER_ALLOWED_NOTIFY, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[IsSpecialBundleAllowedNotify] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2190,7 +2191,7 @@ ErrCode AnsManagerProxy::SetNotificationsEnabledByUser(const int32_t &userId, bo
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_NOTIFICATION_ENABLED_BY_USER, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_BY_USER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetNotificationsEnabledByUser] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2219,7 +2220,7 @@ ErrCode AnsManagerProxy::DeleteAllByUser(const int32_t &userId)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(DELETE_ALL_NOTIFICATIONS_BY_USER, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS_BY_USER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[DeleteAllByUser] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2258,7 +2259,7 @@ ErrCode AnsManagerProxy::SetDoNotDisturbDate(const int32_t &userId, const sptr<N
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_DO_NOT_DISTURB_DATE_BY_USER, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetDoNotDisturbDate] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2287,7 +2288,7 @@ ErrCode AnsManagerProxy::GetDoNotDisturbDate(const int32_t &userId, sptr<Notific
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_DO_NOT_DISTURB_DATE_BY_USER, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetDoNotDisturbDate] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2340,7 +2341,7 @@ ErrCode AnsManagerProxy::SetEnabledForBundleSlot(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_ENABLED_FOR_BUNDLE_SLOT, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_ENABLED_FOR_BUNDLE_SLOT, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetEnabledForBundleSlot] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2380,7 +2381,7 @@ ErrCode AnsManagerProxy::GetEnabledForBundleSlot(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_ENABLED_FOR_BUNDLE_SLOT, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetEnabledForBundleSlot] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2419,7 +2420,8 @@ ErrCode AnsManagerProxy::SetSyncNotificationEnabledWithoutApp(const int32_t user
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetSyncNotificationEnabledWithoutApp] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2448,7 +2450,8 @@ ErrCode AnsManagerProxy::GetSyncNotificationEnabledWithoutApp(const int32_t user
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[GetSyncNotificationEnabledWithoutApp] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2489,7 +2492,7 @@ ErrCode AnsManagerProxy::ShellDump(const std::string &cmd, const std::string &bu
     }
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SHELL_DUMP, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SHELL_DUMP, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[ShellDump] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2520,7 +2523,7 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(SET_BADGE_NUMBER, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_BADGE_NUMBER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetBadgeNumber] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2549,7 +2552,7 @@ ErrCode AnsManagerProxy::RegisterPushCallback(const sptr<IRemoteObject> &pushCal
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_SYNC };
-    ErrCode result = InnerTransact(REGISTER_PUSH_CALLBACK, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REGISTER_PUSH_CALLBACK, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -2573,7 +2576,7 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
 
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_SYNC };
-    ErrCode result = InnerTransact(UNREGISTER_PUSH_CALLBACK, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::UNREGISTER_PUSH_CALLBACK, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
