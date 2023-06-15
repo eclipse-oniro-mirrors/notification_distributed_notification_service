@@ -65,7 +65,7 @@ namespace OHOS {
         reminderRequest.OnStop();
         reminderRequest.OnTerminate();
         reminderRequest.OnTimeZoneChange();
-        std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+        std::shared_ptr<NativeRdb::ResultSet> resultSet =
             std::make_shared<NativeRdb::AbsSharedResultSet>();
         uint8_t column = *data % COLUMN_TYPE;
         Notification::ReminderRequest::DbRecoveryType columnType =

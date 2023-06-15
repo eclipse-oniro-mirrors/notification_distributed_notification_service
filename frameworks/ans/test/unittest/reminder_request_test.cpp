@@ -782,7 +782,7 @@ HWTEST_F(ReminderRequestTest, OnTimeZoneChange_00001, Function | SmallTest | Lev
  */
 HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00001, Function | SmallTest | Level1)
 {
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
+    std::shared_ptr<NativeRdb::ResultSet> resultSet = nullptr;
     std::string columnName = "columnName";
     ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
     auto rrc = std::make_shared<ReminderRequestChild>();
@@ -1149,7 +1149,7 @@ HWTEST_F(ReminderRequestTest, OnStart_00001, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+    std::shared_ptr<NativeRdb::ResultSet> resultSet =
         std::make_shared<NativeRdb::AbsSharedResultSet>();
     std::string columnName = "this is columnName";
     ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
@@ -1173,7 +1173,7 @@ HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | L
 HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00003, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+    std::shared_ptr<NativeRdb::ResultSet> resultSet =
         std::make_shared<NativeRdb::AbsSharedResultSet>();
     std::string columnName = "this is columnName";
 

@@ -36,7 +36,7 @@ namespace OHOS {
         int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
         reminderStore.GetBundleOption(reminderId, bundleOption);
         // test GetInt32Val function
-        std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
+        std::shared_ptr<NativeRdb::ResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
         std::string name(data);
         int32_t value = static_cast<int32_t>(GetU32Data(data));
         reminderStore.GetInt32Val(resultSet, name, value);

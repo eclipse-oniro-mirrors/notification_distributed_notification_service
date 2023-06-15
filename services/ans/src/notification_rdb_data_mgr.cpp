@@ -240,7 +240,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &valu
         NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
         absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
         auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
-        if (absSharedResultSet == nullptr || !absSharedResultSet->HasBlock()) {
+        if (absSharedResultSet == nullptr) {
             ANS_LOGD("absSharedResultSet failed");
             return NativeRdb::E_ERROR;
         }
@@ -273,7 +273,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
         NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
         absRdbPredicates.BeginsWith(NOTIFICATION_KEY, key);
         auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
-        if (absSharedResultSet == nullptr || !absSharedResultSet->HasBlock()) {
+        if (absSharedResultSet == nullptr) {
             ANS_LOGE("absSharedResultSet failed");
             return NativeRdb::E_ERROR;
         }
@@ -318,7 +318,7 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
         auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
-        if (absSharedResultSet == nullptr || !absSharedResultSet->HasBlock()) {
+        if (absSharedResultSet == nullptr) {
             ANS_LOGE("absSharedResultSet failed");
             return NativeRdb::E_ERROR;
         }

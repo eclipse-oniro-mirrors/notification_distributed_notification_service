@@ -437,8 +437,8 @@ public:
      *
      * @param resultSet Indicates the resultSet with pointer to the row of record data.
      */
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
-    void RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
+    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet);
+    void RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet> &resultSet);
     void RecoverWantAgent(const std::string &wantAgentInfo, const uint8_t &type);
 
     /**
@@ -731,7 +731,7 @@ protected:
     {
         return INVALID_LONG_LONG_VALUE;
     }
-    int64_t RecoverInt64FromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet,
+    int64_t RecoverInt64FromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
         const std::string &columnName, const DbRecoveryType &columnType);
 
     /**

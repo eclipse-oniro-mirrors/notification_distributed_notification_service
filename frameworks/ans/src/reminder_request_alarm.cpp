@@ -309,7 +309,7 @@ bool ReminderRequestAlarm::ReadFromParcel(Parcel &parcel)
     return true;
 }
 
-void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     ReminderRequest::RecoverFromDb(resultSet);
 
