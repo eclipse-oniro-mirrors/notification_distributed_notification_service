@@ -93,19 +93,6 @@ public:
      * @param badgeData Indicates the BadgeNumberCallbackData object.
      */
     virtual void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) = 0;
-
-protected:
-    enum TransactId : uint32_t {
-        ON_CONNECTED = FIRST_CALL_TRANSACTION,
-        ON_DISCONNECTED,
-        ON_CONSUMED, // Obsolete
-        ON_CONSUMED_MAP,
-        ON_CANCELED_MAP,
-        ON_UPDATED,
-        ON_DND_DATE_CHANGED,
-        ON_ENABLED_NOTIFICATION_CHANGED,
-        ON_BADGE_CHANGED,
-    };
 };
 }  // namespace Notification
 }  // namespace OHOS

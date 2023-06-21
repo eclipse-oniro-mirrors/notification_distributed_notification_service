@@ -50,7 +50,7 @@ public:
  */
 HWTEST_F(AnsManagerStubTest, OnRemoteRequest0001, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -88,7 +88,7 @@ HWTEST_F(AnsManagerStubTest, OnRemoteRequest0002, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandlePublish01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -111,7 +111,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublish01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandlePublish02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -132,7 +132,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublish02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandlePublish03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -153,7 +153,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublish03, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleCancel01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -176,7 +176,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancel01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleCancel02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -197,7 +197,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancel02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleCancel03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -218,7 +218,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancel03, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAll01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_ALL_NOTIFICATIONS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -237,7 +237,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAll01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -263,7 +263,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle01, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -287,7 +287,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle02, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -311,7 +311,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle03, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -335,7 +335,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle04, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleAddSlotByType01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ADD_SLOT_BY_TYPE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ADD_SLOT_BY_TYPE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -354,7 +354,7 @@ HWTEST_F(AnsManagerStubTest, HandleAddSlotByType01, Function | SmallTest | Level
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveSlotByType01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_SLOT_BY_TYPE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_SLOT_BY_TYPE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -373,7 +373,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveSlotByType01, Function | SmallTest | Le
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveAllSlots01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_ALL_SLOTS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_ALL_SLOTS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -392,7 +392,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveAllSlots01, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSlotByType01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SLOT_BY_TYPE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOT_BY_TYPE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -411,7 +411,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotByType01, Function | SmallTest | Level
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSlotNumAsBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SLOT_NUM_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOT_NUM_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -433,7 +433,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotNumAsBundle01, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSlotNumAsBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SLOT_NUM_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOT_NUM_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -452,7 +452,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotNumAsBundle02, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleGetActiveNotifications01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ACTIVE_NOTIFICATIONS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATIONS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -471,7 +471,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetActiveNotifications01, Function | SmallTes
  */
 HWTEST_F(AnsManagerStubTest, HandleGetActiveNotificationNums01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ACTIVE_NOTIFICATION_NUMS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_NUMS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -490,7 +490,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetActiveNotificationNums01, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleGetAllActiveNotifications01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ALL_ACTIVE_NOTIFICATIONS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_ACTIVE_NOTIFICATIONS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -509,7 +509,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetAllActiveNotifications01, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_AGENT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -531,7 +531,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent01, Function | SmallTest 
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_AGENT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -550,7 +550,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent02, Function | SmallTest 
  */
 HWTEST_F(AnsManagerStubTest, HandleGetNotificationAgent01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_NOTIFICATION_AGENT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_AGENT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -569,7 +569,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetNotificationAgent01, Function | SmallTest 
  */
 HWTEST_F(AnsManagerStubTest, HandleCanPublishAsBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CAN_PUBLISH_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CAN_PUBLISH_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -591,7 +591,7 @@ HWTEST_F(AnsManagerStubTest, HandleCanPublishAsBundle01, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleCanPublishAsBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CAN_PUBLISH_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CAN_PUBLISH_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -610,7 +610,7 @@ HWTEST_F(AnsManagerStubTest, HandleCanPublishAsBundle02, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -635,7 +635,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle01, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -657,7 +657,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle02, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_AS_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_AS_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -679,7 +679,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle03, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationBadgeNum01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_BADGE_NUM);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_BADGE_NUM);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -701,7 +701,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationBadgeNum01, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationBadgeNum02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_BADGE_NUM);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_BADGE_NUM);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -720,7 +720,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationBadgeNum02, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleGetBundleImportance01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_BUNDLE_IMPORTANCE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_BUNDLE_IMPORTANCE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -739,7 +739,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetBundleImportance01, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDate01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -761,7 +761,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDate01, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDate02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -780,7 +780,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDate02, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDate01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_DO_NOT_DISTURB_DATE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -799,7 +799,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDate01, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleDoesSupportDoNotDisturbMode01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DOES_SUPPORT_DO_NOT_DISTURB_MODE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DOES_SUPPORT_DO_NOT_DISTURB_MODE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -818,7 +818,7 @@ HWTEST_F(AnsManagerStubTest, HandleDoesSupportDoNotDisturbMode01, Function | Sma
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishContinuousTaskNotification01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_CONTINUOUS_TASK_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_CONTINUOUS_TASK_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -840,7 +840,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishContinuousTaskNotification01, Function
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishContinuousTaskNotification02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_CONTINUOUS_TASK_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_CONTINUOUS_TASK_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -859,7 +859,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishContinuousTaskNotification02, Function
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelContinuousTaskNotification01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_CONTINUOUS_TASK_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_CONTINUOUS_TASK_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -883,7 +883,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelContinuousTaskNotification01, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelContinuousTaskNotification02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_CONTINUOUS_TASK_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_CONTINUOUS_TASK_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -905,7 +905,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelContinuousTaskNotification02, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelContinuousTaskNotification03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_CONTINUOUS_TASK_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_CONTINUOUS_TASK_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -927,7 +927,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelContinuousTaskNotification03, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleIsNotificationPolicyAccessGranted01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_NOTIFICATION_POLICY_ACCESS_GRANTED);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_NOTIFICATION_POLICY_ACCESS_GRANTED);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -946,7 +946,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsNotificationPolicyAccessGranted01, Function
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveNotification01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -974,7 +974,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveNotification01, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveNotification02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1000,7 +1000,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveNotification02, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveNotification03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1026,7 +1026,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveNotification03, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveNotification04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1052,7 +1052,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveNotification04, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveNotification05, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1078,7 +1078,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveNotification05, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveAllNotifications01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_ALL_NOTIFICATIONS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_ALL_NOTIFICATIONS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1100,7 +1100,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveAllNotifications01, Function | SmallTes
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveAllNotifications02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_ALL_NOTIFICATIONS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_ALL_NOTIFICATIONS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1119,7 +1119,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveAllNotifications02, Function | SmallTes
  */
 HWTEST_F(AnsManagerStubTest, HandleDelete01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1143,7 +1143,7 @@ HWTEST_F(AnsManagerStubTest, HandleDelete01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleDelete02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1165,7 +1165,7 @@ HWTEST_F(AnsManagerStubTest, HandleDelete02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleDelete03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1187,7 +1187,7 @@ HWTEST_F(AnsManagerStubTest, HandleDelete03, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleDeleteByBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_NOTIFICATION_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_NOTIFICATION_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1209,7 +1209,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteByBundle01, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleDeleteByBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_NOTIFICATION_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_NOTIFICATION_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1228,7 +1228,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteByBundle02, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleDeleteAll01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1247,7 +1247,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteAll01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSlotsByBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SLOTS_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTS_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1269,7 +1269,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotsByBundle01, Function | SmallTest | Le
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSlotsByBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SLOTS_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTS_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1288,7 +1288,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotsByBundle02, Function | SmallTest | Le
  */
 HWTEST_F(AnsManagerStubTest, HandleUpdateSlots01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::UPDATE_SLOTS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::UPDATE_SLOTS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1317,7 +1317,7 @@ HWTEST_F(AnsManagerStubTest, HandleUpdateSlots01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleUpdateSlots02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::UPDATE_SLOTS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::UPDATE_SLOTS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1340,7 +1340,7 @@ HWTEST_F(AnsManagerStubTest, HandleUpdateSlots02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleUpdateSlots03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::UPDATE_SLOTS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::UPDATE_SLOTS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1359,7 +1359,7 @@ HWTEST_F(AnsManagerStubTest, HandleUpdateSlots03, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REQUEST_ENABLE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1381,7 +1381,7 @@ HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification01, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REQUEST_ENABLE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1400,7 +1400,7 @@ HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification02, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1424,7 +1424,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForBundle01, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1446,7 +1446,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForBundle02, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1468,7 +1468,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForBundle03, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForAllBundles01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1492,7 +1492,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForAllBundles01, Funct
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForAllBundles02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1514,7 +1514,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForAllBundles02, Funct
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForAllBundles03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1536,7 +1536,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForAllBundles03, Funct
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1562,7 +1562,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle01, Fu
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1586,7 +1586,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle02, Fu
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1610,7 +1610,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle03, Fu
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1634,7 +1634,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledForSpecialBundle04, Fu
  */
 HWTEST_F(AnsManagerStubTest, HandleSetShowBadgeEnabledForBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1658,7 +1658,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetShowBadgeEnabledForBundle01, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleSetShowBadgeEnabledForBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1680,7 +1680,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetShowBadgeEnabledForBundle02, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleSetShowBadgeEnabledForBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1702,7 +1702,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetShowBadgeEnabledForBundle03, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleAddSlots01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ADD_SLOTS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ADD_SLOTS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1721,7 +1721,7 @@ HWTEST_F(AnsManagerStubTest, HandleAddSlots01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleAddSlots02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ADD_SLOTS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ADD_SLOTS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1746,7 +1746,7 @@ HWTEST_F(AnsManagerStubTest, HandleAddSlots02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSlots01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SLOTS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1765,7 +1765,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlots01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleGetSpecialActiveNotifications01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SPECIAL_ACTIVE_NOTIFICATIONS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SPECIAL_ACTIVE_NOTIFICATIONS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1787,7 +1787,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSpecialActiveNotifications01, Function | S
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1811,7 +1811,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle01, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1833,7 +1833,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle02, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1852,7 +1852,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabledForBundle03, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabled01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SHOW_BADGE_ENABLED);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1874,7 +1874,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabled01, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1900,7 +1900,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1924,7 +1924,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1948,7 +1948,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe03, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1972,7 +1972,7 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe04, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::UNSUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::UNSUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -1998,7 +1998,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::UNSUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::UNSUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2022,7 +2022,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::UNSUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::UNSUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2046,7 +2046,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe03, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleUnsubscribe04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::UNSUBSCRIBE_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::UNSUBSCRIBE_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2070,7 +2070,7 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe04, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotify01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_ALLOWED_NOTIFY);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_ALLOWED_NOTIFY);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2089,7 +2089,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotify01, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotifySelf01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_ALLOWED_NOTIFY_SELF);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_ALLOWED_NOTIFY_SELF);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2108,7 +2108,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsAllowedNotifySelf01, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2130,7 +2130,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify01, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2149,7 +2149,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialBundleAllowedNotify02, Function | Sm
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelGroup01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_GROUP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_GROUP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2171,7 +2171,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelGroup01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelGroup02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_GROUP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_GROUP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2190,7 +2190,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelGroup02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_GROUP_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_GROUP_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2214,7 +2214,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle01, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_GROUP_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_GROUP_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2236,7 +2236,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle02, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::REMOVE_GROUP_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_GROUP_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2258,7 +2258,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveGroupByBundle03, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnabled01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_DISTRIBUTED_ENABLED);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2277,7 +2277,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnabled01, Function | SmallTest 
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributed01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ENABLE_DISTRIBUTED);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2299,7 +2299,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributed01, Function | SmallTest | L
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributed02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ENABLE_DISTRIBUTED);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2318,7 +2318,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributed02, Function | SmallTest | L
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ENABLE_DISTRIBUTED_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2342,7 +2342,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle01, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ENABLE_DISTRIBUTED_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2364,7 +2364,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle02, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ENABLE_DISTRIBUTED_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2386,7 +2386,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedByBundle03, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ENABLE_DISTRIBUTED_SELF);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED_SELF);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2408,7 +2408,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf01, Function | SmallTest
  */
 HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::ENABLE_DISTRIBUTED_SELF);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED_SELF);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2427,7 +2427,7 @@ HWTEST_F(AnsManagerStubTest, HandleEnableDistributedSelf02, Function | SmallTest
  */
 HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_DISTRIBUTED_ENABLED_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2449,7 +2449,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle01, Function | Sma
  */
 HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_DISTRIBUTED_ENABLED_BY_BUNDLE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED_BY_BUNDLE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2468,7 +2468,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsDistributedEnableByBundle02, Function | Sma
  */
 HWTEST_F(AnsManagerStubTest, HandleGetDeviceRemindType01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_DEVICE_REMIND_TYPE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_DEVICE_REMIND_TYPE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2487,7 +2487,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetDeviceRemindType01, Function | SmallTest |
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SHELL_DUMP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SHELL_DUMP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2513,7 +2513,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SHELL_DUMP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SHELL_DUMP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2536,7 +2536,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump02, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SHELL_DUMP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SHELL_DUMP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2559,7 +2559,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump03, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleShellDump04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SHELL_DUMP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SHELL_DUMP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2583,7 +2583,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump04, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2610,7 +2610,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder01, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2634,7 +2634,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder02, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2653,7 +2653,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder03, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2680,7 +2680,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder04, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder05, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2707,7 +2707,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder05, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandlePublishReminder06, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2732,7 +2732,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder06, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelReminder01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2754,7 +2754,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelReminder01, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelReminder02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_REMINDER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2773,7 +2773,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelReminder02, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAllReminders01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::CANCEL_ALL_REMINDERS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_ALL_REMINDERS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2792,7 +2792,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAllReminders01, Function | SmallTest | 
  */
 HWTEST_F(AnsManagerStubTest, HandleGetValidReminders01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ALL_VALID_REMINDERS);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_VALID_REMINDERS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2847,7 +2847,7 @@ HWTEST_F(AnsManagerStubTest, ReadParcelableVector02, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_SUPPORT_TEMPLATE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_SUPPORT_TEMPLATE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2869,7 +2869,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate01, Function | SmallTest | L
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_SUPPORT_TEMPLATE);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_SUPPORT_TEMPLATE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2888,7 +2888,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate02, Function | SmallTest | L
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_SPECIAL_USER_ALLOWED_NOTIFY);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_USER_ALLOWED_NOTIFY);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2910,7 +2910,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser01, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::IS_SPECIAL_USER_ALLOWED_NOTIFY);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_USER_ALLOWED_NOTIFY);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2929,7 +2929,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser02, Function 
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2953,7 +2953,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser01, Function | S
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2975,7 +2975,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser02, Function | S
  */
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_NOTIFICATION_ENABLED_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -2997,7 +2997,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser03, Function | S
  */
 HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3019,7 +3019,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser01, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3038,7 +3038,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser02, Function | SmallTest | Lev
  */
 HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3062,7 +3062,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser01, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3084,7 +3084,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser02, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_DO_NOT_DISTURB_DATE_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3106,7 +3106,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser03, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_DO_NOT_DISTURB_DATE_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3130,7 +3130,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser01, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_DO_NOT_DISTURB_DATE_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3149,7 +3149,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser02, Function | Small
  */
 HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_ENABLED_FOR_BUNDLE_SLOT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3175,7 +3175,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_ENABLED_FOR_BUNDLE_SLOT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3199,7 +3199,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot02, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_ENABLED_FOR_BUNDLE_SLOT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3223,7 +3223,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot03, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot04, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_ENABLED_FOR_BUNDLE_SLOT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_ENABLED_FOR_BUNDLE_SLOT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3247,7 +3247,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot04, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ENABLED_FOR_BUNDLE_SLOT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3271,7 +3271,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot01, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ENABLED_FOR_BUNDLE_SLOT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3293,7 +3293,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot02, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_ENABLED_FOR_BUNDLE_SLOT);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3315,7 +3315,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot03, Function | SmallTe
  */
 HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3339,7 +3339,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp01, Function |
  */
 HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3361,7 +3361,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp02, Function |
  */
 HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp03, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3383,7 +3383,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp03, Function |
  */
 HWTEST_F(AnsManagerStubTest, HandleDistributedGetEnabledWithoutApp01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -3405,7 +3405,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedGetEnabledWithoutApp01, Function |
  */
 HWTEST_F(AnsManagerStubTest, HandleDistributedGetEnabledWithoutApp02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -4199,7 +4199,7 @@ HWTEST_F(AnsManagerStubTest, Unsubscribe01, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber01, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -4221,7 +4221,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber01, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber02, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(AnsManagerInterface::TransactId::DELETE_ALL_NOTIFICATIONS_BY_USER);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS_BY_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};

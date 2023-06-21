@@ -51,7 +51,7 @@ public:
  */
 HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00100, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(IPushCallBack::ON_CHECK_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -69,7 +69,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00100, Function | SmallTest 
  */
 HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00200, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(IPushCallBack::ON_CHECK_NOTIFICATION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};

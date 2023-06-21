@@ -72,7 +72,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0100, Function | MediumTe
     MessageOption flags;
     MessageParcel data;
     MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(code, flags, data, reply);
+    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
     EXPECT_EQ(ERR_OK, res);
 }
 
@@ -95,7 +95,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0200, Function | MediumTe
     MessageOption flags;
     MessageParcel data;
     MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(code, flags, data, reply);
+    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
     EXPECT_EQ(ERR_DEAD_OBJECT, res);
 }
 
@@ -118,7 +118,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0300, Function | MediumTe
     MessageOption flags;
     MessageParcel data;
     MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(code, flags, data, reply);
+    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, res);
 }
 
@@ -138,7 +138,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0400, Function | MediumTe
     MessageOption flags;
     MessageParcel data;
     MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(code, flags, data, reply);
+    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
     EXPECT_EQ(ERR_DEAD_OBJECT, res);
 }
 
