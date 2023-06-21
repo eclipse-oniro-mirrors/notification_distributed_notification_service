@@ -852,7 +852,7 @@ private:
  */
 class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
-    explicit PushCallbackRecipient();
+    PushCallbackRecipient();
     virtual ~PushCallbackRecipient();
     virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
 };
