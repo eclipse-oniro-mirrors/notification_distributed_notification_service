@@ -28,7 +28,10 @@ config("public_ans_config") {
 ohos_shared_library("libans") {
   shlib_type = "sa"
   version_script = "libans.map"
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${ffrt_path}/interfaces/kits",
+  ]
 
   sources = [
     "src/access_token_helper.cpp",
@@ -44,7 +47,6 @@ ohos_shared_library("libans") {
     "src/notification_slot_filter.cpp",
     "src/notification_subscriber_manager.cpp",
     "src/permission_filter.cpp",
-    "src/push_callback_stub.cpp",
     "src/reminder_data_manager.cpp",
     "src/reminder_event_manager.cpp",
     "src/reminder_timer_info.cpp",
@@ -56,7 +58,10 @@ ohos_shared_library("libans") {
   defines = []
   cflags = []
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [
+    "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
+  ]
 
   if (is_double_framework) {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
@@ -75,6 +80,7 @@ ohos_shared_library("libans") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "device_manager:devicemanagersdk",
+    "ffrt:libffrt",
     "hitrace_native:hitrace_meter",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",

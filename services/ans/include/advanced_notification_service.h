@@ -23,6 +23,7 @@
 
 #include "event_handler.h"
 #include "event_runner.h"
+#include "ffrt.h"
 #include "refbase.h"
 
 #include "ans_const_define.h"
@@ -840,11 +841,23 @@ private:
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
     DistributedKv::DistributedKvDataManager dataManager_;
-    sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;;
+    sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
+    std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;
 #endif
+};
+
+/**
+ * @class PushCallbackRecipient
+ * PushCallbackRecipient notices IRemoteBroker died.
+ */
+class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
+public:
+    PushCallbackRecipient();
+    virtual ~PushCallbackRecipient();
+    void OnRemoteDied(const wptr<IRemoteObject> &remote);
 };
 }  // namespace Notification
 }  // namespace OHOS

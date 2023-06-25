@@ -66,6 +66,7 @@ ohos_unittest("reminder_unit_test") {
     "common_event_service:cesfwk_innerkits",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
@@ -102,6 +103,7 @@ ohos_unittest("ans_unit_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${ffrt_path}/interfaces/kits",
   ]
 
   defines = []
@@ -155,6 +157,7 @@ ohos_unittest("ans_unit_test") {
     "common_event_service:cesfwk_innerkits",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
@@ -342,6 +345,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${ffrt_path}/interfaces/kits",
   ]
 
   defines = []
@@ -382,6 +386,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
@@ -407,6 +412,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${ffrt_path}/interfaces/kits",
   ]
 
   defines = []
@@ -451,6 +457,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",

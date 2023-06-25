@@ -48,7 +48,7 @@
 #include "notification_subscriber_manager.h"
 #include "os_account_manager.h"
 #include "permission_filter.h"
-#include "push_callback_stub.h"
+#include "push_callback_proxy.h"
 #include "reminder_data_manager.h"
 #include "trigger_info.h"
 #include "want_agent_helper.h"
@@ -278,9 +278,10 @@ sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
 
 AdvancedNotificationService::AdvancedNotificationService()
 {
-    runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationSvrMain");
-    handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner_);
-    AnsWatchdog::AddHandlerThread(handler_, runner_);
+    notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    if (!notificationSvrQueue_) {
+        ANS_LOGE("ffrt create failed!");
+    }
     recentInfo_ = std::make_shared<RecentInfo>();
     distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
         std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
@@ -392,7 +393,9 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
         return ERR_ANS_INVALID_BUNDLE;
     }
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
         result = RemoveFromNotificationList(bundleOption, label, notificationId, notification, true);
         if (result != ERR_OK) {
@@ -409,7 +412,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
 #endif
         }
     }));
-
+    notificationSvrQueue_->wait(handler);
     SendCancelHiSysEvent(notificationId, label, bundleOption, result);
     return result;
 }
@@ -460,7 +463,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     SetNotificationRemindType(record->notification, true);
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = AssignValidNotificationSlot(record);
         if (result != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
@@ -487,7 +491,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         }
 #endif
     }));
-
+    notificationSvrQueue_->wait(handler);
     if (record->request->GetAutoDeletedTime() > GetCurrentTime()) {
         StartAutoDelete(record);
     }
@@ -674,7 +678,8 @@ ErrCode AdvancedNotificationService::CancelAll()
 
     ErrCode result = ERR_OK;
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
 
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
@@ -703,6 +708,7 @@ ErrCode AdvancedNotificationService::CancelAll()
 
         result = ERR_OK;
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -757,7 +763,8 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         std::vector<sptr<NotificationSlot>> addSlots;
         for (auto slot : slots) {
             sptr<NotificationSlot> originalSlot;
@@ -776,6 +783,7 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
             result = NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, addSlots);
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -789,13 +797,15 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().GetNotificationAllSlots(bundleOption, slots);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slots.clear();
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -808,8 +818,8 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(std::vector<sptr<Not
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         notifications.clear();
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
@@ -818,7 +828,8 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(std::vector<sptr<Not
             }
         }
     }));
-    return result;
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
@@ -830,8 +841,8 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         size_t count = 0;
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
@@ -841,7 +852,8 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         }
         num = static_cast<uint64_t>(count);
     }));
-    return result;
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetNotificationAgent(const std::string &agent)
@@ -875,8 +887,12 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(
-        std::bind([&]() { result = NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleOption, num); }));
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+        std::bind([&]() {
+            ANS_LOGD("ffrt enter!");
+            result = NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleOption, num);
+        }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -890,8 +906,12 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(
-        std::bind([&]() { result = NotificationPreferences::GetInstance().GetImportance(bundleOption, importance); }));
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+        std::bind([&]() {
+            ANS_LOGD("ffrt enter!");
+            result = NotificationPreferences::GetInstance().GetImportance(bundleOption, importance);
+        }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -915,7 +935,8 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
 
     ErrCode result = ERR_OK;
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         std::string deviceId;
@@ -936,6 +957,7 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
 #endif
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -959,7 +981,8 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundle);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -987,6 +1010,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
 
         result = ERR_OK;
     }));
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -1005,7 +1029,8 @@ ErrCode AdvancedNotificationService::DeleteAll()
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         int32_t activeUserId = SUBSCRIBE_USER_INIT;
         (void)GetActiveUserId(activeUserId);
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
@@ -1035,6 +1060,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
 
         result = ERR_OK;
     }));
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -1075,13 +1101,16 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().GetNotificationAllSlots(bundle, slots);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slots.clear();
         }
     }));
+
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -1105,12 +1134,14 @@ ErrCode AdvancedNotificationService::UpdateSlots(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().UpdateNotificationSlots(bundle, slots);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     if (result == ERR_OK) {
         PublishSlotChangeCommonEvent(bundle);
@@ -1139,8 +1170,12 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(
-        std::bind([&]() { result = NotificationPreferences::GetInstance().SetShowBadge(bundle, enabled); }));
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+        std::bind([&]() {
+            result = NotificationPreferences::GetInstance().SetShowBadge(bundle, enabled);
+            ANS_LOGD("ffrt enter!");
+        }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -1164,13 +1199,15 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().IsShowBadge(bundle, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = false;
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -1184,13 +1221,15 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().IsShowBadge(bundleOption, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = false;
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -1338,9 +1377,11 @@ ErrCode AdvancedNotificationService::GetSlotByType(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
     }));
+    notificationSvrQueue_->wait(handler);
     // if get slot failed, it still return ok.
     return ERR_OK;
 }
@@ -1354,9 +1395,11 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(const NotificationConstant
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().RemoveNotificationSlot(bundleOption, slotType);
     }));
+    notificationSvrQueue_->wait(handler);
     // if remove slot failed, it still return ok.
     return ERR_OK;
 }
@@ -1374,8 +1417,8 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         notifications.clear();
         for (auto record : notificationList_) {
             if (record->notification != nullptr) {
@@ -1383,7 +1426,8 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
             }
         }
     }));
-    return result;
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
 }
 
 inline bool IsContained(const std::vector<std::string> &vec, const std::string &target)
@@ -1416,15 +1460,16 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
             if (IsContained(key, record->notification->GetKey())) {
                 notifications.push_back(record->notification);
             }
         }
     }));
-    return result;
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(
@@ -1493,7 +1538,8 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         if (deviceId.empty()) {
             // Local device
             result = NotificationPreferences::GetInstance().SetNotificationsEnabled(userId, enabled);
@@ -1501,6 +1547,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
             // Remote device
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -1528,7 +1575,6 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         new EnabledNotificationCallbackData(bundle->GetBundleName(), bundle->GetUid(), enabled);
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
         if (deviceId.empty()) {
             // Local device
             result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
@@ -1542,7 +1588,6 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         } else {
             // Remote revice
         }
-    }));
 
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
     return result;
@@ -1567,10 +1612,12 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         allowed = false;
         result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -1599,7 +1646,6 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
         allowed = false;
         result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
         if (result == ERR_OK && allowed) {
@@ -1610,7 +1656,6 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
                 SetNotificationsEnabledForSpecialBundle("", bundleOption, allowed);
             }
         }
-    }));
     return result;
 }
 
@@ -1676,7 +1721,6 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
         allowed = false;
         result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
         if (result == ERR_OK && allowed) {
@@ -1687,7 +1731,6 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
                 SetNotificationsEnabledForSpecialBundle("", bundleOption, allowed);
             }
         }
-    }));
     return result;
 }
 
@@ -1733,7 +1776,8 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
         record->notification->SetSourceType(NotificationConstant::SourceType::TYPE_CONTINUOUS);
     }
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         if (!IsNotificationExists(record->notification->GetKey())) {
             AddToNotificationList(record);
         } else {
@@ -1749,6 +1793,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
     }));
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -1764,7 +1809,8 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
 
     int32_t uid = IPCSkeleton::GetCallingUid();
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName().empty()) && (record->bundleOption->GetUid() == uid) &&
@@ -1782,6 +1828,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -2146,7 +2193,8 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    handler_->PostTask(std::bind([this, bundleOption]() {
+    notificationSvrQueue_->submit(std::bind([this, bundleOption]() {
+        ANS_LOGD("ffrt enter!");
         ErrCode result = NotificationPreferences::GetInstance().RemoveNotificationForBundle(bundleOption);
         if (result != ERR_OK) {
             ANS_LOGW("NotificationPreferences::RemoveNotificationForBundle failed: %{public}d", result);
@@ -2199,7 +2247,8 @@ void AdvancedNotificationService::OnScreenOff()
 void AdvancedNotificationService::OnDistributedKvStoreDeathRecipient()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    handler_->PostTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().OnDistributedKvStoreDeathRecipient();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         DistributedNotificationManager::GetInstance()->OnDistributedKvStoreDeathRecipient();
@@ -2217,12 +2266,14 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().RemoveNotificationAllSlots(bundleOption);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -2236,7 +2287,8 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
         if ((result == ERR_OK) && (slot != nullptr)) {
@@ -2248,6 +2300,7 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
             result = NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, slots);
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -2273,7 +2326,8 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
         sptr<NotificationRequest> notificationRequest = nullptr;
 
@@ -2316,6 +2370,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
             TriggerRemoveWantAgent(notificationRequest);
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
     return result;
@@ -2340,7 +2395,8 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         for (auto record : notificationList_) {
             if (!record->notification->IsRemoveAllowed()) {
@@ -2372,6 +2428,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
             TriggerRemoveWantAgent(record->request);
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     return ERR_OK;
 }
@@ -2397,13 +2454,15 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
 
     ErrCode result = ERR_OK;
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().GetNotificationSlotsNumForBundle(bundle, num);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             num = 0;
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -2421,7 +2480,8 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
@@ -2448,6 +2508,7 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName)
             }
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     return ERR_OK;
 }
@@ -2475,7 +2536,8 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         for (auto record : notificationList_) {
             if (!record->notification->IsRemoveAllowed()) {
@@ -2505,6 +2567,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
             }
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     return ERR_OK;
 }
@@ -2648,13 +2711,15 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
     ANS_LOGD("%{public}s", __FUNCTION__);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = DistributedPreferences::GetInstance()->GetDistributedEnable(enabled);
         if (result != ERR_OK) {
             result = ERR_OK;
             enabled = false;
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -2676,8 +2741,12 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(
-        std::bind([&]() { result = DistributedPreferences::GetInstance()->SetDistributedEnable(enabled); }));
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+        std::bind([&]() {
+            result = DistributedPreferences::GetInstance()->SetDistributedEnable(enabled);
+            ANS_LOGE("ffrt enter!");
+        }));
+    notificationSvrQueue_->wait(handler);
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -2712,13 +2781,15 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = DistributedPreferences::GetInstance()->SetDistributedBundleEnable(bundle, enabled);
         if (result != ERR_OK) {
             result = ERR_OK;
             enabled = false;
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -2742,8 +2813,12 @@ ErrCode AdvancedNotificationService::EnableDistributedSelf(const bool enabled)
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind(
-        [&]() { result = DistributedPreferences::GetInstance()->SetDistributedBundleEnable(bundleOption, enabled); }));
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind(
+        [&]() {
+            ANS_LOGD("ffrt enter!");
+            result = DistributedPreferences::GetInstance()->SetDistributedBundleEnable(bundleOption, enabled);
+        }));
+    notificationSvrQueue_->wait(handler);
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -2779,13 +2854,15 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = DistributedPreferences::GetInstance()->GetDistributedBundleEnable(bundle, enabled);
         if (result != ERR_OK) {
             result = ERR_OK;
             enabled = false;
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -2806,7 +2883,8 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(NotificationConstant::R
     }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    handler_->PostSyncTask(std::bind([&]() { remindType = GetRemindType(); }));
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() { remindType = GetRemindType(); }));
+    notificationSvrQueue_->wait(handler);
     return ERR_OK;
 #else
     return ERR_INVALID_OPERATION;
@@ -2962,7 +3040,8 @@ void AdvancedNotificationService::OnDistributedPublish(
         return;
     }
 
-    handler_->PostTask(std::bind([this, deviceId, bundleName, request, activeUserId]() {
+    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
+        ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("device type not support display.");
             return;
@@ -3027,7 +3106,8 @@ void AdvancedNotificationService::OnDistributedUpdate(
         return;
     }
 
-    handler_->PostTask(std::bind([this, deviceId, bundleName, request, activeUserId]() {
+    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
+        ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("device type not support display.");
             return;
@@ -3090,7 +3170,8 @@ void AdvancedNotificationService::OnDistributedDelete(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    handler_->PostTask(std::bind([this, deviceId, bundleName, label, id]() {
+    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, label, id]() {
+        ANS_LOGD("ffrt enter!");
         int32_t activeUserId = -1;
         if (!GetActiveUserId(activeUserId)) {
             ANS_LOGE("Failed to get active user id!");
@@ -3191,10 +3272,12 @@ ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templa
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         support = false;
         result = NotificationPreferences::GetInstance().GetTemplateSupported(templateName, support);
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -3237,10 +3320,12 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(const int32_t &u
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         allowed = false;
         result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -3258,9 +3343,11 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(const int32_t
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().SetNotificationsEnabled(userId, enabled);
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -3279,7 +3366,8 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -3307,6 +3395,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
 
         result = ERR_OK;
     }));
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -3398,12 +3487,14 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().SetDoNotDisturbDate(userId, newConfig);
         if (result == ERR_OK) {
             NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(newConfig);
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     return ERR_OK;
 }
@@ -3413,7 +3504,8 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
 {
     ErrCode result = ERR_OK;
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<NotificationDoNotDisturbDate> currentConfig = nullptr;
         result = NotificationPreferences::GetInstance().GetDoNotDisturbDate(userId, currentConfig);
         if (result == ERR_OK) {
@@ -3434,6 +3526,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
             }
         }
     }));
+    notificationSvrQueue_->wait(handler);
 
     return ERR_OK;
 }
@@ -3443,9 +3536,13 @@ ErrCode AdvancedNotificationService::SetHasPoppedDialog(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ANS_LOGE("ffrt start!");
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGE("ffrt enter!");
         result = NotificationPreferences::GetInstance().SetHasPoppedDialog(bundleOption, hasPopped);
     }));
+    notificationSvrQueue_->wait(handler);
+    ANS_LOGE("ffrt end!");
     return result;
 }
 
@@ -3454,9 +3551,11 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -3474,14 +3573,17 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
 {
     DeleteAllByUser(userId);
 
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().RemoveSettings(userId);
     }));
+    notificationSvrQueue_->wait(handler);
 }
 
 void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption)
 {
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -3508,6 +3610,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
             }
         }
     }));
+    notificationSvrQueue_->wait(handler);
 }
 
 void AdvancedNotificationService::GetDisplayPosition(
@@ -3569,7 +3672,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
@@ -3601,6 +3704,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
 
         PublishSlotChangeCommonEvent(bundle);
     }));
+    notificationSvrQueue_->wait(handler);
 
     SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, result);
     return result;
@@ -3626,7 +3730,8 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
         if (result != ERR_OK) {
@@ -3641,6 +3746,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
         }
         enabled = slot->GetEnable();
     }));
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -3677,7 +3783,8 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
     }
 
     ErrCode result = ERR_ANS_NOT_ALLOWED;
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
         if (cmd == ACTIVE_NOTIFICATION_OPTION) {
             result = ActiveNotificationDump(bundle, userId, dumpInfo);
         } else if (cmd == RECENT_NOTIFICATION_OPTION) {
@@ -3692,6 +3799,7 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
             result = ERR_ANS_INVALID_PARAM;
         }
     }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 
@@ -3895,10 +4003,12 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
+            ANS_LOGD("ffrt enter!");
             result = DistributedPreferences::GetInstance()->SetSyncEnabledWithoutApp(userId, enabled);
         }));
+    notificationSvrQueue_->wait(handler);
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -3920,10 +4030,12 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
     }
 
     ErrCode result = ERR_OK;
-    handler_->PostSyncTask(
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
+            ANS_LOGD("ffrt enter!");
             result = DistributedPreferences::GetInstance()->GetSyncEnabledWithoutApp(userId, enabled);
         }));
+    notificationSvrQueue_->wait(handler);
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -3984,7 +4096,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_NO_MEMORY;
     }
 
-    handler_->PostSyncTask([this, &record]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             return;
@@ -3994,6 +4106,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
     });
+    notificationSvrQueue_->wait(handler);
 
     return result;
 }
@@ -4009,13 +4122,11 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
         return ERR_ANS_NO_MEMORY;
     }
 
-    if (!handler_) {
-        ANS_LOGE("handler_ is null.");
-        return ERR_ANS_TASK_ERR;
-    }
-    handler_->PostSyncTask(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        ANS_LOGD("ffrt enter!");
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
-    }));
+    });
+    notificationSvrQueue_->wait(handler);
     return ERR_OK;
 }
 
@@ -4063,8 +4174,8 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObje
         ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
         return ERR_NO_INIT;
     }
-
     pushCallback->AddDeathRecipient(pushRecipient_);
+
     pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
     ANS_LOGD("end");
     return ERR_OK;
@@ -4114,6 +4225,7 @@ bool AdvancedNotificationService::IsNeedPushCheck(NotificationConstant::SlotType
 
 ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
 {
+    ANS_LOGD("start.");
     if (pushCallBack_) {
         nlohmann::json jsonObject;
         jsonObject["pkgName"] = request->GetCreatorBundleName();
@@ -4133,7 +4245,9 @@ void AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Notifica
     auto triggerFunc = std::bind(&AdvancedNotificationService::TriggerAutoDelete,
         this, record->notification->GetKey());
     int64_t autoDeleteTime = record->request->GetAutoDeletedTime() - GetCurrentTime();
-    handler_->PostTask(triggerFunc, autoDeleteTime);
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(triggerFunc,
+        ffrt::task_attr().delay(autoDeleteTime * 1000));
 }
 
 void AdvancedNotificationService::TriggerAutoDelete(std::string hashCode)
@@ -4154,5 +4268,15 @@ void AdvancedNotificationService::TriggerAutoDelete(std::string hashCode)
         }
     }
 }
+
+void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    ANS_LOGE("Push Callback died, remove the proxy object");
+    AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
+}
+
+PushCallbackRecipient::PushCallbackRecipient() {}
+
+PushCallbackRecipient::~PushCallbackRecipient() {}
 }  // namespace Notification
 }  // namespace OHOS

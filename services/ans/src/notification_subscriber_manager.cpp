@@ -39,9 +39,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
-    runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationSubscriberMgr");
-    handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner_);
-    AnsWatchdog::AddHandlerThread(handler_, runner_);
+    notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
     recipient_ =
         new RemoteDeathRecipient(std::bind(&NotificationSubscriberManager::OnRemoteDied, this, std::placeholders::_1));
 }
@@ -83,10 +81,17 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
     }
 
     ErrCode result = ERR_ANS_TASK_ERR;
-    handler_->PostSyncTask(std::bind([this, &subscriber, &subInfo, &result]() {
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
+        return result;
+    }
+    ANS_LOGE("ffrt start!");
+    ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber, &subInfo, &result]() {
+        ANS_LOGE("ffrt enter!");
         result = this->AddSubscriberInner(subscriber, subInfo);
-    }),
-        AppExecFwk::EventQueue::Priority::HIGH);
+    }));/*, AppExecFwk::EventQueue::Priority::HIGH*/
+    notificationSubQueue_->wait(handler);
+    ANS_LOGE("ffrt end!");
     return result;
 }
 
@@ -100,10 +105,18 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
     }
 
     ErrCode result = ERR_ANS_TASK_ERR;
-    handler_->PostSyncTask(std::bind([this, &subscriber, &subscribeInfo, &result]() {
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
+        return result;
+    }
+    ANS_LOGE("ffrt start!");
+    ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber,
+        &subscribeInfo, &result]() {
+        ANS_LOGE("ffrt enter!");
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
-    }),
-        AppExecFwk::EventQueue::Priority::HIGH);
+    }));/*, AppExecFwk::EventQueue::Priority::HIGH*/
+    notificationSubQueue_->wait(handler);
+    ANS_LOGE("ffrt end!");
     return result;
 }
 
@@ -111,83 +124,96 @@ void NotificationSubscriberManager::NotifyConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is nullptr");
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
         std::bind(&NotificationSubscriberManager::NotifyConsumedInner, this, notification, notificationMap);
 
-    handler_->PostTask(NotifyConsumedFunc);
+    ANS_LOGE("ffrt start!");
+    notificationSubQueue_->submit(NotifyConsumedFunc);
+    ANS_LOGE("ffrt end!");
 }
 
 void NotificationSubscriberManager::NotifyCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is nullptr");
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
         return;
     }
-
     AppExecFwk::EventHandler::Callback NotifyCanceledFunc = std::bind(
         &NotificationSubscriberManager::NotifyCanceledInner, this, notification, notificationMap, deleteReason);
 
-    handler_->PostTask(NotifyCanceledFunc);
+    ANS_LOGE("ffrt start!");
+    notificationSubQueue_->submit(NotifyCanceledFunc);
+    ANS_LOGE("ffrt end!");
 }
 
 void NotificationSubscriberManager::NotifyUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is nullptr");
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
         return;
     }
-
     AppExecFwk::EventHandler::Callback NotifyUpdatedFunc =
         std::bind(&NotificationSubscriberManager::NotifyUpdatedInner, this, notificationMap);
 
-    handler_->PostTask(NotifyUpdatedFunc);
+    ANS_LOGE("ffrt start!");
+    notificationSubQueue_->submit(NotifyUpdatedFunc);
+    ANS_LOGE("ffrt end!");
 }
 
 void NotificationSubscriberManager::NotifyDoNotDisturbDateChanged(const sptr<NotificationDoNotDisturbDate> &date)
 {
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is nullptr");
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
         return;
     }
-
     AppExecFwk::EventHandler::Callback func =
         std::bind(&NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner, this, date);
 
-    handler_->PostTask(func);
+    ANS_LOGE("ffrt start!");
+    notificationSubQueue_->submit(func);
+    ANS_LOGE("ffrt end!");
 }
 
 void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is nullptr");
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
         return;
     }
-
     AppExecFwk::EventHandler::Callback func =
         std::bind(&NotificationSubscriberManager::NotifyEnabledNotificationChangedInner, this, callbackData);
 
-    handler_->PostTask(func);
+    ANS_LOGE("ffrt start!");
+    notificationSubQueue_->submit(func);
+    ANS_LOGE("ffrt end!");
 }
 
 void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
     ANS_LOGI("OnRemoteDied");
-    handler_->PostSyncTask(std::bind([this, object]() {
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
+        return;
+    }
+    ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, object]() {
+        ANS_LOGE("ffrt enter!");
         std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
             ANS_LOGW("subscriber removed.");
             subscriberRecordList_.remove(record);
         }
-    }),
-        AppExecFwk::EventQueue::Priority::HIGH);
+    }));/*, AppExecFwk::EventQueue::Priority::HIGH*/
+    ANS_LOGE("ffrt start!");
+    notificationSubQueue_->wait(handler);
+    ANS_LOGE("ffrt end!");
 }
 
 std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSubscriberManager::FindSubscriberRecord(
@@ -312,6 +338,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
 void NotificationSubscriberManager::NotifyConsumedInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
+    ANS_LOGE("ffrt enter!");
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
@@ -335,6 +362,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
 void NotificationSubscriberManager::NotifyCanceledInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    ANS_LOGE("ffrt enter!");
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
@@ -356,6 +384,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
 
 void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap)
 {
+    ANS_LOGE("ffrt enter!");
     for (auto record : subscriberRecordList_) {
         record->subscriber->OnUpdated(notificationMap);
     }
@@ -363,6 +392,7 @@ void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSo
 
 void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const sptr<NotificationDoNotDisturbDate> &date)
 {
+    ANS_LOGE("ffrt enter!");
     for (auto record : subscriberRecordList_) {
         record->subscriber->OnDoNotDisturbDateChange(date);
     }
@@ -376,6 +406,7 @@ bool NotificationSubscriberManager::IsSystemUser(int32_t userId)
 void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    ANS_LOGE("ffrt enter!");
     for (auto record : subscriberRecordList_) {
         record->subscriber->OnEnabledNotificationChanged(callbackData);
     }
@@ -383,17 +414,18 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
 
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
 {
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is nullptr");
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
         return;
     }
-
     std::function<void()> setBadgeNumberFunc = [badgeData] () {
         for (auto record : NotificationSubscriberManager::GetInstance()->subscriberRecordList_) {
             record->subscriber->OnBadgeChanged(badgeData);
         }
     };
-    handler_->PostTask(setBadgeNumberFunc);
+    ANS_LOGE("ffrt start!");
+    notificationSubQueue_->submit(setBadgeNumberFunc);
+    ANS_LOGE("ffrt end!");
 }
 }  // namespace Notification
 }  // namespace OHOS

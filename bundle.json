@@ -80,7 +80,8 @@
         "c_utils",
         "i18n",
         "device_manager",
-        "kv_store"
+        "kv_store",
+        "ffrt"
       ],
       "third_party": [
         "libuv"
