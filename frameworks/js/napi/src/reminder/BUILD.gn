@@ -55,6 +55,7 @@ ohos_shared_library("reminderagent") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "multimedia_image_framework:image",
     "napi:ace_napi",
     "relational_store:native_rdb",
