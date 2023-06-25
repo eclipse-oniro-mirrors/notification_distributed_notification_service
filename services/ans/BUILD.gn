@@ -19,7 +19,10 @@ group("ans_targets") {
 }
 
 config("public_ans_config") {
-  include_dirs = [ "${services_path}/ans/include" ]
+  include_dirs = [
+    "${services_path}/ans/include",
+    "${core_path}/include",
+  ]
 }
 
 ohos_shared_library("libans") {
@@ -92,7 +95,7 @@ ohos_shared_library("libans") {
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
     external_deps += [ "hisysevent:libhisysevent" ]
   }
-
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

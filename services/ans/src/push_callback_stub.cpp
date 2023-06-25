@@ -36,7 +36,7 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
         return ERR_INVALID_STATE;
     }
     switch (code) {
-        case IPushCallBack::ON_CHECK_NOTIFICATION: {
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION): {
             auto notificationData = data.ReadString();
             bool ret = OnCheckNotification(notificationData);
             ANS_LOGI("ret:%{public}d", ret);
@@ -74,7 +74,8 @@ bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
         return false;
     }
 
-    int error = remote->SendRequest(IPushCallBack::ON_CHECK_NOTIFICATION, data, reply, option);
+    int error = remote->SendRequest(
+        static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION), data, reply, option);
     if (error != NO_ERROR) {
         ANS_LOGE("Connect done fail, error: %{public}d", error);
         return false;
