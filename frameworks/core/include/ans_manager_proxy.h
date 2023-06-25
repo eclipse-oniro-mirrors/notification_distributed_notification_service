@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_MANAGER_PROXY_H
 
 #include "ans_manager_interface.h"
+#include "distributed_notification_service_ipc_interface_code.h"
 #include "iremote_proxy.h"
 
 namespace OHOS {
@@ -660,7 +661,7 @@ public:
     ErrCode UnregisterPushCallback() override;
 
 private:
-    ErrCode InnerTransact(uint32_t code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
+    ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data);

@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_SUBSCRIBER_PROXY_H
 
 #include "ans_subscriber_interface.h"
+#include "distributed_notification_service_ipc_interface_code.h"
 #include "iremote_proxy.h"
 
 namespace OHOS {
@@ -86,7 +87,7 @@ public:
     void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 
 private:
-    ErrCode InnerTransact(uint32_t code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
+    ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
     static inline BrokerDelegator<AnsSubscriberProxy> delegator_;
 };
 }  // namespace Notification

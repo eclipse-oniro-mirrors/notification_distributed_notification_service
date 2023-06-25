@@ -408,7 +408,8 @@ HWTEST_F(ReminderRequestTest, OnDateTimeChange_00100, Function | SmallTest | Lev
 {
     MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->OnDateTimeChange(), true);
+    rrc->isExpired_ = true;
+    EXPECT_EQ(rrc->OnDateTimeChange(), false);
 }
 
 /**

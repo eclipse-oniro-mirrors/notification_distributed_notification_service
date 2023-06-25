@@ -517,9 +517,15 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     do {
-        if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT && !AccessTokenHelper::IsSystemApp()) {
-            result = ERR_ANS_NON_SYSTEM_APP;
-            break;
+        if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
+            if (!AccessTokenHelper::IsSystemApp()) {
+                result = ERR_ANS_NON_SYSTEM_APP;
+                break;
+            }
+            if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+                result = ERR_ANS_PERMISSION_DENIED;
+                break;
+            }
         }
 
         Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
