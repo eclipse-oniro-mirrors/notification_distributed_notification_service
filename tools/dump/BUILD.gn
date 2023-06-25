@@ -52,7 +52,7 @@ ohos_executable("anm") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
   ]

@@ -81,7 +81,7 @@ ohos_shared_library("notificationmanager") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "multimedia_image_framework:image",
     "napi:ace_napi",
     "relational_store:native_rdb",
