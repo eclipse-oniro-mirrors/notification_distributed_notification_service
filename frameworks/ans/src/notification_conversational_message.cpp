@@ -103,11 +103,11 @@ NotificationConversationalMessage *NotificationConversationalMessage::FromJson(c
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("arrivedTime") != jsonEnd) {
+    if (jsonObject.find("arrivedTime") != jsonEnd && jsonObject.at("arrivedTime").is_number_integer()) {
         pMessage->arrivedTime_ = jsonObject.at("arrivedTime").get<int64_t>();
     }
 
-    if (jsonObject.find("text") != jsonEnd) {
+    if (jsonObject.find("text") != jsonEnd && jsonObject.at("text").is_string()) {
         pMessage->text_ = jsonObject.at("text").get<std::string>();
     }
 
@@ -122,14 +122,14 @@ NotificationConversationalMessage *NotificationConversationalMessage::FromJson(c
         }
     }
 
-    if (jsonObject.find("uri") != jsonEnd) {
+    if (jsonObject.find("uri") != jsonEnd && jsonObject.at("uri").is_string()) {
         auto uriStr = jsonObject.at("uri").get<std::string>();
         if (!uriStr.empty()) {
             pMessage->uri_ = std::make_shared<Uri>(uriStr);
         }
     }
 
-    if (jsonObject.find("mimeType") != jsonEnd) {
+    if (jsonObject.find("mimeType") != jsonEnd && jsonObject.at("mimeType").is_string()) {
         pMessage->mimeType_ = jsonObject.at("mimeType").get<std::string>();
     }
 

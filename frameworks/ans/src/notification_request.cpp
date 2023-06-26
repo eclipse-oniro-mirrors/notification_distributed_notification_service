@@ -766,7 +766,7 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("version") != jsonEnd) {
+    if (jsonObject.find("version") != jsonEnd && jsonObject.at("version").is_number_integer()) {
         jsonObject.at("version").get<int32_t>();
     }
 
@@ -778,7 +778,7 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
 
     ConvertJsonToBool(pRequest, jsonObject);
 
-    if (jsonObject.find("wantAgent") != jsonEnd) {
+    if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
         auto wantAgentValue  = jsonObject.at("wantAgent").get<std::string>();
         pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue);
     }
@@ -795,7 +795,7 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
         return nullptr;
     }
 
-    if (jsonObject.find("extraInfo") != jsonEnd) {
+    if (jsonObject.find("extraInfo") != jsonEnd && jsonObject.at("extraInfo").is_string()) {
         auto extraInfoStr = jsonObject.at("extraInfo").get<std::string>();
         if (!extraInfoStr.empty()) {
             AAFwk::WantParams params    = AAFwk::WantParamWrapper::ParseWantParams(extraInfoStr);
@@ -1612,39 +1612,39 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
 
     const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("id") != jsonEnd) {
+    if (jsonObject.find("id") != jsonEnd && jsonObject.at("id").is_number_integer()) {
         target->notificationId_ = jsonObject.at("id").get<int32_t>();
     }
 
-    if (jsonObject.find("color") != jsonEnd) {
+    if (jsonObject.find("color") != jsonEnd && jsonObject.at("color").is_number_integer()) {
         target->color_ = jsonObject.at("color").get<uint32_t>();
     }
 
-    if (jsonObject.find("deliveryTime") != jsonEnd) {
+    if (jsonObject.find("deliveryTime") != jsonEnd && jsonObject.at("deliveryTime").is_number_integer()) {
         target->deliveryTime_ = jsonObject.at("deliveryTime").get<int64_t>();
     }
 
-    if (jsonObject.find("autoDeletedTime") != jsonEnd) {
+    if (jsonObject.find("autoDeletedTime") != jsonEnd && jsonObject.at("autoDeletedTime").is_number_integer()) {
         target->autoDeletedTime_ = jsonObject.at("autoDeletedTime").get<int64_t>();
     }
 
-    if (jsonObject.find("creatorUid") != jsonEnd) {
+    if (jsonObject.find("creatorUid") != jsonEnd && jsonObject.at("creatorUid").is_number_integer()) {
         target->creatorUid_ = jsonObject.at("creatorUid").get<int32_t>();
     }
 
-    if (jsonObject.find("creatorPid") != jsonEnd) {
+    if (jsonObject.find("creatorPid") != jsonEnd && jsonObject.at("creatorPid").is_number_integer()) {
         target->creatorPid_ = jsonObject.at("creatorPid").get<int32_t>();
     }
 
-    if (jsonObject.find("creatorUserId") != jsonEnd) {
+    if (jsonObject.find("creatorUserId") != jsonEnd && jsonObject.at("creatorUserId").is_number_integer()) {
         target->creatorUserId_ = jsonObject.at("creatorUserId").get<int32_t>();
     }
 
-    if (jsonObject.find("receiverUserId") != jsonEnd) {
+    if (jsonObject.find("receiverUserId") != jsonEnd && jsonObject.at("receiverUserId").is_number_integer()) {
         target->receiverUserId_ = jsonObject.at("receiverUserId").get<int32_t>();
     }
 
-    if (jsonObject.find("badgeNumber") != jsonEnd) {
+    if (jsonObject.find("badgeNumber") != jsonEnd && jsonObject.at("badgeNumber").is_number_integer()) {
         target->badgeNumber_ = jsonObject.at("badgeNumber").get<uint32_t>();
     }
 }
@@ -1658,27 +1658,27 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
 
     const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("creatorBundleName") != jsonEnd) {
+    if (jsonObject.find("creatorBundleName") != jsonEnd && jsonObject.at("creatorBundleName").is_string()) {
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
     }
 
-    if (jsonObject.find("ownerBundleName") != jsonEnd) {
+    if (jsonObject.find("ownerBundleName") != jsonEnd && jsonObject.at("ownerBundleName").is_string()) {
         target->ownerBundleName_ = jsonObject.at("ownerBundleName").get<std::string>();
     }
 
-    if (jsonObject.find("groupName") != jsonEnd) {
+    if (jsonObject.find("groupName") != jsonEnd && jsonObject.at("groupName").is_string()) {
         target->groupName_ = jsonObject.at("groupName").get<std::string>();
     }
 
-    if (jsonObject.find("label") != jsonEnd) {
+    if (jsonObject.find("label") != jsonEnd && jsonObject.at("label").is_string()) {
         target->label_ = jsonObject.at("label").get<std::string>();
     }
 
-    if (jsonObject.find("classification") != jsonEnd) {
+    if (jsonObject.find("classification") != jsonEnd && jsonObject.at("classification").is_string()) {
         target->classification_ = jsonObject.at("classification").get<std::string>();
     }
 
-    if (jsonObject.find("creatorBundleName") != jsonEnd) {
+    if (jsonObject.find("creatorBundleName") != jsonEnd && jsonObject.at("creatorBundleName").is_string()) {
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
     }
 }
@@ -1692,12 +1692,12 @@ void NotificationRequest::ConvertJsonToEnum(NotificationRequest *target, const n
 
     const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("slotType") != jsonEnd) {
+    if (jsonObject.find("slotType") != jsonEnd && jsonObject.at("slotType").is_number_integer()) {
         auto slotTypeValue  = jsonObject.at("slotType").get<int32_t>();
         target->slotType_ = static_cast<NotificationConstant::SlotType>(slotTypeValue);
     }
 
-    if (jsonObject.find("badgeIconStyle") != jsonEnd) {
+    if (jsonObject.find("badgeIconStyle") != jsonEnd && jsonObject.at("badgeIconStyle").is_number_integer()) {
         auto badgeStyleValue  = jsonObject.at("badgeIconStyle").get<int32_t>();
         target->badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(badgeStyleValue);
     }
@@ -1712,39 +1712,39 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
 
     const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("showDeliveryTime") != jsonEnd) {
+    if (jsonObject.find("showDeliveryTime") != jsonEnd && jsonObject.at("showDeliveryTime").is_boolean()) {
         target->showDeliveryTime_ = jsonObject.at("showDeliveryTime").get<bool>();
     }
 
-    if (jsonObject.find("tapDismissed") != jsonEnd) {
+    if (jsonObject.find("tapDismissed") != jsonEnd && jsonObject.at("tapDismissed").is_boolean()) {
         target->tapDismissed_ = jsonObject.at("tapDismissed").get<bool>();
     }
 
-    if (jsonObject.find("colorEnabled") != jsonEnd) {
+    if (jsonObject.find("colorEnabled") != jsonEnd && jsonObject.at("colorEnabled").is_boolean()) {
         target->colorEnabled_ = jsonObject.at("colorEnabled").get<bool>();
     }
 
-    if (jsonObject.find("isOngoing") != jsonEnd) {
+    if (jsonObject.find("isOngoing") != jsonEnd && jsonObject.at("isOngoing").is_boolean()) {
         target->inProgress_ = jsonObject.at("isOngoing").get<bool>();
     }
 
-    if (jsonObject.find("isAlertOnce") != jsonEnd) {
+    if (jsonObject.find("isAlertOnce") != jsonEnd && jsonObject.at("isAlertOnce").is_boolean()) {
         target->alertOneTime_ = jsonObject.at("isAlertOnce").get<bool>();
     }
 
-    if (jsonObject.find("isStopwatch") != jsonEnd) {
+    if (jsonObject.find("isStopwatch") != jsonEnd && jsonObject.at("isStopwatch").is_boolean()) {
         target->showStopwatch_ = jsonObject.at("isStopwatch").get<bool>();
     }
 
-    if (jsonObject.find("isCountdown") != jsonEnd) {
+    if (jsonObject.find("isCountdown") != jsonEnd && jsonObject.at("isCountdown").is_boolean()) {
         target->isCountdown_ = jsonObject.at("isCountdown").get<bool>();
     }
 
-    if (jsonObject.find("isUnremovable") != jsonEnd) {
+    if (jsonObject.find("isUnremovable") != jsonEnd && jsonObject.at("isUnremovable").is_boolean()) {
         target->unremovable_ = jsonObject.at("isUnremovable").get<bool>();
     }
 
-    if (jsonObject.find("isFloatingIcon") != jsonEnd) {
+    if (jsonObject.find("isFloatingIcon") != jsonEnd && jsonObject.at("isFloatingIcon").is_boolean()) {
         target->floatingIcon_ = jsonObject.at("isFloatingIcon").get<bool>();
     }
 }
@@ -1758,12 +1758,12 @@ void NotificationRequest::ConvertJsonToPixelMap(NotificationRequest *target, con
 
     const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("smallIcon") != jsonEnd) {
+    if (jsonObject.find("smallIcon") != jsonEnd && jsonObject.at("smallIcon").is_string()) {
         auto littleIconStr    = jsonObject.at("smallIcon").get<std::string>();
         target->littleIcon_ = AnsImageUtil::UnPackImage(littleIconStr);
     }
 
-    if (jsonObject.find("largeIcon") != jsonEnd) {
+    if (jsonObject.find("largeIcon") != jsonEnd && jsonObject.at("largeIcon").is_string()) {
         auto bigIconStr    = jsonObject.at("largeIcon").get<std::string>();
         target->bigIcon_ = AnsImageUtil::UnPackImage(bigIconStr);
     }

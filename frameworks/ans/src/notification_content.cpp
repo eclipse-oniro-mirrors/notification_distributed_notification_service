@@ -246,7 +246,12 @@ bool NotificationContent::ConvertJsonToContent(NotificationContent *target, cons
         return false;
     }
 
-    auto contentTypeValue  = jsonObject.at("contentType").get<int32_t>();
+    auto contentType  = jsonObject.at("contentType");
+    if (!contentType.is_number_integer()) {
+        ANS_LOGE("ContentType is not integer");
+        return false;
+    }
+    auto contentTypeValue  = contentType.get<int32_t>();
     target->contentType_   = static_cast<NotificationContent::Type>(contentTypeValue);
 
     auto contentObj = jsonObject.at("content");

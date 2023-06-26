@@ -102,15 +102,15 @@ NotificationMultiLineContent *NotificationMultiLineContent::FromJson(const nlohm
     pContent->ReadFromJson(jsonObject);
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("expandedTitle") != jsonEnd) {
+    if (jsonObject.find("expandedTitle") != jsonEnd && jsonObject.at("expandedTitle").is_string()) {
         pContent->expandedTitle_ = jsonObject.at("expandedTitle").get<std::string>();
     }
 
-    if (jsonObject.find("briefText") != jsonEnd) {
+    if (jsonObject.find("briefText") != jsonEnd && jsonObject.at("briefText").is_string()) {
         pContent->briefText_ = jsonObject.at("briefText").get<std::string>();
     }
 
-    if (jsonObject.find("allLines") != jsonEnd) {
+    if (jsonObject.find("allLines") != jsonEnd && jsonObject.at("allLines").is_array()) {
         pContent->allLines_ = jsonObject.at("allLines").get<std::vector<std::string>>();
     }
 
