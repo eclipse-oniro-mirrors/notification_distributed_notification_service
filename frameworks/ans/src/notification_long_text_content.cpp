@@ -107,15 +107,15 @@ NotificationLongTextContent *NotificationLongTextContent::FromJson(const nlohman
     pContent->ReadFromJson(jsonObject);
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("longText") != jsonEnd) {
+    if (jsonObject.find("longText") != jsonEnd && jsonObject.at("longText").is_string()) {
         pContent->longText_ = jsonObject.at("longText").get<std::string>();
     }
 
-    if (jsonObject.find("expandedTitle") != jsonEnd) {
+    if (jsonObject.find("expandedTitle") != jsonEnd && jsonObject.at("expandedTitle").is_string()) {
         pContent->expandedTitle_ = jsonObject.at("expandedTitle").get<std::string>();
     }
 
-    if (jsonObject.find("briefText") != jsonEnd) {
+    if (jsonObject.find("briefText") != jsonEnd && jsonObject.at("briefText").is_string()) {
         pContent->briefText_ = jsonObject.at("briefText").get<std::string>();
     }
 

@@ -80,7 +80,7 @@ NotificationMediaContent *NotificationMediaContent::FromJson(const nlohmann::jso
     pContent->ReadFromJson(jsonObject);
 
     const auto& jsonEnd = jsonObject.cend();
-    if (jsonObject.find("sequenceNumbers") != jsonEnd) {
+    if (jsonObject.find("sequenceNumbers") != jsonEnd && jsonObject.at("sequenceNumbers").is_array()) {
         pContent->sequenceNumbers_ = jsonObject.at("sequenceNumbers").get<std::vector<uint32_t>>();
     }
 

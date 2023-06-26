@@ -73,15 +73,15 @@ void NotificationBasicContent::ReadFromJson(const nlohmann::json &jsonObject)
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("text") != jsonEnd) {
+    if (jsonObject.find("text") != jsonEnd && jsonObject.at("text").is_string()) {
         text_ = jsonObject.at("text").get<std::string>();
     }
 
-    if (jsonObject.find("title") != jsonEnd) {
+    if (jsonObject.find("title") != jsonEnd && jsonObject.at("title").is_string()) {
         title_ = jsonObject.at("title").get<std::string>();
     }
 
-    if (jsonObject.find("additionalText") != jsonEnd) {
+    if (jsonObject.find("additionalText") != jsonEnd && jsonObject.at("additionalText").is_string()) {
         additionalText_ = jsonObject.at("additionalText").get<std::string>();
     }
 }

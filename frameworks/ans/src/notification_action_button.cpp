@@ -247,21 +247,21 @@ NotificationActionButton *NotificationActionButton::FromJson(const nlohmann::jso
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("icon") != jsonEnd) {
+    if (jsonObject.find("icon") != jsonEnd && jsonObject.at("icon").is_string()) {
         auto iconStr   = jsonObject.at("icon").get<std::string>();
         pButton->icon_ = AnsImageUtil::UnPackImage(iconStr);
     }
 
-    if (jsonObject.find("title") != jsonEnd) {
+    if (jsonObject.find("title") != jsonEnd && jsonObject.at("title").is_string()) {
         pButton->title_ = jsonObject.at("title").get<std::string>();
     }
 
-    if (jsonObject.find("wantAgent") != jsonEnd) {
+    if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
         auto wantAgentValue = jsonObject.at("wantAgent").get<std::string>();
         pButton->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue);
     }
 
-    if (jsonObject.find("extras") != jsonEnd) {
+    if (jsonObject.find("extras") != jsonEnd && jsonObject.at("extras").is_string()) {
         auto extrasString = jsonObject.at("extras").get<std::string>();
         if (!extrasString.empty()) {
             AAFwk::WantParams params = AAFwk::WantParamWrapper::ParseWantParams(extrasString);

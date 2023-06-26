@@ -72,12 +72,12 @@ NotificationFlags *NotificationFlags::FromJson(const nlohmann::json &jsonObject)
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("soundEnabled") != jsonEnd) {
+    if (jsonObject.find("soundEnabled") != jsonEnd && jsonObject.at("soundEnabled").is_number_integer()) {
         auto soundEnabled  = jsonObject.at("soundEnabled").get<uint8_t>();
         pFlags->soundEnabled_ = static_cast<NotificationConstant::FlagStatus>(soundEnabled);
     }
 
-    if (jsonObject.find("vibrationEnabled") != jsonEnd) {
+    if (jsonObject.find("vibrationEnabled") != jsonEnd && jsonObject.at("vibrationEnabled").is_number_integer()) {
         auto vibrationEnabled = jsonObject.at("vibrationEnabled").get<uint8_t>();
         pFlags->vibrationEnabled_ = static_cast<NotificationConstant::FlagStatus>(vibrationEnabled);
     }
