@@ -78,8 +78,8 @@ ErrCode ReminderDataManager::CancelReminder(
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
     int32_t id = reminderId;
-    RemoveReminderLocked(id);
     CancelNotification(reminder);
+    RemoveReminderLocked(id);
     StartRecentReminder();
     return ERR_OK;
 }
@@ -400,12 +400,12 @@ sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(
     if (reminder == nullptr) {
         return nullptr;
     }
-    auto bundleOption = FindNotificationBundleOption(reminderId);
-    if (bundleOption == nullptr) {
-        ANSR_LOGW("Not find the reminder due to bundle info is null");
+    sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
+    if (notificationRequest == nullptr) {
+        ANSR_LOGW("Not find the reminder due to notification request is null");
         return nullptr;
     }
-    if (bundleOption -> GetBundleName() != pkgName) {
+    if (notificationRequest->GetCreatorBundleName() != pkgName) {
         ANSR_LOGW("Not find the reminder due to package name not match");
         return nullptr;
     }
@@ -757,11 +757,14 @@ void ReminderDataManager::UpdateNotification(const sptr<ReminderRequest> &remind
     }
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::COMMON, "");
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::REMOVAL_WANT_AGENT, "");
-    if (reminder->GetWantAgentInfo() != nullptr &&
-        reminder->GetWantAgentInfo()->pkgName == bundleOption->GetBundleName()) {
+
+    // Allow system app to start any wantAgent
+    if (reminder->IsSystemApp() || (reminder->GetWantAgentInfo() != nullptr &&
+        reminder->GetWantAgentInfo()->pkgName == bundleOption->GetBundleName())) {
         reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::WANT_AGENT, "");
     }
-    if (reminder->GetMaxScreenWantAgentInfo()->pkgName == bundleOption->GetBundleName()) {
+    if (reminder->IsSystemApp() || (reminder->GetMaxScreenWantAgentInfo() != nullptr &&
+        reminder->GetMaxScreenWantAgentInfo()->pkgName == bundleOption->GetBundleName())) {
         reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::MAX_SCREEN_WANT_AGENT, "");
     }
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::BUNDLE_INFO, "");

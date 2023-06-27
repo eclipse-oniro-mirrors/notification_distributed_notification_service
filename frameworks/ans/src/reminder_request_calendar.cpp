@@ -518,7 +518,7 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
     return true;
 }
 
-void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     ReminderRequest::RecoverFromDb(resultSet);
 

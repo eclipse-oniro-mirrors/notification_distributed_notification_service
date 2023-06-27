@@ -825,6 +825,7 @@ private:
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
     void StartAutoDelete(const std::shared_ptr<NotificationRecord> &record);
     void TriggerAutoDelete(std::string hashCode);
+    void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

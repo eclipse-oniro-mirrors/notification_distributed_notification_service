@@ -25,8 +25,7 @@ namespace OHOS {
         notificationPictureContent.GetExpandedTitle();
         notificationPictureContent.SetBriefText(stringData);
         notificationPictureContent.GetBriefText();
-        std::shared_ptr<Media::PixelMap> bigPicture = std::make_shared<Media::PixelMap>();
-        notificationPictureContent.SetBigPicture(bigPicture);
+        notificationPictureContent.SetBigPicture(nullptr);
         notificationPictureContent.GetBigPicture();
         notificationPictureContent.Dump();
         Parcel parcel;

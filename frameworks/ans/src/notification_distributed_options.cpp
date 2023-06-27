@@ -97,15 +97,15 @@ NotificationDistributedOptions *NotificationDistributedOptions::FromJson(const n
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("isDistributed") != jsonEnd) {
+    if (jsonObject.find("isDistributed") != jsonEnd && jsonObject.at("isDistributed").is_boolean()) {
         pOpt->isDistributed_ = jsonObject.at("isDistributed").get<bool>();
     }
 
-    if (jsonObject.find("devicesSupportDisplay") != jsonEnd) {
+    if (jsonObject.find("devicesSupportDisplay") != jsonEnd && jsonObject.at("devicesSupportDisplay").is_array()) {
         pOpt->devicesSupportDisplay_ = jsonObject.at("devicesSupportDisplay").get<std::vector<std::string>>();
     }
 
-    if (jsonObject.find("devicesSupportOperate") != jsonEnd) {
+    if (jsonObject.find("devicesSupportOperate") != jsonEnd && jsonObject.at("devicesSupportOperate").is_array()) {
         pOpt->devicesSupportOperate_ = jsonObject.at("devicesSupportOperate").get<std::vector<std::string>>();
     }
 

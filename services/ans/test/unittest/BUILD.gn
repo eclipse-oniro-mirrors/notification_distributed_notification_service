@@ -66,9 +66,9 @@ ohos_unittest("reminder_unit_test") {
     "common_event_service:cesfwk_innerkits",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",
@@ -87,7 +87,7 @@ ohos_unittest("reminder_unit_test") {
 
   cflags = []
   if (hisysevent_usage) {
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
   }
 
@@ -155,9 +155,9 @@ ohos_unittest("ans_unit_test") {
     "common_event_service:cesfwk_innerkits",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",
@@ -176,7 +176,7 @@ ohos_unittest("ans_unit_test") {
 
   cflags = []
   if (hisysevent_usage) {
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
   }
 
@@ -215,9 +215,9 @@ ohos_unittest("access_token_helper_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",
@@ -266,8 +266,8 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
@@ -317,8 +317,8 @@ ohos_unittest("notification_dialog_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
@@ -382,8 +382,8 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
@@ -451,8 +451,8 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
@@ -502,8 +502,8 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
@@ -549,8 +549,8 @@ ohos_unittest("push_callback_stub_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
@@ -602,8 +602,8 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",

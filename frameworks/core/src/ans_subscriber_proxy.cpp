@@ -29,7 +29,7 @@ AnsSubscriberProxy::~AnsSubscriberProxy()
 {}
 
 ErrCode AnsSubscriberProxy::InnerTransact(
-    uint32_t code, MessageOption &flags, MessageParcel &data, MessageParcel &reply)
+    NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply)
 {
     auto remote = Remote();
     if (remote == nullptr) {
@@ -37,7 +37,7 @@ ErrCode AnsSubscriberProxy::InnerTransact(
         return ERR_DEAD_OBJECT;
     }
 
-    int32_t err = remote->SendRequest(code, data, reply, flags);
+    int32_t err = remote->SendRequest(static_cast<uint32_t>(code), data, reply, flags);
     switch (err) {
         case NO_ERROR: {
             return ERR_OK;
@@ -63,7 +63,7 @@ void AnsSubscriberProxy::OnConnected()
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_CONNECTED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_CONNECTED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnConnected] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;
@@ -80,7 +80,7 @@ void AnsSubscriberProxy::OnDisconnected()
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_DISCONNECTED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_DISCONNECTED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnDisconnected] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;
@@ -120,7 +120,7 @@ void AnsSubscriberProxy::OnConsumed(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_CONSUMED_MAP, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_CONSUMED_MAP, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnConsumed] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;
@@ -165,7 +165,7 @@ void AnsSubscriberProxy::OnCanceled(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_CANCELED_MAP, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_CANCELED_MAP, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnCanceled] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;
@@ -192,7 +192,7 @@ void AnsSubscriberProxy::OnUpdated(const sptr<NotificationSortingMap> &notificat
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_UPDATED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_UPDATED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnUpdated] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;
@@ -214,7 +214,7 @@ void AnsSubscriberProxy::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDi
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_DND_DATE_CHANGED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_DND_DATE_CHANGED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnDoNotDisturbDateChange] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;
@@ -236,7 +236,7 @@ void AnsSubscriberProxy::OnEnabledNotificationChanged(const sptr<EnabledNotifica
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_ENABLED_NOTIFICATION_CHANGED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnEnabledNotificationChanged] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;
@@ -258,7 +258,7 @@ void AnsSubscriberProxy::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &bad
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_ASYNC};
-    ErrCode result = InnerTransact(ON_BADGE_CHANGED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_BADGE_CHANGED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnBadgeChanged] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
         return;

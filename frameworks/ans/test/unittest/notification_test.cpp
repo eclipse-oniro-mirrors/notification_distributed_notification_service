@@ -267,7 +267,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "progressValue = 0, progressMax = 0, badgeStyle = 0, classification = , "
     "notificationContentType = 0, showDeliveryTime = false, tapDismissed = true, "
     "colorEnabled = false, alertOneTime = false, showStopwatch = false, isCountdown = false, "
-    "inProgress = false, groupOverview = false, progressIndeterminate = false, "
+    "inProgress = false, groupOverview = false, isRemoveAllowed = true, progressIndeterminate = false, "
     "unremovable = false, floatingIcon = false, onlyLocal = false, permitted = true, "
     "isAgent = false, removalWantAgent = null, maxScreenWantAgent = null, additionalParams = null, "
     "littleIcon = null, bigIcon = null, notificationContent = null, "

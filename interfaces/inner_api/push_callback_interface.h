@@ -34,11 +34,6 @@ public:
      * @return Returns push check result.
      */
     virtual bool OnCheckNotification(const std::string &notificationData) = 0;
-
-    enum {
-        // ipc id for OnCheckNotification
-        ON_CHECK_NOTIFICATION = 1,
-    };
 };
 }  // namespace Notification
 }  // namespace OHOS

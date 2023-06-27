@@ -350,7 +350,7 @@ HWTEST_F(ReminderRequestAlarmTest, RecoverFromDb_00100, Function | SmallTest | L
     uint8_t arr[] = {};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
+    std::shared_ptr<NativeRdb::ResultSet> resultSet = nullptr;
     rrc->RecoverFromDb(resultSet);
     uint8_t ret = rrc->GetRepeatDay();
     EXPECT_EQ(ret, 0);

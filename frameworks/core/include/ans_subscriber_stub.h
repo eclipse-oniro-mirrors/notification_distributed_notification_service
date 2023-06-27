@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_SUBSCRIBER_STUB_H
 
 #include "ans_subscriber_interface.h"
+#include "distributed_notification_service_ipc_interface_code.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -96,7 +97,7 @@ public:
     void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 
 private:
-    std::map<uint32_t, std::function<ErrCode(MessageParcel &, MessageParcel &)>> interfaces_;
+    std::map<NotificationInterfaceCode, std::function<ErrCode(MessageParcel &, MessageParcel &)>> interfaces_;
 
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDisconnected(MessageParcel &data, MessageParcel &reply);

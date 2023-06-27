@@ -25,6 +25,9 @@ Notification::Notification() {};
 
 Notification::Notification(const sptr<NotificationRequest> &request)
 {
+    if (request != nullptr) {
+        isRemoveAllowed_ = request->IsRemoveAllowed();
+    }
     request_ = request;
     key_ = GenerateNotificationKey("", GetUserId(), GetUid(), GetLabel(), GetId());
 }

@@ -1069,6 +1069,10 @@ public:
      */
     int32_t GetReceiverUserId() const;
 
+    bool IsRemoveAllowed() const;
+
+    void SetRemoveAllowed(bool isRemoveAllowed);
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1169,6 +1173,7 @@ private:
     bool onlyLocal_ {false};
     bool permitted_ {true};
     bool isAgent_ {false};
+    bool isRemoveAllowed_ {true};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};

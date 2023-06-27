@@ -283,16 +283,21 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
     if (isExpired_) {
         return false;
     }
+    uint64_t now = GetNowInstantMilli();
+    if (now == 0) {
+        ANSR_LOGE("get now time failed.");
+        return false;
+    }
+    if (oriTriggerTime == 0 && optTriggerTime < now) {
+        ANSR_LOGW("trigger time is less than now time.");
+        return false;
+    }
     bool showImmediately = false;
-    if (optTriggerTime != INVALID_LONG_LONG_VALUE && optTriggerTime <= oriTriggerTime) {
+    if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
         // case1. switch to a previous time
         SetTriggerTimeInMilli(optTriggerTime);
         snoozeTimesDynamic_ = snoozeTimes_;
     } else {
-        uint64_t now = GetNowInstantMilli();
-        if (now == 0) {
-            return false;
-        }
         if (oriTriggerTime <= now) {
             // case2. switch to a future time, trigger time is less than now time.
             // when the reminder show immediately, trigger time will update in onShow function.
@@ -442,7 +447,7 @@ bool ReminderRequest::OnTimeZoneChange()
         triggerTimeInMilli_, GetDurationSinceEpochInMilli(newZoneTriggerTime), nextTriggerTime);
 }
 
-int64_t ReminderRequest::RecoverInt64FromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet,
+int64_t ReminderRequest::RecoverInt64FromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
     const std::string &columnName, const DbRecoveryType &columnType)
 {
     if (resultSet == nullptr) {
@@ -469,7 +474,7 @@ int64_t ReminderRequest::RecoverInt64FromDb(const std::shared_ptr<NativeRdb::Abs
     return 0;
 }
 
-void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     if (resultSet == nullptr) {
         ANSR_LOGE("ResultSet is null");
@@ -579,7 +584,7 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::AbsSharedRe
     resultSet->GetString(ReminderStore::GetColumnIndex(CUSTOM_BUTTON_URI), customButtonUri_);
 }
 
-void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     if (resultSet == nullptr) {
         ANSR_LOGE("ResultSet is null");
@@ -1536,7 +1541,7 @@ void ReminderRequest::UpdateActionButtons(const bool &setSnooze)
         return;
     }
     notificationRequest_->ClearActionButtons();
-    if (setSnooze || snoozeTimesDynamic_ == snoozeTimes_) {
+    if (setSnooze) {
         AddActionButtons(false);
     } else {
         AddActionButtons(true);
@@ -1574,7 +1579,6 @@ void ReminderRequest::UpdateNotificationCommon()
     notificationRequest_->SetDeliveryTime(GetDurationSinceEpochInMilli(now));
     notificationRequest_->SetLabel(NOTIFICATION_LABEL);
     notificationRequest_->SetShowDeliveryTime(true);
-    notificationRequest_->SetTapDismissed(true);
     notificationRequest_->SetSlotType(slotType_);
     notificationRequest_->SetTapDismissed(tapDismissed_);
     notificationRequest_->SetAutoDeletedTime(autoDeletedTime_);

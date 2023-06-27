@@ -32,7 +32,7 @@ namespace OHOS {
         MessageParcel reply;
         MessageOption flags;
         // test InnerTransact function
-        ansSubscriberProxy.InnerTransact(code, flags, datas, reply);
+        ansSubscriberProxy.InnerTransact(static_cast<Notification::NotificationInterfaceCode>(code), flags, datas, reply);
         // test InnerTransact function
         ansSubscriberProxy.OnConnected();
         // test InnerTransact function

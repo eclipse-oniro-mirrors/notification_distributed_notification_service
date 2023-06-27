@@ -47,11 +47,12 @@ ohos_shared_library("libans_distributed") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "kv_store:distributeddata_inner",
   ]
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

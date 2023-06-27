@@ -19,6 +19,7 @@
 #include <iremote_object.h>
 #include <iremote_stub.h>
 
+#include "distributed_notification_service_ipc_interface_code.h"
 #include "push_callback_interface.h"
 #include "nocopyable.h"
 

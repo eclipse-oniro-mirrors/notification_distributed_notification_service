@@ -55,18 +55,18 @@ private:
      * @return int32_t result code.
      */
     int32_t InitData();
-    sptr<ReminderRequest> BuildReminder(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
+    sptr<ReminderRequest> BuildReminder(const std::shared_ptr<NativeRdb::ResultSet> &resultSet);
     int32_t Delete(const std::string &deleteCondition);
-    void GetInt32Val(std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet,
+    void GetInt32Val(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
         const std::string &name, int32_t &value) const;
-    void GetStringVal(std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet,
+    void GetStringVal(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
         const std::string &name, std::string &value) const;
     std::vector<sptr<ReminderRequest>> GetReminders(const std::string &queryCondition);
     void GenerateData(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values) const;
     bool IsReminderExist(const sptr<ReminderRequest> &reminder);
     int64_t Insert(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &bundleOption);
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> Query(const std::string &queryCondition) const;
+    std::shared_ptr<NativeRdb::ResultSet> Query(const std::string &queryCondition) const;
     int64_t Update(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &bundleOption);
 
 class ReminderStoreDataCallBack : public NativeRdb::RdbOpenCallback {

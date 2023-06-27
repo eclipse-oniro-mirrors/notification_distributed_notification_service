@@ -243,8 +243,7 @@ bool ReminderStore::IsReminderExist(const sptr<ReminderRequest> &reminder)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
     absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminder->GetReminderId()));
-    std::unique_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(
-        absRdbPredicates, std::vector<std::string>());
+    auto queryResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
         ANSR_LOGE("QueryResultSet is null.");
         return false;
@@ -257,16 +256,14 @@ bool ReminderStore::IsReminderExist(const sptr<ReminderRequest> &reminder)
     return true;
 }
 
-std::shared_ptr<NativeRdb::AbsSharedResultSet> ReminderStore::Query(const std::string &queryCondition) const
+std::shared_ptr<NativeRdb::ResultSet> ReminderStore::Query(const std::string &queryCondition) const
 {
-    std::unique_ptr<NativeRdb::AbsSharedResultSet> queryResultSet;
     if (rdbStore_ == nullptr) {
         ANSR_LOGE("Rdb store is not initialized.");
-        return queryResultSet;
+        return nullptr;
     }
     std::vector<std::string> whereArgs;
-    queryResultSet = rdbStore_->QuerySql(queryCondition, whereArgs);
-    return queryResultSet;
+    return rdbStore_->QuerySql(queryCondition, whereArgs);
 }
 
 uint8_t ReminderStore::GetColumnIndex(const std::string& name)
@@ -290,7 +287,7 @@ int32_t ReminderStore::GetMaxId()
     std::string queryCondition = "select " + ReminderRequest::REMINDER_ID
         + " from " + REMINDER_DB_TABLE + " order by "
         + ReminderRequest::REMINDER_ID + " desc";
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = ReminderStore::Query(queryCondition);
+    auto queryResultSet = ReminderStore::Query(queryCondition);
     if (queryResultSet == nullptr) {
         ANSR_LOGE("QueryResultSet is null.");
         return STATE_FAIL;
@@ -327,7 +324,7 @@ std::vector<sptr<ReminderRequest>> ReminderStore::GetReminders(const std::string
         ANSR_LOGE("Rdb store is not initialized.");
         return reminders;
     }
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = Query(queryCondition);
+    auto queryResultSet = Query(queryCondition);
     if (queryResultSet == nullptr) {
         return reminders;
     }
@@ -344,7 +341,7 @@ std::vector<sptr<ReminderRequest>> ReminderStore::GetReminders(const std::string
     return reminders;
 }
 
-sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     int32_t reminderType;
     int32_t reminderId;
@@ -387,8 +384,8 @@ bool ReminderStore::GetBundleOption(const int32_t &reminderId, sptr<Notification
     }
     NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
     absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminderId));
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> queryResultSet = rdbStore_->Query(
-        absRdbPredicates, std::vector<std::string>());
+    std::shared_ptr<OHOS::NativeRdb::ResultSet> queryResultSet =
+        rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
         return false;
     }
@@ -407,7 +404,7 @@ bool ReminderStore::GetBundleOption(const int32_t &reminderId, sptr<Notification
     return true;
 }
 
-void ReminderStore::GetInt32Val(std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet,
+void ReminderStore::GetInt32Val(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
     const std::string &name, int32_t &value) const
 {
     int32_t columnIndex;
@@ -415,7 +412,7 @@ void ReminderStore::GetInt32Val(std::shared_ptr<NativeRdb::AbsSharedResultSet> &
     resultSet->GetInt(columnIndex, value);
 }
 
-void ReminderStore::GetStringVal(std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet,
+void ReminderStore::GetStringVal(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
     const std::string &name, std::string &value) const
 {
     int32_t columnIndex;

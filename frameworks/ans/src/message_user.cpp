@@ -132,28 +132,28 @@ MessageUser *MessageUser::FromJson(const nlohmann::json &jsonObject)
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("key") != jsonEnd) {
+    if (jsonObject.find("key") != jsonEnd && jsonObject.at("key").is_string()) {
         messageUser->key_ = jsonObject.at("key").get<std::string>();
     }
 
-    if (jsonObject.find("name") != jsonEnd) {
+    if (jsonObject.find("name") != jsonEnd && jsonObject.at("name").is_string()) {
         messageUser->name_ = jsonObject.at("name").get<std::string>();
     }
 
-    if (jsonObject.find("pixelMap") != jsonEnd) {
+    if (jsonObject.find("pixelMap") != jsonEnd && jsonObject.at("pixelMap").is_string()) {
         auto pmStr             = jsonObject.at("pixelMap").get<std::string>();
         messageUser->pixelMap_ = AnsImageUtil::UnPackImage(pmStr);
     }
 
-    if (jsonObject.find("uri") != jsonEnd) {
+    if (jsonObject.find("uri") != jsonEnd && jsonObject.at("uri").is_string()) {
         messageUser->uri_ = Uri(jsonObject.at("uri").get<std::string>());
     }
 
-    if (jsonObject.find("isMachine") != jsonEnd) {
+    if (jsonObject.find("isMachine") != jsonEnd && jsonObject.at("isMachine").is_boolean()) {
         messageUser->isMachine_ = jsonObject.at("isMachine").get<bool>();
     }
 
-    if (jsonObject.find("isUserImportant") != jsonEnd) {
+    if (jsonObject.find("isUserImportant") != jsonEnd && jsonObject.at("isUserImportant").is_boolean()) {
         messageUser->isUserImportant_ = jsonObject.at("isUserImportant").get<bool>();
     }
 

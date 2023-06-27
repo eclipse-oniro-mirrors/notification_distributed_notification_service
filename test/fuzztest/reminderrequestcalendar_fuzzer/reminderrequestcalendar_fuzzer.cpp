@@ -90,7 +90,7 @@ namespace OHOS {
         // test PreGetNextTriggerTimeIgnoreSnooze function
         reminderRequestCalendar.PreGetNextTriggerTimeIgnoreSnooze(enabled, enabled);
         // test RecoverFromDb function
-        std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet =
+        std::shared_ptr<NativeRdb::ResultSet> resultSet =
         std::make_shared<NativeRdb::AbsSharedResultSet>();
         reminderRequestCalendar.RecoverFromDb(resultSet);
         // test Unmarshalling function

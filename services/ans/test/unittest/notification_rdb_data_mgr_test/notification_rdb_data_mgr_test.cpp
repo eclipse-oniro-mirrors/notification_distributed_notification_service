@@ -81,19 +81,19 @@ class RdbStoreTest : public RdbStore {
         {
             return NativeRdb::E_ERROR;
         };
-        virtual std::unique_ptr<AbsSharedResultSet> Query(int &errCode, bool distinct, const std::string &table,
+        virtual std::shared_ptr<AbsSharedResultSet> Query(int &errCode, bool distinct, const std::string &table,
             const std::vector<std::string> &columns, const std::string &selection = "",
             const std::vector<std::string> &selectionArgs = std::vector<std::string>(), const std::string &groupBy = "",
             const std::string &having = "", const std::string &orderBy = "", const std::string &limit = "")
         {
             return nullptr;
         };
-        virtual std::unique_ptr<AbsSharedResultSet> QuerySql(
+        virtual std::shared_ptr<AbsSharedResultSet> QuerySql(
             const std::string &sql, const std::vector<std::string> &selectionArgs = std::vector<std::string>())
         {
             return nullptr;
         };
-        virtual std::unique_ptr<ResultSet> QueryByStep(
+        virtual std::shared_ptr<ResultSet> QueryByStep(
             const std::string &sql, const std::vector<std::string> &selectionArgs = std::vector<std::string>())
         {
             return nullptr;
@@ -137,18 +137,18 @@ class RdbStoreTest : public RdbStore {
         {
             return NativeRdb::E_ERROR;
         };
-        virtual std::unique_ptr<AbsSharedResultSet> Query(
+        virtual std::shared_ptr<AbsSharedResultSet> Query(
             const AbsRdbPredicates &predicates, const std::vector<std::string> columns)
         {
             if (g_mockQueryRet == false) {
                 std::string name = "aa";
-                std::unique_ptr<AbsSharedResultSet> resultSet =
+                std::shared_ptr<AbsSharedResultSet> resultSet =
                     std::make_unique<AbsSharedResultSet>(name);
                 return resultSet;
             }
             return nullptr;
         };
-        virtual std::unique_ptr<ResultSet> QueryByStep(
+        virtual std::shared_ptr<ResultSet> QueryByStep(
             const AbsRdbPredicates &predicates, const std::vector<std::string> columns)
         {
             return nullptr;
@@ -226,7 +226,8 @@ class RdbStoreTest : public RdbStore {
             return NativeRdb::E_ERROR;
         };
 
-        virtual int SetDistributedTables(const std::vector<std::string>& tables)
+        virtual int SetDistributedTables(const std::vector<std::string>& tables, int type,
+            const DistributedRdb::DistributedConfig &distributedConfig)
         {
             return E_ERROR;
         };
@@ -237,7 +238,12 @@ class RdbStoreTest : public RdbStore {
             return "";
         }
 
-        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const SyncCallback& callback)
+        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const AsyncBrief& async)
+        {
+            return E_ERROR;
+        };
+        
+        virtual int Sync(const SyncOption& option, const std::vector<std::string>& tables, const AsyncDetail& async)
         {
             return E_ERROR;
         };
