@@ -15,7 +15,6 @@
 
 #include "push_callback_stub.h"
 
-#include "advanced_notification_service.h"
 #include "ans_log_wrapper.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
@@ -74,8 +73,7 @@ bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
         return false;
     }
 
-    int error = remote->SendRequest(
-        static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION), data, reply, option);
+    int error = remote->SendRequest(static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION), data, reply, option);
     if (error != NO_ERROR) {
         ANS_LOGE("Connect done fail, error: %{public}d", error);
         return false;
@@ -83,15 +81,5 @@ bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
 
     return reply.ReadBool();
 }
-
-void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
-{
-    ANS_LOGE("Push Callback died, remove the proxy object");
-    AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
-}
-
-PushCallbackRecipient::PushCallbackRecipient() {}
-
-PushCallbackRecipient::~PushCallbackRecipient() {}
 } // namespace Notification
 } // namespace OHOS

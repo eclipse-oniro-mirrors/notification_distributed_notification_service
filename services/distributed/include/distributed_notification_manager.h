@@ -22,6 +22,7 @@
 
 #include "event_handler.h"
 #include "event_runner.h"
+#include "ffrt.h"
 
 #include "distributed_database.h"
 #include "distributed_database_callback.h"
@@ -166,6 +167,7 @@ private:
     std::shared_ptr<DistributedDatabaseCallback> databaseCb_;
     std::shared_ptr<DistributedDeviceCallback> deviceCb_;
     IDistributedCallback callback_ = {0};
+    std::shared_ptr<ffrt::queue> distributedQueue_ = nullptr;
 
     DECLARE_DELAYED_SINGLETON(DistributedNotificationManager);
     DISALLOW_COPY_AND_MOVE(DistributedNotificationManager);

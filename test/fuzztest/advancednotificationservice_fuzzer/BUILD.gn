@@ -33,6 +33,7 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
+    "${ffrt_path}/interfaces/kits",
   ]
   cflags = [
     "-g",
@@ -53,6 +54,7 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",

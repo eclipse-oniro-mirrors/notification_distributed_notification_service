@@ -15,7 +15,10 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
 config("ans_distributed_config") {
-  include_dirs = [ "${services_path}/distributed/include" ]
+  include_dirs = [
+    "${services_path}/distributed/include",
+    "${ffrt_path}/interfaces/kits",
+  ]
 }
 
 ohos_shared_library("libans_distributed") {
@@ -47,6 +50,7 @@ ohos_shared_library("libans_distributed") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "kv_store:distributeddata_inner",

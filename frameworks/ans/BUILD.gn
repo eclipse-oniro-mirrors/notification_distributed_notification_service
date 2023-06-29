@@ -64,6 +64,7 @@ ohos_shared_library("ans_innerkits") {
     "src/notification_subscriber.cpp",
     "src/notification_template.cpp",
     "src/notification_user_input.cpp",
+    "src/push_callback_stub.cpp",
   ]
 
   configs = [ "${core_path}:public_ans_core_config" ]
