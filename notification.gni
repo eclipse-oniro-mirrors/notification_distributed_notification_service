@@ -40,7 +40,7 @@ component_external_deps = [
   "bundle_framework:appexecfwk_core",
   "common_event_service:cesfwk_innerkits",
   "eventhandler:libeventhandler",
-  "hiviewdfx_hilog_native:libhilog",
+  "hilog:libhilog",
   "ipc:ipc_core",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",

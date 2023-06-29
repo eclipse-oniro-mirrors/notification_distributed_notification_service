@@ -88,15 +88,15 @@ NotificationPictureContent *NotificationPictureContent::FromJson(const nlohmann:
     pContent->ReadFromJson(jsonObject);
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("expandedTitle") != jsonEnd) {
+    if (jsonObject.find("expandedTitle") != jsonEnd && jsonObject.at("expandedTitle").is_string()) {
         pContent->expandedTitle_ = jsonObject.at("expandedTitle").get<std::string>();
     }
 
-    if (jsonObject.find("briefText") != jsonEnd) {
+    if (jsonObject.find("briefText") != jsonEnd && jsonObject.at("briefText").is_string()) {
         pContent->briefText_ = jsonObject.at("briefText").get<std::string>();
     }
 
-    if (jsonObject.find("bigPicture") != jsonEnd) {
+    if (jsonObject.find("bigPicture") != jsonEnd && jsonObject.at("bigPicture").is_string()) {
         auto picStr           = jsonObject.at("bigPicture").get<std::string>();
         pContent->bigPicture_ = AnsImageUtil::UnPackImage(picStr);
     }

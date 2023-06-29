@@ -44,6 +44,7 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
     CommonEventSubscribeInfo customSubscriberInfo(customMatchingSkills);
     customSubscriberInfo.SetPermission("ohos.permission.GRANT_SENSITIVE_PERMISSIONS");
+    customSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     auto customSubscriber = std::make_shared<ReminderEventCustomSubscriber>(customSubscriberInfo, reminderDataManager);
 
     MatchingSkills matchingSkills;
@@ -56,6 +57,7 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_REMOVED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    subscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     auto subscriber = std::make_shared<ReminderEventSubscriber>(subscriberInfo, reminderDataManager);
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();

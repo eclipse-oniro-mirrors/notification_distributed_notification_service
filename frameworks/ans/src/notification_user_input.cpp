@@ -261,27 +261,27 @@ NotificationUserInput *NotificationUserInput::FromJson(const nlohmann::json &jso
     }
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("inputKey") != jsonEnd) {
+    if (jsonObject.find("inputKey") != jsonEnd && jsonObject.at("inputKey").is_string()) {
         pUserInput->inputKey_ = jsonObject.at("inputKey").get<std::string>();
     }
 
-    if (jsonObject.find("tag") != jsonEnd) {
+    if (jsonObject.find("tag") != jsonEnd && jsonObject.at("tag").is_string()) {
         pUserInput->tag_ = jsonObject.at("tag").get<std::string>();
     }
 
-    if (jsonObject.find("options") != jsonEnd) {
+    if (jsonObject.find("options") != jsonEnd && jsonObject.at("options").is_array()) {
         pUserInput->options_ = jsonObject.at("options").get<std::vector<std::string>>();
     }
 
-    if (jsonObject.find("permitFreeFormInput") != jsonEnd) {
+    if (jsonObject.find("permitFreeFormInput") != jsonEnd && jsonObject.at("permitFreeFormInput").is_boolean()) {
         pUserInput->permitFreeFormInput_ = jsonObject.at("permitFreeFormInput").get<bool>();
     }
 
-    if (jsonObject.find("permitMimeTypes") != jsonEnd) {
+    if (jsonObject.find("permitMimeTypes") != jsonEnd && jsonObject.at("permitMimeTypes").is_array()) {
         pUserInput->permitMimeTypes_ = jsonObject.at("permitMimeTypes").get<std::set<std::string>>();
     }
 
-    if (jsonObject.find("additionalData") != jsonEnd) {
+    if (jsonObject.find("additionalData") != jsonEnd && jsonObject.at("additionalData").is_string()) {
         auto additionalDataString = jsonObject.at("additionalData").get<std::string>();
         if (!additionalDataString.empty()) {
             AAFwk::WantParams params = AAFwk::WantParamWrapper::ParseWantParams(additionalDataString);
@@ -289,7 +289,7 @@ NotificationUserInput *NotificationUserInput::FromJson(const nlohmann::json &jso
         }
     }
 
-    if (jsonObject.find("editType") != jsonEnd) {
+    if (jsonObject.find("editType") != jsonEnd && jsonObject.at("editType").is_number_integer()) {
         auto editTypeValue    = jsonObject.at("editType").get<int32_t>();
         pUserInput->editType_ = static_cast<NotificationConstant::InputEditType>(editTypeValue);
     }

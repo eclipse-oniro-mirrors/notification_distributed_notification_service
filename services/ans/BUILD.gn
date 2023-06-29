@@ -81,7 +81,7 @@ ohos_shared_library("libans") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "ffrt:libffrt",
-    "hitrace_native:hitrace_meter",
+    "hitrace:hitrace_meter",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",
     "os_account:os_account_innerkits",
@@ -99,7 +99,7 @@ ohos_shared_library("libans") {
 
   if (hisysevent_usage) {
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${subsystem_name}"

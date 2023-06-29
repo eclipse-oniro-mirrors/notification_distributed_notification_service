@@ -16,7 +16,7 @@
 import extension from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
 import display from '@ohos.display';
-import deviceInfo from '@ohos.deviceInfo'
+import deviceInfo from '@ohos.deviceInfo';
 const TAG = 'NotificationDialog_Service';
 
 export default class NotificationDialogServiceExtensionAbility extends extension {
@@ -46,7 +46,7 @@ export default class NotificationDialogServiceExtensionAbility extends extension
     try {
       const win = await window.create(globalThis.notificationExtensionContext, name, windowType);
       await win.show();
-      if (deviceInfo.deviceType == 'default' || deviceInfo.deviceType == 'phone') {
+      if (deviceInfo.deviceType === 'default' || deviceInfo.deviceType === 'phone') {
         await win.setWindowLayoutFullScreen(true);
       }
       await win.loadContent('pages/notificationDialog');
