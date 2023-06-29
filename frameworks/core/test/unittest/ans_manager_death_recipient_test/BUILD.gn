@@ -30,7 +30,7 @@ ohos_unittest("ans_manager_death_recipient_test") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
   ]
