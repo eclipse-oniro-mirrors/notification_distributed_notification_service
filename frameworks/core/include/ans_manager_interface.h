@@ -275,6 +275,8 @@ public:
      */
     virtual ErrCode RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption) = 0;
 
+    virtual ErrCode RemoveNotifications(const std::vector<std::string> &hashcodes, int32_t removeReason) = 0;
+
     /**
      * @brief Remove notifications based on bundle.
      *

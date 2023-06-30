@@ -30,6 +30,7 @@ struct BundleAndKeyInfo {
 struct RemoveParams {
     std::optional<std::string> hashcode {};
     std::optional<BundleAndKeyInfo> bundleAndKeyInfo {};
+    std::vector<std::string>  hashcodes;
     int32_t userId = SUBSCRIBE_USER_INIT;
     int32_t removeReason = NotificationConstant::CANCEL_REASON_DELETE;
     bool hasUserId = false;

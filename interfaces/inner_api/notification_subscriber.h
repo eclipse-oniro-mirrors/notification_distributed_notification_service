@@ -123,6 +123,9 @@ private:
         void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
             int32_t deleteReason) override;
 
+        void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+            const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
+
         void OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override;
 
         void OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;

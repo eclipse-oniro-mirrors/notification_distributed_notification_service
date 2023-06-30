@@ -66,6 +66,9 @@ public:
     virtual void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
         int32_t deleteReason) = 0;
 
+    virtual void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) = 0;
+
     /**
      * @brief The callback function on the notifications updated.
      *

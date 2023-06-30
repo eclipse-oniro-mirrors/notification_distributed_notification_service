@@ -29,7 +29,10 @@ void NapiRemoveExecuteCallback(napi_env env, void *data)
     }
     auto removeInfo = static_cast<AsyncCallbackInfoRemove *>(data);
     if (removeInfo) {
-        if (removeInfo->params.hashcode.has_value()) {
+        if (!removeInfo->params.hashcodes.empty()) {
+            removeInfo->info.errorCode = NotificationHelper::RemoveNotifications(removeInfo->params.hashcodes,
+                removeInfo->params.removeReason);
+        } else if (removeInfo->params.hashcode.has_value()) {
             removeInfo->info.errorCode = NotificationHelper::RemoveNotification(removeInfo->params.hashcode.value(),
                 removeInfo->params.removeReason);
         } else if (removeInfo->params.bundleAndKeyInfo.has_value()) {
@@ -76,6 +79,7 @@ napi_value NapiRemove(napi_env env, napi_callback_info info)
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "remove", NAPI_AUTO_LENGTH, &resourceName);
+
     // Asynchronous function call
     napi_create_async_work(env, nullptr, resourceName, NapiRemoveExecuteCallback, NapiRemoveCompleteCallback,
         (void *)removeInfo, &removeInfo->asyncWork);

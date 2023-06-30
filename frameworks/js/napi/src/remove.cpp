@@ -64,7 +64,17 @@ bool ParseHashcodeTypeParams(
     const napi_env &env, napi_value* argv, size_t argc, napi_valuetype valueType, RemoveParams &params)
 {
     // argv[0]: hashCode
-    if (valueType == napi_string) {
+    bool isArray = false;
+    napi_is_array(env, argv[PARAM0], &isArray);
+    if (isArray) {
+        std::vector<std::string> hashcodes;
+        auto retValue = Common::GetHashCodes(env, argv[PARAM0], hashcodes);
+        if (retValue == nullptr) {
+            ANS_LOGW("GetHashCodes failed.");
+            return false;
+        }
+        params.hashcodes = hashcodes;
+    } else if (valueType == napi_string) {
         size_t strLen = 0;
         char str[STR_MAX_SIZE] = {0};
         NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen), false);
@@ -129,14 +139,16 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
         ANS_LOGW("Wrong number of arguments.");
         return false;
     }
+    bool isArray = false;
+    napi_is_array(env, argv[PARAM0], &isArray);
     napi_valuetype valueType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, argv[PARAM0], &valueType), false);
     if ((valueType != napi_string) && (valueType != napi_object) &&
-        (valueType != napi_number) && (valueType != napi_boolean)) {
+        (valueType != napi_number) && (valueType != napi_boolean) && !isArray) {
         ANS_LOGW("Wrong argument type. String or object expected.");
         return false;
     }
-    if ((valueType == napi_string) || (valueType == napi_number) || (valueType == napi_boolean)) {
+    if ((valueType == napi_string) || (valueType == napi_number) || (valueType == napi_boolean) || isArray) {
         return ParseHashcodeTypeParams(env, argv, argc, valueType, params);
     }
     return ParseBundleOptionTypeParams(env, argv, argc, params);

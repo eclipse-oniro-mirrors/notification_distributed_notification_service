@@ -255,6 +255,8 @@ public:
      */
     ErrCode RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption) override;
 
+    ErrCode RemoveNotifications(const std::vector<std::string> &hashcodes, int32_t removeReason) override;
+
     /**
      * @brief Delete notification based on key.
      *

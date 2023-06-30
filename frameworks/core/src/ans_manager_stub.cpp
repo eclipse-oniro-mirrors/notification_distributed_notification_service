@@ -100,6 +100,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::REMOVE_ALL_NOTIFICATIONS,
             std::bind(&AnsManagerStub::HandleRemoveAllNotifications, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+        {NotificationInterfaceCode::REMOVE_NOTIFICATIONS_BY_KEYS,
+            std::bind(&AnsManagerStub::HandleRemoveNotifications, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3)},
         {NotificationInterfaceCode::DELETE_NOTIFICATION,
             std::bind(
                 &AnsManagerStub::HandleDelete, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
@@ -791,6 +794,36 @@ ErrCode AnsManagerStub::HandleRemoveAllNotifications(MessageParcel &data, Messag
     }
     return ERR_OK;
 }
+
+ErrCode AnsManagerStub::HandleRemoveNotifications(MessageParcel &data, MessageParcel &reply)
+{
+
+    int32_t keysSize = 0;
+    if (!data.ReadInt32(keysSize)) {
+        ANS_LOGE("read keys size failed.");
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    if (!data.ReadStringVector(&keys)) {
+        ANS_LOGE("read keys failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t removeReason = 0;
+    if (!data.ReadInt32(removeReason)) {
+        ANS_LOGE("read removeReason failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = RemoveNotifications(keys, removeReason);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
 
 ErrCode AnsManagerStub::HandleDelete(MessageParcel &data, MessageParcel &reply)
 {
@@ -1896,6 +1929,12 @@ ErrCode AnsManagerStub::RemoveNotification(const sptr<NotificationBundleOption> 
 ErrCode AnsManagerStub::RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGE("AnsManagerStub::RemoveAllNotifications called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason)
+{
+    ANS_LOGD("called!");
     return ERR_INVALID_OPERATION;
 }
 

@@ -270,6 +270,8 @@ public:
      */
     virtual ErrCode RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption) override;
 
+    ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
+
     /**
      * @brief Delete notification based on key.
      *
@@ -709,6 +711,7 @@ private:
     ErrCode HandleIsNotificationPolicyAccessGranted(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveNotification(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveAllNotifications(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleRemoveNotifications(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDelete(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDeleteByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDeleteAll(MessageParcel &data, MessageParcel &reply);

@@ -1369,6 +1369,8 @@ public:
      */
     static napi_value GetBundleOption(const napi_env &env, const napi_value &value, NotificationBundleOption &option);
 
+    static napi_value GetHashCodes(const napi_env &env, const napi_value &value, std::vector<std::string> &hashCodes);
+
     /**
      * @brief Gets a NotificationKey object from specified js object
      *

@@ -823,6 +823,50 @@ ErrCode AnsManagerProxy::RemoveAllNotifications(const sptr<NotificationBundleOpt
     return result;
 }
 
+ErrCode AnsManagerProxy::RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason)
+{
+    if (keys.empty()) {
+        ANS_LOGE("fail: keys is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("fail:, write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(keys.size())) {
+        ANS_LOGE("write keys size failed");
+        return false;
+    }
+
+    if (!data.WriteStringVector(keys)) {
+        ANS_LOGE("fail: write keys failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(removeReason)) {
+        ANS_LOGE("fail: write removeReason failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_NOTIFICATIONS_BY_KEYS, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::Delete(const std::string &key, int32_t removeReason)
 {
     if (key.empty()) {

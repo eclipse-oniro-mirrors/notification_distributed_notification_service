@@ -488,6 +488,21 @@ ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &
     return ansManagerProxy_->RemoveAllNotifications(bo);
 }
 
+ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason)
+{
+    if (hashcodes.empty()) {
+        ANS_LOGE("Hashcodes is empty");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->RemoveNotifications(hashcodes, removeReason);
+}
+
 ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption)
 {
     if (bundleOption.GetBundleName().empty()) {

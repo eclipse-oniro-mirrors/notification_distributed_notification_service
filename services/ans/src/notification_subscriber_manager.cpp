@@ -152,6 +152,21 @@ void NotificationSubscriberManager::NotifyCanceled(
     ANS_LOGE("ffrt end!");
 }
 
+void NotificationSubscriberManager::BatchNotifyCanceled(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGD("queue is nullptr");
+        return;
+    }
+
+    AppExecFwk::EventHandler::Callback NotifyCanceledFunc = std::bind(
+        &NotificationSubscriberManager::BatchNotifyCanceledInner, this, notifications, notificationMap, deleteReason);
+
+    notificationSubQueue_->submit(NotifyCanceledFunc);
+}
+
 void NotificationSubscriberManager::NotifyUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
     if (notificationSubQueue_ == nullptr) {
@@ -378,6 +393,45 @@ void NotificationSubscriberManager::NotifyCanceledInner(
             IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
             IsSystemUser(sendUserId))) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
+        }
+    }
+}
+
+void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+
+    ANS_LOGD("notifications size = <%{public}d>", notifications.size());
+    for (auto record : subscriberRecordList_) {
+        if (record == nullptr) {
+            continue;
+        }
+        ANS_LOGD("record->userId = <%{public}d>", record->userId);
+        std::vector<sptr<Notification>> currNotifications;
+        for (size_t i = 0; i < notifications.size(); i ++) {
+            sptr<Notification> notification = notifications[i];
+            if (notification == nullptr) {
+                continue;
+            }
+            auto bundleName = notification->GetBundleName();
+            auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleName);
+            int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
+            int32_t sendUserId = notification->GetUserId();
+            if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
+                ((record->userId == sendUserId) ||
+                (record->userId == SUBSCRIBE_USER_ALL) ||
+                (record->userId == recvUserId) ||
+                IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
+                IsSystemUser(sendUserId))) {
+                currNotifications.emplace_back(notification);
+            }
+        }
+        if (!currNotifications.empty()) {
+            ANS_LOGD("onCanceledList currNotifications size = <%{public}d>", currNotifications.size());
+            if (record->subscriber != nullptr) {
+                record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
+            }
         }
     }
 }

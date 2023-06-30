@@ -68,6 +68,9 @@ public:
     void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
         int32_t deleteReason) override;
 
+    void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
+
     /**
      * @brief The callback function on the notifications updated.
      *
@@ -103,10 +106,13 @@ private:
     ErrCode HandleOnDisconnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnConsumedMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnCanceledMap(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleOnCanceledListMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnUpdated(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDoNotDisturbDateChange(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnEnabledNotificationChanged(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnBadgeChanged(MessageParcel &data, MessageParcel &reply);
+    template<typename T>
+    bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data);
 };
 }  // namespace Notification
 }  // namespace OHOS
