@@ -23,6 +23,7 @@
 #include "errors.h"
 #include "event_handler.h"
 #include "event_runner.h"
+#include "ffrt.h"
 #include "nocopyable.h"
 #include "refbase.h"
 #include "singleton.h"
@@ -138,6 +139,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};
     sptr<AnsSubscriberInterface> ansSubscriberProxy_ {};
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
+    std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
 
     DECLARE_DELAYED_SINGLETON(NotificationSubscriberManager);
     DISALLOW_COPY_AND_MOVE(NotificationSubscriberManager);

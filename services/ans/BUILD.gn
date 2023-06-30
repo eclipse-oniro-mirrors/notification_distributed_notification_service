@@ -28,7 +28,10 @@ config("public_ans_config") {
 ohos_shared_library("libans") {
   shlib_type = "sa"
   version_script = "libans.map"
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${ffrt_path}/interfaces/kits",
+  ]
 
   sources = [
     "src/access_token_helper.cpp",
@@ -77,6 +80,7 @@ ohos_shared_library("libans") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "device_manager:devicemanagersdk",
+    "ffrt:libffrt",
     "hitrace:hitrace_meter",
     "kv_store:distributeddata_inner",
     "multimedia_image_framework:image_native",
