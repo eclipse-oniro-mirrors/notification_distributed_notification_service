@@ -23,7 +23,6 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-constexpr int32_t NOTIFICATION_TIME_OUT = 500; // 500ms
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 JSPushCallBack::JSPushCallBack(NativeEngine &engine) : engine_(engine) {}
@@ -52,34 +51,6 @@ bool JSPushCallBack::IsEqualPushCallBackObject(NativeValue *pushCallBackObject)
 }
 
 bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
-{
-    wptr<JSPushCallBack> weakPush = this;
-    bool retval = false;
-    auto complete = [weakPush, &retval, notificationData](
-                        NativeEngine &engine, AbilityRuntime::AsyncTask &task, int32_t status) {
-        auto pushCallback = weakPush.promote();
-        if (pushCallback == nullptr) {
-            ANS_LOGE("push call back is nullptr!");
-            retval = false;
-            return;
-        }
-        retval = pushCallback->HandleCheckNotificationTask(notificationData);
-        std::unique_lock<std::mutex> lock(pushCallback->mutexlock);
-        pushCallback->condition.notify_all();
-    };
-
-    std::unique_lock<std::mutex> lock(mutexlock);
-    NativeValue *result;
-    AbilityRuntime::AsyncTask::Schedule("JSPushCallBack::OnCheckNotification", engine_,
-        AbilityRuntime::CreateAsyncTaskWithLastParam(engine_, nullptr, nullptr, std::move(complete), &result));
-    if (condition.wait_for(lock, std::chrono::milliseconds(NOTIFICATION_TIME_OUT)) == std::cv_status::timeout) {
-        ANS_LOGE("wait for check notification task time out!");
-        return false;
-    }
-    return retval;
-}
-
-bool JSPushCallBack::HandleCheckNotificationTask(const std::string &notificationData)
 {
     AbilityRuntime::HandleEscape handleEscape(engine_);
     if (pushCallBackObject_ == nullptr) {

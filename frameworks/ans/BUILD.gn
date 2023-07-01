@@ -78,6 +78,7 @@ ohos_shared_library("ans_innerkits") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",

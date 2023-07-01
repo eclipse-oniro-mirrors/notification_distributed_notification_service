@@ -16,11 +16,13 @@
 #include "push_callback_stub.h"
 
 #include "ans_log_wrapper.h"
+#include "event_handler.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "push_callback_proxy.h"
 #include "singleton.h"
 
+using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace Notification {
 PushCallBackStub::PushCallBackStub() {}
@@ -37,7 +39,20 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
     switch (code) {
         case static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION): {
             auto notificationData = data.ReadString();
-            bool ret = OnCheckNotification(notificationData);
+            bool ret = false;
+            std::shared_ptr<EventHandler> handler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+            wptr<PushCallBackStub> weak = this;
+            if (handler) {
+                handler->PostSyncTask([weak, notificationData, &ret]() {
+                    auto pushCallBackStub = weak.promote();
+                    if (pushCallBackStub == nullptr) {
+                        ANS_LOGE("pushCallBackStub is nullptr!");
+                        ret = false;
+                        return;
+                    }
+                    ret = pushCallBackStub->OnCheckNotification(notificationData);
+                });
+            }
             ANS_LOGI("ret:%{public}d", ret);
             if (!reply.WriteBool(ret)) {
                 ANS_LOGE("Failed to write reply ");

@@ -4271,7 +4271,7 @@ void AdvancedNotificationService::TriggerAutoDelete(std::string hashCode)
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    ANS_LOGE("Push Callback died, remove the proxy object");
+    ANS_LOGI("Push Callback died, remove the proxy object");
     AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
 }
 
