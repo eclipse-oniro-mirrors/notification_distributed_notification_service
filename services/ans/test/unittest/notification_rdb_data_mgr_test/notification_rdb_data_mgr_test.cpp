@@ -264,7 +264,7 @@ class RdbStoreTest : public RdbStore {
         };
 
         virtual std::map<PRIKey, Date> GetModifyTime(
-            const std::string &table, const std::string &columnName, std::vector<ValueObject> &PKey)
+            const std::string &table, const std::string &columnName, std::vector<PRIKey> &PKey)
         {
             return {};
         };
