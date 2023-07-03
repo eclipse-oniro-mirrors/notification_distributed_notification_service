@@ -172,6 +172,68 @@ void AnsSubscriberProxy::OnCanceled(
     }
 }
 
+void AnsSubscriberProxy::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    if (notifications.empty()) {
+        ANS_LOGE("Notifications is empty.");
+        return;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return;
+    }
+
+    if (!WriteParcelableVector(notifications, data)) {
+        ANS_LOGE("Write notifications failed");
+        return;
+    }
+
+    if (!data.WriteBool(notificationMap != nullptr)) {
+        ANS_LOGE("Write existMap failed");
+        return;
+    }
+
+    if (notificationMap != nullptr) {
+        if (!data.WriteParcelable(notificationMap)) {
+            ANS_LOGE("Write notificationMap failed");
+            return;
+        }
+    }
+
+    if (!data.WriteInt32(deleteReason)) {
+        ANS_LOGE("Write deleteReason failed.");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_ASYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_CANCELED_LIST_MAP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact ErrCode=ERR_ANS_TRANSACT_FAILED");
+        return;
+    }
+}
+
+template<typename T>
+bool AnsSubscriberProxy::WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
+{
+    if (!data.WriteInt32(parcelableVector.size())) {
+        ANS_LOGE("write ParcelableVector size failed");
+        return false;
+    }
+
+    for (auto &parcelable : parcelableVector) {
+        if (!data.WriteStrongParcelable(parcelable)) {
+            ANS_LOGE("write ParcelableVector failed");
+            return false;
+        }
+    }
+    return true;
+}
+
 void AnsSubscriberProxy::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
     if (notificationMap == nullptr) {

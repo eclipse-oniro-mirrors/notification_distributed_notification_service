@@ -4242,6 +4242,33 @@ napi_value Common::GetBundleOption(const napi_env &env, const napi_value &value,
     return NapiGetNull(env);
 }
 
+napi_value Common::GetHashCodes(const napi_env &env, const napi_value &value, std::vector<std::string> &hashCodes)
+{
+    ANS_LOGD("enter");
+    uint32_t length = 0;
+    napi_get_array_length(env, value, &length);
+    if (length == 0) {
+        ANS_LOGE("The array is empty.");
+        return nullptr;
+    }
+    napi_valuetype valuetype = napi_undefined;
+    for (size_t i = 0; i < length; i++) {
+        napi_value hashCode = nullptr;
+        napi_get_element(env, value, i, &hashCode);
+        NAPI_CALL(env, napi_typeof(env, hashCode, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return nullptr;
+        }
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        NAPI_CALL(env, napi_get_value_string_utf8(env, hashCode, str, STR_MAX_SIZE - 1, &strLen));
+        hashCodes.emplace_back(str);
+    }
+
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetNotificationKey(const napi_env &env, const napi_value &value, NotificationKey &key)
 {
     ANS_LOGI("enter");

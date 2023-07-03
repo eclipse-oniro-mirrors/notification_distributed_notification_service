@@ -52,11 +52,13 @@ public:
      * @brief The callback function on a notification canceled.
      *
      * @param notification Indicates the canceled notification.
-     * @param notificationMap Indicates the NotificationSortingMap object.
      * @param deleteReason Indicates the delete reason.
      */
     void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
         int32_t deleteReason) override;
+
+    void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
 
     /**
      * @brief The callback function on the notifications updated.
@@ -89,6 +91,8 @@ public:
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
     static inline BrokerDelegator<AnsSubscriberProxy> delegator_;
+    template<typename T>
+    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data);
 };
 }  // namespace Notification
 }  // namespace OHOS

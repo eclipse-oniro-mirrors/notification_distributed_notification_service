@@ -381,6 +381,8 @@ public:
      */
     static ErrCode RemoveAllNotifications(const NotificationBundleOption &bundleOption);
 
+    static ErrCode RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason);
+
     /**
      * @brief Removes all removable notifications of a specified bundle.
      * @note Your application must have platform signature to use this method.

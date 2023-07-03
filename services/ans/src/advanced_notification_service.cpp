@@ -405,8 +405,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
         if (notification != nullptr) {
             int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
             UpdateRecentNotification(notification, true, reason);
-            sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete("", "", notification);
 #endif
@@ -683,6 +682,7 @@ ErrCode AdvancedNotificationService::CancelAll()
         sptr<Notification> notification = nullptr;
 
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
+        std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -698,14 +698,23 @@ ErrCode AdvancedNotificationService::CancelAll()
             if (notification != nullptr) {
                 int32_t reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+                notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+                notifications.clear();
+            }
         }
 
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+        }
         result = ERR_OK;
     }));
     notificationSvrQueue_->wait(handler);
@@ -950,8 +959,7 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
 
         if (notification != nullptr) {
             UpdateRecentNotification(notification, true, removeReason);
-            sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, removeReason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, removeReason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -1000,8 +1008,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
             if (notification != nullptr) {
                 int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -1034,6 +1041,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
         int32_t activeUserId = SUBSCRIBE_USER_INIT;
         (void)GetActiveUserId(activeUserId);
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
+        std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -1050,12 +1058,18 @@ ErrCode AdvancedNotificationService::DeleteAll()
             if (notification->GetUserId() == activeUserId) {
                 int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+                notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+            }
+        }
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::CANCEL_REASON_DELETE);
         }
 
         result = ERR_OK;
@@ -1824,8 +1838,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
         if (notification != nullptr) {
             int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
             UpdateRecentNotification(notification, true, reason);
-            sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -2205,6 +2218,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 #else
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
 #endif
+        std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
             sptr<Notification> notification = nullptr;
             result = RemoveFromNotificationList(key, notification, true,
@@ -2216,12 +2230,21 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
             if (notification != nullptr) {
                 int32_t reason = NotificationConstant::PACKAGE_CHANGED_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+                notifications.emplace_back(notification);
+                if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                    std::vector<sptr<Notification>> currNotificationList = notifications;
+                    NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                        currNotificationList, nullptr, reason);
+                    notifications.clear();
+                }
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete("", "", notification);
 #endif
             }
+        }
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
         }
 
         NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
@@ -2360,8 +2383,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 
         if (notification != nullptr) {
             UpdateRecentNotification(notification, true, removeReason);
-            sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, removeReason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, removeReason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -2398,6 +2420,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
+        int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
         for (auto record : notificationList_) {
             if (!record->notification->IsRemoveAllowed()) {
                 continue;
@@ -2413,19 +2436,77 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
             }
         }
 
+        std::vector<sptr<Notification>> notifications;
         for (auto record : removeList) {
             notificationList_.remove(record);
             if (record->notification != nullptr) {
-                int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
                 UpdateRecentNotification(record->notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
+                notifications.emplace_back(record->notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                SendNotificationsOnCanceled(notifications, nullptr, reason);
+            }
 
             TriggerRemoveWantAgent(record->request);
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveNotifications(
+    const std::vector<std::string> &keys, int32_t removeReason)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("enter");
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        std::vector<sptr<Notification>> notifications;
+        for (auto key : keys) {
+            sptr<Notification> notification = nullptr;
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
+#endif
+            ErrCode result = RemoveFromNotificationList(key, notification, false, removeReason);
+            if (result != ERR_OK) {
+                continue;
+            }
+            if (notification != nullptr) {
+                UpdateRecentNotification(notification, true, removeReason);
+                notifications.emplace_back(notification);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+                DoDistributedDelete(deviceId, bundleName, notification);
+#endif
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, removeReason);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, removeReason);
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -2494,18 +2575,29 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName)
             }
         }
 
+        std::vector<sptr<Notification>> notifications;
         for (auto record : removeList) {
             notificationList_.remove(record);
 
             if (record->notification != nullptr) {
                 int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
                 UpdateRecentNotification(record->notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
+                notifications.emplace_back(record->notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -2539,6 +2631,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
+        int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
         for (auto record : notificationList_) {
             if (!record->notification->IsRemoveAllowed()) {
                 continue;
@@ -2553,18 +2646,24 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
             }
         }
 
+        std::vector<sptr<Notification>> notifications;
         for (auto record : removeList) {
             notificationList_.remove(record);
 
             if (record->notification != nullptr) {
-                int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
                 UpdateRecentNotification(record->notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
+                notifications.emplace_back(record->notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                SendNotificationsOnCanceled(notifications, nullptr, reason);
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -3207,8 +3306,7 @@ void AdvancedNotificationService::OnDistributedDelete(
         if (notification != nullptr) {
             int32_t reason = NotificationConstant::APP_CANCEL_REASON_OTHER;
             UpdateRecentNotification(notification, true, reason);
-            sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
         }
     }));
 }
@@ -3369,6 +3467,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
+        std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -3385,12 +3484,19 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
             if (notification->GetUserId() == userId) {
                 int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+                notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
         }
 
         result = ERR_OK;
@@ -3585,6 +3691,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
+        std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -3602,12 +3709,22 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
             if (notification != nullptr) {
                 int32_t reason = NotificationConstant::PACKAGE_CHANGED_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
-                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, sortingMap, reason);
+                notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -4261,14 +4378,24 @@ void AdvancedNotificationService::TriggerAutoDelete(std::string hashCode)
         if (record->notification->GetKey() == hashCode) {
             int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
             UpdateRecentNotification(record->notification, true, reason);
-            sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-            NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, sortingMap, reason);
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             notificationList_.remove(record);
             break;
         }
     }
 }
 
+void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    std::vector<sptr<Notification>> currNotifications;
+    for (auto notification : notifications) {
+        currNotifications.emplace_back(notification);
+    }
+    NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+        currNotifications, nullptr, deleteReason);
+    notifications.clear();
+}
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     ANS_LOGI("Push Callback died, remove the proxy object");

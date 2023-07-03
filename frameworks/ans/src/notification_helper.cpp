@@ -198,6 +198,11 @@ ErrCode NotificationHelper::RemoveAllNotifications(const NotificationBundleOptio
     return DelayedSingleton<AnsNotification>::GetInstance()->RemoveAllNotifications(bundleOption);
 }
 
+ErrCode NotificationHelper::RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications(hashcodes, removeReason);
+}
+
 ErrCode NotificationHelper::RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationsByBundle(bundleOption);

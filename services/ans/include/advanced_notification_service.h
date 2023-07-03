@@ -281,6 +281,8 @@ public:
      */
     ErrCode RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption) override;
 
+    ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
+
     /**
      * @brief Delete notification based on key.
      *
@@ -826,6 +828,8 @@ private:
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
     void StartAutoDelete(const std::shared_ptr<NotificationRecord> &record);
     void TriggerAutoDelete(std::string hashCode);
+    void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
 private:
     static sptr<AdvancedNotificationService> instance_;

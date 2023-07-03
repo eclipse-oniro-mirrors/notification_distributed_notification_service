@@ -71,9 +71,23 @@ void NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
-        std::make_shared<NotificationSortingMap>(*notificationMap),
-        deleteReason);
+    if (notificationMap == nullptr) {
+        subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
+            std::make_shared<NotificationSortingMap>(), deleteReason);
+    } else {
+        subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
+            std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
+    }
+}
+
+
+void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    for (auto notification : notifications) {
+        OnCanceled(notification, notificationMap, deleteReason);
+    }
 }
 
 void NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)

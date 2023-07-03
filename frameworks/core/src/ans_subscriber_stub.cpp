@@ -34,6 +34,8 @@ AnsSubscriberStub::AnsSubscriberStub()
         std::bind(&AnsSubscriberStub::HandleOnConsumedMap, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(NotificationInterfaceCode::ON_CANCELED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnCanceledMap, this, std::placeholders::_1, std::placeholders::_2));
+    interfaces_.emplace(NotificationInterfaceCode::ON_CANCELED_LIST_MAP,
+        std::bind(&AnsSubscriberStub::HandleOnCanceledListMap, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(NotificationInterfaceCode::ON_UPDATED,
         std::bind(&AnsSubscriberStub::HandleOnUpdated, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(NotificationInterfaceCode::ON_DND_DATE_CHANGED,
@@ -147,6 +149,64 @@ ErrCode AnsSubscriberStub::HandleOnCanceledMap(MessageParcel &data, MessageParce
     return ERR_OK;
 }
 
+
+ErrCode AnsSubscriberStub::HandleOnCanceledListMap(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<sptr<Notification>> notifications;
+    if (!ReadParcelableVector(notifications, data)) {
+        ANS_LOGE("read notifications failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool existMap = false;
+    if (!data.ReadBool(existMap)) {
+        ANS_LOGE("read existMap failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+    if (existMap) {
+        notificationMap = data.ReadParcelable<NotificationSortingMap>();
+        if (notificationMap == nullptr) {
+            ANS_LOGE("read NotificationSortingMap failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
+    int32_t reason = 0;
+    if (!data.ReadInt32(reason)) {
+        ANS_LOGE("read reason failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    OnCanceledList(notifications, notificationMap, reason);
+    return ERR_OK;
+}
+
+
+template<typename T>
+bool AnsSubscriberStub::ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data)
+{
+    int32_t infoSize = 0;
+    if (!data.ReadInt32(infoSize)) {
+        ANS_LOGE("read Parcelable size failed.");
+        return false;
+    }
+
+    parcelableInfos.clear();
+    infoSize = (infoSize < MAX_PARCELABLE_VECTOR_NUM) ? infoSize : MAX_PARCELABLE_VECTOR_NUM;
+    for (int32_t index = 0; index < infoSize; index++) {
+        sptr<T> info = data.ReadStrongParcelable<T>();
+        if (info == nullptr) {
+            ANS_LOGE("read Parcelable infos failed.");
+            return false;
+        }
+        parcelableInfos.emplace_back(info);
+    }
+
+    return true;
+}
+
 ErrCode AnsSubscriberStub::HandleOnUpdated(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NotificationSortingMap> notificationMap = data.ReadParcelable<NotificationSortingMap>();
@@ -204,6 +264,10 @@ void AnsSubscriberStub::OnConsumed(
 
 void AnsSubscriberStub::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{}
+
+void AnsSubscriberStub::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {}
 
 void AnsSubscriberStub::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
