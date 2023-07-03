@@ -262,6 +262,17 @@ class RdbStoreTest : public RdbStore {
         {
             return false;
         };
+
+        virtual std::map<PRIKey, Date> GetModifyTime(
+            const std::string &table, const std::string &columnName, std::vector<PRIKey> &keys)
+        {
+            return {};
+        };
+
+        virtual std::shared_ptr<ResultSet> QueryByStep(const std::string &sql, std::vector<ValueObject> &&args)
+        {
+            return nullptr;
+        };
 };
 
 /**
