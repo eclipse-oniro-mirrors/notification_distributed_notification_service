@@ -402,7 +402,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
 
-    ANS_LOGD("notifications size = <%{public}d>", notifications.size());
+    ANS_LOGD("notifications size = <%{public}zu>", notifications.size());
     for (auto record : subscriberRecordList_) {
         if (record == nullptr) {
             continue;
@@ -428,7 +428,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             }
         }
         if (!currNotifications.empty()) {
-            ANS_LOGD("onCanceledList currNotifications size = <%{public}d>", currNotifications.size());
+            ANS_LOGD("onCanceledList currNotifications size = <%{public}zu>", currNotifications.size());
             if (record->subscriber != nullptr) {
                 record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
             }
