@@ -266,6 +266,7 @@ private:
 
 private:
     NotificationPreferencesInfo preferencesInfo_ {};
+    std::mutex preferenceMutex_;
     std::unique_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
     DECLARE_DELAYED_REF_SINGLETON(NotificationPreferences);
 };
