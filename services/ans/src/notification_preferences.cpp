@@ -332,6 +332,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result =
         SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled);
