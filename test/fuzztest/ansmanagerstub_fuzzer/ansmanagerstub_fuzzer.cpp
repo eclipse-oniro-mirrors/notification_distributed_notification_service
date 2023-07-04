@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,12 @@
 #include "notification_request.h"
 
 constexpr uint8_t SLOT_TYPE_NUM = 5;
+constexpr uint8_t ENABLE = 2;
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
+        std::string stringData(data, size);
         Notification::AnsManagerStub ansManagerStub;
         uint32_t code = GetU32Data(data);
         MessageParcel datas;
@@ -103,15 +104,12 @@ namespace OHOS {
         ansManagerStub.HandleDistributedSetEnabledWithoutApp(datas, reply);
         ansManagerStub.HandleDistributedGetEnabledWithoutApp(datas, reply);
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
-        const std::string label = "this is a notification label";
-        ansManagerStub.Publish(label, notification);
-        const std::string deviceId = "this is a notification deviceId";
-        int notificationId = 1;
-        ansManagerStub.Cancel(notificationId, label);
+        ansManagerStub.Publish(stringData, notification);
+        int notificationId = static_cast<int>(GetU32Data(data));
+        ansManagerStub.Cancel(notificationId, stringData);
         ansManagerStub.CancelAll();
-        const std::string representativeBundle = "this is a notification representativeBundle";
-        int32_t userId = 1;
-        ansManagerStub.CancelAsBundle(notificationId, representativeBundle, userId);
+        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        ansManagerStub.CancelAsBundle(notificationId, stringData, userId);
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         ansManagerStub.AddSlotByType(slotType);
@@ -123,7 +121,7 @@ namespace OHOS {
         ansManagerStub.GetSlotByType(slotType, slot);
         ansManagerStub.GetSlots(slots);
         sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
-        uint64_t num = 1;
+        uint64_t num = static_cast<uint64_t>(GetU32Data(data));
         ansManagerStub.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
         ansManagerStub.GetActiveNotifications(notifications);
@@ -132,44 +130,40 @@ namespace OHOS {
         ansManagerStub.GetAllActiveNotifications(notificationss);
         std::vector<std::string> key;
         ansManagerStub.GetSpecialActiveNotifications(key, notificationss);
-        std::string agent = "this is a notification agent";
-        ansManagerStub.SetNotificationAgent(agent);
-        ansManagerStub.GetNotificationAgent(agent);
-        bool canPublish = true;
-        ansManagerStub.CanPublishAsBundle(representativeBundle, canPublish);
-        ansManagerStub.PublishAsBundle(notification, representativeBundle);
+        ansManagerStub.SetNotificationAgent(stringData);
+        ansManagerStub.GetNotificationAgent(stringData);
+        bool canPublish = *data % ENABLE;
+        ansManagerStub.CanPublishAsBundle(stringData, canPublish);
+        ansManagerStub.PublishAsBundle(notification, stringData);
         ansManagerStub.SetNotificationBadgeNum(num);
-        int importance = 1;
+        int importance = static_cast<int>(GetU32Data(data));
         ansManagerStub.GetBundleImportance(importance);
-        bool granted = true;
+        bool granted = *data % ENABLE;
         ansManagerStub.HasNotificationPolicyAccessPermission(granted);
-        int32_t removeReason = 1;
-        ansManagerStub.RemoveNotification(bundleOption, notificationId, label, removeReason);
+        int32_t removeReason = static_cast<int32_t>(GetU32Data(data));
+        ansManagerStub.RemoveNotification(bundleOption, notificationId, stringData, removeReason);
         ansManagerStub.RemoveAllNotifications(bundleOption);
-        const std::string keys = "this is a notification keys";
-        ansManagerStub.Delete(keys, removeReason);
+        ansManagerStub.Delete(stringData, removeReason);
         ansManagerStub.DeleteByBundle(bundleOption);
         ansManagerStub.DeleteAll();
         ansManagerStub.GetSlotsByBundle(bundleOption, slots);
         ansManagerStub.UpdateSlots(bundleOption, slots);
-        ansManagerStub.RequestEnableNotification(deviceId);
-        const std::string bundle = "this is a notification bundle";
-        bool enabled = true;
-        ansManagerStub.SetNotificationsEnabledForBundle(bundle, enabled);
-        ansManagerStub.SetNotificationsEnabledForSpecialBundle(deviceId, bundleOption, enabled);
+        ansManagerStub.RequestEnableNotification(stringData);
+        bool enabled = *data % ENABLE;
+        ansManagerStub.SetNotificationsEnabledForBundle(stringData, enabled);
+        ansManagerStub.SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);
         ansManagerStub.SetShowBadgeEnabledForBundle(bundleOption, enabled);
         ansManagerStub.GetShowBadgeEnabledForBundle(bundleOption, enabled);
         ansManagerStub.GetShowBadgeEnabled(enabled);
-        bool allowed = true;
+        bool allowed = *data % ENABLE;
         ansManagerStub.IsAllowedNotify(allowed);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allowed);
-        const std::string groupName = "this is a notification groupName";
-        ansManagerStub.CancelGroup(groupName);
-        ansManagerStub.RemoveGroupByBundle(bundleOption, groupName);
+        ansManagerStub.CancelGroup(stringData);
+        ansManagerStub.RemoveGroupByBundle(bundleOption, stringData);
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
         ansManagerStub.SetDoNotDisturbDate(date);
         ansManagerStub.GetDoNotDisturbDate(date);
-        bool doesSupport = true;
+        bool doesSupport = *data % ENABLE;
         ansManagerStub.DoesSupportDoNotDisturbMode(doesSupport);
         ansManagerStub.IsDistributedEnabled(enabled);
         ansManagerStub.EnableDistributedByBundle(bundleOption, enabled);
@@ -179,28 +173,26 @@ namespace OHOS {
         ansManagerStub.GetDeviceRemindType(remindType);
         sptr<Notification::NotificationRequest> request = new Notification::NotificationRequest();
         ansManagerStub.PublishContinuousTaskNotification(request);
-        ansManagerStub.CancelContinuousTaskNotification(label, notificationId);
+        ansManagerStub.CancelContinuousTaskNotification(stringData, notificationId);
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequest();
         ansManagerStub.PublishReminder(reminder);
-        const int32_t reminderId = 1;
+        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
         ansManagerStub.CancelReminder(reminderId);
         std::vector<sptr<Notification::ReminderRequest>> reminders;
         ansManagerStub.GetValidReminders(reminders);
         ansManagerStub.CancelAllReminders();
-        const std::string templateName = "this is a notification templateName";
-        bool support = true;
-        ansManagerStub.IsSupportTemplate(templateName, support);
+        bool support = *data % ENABLE;
+        ansManagerStub.IsSupportTemplate(stringData, support);
         ansManagerStub.IsSpecialUserAllowedNotify(userId, allowed);
-        const int32_t deviceIds = 1;
+        int32_t deviceIds = static_cast<int32_t>(GetU32Data(data));
         ansManagerStub.SetNotificationsEnabledByUser(deviceIds, enabled);
         ansManagerStub.DeleteAllByUser(userId);
         ansManagerStub.SetDoNotDisturbDate(date);
         ansManagerStub.GetDoNotDisturbDate(date);
         ansManagerStub.SetEnabledForBundleSlot(bundleOption, slotType, enabled);
         ansManagerStub.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
-        const std::string cmd = "this is a notification cmd";
         std::vector<std::string> dumpInfo;
-        ansManagerStub.ShellDump(cmd, bundle, userId, dumpInfo);
+        ansManagerStub.ShellDump(stringData, stringData, userId, dumpInfo);
         ansManagerStub.SetSyncNotificationEnabledWithoutApp(userId, enabled);
         ansManagerStub.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         return true;
