@@ -1789,9 +1789,25 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
 
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     std::string bundle = GetClientBundleName();
-    if (reminder->IsSystemApp() && reminder->GetWantAgentInfo() != nullptr &&
-        reminder->GetWantAgentInfo()->pkgName != "" && reminder->GetWantAgentInfo()->pkgName != bundle) {
-        SetAgentNotification(notificationRequest, reminder->GetWantAgentInfo()->pkgName);
+    if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
+        ANSR_LOGE("wantagent info is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::string wantAgentName = reminder->GetWantAgentInfo()->pkgName;
+    std::string msWantAgentName = reminder->GetMaxScreenWantAgentInfo()->pkgName;
+    if (wantAgentName != msWantAgentName && wantAgentName != "" && msWantAgentName != "") {
+        ANSR_LOGE("wantAgentName is not same to msWantAgentName, wantAgentName:%{public}s, msWantAgentName:%{public}s",
+            wantAgentName.c_str(), msWantAgentName.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (wantAgentName != bundle && wantAgentName != "") {
+        ANSR_LOGI("Set agent reminder, bundle:%{public}s, wantAgentName:%{public}s", bundle.c_str(),
+            wantAgentName.c_str());
+        SetAgentNotification(notificationRequest, wantAgentName);
+    } else if (msWantAgentName != bundle && msWantAgentName != "") {
+        ANSR_LOGI("Set agent reminder, bundle:%{public}s, msWantAgentName:%{public}s", bundle.c_str(),
+            msWantAgentName.c_str());
+        SetAgentNotification(notificationRequest, msWantAgentName);
     }
     sptr<NotificationBundleOption> bundleOption = nullptr;
     result = PrepareNotificationInfo(notificationRequest, bundleOption);
