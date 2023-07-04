@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,12 +50,12 @@ namespace OHOS {
         reminderRequest.IsShowing();
         reminderRequest.OnClose(enabled);
         reminderRequest.OnDateTimeChange();
-        uint64_t oriTriggerTime = 2;
-        uint64_t optTriggerTimes = 2;
+        uint64_t oriTriggerTime = static_cast<uint64_t>(GetU32Data(data));
+        uint64_t optTriggerTimes = static_cast<uint64_t>(GetU32Data(data));
         reminderRequest.HandleSysTimeChange(oriTriggerTime, optTriggerTimes);
-        uint64_t oldZoneTriggerTime = 1;
-        uint64_t newZoneTriggerTime = 2;
-        uint64_t optTriggerTime = 3;
+        uint64_t oldZoneTriggerTime = static_cast<uint64_t>(GetU32Data(data));
+        uint64_t newZoneTriggerTime = static_cast<uint64_t>(GetU32Data(data));
+        uint64_t optTriggerTime = static_cast<uint64_t>(GetU32Data(data));
         reminderRequest.HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime);
         reminderRequest.OnSameNotificationIdCovered();
         reminderRequest.OnShow(enabled, enabled, enabled);
