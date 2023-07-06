@@ -34,7 +34,6 @@ typedef std::function<void(const std::shared_ptr<Notification>, const std::share
 typedef std::function<void(const std::shared_ptr<Notification>, const std::shared_ptr<NotificationSortingMap>, int)>
     CanceledFunc;
 
-sptr<AdvancedNotificationService> g_advancedNotificationService;
 bool passed = false;
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
@@ -93,32 +92,28 @@ public:
 void AnsModuleTest::SetUpTestCase()
 {
     passed = false;
-    g_advancedNotificationService = new AdvancedNotificationService();
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
 }
 
 void AnsModuleTest::TearDownTestCase()
 {
     passed = false;
-    g_advancedNotificationService = nullptr;
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
 }
 
 void AnsModuleTest::SetUp()
 {
     passed = false;
-    g_advancedNotificationService = new AdvancedNotificationService();
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
 }
 
 void AnsModuleTest::TearDown()
 {
-    g_advancedNotificationService = nullptr;
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
     passed = false;
 }
 
-void TestAddSlots()
+void TestAddSlots(std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService)
 {
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -133,7 +128,9 @@ void TestAddSlots()
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_001, Function | SmallTest | Level1)
 {
-    TestAddSlots();
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
+    TestAddSlots(g_advancedNotificationService);
     std::string label = "testLabel";
     auto subscriber = new TestAnsSubscriber();
     subscriber->consumedCb_ = [](const std::shared_ptr<Notification>, const std::shared_ptr<NotificationSortingMap>) {
@@ -162,7 +159,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_001, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
 {
-    TestAddSlots();
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
+    TestAddSlots(g_advancedNotificationService);
     std::string label = "testLabel";
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
@@ -194,6 +193,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_003, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -217,6 +218,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_003, Function | SmallTest | Level1)
     g_advancedNotificationService->SetNotificationsEnabledForBundle("", false);
 
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(true, passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -228,6 +230,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_003, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -276,6 +280,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_006, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -299,6 +305,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_006, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -310,7 +317,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_006, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
 {
-    // subscriber
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
+// subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
     subscriberInfo->AddAppName("bundleName");
@@ -358,7 +367,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0013, Function | SmallTest | Level1)
 {
-    // subscriber
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
+// subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
     subscriberInfo->AddAppName("bundleName");
@@ -381,6 +392,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0013, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds (200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -392,6 +404,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0013, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0014, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -420,6 +434,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0014, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -431,6 +446,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0014, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0015, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -459,6 +476,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0015, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -470,6 +488,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0015, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0017, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -498,6 +518,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0017, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -509,6 +530,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0017, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0019, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -537,6 +560,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0019, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -548,6 +572,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0019, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0021, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -602,6 +628,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0021, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0023, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -630,6 +658,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0023, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -641,6 +670,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0023, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0031, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -695,6 +726,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0031, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0033, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -729,6 +762,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0033, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -740,6 +774,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0033, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0034, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -774,6 +810,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0034, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -785,6 +822,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0034, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0035, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -815,6 +854,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0035, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Cancel(0, label);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -826,6 +866,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0035, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0036, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -867,6 +909,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0036, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0039, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -922,6 +966,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0039, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0040, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -950,6 +996,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0040, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -961,6 +1008,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0040, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0041, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -989,6 +1038,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0041, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1000,6 +1050,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0041, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0042, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1028,6 +1080,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0042, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1039,6 +1092,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0042, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0043, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1067,6 +1122,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0043, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1078,6 +1134,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0043, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0049, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -1100,6 +1158,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0049, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0051, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -1126,6 +1186,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0051, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0052, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -1151,6 +1213,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0052, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0054, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -1173,6 +1237,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0054, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0055, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -1189,6 +1255,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0055, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0056, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -1205,6 +1273,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0056, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0058, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1236,6 +1306,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0058, Function | SmallTest | Level1)
     g_advancedNotificationService->SetShowBadgeEnabledForBundle(bundleOption, true);
 
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(true, passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1247,6 +1318,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0058, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0060, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1278,12 +1351,14 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0060, Function | SmallTest | Level1)
     // not allow publish notification
     g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle("", bundleOption, false);
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_FALSE(passed);
 
     passed = false;
     // allow publish
     g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle("", bundleOption, true);
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
 
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
@@ -1296,6 +1371,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0060, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0061, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1327,12 +1404,14 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0061, Function | SmallTest | Level1)
     // allow publish notification
     g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle("", bundleOption, true);
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
 
     // not allow publish
     passed = false;
     g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle("", bundleOption, false);
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_FALSE(passed);
 
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
@@ -1345,6 +1424,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0061, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1393,6 +1474,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0063, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -1438,6 +1521,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0063, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0064, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1455,6 +1540,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0064, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0065, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -1470,6 +1557,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0065, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0066, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -1498,6 +1587,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0066, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0100, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1531,6 +1622,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0100, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1542,6 +1634,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0100, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0101, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1563,6 +1657,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0101, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1574,6 +1669,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0101, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0102, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1595,6 +1692,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0102, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1606,6 +1704,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0102, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0103, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1627,6 +1727,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0103, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(passed, true);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1638,6 +1739,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0103, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0105, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     sptr<NotificationSlot> reminderSlot = new NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
@@ -1662,6 +1765,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0105, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0106, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1688,6 +1793,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0106, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -1699,6 +1805,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0106, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0107, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1747,6 +1855,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0107, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0108, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1796,6 +1906,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0108, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0110, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1815,6 +1927,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0110, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0111, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -1832,6 +1946,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0111, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0112, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -1892,6 +2008,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0112, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0113, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -1951,6 +2069,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0113, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0114, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2010,6 +2130,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0114, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0116, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2070,6 +2192,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0116, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0117, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2130,6 +2254,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0117, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0120, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
@@ -2159,6 +2285,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0120, Function | SmallTest | Level1)
     g_advancedNotificationService->SetNotificationsEnabledForBundle("bundleName", false);
 
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(true, passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -2170,6 +2297,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0120, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0121, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // add slot
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> socialSlot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -2199,6 +2328,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0121, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0122, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2248,6 +2379,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0122, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     int ret = 0;
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2282,17 +2415,23 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
     req4->SetSlotType(NotificationConstant::SlotType::CUSTOM);
 
     g_advancedNotificationService->Publish("testLabel", req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(ret, 1);
     g_advancedNotificationService->Publish("testLabel", req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(ret, 2);
     g_advancedNotificationService->Publish("testLabel", req2);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(ret, 3);
     g_advancedNotificationService->Publish("testLabel", req3);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(ret, 4);
     g_advancedNotificationService->Publish("testLabel", req4);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(ret, 5);
     g_advancedNotificationService->DeleteAll();
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), nullptr);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
 }
 
@@ -2303,6 +2442,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0124, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2341,6 +2482,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0124, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0125, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2374,6 +2517,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0125, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0126, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2412,6 +2557,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0126, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0127, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     const int EXPECT_REQUST_NUM = 2;
 
     int ret = 0;
@@ -2466,6 +2613,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0127, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0128, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     const int EXPECT_REQUST_NUM = 2;
 
     int ret = 0;
@@ -2520,6 +2669,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0128, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0130, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2553,6 +2704,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0130, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0131, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2571,6 +2724,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0131, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0132, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     EXPECT_EQ(g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr), ERR_OK);
@@ -2606,6 +2761,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0132, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0133, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     EXPECT_EQ(g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr), ERR_OK);
@@ -2648,6 +2805,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0133, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0134, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);
@@ -2690,6 +2849,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0134, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0135, Function | SmallTest | Level1)
 {
+    std::shared_ptr<AdvancedNotificationService> g_advancedNotificationService =
+        std::make_shared<AdvancedNotificationService>();
     // subscriber
     auto subscriber = new TestAnsSubscriber();
     g_advancedNotificationService->Subscribe(subscriber->GetImpl(), nullptr);

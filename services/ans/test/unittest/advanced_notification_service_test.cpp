@@ -3496,7 +3496,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_221000
     request->SetCreatorUserId(0);
     request->SetLabel("label");
     request->SetTapDismissed(true);
-    request->SetAutoDeletedTime(clock() + 1000);  // 1000ms
+    auto now = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    request->SetAutoDeletedTime(duration.count() + 1000);  // 1000ms
     sptr<Notification> notification = new (std::nothrow) Notification(request);
     EXPECT_NE(notification, nullptr);
 
@@ -3578,8 +3580,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00004,
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00004 test start";
     int32_t badgeNumber = 1;
-    advancedNotificationService_->handler_ = nullptr;
-    EXPECT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber), ERR_ANS_TASK_ERR);
+    EXPECT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber), ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00004 test end";
 }
 
