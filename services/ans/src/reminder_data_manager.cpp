@@ -757,16 +757,8 @@ void ReminderDataManager::UpdateNotification(const sptr<ReminderRequest> &remind
     }
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::COMMON, "");
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::REMOVAL_WANT_AGENT, "");
-
-    // Allow system app to start any wantAgent
-    if (reminder->IsSystemApp() || (reminder->GetWantAgentInfo() != nullptr &&
-        reminder->GetWantAgentInfo()->pkgName == bundleOption->GetBundleName())) {
-        reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::WANT_AGENT, "");
-    }
-    if (reminder->IsSystemApp() || (reminder->GetMaxScreenWantAgentInfo() != nullptr &&
-        reminder->GetMaxScreenWantAgentInfo()->pkgName == bundleOption->GetBundleName())) {
-        reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::MAX_SCREEN_WANT_AGENT, "");
-    }
+    reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::WANT_AGENT, "");
+    reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::MAX_SCREEN_WANT_AGENT, "");
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::BUNDLE_INFO, "");
 }
 
