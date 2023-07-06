@@ -47,7 +47,7 @@ public:
 /**
  * @tc.number    : NotificationSubscriberManager_00100
  * @tc.name      : NotificationSubscriberManager_00100
- * @tc.desc      : test NotifyConsumed function and handler_ == nullptr
+ * @tc.desc      : test NotifyConsumed function and notificationSubQueue_ == nullptr
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00100, Function | SmallTest | Level1)
 {
@@ -56,14 +56,14 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
     ASSERT_NE(nullptr, notificationSubscriberManager);
     sptr<Notification> notification = nullptr;
     sptr<NotificationSortingMap> notificationMap = nullptr;
-    notificationSubscriberManager->handler_ = nullptr;
+    notificationSubscriberManager->notificationSubQueue_ = nullptr;
     notificationSubscriberManager->NotifyConsumed(notification, notificationMap);
 }
 
 /**
  * @tc.number    : NotificationSubscriberManager_00200
  * @tc.name      : NotificationSubscriberManager_00200
- * @tc.desc      : test NotifyCanceled function and handler_ == nullptr
+ * @tc.desc      : test NotifyCanceled function and notificationSubQueue_ == nullptr
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00200, Function | SmallTest | Level1)
 {
@@ -73,14 +73,14 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
     sptr<Notification> notification = nullptr;
     sptr<NotificationSortingMap> notificationMap = nullptr;
     int32_t deleteReason = 1;
-    notificationSubscriberManager->handler_ = nullptr;
+    notificationSubscriberManager->notificationSubQueue_ = nullptr;
     notificationSubscriberManager->NotifyCanceled(notification, notificationMap, deleteReason);
 }
 
 /**
  * @tc.number    : NotificationSubscriberManager_00300
  * @tc.name      : NotificationSubscriberManager_00300
- * @tc.desc      : test NotifyUpdated function and handler_ == nullptr
+ * @tc.desc      : test NotifyUpdated function and notificationSubQueue_ == nullptr
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00300, Function | SmallTest | Level1)
 {
@@ -88,14 +88,14 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
         std::make_shared<NotificationSubscriberManager>();
     ASSERT_NE(nullptr, notificationSubscriberManager);
     sptr<NotificationSortingMap> notificationMap = nullptr;
-    notificationSubscriberManager->handler_ = nullptr;
+    notificationSubscriberManager->notificationSubQueue_ = nullptr;
     notificationSubscriberManager->NotifyUpdated(notificationMap);
 }
 
 /**
  * @tc.number    : NotificationSubscriberManager_00400
  * @tc.name      : NotificationSubscriberManager_00400
- * @tc.desc      : test NotifyDoNotDisturbDateChanged function and handler_ == nullptr
+ * @tc.desc      : test NotifyDoNotDisturbDateChanged function and notificationSubQueue_ == nullptr
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00400, Function | SmallTest | Level1)
 {
@@ -103,14 +103,14 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
         std::make_shared<NotificationSubscriberManager>();
     ASSERT_NE(nullptr, notificationSubscriberManager);
     sptr<NotificationDoNotDisturbDate> date = nullptr;
-    notificationSubscriberManager->handler_ = nullptr;
+    notificationSubscriberManager->notificationSubQueue_ = nullptr;
     notificationSubscriberManager->NotifyDoNotDisturbDateChanged(date);
 }
 
 /**
  * @tc.number    : NotificationSubscriberManager_00500
  * @tc.name      : NotificationSubscriberManager_00500
- * @tc.desc      : test NotifyEnabledNotificationChanged function and handler_ == nullptr
+ * @tc.desc      : test NotifyEnabledNotificationChanged function and notificationSubQueue_ == nullptr
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00500, Function | SmallTest | Level1)
 {
@@ -118,7 +118,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
         std::make_shared<NotificationSubscriberManager>();
     ASSERT_NE(nullptr, notificationSubscriberManager);
     sptr<EnabledNotificationCallbackData> callbackData = nullptr;
-    notificationSubscriberManager->handler_ = nullptr;
+    notificationSubscriberManager->notificationSubQueue_ = nullptr;
     notificationSubscriberManager->NotifyEnabledNotificationChanged(callbackData);
 }
 
