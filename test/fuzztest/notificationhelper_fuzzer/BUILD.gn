@@ -41,7 +41,7 @@ ohos_fuzztest("NotificationHelperFuzzTest") {
     "ability_base:zuri",
     "c_utils:utils",
     "hilog:libhilog",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
     "relational_store:native_rdb",
   ]
 }

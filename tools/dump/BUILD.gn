@@ -53,7 +53,7 @@ ohos_executable("anm") {
     "access_token:libtoken_setproc",
     "c_utils:utils",
     "hilog:libhilog",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
     "relational_store:native_rdb",
   ]
   external_deps += component_external_deps

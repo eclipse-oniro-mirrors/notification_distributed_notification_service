@@ -73,7 +73,7 @@
         "access_token",
         "ipc",
         "player_framework",
-        "multimedia_image_framework",
+        "image_framework",
         "eventhandler",
         "c_utils",
         "i18n",
