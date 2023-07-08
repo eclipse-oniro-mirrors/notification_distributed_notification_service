@@ -16,9 +16,14 @@
 #include "reminder_data_manager.h"
 
 #include "ability_manager_client.h"
+#include "access_token_helper.h"
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
 #include "common_event_support.h"
+#ifdef DEVICE_STANDBY_ENABLE
+#include "standby_service_client.h"
+#include "allow_type.h"
+#endif
 #include "ipc_skeleton.h"
 #include "notification_slot.h"
 #include "os_account_manager.h"
@@ -310,8 +315,6 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
 {
     uint8_t timerTypeWakeup = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_WAKEUP);
     uint8_t timerTypeExact = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_EXACT);
-    int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-    sharedTimerInfo->SetType(timerType);
     sharedTimerInfo->SetRepeat(false);
     sharedTimerInfo->SetInterval(0);
 
@@ -323,6 +326,40 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
     }
     sharedTimerInfo->SetBundleName(mit->second->GetBundleName());
     sharedTimerInfo->SetUid(mit->second->GetUid());
+
+    // The systemtimer type will be set TIMER_TYPE_INEXACT_REMINDER&&EXACT if reminder type is CALENDAR or TIMER,
+    // and set WAKEUP&&EXACT if ALARM.
+    int32_t timerType;
+    if (reminderRequest->GetReminderType() == ReminderRequest::ReminderType::CALENDAR ||
+        reminderRequest->GetReminderType() == ReminderRequest::ReminderType::TIMER) {
+#ifdef DEVICE_STANDBY_ENABLE
+        // Get allow list.
+        std::string name = mit->second->GetBundleName();
+        std::vector<DevStandbyMgr::AllowInfo> allowInfoList;
+        DevStandbyMgr::StandbyServiceClient::GetInstance().GetAllowList(DevStandbyMgr::AllowType::TIMER, allowInfoList, 0);
+        auto it = std::find_if(allowInfoList.begin(),
+                    allowInfoList.end(),
+                    [name](const DevStandbyMgr::AllowInfo &allowInfo) {
+                        return allowInfo.GetName() == name;
+                    });
+        if (AccessTokenHelper::IsSystemApp() || it != allowInfoList.end()) {
+            timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
+        } else {
+            uint8_t timerTypeAns = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_INEXACT_REMINDER);
+            timerType = static_cast<int32_t>(timerTypeAns | timerTypeExact);
+        }
+#else
+        if (AccessTokenHelper::IsSystemApp()) {
+            timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
+        } else {
+            uint8_t timerTypeAns = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_INEXACT_REMINDER);
+            timerType = static_cast<int32_t>(timerTypeAns | timerTypeExact);
+        }
+#endif
+    } else {
+        timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
+    }
+    sharedTimerInfo->SetType(timerType);
 }
 
 std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerType type,
