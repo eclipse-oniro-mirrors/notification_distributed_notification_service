@@ -49,6 +49,7 @@ component_external_deps = [
 declare_args() {
   device_usage = true
   hisysevent_usage = true
+  standby_enable = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
@@ -60,10 +61,9 @@ declare_args() {
     hisysevent_usage = false
   }
 
-  standby_enable = true
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_standby)) {
-      standby_enable = false
+    standby_enable = false
   }
 
   print("hisysevent_usage = " + "$hisysevent_usage")

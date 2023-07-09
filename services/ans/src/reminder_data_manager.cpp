@@ -36,6 +36,9 @@ namespace Notification {
 namespace {
 const std::string ALL_PACKAGES = "allPackages";
 const int32_t MAIN_USER_ID = 100;
+#ifdef DEVICE_STANDBY_ENABLE
+const int REASON_APP_API = 1;
+#endif
 }
 
 /**
@@ -336,12 +339,13 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
         // Get allow list.
         std::string name = mit->second->GetBundleName();
         std::vector<DevStandbyMgr::AllowInfo> allowInfoList;
-        DevStandbyMgr::StandbyServiceClient::GetInstance().GetAllowList(DevStandbyMgr::AllowType::TIMER, allowInfoList, 0);
+        DevStandbyMgr::StandbyServiceClient::GetInstance().GetAllowList(DevStandbyMgr::AllowType::TIMER,
+            allowInfoList, REASON_APP_API);
         auto it = std::find_if(allowInfoList.begin(),
-                    allowInfoList.end(),
-                    [name](const DevStandbyMgr::AllowInfo &allowInfo) {
-                        return allowInfo.GetName() == name;
-                    });
+            allowInfoList.end(),
+            [&name](const DevStandbyMgr::AllowInfo &allowInfo) {
+                return allowInfo.GetName() == name;
+            });
         if (AccessTokenHelper::IsSystemApp() || it != allowInfoList.end()) {
             timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
         } else {
@@ -349,12 +353,7 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
             timerType = static_cast<int32_t>(timerTypeAns | timerTypeExact);
         }
 #else
-        if (AccessTokenHelper::IsSystemApp()) {
-            timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-        } else {
-            uint8_t timerTypeAns = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_INEXACT_REMINDER);
-            timerType = static_cast<int32_t>(timerTypeAns | timerTypeExact);
-        }
+        timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
 #endif
     } else {
         timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
