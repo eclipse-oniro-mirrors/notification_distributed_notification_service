@@ -25,14 +25,41 @@
 #include "mock_ipc_skeleton.h"
 #include "notification.h"
 #include "notification_subscriber.h"
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+#include "ans_permission_def.h"
 
 
 using namespace OHOS;
 using namespace OHOS::Notification;
 using namespace OHOS::AbilityRuntime;
+using namespace OHOS::Notification;
 
 namespace {
 const uint32_t TOKEN_ID = 0x08000000;
+
+void AddPermission()
+{
+    uint64_t tokenId;
+    const char *perms[2];
+    perms[0] = OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER;
+    perms[1] = OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .aclsNum = 0,
+        .dcaps = NULL,
+        .perms = perms,
+        .acls = NULL,
+        .processName = "com.distributed.notification.service.test",
+        .aplStr = "system_core",
+
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
@@ -72,7 +99,10 @@ public:
 
     void SetUp(const ::benchmark::State &state) override
     {
-        IPCSkeleton::SetCallingTokenID(TOKEN_ID);
+        if (flag) {
+            AddPermission();
+            flag = false;
+        }
     }
     void TearDown(const ::benchmark::State &state) override
     {}
@@ -80,6 +110,7 @@ public:
 protected:
     const int32_t repetitions = 3;
     const int32_t iterations = 100;
+    bool flag = true;
     static sptr<AdvancedNotificationService> advancedNotificationService_;
 };
 
@@ -160,6 +191,7 @@ BENCHMARK_F(BenchmarkNotificationService, PublishNotificationTestCase001)(benchm
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
+    req->SetCreatorUid(100);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -190,6 +222,7 @@ BENCHMARK_F(BenchmarkNotificationService, CancelNotificationTestCase001)(benchma
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
+    req->SetCreatorUid(100);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
