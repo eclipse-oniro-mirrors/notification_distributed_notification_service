@@ -79,7 +79,8 @@
         "i18n",
         "device_manager",
         "kv_store",
-        "ffrt"
+        "ffrt",
+        "device_standby"
       ],
       "third_party": [
         "libuv"
