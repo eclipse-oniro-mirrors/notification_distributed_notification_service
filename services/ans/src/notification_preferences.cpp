@@ -49,6 +49,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || slots.empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     for (auto slot : slots) {
@@ -76,6 +77,7 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
         return ERR_ANS_INVALID_PARAM;
     }
 
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     preferencesInfo.SetBundleInfo(bundleInfo);
@@ -97,6 +99,7 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     result = CheckSlotForRemoveSlot(bundleOption, slotType, preferencesInfo);
@@ -116,6 +119,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
@@ -141,7 +145,7 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
     ErrCode result = ERR_OK;
@@ -168,7 +172,7 @@ ErrCode NotificationPreferences::UpdateNotificationSlots(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || slots.empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     for (auto slotIter : slots) {
@@ -260,7 +264,7 @@ ErrCode NotificationPreferences::SetShowBadge(const sptr<NotificationBundleOptio
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SHOW_BADGE_TYPE, enable);
     if (result == ERR_OK) {
@@ -284,6 +288,7 @@ ErrCode NotificationPreferences::SetImportance(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_IMPORTANCE_TYPE, importance);
     if (result == ERR_OK) {
@@ -307,6 +312,7 @@ ErrCode NotificationPreferences::SetTotalBadgeNums(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, num);
     if (result == ERR_OK) {
@@ -360,7 +366,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabled(const int32_t &userId, 
     if (userId <= SUBSCRIBE_USER_INIT) {
         return ERR_ANS_INVALID_PARAM;
     }
-
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     preferencesInfo.SetEnabledAllNotification(userId, enabled);
     ErrCode result = ERR_OK;
@@ -387,7 +393,7 @@ ErrCode NotificationPreferences::SetHasPoppedDialog(const sptr<NotificationBundl
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_PARAM;
     }
-
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped);
@@ -405,6 +411,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbDate(const int32_t &userId,
     }
 
     ErrCode result = ERR_OK;
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (!preferencesInfo.GetDoNotDisturbDate(userId, date)) {
         result = ERR_ANS_INVALID_PARAM;
@@ -419,7 +426,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
     if (userId <= SUBSCRIBE_USER_INIT) {
         return ERR_ANS_INVALID_PARAM;
     }
-
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     preferencesInfo.SetDoNotDisturbDate(userId, date);
 
