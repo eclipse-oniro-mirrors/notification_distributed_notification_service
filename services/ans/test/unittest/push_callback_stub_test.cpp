@@ -74,10 +74,10 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00200, Function | SmallTest 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
-    TestPushCallBackStub testPushCallBackStub;
-    data.WriteInterfaceToken(testPushCallBackStub.GetDescriptor());
+    sptr<TestPushCallBackStub> testPushCallBackStub = new TestPushCallBackStub();
+    data.WriteInterfaceToken(testPushCallBackStub->GetDescriptor());
 
-    int ret = testPushCallBackStub.OnRemoteRequest(code, data, reply, option);
+    int ret = testPushCallBackStub->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);
 }
 
