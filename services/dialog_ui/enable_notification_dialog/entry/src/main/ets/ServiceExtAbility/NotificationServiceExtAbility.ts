@@ -48,6 +48,12 @@ export default class NotificationDialogServiceExtensionAbility extends extension
       await win.show();
       if (deviceInfo.deviceType === 'default' || deviceInfo.deviceType === 'phone') {
         await win.setWindowLayoutFullScreen(true);
+      } else {
+        let def = display.getDefaultDisplaySync();
+        let topMargin = 60;
+        let bottomMargin = 96;
+        win.moveTo(0, def.densityPixels * topMargin);
+        win.resetSize(def.width, def.height - def.densityPixels * bottomMargin - def.densityPixels * topMargin);
       }
       await win.loadContent('pages/notificationDialog');
       await win.setBackgroundColor('#00000000');
