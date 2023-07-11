@@ -258,6 +258,11 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
+        virtual int Notify(const std::string &event)
+        {
+            return E_ERROR;
+        }
+
         virtual bool DropDeviceData(const std::vector<std::string>& devices, const DropOption& option)
         {
             return false;
