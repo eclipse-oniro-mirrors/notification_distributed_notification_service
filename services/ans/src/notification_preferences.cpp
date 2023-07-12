@@ -444,6 +444,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 {
     ErrCode result = ERR_OK;
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (!preferncesDB_->RemoveAllDataFromDisturbeDB()) {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
