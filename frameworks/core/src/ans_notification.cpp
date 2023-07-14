@@ -326,14 +326,14 @@ ErrCode AnsNotification::IsAllowedNotifySelf(bool &allowed)
     return ansManagerProxy_->IsAllowedNotifySelf(allowed);
 }
 
-ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId)
+ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId, sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("enter");
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->RequestEnableNotification(deviceId);
+    return ansManagerProxy_->RequestEnableNotification(deviceId, callerToken);
 }
 
 ErrCode AnsNotification::HasNotificationPolicyAccessPermission(bool &hasPermission)

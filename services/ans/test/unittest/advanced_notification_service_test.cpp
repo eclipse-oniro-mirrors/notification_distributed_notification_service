@@ -1744,7 +1744,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     std::string deviceId = "DeviceId";
-    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId), (int)ERR_ANS_INVALID_PARAM);
+    sptr<IRemoteObject> callerToken = nullptr;
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, callerToken), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -2321,7 +2322,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
 
     std::string deviceId = "DeviceId";
     bool needPop = false;
-    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId), ERR_ANS_INVALID_BUNDLE);
+    sptr<IRemoteObject> callerToken = nullptr;
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, callerToken), ERR_ANS_INVALID_BUNDLE);
     EXPECT_EQ(advancedNotificationService_->IsAllowedNotifySelf(needPop), ERR_ANS_INVALID_BUNDLE);
     sptr<NotificationBundleOption> bundleOption;
     EXPECT_EQ(advancedNotificationService_->IsAllowedNotifySelf(bundleOption, needPop), ERR_ANS_INVALID_BUNDLE);

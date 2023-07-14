@@ -264,7 +264,7 @@ public:
      *                 only be null or an empty string, indicating the current device.
      * @return Returns set notifications enabled for default bundle result.
      */
-    static ErrCode RequestEnableNotification(std::string &deviceId);
+    static ErrCode RequestEnableNotification(std::string &deviceId, sptr<IRemoteObject> &callerToken);
 
     /**
      * @brief Checks whether this application has permission to modify the Do Not Disturb (DND) notification policy.

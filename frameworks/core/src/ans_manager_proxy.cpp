@@ -1050,7 +1050,7 @@ ErrCode AnsManagerProxy::UpdateSlots(
     return result;
 }
 
-ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId)
+ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGI("enter");
     MessageParcel data;
@@ -1062,6 +1062,17 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId)
     if (!data.WriteString(deviceId)) {
         ANS_LOGE("[RequestEnableNotification] fail: write deviceId failed");
         return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteBool(callerToken != nullptr)) {
+        ANS_LOGE("fail: write callerToken failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (callerToken != nullptr) {
+        if (!data.WriteRemoteObject(callerToken)) {
+            ANS_LOGE("fail: write callerToken failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
     }
 
     MessageParcel reply;

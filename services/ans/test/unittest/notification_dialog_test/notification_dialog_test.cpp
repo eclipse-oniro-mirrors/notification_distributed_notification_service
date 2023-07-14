@@ -89,7 +89,8 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest 
     EXPECT_EQ(result2, code);
 
     int32_t uid = 2;
-    ErrCode result3 =  notificationDialog.StartEnableNotificationDialogAbility(uid);
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result3 =  notificationDialog.StartEnableNotificationDialogAbility(uid, callerToken);
     EXPECT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -112,7 +113,8 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest 
     EXPECT_EQ(result2, code);
     
     int32_t uid = -1;
-    ErrCode result3 =  notificationDialog.StartEnableNotificationDialogAbility(uid);
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result3 =  notificationDialog.StartEnableNotificationDialogAbility(uid, callerToken);
     EXPECT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
 }  // namespace Notification

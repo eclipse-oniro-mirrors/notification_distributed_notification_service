@@ -318,7 +318,7 @@ public:
      * @param deviceId Indicates the device Id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode RequestEnableNotification(const std::string &deviceId) = 0;
+    virtual ErrCode RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callerToken) = 0;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.

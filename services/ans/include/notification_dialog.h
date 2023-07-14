@@ -30,7 +30,7 @@ public:
      * @param uid The uid of application that want launch notification dialog.
      * @return ERR_OK if success, else not.
      */
-    ErrCode StartEnableNotificationDialogAbility(int32_t uid);
+    ErrCode StartEnableNotificationDialogAbility(int32_t uid, const sptr<IRemoteObject> &callerToken);
 
 private:
     int32_t GetActiveUserId();

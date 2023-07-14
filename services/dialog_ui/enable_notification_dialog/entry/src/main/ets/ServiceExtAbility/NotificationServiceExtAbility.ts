@@ -19,21 +19,37 @@ import display from '@ohos.display';
 import deviceInfo from '@ohos.deviceInfo';
 const TAG = 'NotificationDialog_Service';
 
+let winNum = 1;
+let win;
 export default class NotificationDialogServiceExtensionAbility extends extension {
   onCreate(want): void {
-      console.debug(TAG, "onCreate, want: " + JSON.stringify(want));
-      globalThis.notificationExtensionContext = this.context;
-      globalThis.closeDialog = (): void => {
-        console.info(TAG, 'click waiting for a response');
-        globalThis.notificationExtensionContext.terminateSelf();
-      }
+    console.debug(TAG, "onCreate, want: " + JSON.stringify(want));
+    globalThis.notificationExtensionContext = this.context;
+    globalThis.closeDialog = (): void => {
+      console.info(TAG, 'click waiting for a response');
+      globalThis.notificationExtensionContext.terminateSelf();
+    }
   };
 
   onRequest(want, startId): void {
     globalThis.abilityWant = want;
-    console.log(TAG, 'globalThis.resolution' + JSON.stringify(globalThis.resolution));
+
+    if (want["parameters"]["callerToken"] !== undefined && want["parameters"]["callerToken"] != null) {
+      globalThis.callerToken = want["parameters"]["callerToken"];
+    }
     display.getDefaultDisplay().then(() => {
-      this.createWindow('EnableNotificationDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT);
+
+      if (globalThis.callerToken != null) {
+        if (winNum > 1) {
+          win.destroy();
+          winNum--;
+        }
+        this.createWindow('EnableNotificationDialog' + startId, window.WindowType.TYPE_DIALOG);
+        winNum++;
+      } else {
+        this.createWindow('EnableNotificationDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT);
+      }
+
     });
   }
 
@@ -44,7 +60,18 @@ export default class NotificationDialogServiceExtensionAbility extends extension
   private async createWindow(name: string, windowType: number) {
     console.info(TAG, 'create window');
     try {
-      const win = await window.create(globalThis.notificationExtensionContext, name, windowType);
+      win = await window.create(globalThis.notificationExtensionContext, name, windowType);
+
+      if (globalThis.callerToken != null) {
+        await win.bindDialogTarget(globalThis.callerToken.value, () => {
+          win.destroyWindow();
+          winNum--;
+          if (winNum === 0) {
+            globalThis.selectExtensionContext.terminateSelf();
+          }
+        });
+      }
+
       await win.show();
       if (deviceInfo.deviceType === 'default' || deviceInfo.deviceType === 'phone') {
         await win.setWindowLayoutFullScreen(true);

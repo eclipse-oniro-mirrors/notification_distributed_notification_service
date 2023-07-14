@@ -323,7 +323,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestEnableNotification(
-        const std::string &deviceId) override;
+        const std::string &deviceId, const sptr<IRemoteObject> &callerToken) override;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.

@@ -21,7 +21,8 @@ namespace OHOS {
     {
         // test RequestEnableNotification function
         std::string deviceId(data);
-        Notification::NotificationHelper::RequestEnableNotification(deviceId);
+        sptr<IRemoteObject> callerToken = nullptr;
+        Notification::NotificationHelper::RequestEnableNotification(deviceId, callerToken);
         // test HasNotificationPolicyAccessPermission function
         bool hasPermission = true;
         Notification::NotificationHelper::HasNotificationPolicyAccessPermission(hasPermission);
