@@ -797,7 +797,6 @@ ErrCode AnsManagerStub::HandleRemoveAllNotifications(MessageParcel &data, Messag
 
 ErrCode AnsManagerStub::HandleRemoveNotifications(MessageParcel &data, MessageParcel &reply)
 {
-
     int32_t keysSize = 0;
     if (!data.ReadInt32(keysSize)) {
         ANS_LOGE("read keys size failed.");
