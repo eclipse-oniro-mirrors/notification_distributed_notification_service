@@ -14,6 +14,7 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "${component_name}/moduletest"
 
@@ -95,6 +96,10 @@ ohos_moduletest("ans_module_test") {
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
     defines = [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libdm" ]
   }
 
   subsystem_name = "${subsystem_name}"
