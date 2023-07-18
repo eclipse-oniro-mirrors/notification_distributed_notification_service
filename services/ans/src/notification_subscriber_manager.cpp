@@ -89,7 +89,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber, &subInfo, &result]() {
         ANS_LOGE("ffrt enter!");
         result = this->AddSubscriberInner(subscriber, subInfo);
-    }));/*, AppExecFwk::EventQueue::Priority::HIGH*/
+    }));
     notificationSubQueue_->wait(handler);
     ANS_LOGE("ffrt end!");
     return result;
@@ -114,7 +114,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         &subscribeInfo, &result]() {
         ANS_LOGE("ffrt enter!");
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
-    }));/*, AppExecFwk::EventQueue::Priority::HIGH*/
+    }));
     notificationSubQueue_->wait(handler);
     ANS_LOGE("ffrt end!");
     return result;
@@ -225,7 +225,7 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
             ANS_LOGW("subscriber removed.");
             subscriberRecordList_.remove(record);
         }
-    }));/*, AppExecFwk::EventQueue::Priority::HIGH*/
+    }));
     ANS_LOGE("ffrt start!");
     notificationSubQueue_->wait(handler);
     ANS_LOGE("ffrt end!");
