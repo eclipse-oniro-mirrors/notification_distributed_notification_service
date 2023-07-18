@@ -516,8 +516,10 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2900, Func
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_3000, Function | SmallTest | Level1)
 {
-    database_->kvDataManager_ = nullptr;
-    EXPECT_EQ(false, database_->RecreateDistributedDB());
+    std::shared_ptr<DistributedDatabase> distributedDatabase =
+        std::make_shared<DistributedDatabase>(databaseCallback_, deviceCallback_);
+    distributedDatabase->kvDataManager_ = nullptr;
+    EXPECT_EQ(false, distributedDatabase->RecreateDistributedDB());
 }
 
 /**
