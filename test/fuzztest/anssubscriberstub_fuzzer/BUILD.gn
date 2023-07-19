@@ -42,8 +42,8 @@ ohos_fuzztest("AnsSubscriberStubFuzzTest") {
     "ability_base:zuri",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
   ]
 }

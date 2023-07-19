@@ -56,8 +56,8 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "image_framework:image_native",
     "kv_store:distributeddata_inner",
-    "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
   ]
 }

@@ -31,8 +31,8 @@ ohos_unittest("ans_subscriber_stub_test") {
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
   ]
 

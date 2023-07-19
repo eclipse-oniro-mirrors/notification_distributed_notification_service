@@ -59,7 +59,7 @@ ohos_shared_library("notificationsubscribe") {
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
-    "multimedia_image_framework:image",
+    "image_framework:image",
     "napi:ace_napi",
     "relational_store:native_rdb",
   ]
