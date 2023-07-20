@@ -144,9 +144,9 @@ ErrCode NotificationHelper::IsAllowedNotifySelf(bool &allowed)
     return DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
 }
 
-ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId)
+ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId, sptr<IRemoteObject> &callerToken)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(deviceId);
+    return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(deviceId, callerToken);
 }
 
 ErrCode NotificationHelper::HasNotificationPolicyAccessPermission(bool &hasPermission)

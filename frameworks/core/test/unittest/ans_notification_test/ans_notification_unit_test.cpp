@@ -355,7 +355,8 @@ HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0100, Function | Med
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::string deviceId = "this is deviceId";
-    ErrCode ret1 = ans_->RequestEnableNotification(deviceId);
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode ret1 = ans_->RequestEnableNotification(deviceId, callerToken);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
     bool hasPermission = true;
     ErrCode ret3 = ans_->HasNotificationPolicyAccessPermission(hasPermission);

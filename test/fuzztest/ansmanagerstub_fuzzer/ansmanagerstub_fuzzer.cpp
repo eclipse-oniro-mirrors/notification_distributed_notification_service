@@ -148,7 +148,8 @@ namespace OHOS {
         ansManagerStub.DeleteAll();
         ansManagerStub.GetSlotsByBundle(bundleOption, slots);
         ansManagerStub.UpdateSlots(bundleOption, slots);
-        ansManagerStub.RequestEnableNotification(stringData);
+        sptr<IRemoteObject> callerToken = nullptr;
+        ansManagerStub.RequestEnableNotification(stringData, callerToken);
         bool enabled = *data % ENABLE;
         ansManagerStub.SetNotificationsEnabledForBundle(stringData, enabled);
         ansManagerStub.SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);

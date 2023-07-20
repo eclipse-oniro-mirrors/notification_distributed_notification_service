@@ -77,7 +77,8 @@ namespace OHOS {
         advancedNotificationService.DeleteAll();
         advancedNotificationService.GetSlotsByBundle(bundleOption, slots);
         advancedNotificationService.UpdateSlots(bundleOption, slots);
-        advancedNotificationService.RequestEnableNotification(stringData);
+        sptr<IRemoteObject> callerToken = nullptr;
+        advancedNotificationService.RequestEnableNotification(stringData, callerToken);
         bool enabled = *data % ENABLE;
         advancedNotificationService.SetNotificationsEnabledForBundle(stringData, enabled);
         advancedNotificationService.SetNotificationsEnabledForAllBundles(stringData, enabled);

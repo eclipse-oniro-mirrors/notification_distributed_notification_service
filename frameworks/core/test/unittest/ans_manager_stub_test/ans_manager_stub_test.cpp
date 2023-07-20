@@ -1368,6 +1368,7 @@ HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification01, Function | Small
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(deviceId);
+    data.WriteBool(false);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
@@ -3616,7 +3617,8 @@ HWTEST_F(AnsManagerStubTest, UpdateSlots01, Function | SmallTest | Level1)
 HWTEST_F(AnsManagerStubTest, RequestEnableNotification01, Function | SmallTest | Level1)
 {
     std::string deviceId = "this is deviceId";
-    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId);
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, callerToken);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

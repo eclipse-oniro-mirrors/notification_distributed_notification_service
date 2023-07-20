@@ -31,6 +31,8 @@ struct IsEnableParams {
     int32_t userId = SUBSCRIBE_USER_INIT;
     bool hasUserId = false;
     bool allowToPop = false;
+    sptr<IRemoteObject> callerToken = nullptr;
+    bool hasCallerToken = false;
 };
 
 struct AsyncCallbackInfoIsEnable {

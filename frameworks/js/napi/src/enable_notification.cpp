@@ -374,7 +374,7 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 std::string deviceId {""};
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::RequestEnableNotification(deviceId);
+                    NotificationHelper::RequestEnableNotification(deviceId, asynccallbackinfo->params.callerToken);
             }
         },
         [](napi_env env, napi_status status, void *data) {

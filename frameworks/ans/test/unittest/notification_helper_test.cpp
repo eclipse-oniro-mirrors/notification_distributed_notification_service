@@ -409,7 +409,8 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
 {
     std::string deviceId = "DeviceId";
     NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.RequestEnableNotification(deviceId);
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode ret = notificationHelper.RequestEnableNotification(deviceId, callerToken);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 

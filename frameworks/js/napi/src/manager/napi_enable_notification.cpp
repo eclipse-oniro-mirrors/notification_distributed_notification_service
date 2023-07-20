@@ -17,9 +17,11 @@
 
 #include "ans_inner_errors.h"
 #include "enable_notification.h"
+#include "napi_base_context.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
 void AsyncCompleteCallbackNapiEnableNotification(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("enter");
@@ -254,7 +256,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
     IsEnableParams params {};
-    if (ParseParameters(env, info, params) == nullptr) {
+    if (ParseRequestEnableParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
@@ -277,7 +279,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 std::string deviceId {""};
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::RequestEnableNotification(deviceId);
+                    NotificationHelper::RequestEnableNotification(deviceId, asynccallbackinfo->params.callerToken);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -308,6 +310,54 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+}
+
+napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback_info &info, IsEnableParams &params)
+{
+    ANS_LOGD("enter");
+
+    size_t argc = IS_NOTIFICATION_ENABLE_MAX_PARA;
+    napi_value argv[IS_NOTIFICATION_ENABLE_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+
+    if (argc == 0) {
+        return Common::NapiGetNull(env);
+    }
+
+    // argv[0]: context / callback
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if ((valuetype != napi_object) && (valuetype != napi_function)) {
+        ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
+        return Common::NapiGetNull(env);
+    }
+    if (valuetype == napi_object) {
+        bool stageMode = false;
+        napi_status status = OHOS::AbilityRuntime::IsStageContext(env, argv[PARAM0], stageMode);
+        if (status == napi_ok && stageMode) {
+            auto context = OHOS::AbilityRuntime::GetStageModeContext(env, argv[PARAM0]);
+            sptr<IRemoteObject> callerToken = context->GetToken();
+            params.callerToken = callerToken;
+            params.hasCallerToken = true;
+        } else {
+            ANS_LOGE("Only support stage mode");
+            return nullptr;
+        }
+    } else {
+        napi_create_reference(env, argv[PARAM0], 1, &params.callback);
+    }
+    // argv[1]:context
+    if (argc >= IS_NOTIFICATION_ENABLE_MAX_PARA && valuetype == napi_object) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+        if (valuetype != napi_function) {
+            ANS_LOGW("Callback is not function excute promise.");
+            return Common::NapiGetNull(env);
+        }
+        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
+    }
+
+    return Common::NapiGetNull(env);
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

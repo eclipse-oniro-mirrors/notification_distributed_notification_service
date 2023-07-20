@@ -47,7 +47,7 @@ int32_t NotificationDialog::GetUidByBundleName(const std::string &bundleName)
     return IN_PROCESS_CALL(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId));
 }
 
-ErrCode NotificationDialog::StartEnableNotificationDialogAbility(int32_t uid)
+ErrCode NotificationDialog::StartEnableNotificationDialogAbility(int32_t uid, const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
     auto bundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
@@ -60,6 +60,9 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(int32_t uid)
     AAFwk::Want want;
     want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
     want.SetParam("from", bundleName);
+    if (callerToken != nullptr) {
+        want.SetParam("callerToken", callerToken);
+    }
     auto result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want));
     ANS_LOGD("End, result = %{public}d", result);
     return result;
