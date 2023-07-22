@@ -27,6 +27,9 @@ export default class NotificationDialogServiceExtensionAbility extends extension
     globalThis.notificationExtensionContext = this.context;
     globalThis.closeDialog = (): void => {
       console.info(TAG, 'click waiting for a response');
+      if (win !== undefined) {
+        win.destroyWindow();
+      }
       globalThis.notificationExtensionContext.terminateSelf();
     }
   };
