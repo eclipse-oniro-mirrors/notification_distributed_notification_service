@@ -106,7 +106,7 @@ ohos_shared_library("libans") {
     external_deps += [ "device_standby:standby_innerkits" ]
     defines += [ "DEVICE_STANDBY_ENABLE" ]
   }
-  innerapi_tags = [ "platformsdk" ]
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

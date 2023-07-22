@@ -17,7 +17,9 @@
 
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
+#define private public
 #include "advanced_notification_service.h"
+#undef private
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "notification_helper.h"
@@ -38,18 +40,25 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+    static sptr<AdvancedNotificationService> service_;
 };
 
+sptr<AdvancedNotificationService> AnsInnerKitsModuleSettingTest::service_;
 void AnsInnerKitsModuleSettingTest::SetUpTestCase()
 {
     RemoteNativeToken::SetNativeToken("ans_innerkits_module_setting_test");
-    sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
+    service_ = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
-    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
+    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service_, saExtraProp);
 }
 
 void AnsInnerKitsModuleSettingTest::TearDownTestCase()
-{}
+{
+    if (service_ != nullptr) {
+        service_->SelfClean();
+    }
+}
 
 void AnsInnerKitsModuleSettingTest::SetUp()
 {}

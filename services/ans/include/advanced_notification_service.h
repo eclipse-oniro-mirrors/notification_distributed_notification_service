@@ -831,6 +831,8 @@ private:
     void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
+    void SelfClean();
+
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

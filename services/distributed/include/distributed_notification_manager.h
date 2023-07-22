@@ -130,6 +130,11 @@ public:
      */
     ErrCode OnDistributedKvStoreDeathRecipient();
 
+    /**
+     * @brief Reset ffrt queue
+     */
+    void ResetFfrtQueue();
+
 private:
     void OnDatabaseInsert(const std::string &deviceId, const std::string &key, const std::string &value);
     void OnDatabaseUpdate(const std::string &deviceId, const std::string &key, const std::string &value);

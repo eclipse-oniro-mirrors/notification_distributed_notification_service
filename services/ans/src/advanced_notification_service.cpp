@@ -278,6 +278,7 @@ sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
 
 AdvancedNotificationService::AdvancedNotificationService()
 {
+    ANS_LOGI("constructor");
     notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
     if (!notificationSvrQueue_) {
         ANS_LOGE("ffrt create failed!");
@@ -326,12 +327,24 @@ AdvancedNotificationService::AdvancedNotificationService()
 
 AdvancedNotificationService::~AdvancedNotificationService()
 {
+    ANS_LOGI("deconstructor");
     dataManager_.UnRegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
 
     StopFilters();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     DistributedNotificationManager::GetInstance()->UngegisterCallback();
 #endif
+    SelfClean();
+}
+
+void AdvancedNotificationService::SelfClean()
+{
+    if (notificationSvrQueue_ != nullptr) {
+        notificationSvrQueue_.reset();
+    }
+
+    NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
+    DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
 }
 
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
@@ -392,8 +405,12 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
-    ErrCode result = ERR_OK;
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
@@ -461,6 +478,10 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     record->bundleOption = bundleOption;
     SetNotificationRemindType(record->notification, true);
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -647,14 +668,18 @@ sptr<NotificationSortingMap> AdvancedNotificationService::GenerateSortingMap()
 void AdvancedNotificationService::StartFilters()
 {
     for (auto filter : NOTIFICATION_FILTERS) {
-        filter->OnStart();
+        if (filter != nullptr) {
+            filter->OnStart();
+        }
     }
 }
 
 void AdvancedNotificationService::StopFilters()
 {
     for (auto filter : NOTIFICATION_FILTERS) {
-        filter->OnStop();
+        if (filter != nullptr) {
+            filter->OnStop();
+        }
     }
 }
 
@@ -675,8 +700,11 @@ ErrCode AdvancedNotificationService::CancelAll()
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
-
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
@@ -771,6 +799,10 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -805,6 +837,10 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -827,6 +863,10 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(std::vector<sptr<Not
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         notifications.clear();
@@ -850,6 +890,10 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         size_t count = 0;
@@ -895,6 +939,10 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
@@ -914,6 +962,10 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
@@ -942,8 +994,11 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
-
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
@@ -988,6 +1043,10 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1035,6 +1094,10 @@ ErrCode AdvancedNotificationService::DeleteAll()
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1114,6 +1177,10 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1147,6 +1214,10 @@ ErrCode AdvancedNotificationService::UpdateSlots(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1183,6 +1254,10 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
@@ -1212,6 +1287,10 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1234,6 +1313,10 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1391,6 +1474,10 @@ ErrCode AdvancedNotificationService::GetSlotByType(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
@@ -1409,6 +1496,10 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(const NotificationConstant
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().RemoveNotificationSlot(bundleOption, slotType);
@@ -1431,6 +1522,10 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         notifications.clear();
@@ -1474,6 +1569,10 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
@@ -1551,6 +1650,10 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1625,6 +1728,10 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -1790,6 +1897,10 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
         record->notification->SetSourceType(NotificationConstant::SourceType::TYPE_CONTINUOUS);
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (!IsNotificationExists(record->notification->GetKey())) {
@@ -1821,6 +1932,10 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
         return ERR_ANS_NOT_SYSTEM_SERVICE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     int32_t uid = IPCSkeleton::GetCallingUid();
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -2221,7 +2336,10 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
 void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     notificationSvrQueue_->submit(std::bind([this, bundleOption]() {
         ANS_LOGD("ffrt enter!");
         ErrCode result = NotificationPreferences::GetInstance().RemoveNotificationForBundle(bundleOption);
@@ -2286,6 +2404,10 @@ void AdvancedNotificationService::OnScreenOff()
 void AdvancedNotificationService::OnDistributedKvStoreDeathRecipient()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().OnDistributedKvStoreDeathRecipient();
@@ -2304,6 +2426,10 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -2325,6 +2451,10 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -2363,8 +2493,11 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
@@ -2433,6 +2566,10 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
@@ -2493,6 +2630,10 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
@@ -2549,8 +2690,11 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
-
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().GetNotificationSlotsNumForBundle(bundle, num);
@@ -2577,6 +2721,10 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
@@ -2644,6 +2792,10 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
@@ -2825,6 +2977,10 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -2855,6 +3011,10 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
@@ -2895,6 +3055,10 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -2927,6 +3091,10 @@ ErrCode AdvancedNotificationService::EnableDistributedSelf(const bool enabled)
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind(
         [&]() {
@@ -2968,6 +3136,10 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
         return ERR_OK;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -2998,6 +3170,10 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(NotificationConstant::R
     }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() { remindType = GetRemindType(); }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
@@ -3155,6 +3331,10 @@ void AdvancedNotificationService::OnDistributedPublish(
         return;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
@@ -3221,6 +3401,10 @@ void AdvancedNotificationService::OnDistributedUpdate(
         return;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
@@ -3285,6 +3469,10 @@ void AdvancedNotificationService::OnDistributedDelete(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, label, id]() {
         ANS_LOGD("ffrt enter!");
         int32_t activeUserId = -1;
@@ -3385,6 +3573,10 @@ ErrCode AdvancedNotificationService::PrepareContinuousTaskNotificationRequest(
 ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templateName, bool &support)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -3433,6 +3625,10 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(const int32_t &u
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -3456,6 +3652,10 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(const int32_t
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -3479,6 +3679,10 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -3609,6 +3813,10 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().SetDoNotDisturbDate(userId, newConfig);
@@ -3625,7 +3833,10 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
     sptr<NotificationDoNotDisturbDate> &date)
 {
     ErrCode result = ERR_OK;
-
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationDoNotDisturbDate> currentConfig = nullptr;
@@ -3657,6 +3868,10 @@ ErrCode AdvancedNotificationService::SetHasPoppedDialog(
     const sptr<NotificationBundleOption> bundleOption, bool hasPopped)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ANS_LOGE("ffrt start!");
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -3672,6 +3887,10 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     const sptr<NotificationBundleOption> bundleOption, bool &hasPopped)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -3695,6 +3914,10 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
 {
     DeleteAllByUser(userId);
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().RemoveSettings(userId);
@@ -3704,6 +3927,10 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
 
 void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
@@ -3804,6 +4031,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         sptr<NotificationSlot> slot;
@@ -3862,6 +4093,10 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -3915,6 +4150,10 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_ANS_NOT_ALLOWED;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -4135,6 +4374,10 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
@@ -4162,6 +4405,10 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
@@ -4229,6 +4476,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_NO_MEMORY;
     }
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
@@ -4246,6 +4497,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     std::string bundleName = GetClientBundleName();
     sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
@@ -4379,6 +4634,10 @@ void AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Notifica
         this, record->notification->GetKey());
     int64_t autoDeleteTime = record->request->GetAutoDeletedTime() - GetCurrentTime();
 
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(triggerFunc,
         ffrt::task_attr().delay(autoDeleteTime * 1000));
 }

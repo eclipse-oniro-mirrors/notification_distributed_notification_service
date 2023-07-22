@@ -77,7 +77,10 @@ void NotificationSubscriberManagerTest::SetUpTestCase()
 void NotificationSubscriberManagerTest::TearDownTestCase()
 {
     subscriber_ = nullptr;
-    notificationSubscriberManager_ = nullptr;
+    if (notificationSubscriberManager_ != nullptr) {
+        notificationSubscriberManager_->ResetFfrtQueue();
+        notificationSubscriberManager_ = nullptr;
+    }
 }
 
 void NotificationSubscriberManagerTest::SetUp()
