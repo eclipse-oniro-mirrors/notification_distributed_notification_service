@@ -62,6 +62,7 @@ ohos_shared_library("ans_core") {
     "${frameworks_module_ans_path}/src/notification_subscriber.cpp",
     "${frameworks_module_ans_path}/src/notification_template.cpp",
     "${frameworks_module_ans_path}/src/notification_user_input.cpp",
+    "${frameworks_module_ans_path}/src/push_callback_stub.cpp",
     "${frameworks_module_ans_path}/src/reminder_helper.cpp",
     "${frameworks_module_ans_path}/src/reminder_request.cpp",
     "${frameworks_module_ans_path}/src/reminder_request_alarm.cpp",
