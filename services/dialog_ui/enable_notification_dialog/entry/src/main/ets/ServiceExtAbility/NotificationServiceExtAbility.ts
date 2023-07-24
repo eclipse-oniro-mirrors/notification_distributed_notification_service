@@ -23,7 +23,7 @@ let winNum = 1;
 let win;
 export default class NotificationDialogServiceExtensionAbility extends extension {
   onCreate(want): void {
-    console.debug(TAG, "onCreate, want: " + JSON.stringify(want));
+    console.debug(TAG, 'onCreate, want: ' + JSON.stringify(want));
     globalThis.notificationExtensionContext = this.context;
     globalThis.closeDialog = (): void => {
       console.info(TAG, 'click waiting for a response');
@@ -31,14 +31,14 @@ export default class NotificationDialogServiceExtensionAbility extends extension
         win.destroyWindow();
       }
       globalThis.notificationExtensionContext.terminateSelf();
-    }
+    };
   };
 
   onRequest(want, startId): void {
     globalThis.abilityWant = want;
 
-    if (want["parameters"]["callerToken"] !== undefined && want["parameters"]["callerToken"] != null) {
-      globalThis.callerToken = want["parameters"]["callerToken"];
+    if (want['parameters']['callerToken'] !== undefined && want['parameters']['callerToken'] != null) {
+      globalThis.callerToken = want['parameters']['callerToken'];
     }
     display.getDefaultDisplay().then(() => {
 
