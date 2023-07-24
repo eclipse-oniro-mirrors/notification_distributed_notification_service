@@ -1745,7 +1745,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
     EXPECT_NE(req, nullptr);
     std::string deviceId = "DeviceId";
     sptr<IRemoteObject> callerToken = nullptr;
-    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, callerToken), (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, callerToken),
+        (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
