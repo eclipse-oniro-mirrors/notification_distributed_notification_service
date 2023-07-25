@@ -1132,6 +1132,10 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     if (soundPlayer_ == nullptr) {
         soundPlayer_ = Media::PlayerFactory::CreatePlayer();
     }
+    if (soundPlayer_ == nullptr) {
+        ANSR_LOGE("Fail to creat player.");
+        return;
+    }
     Uri soundUri = DEFAULT_REMINDER_SOUND;
     std::string uri = soundUri.GetSchemeSpecificPart();
     ANSR_LOGD("uri:%{public}s", uri.c_str());
