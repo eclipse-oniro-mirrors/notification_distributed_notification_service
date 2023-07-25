@@ -111,6 +111,11 @@ public:
      */
     void SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData);
 
+    /**
+     * @brief Reset ffrt queue
+     */
+    void ResetFfrtQueue();
+
 private:
     struct SubscriberRecord;
 

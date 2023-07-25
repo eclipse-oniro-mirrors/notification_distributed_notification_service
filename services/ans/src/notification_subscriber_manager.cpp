@@ -39,6 +39,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
+    ANS_LOGI("constructor");
     notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
     recipient_ =
         new RemoteDeathRecipient(std::bind(&NotificationSubscriberManager::OnRemoteDied, this, std::placeholders::_1));
@@ -46,7 +47,15 @@ NotificationSubscriberManager::NotificationSubscriberManager()
 
 NotificationSubscriberManager::~NotificationSubscriberManager()
 {
+    ANS_LOGI("deconstructor");
     subscriberRecordList_.clear();
+}
+
+void NotificationSubscriberManager::ResetFfrtQueue()
+{
+    if (notificationSubQueue_ != nullptr) {
+        notificationSubQueue_.reset();
+    }
 }
 
 ErrCode NotificationSubscriberManager::AddSubscriber(

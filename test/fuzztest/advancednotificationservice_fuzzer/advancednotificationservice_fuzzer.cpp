@@ -26,8 +26,7 @@ constexpr uint8_t SLOT_TYPE_NUM = 5;
 constexpr uint8_t ENABLE = 2;
 
 namespace OHOS {
-
-    static Notification::AdvancedNotificationService advancedNotificationService;
+    Notification::AdvancedNotificationService advancedNotificationService;
 
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {

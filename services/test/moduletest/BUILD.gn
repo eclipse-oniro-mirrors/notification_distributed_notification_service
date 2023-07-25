@@ -30,20 +30,6 @@ ohos_moduletest("ans_module_test") {
   ]
 
   sources = [
-    "${services_path}/ans/src/advanced_notification_service.cpp",
-    "${services_path}/ans/src/advanced_notification_service_ability.cpp",
-    "${services_path}/ans/src/event_report.cpp",
-    "${services_path}/ans/src/notification_preferences.cpp",
-    "${services_path}/ans/src/notification_preferences_database.cpp",
-    "${services_path}/ans/src/notification_preferences_info.cpp",
-    "${services_path}/ans/src/notification_rdb_data_mgr.cpp",
-    "${services_path}/ans/src/notification_slot_filter.cpp",
-    "${services_path}/ans/src/notification_subscriber_manager.cpp",
-    "${services_path}/ans/src/permission_filter.cpp",
-    "${services_path}/ans/src/reminder_data_manager.cpp",
-    "${services_path}/ans/src/reminder_event_manager.cpp",
-    "${services_path}/ans/src/reminder_timer_info.cpp",
-    "${services_path}/ans/src/system_event_observer.cpp",
     "${services_path}/ans/test/unittest/mock/mock_ipc.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "ans_module_test.cpp",
@@ -59,7 +45,6 @@ ohos_moduletest("ans_module_test") {
 
   deps = [
     "${core_path}:ans_core",
-    "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
   ]
 

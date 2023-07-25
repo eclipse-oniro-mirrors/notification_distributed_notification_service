@@ -15,7 +15,9 @@
 #include <gtest/gtest.h>
 #include <functional>
 
+#define private public
 #include "advanced_notification_service.h"
+#undef private
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
@@ -38,18 +40,25 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+    static sptr<AdvancedNotificationService> service_;
 };
 
+sptr<AdvancedNotificationService> AnsInnerKitsModuleSlotTest::service_;
 void AnsInnerKitsModuleSlotTest::SetUpTestCase()
 {
     RemoteNativeToken::SetNativeToken("ans_innerkits_module_slot_test");
-    sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
+    service_ = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
-    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
+    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service_, saExtraProp);
 }
 
 void AnsInnerKitsModuleSlotTest::TearDownTestCase()
-{}
+{
+    if (service_ != nullptr) {
+        service_->SelfClean();
+    }
+}
 
 void AnsInnerKitsModuleSlotTest::SetUp()
 {
