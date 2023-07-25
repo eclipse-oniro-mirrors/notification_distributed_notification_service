@@ -33,7 +33,7 @@ void MockGetString(bool mockRet)
 
 namespace OHOS {
 namespace NativeRdb {
-bool AbsSharedResultSet::HasBlock() const
+bool AbsSharedResultSet::HasBlock()
 {
     return g_mockHasBlockRet;
 }
