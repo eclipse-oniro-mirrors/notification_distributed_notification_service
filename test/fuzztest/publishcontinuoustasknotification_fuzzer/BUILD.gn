@@ -33,13 +33,14 @@ ohos_fuzztest("PublishContinuousTaskNotificationFuzzTest") {
   sources = [ "publishcontinuoustasknotification_fuzzer.cpp" ]
 
   deps = [
+    "${component_path}/frameworks/core:ans_core",
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
-    "${frameworks_module_ans_path}:ans_innerkits",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",
