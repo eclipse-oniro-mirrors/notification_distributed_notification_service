@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00100, Function | Smal
  */
 HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00200, Function | SmallTest | Level1)
 {
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = 100;
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     EXPECT_TRUE(bundleManager->IsSystemApp(callingUid));
 }
