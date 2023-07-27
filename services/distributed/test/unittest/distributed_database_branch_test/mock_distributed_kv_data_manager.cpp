@@ -60,5 +60,10 @@ Status DistributedKvDataManager::GetSingleKvStore(const Options &options, const 
     }
     return Status::SUCCESS;
 }
+
+Status DistributedKvDataManager::DeleteKvStore(const AppId &appId, const StoreId &storeId, const std::string &path)
+{
+    return Status::SUCCESS;
+}
 }  // namespace DistributedKv
 }  // namespace OHOS

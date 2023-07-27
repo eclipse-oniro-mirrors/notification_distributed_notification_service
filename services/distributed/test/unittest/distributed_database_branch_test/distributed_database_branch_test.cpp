@@ -512,20 +512,22 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2900, Func
 /**
  * @tc.name   : DistributedDatabaseBranchTest_3000
  * @tc.number : DistributedDatabaseBranchTest_3000
- * @tc.desc   : Test RecreateDistributedDB function and CheckKvDataManager is false.
+ * @tc.desc   : 1.Test RecreateDistributedDB function and CheckKvDataManager is true.
+ *              2.set KvManagerFlowControl is true
+ *              3.status is DistributedKv::Status::SUCCESS
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_3000, Function | SmallTest | Level1)
 {
-    std::shared_ptr<DistributedDatabase> distributedDatabase =
-        std::make_shared<DistributedDatabase>(databaseCallback_, deviceCallback_);
-    distributedDatabase->kvDataManager_ = nullptr;
-    EXPECT_EQ(false, distributedDatabase->RecreateDistributedDB());
+    database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
+    MockKvManagerFlowControl(true);
+    EXPECT_EQ(true, database_->RecreateDistributedDB());
 }
 
 /**
  * @tc.name   : DistributedDatabaseBranchTest_3100
  * @tc.number : DistributedDatabaseBranchTest_3100
- * @tc.desc   : Test RecreateDistributedDB function and KvManagerFlowControl is false.
+ * @tc.desc   : 1.Test RecreateDistributedDB function and CheckKvDataManager is true.
+ *              2.set KvManagerFlowControl is false
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_3100, Function | SmallTest | Level1)
 {
