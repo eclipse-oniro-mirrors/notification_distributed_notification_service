@@ -30,6 +30,7 @@ const std::string DELIMITER = "|";
 
 DistributedNotificationManager::DistributedNotificationManager()
 {
+    ANS_LOGI("constructor");
     distributedQueue_ = std::make_shared<ffrt::queue>("NotificationDistributedMgr");
 
     DistributedDatabaseCallback::IDatabaseChange databaseCallback = {
@@ -66,10 +67,20 @@ DistributedNotificationManager::DistributedNotificationManager()
 
 DistributedNotificationManager::~DistributedNotificationManager()
 {
+    ANS_LOGI("deconstructor");
     ANS_LOGE("ffrt start!");
-    ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([&]() { callback_ = {}; }));
-    distributedQueue_->wait(handler);
+    if (distributedQueue_ != nullptr) {
+        ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([&]() { callback_ = {}; }));
+        distributedQueue_->wait(handler);
+    }
     ANS_LOGE("ffrt end!");
+}
+
+void DistributedNotificationManager::ResetFfrtQueue()
+{
+    if (distributedQueue_ != nullptr) {
+        distributedQueue_.reset();
+    }
 }
 
 void DistributedNotificationManager::GenerateDistributedKey(
@@ -133,6 +144,10 @@ void DistributedNotificationManager::OnDatabaseInsert(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ANS_LOGE("ffrt start!");
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     distributedQueue_->submit(std::bind([=]() {
         ANS_LOGE("ffrt enter!");
         if (!CheckDeviceId(deviceId, key)) {
@@ -162,6 +177,10 @@ void DistributedNotificationManager::OnDatabaseUpdate(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ANS_LOGE("ffrt start!");
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([=]() {
         ANS_LOGE("ffrt enter!");
         if (!CheckDeviceId(deviceId, key)) {
@@ -191,6 +210,10 @@ void DistributedNotificationManager::OnDatabaseDelete(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ANS_LOGE("ffrt start!");
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     distributedQueue_->submit(std::bind([=]() {
         ANS_LOGE("ffrt enter!");
         if (!CheckDeviceId(deviceId, key)) {
@@ -212,6 +235,10 @@ void DistributedNotificationManager::OnDeviceConnected(const std::string &device
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ANS_LOGE("ffrt start!");
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     distributedQueue_->submit(std::bind([=]() {
         ANS_LOGE("ffrt enter!");
         if (database_ == nullptr) {
@@ -230,6 +257,10 @@ void DistributedNotificationManager::OnDeviceDisconnected(const std::string &dev
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     ANS_LOGE("ffrt start!");
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
     distributedQueue_->submit(std::bind([=]() {
         ANS_LOGE("ffrt enter!");
         std::string prefixKey = deviceId + DELIMITER;
@@ -381,6 +412,10 @@ ErrCode DistributedNotificationManager::RegisterCallback(const IDistributedCallb
 {
     ANS_LOGI("%{public}s start", __FUNCTION__);
     ANS_LOGE("ffrt start!");
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([&]() { callback_ = callback; }));
     distributedQueue_->wait(handler);
     ANS_LOGE("ffrt end!");
@@ -391,6 +426,10 @@ ErrCode DistributedNotificationManager::UngegisterCallback(void)
 {
     ANS_LOGI("%{public}s start", __FUNCTION__);
     ANS_LOGE("ffrt start!");
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([&]() { callback_ = {}; }));
     distributedQueue_->wait(handler);
     ANS_LOGE("ffrt end!");

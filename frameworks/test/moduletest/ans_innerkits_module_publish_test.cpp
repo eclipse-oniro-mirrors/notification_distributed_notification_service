@@ -17,7 +17,9 @@
 
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
+#define private public
 #include "advanced_notification_service.h"
+#undef private
 #include "datetime_ex.h"
 #include "if_system_ability_manager.h"
 #include "int_wrapper.h"
@@ -429,18 +431,25 @@ public:
     void WaitOnConsumed();
     void WaitOnUnsubscribeResult();
     void CheckJsonConverter(const NotificationRequest *request);
+
+    static sptr<AdvancedNotificationService> service_;
 };
 
+sptr<AdvancedNotificationService> AnsInnerKitsModulePublishTest::service_;
 void AnsInnerKitsModulePublishTest::SetUpTestCase()
 {
     RemoteNativeToken::SetNativeToken("ans_innerkits_module_publish_test");
-    sptr<AdvancedNotificationService> service = OHOS::Notification::AdvancedNotificationService::GetInstance();
+    service_ = OHOS::Notification::AdvancedNotificationService::GetInstance();
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
-    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service, saExtraProp);
+    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service_, saExtraProp);
 }
 
 void AnsInnerKitsModulePublishTest::TearDownTestCase()
-{}
+{
+    if (service_ != nullptr) {
+        service_->SelfClean();
+    }
+}
 
 void AnsInnerKitsModulePublishTest::SetUp()
 {}
