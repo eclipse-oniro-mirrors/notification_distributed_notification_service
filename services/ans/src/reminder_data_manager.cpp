@@ -346,7 +346,7 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
             [&name](const DevStandbyMgr::AllowInfo &allowInfo) {
                 return allowInfo.GetName() == name;
             });
-        if (AccessTokenHelper::IsSystemApp() || it != allowInfoList.end()) {
+        if (reminderRequest->IsSystemApp() || it != allowInfoList.end()) {
             timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
         } else {
             uint8_t timerTypeAns = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_INEXACT_REMINDER);
