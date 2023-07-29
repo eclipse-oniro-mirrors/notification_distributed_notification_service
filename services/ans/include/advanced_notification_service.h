@@ -832,6 +832,8 @@ private:
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
     void SelfClean();
+    ErrCode SetDefaultNotificationEnabled(
+        const sptr<NotificationBundleOption> &bundleOption, bool enabled);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

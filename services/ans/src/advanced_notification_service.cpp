@@ -347,6 +347,32 @@ void AdvancedNotificationService::SelfClean()
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
 }
 
+ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
+    const sptr<NotificationBundleOption> &bundleOption, bool enabled)
+{
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    sptr<EnabledNotificationCallbackData> bundleData =
+        new EnabledNotificationCallbackData(bundle->GetBundleName(), bundle->GetUid(), enabled);
+
+    ErrCode result = ERR_OK;
+    result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
+
+    if (!enabled) {
+        ANS_LOGI("result = %{public}d", result);
+        result = RemoveAllNotifications(bundle);
+    }
+    if (result == ERR_OK) {
+        NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
+        PublishSlotChangeCommonEvent(bundle);
+    }
+
+    SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
+    return result;
+}
+
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
@@ -1692,19 +1718,19 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         new EnabledNotificationCallbackData(bundle->GetBundleName(), bundle->GetUid(), enabled);
 
     ErrCode result = ERR_OK;
-        if (deviceId.empty()) {
-            // Local device
-            result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
-            if (!enabled) {
-                result = RemoveAllNotifications(bundle);
-            }
-            if (result == ERR_OK) {
-                NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
-                PublishSlotChangeCommonEvent(bundle);
-            }
-        } else {
-            // Remote revice
+    if (deviceId.empty()) {
+        // Local device
+        result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
+        if (!enabled) {
+            result = RemoveAllNotifications(bundle);
         }
+        if (result == ERR_OK) {
+            NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
+            PublishSlotChangeCommonEvent(bundle);
+        }
+    } else {
+        // Remote revice
+    }
 
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
     return result;
@@ -1774,7 +1800,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
             if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
                 result = ERR_OK;
                 allowed = CheckApiCompatibility(bundleOption);
-                SetNotificationsEnabledForSpecialBundle("", bundleOption, allowed);
+                SetDefaultNotificationEnabled(bundleOption, allowed);
             }
         }
     return result;
@@ -3893,7 +3919,6 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
     }));
     notificationSvrQueue_->wait(handler);
