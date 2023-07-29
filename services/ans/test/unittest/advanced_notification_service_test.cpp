@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
 #include "notification_subscriber.h"
+#include "notification_subscriber_manager.h"
 #include "mock_push_callback_stub.h"
 #include "system_event_observer.h"
 #include "notification_constant.h"
@@ -938,9 +939,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08300,
 {
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), (int)ERR_OK);
-    EXPECT_EQ((int)advancedNotificationService_->Subscribe(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
-    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
+    sptr<AdvancedNotificationService> advancedNotificationServices = new (std::nothrow) AdvancedNotificationService();
+    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
+        NotificationSubscriberManager::GetInstance();
+    notificationSubscriberManager->notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
+    EXPECT_EQ((int)advancedNotificationServices->Subscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationServices->Subscribe(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ((int)advancedNotificationServices->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
 }
 
 /**
@@ -2529,8 +2534,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400,
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_OK);
-    EXPECT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_OK);
+    sptr<AdvancedNotificationService> advancedNotificationServices = new (std::nothrow) AdvancedNotificationService();
+    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
+        NotificationSubscriberManager::GetInstance();
+    notificationSubscriberManager->notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
+    EXPECT_EQ(advancedNotificationServices->Subscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_EQ(advancedNotificationServices->Unsubscribe(subscriber->GetImpl(), info), ERR_OK);
 
     GTEST_LOG_(INFO) << "Subscribe_1000 test end";
 }
@@ -2547,8 +2556,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17500,
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_OK);
-    EXPECT_EQ(advancedNotificationService_->Unsubscribe(nullptr, info), ERR_ANS_INVALID_PARAM);
+    sptr<AdvancedNotificationService> advancedNotificationServices = new (std::nothrow) AdvancedNotificationService();
+    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
+        NotificationSubscriberManager::GetInstance();
+    notificationSubscriberManager->notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
+    EXPECT_EQ(advancedNotificationServices->Subscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_EQ(advancedNotificationServices->Unsubscribe(nullptr, info), ERR_ANS_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "Unsubscribe_1000 test end";
 }
