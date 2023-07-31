@@ -240,7 +240,7 @@ private:
     std::shared_ptr<ReminderTimerInfo> CreateTimerInfo(TimerType type,
         const sptr<ReminderRequest> &reminderRequest) const;
     void InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &timerInfo,
-        const sptr<ReminderRequest> &reminderRequest) const;
+        const sptr<ReminderRequest> &reminderRequest, TimerType reminderType) const;
 
     void GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const;
 
