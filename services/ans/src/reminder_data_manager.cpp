@@ -314,7 +314,7 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
 }
 
 void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &sharedTimerInfo,
-    const sptr<ReminderRequest> &reminderRequest) const
+    const sptr<ReminderRequest> &reminderRequest, TimerType reminderType) const
 {
     uint8_t timerTypeWakeup = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_WAKEUP);
     uint8_t timerTypeExact = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_EXACT);
@@ -333,8 +333,9 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
     // The systemtimer type will be set TIMER_TYPE_INEXACT_REMINDER&&EXACT if reminder type is CALENDAR or TIMER,
     // and set WAKEUP&&EXACT if ALARM.
     int32_t timerType;
-    if (reminderRequest->GetReminderType() == ReminderRequest::ReminderType::CALENDAR ||
-        reminderRequest->GetReminderType() == ReminderRequest::ReminderType::TIMER) {
+    if (reminderType == TimerType::TRIGGER_TIMER &&
+        (reminderRequest->GetReminderType() == ReminderRequest::ReminderType::CALENDAR ||
+        reminderRequest->GetReminderType() == ReminderRequest::ReminderType::TIMER)) {
 #ifdef DEVICE_STANDBY_ENABLE
         // Get allow list.
         std::string name = mit->second->GetBundleName();
@@ -369,7 +370,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
         ANSR_LOGE("Failed to set timer type.");
         return nullptr;
     }
-    InitTimerInfo(sharedTimerInfo, reminderRequest);
+    InitTimerInfo(sharedTimerInfo, reminderRequest, type);
 
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
