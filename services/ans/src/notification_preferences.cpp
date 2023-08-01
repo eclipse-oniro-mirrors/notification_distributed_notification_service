@@ -204,6 +204,7 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
 
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
         if (!bundleInfo.GetSlot(type, slot)) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
@@ -224,6 +225,7 @@ ErrCode NotificationPreferences::GetNotificationAllSlots(
 
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
         bundleInfo.GetAllSlots(slots);
     } else {
@@ -243,6 +245,7 @@ ErrCode NotificationPreferences::GetNotificationSlotsNumForBundle(
 
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
         num = static_cast<uint64_t>(bundleInfo.GetAllSlotsSize());
     } else {
@@ -355,6 +358,7 @@ ErrCode NotificationPreferences::GetNotificationsEnabled(const int32_t &userId, 
     }
 
     ErrCode result = ERR_OK;
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (!preferencesInfo_.GetEnabledAllNotification(userId, enabled)) {
         result = ERR_ANS_INVALID_PARAM;
     }
@@ -575,10 +579,11 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
 
 template <typename T>
 ErrCode NotificationPreferences::GetBundleProperty(
-    const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, T &value) const
+    const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, T &value)
 {
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
         switch (type) {
             case BundleType::BUNDLE_IMPORTANCE_TYPE:
@@ -654,6 +659,7 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
 void NotificationPreferences::InitSettingFromDisturbDB()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferncesDB_ != nullptr) {
         preferncesDB_->ParseFromDisturbeDB(preferencesInfo_);
     }
@@ -663,8 +669,11 @@ void NotificationPreferences::RemoveSettings(int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    preferencesInfo_.RemoveNotificationEnable(userId);
-    preferencesInfo_.RemoveDoNotDisturbDate(userId);
+    {
+        std::lock_guard<std::mutex> lock(preferenceMutex_);
+        preferencesInfo_.RemoveNotificationEnable(userId);
+        preferencesInfo_.RemoveDoNotDisturbDate(userId);
+    }
 
     if (preferncesDB_ != nullptr) {
         preferncesDB_->RemoveNotificationEnable(userId);
