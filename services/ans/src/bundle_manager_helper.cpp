@@ -99,7 +99,11 @@ bool BundleManagerHelper::GetBundleInfoByBundleName(
     if (bundleMgr_ == nullptr) {
         return false;
     }
-    return bundleMgr_->GetBundleInfo(bundle, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId);
+    bool ret = false;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    ret = bundleMgr_->GetBundleInfo(bundle, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return ret;
 }
 
 void BundleManagerHelper::Connect()
