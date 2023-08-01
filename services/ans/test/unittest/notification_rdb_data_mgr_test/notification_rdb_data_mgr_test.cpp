@@ -22,6 +22,7 @@
 #undef private
 #undef protected
 #include "rdb_store.h"
+#include "value_object.h"
 
 namespace {
     bool g_mockQueryRet = true;
@@ -65,19 +66,36 @@ class RdbStoreTest : public RdbStore {
             return NativeRdb::E_ERROR;
         };
         virtual int Update(int &changedRows, const std::string &table, const ValuesBucket &values,
+            const std::string &whereClaus,
+            const std::vector<std::string> &whereArgs)
+        {
+            return NativeRdb::E_ERROR;
+        };
+        virtual int Update(int &changedRows, const std::string &table, const ValuesBucket &values,
             const std::string &whereClause = "",
-            const std::vector<std::string> &whereArgs = std::vector<std::string>())
+            const std::vector<ValueObject> &bindArgs = {})
         {
             return NativeRdb::E_ERROR;
         };
         virtual int UpdateWithConflictResolution(int &changedRows, const std::string &table, const ValuesBucket &values,
-            const std::string &whereClause = "", const std::vector<std::string> &whereArgs = std::vector<std::string>(),
+            const std::string &whereClause, const std::vector<std::string> &whereArgs,
+            ConflictResolution conflictResolution)
+        {
+            return NativeRdb::E_ERROR;
+        };
+        virtual int UpdateWithConflictResolution(int &changedRows, const std::string &table, const ValuesBucket &values,
+            const std::string &whereClause = "", const std::vector<ValueObject> &bindArgs = {},
             ConflictResolution conflictResolution = ConflictResolution::ON_CONFLICT_NONE)
         {
             return NativeRdb::E_ERROR;
         };
+        virtual int Delete(int &deletedRows, const std::string &table, const std::string &whereClause,
+            const std::vector<std::string> &whereArgs)
+        {
+            return NativeRdb::E_ERROR;
+        };
         virtual int Delete(int &deletedRows, const std::string &table, const std::string &whereClause = "",
-            const std::vector<std::string> &whereArgs = std::vector<std::string>())
+            const std::vector<ValueObject> &bindArgs = {})
         {
             return NativeRdb::E_ERROR;
         };
@@ -89,12 +107,22 @@ class RdbStoreTest : public RdbStore {
             return nullptr;
         };
         virtual std::shared_ptr<AbsSharedResultSet> QuerySql(
-            const std::string &sql, const std::vector<std::string> &selectionArgs = std::vector<std::string>())
+            const std::string &sql, const std::vector<std::string> &selectionArgs)
+        {
+            return nullptr;
+        };
+        virtual std::shared_ptr<AbsSharedResultSet> QuerySql(
+            const std::string &sql, const std::vector<ValueObject> &selectionArgs = {})
         {
             return nullptr;
         };
         virtual std::shared_ptr<ResultSet> QueryByStep(
-            const std::string &sql, const std::vector<std::string> &selectionArgs = std::vector<std::string>())
+            const std::string &sql, const std::vector<std::string> &selectionArgs)
+        {
+            return nullptr;
+        };
+        virtual std::shared_ptr<ResultSet> QueryByStep(
+            const std::string &sql, const std::vector<ValueObject> &bindArgs = {})
         {
             return nullptr;
         };
@@ -138,7 +166,7 @@ class RdbStoreTest : public RdbStore {
             return NativeRdb::E_ERROR;
         };
         virtual std::shared_ptr<AbsSharedResultSet> Query(
-            const AbsRdbPredicates &predicates, const std::vector<std::string> columns)
+            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns)
         {
             if (g_mockQueryRet == false) {
                 std::string name = "aa";
@@ -149,7 +177,7 @@ class RdbStoreTest : public RdbStore {
             return nullptr;
         };
         virtual std::shared_ptr<ResultSet> QueryByStep(
-            const AbsRdbPredicates &predicates, const std::vector<std::string> columns)
+            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns)
         {
             return nullptr;
         };
@@ -272,11 +300,6 @@ class RdbStoreTest : public RdbStore {
             const std::string &table, const std::string &columnName, std::vector<PRIKey> &keys)
         {
             return {};
-        };
-
-        virtual std::shared_ptr<ResultSet> QueryByStep(const std::string &sql, std::vector<ValueObject> &&args)
-        {
-            return nullptr;
         };
 };
 
