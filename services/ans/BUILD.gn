@@ -85,7 +85,6 @@ ohos_shared_library("libans") {
     "player_framework:media_client",
     "relational_store:native_rdb",
     "time_service:time_client",
-    "window_manager:libdm",
   ]
   external_deps += component_external_deps
 

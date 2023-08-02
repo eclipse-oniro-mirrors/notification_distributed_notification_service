@@ -2146,7 +2146,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15800,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test start";
-    
+
     int32_t notificationId = 0;
     std::string label = "testLabel";
     sptr<NotificationBundleOption> bundleOption = nullptr;
@@ -2165,7 +2165,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16100, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test start";
-    
+
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -2371,7 +2371,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17000,
     std::string agent = "agent";
     EXPECT_EQ(advancedNotificationService_->SetNotificationAgent(agent), ERR_INVALID_OPERATION);
     EXPECT_EQ(advancedNotificationService_->GetNotificationAgent(agent), ERR_INVALID_OPERATION);
-    
+
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
 
@@ -2444,7 +2444,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 
     int32_t userId = 1;
     EXPECT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, enable), ERR_ANS_INVALID_PARAM);
-    
+
     EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(userId, enable), ERR_OK);
 
     EXPECT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_OK);
@@ -3145,27 +3145,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20700,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_20800
- * @tc.name      : GetDisplayPosition_0100
- * @tc.desc      : Test GetDisplayPosition function
- * @tc.require   : #I61RF2
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20800, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "GetDisplayPosition_0100 test start";
-
-    int offsetX = 1;
-    int offsetY = 1;
-    int width = 1;
-    int height = 1;
-    bool wideScreen = 1;
-    ASSERT_NE(nullptr, advancedNotificationService_);
-    advancedNotificationService_->GetDisplayPosition(offsetX, offsetY, width, height, wideScreen);
-
-    GTEST_LOG_(INFO) << "GetDisplayPosition_0100 test end";
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_20900
  * @tc.name      : GetDumpInfo_0100
  * @tc.desc      : Test GetDumpInfo function
@@ -3256,9 +3235,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21300,
     bool isAgentTrue = true;
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetIsAgentNotification(isAgentTrue);
-    
+
     std::shared_ptr<BundleManagerHelper> bundleManager = nullptr;
-    
+
     EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_OK);
     GTEST_LOG_(INFO) << "PrepareNotificationRequest_0200 test end";
 }
@@ -3272,11 +3251,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21300,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21400, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "PrepareNotificationInfo_2000 test start";
-    
+
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    
+
     EXPECT_EQ(advancedNotificationService_->PrepareNotificationInfo(req, bundleOption), ERR_OK);
 
     GTEST_LOG_(INFO) << "PrepareNotificationInfo_2000 test end";
@@ -3291,12 +3270,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21400,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21500, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test start";
-    
+
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
     sptr<Notification> notification = new (std::nothrow) Notification(req);
     EXPECT_NE(notification, nullptr);
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    
+
     EXPECT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption), ERR_ANS_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test end";

@@ -83,10 +83,6 @@ ohos_moduletest("ans_module_test") {
     defines = [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
   }
 
-  if (ability_runtime_graphics) {
-    external_deps += [ "window_manager:libdm" ]
-  }
-
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
