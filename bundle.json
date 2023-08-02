@@ -53,11 +53,9 @@
     ],
     "deps": {
       "components": [
-        "ace_engine",
         "samgr",
         "hitrace",
         "napi",
-        "window_manager",
         "hilog",
         "relational_store",
         "device_usage_statistics",

@@ -34,7 +34,6 @@
 #endif
 #include "common_event_manager.h"
 #include "common_event_support.h"
-#include "display_manager.h"
 #include "event_report.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
@@ -3971,44 +3970,6 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
         }
     }));
     notificationSvrQueue_->wait(handler);
-}
-
-void AdvancedNotificationService::GetDisplayPosition(
-    int& offsetX, int& offsetY, int& width, int& height, bool& wideScreen)
-{
-    wideScreen = false;
-    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (display == nullptr) {
-        ANS_LOGD("dialog GetDefaultDisplay fail, try again.");
-        display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    }
-
-    if (display != nullptr) {
-        ANS_LOGD("display size: %{public}d x %{public}d",
-            display->GetWidth(), display->GetHeight());
-        if (display->GetWidth() < display->GetHeight()) {
-            float widthRatio = 0.75f;
-            int32_t heightRatio = 5;
-            width = static_cast<int32_t>(display->GetWidth() * widthRatio);
-            height = display->GetHeight() / heightRatio;
-        } else {
-            int32_t widthRatio = 3;
-            int32_t heightRatio = 4;
-            wideScreen = true;
-            width = display->GetWidth() / widthRatio;
-            height = display->GetHeight() / heightRatio;
-        }
-        offsetX = (display->GetWidth() - width) / UI_HALF;
-        offsetY = (display->GetHeight() - height) / UI_HALF;
-    } else {
-        ANS_LOGD("dialog get display fail, use default wide.");
-        width = DIALOG_DEFAULT_WIDTH;
-        height = DIALOG_DEFAULT_HEIGHT;
-        offsetX = (WINDOW_DEFAULT_WIDTH - width) / UI_HALF;
-        offsetY = (WINDOW_DEFAULT_HEIGHT - height) / UI_HALF;
-    }
-    ANS_LOGD("GetDisplayPosition: %{public}d, %{public}d (%{public}d x %{public}d)",
-        offsetX, offsetY, width, height);
 }
 
 ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
