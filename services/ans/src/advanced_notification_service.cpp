@@ -116,11 +116,6 @@ std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
 sptr<IPushCallBack> AdvancedNotificationService::pushCallBack_;
 
-static const std::shared_ptr<INotificationFilter> NOTIFICATION_FILTERS[] = {
-    std::make_shared<PermissionFilter>(),
-    std::make_shared<NotificationSlotFilter>(),
-};
-
 inline std::string GetClientBundleName()
 {
     std::string bundle;
@@ -322,6 +317,8 @@ AdvancedNotificationService::AdvancedNotificationService()
     };
     DistributedNotificationManager::GetInstance()->RegisterCallback(distributedCallback);
 #endif
+    permissonFilter_ = std::make_shared<PermissionFilter>();
+    notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
 }
 
 AdvancedNotificationService::~AdvancedNotificationService()
@@ -630,16 +627,24 @@ bool AdvancedNotificationService::IsNotificationExists(const std::string &key)
 
 ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRecord> &record)
 {
-    ErrCode result = ERR_OK;
-
-    for (auto filter : NOTIFICATION_FILTERS) {
-        result = filter->OnPublish(record);
-        if (result != ERR_OK) {
-            break;
-        }
+    if (permissonFilter_ == nullptr || notificationSlotFilter_ == nullptr) {
+        ANS_LOGE("Filter is invalid.");
+        return ERR_ANS_INVALID_PARAM;
     }
 
-    return result;
+    auto result = permissonFilter_->OnPublish(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Permission filter on publish failed with %{public}d.", result);
+        return result;
+    }
+
+    result = notificationSlotFilter_->OnPublish(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Notification slot filter on publish failed with %{public}d.", result);
+        return result;
+    }
+
+    return ERR_OK;
 }
 
 void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<NotificationRecord> &record)
@@ -692,19 +697,23 @@ sptr<NotificationSortingMap> AdvancedNotificationService::GenerateSortingMap()
 
 void AdvancedNotificationService::StartFilters()
 {
-    for (auto filter : NOTIFICATION_FILTERS) {
-        if (filter != nullptr) {
-            filter->OnStart();
-        }
+    if (permissonFilter_ != nullptr) {
+        permissonFilter_->OnStart();
+    }
+
+    if (notificationSlotFilter_ != nullptr) {
+        notificationSlotFilter_->OnStart();
     }
 }
 
 void AdvancedNotificationService::StopFilters()
 {
-    for (auto filter : NOTIFICATION_FILTERS) {
-        if (filter != nullptr) {
-            filter->OnStop();
-        }
+    if (permissonFilter_ != nullptr) {
+        permissonFilter_->OnStop();
+    }
+
+    if (notificationSlotFilter_ != nullptr) {
+        notificationSlotFilter_->OnStop();
     }
 }
 

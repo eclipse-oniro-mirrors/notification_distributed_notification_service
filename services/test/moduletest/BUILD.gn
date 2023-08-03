@@ -83,6 +83,11 @@ ohos_moduletest("ans_module_test") {
     defines = [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
   }
 
+  if (distributed_notification_supported) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+  }
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
