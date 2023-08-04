@@ -32,8 +32,6 @@ public:
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
-
-    // static const uint8_t REMINDER_STATUS_SHOWING;
 };
 
 // const uint8_t ReminderRequestBranchTest::REMINDER_STATUS_SHOWING = 4;
@@ -80,6 +78,497 @@ HWTEST_F(ReminderRequestBranchTest, CanShow_00100, Function | SmallTest | Level1
     ReminderRequest reminderRequest;
     bool ret = reminderRequest.CanShow();
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: HandleSysTimeChange_00100
+ * @tc.desc: 1.Test HandleSysTimeChange function
+ *           2.OriTriggerTime == 0 and optTriggerTime < now
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00100, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    reminderRequest->isExpired_ = false;
+    MockNowInstantMilli(true);
+    uint64_t oriTriggerTime = 0;
+    uint64_t optTriggerTime = 1675876470000;
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleSysTimeChange_00200
+ * @tc.desc: 1.Test HandleSysTimeChange function
+ *           2.OriTriggerTime == 0 and optTriggerTime > now
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00200, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    reminderRequest->isExpired_ = false;
+    MockNowInstantMilli(true);
+    uint64_t oriTriggerTime = 0;
+    uint64_t optTriggerTime = 1675876480001;
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleSysTimeChange_00300
+ * @tc.desc: 1.Test HandleSysTimeChange function
+ *           2.OriTriggerTime == optTriggerTime and optTriggerTime != 0
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00300, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    reminderRequest->isExpired_ = false;
+    MockNowInstantMilli(true);
+    uint64_t oriTriggerTime = 1675876480001;
+    uint64_t optTriggerTime = 1675876480001;
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleSysTimeChange_00400
+ * @tc.desc: 1.Test HandleSysTimeChange function
+ *           2.OriTriggerTime != 0 and optTriggerTime == 0
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00400, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    reminderRequest->isExpired_ = false;
+    MockNowInstantMilli(true);
+    uint64_t oriTriggerTime = 1675876470000;
+    uint64_t optTriggerTime = 0;
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
+}
+
+/**
+ * @tc.name: HandleSysTimeChange_00500
+ * @tc.desc: 1.Test HandleSysTimeChange function
+ *           2.OriTriggerTime > now and optTriggerTime == 0
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00500, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    reminderRequest->isExpired_ = false;
+    MockNowInstantMilli(true);
+    uint64_t oriTriggerTime = 1675876480001;
+    uint64_t optTriggerTime = 0;
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: UpdateNotificationRequest_00100
+ * @tc.desc: 1.Test UpdateNotificationRequest function
+ *           2.Type is UpdateNotificationType::COMMON
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00100, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    ReminderRequest::UpdateNotificationType type = ReminderRequest::UpdateNotificationType::COMMON;
+    std::string extra = "aa";
+    reminderRequest->UpdateNotificationRequest(type, extra);
+}
+
+/**
+ * @tc.name: UpdateNotificationRequest_00200
+ * @tc.desc: 1.Test UpdateNotificationRequest function
+ *           2.Type is UpdateNotificationType::REMOVAL_WANT_AGENT
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00200, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    ReminderRequest::UpdateNotificationType type = ReminderRequest::UpdateNotificationType::REMOVAL_WANT_AGENT;
+    std::string extra = "aa";
+    reminderRequest->UpdateNotificationRequest(type, extra);
+}
+
+/**
+ * @tc.name: UpdateNotificationRequest_00300
+ * @tc.desc: 1.Test UpdateNotificationRequest function
+ *           2.Type is UpdateNotificationType::WANT_AGENT
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00300, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    reminderRequest->wantAgentInfo_ = std::make_shared<ReminderRequest::WantAgentInfo>();
+    ReminderRequest::UpdateNotificationType type = ReminderRequest::UpdateNotificationType::WANT_AGENT;
+    std::string extra = "aa";
+    reminderRequest->UpdateNotificationRequest(type, extra);
+}
+
+/**
+ * @tc.name: UpdateNotificationRequest_00400
+ * @tc.desc: 1.Test UpdateNotificationRequest function
+ *           2.Type is UpdateNotificationType::MAX_SCREEN_WANT_AGENT
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00400, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    reminderRequest->maxScreenWantAgentInfo_ = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
+    ReminderRequest::UpdateNotificationType type = ReminderRequest::UpdateNotificationType::MAX_SCREEN_WANT_AGENT;
+    std::string extra = "aa";
+    reminderRequest->UpdateNotificationRequest(type, extra);
+}
+
+/**
+ * @tc.name: UpdateNotificationRequest_00500
+ * @tc.desc: 1.Test UpdateNotificationRequest function
+ *           2.Type is UpdateNotificationType::BUNDLE_INFO
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00500, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    ReminderRequest::UpdateNotificationType type = ReminderRequest::UpdateNotificationType::BUNDLE_INFO;
+    std::string extra = "aa";
+    reminderRequest->UpdateNotificationRequest(type, extra);
+}
+
+/**
+ * @tc.name: UpdateNotificationRequest_00600
+ * @tc.desc: 1.Test UpdateNotificationRequest function
+ *           2.Type is UpdateNotificationType::CONTENT
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00600, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    ReminderRequest::UpdateNotificationType type = ReminderRequest::UpdateNotificationType::CONTENT;
+    std::string extra = "aa";
+    reminderRequest->UpdateNotificationRequest(type, extra);
+}
+
+/**
+ * @tc.name: GetButtonInfo_00100
+ * @tc.desc: 1.Test GetButtonInfo function
+ *           2.IsFirst is true and buttonInfo.wantAgent is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, GetButtonInfo_00100, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CLOSE;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = nullptr;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    EXPECT_NE(reminderRequest->GetButtonInfo(), "");
+}
+
+/**
+ * @tc.name: GetButtonInfo_00200
+ * @tc.desc: 1.Test GetButtonInfo function
+ *           2.IsFirst is true and buttonInfo.wantAgent is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, GetButtonInfo_00200, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    std::string pkgName = "bb";
+    std::string abilityName = "cc";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CLOSE;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    info.wantAgent->pkgName = pkgName;
+    info.wantAgent->abilityName = abilityName;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    EXPECT_NE(reminderRequest->GetButtonInfo(), "");
+}
+
+/**
+ * @tc.name: AddActionButtons_00100
+ * @tc.desc: 1.Test AddActionButtons function
+ *           2.Type is ActionButtonType::CLOSE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00100, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CLOSE;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = nullptr;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    bool includeSnooze = true;
+    reminderRequest->AddActionButtons(includeSnooze);
+}
+
+/**
+ * @tc.name: AddActionButtons_00200
+ * @tc.desc: 1.Test AddActionButtons function
+ *           2.Type is ActionButtonType::SNOOZE and includeSnooze is true
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00200, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::SNOOZE;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = nullptr;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    bool includeSnooze = true;
+    reminderRequest->AddActionButtons(includeSnooze);
+}
+
+/**
+ * @tc.name: AddActionButtons_00300
+ * @tc.desc: 1.Test AddActionButtons function
+ *           2.Type is ActionButtonType::SNOOZE and includeSnooze is false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00300, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::SNOOZE;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = nullptr;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    bool includeSnooze = false;
+    reminderRequest->AddActionButtons(includeSnooze);
+}
+
+/**
+ * @tc.name: AddActionButtons_00400
+ * @tc.desc: 1.Test AddActionButtons function
+ *           2.Type is ActionButtonType::CUSTOM and button.second.wantAgent is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00400, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CUSTOM;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = nullptr;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    bool includeSnooze = false;
+    reminderRequest->AddActionButtons(includeSnooze);
+}
+
+/**
+ * @tc.name: AddActionButtons_00500
+ * @tc.desc: 1.Test AddActionButtons function
+ *           2.Type is ActionButtonType::CUSTOM and button.second.wantAgent is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00500, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    std::string pkgName = "bb";
+    std::string abilityName = "cc";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CUSTOM;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    info.wantAgent->pkgName = pkgName;
+    info.wantAgent->abilityName = abilityName;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    bool includeSnooze = false;
+    reminderRequest->AddActionButtons(includeSnooze);
+}
+
+/**
+ * @tc.name: AddActionButtons_00600
+ * @tc.desc: 1.Test AddActionButtons function
+ *           2.Type is ActionButtonType::INVALID
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00600, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string title = "aa";
+    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::INVALID;
+    ReminderRequest::ActionButtonInfo info;
+    info.type = ReminderRequest::ActionButtonType::SNOOZE;
+    info.title = title;
+    info.wantAgent = nullptr;
+    reminderRequest->actionButtonMap_.insert(
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+    bool includeSnooze = false;
+    reminderRequest->AddActionButtons(includeSnooze);
+}
+
+/**
+ * @tc.name: UpdateNotificationCommon_00100
+ * @tc.desc: 1.Test UpdateNotificationCommon function
+ *           2.reminderType_ is ReminderRequest::ReminderType::TIMER
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00100, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    reminderRequest->reminderType_ = ReminderRequest::ReminderType::TIMER;
+    reminderRequest->UpdateNotificationCommon();
+}
+
+/**
+ * @tc.name: UpdateNotificationCommon_00200
+ * @tc.desc: 1.Test UpdateNotificationCommon function
+ *           2.reminderType_ is ReminderRequest::ReminderType::ALARM
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00200, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    reminderRequest->reminderType_ = ReminderRequest::ReminderType::ALARM;
+    reminderRequest->UpdateNotificationCommon();
+}
+
+/**
+ * @tc.name: UpdateNotificationCommon_00300
+ * @tc.desc: 1.Test UpdateNotificationCommon function
+ *           2.reminderType_ is ReminderRequest::ReminderType::INVALID
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00300, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    reminderRequest->reminderType_ = ReminderRequest::ReminderType::INVALID;
+    reminderRequest->UpdateNotificationCommon();
+}
+
+/**
+ * @tc.name: UpdateNotificationBundleInfo_00100
+ * @tc.desc: 1.Test UpdateNotificationBundleInfo function
+ *           2.OwnerBundleName is empty
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationBundleInfo_00100, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string ownerName = "";
+    reminderRequest->notificationRequest_->SetOwnerBundleName(ownerName);
+    reminderRequest->UpdateNotificationBundleInfo();
+}
+
+/**
+ * @tc.name: UpdateNotificationBundleInfo_00200
+ * @tc.desc: 1.Test UpdateNotificationBundleInfo function
+ *           2.OwnerBundleName is not empty
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestBranchTest, UpdateNotificationBundleInfo_00200, Function | SmallTest | Level1)
+{
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    EXPECT_NE(reminderRequest, nullptr);
+    int32_t notificationId_ = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
+    std::string ownerName = "aa";
+    reminderRequest->notificationRequest_->SetOwnerBundleName(ownerName);
+    reminderRequest->UpdateNotificationBundleInfo();
 }
 }
 }
