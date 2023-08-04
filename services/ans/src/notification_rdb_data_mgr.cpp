@@ -88,11 +88,12 @@ NotificationDataMgr::NotificationDataMgr(const NotificationRdbConfig &notificati
 int32_t NotificationDataMgr::Init()
 {
     ANS_LOGD("Create rdbStore");
-
-    int32_t ret = NativeRdb::E_OK;
-    if (rdbStore_ != nullptr) {
-        ANS_LOGD("notification rdb has existed");
-        return NativeRdb::E_OK;
+    {
+        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ != nullptr) {
+            ANS_LOGD("notification rdb has existed");
+            return NativeRdb::E_OK;
+        }
     }
 
     NativeRdb::RdbStoreConfig rdbStoreConfig(
@@ -104,25 +105,34 @@ int32_t NotificationDataMgr::Init()
             notificationRdbConfig_.syncMode);
     rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
-    rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(
-        rdbStoreConfig, notificationRdbConfig_.version, rdbDataCallBack_, ret);
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb init fail");
-        return NativeRdb::E_ERROR;
+
+    {
+        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        int32_t ret = NativeRdb::E_OK;
+        rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(rdbStoreConfig, notificationRdbConfig_.version,
+            rdbDataCallBack_, ret);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb init fail");
+            return NativeRdb::E_ERROR;
+        }
     }
+
     return NativeRdb::E_OK;
 }
 
 int32_t NotificationDataMgr::Destroy()
 {
     ANS_LOGD("Destory rdbStore");
+    {
+        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
 
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
+        rdbStore_ = nullptr;
     }
 
-    rdbStore_ = nullptr;
     int32_t ret = NativeRdb::RdbHelper::DeleteRdbStore(notificationRdbConfig_.dbPath + notificationRdbConfig_.dbName);
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("failed to destroy db store");

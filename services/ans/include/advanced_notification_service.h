@@ -33,7 +33,9 @@
 #include "notification.h"
 #include "notification_bundle_option.h"
 #include "notification_record.h"
+#include "notification_slot_filter.h"
 #include "notification_sorting_map.h"
+#include "permission_filter.h"
 #include "push_callback_interface.h"
 #include "system_event_observer.h"
 
@@ -854,6 +856,8 @@ private:
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;
 #endif
+    std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
+    std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
 };
 
 /**

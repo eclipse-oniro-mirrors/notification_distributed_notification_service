@@ -30,7 +30,13 @@ namespace Notification {
 class NotificationPreferencesTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void TearDownTestCase()
+    {
+        if (advancedNotificationService_ != nullptr) {
+            advancedNotificationService_->SelfClean();
+        }
+    }
+
     void SetUp() {};
     void TearDown();
 
@@ -869,7 +875,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00200, Function | 
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00300, Function | SmallTest | Level1)
 {
     bool enable = false;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, enable), 
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, enable),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
