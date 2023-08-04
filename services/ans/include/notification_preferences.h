@@ -260,7 +260,7 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, const T &value);
     template <typename T>
     ErrCode GetBundleProperty(
-        const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, T &value) const;
+        const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, T &value);
     std::string GenerateBundleKey(const sptr<NotificationBundleOption> &bundleOption) const;
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption) const;
 
