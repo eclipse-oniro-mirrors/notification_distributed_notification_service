@@ -4233,5 +4233,47 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber02, Function | SmallTest | Leve
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
+
+/**
+ * @tc.name: HandleRemoveNotifications01
+ * @tc.desc: Test HandleRemoveNotifications function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleRemoveNotifications01, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ErrCode ret = ansManagerStub_->HandleRemoveNotifications(data, reply);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleUnregisterPushCallback01
+ * @tc.desc: Test HandleUnregisterPushCallback function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleUnregisterPushCallback01, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ErrCode ret = ansManagerStub_->HandleUnregisterPushCallback(data, reply);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HandleRegisterPushCallback01
+ * @tc.desc: Test HandleRegisterPushCallback function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleRegisterPushCallback01, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ErrCode ret = ansManagerStub_->HandleRegisterPushCallback(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
 }
 }
