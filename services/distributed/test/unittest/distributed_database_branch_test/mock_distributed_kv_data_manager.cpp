@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,30 +18,12 @@
 #include "mock_single_kv_store.h"
 
 namespace {
-    bool g_mockStartWatchDeviceChangeRet = true;
     bool g_mockGetSingleKvStoreRet = true;
-    bool g_mockGetLocalDeviceRet = true;
-    bool g_mockGetDeviceListRet = true;
-}
-
-void MockStartWatchDeviceChange(bool mockRet)
-{
-    g_mockStartWatchDeviceChangeRet = mockRet;
 }
 
 void MockGetSingleKvStore(bool mockRet)
 {
     g_mockGetSingleKvStoreRet = mockRet;
-}
-
-void MockGetLocalDevice(bool mockRet)
-{
-    g_mockGetLocalDeviceRet = mockRet;
-}
-
-void MockGetDeviceList(bool mockRet)
-{
-    g_mockGetDeviceListRet = mockRet;
 }
 
 namespace OHOS {

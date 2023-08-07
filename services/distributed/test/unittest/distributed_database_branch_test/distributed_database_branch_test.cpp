@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,14 +22,15 @@
 #include "ans_inner_errors.h"
 #include "mock_single_kv_store.h"
 
-extern void MockStartWatchDeviceChange(bool mockRet);
+extern void MockInitDeviceManager(bool mockRet);
+extern void MockRegisterDevStateCallback(bool mockRet);
 extern void MockGetSingleKvStore(bool mockRet);
 extern void MockSubscribeKvStore(bool mockRet);
 extern void MockKvStoreFlowControl(bool mockRet);
 extern void MockRemoveDeviceData(bool mockRet);
 extern void MockKvManagerFlowControl(bool mockRet);
 extern void MockGetLocalDevice(bool mockRet);
-extern void MockGetDeviceList(bool mockRet);
+extern void MockGetTrustedDeviceList(bool mockRet);
 
 using namespace testing::ext;
 using namespace OHOS::DistributedKv;
@@ -114,7 +115,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0100, Func
 {
     ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = nullptr;
-    MockStartWatchDeviceChange(false);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
     EXPECT_EQ(true, database_->CheckKvDataManager());
 }
 
@@ -127,7 +129,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0200, Func
 {
     ASSERT_NE(nullptr, database_);
     database_->kvDataManager_ = nullptr;
-    MockStartWatchDeviceChange(false);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(true);
     database_->GetKvStore();
 }
 
@@ -197,6 +200,8 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0600, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_0700, Function | SmallTest | Level1)
 {
     database_->kvStore_ = nullptr;
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(true);
     EXPECT_EQ(false, database_->CheckKvStore());
 }
 
@@ -409,13 +414,18 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2100, Func
 /**
  * @tc.name   : DistributedDatabaseBranchTest_2200
  * @tc.number : DistributedDatabaseBranchTest_2200
- * @tc.desc   : Test GetLocalDeviceId function and CheckKvDataManager is false.
+ * @tc.desc   : Test GetLocalDeviceId function and localDeviceId_ is not empty.
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2200, Function | SmallTest | Level1)
 {
-    database_->kvDataManager_ = nullptr;
+    database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
+    // set localDeviceId_ is localDeviceId
+    database_->localDeviceId_ = "localDeviceId";
+    MockKvManagerFlowControl(false);
     std::string deviceId = "<deviceId>";
     EXPECT_EQ(true, database_->GetLocalDeviceId(deviceId));
+    // set localDeviceId_ is empty
+    database_->localDeviceId_ = "";
 }
 
 /**
@@ -439,6 +449,7 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2300, Func
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2400, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = nullptr;
+    MockInitDeviceManager(true);
     DistributedHardware::DmDeviceInfo localInfo;
     EXPECT_EQ(false, database_->GetLocalDeviceInfo(localInfo));
 }
@@ -473,11 +484,13 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2600, Func
 /**
  * @tc.name   : DistributedDatabaseBranchTest_2700
  * @tc.number : DistributedDatabaseBranchTest_2700
- * @tc.desc   : Test GetDeviceInfoList function and CheckKvDataManager is false.
+ * @tc.desc   : Test GetDeviceInfoList function and ret == ERR_OK.
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2700, Function | SmallTest | Level1)
 {
-    database_->kvDataManager_ = nullptr;
+    database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
+    MockKvManagerFlowControl(true);
+    MockGetTrustedDeviceList(false);
     std::vector<DistributedHardware::DmDeviceInfo> deviceList;
     EXPECT_EQ(true, database_->GetDeviceInfoList(deviceList));
 }
@@ -498,15 +511,15 @@ HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2800, Func
 /**
  * @tc.name   : DistributedDatabaseBranchTest_2900
  * @tc.number : DistributedDatabaseBranchTest_2900
- * @tc.desc   : Test GetDeviceInfoList function and status != DistributedKv::Status::SUCCESS.
+ * @tc.desc   : Test GetDeviceInfoList function and ret != ERR_OK.
  */
 HWTEST_F(DistributedDatabaseBranchTest, DistributedDatabaseBranchTest_2900, Function | SmallTest | Level1)
 {
     database_->kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
     MockKvManagerFlowControl(true);
-    MockGetDeviceList(false);
+    MockGetTrustedDeviceList(true);
     std::vector<DistributedHardware::DmDeviceInfo> deviceList;
-    EXPECT_EQ(true, database_->GetDeviceInfoList(deviceList));
+    EXPECT_EQ(false, database_->GetDeviceInfoList(deviceList));
 }
 
 /**

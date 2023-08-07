@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,27 +16,6 @@
 #include "distributed_kv_data_manager.h"
 
 #include "mock_single_kv_store.h"
-
-namespace {
-    bool g_mockGetDeviceListRet = true;
-    bool g_mockStartWatchDeviceChangeRet = true;
-    bool g_mockGetLocalDeviceRet = true;
-}
-
-void MockGetDeviceList(bool mockRet)
-{
-    g_mockGetDeviceListRet = mockRet;
-}
-
-void MockStartWatchDeviceChange(bool mockRet)
-{
-    g_mockStartWatchDeviceChangeRet = mockRet;
-}
-
-void MockGetLocalDevice(bool mockRet)
-{
-    g_mockGetLocalDeviceRet = mockRet;
-}
 
 namespace OHOS {
 namespace DistributedKv {

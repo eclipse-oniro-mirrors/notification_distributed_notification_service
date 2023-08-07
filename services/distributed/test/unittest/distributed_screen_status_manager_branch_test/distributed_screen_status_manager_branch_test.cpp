@@ -22,8 +22,9 @@
 #include "ans_inner_errors.h"
 #include "mock_single_kv_store.h"
 
-extern void MockGetDeviceList(bool mockRet);
-extern void MockStartWatchDeviceChange(bool mockRet);
+extern void MockInitDeviceManager(bool mockRet);
+extern void MockRegisterDevStateCallback(bool mockRet);
+extern void MockGetTrustedDeviceList(bool mockRet);
 extern void MockKvManagerFlowControl(bool mockRet);
 extern void MockKvStoreFlowControl(bool mockRet);
 extern void MockGetEntries(bool mockRet);
@@ -54,22 +55,24 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0100, Funct
 {
     DistributedScreenStatusManager distributedScreenStatusManager;
     distributedScreenStatusManager.kvDataManager_ = nullptr;
-    MockStartWatchDeviceChange(false);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
     EXPECT_EQ(true, distributedScreenStatusManager.CheckKvDataManager());
 }
 
 /**
  * @tc.name   : DistributedScreen_0200
  * @tc.number : DistributedScreen_0200
- * @tc.desc   : Test OnDeviceDisconnected function and status != DistributedKv::Status::SUCCESS.
+ * @tc.desc   : Test OnDeviceDisconnected function and ret == ERR_OK.
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0200, Function | SmallTest | Level1)
 {
     std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
         std::make_shared<DistributedScreenStatusManager>();
     ASSERT_NE(nullptr, distributedScreenStatusManager);
-    MockGetDeviceList(false);
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
+    MockGetTrustedDeviceList(false);
     std::string deviceId = "aa";
     distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
 }
@@ -77,15 +80,16 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0200, Funct
 /**
  * @tc.name   : DistributedScreen_0300
  * @tc.number : DistributedScreen_0300
- * @tc.desc   : Test OnDeviceDisconnected function and devInfoList is empty.
+ * @tc.desc   : Test OnDeviceDisconnected function and ret != ERR_OK.
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0300, Function | SmallTest | Level1)
 {
     std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
         std::make_shared<DistributedScreenStatusManager>();
     ASSERT_NE(nullptr, distributedScreenStatusManager);
-    MockGetDeviceList(true);
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
+    MockGetTrustedDeviceList(true);
     std::string deviceId = "aa";
     distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
 }
@@ -125,8 +129,9 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0600, Funct
     std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
         std::make_shared<DistributedScreenStatusManager>();
     ASSERT_NE(nullptr, distributedScreenStatusManager);
-    MockGetDeviceList(true);
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
+    MockGetTrustedDeviceList(false);
     distributedScreenStatusManager->kvStore_ = nullptr;
     std::string deviceId = "aa";
     distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
@@ -135,14 +140,14 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0600, Funct
 /**
  * @tc.name   : DistributedScreen_0700
  * @tc.number : DistributedScreen_0700
- * @tc.desc   : Test GetKvDataManager function and status != DistributedKv::Status::SUCCESS.
+ * @tc.desc   : Test GetKvDataManager function and ret != 0.
  */
 HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0700, Function | SmallTest | Level1)
 {
     std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
         std::make_shared<DistributedScreenStatusManager>();
     ASSERT_NE(nullptr, distributedScreenStatusManager);
-    MockStartWatchDeviceChange(false);
+    MockInitDeviceManager(true);
     distributedScreenStatusManager->GetKvDataManager();
 }
 
@@ -156,7 +161,7 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0800, Funct
     std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
         std::make_shared<DistributedScreenStatusManager>();
     ASSERT_NE(nullptr, distributedScreenStatusManager);
-    MockStartWatchDeviceChange(false);
+    MockInitDeviceManager(true);
     distributedScreenStatusManager->GetKvStore();
 }
 
@@ -170,7 +175,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_0900, Funct
     std::shared_ptr<DistributedScreenStatusManager> distributedScreenStatusManager =
         std::make_shared<DistributedScreenStatusManager>();
     ASSERT_NE(nullptr, distributedScreenStatusManager);
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(true);
     distributedScreenStatusManager->GetKvStore();
 }
 
@@ -185,7 +191,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1000, Funct
         std::make_shared<DistributedScreenStatusManager>();
     ASSERT_NE(nullptr, distributedScreenStatusManager);
     distributedScreenStatusManager->kvDataManager_ = nullptr;
-    MockStartWatchDeviceChange(false);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(true);
     std::string deviceId = "aa";
     distributedScreenStatusManager->OnDeviceDisconnected(deviceId);
 }
@@ -200,7 +207,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1100, Funct
     DistributedScreenStatusManager distributedScreenStatusManager;
     // set CheckKvDataManager is false
     distributedScreenStatusManager.kvDataManager_ = nullptr;
-    MockStartWatchDeviceChange(false);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(true);
     // set kvStore_ is nullptr
     distributedScreenStatusManager.kvStore_ = nullptr;
     bool isUsing = true;
@@ -216,7 +224,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1200, Funct
 {
     DistributedScreenStatusManager distributedScreenStatusManager;
     // set CheckKvDataManager is true
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
     // set kvStore_ is not nullptr
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedScreenStatusManager.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
@@ -237,7 +246,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1300, Funct
 {
     DistributedScreenStatusManager distributedScreenStatusManager;
     // set CheckKvDataManager is true
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
     // set kvStore_ is not nullptr
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedScreenStatusManager.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
@@ -245,10 +255,10 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1300, Funct
     MockKvManagerFlowControl(true);
     // set KvStoreFlowControl is true
     MockKvStoreFlowControl(true);
-    // set status != DistributedKv::Status::SUCCESS
-    MockGetDeviceList(false);
+    // set ret != ERR_OK
+    MockGetTrustedDeviceList(true);
     bool isUsing = true;
-    EXPECT_EQ(ERR_OK, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
+    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
 }
 
 /**
@@ -260,7 +270,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1400, Funct
 {
     DistributedScreenStatusManager distributedScreenStatusManager;
     // set CheckKvDataManager is true
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
     // set kvStore_ is not nullptr
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedScreenStatusManager.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
@@ -268,8 +279,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1400, Funct
     MockKvManagerFlowControl(true);
     // set KvStoreFlowControl is true
     MockKvStoreFlowControl(true);
-    // set status == DistributedKv::Status::SUCCESS
-    MockGetDeviceList(true);
+    // set ret == ERR_OK
+    MockGetTrustedDeviceList(false);
     // set status != DistributedKv::Status::SUCCESS
     MockGetEntries(false);
     bool isUsing = true;
@@ -285,7 +296,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1500, Funct
 {
     DistributedScreenStatusManager distributedScreenStatusManager;
     // set CheckKvDataManager is true
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
     // set kvStore_ is not nullptr
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedScreenStatusManager.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
@@ -293,8 +305,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1500, Funct
     MockKvManagerFlowControl(true);
     // set KvStoreFlowControl is true
     MockKvStoreFlowControl(true);
-    // set status == DistributedKv::Status::SUCCESS
-    MockGetDeviceList(true);
+    // set ret == ERR_OK
+    MockGetTrustedDeviceList(false);
     // set status == DistributedKv::Status::SUCCESS
     MockGetEntries(true);
     bool isUsing = true;
@@ -310,7 +322,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1600, Funct
 {
     DistributedScreenStatusManager distributedScreenStatusManager;
     // set CheckKvDataManager is true
-    MockStartWatchDeviceChange(true);
+    MockInitDeviceManager(false);
+    MockRegisterDevStateCallback(false);
     // set kvStore_ is not nullptr
     std::shared_ptr<MockSingleKvStore> kvStore = std::make_shared<MockSingleKvStore>();
     distributedScreenStatusManager.kvStore_ = std::static_pointer_cast<SingleKvStore>(kvStore);
@@ -318,8 +331,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1600, Funct
     MockKvManagerFlowControl(true);
     // set KvStoreFlowControl is true
     MockKvStoreFlowControl(true);
-    // set status == DistributedKv::Status::SUCCESS
-    MockGetDeviceList(true);
+    // set ret == ERR_OK
+    MockGetTrustedDeviceList(false);
     // set status == DistributedKv::Status::SUCCESS
     MockGetEntries(true);
     bool isUsing = false;
@@ -360,10 +373,10 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1800, Funct
     MockKvManagerFlowControl(true);
     // set KvStoreFlowControl is true
     MockKvStoreFlowControl(true);
-    // set status != DistributedKv::Status::SUCCESS
-    MockGetLocalDevice(false);
+    // set ret != ERR_OK
+    MockGetLocalDevice(true);
     bool screenOn = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
+    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
 }
 
 /**
@@ -381,8 +394,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1900, Funct
     MockKvManagerFlowControl(true);
     // set KvStoreFlowControl is true
     MockKvStoreFlowControl(true);
-    // set status == DistributedKv::Status::SUCCESS
-    MockGetLocalDevice(true);
+    // set ret == ERR_OK
+    MockGetLocalDevice(false);
     bool screenOn = true;
     EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
 }
