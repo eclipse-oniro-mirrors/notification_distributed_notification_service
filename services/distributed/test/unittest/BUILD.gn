@@ -147,6 +147,7 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
   ]
 
   sources = [
+    "distributed_database_branch_test/mock_device_manager_impl.cpp",
     "distributed_screen_status_manager_branch_test/distributed_screen_status_manager_branch_test.cpp",
     "distributed_screen_status_manager_branch_test/mock_distributed_flow_control.cpp",
     "distributed_screen_status_manager_branch_test/mock_distributed_kv_data_manager.cpp",
@@ -194,6 +195,7 @@ ohos_unittest("distributed_database_branch_test") {
 
   sources = [
     "distributed_database_branch_test/distributed_database_branch_test.cpp",
+    "distributed_database_branch_test/mock_device_manager_impl.cpp",
     "distributed_database_branch_test/mock_distributed_flow_control.cpp",
     "distributed_database_branch_test/mock_distributed_kv_data_manager.cpp",
     "distributed_database_branch_test/mock_single_kv_store.cpp",
