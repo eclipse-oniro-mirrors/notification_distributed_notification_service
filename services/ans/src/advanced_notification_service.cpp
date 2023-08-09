@@ -459,6 +459,10 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (request == nullptr) {
+        ANS_LOGE("request is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if ((request->GetSlotType() == NotificationConstant::SlotType::CUSTOM) &&
         !AccessTokenHelper::IsSystemApp() && !isSubsystem) {
