@@ -97,7 +97,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest 
 /**
  * @tc.name      : NotificationDialog_00400
  * @tc.number    :
- * @tc.desc      : test StartEnableNotificationDialogAbility function and topUid is not uid
+ * @tc.desc      : test StartEnableNotificationDialogAbility function topUid is not uid
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest | Level1)
 {
@@ -111,8 +111,8 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest 
     int32_t result2 =  notificationDialog.GetUidByBundleName(bundleName);
     int32_t code = -1;
     EXPECT_EQ(result2, code);
-    
-    int32_t uid = -1;
+
+    int32_t uid = 100;
     sptr<IRemoteObject> callerToken = nullptr;
     ErrCode result3 =  notificationDialog.StartEnableNotificationDialogAbility(uid, callerToken);
     EXPECT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
