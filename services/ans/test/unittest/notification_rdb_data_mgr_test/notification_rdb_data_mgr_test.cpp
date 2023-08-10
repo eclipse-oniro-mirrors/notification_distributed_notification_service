@@ -100,9 +100,11 @@ class RdbStoreTest : public RdbStore {
             return NativeRdb::E_ERROR;
         };
         virtual std::shared_ptr<AbsSharedResultSet> Query(int &errCode, bool distinct, const std::string &table,
-            const std::vector<std::string> &columns, const std::string &selection = "",
-            const std::vector<std::string> &selectionArgs = std::vector<std::string>(), const std::string &groupBy = "",
-            const std::string &having = "", const std::string &orderBy = "", const std::string &limit = "")
+            const std::vector<std::string> &columns, const std::string &whereClause = "",
+            const std::vector<ValueObject> &bindArgs = {}, const std::string &groupBy = "",
+            const std::string &indexName = "", const std::string &orderBy = "",
+            const int &limit = AbsPredicates::INIT_LIMIT_VALUE,
+            const int &offset = AbsPredicates::INIT_LIMIT_VALUE)
         {
             return nullptr;
         };
