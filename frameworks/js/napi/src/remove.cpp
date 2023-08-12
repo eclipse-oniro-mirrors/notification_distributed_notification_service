@@ -319,7 +319,7 @@ napi_value Remove(napi_env env, napi_callback_info info)
     // Asynchronous function call
     napi_create_async_work(env, nullptr, resourceName, RemoveExecuteCallback, RemoveCompleteCallback,
         (void *)removeInfo, &removeInfo->asyncWork);
-    NAPI_CALL(env, napi_queue_async_work(env, removeInfo->asyncWork));
+    NAPI_CALL(env, napi_queue_async_work_with_qos(env, removeInfo->asyncWork, napi_qos_user_initiated));
     if (removeInfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {
@@ -382,7 +382,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -460,7 +460,7 @@ napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
