@@ -71,7 +71,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
         &asyncCallbackinfo->asyncWork);
 
     bool isCallback = asyncCallbackinfo->info.isCallback;
-    napi_status status = napi_queue_async_work(env, asyncCallbackinfo->asyncWork);
+    napi_status status = napi_queue_async_work_with_qos(env, asyncCallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
         asyncCallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;

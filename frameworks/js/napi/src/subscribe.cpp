@@ -237,7 +237,8 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnCanceled);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnCanceled, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -332,7 +333,8 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnConsumed);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnConsumed, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -414,7 +416,8 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnUpdate);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnUpdate, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -482,7 +485,8 @@ void SubscriberInstance::OnConnected()
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnConnected);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnConnected, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -553,7 +557,8 @@ void SubscriberInstance::OnDisconnected()
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnDisconnected);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnDisconnected, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -621,7 +626,8 @@ void SubscriberInstance::OnDied()
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnDied);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnDied, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -705,7 +711,8 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnDoNotDisturbDateChange);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnDoNotDisturbDateChange, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -790,7 +797,8 @@ void SubscriberInstance::OnEnabledNotificationChanged(
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnEnabledNotificationChanged);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnEnabledNotificationChanged, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -873,7 +881,8 @@ void SubscriberInstance::OnBadgeChanged(
 
     work->data = reinterpret_cast<void *>(dataWorker);
 
-    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, UvQueueWorkOnBadgeChanged);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnBadgeChanged, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -1330,7 +1339,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work(env, asynccallbackinfo->asyncWork);
+    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
