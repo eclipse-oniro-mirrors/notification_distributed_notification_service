@@ -51,6 +51,8 @@
 #include "reminder_data_manager.h"
 #include "trigger_info.h"
 #include "want_agent_helper.h"
+#include "notification_timer_info.h"
+#include "time_service_client.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -4631,14 +4633,16 @@ void AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Notifica
     ANS_LOGD("enter");
     auto triggerFunc = std::bind(&AdvancedNotificationService::TriggerAutoDelete,
         this, record->notification->GetKey());
-    int64_t autoDeleteTime = record->request->GetAutoDeletedTime() - GetCurrentTime();
+    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
+    notificationTimerInfo->SetCallbackInfo(triggerFunc);
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
         return;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(triggerFunc,
-        ffrt::task_attr().delay(autoDeleteTime * 1000));
+    uint64_t timerId = timer->CreateTimer(notificationTimerInfo);
+    timer->StartTimer(timerId, record->request->GetAutoDeletedTime());
 }
 
 void AdvancedNotificationService::TriggerAutoDelete(std::string hashCode)
