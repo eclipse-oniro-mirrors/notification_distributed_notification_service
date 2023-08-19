@@ -150,6 +150,8 @@ private:
      */
     int8_t GetNextAlarm(const time_t now, const time_t target) const;
 
+    time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
+
     static const uint8_t DAYS_PER_WEEK;
     static const uint8_t MONDAY;
     static const uint8_t SUNDAY;

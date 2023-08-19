@@ -1166,6 +1166,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
     ANSR_LOGD("Play sound and vibration, reminderId=%{public}d", reminder->GetReminderId());
+#ifdef PLAYER_FRAMEWORK_ENABLE
     if (soundPlayer_ == nullptr) {
         soundPlayer_ = Media::PlayerFactory::CreatePlayer();
         if (soundPlayer_ == nullptr) {
@@ -1180,6 +1181,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     soundPlayer_->SetLooping(true);
     soundPlayer_->PrepareAsync();
     soundPlayer_->Play();
+#endif
     SetAlertingReminder(reminder);
 }
 
@@ -1224,6 +1226,7 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
         return;
     }
     ANSR_LOGD("Stop sound and vibration, reminderId=%{public}d", reminder->GetReminderId());
+#ifdef PLAYER_FRAMEWORK_ENABLE
     if (soundPlayer_ == nullptr) {
         ANSR_LOGW("Sound player is null");
     } else {
@@ -1231,6 +1234,7 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
         soundPlayer_->Release();
         soundPlayer_ = nullptr;
     }
+#endif
     sptr<ReminderRequest> nullReminder = nullptr;
     SetAlertingReminder(nullReminder);
 }

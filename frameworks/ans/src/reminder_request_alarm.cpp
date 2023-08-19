@@ -140,19 +140,35 @@ uint64_t ReminderRequestAlarm::GetNextTriggerTime(bool forceToGetNext) const
     } else {
         nextTriggerTime = target + nextDayInterval * HOURS_PER_DAY * SECONDS_PER_HOUR;
     }
+    time_t triggerTime = GetTriggerTimeWithDST(now, nextTriggerTime);
     struct tm test;
-    (void)localtime_r(&nextTriggerTime, &test);
+    (void)localtime_r(&triggerTime, &test);
     ANSR_LOGI("NextTriggerTime: year=%{public}d, mon=%{public}d, day=%{public}d, hour=%{public}d, "
         "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
         GetActualTime(TimeTransferType::YEAR, test.tm_year),
         GetActualTime(TimeTransferType::MONTH, test.tm_mon),
         test.tm_mday, test.tm_hour, test.tm_min, test.tm_sec,
-        GetActualTime(TimeTransferType::WEEK, test.tm_wday), (long long)nextTriggerTime);
+        GetActualTime(TimeTransferType::WEEK, test.tm_wday), (long long)triggerTime);
 
-    if (static_cast<int64_t>(nextTriggerTime) <= 0) {
+    if (static_cast<int64_t>(triggerTime) <= 0) {
         return 0;
     }
-    return ReminderRequest::GetDurationSinceEpochInMilli(nextTriggerTime);
+    return ReminderRequest::GetDurationSinceEpochInMilli(triggerTime);
+}
+
+time_t ReminderRequestAlarm::GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const
+{
+    time_t triggerTime = nextTriggerTime;
+    struct tm nowLocal;
+    struct tm nextLocal;
+    (void)localtime_r(&now, &nowLocal);
+    (void)localtime_r(&nextTriggerTime, &nextLocal);
+    if (nowLocal.tm_isdst == 0 && nextLocal.tm_isdst > 0) {
+        triggerTime -= SECONDS_PER_HOUR;
+    } else if (nowLocal.tm_isdst > 0 && nextLocal.tm_isdst == 0) {
+        triggerTime += SECONDS_PER_HOUR;
+    }
+    return triggerTime;
 }
 
 int8_t ReminderRequestAlarm::GetNextAlarm(const time_t now, const time_t target) const
