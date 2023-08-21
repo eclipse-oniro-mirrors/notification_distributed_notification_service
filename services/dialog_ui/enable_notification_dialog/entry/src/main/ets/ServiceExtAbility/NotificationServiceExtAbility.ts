@@ -77,7 +77,9 @@ export default class NotificationDialogServiceExtensionAbility extends extension
 
       await win.show();
       if (deviceInfo.deviceType === 'default' || deviceInfo.deviceType === 'phone') {
-        await win.setWindowLayoutFullScreen(true);
+        let def = display.getDefaultDisplaySync();
+        win.moveTo(0, 0);
+        win.resetSize(def.width, def.height);
       } else {
         let def = display.getDefaultDisplaySync();
         let topMargin = 60;
