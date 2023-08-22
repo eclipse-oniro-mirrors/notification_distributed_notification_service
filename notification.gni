@@ -50,6 +50,7 @@ declare_args() {
   device_usage = true
   hisysevent_usage = true
   standby_enable = true
+  player_framework = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
@@ -64,6 +65,11 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_standby)) {
     standby_enable = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.multimedia_player_framework)) {
+    player_framework = false
   }
 
   print("hisysevent_usage = " + "$hisysevent_usage")

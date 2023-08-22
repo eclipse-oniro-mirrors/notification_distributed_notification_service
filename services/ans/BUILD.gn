@@ -83,7 +83,6 @@ ohos_shared_library("libans") {
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "time_service:time_client",
   ]
@@ -102,6 +101,11 @@ ohos_shared_library("libans") {
   if (standby_enable) {
     external_deps += [ "device_standby:standby_innerkits" ]
     defines += [ "DEVICE_STANDBY_ENABLE" ]
+  }
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
 
   subsystem_name = "${subsystem_name}"

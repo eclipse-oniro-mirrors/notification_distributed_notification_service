@@ -21,7 +21,9 @@
 
 #include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
+#ifdef PLAYER_FRAMEWORK_ENABLE
 #include "player.h"
+#endif
 #include "reminder_request.h"
 #include "reminder_store.h"
 #include "reminder_timer_info.h"
@@ -504,9 +506,9 @@ private:
      */
     int32_t alertingReminderId_ = -1;
     sptr<ReminderRequest> alertingReminder_ = nullptr;
-
+#ifdef PLAYER_FRAMEWORK_ENABLE
     std::shared_ptr<Media::Player> soundPlayer_ = nullptr;
-
+#endif
     /**
      * Indicates the total count of reminders in system.
      */
