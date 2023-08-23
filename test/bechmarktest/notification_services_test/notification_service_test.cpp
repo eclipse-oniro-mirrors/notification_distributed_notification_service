@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,14 +67,14 @@ public:
     {}
     void OnDisconnected() override
     {}
-    void OnDied() override
-    {}
     void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
     void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
     {}
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
+    {}
+    void OnDied() override
     {}
     void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override

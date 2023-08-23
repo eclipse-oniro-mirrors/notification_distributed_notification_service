@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,8 +103,6 @@ int SendRequestReplaceString(uint32_t code, MessageParcel &data, MessageParcel &
 
 class TestSubscriber : public NotificationSubscriber {
 public:
-    void OnConnected() override
-    {}
     void OnDisconnected() override
     {}
     void OnDied() override
@@ -113,16 +111,18 @@ public:
     {}
     void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
     {}
+    void OnConnected() override
+    {}
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
-    {}
-    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
 };
 

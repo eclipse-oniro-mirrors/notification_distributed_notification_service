@@ -15,14 +15,14 @@
 
 #include <gtest/gtest.h>
 
-#define private public
 #define protected public
+#define private public
 #include "reminder_request.h"
-#undef private
 #undef protected
-
+#undef private
 
 extern void MockNowInstantMilli(bool mockRet);
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
