@@ -454,11 +454,11 @@ HWTEST_F(AnsImageUtilUnitTest, CreatePixelMapTest_0400, Function | MediumTest | 
     MockImageSourceCreateImageSource(false, 0);
     MockImageSourceGetSupportedFormats(0);
     MockImageSourceCreatePixelMap(true, 0);
-    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
-    ASSERT_NE(nullptr, imageUtil);
-    std::string inFilePath = "testInfile";
-    std::string format = "testFormat";
-    std::shared_ptr<Media::PixelMap> res = imageUtil->CreatePixelMap(inFilePath, format);
+    std::shared_ptr<AnsImageUtil> ansImageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, ansImageUtil);
+    std::string testInfile = "testInfile";
+    std::string testFormat = "testFormat";
+    std::shared_ptr<Media::PixelMap> res = ansImageUtil->CreatePixelMap(testInfile, testFormat);
     EXPECT_EQ(nullptr, res);
     MockResetImageSourceState();
     MockResetImagePackerState();

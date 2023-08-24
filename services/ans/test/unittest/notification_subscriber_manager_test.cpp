@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,10 +41,6 @@ private:
         {}
         void OnDied() override
         {}
-        void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
-        {}
-        void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
-        {}
         void OnEnabledNotificationChanged(
             const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
         {}
@@ -53,6 +49,10 @@ private:
         {}
         void OnConsumed(const std::shared_ptr<Notification> &request,
             const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+        {}
+        void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+        {}
+        void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
         {}
         void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
         {}

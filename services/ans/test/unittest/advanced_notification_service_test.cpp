@@ -97,6 +97,8 @@ inline void SleepForFC()
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
+    void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
+    {}
     void OnConnected() override
     {}
     void OnDisconnected() override
@@ -105,7 +107,7 @@ public:
     {}
     void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
-    void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
@@ -115,8 +117,6 @@ public:
     {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
-    {}
-    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
 };
 

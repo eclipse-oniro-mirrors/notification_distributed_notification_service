@@ -24,16 +24,16 @@ namespace OHOS {
 namespace Notification {
 class ReminderRequestTimerTest : public testing::Test {
 public:
-    static void SetUpTestCase()
-    {
-        ReminderHelper::CancelAllReminders();
-    }
-    static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown()
     {
         ReminderHelper::CancelAllReminders();
     }
+    static void SetUpTestCase()
+    {
+        ReminderHelper::CancelAllReminders();
+    }
+    static void TearDownTestCase() {}
 };
 
 /**

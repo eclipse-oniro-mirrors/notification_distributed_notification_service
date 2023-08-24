@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,8 +33,8 @@ public:
     {
         ReminderHelper::CancelAllReminders();
     }
-    static void TearDownTestCase() {}
     void SetUp() {}
+    static void TearDownTestCase() {}
     void TearDown()
     {
         ReminderHelper::CancelAllReminders();
@@ -186,18 +186,18 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00500, Function | SmallTest |
     EXPECT_NE(nullptr, tmp);
     tm nowTime = *tmp;
     nowTime.tm_year += 1;
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    repeatMonths.push_back(-1);
-    repeatDays.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    std::vector<uint8_t> repeatMonth;
+    std::vector<uint8_t> repeatDay;
+    repeatMonth.push_back(-1);
+    repeatDay.push_back(1);
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay);
     calendar->SetNextTriggerTime();
     std::vector<uint8_t> actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with -1 error.";
 
-    repeatMonths.clear();
-    repeatMonths.push_back(13);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    repeatMonth.clear();
+    repeatMonth.push_back(13);
+    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay);
     calendar->SetNextTriggerTime();
     actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with 13 error.";
@@ -760,22 +760,22 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00004, Function | Small
 
     uint8_t month = 1;
     calendar->SetMonth(month, isSet);
-    bool result1 = calendar->IsRepeatMonth(month);
-    EXPECT_EQ(result1, false);
+    bool result7 = calendar->IsRepeatMonth(month);
+    EXPECT_EQ(result7, false);
 
-    auto rrc = std::make_shared<ReminderRequest>();
-    rrc->SetSnoozeTimes(1);
-    EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
+    auto reminderRequest = std::make_shared<ReminderRequest>();
+    reminderRequest->SetSnoozeTimes(1);
+    EXPECT_EQ(reminderRequest->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
 
-    rrc->SetSnoozeTimesDynamic(0);
-    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0) << "Get snoozeTimesDynamic not 1";
+    reminderRequest->SetSnoozeTimesDynamic(0);
+    EXPECT_EQ(reminderRequest->GetSnoozeTimesDynamic(), 0) << "Get snoozeTimesDynamic not 1";
 
-    uint32_t minTimeIntervalInSecond = 5 * 60;
-    rrc->SetTimeInterval(1);
-    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+    uint32_t minTimeIntervalInSeconds = 5 * 60;
+    reminderRequest->SetTimeInterval(1);
+    EXPECT_EQ(reminderRequest->GetTimeInterval(), minTimeIntervalInSeconds);
 
-    bool result3 = calendar->UpdateNextReminder();
-    EXPECT_EQ(result3, false);
+    bool result6 = calendar->UpdateNextReminder();
+    EXPECT_EQ(result6, false);
 }
 
 /**

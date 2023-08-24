@@ -86,21 +86,21 @@ inline void SleepForFC()
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
+    void OnDied() override
+    {}
     void OnConnected() override
     {}
     void OnDisconnected() override
-    {}
-    void OnDied() override
     {}
     void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
     void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
     {}
-    void OnEnabledNotificationChanged(
-        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
-    {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
+    {}
+    void OnEnabledNotificationChanged(
+        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
