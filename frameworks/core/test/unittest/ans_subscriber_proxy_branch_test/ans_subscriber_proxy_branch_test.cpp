@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#define private public
 #define protected public
+#define private public
 #include "ans_subscriber_proxy.h"
-#undef private
 #undef protected
+#undef private
 #include "ans_inner_errors.h"
 #include "ipc_types.h"
 #include "mock_i_remote_object.h"

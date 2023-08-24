@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,6 @@ class NotificationHelperTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        uint64_t tokenId;
         const char **perms = new const char *[1];
         perms[0] = "ohos.permission.NOTIFICATION_CONTROLLER";
         NativeTokenInfoParams infoInstance = {
@@ -48,6 +47,7 @@ public:
             .aplStr = "system_basic",
         };
 
+        uint64_t tokenId;
         infoInstance.processName = "ans_reminder_unit_test";
         tokenId = GetAccessTokenId(&infoInstance);
         SetSelfTokenID(tokenId);

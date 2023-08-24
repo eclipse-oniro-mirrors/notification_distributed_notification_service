@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -302,21 +302,21 @@ HWTEST_F(NotificationUserInputTest, Create_00005, Function | SmallTest | Level1)
  */
 HWTEST_F(NotificationUserInputTest, Create_00006, Function | SmallTest | Level1)
 {
-    std::string inputKey = "this is inputKey";
+    std::string inputKey = "inputKey";
     std::string tag = "Tag";
-    std::vector<std::string> options;
-    std::string option = "this is option";
-    options.emplace_back(option);
+    std::vector<std::string> vecs;
+    std::string option = "option";
+    vecs.emplace_back(option);
     bool permitFreeFormInput = false;
     std::set<std::string> permitMimeTypes;
-    std::string permitMimeType = "this is permitMimeType";
+    std::string permitMimeType = "permitMimeType";
     permitMimeTypes.insert(permitMimeType);
     std::shared_ptr<AAFwk::WantParams> additional = std::make_shared<AAFwk::WantParams>();
     Notification::NotificationConstant::InputEditType editType =
         Notification::NotificationConstant::InputEditType::EDIT_DISABLED;
     std::shared_ptr<NotificationUserInput> notificationUserInput = std::make_shared<NotificationUserInput>();
     ASSERT_NE(nullptr, notificationUserInput);
-    notificationUserInput->Create(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
+    notificationUserInput->Create(inputKey, tag, vecs, permitFreeFormInput, permitMimeTypes,
         additional, editType);
 }
 
@@ -346,14 +346,14 @@ HWTEST_F(NotificationUserInputTest, AddAdditionalData_00001, Function | SmallTes
 {
     std::string inputKey = "InputKey";
     std::string tag = "Tag";
-    std::vector<std::string> options;
+    std::vector<std::string> vecs;
     bool permitFreeFormInput = true;
     std::set<std::string> permitMimeTypes;
     std::shared_ptr<AAFwk::WantParams> additional = nullptr;
-    Notification::NotificationConstant::InputEditType editType =
+    Notification::NotificationConstant::InputEditType inputEditType =
         Notification::NotificationConstant::InputEditType(1);
-    auto rrc = std::make_shared<NotificationUserInput>(inputKey, tag, options, permitFreeFormInput, permitMimeTypes,
-    additional, editType);
+    auto rrc = std::make_shared<NotificationUserInput>(inputKey, tag, vecs, permitFreeFormInput, permitMimeTypes,
+    additional, inputEditType);
     std::shared_ptr<AAFwk::WantParams> ret = rrc->GetAdditionalData();
     EXPECT_EQ(ret, nullptr);
     AAFwk::WantParams aitional;

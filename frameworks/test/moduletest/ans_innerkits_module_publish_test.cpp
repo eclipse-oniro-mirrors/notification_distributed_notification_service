@@ -91,14 +91,14 @@ public:
     void OnDied() override
     {}
 
-    void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
+    void OnEnabledNotificationChanged(
+        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
 
     void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
     {}
 
-    void OnEnabledNotificationChanged(
-        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
+    void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
 
     void OnCanceled(const std::shared_ptr<Notification> &request,

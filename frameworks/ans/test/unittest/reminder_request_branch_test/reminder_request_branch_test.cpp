@@ -341,16 +341,16 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00100, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    int32_t notificationId_ = 0;
-    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
-    std::string title = "aa";
-    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CLOSE;
+    int32_t notificationId = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId);
+    std::string stringData = "aa";
+    ReminderRequest::ActionButtonType buttonType = ReminderRequest::ActionButtonType::CLOSE;
     ReminderRequest::ActionButtonInfo info;
     info.type = ReminderRequest::ActionButtonType::SNOOZE;
-    info.title = title;
+    info.title = stringData;
     info.wantAgent = nullptr;
     reminderRequest->actionButtonMap_.insert(
-        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(buttonType, info));
     bool includeSnooze = true;
     reminderRequest->AddActionButtons(includeSnooze);
 }
@@ -391,16 +391,16 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00300, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    int32_t notificationId_ = 0;
-    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
-    std::string title = "aa";
-    ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::SNOOZE;
+    int32_t notificationIds = 0;
+    reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationIds);
+    std::string title = "title";
+    ReminderRequest::ActionButtonType actionButtonType_ = ReminderRequest::ActionButtonType::SNOOZE;
     ReminderRequest::ActionButtonInfo info;
     info.type = ReminderRequest::ActionButtonType::SNOOZE;
     info.title = title;
     info.wantAgent = nullptr;
     reminderRequest->actionButtonMap_.insert(
-        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
+        std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType_, info));
     bool includeSnooze = false;
     reminderRequest->AddActionButtons(includeSnooze);
 }
