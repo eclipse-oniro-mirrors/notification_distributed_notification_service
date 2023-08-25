@@ -864,7 +864,11 @@ void NotificationPreferencesDatabase::ParseSlotFromDisturbeDB(NotificationPrefer
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(StringToInt(typeStr));
     sptr<NotificationSlot> slot = nullptr;
     if (!bundleInfo.GetSlot(slotType, slot)) {
-        slot = new NotificationSlot(slotType);
+        slot = new (std::nothrow) NotificationSlot(slotType);
+        if (slot == nullptr) {
+            ANS_LOGE("Failed to create NotificationSlot instance");
+            return;
+        }
     }
     std::string findString = GenerateSlotKey(bundleKey, typeStr) + KEY_UNDER_LINE;
     ParseSlot(findString, slot, entry);
@@ -1216,8 +1220,12 @@ void NotificationPreferencesDatabase::GetDoNotDisturbType(NotificationPreference
         std::string().append(KEY_DO_NOT_DISTURB_TYPE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
         key, [&](const int32_t &status, std::string &value) {
-            sptr<NotificationDoNotDisturbDate> disturbDate =
-                        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+            sptr<NotificationDoNotDisturbDate> disturbDate = new (std::nothrow)
+                NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+            if (disturbDate == nullptr) {
+                ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                return;
+            }
             info.GetDoNotDisturbDate(userId, disturbDate);
             if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
                 PutDoNotDisturbDate(userId, disturbDate);
@@ -1241,8 +1249,12 @@ void NotificationPreferencesDatabase::GetDoNotDisturbBeginDate(NotificationPrefe
         std::string().append(KEY_DO_NOT_DISTURB_BEGIN_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
         key, [&](const int32_t &status, std::string &value) {
-            sptr<NotificationDoNotDisturbDate> disturbDate =
-                        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+            sptr<NotificationDoNotDisturbDate> disturbDate = new (std::nothrow)
+                NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+            if (disturbDate == nullptr) {
+                ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                return;
+            }
             info.GetDoNotDisturbDate(userId, disturbDate);
             if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
                 PutDoNotDisturbDate(userId, disturbDate);
@@ -1265,8 +1277,12 @@ void NotificationPreferencesDatabase::GetDoNotDisturbEndDate(NotificationPrefere
         std::string().append(KEY_DO_NOT_DISTURB_END_DATE).append(KEY_UNDER_LINE).append(std::to_string(userId));
     GetValueFromDisturbeDB(
         key, [&](const int32_t &status, std::string &value) {
-            sptr<NotificationDoNotDisturbDate> disturbDate =
-                        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+            sptr<NotificationDoNotDisturbDate> disturbDate = new (std::nothrow)
+                NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+            if (disturbDate == nullptr) {
+                ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                return;
+            }
             info.GetDoNotDisturbDate(userId, disturbDate);
             if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
                 PutDoNotDisturbDate(userId, disturbDate);

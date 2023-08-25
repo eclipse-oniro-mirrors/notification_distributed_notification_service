@@ -107,7 +107,11 @@ ErrCode NotificationShellCommand::Init()
 void NotificationShellCommand::SetNativeToken()
 {
     uint64_t tokenId;
-    const char **perms = new const char *[1];
+    const char **perms = new (std::nothrow) const char *[1];
+    if (perms == nullptr) {
+        ANS_LOGE("Failed to create buffer.");
+        return;
+    }
     perms[0] = "ohos.permission.NOTIFICATION_CONTROLLER";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
