@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,14 +77,14 @@ public:
     {}
     void OnDisconnected() override
     {}
-    void OnDied() override
-    {}
     void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
-    void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
+    void OnDied() override
     {}
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
+    {}
+    void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override
     {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
@@ -190,16 +190,16 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlot_0100, Function | MediumTes
 HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0100, Function | MediumTest | Level1)
 {
     MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
-    NotificationBundleOption bundleOption;
-    std::string bundleName = "this is bundleName";
-    bundleOption.SetBundleName(bundleName);
+    NotificationBundleOption bundleOptions;
+    std::string bundleName = "bundleName";
+    bundleOptions.SetBundleName(bundleName);
     uint64_t num = 10;
-    ErrCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOption, num);
+    ErrCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
@@ -681,13 +681,13 @@ HWTEST_F(AnsNotificationUnitTest, SetDoNotDisturbDate_0200, Function | MediumTes
 HWTEST_F(AnsNotificationUnitTest, SetEnabledForBundleSlot_0100, Function | MediumTest | Level1)
 {
     MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     NotificationBundleOption bundleOption;
-    std::string bundleName = "this is bundleName";
+    std::string bundleName = "bundleName";
     bundleOption.SetBundleName(bundleName);
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
     bool enabled = true;
@@ -755,9 +755,9 @@ HWTEST_F(AnsNotificationUnitTest, SetSyncNotificationEnabledWithoutApp_0100, Fun
 HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0100, Function | MediumTest | Level1)
 {
     MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
     ASSERT_NE(nullptr, proxy);
     bool res = ans_->GetAnsManagerProxy();
     EXPECT_EQ(res, false);

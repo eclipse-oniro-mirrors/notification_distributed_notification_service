@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1876,7 +1876,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetShowBadgeEnabled01, Function | SmallTest |
 HWTEST_F(AnsManagerStubTest, HandleSubscribe01, Function | SmallTest | Level1)
 {
     uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
-    MessageParcel data;
+    MessageParcel parcels;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
@@ -1884,12 +1884,12 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe01, Function | SmallTest | Level1)
     bool subcribeInfo = true;
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
 
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteParcelable(subscriber);
-    data.WriteBool(subcribeInfo);
-    data.WriteParcelable(info);
+    parcels.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    parcels.WriteParcelable(subscriber);
+    parcels.WriteBool(subcribeInfo);
+    parcels.WriteParcelable(info);
 
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, parcels, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
@@ -1902,66 +1902,66 @@ HWTEST_F(AnsManagerStubTest, HandleSubscribe01, Function | SmallTest | Level1)
 HWTEST_F(AnsManagerStubTest, HandleSubscribe02, Function | SmallTest | Level1)
 {
     uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
-    MessageParcel data;
+    MessageParcel parcels;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<IRemoteObject> subscriber;
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
 
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteRemoteObject(subscriber);
-    data.WriteParcelable(info);
+    parcels.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    parcels.WriteRemoteObject(subscriber);
+    parcels.WriteParcelable(info);
 
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, parcels, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
  * @tc.name: HandleSubscribe03
- * @tc.desc: Test if the info in data is null.
+ * @tc.desc: Test if the info in parcels is null.
  * @tc.type: FUNC
  * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe03, Function | SmallTest | Level1)
 {
     uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
-    MessageParcel data;
+    MessageParcel parcels;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<IRemoteObject> subscriber;
     bool subcribeInfo = true;
 
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteParcelable(subscriber);
-    data.WriteBool(subcribeInfo);
+    parcels.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    parcels.WriteParcelable(subscriber);
+    parcels.WriteBool(subcribeInfo);
 
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, parcels, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
  * @tc.name: HandleSubscribe04
- * @tc.desc: Test if the subscriber in data is null.
+ * @tc.desc: Test if the subscriber in parcel is null.
  * @tc.type: FUNC
  * @tc.require: issueI620XB
  */
 HWTEST_F(AnsManagerStubTest, HandleSubscribe04, Function | SmallTest | Level1)
 {
     uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION);
-    MessageParcel data;
+    MessageParcel parcels;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
     bool subcribeInfo = true;
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
 
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteBool(subcribeInfo);
-    data.WriteParcelable(info);
+    parcels.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    parcels.WriteBool(subcribeInfo);
+    parcels.WriteParcelable(info);
 
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, parcels, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
@@ -2931,18 +2931,18 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser02, Function 
 HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser01, Function | SmallTest | Level1)
 {
     uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_BY_USER);
-    MessageParcel data;
+    MessageParcel parcels;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t userId = 4;
     bool enabled = true;
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteInt32(userId);
-    data.WriteBool(enabled);
+    parcels.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    parcels.WriteInt32(userId);
+    parcels.WriteBool(enabled);
 
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, parcels, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
 }
 

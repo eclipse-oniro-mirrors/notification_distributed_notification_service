@@ -817,12 +817,12 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotsTest_0400, Function | MediumTest | Lev
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, AddSlotsTest_0400, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    EXPECT_CALL(*iremoteObjects, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, true, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
@@ -863,12 +863,12 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotsTest_0600, Function | MediumTest | Lev
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, AddSlotsTest_0600, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    EXPECT_CALL(*iremoteObjects, SendRequest(_, _, _, _)).Times(1)
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, false, false, false)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
@@ -3961,13 +3961,13 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0200, Functio
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0200, TestSize.Level1";
-        MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    EXPECT_CALL(*iremoteObjects, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, true, true, true)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
@@ -4205,13 +4205,13 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0200, Function | MediumTest | Le
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, SubscribeTest_0200, TestSize.Level1";
-        MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    EXPECT_CALL(*iremoteObjects, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, true, true, true)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
@@ -4315,7 +4315,7 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0200, Function | MediumTest | 
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, UnsubscribeTest_0200, TestSize.Level1";
-        MockWriteInterfaceToken(true);
+    MockWriteInterfaceToken(true);
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
@@ -4643,7 +4643,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0200, Functio
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0200, TestSize.Level1";
-        MockWriteInterfaceToken(true);
+    MockWriteInterfaceToken(true);
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
@@ -5751,14 +5751,14 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishContinuousTaskNotificationTest_0200, Fu
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, PublishContinuousTaskNotificationTest_0200, TestSize.Level1";
     MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> ansManagerProxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, ansManagerProxy);
     NotificationRequest request(1);
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
-    int32_t result = proxy->PublishContinuousTaskNotification(notification);
+    int32_t result = ansManagerProxy->PublishContinuousTaskNotification(notification);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -6669,18 +6669,18 @@ HWTEST_F(AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0200, Function | M
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0200, TestSize.Level1";
-        MockWriteInterfaceToken(true);
+    MockWriteInterfaceToken(true);
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, true, true, true)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
+    std::shared_ptr<AnsManagerProxy> ansManagerProxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, ansManagerProxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
-    int32_t result = proxy->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    bool enabled = false;
+    int32_t result = ansManagerProxy->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
     EXPECT_EQ(ERR_OK, result);
     EXPECT_EQ(true, enabled);
 }
@@ -7040,15 +7040,15 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0300, Function | MediumTest | Le
 {
     GTEST_LOG_(INFO)
         << "AnsManagerProxyUnitTest, ShellDumpTest_0300, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    EXPECT_CALL(*iremoteObjects, SendRequest(_, _, _, _)).Times(1)
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplaceDumpInfo, _1, _2, _3, _4,
         ERR_OK, false, 0)), Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
+    std::shared_ptr<AnsManagerProxy> ansManagerProxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, ansManagerProxy);
     std::vector<std::string> dumpInfo;
-    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
+    int32_t result = ansManagerProxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -510,22 +510,22 @@ HWTEST_F(ReminderRequestAlarmTest, UpdateNextReminder_00200, Function | SmallTes
 {
     uint8_t arr[] = {};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
-    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    auto reminderRequestAlarm = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
 
     auto ret = std::make_shared<ReminderRequest>();
     ret->SetSnoozeTimes(1);
     EXPECT_EQ(ret->GetSnoozeTimes(), 1);
 
     uint32_t minTimeIntervalInSecond = 300;
-    rrc->SetTimeInterval(1);
-    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+    reminderRequestAlarm->SetTimeInterval(1);
+    EXPECT_EQ(reminderRequestAlarm->GetTimeInterval(), minTimeIntervalInSecond);
 
     ret->SetSnoozeTimesDynamic(0);
     EXPECT_EQ(ret->GetSnoozeTimesDynamic(), 0);
-    uint8_t result = rrc->GetRepeatDay();
+    uint8_t result = reminderRequestAlarm->GetRepeatDay();
     EXPECT_EQ(result, 0);
-    EXPECT_EQ(rrc->IsRepeatReminder(), true);
-    EXPECT_EQ(rrc->UpdateNextReminder(), true);
+    EXPECT_EQ(reminderRequestAlarm->IsRepeatReminder(), true);
+    EXPECT_EQ(reminderRequestAlarm->UpdateNextReminder(), true);
 }
 }
 }
