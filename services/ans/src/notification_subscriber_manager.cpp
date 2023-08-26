@@ -41,8 +41,11 @@ NotificationSubscriberManager::NotificationSubscriberManager()
 {
     ANS_LOGI("constructor");
     notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
-    recipient_ =
-        new RemoteDeathRecipient(std::bind(&NotificationSubscriberManager::OnRemoteDied, this, std::placeholders::_1));
+    recipient_ = new (std::nothrow)
+        RemoteDeathRecipient(std::bind(&NotificationSubscriberManager::OnRemoteDied, this, std::placeholders::_1));
+    if (recipient_ == nullptr) {
+        ANS_LOGE("Failed to create RemoteDeathRecipient instance");
+    }
 }
 
 NotificationSubscriberManager::~NotificationSubscriberManager()

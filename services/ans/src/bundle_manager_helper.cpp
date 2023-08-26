@@ -27,8 +27,11 @@ namespace OHOS {
 namespace Notification {
 BundleManagerHelper::BundleManagerHelper()
 {
-    deathRecipient_ =
-        new RemoteDeathRecipient(std::bind(&BundleManagerHelper::OnRemoteDied, this, std::placeholders::_1));
+    deathRecipient_ = new (std::nothrow)
+        RemoteDeathRecipient(std::bind(&BundleManagerHelper::OnRemoteDied, this, std::placeholders::_1));
+    if (deathRecipient_ == nullptr) {
+        ANS_LOGE("Failed to create RemoteDeathRecipient instance");
+    }
 }
 
 BundleManagerHelper::~BundleManagerHelper()
