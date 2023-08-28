@@ -39,13 +39,13 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
+        ANS_LOGW("Wrong argument type. Object expected");
         return nullptr;
     }
 
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
-        ANS_LOGE("GetBundleOption failed.");
+        ANS_LOGE("GetBundleOption failed");
         return nullptr;
     }
 
@@ -141,7 +141,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("DisplayBadge napi_create_async_work start");
+            ANS_LOGI("DisplayBadge work excute.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d enable = %{public}d",
@@ -154,11 +154,12 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("DisplayBadge napi_create_async_work end");
+            ANS_LOGI("DisplayBadge work complete.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete DisplayBadge callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -171,7 +172,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue DisplayBadge work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -234,7 +235,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsBadgeDisplayed napi_create_async_work start");
+            ANS_LOGI("IsBadgeDisplayed work excute.");
             AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
@@ -257,7 +258,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue IsBadgeDisplayed work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }

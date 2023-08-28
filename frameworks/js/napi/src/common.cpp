@@ -2813,7 +2813,7 @@ napi_value Common::GetNotificationSmallIcon(const napi_env &env, const napi_valu
         napi_get_named_property(env, value, "smallIcon", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
-            ANS_LOGE("Wrong argument type. Object expected.");
+            ANS_LOGE("Argument type is not object.");
             return nullptr;
         }
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;

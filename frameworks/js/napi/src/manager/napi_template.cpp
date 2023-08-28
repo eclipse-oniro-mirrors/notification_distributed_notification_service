@@ -44,7 +44,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsSupportTemplate napi_create_async_work start");
+            ANS_LOGI("NapiIsSupportTemplate work excute.");
             AsyncCallbackInfoTemplate *asyncCallbackinfo = static_cast<AsyncCallbackInfoTemplate *>(data);
 
             if (asyncCallbackinfo) {
@@ -53,13 +53,14 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("IsSupportTemplate napi_create_async_work end");
+            ANS_LOGI("NapiIsSupportTemplate work complete.");
             AsyncCallbackInfoTemplate *asyncCallbackinfo = static_cast<AsyncCallbackInfoTemplate *>(data);
             if (asyncCallbackinfo) {
                 napi_value result = nullptr;
                 napi_get_boolean(env, asyncCallbackinfo->params.support, &result);
                 Common::CreateReturnValue(env, asyncCallbackinfo->info, result);
                 if (asyncCallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete napiIsSupportTemplate callback reference.");
                     napi_delete_reference(env, asyncCallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asyncCallbackinfo->asyncWork);
@@ -73,7 +74,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
     bool isCallback = asyncCallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asyncCallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiIsSupportTemplate work failed return: %{public}d", status);
         asyncCallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asyncCallbackinfo->info, Common::NapiGetNull(env));
         if (asyncCallbackinfo->info.callback != nullptr) {

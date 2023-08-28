@@ -160,7 +160,7 @@ napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
     // Asynchronous function call
     napi_create_async_work(env,
         nullptr, resourceName, [](napi_env env, void *data) {
-            ANS_LOGI("SetDoNotDisturbDate napi_create_async_work start");
+            ANS_LOGI("SetDoNotDisturbDate work excute.");
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
@@ -177,11 +177,12 @@ napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("SetDoNotDisturbDate napi_create_async_work end");
+            ANS_LOGI("SetDoNotDisturbDate work complete.");
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete SetDoNotDisturbDate callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -193,7 +194,7 @@ napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue SetDoNotDisturbDate work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -228,6 +229,7 @@ void AsyncCompleteCallbackGetDoNotDisturbDate(napi_env env, napi_status status, 
         }
         Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete GetDoNotDisturbDate callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -298,7 +300,7 @@ napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetDoNotDisturbDate napi_create_async_work start");
+            ANS_LOGI("GetDoNotDisturbDate work excute.");
             AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
@@ -321,7 +323,7 @@ napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue getDoNotDisturbDate work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -364,18 +366,18 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("SupportDoNotDisturbMode napi_create_async_work start");
+            ANS_LOGI("SupportDoNotDisturbMode work excute.");
             AsyncCallbackInfoSupportDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::DoesSupportDoNotDisturbMode(asynccallbackinfo->isSupported);
-                ANS_LOGI("SupportDoNotDisturbMode errorCode=%{public}d isSupported=%{public}d",
+                ANS_LOGI("errorCode=%{public}d isSupported=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("SupportDoNotDisturbMode napi_create_async_work end");
+            ANS_LOGI("SupportDoNotDisturbMode work complete.");
             AsyncCallbackInfoSupportDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {
@@ -383,6 +385,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
                 napi_get_boolean(env, asynccallbackinfo->isSupported, &result);
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete supportDoNotDisturbMode callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -395,7 +398,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue supportDoNotDisturbMode work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }

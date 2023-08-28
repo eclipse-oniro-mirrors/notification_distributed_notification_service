@@ -1297,7 +1297,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Subscribe napi_create_async_work start");
+            ANS_LOGI("Subscribe work excuted.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -1318,7 +1318,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("Subscribe napi_create_async_work end");
+            ANS_LOGI("Subscribe work complete.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -1328,6 +1328,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
 
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete subscribe callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -1341,7 +1342,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue subscribe work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
