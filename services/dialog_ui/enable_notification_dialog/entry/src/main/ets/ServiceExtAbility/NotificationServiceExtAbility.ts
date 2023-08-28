@@ -70,7 +70,7 @@ export default class NotificationDialogServiceExtensionAbility extends extension
           win.destroyWindow();
           winNum--;
           if (winNum === 0) {
-            globalThis.selectExtensionContext.terminateSelf();
+            globalThis.notificationExtensionContext.terminateSelf();
           }
         });
       }
