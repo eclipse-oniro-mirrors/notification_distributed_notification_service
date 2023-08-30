@@ -372,6 +372,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete removeAll callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -384,7 +385,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue removeAll work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -462,7 +463,7 @@ napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue removeGroupByBundle work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }

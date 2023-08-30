@@ -39,7 +39,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[0]: id: number
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
+        ANS_LOGW("Argument type is not number");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &paras.id));
@@ -158,7 +158,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Cancel napi_create_async_work start");
+            ANS_LOGI("Cancel work excute.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
 
             if (asynccallbackinfo) {
@@ -167,11 +167,12 @@ napi_value Cancel(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("Cancel napi_create_async_work end");
+            ANS_LOGI("Cancel work complete.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete cancel callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -184,7 +185,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue cancel work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -224,18 +225,19 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("CancelAll napi_create_async_work start");
+            ANS_LOGI("CancelAll work excute.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::CancelAllNotifications();
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("CancelAll napi_create_async_work end");
+            ANS_LOGI("CancelAll work complete.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete CancelAll callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -248,7 +250,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue CancelAll work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -289,7 +291,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("CancelGroup napi_create_async_work start");
+            ANS_LOGI("CancelGroup work excute.");
             AsyncCallbackInfoCancelGroup *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelGroup *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("asynccallbackinfo->params.groupName = %{public}s",
@@ -299,11 +301,12 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("CancelGroup napi_create_async_work end");
+            ANS_LOGI("CancelGroup work complete.");
             AsyncCallbackInfoCancelGroup *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelGroup *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete CancelGroup callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -316,7 +319,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue CancelGroup work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -426,7 +429,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Cancel napi_create_async_work start");
+            ANS_LOGI("CancelAsBundle work excute.");
             AsyncCallbackInfoCancelAsBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelAsBundle *>(data);
 
             if (asynccallbackinfo) {
@@ -435,11 +438,12 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("Cancel napi_create_async_work end");
+            ANS_LOGI("CancelAsBundle work complete");
             AsyncCallbackInfoCancelAsBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelAsBundle *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete CancelAsBundle callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -452,7 +456,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue CancelAsBundle work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }

@@ -269,7 +269,7 @@ napi_value ParseParametersSetSlotByBundle(
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_SLOT_AS_BUNDLE_MAX_PARA - 1) {
-        ANS_LOGE("Wrong number of arguments");
+        ANS_LOGE("Wrong number of arguments.");
         return nullptr;
     }
 
@@ -504,7 +504,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("AddSlot napi_create_async_work start");
+            ANS_LOGI("AddSlot work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlot *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->isAddSlotByType) {
@@ -516,11 +516,12 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("AddSlot napi_create_async_work end");
+            ANS_LOGI("AddSlot work complete.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlot *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete addSlot callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -533,7 +534,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue addSlot work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -574,18 +575,19 @@ napi_value AddSlots(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("AddSlots napi_create_async_work start");
+            ANS_LOGI("AddSlots work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::AddNotificationSlots(asynccallbackinfo->slots);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("AddSlots napi_create_async_work end");
+            ANS_LOGI("AddSlots work complete.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlots *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete addSlots callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -598,7 +600,7 @@ napi_value AddSlots(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue addSlots work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -652,6 +654,7 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete setSlotByBundle callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -664,7 +667,7 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue setSlotByBundle work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -684,7 +687,7 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetSlot(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("GetSlot napi_create_async_work end");
+    ANS_LOGI("GetSlot work complete.");
 
     if (!data) {
         ANS_LOGE("Invalid async callback data");
@@ -705,6 +708,7 @@ void AsyncCompleteCallbackGetSlot(napi_env env, napi_status status, void *data)
         }
         Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete getSlot callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -806,6 +810,7 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
                 napi_create_uint32(env, asynccallbackinfo->num, &result);
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete getSlotNumByBundle callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -818,7 +823,7 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue getSlotNumByBundle work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -839,7 +844,7 @@ void AsyncCompleteCallbackGetSlots(napi_env env, napi_status status, void *data)
 {
     ANS_LOGI("enter");
     if (!data) {
-        ANS_LOGE("Invalid async callback data");
+        ANS_LOGE("Invalid async callback data.");
         return;
     }
     napi_value result = nullptr;
@@ -853,7 +858,7 @@ void AsyncCompleteCallbackGetSlots(napi_env env, napi_status status, void *data)
             size_t count = 0;
             for (auto vec : asynccallbackinfo->slots) {
                 if (!vec) {
-                    ANS_LOGW("Invalid NotificationSlot object ptr");
+                    ANS_LOGW("Invalid NotificationSlot object ptr.");
                     continue;
                 }
                 napi_value nSlot = nullptr;
@@ -873,6 +878,7 @@ void AsyncCompleteCallbackGetSlots(napi_env env, napi_status status, void *data)
         }
         Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete getSlots callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -916,7 +922,7 @@ napi_value GetSlots(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue getSlots work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -937,7 +943,7 @@ void AsyncCompleteCallbackGetSlotsByBundle(napi_env env, napi_status status, voi
 {
     ANS_LOGI("enter");
     if (!data) {
-        ANS_LOGE("Invalid async callback data");
+        ANS_LOGE("Invalid async callback data.");
         return;
     }
     napi_value result = nullptr;
@@ -971,6 +977,7 @@ void AsyncCompleteCallbackGetSlotsByBundle(napi_env env, napi_status status, voi
         }
         Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete getSlotsByBundle callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -1016,7 +1023,7 @@ napi_value GetSlotsByBundle(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue getSlotsByBundle work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -1070,6 +1077,7 @@ napi_value RemoveSlot(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete removeSlot callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -1082,7 +1090,7 @@ napi_value RemoveSlot(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue removeSlot work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -1134,6 +1142,7 @@ napi_value RemoveAllSlots(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("RemoveAllSlots napi_delete_reference start");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -1146,7 +1155,7 @@ napi_value RemoveAllSlots(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("RemoveAllSlots napi_queue_async_work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -1181,7 +1190,7 @@ napi_value ParseParametersEnableSlot(
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
+        ANS_LOGW("ParseParametersEnableSlot, Wrong argument type. Object expected.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
@@ -1262,6 +1271,7 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete enableNotificationSlot callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -1274,7 +1284,7 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue enableNotificationSlot work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
@@ -1394,7 +1404,7 @@ napi_value IsEnableNotificationSlot(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue isEnableNotificationSlot work failed return: %{public}d", status);
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
