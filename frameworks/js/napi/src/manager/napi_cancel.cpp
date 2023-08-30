@@ -72,10 +72,11 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue NapiCancel work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiCancel work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiCancel callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -143,6 +144,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiCancelAll callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -214,6 +216,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiCancelGroup callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);

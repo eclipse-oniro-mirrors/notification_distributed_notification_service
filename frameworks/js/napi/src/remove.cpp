@@ -220,7 +220,7 @@ napi_value ParseParameters(
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
+        ANS_LOGW("Valuetype is not object.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);

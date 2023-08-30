@@ -107,6 +107,7 @@ napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
                 napi_get_boolean(env, asyncCallbackinfo->params.support, &result);
                 Common::ReturnCallbackPromise(env, asyncCallbackinfo->info, result);
                 if (asyncCallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete isSupportTemplate callback reference.");
                     napi_delete_reference(env, asyncCallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asyncCallbackinfo->asyncWork);
@@ -119,8 +120,9 @@ napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
 
     napi_status status = napi_queue_async_work_with_qos(env, asyncCallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue isSupportTemplate work failed return: %{public}d", status);
         if (asyncCallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete isSupportTemplate callback reference.");
             napi_delete_reference(env, asyncCallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asyncCallbackinfo->asyncWork);
