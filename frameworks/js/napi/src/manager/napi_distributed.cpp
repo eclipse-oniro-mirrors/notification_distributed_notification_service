@@ -72,7 +72,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsDistributedEnabled napi_create_async_work start");
+            ANS_LOGI("NapiIsDistributedEnabled work excute.");
             AsyncCallbackInfoIsEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnabled *>(data);
 
             if (asynccallbackinfo) {
@@ -88,10 +88,11 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiIsDistributedEnabled work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiIsDistributedEnabled callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -132,7 +133,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("EnableDistributed napi_create_async_work start");
+            ANS_LOGI("NapiEnableDistributed work excute.");
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
 
             if (asynccallbackinfo) {
@@ -141,7 +142,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("EnableDistributed napi_create_async_work end");
+            ANS_LOGI("NapiEnableDistributed work complete.");
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -160,10 +161,11 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiEnableDistributed work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiEnableDistributed callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -204,7 +206,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("EnableDistributedByBundle napi_create_async_work start");
+            ANS_LOGI("NapiEnableDistributedByBundle work excute.");
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::EnableDistributedByBundle(
@@ -212,7 +214,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("EnableDistributedByBundle napi_create_async_work end");
+            ANS_LOGI("NapiEnableDistributedByBundle work complete.");
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -231,10 +233,11 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiEnableDistributedByBundle work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiEnableDistributedByBundle callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -275,16 +278,16 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("EnableDistributedSelf napi_create_async_work start");
+            ANS_LOGI("NapiEnableDistributedSelf work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::EnableDistributedSelf(asynccallbackinfo->params.enable);
-                ANS_LOGI("EnableDistributedSelf enable = %{public}d", asynccallbackinfo->params.enable);
+                ANS_LOGI("enable = %{public}d", asynccallbackinfo->params.enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("EnableDistributedSelf napi_create_async_work end");
+            ANS_LOGI("NapiEnableDistributedSelf work complete.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -303,10 +306,11 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiEnableDistributedSelf work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiEnableDistributedSelf callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -374,7 +378,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsDistributedEnableByBundle napi_create_async_work start");
+            ANS_LOGI("NapiIsDistributedEnableByBundle work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
@@ -388,10 +392,11 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiIsDistributedEnableByBundle work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiIsDistributedEnableByBundle callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -463,7 +468,7 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetDeviceRemindType napi_create_async_work start");
+            ANS_LOGI("NapiGetDeviceRemindType work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetRemindType *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -477,10 +482,11 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiGetDeviceRemindType work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiGetDeviceRemindType callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -521,7 +527,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("SetSyncNotificationEnabledWithoutApp napi_create_async_work start");
+            ANS_LOGI("NapiSetSyncNotificationEnabledWithoutApp work excute.");
             AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
@@ -530,7 +536,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("SetSyncNotificationEnabledWithoutApp napi_create_async_work end");
+            ANS_LOGI("NapiSetSyncNotificationEnabledWithoutApp work complete.");
             AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
@@ -550,10 +556,11 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiSetSyncNotificationEnabledWithoutApp work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiSetSyncNotificationEnabledWithoutApp callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -595,7 +602,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetSyncNotificationEnabledWithoutApp napi_create_async_work start");
+            ANS_LOGI("NapiGetSyncNotificationEnabledWithoutApp work excute.");
             AsyncCallbackInfoGetEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
@@ -604,7 +611,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("GetSyncNotificationEnabledWithoutApp napi_create_async_work end");
+            ANS_LOGI("NapiGetSyncNotificationEnabledWithoutApp work complete.");
             AsyncCallbackInfoGetEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
@@ -630,10 +637,11 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiGetSyncNotificationEnabledWithoutApp work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiGetSyncNotificationEnabledWithoutApp callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);

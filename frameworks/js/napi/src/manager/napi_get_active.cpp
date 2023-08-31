@@ -93,7 +93,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetAllActiveNotifications napi_create_async_work start");
+            ANS_LOGI("NapiGetAllActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -107,10 +107,11 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiGetAllActiveNotifications work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiGetAllActiveNotifications callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -198,7 +199,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetActiveNotifications napi_create_async_work start");
+            ANS_LOGI("NapiGetActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -212,10 +213,11 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiGetActiveNotifications work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiGetActiveNotifications callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -248,7 +250,7 @@ void AsyncCompleteCallbackNapiGetActiveNotificationCount(napi_env env, napi_stat
         }
         Common::CreateReturnValue(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete NapiGetActiveNotificationCount callback reference.");
+            ANS_LOGD("Delete napiGetActiveNotificationCount callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -281,12 +283,12 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetActiveNotificationCount napi_create_async_work start");
+            ANS_LOGI("NapiGetActiveNotificationCount work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::GetActiveNotificationNums(asynccallbackinfo->num);
-                ANS_LOGI("GetActiveNotificationCount count = %{public}" PRIu64 "", asynccallbackinfo->num);
+                ANS_LOGI("count = %{public}" PRIu64 "", asynccallbackinfo->num);
             }
         },
         AsyncCompleteCallbackNapiGetActiveNotificationCount,
@@ -296,10 +298,11 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("napi_queue_async_work failed return: %{public}d", status);
+        ANS_LOGE("Queue napiGetActiveNotificationCount work failed return: %{public}d", status);
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiGetActiveNotificationCount callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
