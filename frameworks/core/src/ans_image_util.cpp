@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
     std::set<std::string> formats;
     auto ret = imagePacker.GetSupportedFormats(formats);
     if (ret) {
-        ANS_LOGE("image packer get supported format failed, ret : %{public}u", ret);
+        ANS_LOGE("Failed to GetSupportedFormats, ret : %{public}u", ret);
         return {};
     }
 
@@ -88,7 +88,7 @@ std::shared_ptr<Media::PixelMap> AnsImageUtil::UnPackImage(const std::string &pi
     Media::DecodeOptions decodeOpts;
     auto pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode || !pixelMap) {
-        ANS_LOGE("create pixelMap failed");
+        ANS_LOGE("Failed to create pixelMap.");
         return {};
     }
 

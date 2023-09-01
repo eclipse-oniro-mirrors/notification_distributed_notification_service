@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,7 +130,7 @@ bool NotificationLongTextContent::Marshalling(Parcel &parcel) const
     }
 
     if (!parcel.WriteString(expandedTitle_)) {
-        ANS_LOGE("Failed to write expanded title");
+        ANS_LOGE("Write expanded title fail.");
         return false;
     }
 
@@ -166,7 +166,7 @@ bool NotificationLongTextContent::ReadFromParcel(Parcel &parcel)
     }
 
     if (!parcel.ReadString(expandedTitle_)) {
-        ANS_LOGE("Failed to read expanded title");
+        ANS_LOGE("Read expanded title failed.");
         return false;
     }
 

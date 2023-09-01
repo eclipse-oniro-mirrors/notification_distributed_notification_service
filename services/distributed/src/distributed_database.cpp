@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ bool DistributedDatabase::CheckKvDataManager(void)
         GetKvDataManager();
     }
     if (kvDataManager_ == nullptr) {
-        ANS_LOGE("kvDataManager is nullptr.");
+        ANS_LOGE("kvDataManager_ is nullptr.");
         return false;
     }
     return true;
@@ -89,7 +89,7 @@ void DistributedDatabase::GetKvStore(void)
     DistributedKv::StoreId storeId = {.storeId = STORE_ID};
     DistributedKv::Status status = kvDataManager_->GetSingleKvStore(options, appId, storeId, kvStore_);
     if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager GetSingleKvStore failed ret = 0x%{public}x", status);
+        ANS_LOGE("Failed to GetSingleKvStore ret = 0x%{public}x", status);
         kvStore_.reset();
         DistributedHardware::DeviceManager::GetInstance().UnRegisterDevStateCallback(APP_ID + STORE_ID);
         kvDataManager_.reset();
@@ -130,7 +130,7 @@ bool DistributedDatabase::PutToDistributedDB(const std::string &key, const std::
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is nullptr.");
+        ANS_LOGE("kvStore is null.");
         return false;
     }
 
@@ -160,7 +160,7 @@ bool DistributedDatabase::GetFromDistributedDB(const std::string &key, std::stri
     }
 
     if (!KvStoreFlowControl()) {
-        ANS_LOGE("KvStore flow control.");
+        ANS_LOGE("KvStoreFlowControl is false.");
         return false;
     }
 
@@ -182,12 +182,12 @@ bool DistributedDatabase::GetEntriesFromDistributedDB(const std::string &prefixK
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is nullptr.");
+        ANS_LOGE("kvStore_ is nullptr.");
         return false;
     }
 
     if (!KvStoreFlowControl()) {
-        ANS_LOGE("KvStore flow control.");
+        ANS_LOGE("KvStoreFlowControl is fail.");
         return false;
     }
 
@@ -211,7 +211,7 @@ bool DistributedDatabase::DeleteToDistributedDB(const std::string &key)
     }
 
     if (!KvStoreFlowControl()) {
-        ANS_LOGE("KvStore flow control.");
+        ANS_LOGE("KvStoreFlowControl is defeat.");
         return false;
     }
 

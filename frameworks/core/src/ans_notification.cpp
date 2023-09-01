@@ -111,7 +111,7 @@ ErrCode AnsNotification::GetNotificationSlotNumAsBundle(const NotificationBundle
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
@@ -136,7 +136,7 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     }
 
     if (!CanPublishMediaContent(request)) {
-        ANS_LOGE("Refuse to publish the notification because the sequence numbers actions not match those assigned to "
+        ANS_LOGE("Refuse to publish the notification because the series numbers actions not match those assigned to "
                  "added action buttons.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -148,13 +148,13 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANS_LOGE("Failed to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationRequest> reqPtr = new (std::nothrow) NotificationRequest(request);
     if (reqPtr == nullptr) {
-        ANS_LOGE("Failed to create NotificationRequest ptr");
+        ANS_LOGE("Create notificationRequest ptr fail.");
         return ERR_ANS_NO_MEMORY;
     }
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
@@ -256,7 +256,7 @@ ErrCode AnsNotification::PublishNotificationAsBundle(
     }
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
-        ANS_LOGE("Refuse to publish the notification without valid content");
+        ANS_LOGE("Refuse to publish the notification without effective content");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -268,7 +268,7 @@ ErrCode AnsNotification::PublishNotificationAsBundle(
 
     ErrCode checkErr = CheckImageSize(request);
     if (checkErr != ERR_OK) {
-        ANS_LOGE("The size of one picture exceeds the limit");
+        ANS_LOGE("The size of one picture overtake the limit");
         return checkErr;
     }
 
@@ -382,7 +382,7 @@ ErrCode AnsNotification::SubscribeNotification(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANS_LOGE("Failed to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
@@ -464,7 +464,7 @@ ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bund
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
@@ -480,7 +480,7 @@ ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANS_LOGE("GetAnsManagerProxy defeat.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
@@ -511,7 +511,7 @@ ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOpt
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANS_LOGE("Defeated to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
@@ -554,7 +554,7 @@ ErrCode AnsNotification::UpdateNotificationSlots(
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANS_LOGE("GetAnsManagerProxy flop.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
@@ -636,7 +636,7 @@ ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
 ErrCode AnsNotification::SetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool enabled)
 {
     if (bundleOption.GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle name.");
+        ANS_LOGE("Invalidated bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -716,7 +716,7 @@ ErrCode AnsNotification::SetDoNotDisturbDate(const NotificationDoNotDisturbDate 
 
     auto dndDatePtr = new (std::nothrow) NotificationDoNotDisturbDate(doNotDisturbDate);
     if (dndDatePtr == nullptr) {
-        ANS_LOGE("create DoNotDisturbDate failed.");
+        ANS_LOGE("Create notificationDoNotDisturbDate failed.");
         return ERR_ANS_NO_MEMORY;
     }
 
@@ -734,7 +734,7 @@ ErrCode AnsNotification::GetDoNotDisturbDate(NotificationDoNotDisturbDate &doNot
     sptr<NotificationDoNotDisturbDate> dndDate = nullptr;
     auto ret = ansManagerProxy_->GetDoNotDisturbDate(dndDate);
     if (ret != ERR_OK) {
-        ANS_LOGE("Get DoNotDisturbDate failed.");
+        ANS_LOGE("GetDoNotDisturbDate failed.");
         return ret;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,18 +149,18 @@ void DistributedNotificationManager::OnDatabaseInsert(
     ANS_LOGD("%{public}s", __FUNCTION__);
     ANS_LOGE("ffrt start!");
     if (distributedQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is nullptr.");
         return;
     }
     distributedQueue_->submit(std::bind([=]() {
         ANS_LOGE("ffrt enter!");
         if (!CheckDeviceId(deviceId, key)) {
-            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
+            ANS_LOGD("device id is distinct. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
         }
 
         ResolveKey resolveKey;
         if (!ResolveDistributedKey(key, resolveKey)) {
-            ANS_LOGE("key <%{public}s> is invalid.", key.c_str());
+            ANS_LOGE("key <%{public}s> is invalidity.", key.c_str());
             return;
         }
 
@@ -342,7 +342,7 @@ ErrCode DistributedNotificationManager::Publish(
     ANS_LOGI("%{public}s start", __FUNCTION__);
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
-        ANS_LOGE("Generate distributed key failed.");
+        ANS_LOGE("Failed to generate distributed key.");
         return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
     }
 
@@ -353,7 +353,7 @@ ErrCode DistributedNotificationManager::Publish(
     }
 
     if (database_ == nullptr) {
-        ANS_LOGE("database_ is invalid.");
+        ANS_LOGE("database_ is nullptr.");
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->PutToDistributedDB(key, value)) {
@@ -402,11 +402,11 @@ ErrCode DistributedNotificationManager::Delete(const std::string &bundleName, co
     }
 
     if (database_ == nullptr) {
-        ANS_LOGE("database_ is invalid.");
+        ANS_LOGE("database_ is nullptr.");
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->DeleteToDistributedDB(key)) {
-        ANS_LOGE("delete to distributed DB failed. key:%{public}s", key.c_str());
+        ANS_LOGE("Failed to DeleteToDistributedDB. key:%{public}s", key.c_str());
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;

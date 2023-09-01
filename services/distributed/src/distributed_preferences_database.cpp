@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ void DistributedPreferencesDatabase::GetKvStore(void)
     DistributedKv::StoreId storeId = {.storeId = STORE_ID};
     DistributedKv::Status status = kvDataManager_->GetSingleKvStore(options, appId, storeId, kvStore_);
     if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager GetSingleKvStore failed ret = 0x%{public}x", status);
+        ANS_LOGE("GetSingleKvStore failed ret = 0x%{public}x", status);
         kvStore_.reset();
         kvDataManager_.reset();
     }
@@ -97,7 +97,7 @@ bool DistributedPreferencesDatabase::PutToDistributedDB(const std::string &key, 
     }
 
     if (!KvStoreFlowControl()) {
-        ANS_LOGE("kvStore flow control.");
+        ANS_LOGE("KvStoreFlowControl is false.");
         CloseKvStore();
         return false;
     }
@@ -122,7 +122,7 @@ bool DistributedPreferencesDatabase::GetFromDistributedDB(const std::string &key
     }
 
     if (!KvStoreFlowControl()) {
-        ANS_LOGE("kvStore flow control.");
+        ANS_LOGE("KvStoreFlowControl is defeat.");
         CloseKvStore();
         return false;
     }

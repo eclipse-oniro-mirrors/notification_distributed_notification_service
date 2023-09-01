@@ -782,7 +782,7 @@ ErrCode AnsManagerProxy::RemoveNotification(const sptr<NotificationBundleOption>
     }
 
     if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[RemoveNotification] fail: read result failed.");
+        ANS_LOGE("[RemoveNotification] fail: read result error.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1496,7 +1496,7 @@ ErrCode AnsManagerProxy::IsSpecialBundleAllowedNotify(const sptr<NotificationBun
     }
 
     if (!reply.ReadBool(allowed)) {
-        ANS_LOGE("[IsSpecialBundleAllowedNotify] fail: read allowed failed.");
+        ANS_LOGE("[IsSpecialBundleAllowedNotify] fail: read allowed error.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1576,7 +1576,7 @@ ErrCode AnsManagerProxy::SetDoNotDisturbDate(const sptr<NotificationDoNotDisturb
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[SetDoNotDisturbDate] fail: write interface token failed.");
+        ANS_LOGE("[SetDoNotDisturbDate] fail: write interface token error.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1594,7 +1594,7 @@ ErrCode AnsManagerProxy::SetDoNotDisturbDate(const sptr<NotificationDoNotDisturb
     }
 
     if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[SetDoNotDisturbDate] fail: read result failed.");
+        ANS_LOGE("[SetDoNotDisturbDate] fail: read result error.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1618,14 +1618,14 @@ ErrCode AnsManagerProxy::GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> 
     }
 
     if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[GetDoNotDisturbDate] fail: read result failed.");
+        ANS_LOGE("[GetDoNotDisturbDate] fail: read result error.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (result == ERR_OK) {
         date = reply.ReadParcelable<NotificationDoNotDisturbDate>();
         if (date == nullptr) {
-            ANS_LOGE("[GetDoNotDisturbDate] fail: read date failed.");
+            ANS_LOGE("[GetDoNotDisturbDate] fail: read date error.");
             return ERR_ANS_PARCELABLE_FAILED;
         }
     }
@@ -2094,7 +2094,7 @@ ErrCode AnsManagerProxy::InnerTransact(NotificationInterfaceCode code, MessageOp
 {
     auto remote = Remote();
     if (remote == nullptr) {
-        ANS_LOGE("[InnerTransact] fail: get Remote fail code %{public}u", code);
+        ANS_LOGE("[InnerTransact] defeat: get Remote defeat code %{public}u", code);
         return ERR_DEAD_OBJECT;
     }
     int32_t err = remote->SendRequest(static_cast<uint32_t>(code), data, reply, flags);
@@ -2103,11 +2103,11 @@ ErrCode AnsManagerProxy::InnerTransact(NotificationInterfaceCode code, MessageOp
             return ERR_OK;
         }
         case DEAD_OBJECT: {
-            ANS_LOGE("[InnerTransact] fail: ipcErr=%{public}d code %{public}d", err, code);
+            ANS_LOGE("[InnerTransact] defeat: ipcErr=%{public}d code %{public}d", err, code);
             return ERR_DEAD_OBJECT;
         }
         default: {
-            ANS_LOGE("[InnerTransact] fail: ipcErr=%{public}d code %{public}d", err, code);
+            ANS_LOGE("[InnerTransact] defeat: ipcErr=%{public}d code %{public}d", err, code);
             return ERR_ANS_TRANSACT_FAILED;
         }
     }
@@ -2117,13 +2117,13 @@ template<typename T>
 bool AnsManagerProxy::WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
 {
     if (!data.WriteInt32(parcelableVector.size())) {
-        ANS_LOGE("write ParcelableVector size failed");
+        ANS_LOGE("Failed to write ParcelableVector size.");
         return false;
     }
 
     for (auto &parcelable : parcelableVector) {
         if (!data.WriteStrongParcelable(parcelable)) {
-            ANS_LOGE("write ParcelableVector failed");
+            ANS_LOGE("Failed to write ParcelableVector");
             return false;
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,7 @@ NotificationMultiLineContent *NotificationMultiLineContent::FromJson(const nlohm
 bool NotificationMultiLineContent::Marshalling(Parcel &parcel) const
 {
     if (!NotificationBasicContent::Marshalling(parcel)) {
-        ANS_LOGE("Failed to write basic");
+        ANS_LOGE("Write basic fail.");
         return false;
     }
 
@@ -130,7 +130,7 @@ bool NotificationMultiLineContent::Marshalling(Parcel &parcel) const
     }
 
     if (!parcel.WriteString(briefText_)) {
-        ANS_LOGE("Failed to write brief text");
+        ANS_LOGE("Write brief text fail.");
         return false;
     }
 
@@ -156,7 +156,7 @@ NotificationMultiLineContent *NotificationMultiLineContent::Unmarshalling(Parcel
 bool NotificationMultiLineContent::ReadFromParcel(Parcel &parcel)
 {
     if (!NotificationBasicContent::ReadFromParcel(parcel)) {
-        ANS_LOGE("Failed to read basic");
+        ANS_LOGE("Read basic failed.");
         return false;
     }
 
@@ -166,7 +166,7 @@ bool NotificationMultiLineContent::ReadFromParcel(Parcel &parcel)
     }
 
     if (!parcel.ReadString(briefText_)) {
-        ANS_LOGE("Failed to read brief text");
+        ANS_LOGE("Read brief text failed.");
         return false;
     }
 
