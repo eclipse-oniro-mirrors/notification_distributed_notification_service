@@ -1561,7 +1561,7 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(const NotificationConstant
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -2643,7 +2643,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {

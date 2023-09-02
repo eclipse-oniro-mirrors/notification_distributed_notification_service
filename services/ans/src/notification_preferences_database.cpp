@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -360,7 +360,7 @@ bool NotificationPreferencesDatabase::PutShowBadge(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enable)
 {
     if (bundleInfo.GetBundleName().empty()) {
-        ANS_LOGE("Bundle name is null.");
+        ANS_LOGE("Bundle name is nullptr.");
         return false;
     }
 
@@ -378,7 +378,7 @@ bool NotificationPreferencesDatabase::PutImportance(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &importance)
 {
     if (bundleInfo.GetBundleName().empty()) {
-        ANS_LOGE("Bundle name is null.");
+        ANS_LOGE("Bundle name is empty.");
         return false;
     }
 
@@ -396,7 +396,7 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &totalBadgeNum)
 {
     if (bundleInfo.GetBundleName().empty()) {
-        ANS_LOGE("Bundle name is null.");
+        ANS_LOGE("Bundle name is blank.");
         return false;
     }
 
@@ -661,7 +661,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleKey.empty()) {
-        ANS_LOGE("Bundle name is null.");
+        ANS_LOGE("Bundle name is empty.");
         return false;
     }
 
@@ -1223,7 +1223,7 @@ void NotificationPreferencesDatabase::GetDoNotDisturbType(NotificationPreference
             sptr<NotificationDoNotDisturbDate> disturbDate = new (std::nothrow)
                 NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             if (disturbDate == nullptr) {
-                ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                ANS_LOGE("Create NotificationDoNotDisturbDate instance fail.");
                 return;
             }
             info.GetDoNotDisturbDate(userId, disturbDate);
@@ -1280,7 +1280,7 @@ void NotificationPreferencesDatabase::GetDoNotDisturbEndDate(NotificationPrefere
             sptr<NotificationDoNotDisturbDate> disturbDate = new (std::nothrow)
                 NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
             if (disturbDate == nullptr) {
-                ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                ANS_LOGE("Defeat to create NotificationDoNotDisturbDate instance");
                 return;
             }
             info.GetDoNotDisturbDate(userId, disturbDate);

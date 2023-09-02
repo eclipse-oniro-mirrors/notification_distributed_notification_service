@@ -1499,7 +1499,7 @@ bool AnsManagerStub::ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos,
 {
     int32_t infoSize = 0;
     if (!data.ReadInt32(infoSize)) {
-        ANS_LOGE("read Parcelable size failed.");
+        ANS_LOGE("Failed to read Parcelable size.");
         return false;
     }
 
@@ -1508,7 +1508,7 @@ bool AnsManagerStub::ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos,
     for (int32_t index = 0; index < infoSize; index++) {
         sptr<T> info = data.ReadStrongParcelable<T>();
         if (info == nullptr) {
-            ANS_LOGE("read Parcelable infos failed.");
+            ANS_LOGE("Failed to read Parcelable infos.");
             return false;
         }
         parcelableInfos.emplace_back(info);

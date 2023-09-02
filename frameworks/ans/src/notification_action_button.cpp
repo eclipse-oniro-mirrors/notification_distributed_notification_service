@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -317,7 +317,7 @@ bool NotificationActionButton::Marshalling(Parcel &parcel) const
 
     if (valid) {
         if (!parcel.WriteParcelable(wantAgent_.get())) {
-            ANS_LOGE("Failed to write wantAgent");
+            ANS_LOGE("Write wantAgent failed.");
             return false;
         }
     }
@@ -391,7 +391,7 @@ bool NotificationActionButton::ReadFromParcel(Parcel &parcel)
         wantAgent_ = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
             parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
         if (!wantAgent_) {
-            ANS_LOGE("Failed to read wantAgent");
+            ANS_LOGE("Failed to read want agent");
             return false;
         }
     }
