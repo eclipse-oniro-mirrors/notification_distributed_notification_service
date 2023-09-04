@@ -96,7 +96,7 @@ NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const Nati
 
     std::string type;
     if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
-        ANS_LOGE("Parse type failed");
+        ANS_LOGE("Failed to parse type.");
         ThrowError(engine, ERROR_PARAM_INVALID);
         return engine.CreateUndefined();
     }

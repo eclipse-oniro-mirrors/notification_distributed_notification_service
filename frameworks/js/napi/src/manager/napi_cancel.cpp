@@ -65,6 +65,7 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiCancel work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -85,6 +86,7 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiCancel callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -133,6 +135,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiCancelAll work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -153,6 +156,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiCancelAll callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -205,6 +209,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiCancelGroup work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -225,6 +230,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiCancelGroup callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -280,6 +286,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiCancelAsBundle work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -300,6 +307,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiCancelAsBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

@@ -72,6 +72,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
     AsyncCallbackInfoUnsubscribe *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoUnsubscribe {.env = env, .asyncWork = nullptr, .objectInfo = paras.objectInfo};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -118,6 +119,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("Unsubscribe work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);

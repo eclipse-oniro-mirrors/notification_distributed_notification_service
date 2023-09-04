@@ -71,6 +71,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiDisplayBadge work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -91,6 +92,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiDisplayBadge callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -180,6 +182,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiIsBadgeDisplayed callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -291,6 +294,7 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiSetBadgeNumber callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

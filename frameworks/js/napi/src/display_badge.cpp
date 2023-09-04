@@ -129,6 +129,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnableBadge *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnableBadge {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -144,13 +145,13 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
             ANS_LOGI("DisplayBadge work excute.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d enable = %{public}d",
+                ANS_LOGI("option.bundle : %{public}s option.uid : %{public}d enable = %{public}d",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.enable);
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetShowBadgeEnabledForBundle(
                     asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("asynccallbackinfo->info.errorCode : %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -166,6 +167,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("DisplayBadge work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -183,6 +185,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("DisplayBadge callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -193,7 +196,7 @@ void AsyncCompleteCallbackIsBadgeDisplayed(napi_env env, napi_status status, voi
 {
     ANS_LOGI("enter");
     if (!data) {
-        ANS_LOGE("Invalid async callback data");
+        ANS_LOGE("Invalidity async callback data");
         return;
     }
     AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
@@ -216,13 +219,14 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
 
     IsDisplayBadgeParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        ANS_LOGE("Failed to parse params!");
+        ANS_LOGE("Parse params fail!");
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsDisplayBadge {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo fail.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -239,7 +243,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
-                    ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d",
+                    ANS_LOGI("option.bundle : %{public}s option.uid : %{public}d",
                         asynccallbackinfo->params.option.GetBundleName().c_str(),
                         asynccallbackinfo->params.option.GetUid());
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabledForBundle(
@@ -248,7 +252,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabled(
                         asynccallbackinfo->enabled);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, enabled = %{public}d",
+                ANS_LOGI("asynccallbackinfo->info.errorCode : %{public}d, enabled : %{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
             }
         },
@@ -269,6 +273,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("IsBadgeDisplayed callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

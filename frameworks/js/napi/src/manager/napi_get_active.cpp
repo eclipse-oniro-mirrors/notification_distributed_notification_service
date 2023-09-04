@@ -30,6 +30,7 @@ void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_statu
 
     auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
     if (asynccallbackinfo) {
+        ANS_LOGD("Conversion data is success.");
         napi_value result = nullptr;
         if (asynccallbackinfo->info.errorCode != ERR_OK) {
             result = Common::NapiGetNull(env);
@@ -74,12 +75,14 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     ANS_LOGI("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        ANS_LOGD("ParseParaOnlyCallback is nullptr.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -120,6 +123,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiGetAllActiveNotifications callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -130,7 +134,7 @@ void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status s
 {
     ANS_LOGI("callback");
     if (!data) {
-        ANS_LOGE("Invalid async callback data.");
+        ANS_LOGE("Ineffective async callback data.");
         return;
     }
 
@@ -180,12 +184,14 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     ANS_LOGI("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+        ANS_LOGD("Callback is nullptr.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo failed.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -226,6 +232,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiGetActiveNotifications callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -236,7 +243,7 @@ void AsyncCompleteCallbackNapiGetActiveNotificationCount(napi_env env, napi_stat
 {
     ANS_LOGI("callback");
     if (!data) {
-        ANS_LOGE("Invalid async callback data.");
+        ANS_LOGE("Async callback ineffective data.");
         return;
     }
 
@@ -311,6 +318,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiGetActiveNotificationCount callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

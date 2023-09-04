@@ -48,7 +48,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
             ANS_LOGI("NapiPublish work excute.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("notificationId = %{public}d, contentType = "
+                ANS_LOGI("notificationId : %{public}d, contentType : "
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
@@ -91,6 +91,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiPublish callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -234,6 +235,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiPublishAsBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

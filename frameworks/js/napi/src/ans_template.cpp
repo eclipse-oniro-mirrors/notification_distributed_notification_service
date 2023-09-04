@@ -79,6 +79,7 @@ napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
     AsyncCallbackInfoTemplate *asyncCallbackinfo = new (std::nothrow)
         AsyncCallbackInfoTemplate {.env = env, .asyncWork = nullptr, .params = params};
     if (!asyncCallbackinfo) {
+        ANS_LOGD("AsyncCallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -86,7 +87,7 @@ napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "IsSupportTemplate", NAPI_AUTO_LENGTH, &resourceName);
-    // Asynchronous function call
+    // Async function call
     napi_create_async_work(env,
         nullptr,
         resourceName,

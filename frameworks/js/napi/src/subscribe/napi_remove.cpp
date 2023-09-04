@@ -142,6 +142,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiRemoveAll work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -162,6 +163,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiRemoveAll callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

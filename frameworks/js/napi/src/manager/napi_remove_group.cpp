@@ -42,7 +42,7 @@ napi_value ParseParameters(
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
+        ANS_LOGW("Argument type error. Object expected.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
@@ -131,7 +131,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
             AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle = %{public}s, option.uid = %{public}d, groupName = %{public}s",
+                ANS_LOGI("option.bundle : %{public}s, option.uid : %{public}d, groupName : %{public}s",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.groupName.c_str());
@@ -159,6 +159,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiRemoveGroupByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
