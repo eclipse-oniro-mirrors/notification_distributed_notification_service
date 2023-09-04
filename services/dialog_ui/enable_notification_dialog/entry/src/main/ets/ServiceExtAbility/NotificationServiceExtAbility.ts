@@ -75,7 +75,6 @@ export default class NotificationDialogServiceExtensionAbility extends extension
         });
       }
 
-      await win.show();
       if (deviceInfo.deviceType === 'default' || deviceInfo.deviceType === 'phone') {
         let def = display.getDefaultDisplaySync();
         win.moveTo(0, 0);
@@ -88,6 +87,7 @@ export default class NotificationDialogServiceExtensionAbility extends extension
         win.resetSize(def.width, def.height - def.densityPixels * bottomMargin - def.densityPixels * topMargin);
       }
       await win.loadContent('pages/notificationDialog');
+      await win.show();
       await win.setBackgroundColor('#00000000');
     } catch {
       console.error(TAG, 'window create failed!');
