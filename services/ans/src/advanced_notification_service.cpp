@@ -577,7 +577,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     if (!request->IsRemoveAllowed()) {
-        if (!AccessTokenHelper::IsSystemApp() || !CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
         }
     }
