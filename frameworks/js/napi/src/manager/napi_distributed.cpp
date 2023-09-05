@@ -101,6 +101,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiIsDistributedEnabled callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -120,6 +121,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabled {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asyncCallbackinfo fail.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -127,7 +129,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "enableDistributed", NAPI_AUTO_LENGTH, &resourceName);
-    // Asynchronous function call
+    // Async function call
     napi_create_async_work(
         env,
         nullptr,
@@ -154,6 +156,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiEnableDistributed work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -174,6 +177,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiEnableDistributed callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -226,6 +230,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiEnableDistributedByBundle work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -246,6 +251,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiEnableDistributedByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -265,6 +271,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabled {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Fail to create asyncCallbackinfo.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -299,6 +306,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiEnableDistributedSelf work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -319,6 +327,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiEnableDistributedSelf callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -405,6 +414,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
     }
 
     if (isCallback) {
+        ANS_LOGD("napiIsDistributedEnableByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -495,6 +505,7 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiGetDeviceRemindType callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -549,6 +560,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiSetSyncNotificationEnabledWithoutApp work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -569,6 +581,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
     }
 
     if (isCallback) {
+        ANS_LOGD("napiSetSyncNotificationEnabledWithoutApp callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -630,6 +643,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiGetSyncNotificationEnabledWithoutApp work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -650,6 +664,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
     }
 
     if (isCallback) {
+        ANS_LOGD("napiGetSyncNotificationEnabledWithoutApp callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

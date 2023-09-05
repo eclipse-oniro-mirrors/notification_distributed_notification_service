@@ -125,7 +125,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Parameter type error. Object expected.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
@@ -185,6 +185,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoIsEnabled {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -224,6 +225,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("isDistributedEnabled callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -242,6 +244,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabled {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("AsyncCallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -257,7 +260,6 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGI("EnableDistributed work excute.");
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
-
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::EnableDistributed(asynccallbackinfo->params.enable);
@@ -276,6 +278,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("EnableDistributed work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -293,6 +296,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("enableDistributed callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -311,6 +315,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnabledByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabledByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("AsyncCallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -318,7 +323,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "enableDistributedByBundle", NAPI_AUTO_LENGTH, &resourceName);
-    // Asynchronous function call
+    // Async function call
     napi_create_async_work(
         env,
         nullptr,
@@ -344,6 +349,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("EnableDistributedByBundle work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -361,6 +367,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("enableDistributedByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -413,6 +420,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("EnableDistributedSelf work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -430,6 +438,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("enableDistributedSelf callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -475,6 +484,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsEnabledByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnabledByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -512,6 +522,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("isDistributedEnableByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -522,7 +533,7 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
 {
     ANS_LOGI("enter");
     if (!data) {
-        ANS_LOGE("Invalid async callback data");
+        ANS_LOGE("Invalidity async callback data");
         return;
     }
     ANS_LOGI("GetDeviceRemindType work complete.");
@@ -561,6 +572,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoGetRemindType {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo fail.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -598,6 +610,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("getDeviceRemindType callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -663,6 +676,7 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
     AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabledWithoutApp {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -714,6 +728,7 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("setSyncNotificationEnabledWithoutApp callback is nullptr.");
         return Common::NapiGetNull(env);
     }
     return promise;
@@ -771,6 +786,7 @@ napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
         new (std::nothrow) AsyncCallbackInfoGetEnabledWithoutApp {
         .env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -826,6 +842,7 @@ napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("GetSyncNotificationEnabledWithoutApp callback is nullptr.");
         return Common::NapiGetNull(env);
     }
     return promise;

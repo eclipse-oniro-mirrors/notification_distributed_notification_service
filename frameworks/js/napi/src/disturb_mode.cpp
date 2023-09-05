@@ -150,6 +150,7 @@ napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
     AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoSetDoNotDisturb {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo is failed.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -205,6 +206,7 @@ napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("SetDoNotDisturbDate callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -220,6 +222,7 @@ void AsyncCompleteCallbackGetDoNotDisturbDate(napi_env env, napi_status status, 
     }
     AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
     if (asynccallbackinfo) {
+        ANS_LOGD("asynccallbackinfo is not nullptr.");
         napi_value result = Common::NapiGetNull(env);
         if (asynccallbackinfo->info.errorCode == ERR_OK) {
             napi_create_object(env, &result);
@@ -288,6 +291,7 @@ napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
     AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetDoNotDisturb {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo is failed.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -334,6 +338,7 @@ napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("getDoNotDisturbDate callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -354,6 +359,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .callback = callback};
 
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo is failed.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -372,7 +378,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::DoesSupportDoNotDisturbMode(asynccallbackinfo->isSupported);
-                ANS_LOGI("errorCode=%{public}d isSupported=%{public}d",
+                ANS_LOGI("errorCode:%{public}d isSupported:%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
             }
         },
@@ -392,6 +398,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("SupportDoNotDisturbMode work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -409,6 +416,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("supportDoNotDisturbMode callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

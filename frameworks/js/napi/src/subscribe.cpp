@@ -159,7 +159,7 @@ void UvQueueWorkOnCanceled(uv_work_t *work, int status)
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGE("dataWorkerData is null");
+        ANS_LOGE("Create dataWorkerData failed.");
         delete work;
         work = nullptr;
         return;
@@ -217,7 +217,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
 
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
-        ANS_LOGE("new dataWorker failed");
+        ANS_LOGE("DataWorker is nullptr.");
         return;
     }
 
@@ -252,7 +252,7 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
     ANS_LOGI("OnConsumed uv_work_t start");
 
     if (work == nullptr) {
-        ANS_LOGE("work is null");
+        ANS_LOGE("work is nullptr");
         return;
     }
 
@@ -272,7 +272,7 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
         dataWorkerData->sortingMap,
         NO_DELETE_REASON,
         result)) {
-        ANS_LOGE("Failed to convert data to JS");
+        ANS_LOGE("Convert data to JS fail.");
     } else {
         Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
     }
@@ -294,12 +294,12 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
     }
 
     if (request == nullptr) {
-        ANS_LOGE("request is null");
+        ANS_LOGE("request is nullptr.");
         return;
     }
 
     if (sortingMap == nullptr) {
-        ANS_LOGE("sortingMap is null");
+        ANS_LOGE("sortingMap is nullptr.");
         return;
     }
     ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu",
@@ -353,7 +353,7 @@ void UvQueueWorkOnUpdate(uv_work_t *work, int status)
     }
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGE("dataWorkerData is null");
+        ANS_LOGE("dataWorkerData is nullptr");
         delete work;
         work = nullptr;
         return;
@@ -431,13 +431,13 @@ void UvQueueWorkOnConnected(uv_work_t *work, int status)
     ANS_LOGI("OnConnected uv_work_t start");
 
     if (work == nullptr) {
-        ANS_LOGE("work is null");
+        ANS_LOGE("work is nullptr.");
         return;
     }
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGE("dataWorkerData is null");
+        ANS_LOGE("dataWorkerData is nullptr.");
         delete work;
         work = nullptr;
         return;
@@ -506,7 +506,7 @@ void UvQueueWorkOnDisconnected(uv_work_t *work, int status)
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGE("dataWorkerData is null");
+        ANS_LOGE("Failed to create dataWorkerData.");
         delete work;
         work = nullptr;
         return;
@@ -1253,7 +1253,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (argc >= SUBSRIBE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGE("Callback is not function excute promise.");
+            ANS_LOGE("Callback is not function enforce promise.");
             return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &callback);
@@ -1281,6 +1281,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
     };
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         if (objectInfo) {
             delete objectInfo;
             objectInfo = nullptr;
@@ -1326,16 +1327,15 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-
                 if (asynccallbackinfo->info.callback != nullptr) {
                     ANS_LOGD("Delete subscribe callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("Subscribe work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -1353,6 +1353,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("subscribe callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

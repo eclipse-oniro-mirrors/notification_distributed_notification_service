@@ -90,6 +90,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiSetDoNotDisturbDate callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -184,6 +185,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiGetDoNotDisturbDate callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -243,6 +245,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiSupportDoNotDisturbMode work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -263,6 +266,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiSupportDoNotDisturbMode callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

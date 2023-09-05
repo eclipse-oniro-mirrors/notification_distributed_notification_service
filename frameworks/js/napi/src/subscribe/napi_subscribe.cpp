@@ -85,16 +85,15 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-
                 if (asynccallbackinfo->info.callback != nullptr) {
                     ANS_LOGD("Delete napiSubscribe callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiSubscribe work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -115,6 +114,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiSubscribe callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -180,6 +180,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("NapiUnsubscribe work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -200,6 +201,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
     }
 
     if (isCallback) {
+        ANS_LOGD("napiUnsubscribe callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

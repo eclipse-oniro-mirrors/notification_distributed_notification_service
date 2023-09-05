@@ -57,7 +57,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
+        ANS_LOGW("Argument type error. Object expected.");
         return nullptr;
     }
 
@@ -106,6 +106,7 @@ napi_value Publish(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
 
@@ -144,7 +145,7 @@ napi_value Publish(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
-            ANS_LOGI("Publish napi_create_async_work complete end");
+            ANS_LOGD("Publish work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -162,6 +163,7 @@ napi_value Publish(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("publish callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -398,7 +400,7 @@ napi_value ParsePublishAsBundleParameters(
     // argv[1] : bundleName
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
-        ANS_LOGW("Wrong argument type. String number boolean expected.");
+        ANS_LOGW("Error argument type. String number boolean expected.");
         return nullptr;
     }
 
@@ -451,6 +453,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo failed.");
         return Common::JSParaError(env, params.callback);
     }
 
@@ -482,6 +485,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete publishAsBundle callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);
@@ -506,6 +510,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("publishAsBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

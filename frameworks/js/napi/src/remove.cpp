@@ -213,7 +213,7 @@ napi_value ParseParameters(
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < REMOVE_GROUP_BY_BUNDLE_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGW("Error number of arguments.");
         return nullptr;
     }
 
@@ -232,7 +232,7 @@ napi_value ParseParameters(
     // argv[1]: groupName: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
-        ANS_LOGW("Wrong argument type. String number boolean expected.");
+        ANS_LOGW("Error argument type. String number boolean anticipate.");
         return nullptr;
     }
     if (valuetype == napi_string) {
@@ -309,6 +309,7 @@ napi_value Remove(napi_env env, napi_callback_info info)
     }
     auto removeInfo = new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
     if (!removeInfo) {
+        ANS_LOGD("RemoveInfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -339,6 +340,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
     AsyncCallbackInfoRemove *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -379,6 +381,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("RemoveAll work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -396,6 +399,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("removeAll callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -433,6 +437,7 @@ napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoRemoveGroupByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo failed.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -474,6 +479,7 @@ napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("removeGroupByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

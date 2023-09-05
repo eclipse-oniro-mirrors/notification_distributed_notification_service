@@ -146,6 +146,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
     AsyncCallbackInfoCancel *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr, .id = paras.id, .label = paras.label};
     if (!asynccallbackinfo) {
+        ANS_LOGD("AsyncCallbackinfo is nullptr.");
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -153,7 +154,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "cancel", NAPI_AUTO_LENGTH, &resourceName);
-    // Asynchronous function call
+    // Async function call
     napi_create_async_work(env,
         nullptr,
         resourceName,
@@ -179,6 +180,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("Cancel work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -213,6 +215,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -244,6 +247,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("CancelAll work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -261,6 +265,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("CancelAll callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -279,6 +284,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
     AsyncCallbackInfoCancelGroup *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoCancelGroup {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo fail.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -313,6 +319,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("CancelGroup work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -330,6 +337,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("CancelGroup callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -417,6 +425,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
         .userId = paras.userId
     };
     if (!asynccallbackinfo) {
+        ANS_LOGD("AsyncCallbackinfo is nullptr.");
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -450,6 +459,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
+            ANS_LOGD("CancelAsBundle work complete end.");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);

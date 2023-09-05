@@ -40,7 +40,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
+        ANS_LOGW("Parameter type error. Object expected.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
@@ -87,7 +87,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if ((valuetype != napi_object) && (valuetype != napi_number) && (valuetype != napi_function)) {
-        ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
+        ANS_LOGW("Parameter type error. Function or object expected. Excute promise.");
         return Common::NapiGetNull(env);
     }
     if (valuetype == napi_object) {
@@ -149,6 +149,7 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -187,6 +188,7 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("enableNotification callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -230,6 +232,7 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -246,20 +249,20 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
-                    ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d",
+                    ANS_LOGI("option.bundle : %{public}s option.uid : %{public}d",
                         asynccallbackinfo->params.option.GetBundleName().c_str(),
                         asynccallbackinfo->params.option.GetUid());
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.option, asynccallbackinfo->allowed);
                 } else if (asynccallbackinfo->params.hasUserId) {
-                    ANS_LOGI("userId = %{public}d", asynccallbackinfo->params.userId);
+                    ANS_LOGI("userId : %{public}d", asynccallbackinfo->params.userId);
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->allowed);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
+                ANS_LOGI("asynccallbackinfo->info.errorCode : %{public}d, allowed : %{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
@@ -280,6 +283,7 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("isNotificationEnabled callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -298,6 +302,7 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo fail.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -340,6 +345,7 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("isNotificationEnabledSelf callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -359,6 +365,7 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
 
     if (!asynccallbackinfo) {
+        ANS_LOGD("Failed to create asynccallbackinfo.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -402,6 +409,7 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("RequestEnableNotification callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
