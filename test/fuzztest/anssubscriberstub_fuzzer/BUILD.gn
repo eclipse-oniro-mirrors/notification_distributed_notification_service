@@ -33,7 +33,6 @@ ohos_fuzztest("AnsSubscriberStubFuzzTest") {
 
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
-    "${component_path}\frameworks\core:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
   ]
 

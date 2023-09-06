@@ -51,7 +51,6 @@ ohos_unittest("notification_shell_command_dump_test") {
   }
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",

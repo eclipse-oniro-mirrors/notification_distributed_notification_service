@@ -23,7 +23,7 @@ ohos_unittest("ans_subscriber_stub_test") {
 
   sources = [ "ans_subscriber_stub_unit_test.cpp" ]
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",

@@ -40,7 +40,6 @@ ohos_unittest("reminder_unit_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -128,7 +127,7 @@ ohos_unittest("ans_unit_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
   ]
@@ -208,7 +207,7 @@ ohos_unittest("notification_service_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
   ]
@@ -289,7 +288,7 @@ ohos_unittest("notification_preferences_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
   ]
@@ -359,7 +358,7 @@ ohos_unittest("access_token_helper_test") {
     "access_token_helper_test/access_token_helper_test.cpp",
   ]
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
@@ -407,7 +406,6 @@ ohos_unittest("bundle_manager_helper_branch_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -458,7 +456,6 @@ ohos_unittest("notification_dialog_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -518,7 +515,6 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -589,7 +585,6 @@ ohos_unittest("advanced_notification_service_branch_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -647,7 +642,6 @@ ohos_unittest("notification_preferences_database_branch_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -694,7 +688,6 @@ ohos_unittest("push_callback_stub_test") {
   sources = [ "push_callback_stub_test.cpp" ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -747,7 +740,6 @@ ohos_unittest("notification_rdb_data_mgr_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
