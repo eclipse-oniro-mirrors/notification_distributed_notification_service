@@ -1576,6 +1576,7 @@ private:
     static const int32_t ONLY_CALLBACK_MAX_PARA = 1;
     static const int32_t ONLY_CALLBACK_MIN_PARA = 0;
     static std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> wantAgent_;
+    static std::mutex mutex_;
 };
 }  // namespace NotificationNapi
 }  // namespace OHOS

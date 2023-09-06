@@ -21,6 +21,7 @@
 namespace OHOS {
 namespace NotificationNapi {
 std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> Common::wantAgent_;
+std::mutex Common::mutex_;
 
 namespace {
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
@@ -4598,7 +4599,10 @@ napi_value Common::CreateWantAgentByJS(const napi_env &env,
         return nullptr;
     }
 
-    wantAgent_.insert(agent);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        wantAgent_.insert(agent);
+    }
     napi_value wantAgent = nullptr;
     napi_value wantAgentClass = nullptr;
     napi_define_class(env,
@@ -4621,6 +4625,7 @@ napi_value Common::CreateWantAgentByJS(const napi_env &env,
             AbilityRuntime::WantAgent::WantAgent *objectInfo =
                 static_cast<AbilityRuntime::WantAgent::WantAgent *>(data);
             if (objectInfo) {
+                std::lock_guard<std::mutex> lock(mutex_);
                 for (auto it = wantAgent_.begin(); it != wantAgent_.end(); ++it) {
                     if ((*it).get() == objectInfo) {
                         wantAgent_.erase(it);
