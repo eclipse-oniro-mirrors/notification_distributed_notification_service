@@ -134,6 +134,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     }
 
     if (result == ERR_OK) {
+        ANS_LOGD("result is ERR_OK");
         preferencesInfo_ = preferencesInfo;
     }
     return result;

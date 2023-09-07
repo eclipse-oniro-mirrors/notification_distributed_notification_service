@@ -146,7 +146,7 @@ bool DistributedPreferencesDatabase::GetEntriesFromDistributedDB(
         return false;
     }
     if (!KvStoreFlowControl()) {
-        ANS_LOGE("kvStore flow control.");
+        ANS_LOGE("KvStoreFlowControl is false.");
         CloseKvStore();
         return false;
     }

@@ -451,7 +451,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -765,7 +765,7 @@ ErrCode AdvancedNotificationService::CancelAll()
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidated.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -902,7 +902,7 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -928,7 +928,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(std::vector<sptr<Not
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidated.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -951,6 +951,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANS_LOGD("BundleOption is nullptr.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -1000,11 +1001,12 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANS_LOGD("BundleOption is null.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1023,6 +1025,7 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANS_LOGD("GenerateBundleOption failed.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -1051,6 +1054,7 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("VerifyNativeToken and IsSystemApp is false.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -1059,7 +1063,7 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidated.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1095,6 +1099,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("VerifyNativeToken is false.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -1104,6 +1109,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        ANS_LOGD("bundle is false.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -1155,11 +1161,12 @@ ErrCode AdvancedNotificationService::DeleteAll()
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1191,6 +1198,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
 #endif
             }
             if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                ANS_LOGD("Notifications size greater than or equal to MAX_CANCELED_PARCELABLE_VECTOR_NUM.");
                 SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
             }
         }
@@ -1229,6 +1237,7 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is false.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -1238,6 +1247,7 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        ANS_LOGD("GenerateValidBundleOption failed.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -1270,6 +1280,7 @@ ErrCode AdvancedNotificationService::UpdateSlots(
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1279,7 +1290,7 @@ ErrCode AdvancedNotificationService::UpdateSlots(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1310,6 +1321,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("Check permission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1319,7 +1331,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("NotificationSvrQueue_ is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1339,6 +1351,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("VerifyNativeToken is bogus.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -1348,6 +1361,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        ANS_LOGD("Failed to generateValidBundleOption.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -1378,7 +1392,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is ineffective.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1535,6 +1549,7 @@ ErrCode AdvancedNotificationService::GetSlotByType(
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANS_LOGD("Failed to generateBundleOption.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -1583,11 +1598,12 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission failed.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -1630,6 +1646,7 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("Check permission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1702,6 +1719,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("VerifyNativeToken and IsSystemApp is false.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -1715,7 +1733,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1740,6 +1758,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -1788,6 +1807,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is false");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1831,6 +1851,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
 
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (!GetActiveUserId(userId)) {
+        ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
@@ -2176,6 +2197,7 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
         stream << "\tCreatePid: " << record->request->GetCreatorPid() << "\n";
         stream << "\tOwnerBundleName: " << record->notification->GetBundleName() << "\n";
         if (record->request->GetOwnerUid() > 0) {
+            ANS_LOGD("GetOwnerUid larger than zero.");
             stream << "\tOwnerUid: " << record->request->GetOwnerUid() << "\n";
         } else {
             stream << "\tOwnerUid: " << record->request->GetCreatorUid() << "\n";
@@ -2185,6 +2207,7 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
         stream << "\t\tId: " << record->notification->GetId() << "\n";
         stream << "\t\tLabel: " << record->notification->GetLabel() << "\n";
         stream << "\t\tSlotType = " << record->request->GetSlotType() << "\n";
+        ANS_LOGD("DumpInfo push stream.");
         dumpInfo.push_back(stream.str());
     }
     return ERR_OK;
@@ -2494,6 +2517,7 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANS_LOGD("GenerateBundleOption defeat.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -2523,7 +2547,7 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -2561,6 +2585,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is bogus.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -2570,7 +2595,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("NotificationSvrQueue_ is null.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
@@ -2634,6 +2659,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is fake.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -2647,9 +2673,9 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
+        ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
             if (!record->notification->IsRemoveAllowed()) {
                 continue;
@@ -2669,6 +2695,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         for (auto record : removeList) {
             notificationList_.remove(record);
             if (record->notification != nullptr) {
+                ANS_LOGD("record->notification is not nullptr.");
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -2707,7 +2734,7 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("NotificationSvrQueue is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -2763,6 +2790,7 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        ANS_LOGD("Bundle is null.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -2886,6 +2914,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
                 record->deviceId.empty() &&
 #endif
                 (record->request->GetGroupName() == groupName)) {
+                ANS_LOGD("RemoveList push enter.");
                 removeList.push_back(record);
             }
         }
@@ -3080,6 +3109,7 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("VerifyNativeToken and IsSystemApp is false.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -3088,7 +3118,7 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -3116,11 +3146,13 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        ANS_LOGD("Create bundle failed.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -3168,7 +3200,7 @@ ErrCode AdvancedNotificationService::EnableDistributedSelf(const bool enabled)
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -3201,6 +3233,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        ANS_LOGD("Failed to create bundle.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -3408,13 +3441,13 @@ void AdvancedNotificationService::OnDistributedPublish(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return;
     }
     notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
-            ANS_LOGD("device type not support display.");
+            ANS_LOGD("CheckDistributedNotificationType is false.");
             return;
         }
 
@@ -3424,7 +3457,7 @@ void AdvancedNotificationService::OnDistributedPublish(
                 request->SetOwnerBundleName(FOUNDATION_BUNDLE_NAME);
                 request->SetCreatorBundleName(FOUNDATION_BUNDLE_NAME);
             } else {
-                ANS_LOGE("bundle does not exit and enable off!");
+                ANS_LOGE("bundle does not exit and make off!");
                 return;
             }
         }
@@ -3435,6 +3468,7 @@ void AdvancedNotificationService::OnDistributedPublish(
 
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
         if (record == nullptr) {
+            ANS_LOGD("record is nullptr.");
             return;
         }
         record->request = request;
@@ -3706,11 +3740,12 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(const int32_t &u
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("Failed to checkPermission");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -3737,7 +3772,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(const int32_t
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is ineffectiveness.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -3816,7 +3851,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const int32_t &userId,
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Input userId is invalid.");
+        ANS_LOGE("Input userId is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -4077,6 +4112,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("CheckPermission failed.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -4086,7 +4122,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -4135,6 +4171,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("VerifyNativeToken and isSystemApp failed.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -4278,6 +4315,7 @@ void AdvancedNotificationService::SendSubscribeHiSysEvent(int32_t pid, int32_t u
     eventInfo.pid = pid;
     eventInfo.uid = uid;
     if (info != nullptr) {
+        ANS_LOGD("info is not nullptr.");
         eventInfo.userId = info->GetAppUserId();
         std::vector<std::string> appNames = info->GetAppNames();
         eventInfo.bundleName = std::accumulate(appNames.begin(), appNames.end(), std::string(""),
@@ -4335,6 +4373,7 @@ void AdvancedNotificationService::SendCancelHiSysEvent(int32_t notificationId, c
     const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode)
 {
     if (bundleOption == nullptr || errCode != ERR_OK) {
+        ANS_LOGD("bundleOption is nullptr.");
         return;
     }
 
@@ -4425,11 +4464,12 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -4592,7 +4632,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObje
     }
 
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER Permission!");
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER approval!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
