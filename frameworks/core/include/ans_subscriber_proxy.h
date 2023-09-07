@@ -91,8 +91,23 @@ public:
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
     static inline BrokerDelegator<AnsSubscriberProxy> delegator_;
+
     template<typename T>
-    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data);
+    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
+    {
+        if (!data.WriteInt32(parcelableVector.size())) {
+            ANS_LOGE("write ParcelableVector size failed");
+            return false;
+        }
+
+        for (auto &parcelable : parcelableVector) {
+            if (!data.WriteStrongParcelable(parcelable)) {
+                ANS_LOGE("write ParcelableVector failed");
+                return false;
+            }
+        }
+        return true;
+    }
 };
 }  // namespace Notification
 }  // namespace OHOS

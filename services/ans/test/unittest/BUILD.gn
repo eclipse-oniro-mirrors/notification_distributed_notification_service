@@ -637,13 +637,14 @@ ohos_unittest("notification_preferences_database_branch_test") {
   ]
 
   sources = [
+    "${services_path}/ans/src/notification_preferences_database.cpp",
+    "${services_path}/ans/src/notification_preferences_info.cpp",
     "notification_preferences_database_branch_test/mock_notification_rdb_data_mgr.cpp",
     "notification_preferences_database_branch_test/notification_preferences_database_branch_test.cpp",
   ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
   ]
 

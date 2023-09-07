@@ -598,7 +598,7 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     store_->UpdateOrInsert(reminder, bundleOption);
 }
 
-void ReminderDataManager::SetService(AdvancedNotificationService *advancedNotificationService)
+void ReminderDataManager::SetService(sptr<AdvancedNotificationService> &advancedNotificationService)
 {
     advancedNotificationService_ = advancedNotificationService;
 }

@@ -209,15 +209,23 @@ std::string NotificationUserInput::Dump()
     for (std::string option : options_) {
         options += option + ", ";
     }
-    options.pop_back();
-    options.pop_back();
+    if (!options.empty()) {
+        options.pop_back();
+    }
+    if (!options.empty()) {
+        options.pop_back();
+    }
 
     std::string permitMimeTypes;
     for (auto permitMimeType : permitMimeTypes_) {
         permitMimeTypes += permitMimeType + ", ";
     }
-    permitMimeTypes.pop_back();
-    permitMimeTypes.pop_back();
+    if (!permitMimeTypes.empty()) {
+        permitMimeTypes.pop_back();
+    }
+    if (!permitMimeTypes.empty()) {
+        permitMimeTypes.pop_back();
+    }
 
     return "NotificationUserInput{ "
             "inputKey = " + inputKey_ +

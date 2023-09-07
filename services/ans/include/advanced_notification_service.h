@@ -757,8 +757,8 @@ private:
     ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
-    sptr<NotificationBundleOption> GenerateBundleOption();
-    sptr<NotificationBundleOption> GenerateValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
+    static sptr<NotificationBundleOption> GenerateBundleOption();
+    static sptr<NotificationBundleOption> GenerateValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
 
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
@@ -772,10 +772,10 @@ private:
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);
 
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);
-    bool CheckPermission(const std::string &permission);
+    static bool CheckPermission(const std::string &permission);
     ErrCode PrepareNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
-    bool GetActiveUserId(int& userId);
+    static bool GetActiveUserId(int& userId);
     void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request);
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
@@ -796,7 +796,8 @@ private:
         const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request);
     void OnDistributedDelete(
         const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id);
-    ErrCode GetDistributedEnableInApplicationInfo(const sptr<NotificationBundleOption> bundleOption, bool &enable);
+    static ErrCode GetDistributedEnableInApplicationInfo(
+        const sptr<NotificationBundleOption> bundleOption, bool &enable);
     bool CheckPublishWithoutApp(const int32_t userId, const sptr<NotificationRequest> &request);
 #endif
 
@@ -804,16 +805,16 @@ private:
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode SetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool hasPopped);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
-    ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
+    static ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
         sptr<NotificationBundleOption> &targetBundle);
     bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
     void ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName);
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void GetDumpInfo(const std::vector<std::u16string> &args, std::string &result);
 
-    void SendSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info,
+    static void SendSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info,
         ErrCode errCode);
-    void SendUnSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info);
+    static void SendUnSubscribeHiSysEvent(int32_t pid, int32_t uid, const sptr<NotificationSubscribeInfo> &info);
     void SendPublishHiSysEvent(const sptr<NotificationRequest> &request, ErrCode errCode);
     void SendCancelHiSysEvent(int32_t notificationId, const std::string &label,
         const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode);

@@ -217,23 +217,6 @@ void AnsSubscriberProxy::OnCanceledList(const std::vector<sptr<Notification>> &n
     }
 }
 
-template<typename T>
-bool AnsSubscriberProxy::WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
-{
-    if (!data.WriteInt32(parcelableVector.size())) {
-        ANS_LOGE("write ParcelableVector size failed");
-        return false;
-    }
-
-    for (auto &parcelable : parcelableVector) {
-        if (!data.WriteStrongParcelable(parcelable)) {
-            ANS_LOGE("write ParcelableVector failed");
-            return false;
-        }
-    }
-    return true;
-}
-
 void AnsSubscriberProxy::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
     if (notificationMap == nullptr) {

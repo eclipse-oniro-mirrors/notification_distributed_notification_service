@@ -61,7 +61,20 @@ void MockDeleteData(bool mockRet)
 
 namespace OHOS {
 namespace Notification {
+NotificationDataMgr::NotificationDataMgr(const NotificationRdbConfig &notificationRdbConfig)
+    : notificationRdbConfig_(notificationRdbConfig)
+{
+}
+
 int32_t NotificationDataMgr::Init()
+{
+    if (g_mockInitRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::Destroy()
 {
     if (g_mockInitRet == false) {
         return NativeRdb::E_ERROR;

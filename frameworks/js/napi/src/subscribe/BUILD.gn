@@ -27,6 +27,16 @@ config("native_module_config") {
 }
 
 ohos_shared_library("notificationsubscribe") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  stack_protector_ret = true
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_napi_path}/inner/napi_common",

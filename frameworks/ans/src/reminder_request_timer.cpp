@@ -108,8 +108,8 @@ void ReminderRequestTimer::UpdateTimeInfo(const std::string &description)
         ANSR_LOGW("BootTime is illegal");
         return;
     }
-    SetTriggerTimeInMilli(whenToChangeSysTime_ + (countDownTimeInSeconds_ * MILLI_SECONDS -
-        (static_cast<uint64_t>(bootTime) - firstRealTimeInMilliSeconds_)));
+    SetTriggerTimeInMilli(whenToChangeSysTime_ + countDownTimeInSeconds_ * MILLI_SECONDS -
+        (static_cast<uint64_t>(bootTime) - firstRealTimeInMilliSeconds_));
 }
 
 bool ReminderRequestTimer::Marshalling(Parcel &parcel) const

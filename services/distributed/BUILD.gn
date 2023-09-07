@@ -22,6 +22,16 @@ config("ans_distributed_config") {
 }
 
 ohos_shared_library("libans_distributed") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  stack_protector_ret = true
+
   sources = [
     "src/distributed_database.cpp",
     "src/distributed_database_callback.cpp",

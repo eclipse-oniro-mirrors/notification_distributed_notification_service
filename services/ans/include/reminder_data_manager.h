@@ -137,7 +137,7 @@ public:
      *
      * @param Indicates the single instance of ans notification service.
      */
-    void SetService(AdvancedNotificationService *advancedNotificationService);
+    void SetService(sptr<AdvancedNotificationService> &advancedNotificationService);
 
     bool ShouldAlert(const sptr<ReminderRequest> &reminder) const;
 

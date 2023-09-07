@@ -613,7 +613,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_250000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    sptr<NotificationBundleOption> targetBundle = nullptr;
+    sptr<NotificationBundleOption> targetBundle(nullptr);
     bundleOption->SetBundleName("test");
     EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_ANS_NON_SYSTEM_APP);
 }
