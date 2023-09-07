@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,7 @@ void SystemEventObserverTest::TearDown()
  */
 HWTEST_F(SystemEventObserverTest, OnReceiveEvent_001, Function | SmallTest | Level1)
 {
+    EXPECT_NE(stub_, nullptr);
     EventFwk::Want want;
     EventFwk::CommonEventData data;
     data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED));
@@ -76,6 +77,7 @@ HWTEST_F(SystemEventObserverTest, OnReceiveEvent_001, Function | SmallTest | Lev
  */
 HWTEST_F(SystemEventObserverTest, OnReceiveEvent_002, Function | SmallTest | Level1)
 {
+    EXPECT_NE(stub_, nullptr);
     EventFwk::Want want;
     EventFwk::CommonEventData data;
     data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED));
@@ -89,6 +91,7 @@ HWTEST_F(SystemEventObserverTest, OnReceiveEvent_002, Function | SmallTest | Lev
  */
 HWTEST_F(SystemEventObserverTest, OnReceiveEvent_003, Function | SmallTest | Level1)
 {
+    EXPECT_NE(stub_, nullptr);
     EventFwk::Want want;
     EventFwk::CommonEventData data;
     data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED));
@@ -102,6 +105,7 @@ HWTEST_F(SystemEventObserverTest, OnReceiveEvent_003, Function | SmallTest | Lev
  */
 HWTEST_F(SystemEventObserverTest, OnReceiveEvent_004, Function | SmallTest | Level1)
 {
+    EXPECT_NE(stub_, nullptr);
     EventFwk::Want want;
     EventFwk::CommonEventData data;
     data.SetWant(want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED));
