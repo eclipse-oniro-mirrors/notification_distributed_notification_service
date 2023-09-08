@@ -89,6 +89,7 @@ NotificationPictureContent *NotificationPictureContent::FromJson(const nlohmann:
 
     const auto &jsonEnd = jsonObject.cend();
     if (jsonObject.find("expandedTitle") != jsonEnd && jsonObject.at("expandedTitle").is_string()) {
+        ANS_LOGD("Find expandedTitle success.");
         pContent->expandedTitle_ = jsonObject.at("expandedTitle").get<std::string>();
     }
 
