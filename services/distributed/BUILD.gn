@@ -38,11 +38,10 @@ ohos_shared_library("libans_distributed") {
 
   configs = [
     ":ans_distributed_config",
-    "${core_path}:public_ans_core_config",
     "${frameworks_module_ans_path}:ans_innerkits_public_config",
   ]
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",

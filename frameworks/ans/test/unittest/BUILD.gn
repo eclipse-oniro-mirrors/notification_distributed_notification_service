@@ -58,7 +58,6 @@ ohos_unittest("ans_reminder_unit_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gtest_main",
   ]
@@ -104,7 +103,6 @@ ohos_unittest("reminder_request_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gtest_main",
   ]
@@ -136,7 +134,6 @@ ohos_unittest("reminder_request_branch_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gtest_main",
   ]

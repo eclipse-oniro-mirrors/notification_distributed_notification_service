@@ -23,7 +23,7 @@ ohos_unittest("ans_manager_death_recipient_test") {
 
   sources = [ "ans_manager_death_recipient_unit_test.cpp" ]
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",

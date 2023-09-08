@@ -49,7 +49,7 @@ ohos_shared_library("notificationsubscribe") {
     "napi_subscribe.cpp",
   ]
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",

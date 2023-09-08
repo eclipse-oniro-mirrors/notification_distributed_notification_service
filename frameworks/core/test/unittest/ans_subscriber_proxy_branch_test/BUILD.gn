@@ -27,7 +27,7 @@ ohos_unittest("ans_subscriber_proxy_branch_test") {
   sources = [ "ans_subscriber_proxy_branch_test.cpp" ]
 
   deps = [
-    "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

@@ -36,10 +36,10 @@ ohos_executable("anm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [ "${core_path}:ans_core" ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   configs = [
-    "${core_path}:public_ans_core_config",
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
     "${ability_runtime_inner_api_path}/wantagent:wantagent_innerkits_public_config",
   ]
 

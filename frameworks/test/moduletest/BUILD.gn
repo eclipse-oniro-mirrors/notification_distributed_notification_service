@@ -59,7 +59,6 @@ ohos_moduletest("ans_fw_module_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -124,7 +123,6 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
 
   deps = [
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -191,7 +189,6 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
@@ -257,7 +254,6 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
   ]
 
   deps = [
-    "${core_path}:ans_core",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",

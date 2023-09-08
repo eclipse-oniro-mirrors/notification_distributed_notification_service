@@ -33,8 +33,8 @@ ohos_fuzztest("SetDoNotDisturbDateFuzzTest") {
   sources = [ "setdonotdisturbdate_fuzzer.cpp" ]
 
   deps = [
-    "${component_path}/frameworks/core:ans_core",
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
+    "${frameworks_module_ans_path}:ans_innerkits",
   ]
 
   external_deps = [

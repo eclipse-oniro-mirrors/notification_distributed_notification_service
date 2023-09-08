@@ -29,7 +29,7 @@ ohos_systemtest("AnsDumpTest") {
   }
 
   deps = [
-    "${core_path}:ans_core",
+    "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gtest_main",
   ]
 
