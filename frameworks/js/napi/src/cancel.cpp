@@ -152,6 +152,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create cancel string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "cancel", NAPI_AUTO_LENGTH, &resourceName);
     // Async function call
@@ -198,6 +199,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("cancel callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -221,6 +223,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create cancelAll string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "cancelAll", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -290,6 +293,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create cancelGroup string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "cancelGroup", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -431,6 +435,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create cancelasbundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "cancelasbundle", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -477,6 +482,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("CancelAsBundle callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

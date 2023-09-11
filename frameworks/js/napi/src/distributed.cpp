@@ -191,6 +191,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create isDistributedEnabled string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "isDistributedEnabled", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -250,6 +251,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create enableDistributed string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "enableDistributed", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -321,6 +323,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create enableDistributedByBundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "enableDistributedByBundle", NAPI_AUTO_LENGTH, &resourceName);
     // Async function call
@@ -391,6 +394,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGI("Create enableDistributedSelf string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "enableDistributedSelf", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -490,6 +494,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create isDistributedEnableByBundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "isDistributedEnableByBundle", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -541,6 +546,7 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
     if (asynccallbackinfo) {
         napi_value result = nullptr;
         if (asynccallbackinfo->info.errorCode != ERR_OK) {
+            ANS_LOGD("errorCode is not ERR_OK.");
             result = Common::NapiGetNull(env);
         } else {
             DeviceRemindType outType = DeviceRemindType::IDLE_DONOT_REMIND;
@@ -578,6 +584,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getDeviceRemindType string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getDeviceRemindType", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -634,7 +641,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
+        ANS_LOGE("Argument type error. Number expected.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &params.userId));
@@ -682,6 +689,7 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create SetSyncNotificationEnabledWithoutApp string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "SetSyncNotificationEnabledWithoutApp", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -792,6 +800,7 @@ napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create GetSyncNotificationEnabledWithoutApp string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "GetSyncNotificationEnabledWithoutApp", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -821,6 +830,7 @@ napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
                 }
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
                 if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete getSyncNotificationEnabledWithoutApp callback reference.");
                     napi_delete_reference(env, asynccallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asynccallbackinfo->asyncWork);

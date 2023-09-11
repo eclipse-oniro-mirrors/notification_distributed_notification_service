@@ -429,18 +429,19 @@ void AsyncCompleteCallbackNapiGetSlots(napi_env env, napi_status status, void *d
             size_t count = 0;
             for (auto vec : asynccallbackinfo->slots) {
                 if (!vec) {
-                    ANS_LOGW("Invalid NotificationSlot object ptr.");
+                    ANS_LOGW("Invalidated NotificationSlot object ptr.");
                     continue;
                 }
                 napi_value nSlot = nullptr;
                 napi_create_object(env, &nSlot);
                 if (!Common::SetNotificationSlot(env, *vec, nSlot)) {
+                    ANS_LOGD("SetNotificationSlot is nullptr.");
                     continue;
                 }
                 napi_set_element(env, arr, count, nSlot);
                 count++;
             }
-            ANS_LOGI("getSlots count = %{public}zu", count);
+            ANS_LOGI("NapiGetSlots count : %{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;

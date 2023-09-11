@@ -128,6 +128,7 @@ napi_value NapiIsNotificationEnabled(napi_env env, napi_callback_info info)
     ANS_LOGI("enter");
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        ANS_LOGD("ParseParameters is nullptr.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }

@@ -241,10 +241,12 @@ napi_value ParseParameters(
         NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
         params.groupName = str;
     } else if (valuetype == napi_number) {
+        ANS_LOGD("valuetype is number.");
         int64_t number = 0;
         NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
         params.groupName = std::to_string(number);
     } else {
+        ANS_LOGD("valuetype is other types.");
         bool result = false;
         NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
         params.groupName = std::to_string(result);
@@ -253,7 +255,7 @@ napi_value ParseParameters(
     if (argc >= REMOVE_GROUP_BY_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Callback is not function excute promise.");
+            ANS_LOGW("Callback is not function.");
             return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
@@ -346,6 +348,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create removeAll string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "removeAll", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -358,9 +361,9 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {
                     auto &infos = asynccallbackinfo->params.bundleAndKeyInfo.value();
-
                     asynccallbackinfo->info.errorCode = NotificationHelper::RemoveAllNotifications(infos.option);
                 } else if (asynccallbackinfo->params.hasUserId) {
+                    ANS_LOGD("hasUserId is true.");
                     asynccallbackinfo->info.errorCode = NotificationHelper::RemoveNotifications(
                         asynccallbackinfo->params.userId);
                 } else {
@@ -443,6 +446,7 @@ napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create removeGroupByBundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "removeGroupByBundle", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call

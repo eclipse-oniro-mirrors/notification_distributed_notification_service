@@ -135,6 +135,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create DisplayBadge string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "DisplayBadge", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -232,6 +233,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create IsBadgeDisplayed string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "IsBadgeDisplayed", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call

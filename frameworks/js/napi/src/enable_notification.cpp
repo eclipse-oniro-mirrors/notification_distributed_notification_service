@@ -155,6 +155,7 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create enableNotification string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "enableNotification", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -232,12 +233,13 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        ANS_LOGD("Asynccallbackinfo is nullptr.");
+        ANS_LOGD("Failed to create asynccallbackinfo.");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create isNotificationEnabled string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "isNotificationEnabled", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -255,14 +257,14 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.option, asynccallbackinfo->allowed);
                 } else if (asynccallbackinfo->params.hasUserId) {
-                    ANS_LOGI("userId : %{public}d", asynccallbackinfo->params.userId);
+                    ANS_LOGI("userId = %{public}d", asynccallbackinfo->params.userId);
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->allowed);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode : %{public}d, allowed : %{public}d",
+                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
@@ -308,6 +310,7 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create IsNotificationEnabledSelf string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "IsNotificationEnabledSelf", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call

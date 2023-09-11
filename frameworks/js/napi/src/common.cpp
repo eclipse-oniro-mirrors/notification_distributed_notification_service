@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,7 @@ void Common::PaddingCallbackPromiseInfo(
     ANS_LOGI("enter");
 
     if (callback) {
+        ANS_LOGD("Callback is not nullptr.");
         info.callback = callback;
         info.isCallback = true;
     } else {
@@ -1278,7 +1279,7 @@ napi_value Common::SetNotificationActionButton(
         iconResult = Media::PixelMapNapi::CreatePixelMap(env, icon);
         NAPI_CALL(env, napi_typeof(env, iconResult, &valuetype));
         if (valuetype == napi_undefined) {
-            ANS_LOGW("iconResult is undefined");
+            ANS_LOGW("icon result is undefined");
             napi_set_named_property(env, result, "icon", NapiGetNull(env));
         } else {
             napi_set_named_property(env, result, "icon", iconResult);
@@ -2615,8 +2616,8 @@ napi_value Common::GetNotificationUserInputByOptions(
     napi_valuetype valuetype = napi_undefined;
     napi_value value = nullptr;
     bool hasProperty = false;
-    size_t strLen = 0;
     uint32_t length = 0;
+    size_t strLen = 0;
     bool isArray = false;
 
     if (!userInput) {

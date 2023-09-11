@@ -258,7 +258,7 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGE("dataWorkerData is null");
+        ANS_LOGD("dataWorkerData is null.");
         delete work;
         work = nullptr;
         return;
@@ -572,7 +572,7 @@ void UvQueueWorkOnDied(uv_work_t *work, int status)
     ANS_LOGI("OnDied uv_work_t start");
 
     if (work == nullptr) {
-        ANS_LOGE("work is null");
+        ANS_LOGE("work is null.");
         return;
     }
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
@@ -647,7 +647,7 @@ void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGE("dataWorkerData is null");
+        ANS_LOGE("Data worker data is null.");
         delete work;
         work = nullptr;
         return;
@@ -726,13 +726,13 @@ void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
     ANS_LOGI("OnEnabledNotificationChanged uv_work_t start");
 
     if (work == nullptr) {
-        ANS_LOGE("work is null");
+        ANS_LOGE("work is null.");
         return;
     }
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGE("dataWorkerData is null");
+        ANS_LOGE("Data worker data is null.");
         delete work;
         work = nullptr;
         return;
@@ -1270,6 +1270,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     SubscriberInstance *objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
+        ANS_LOGD("ParseParameters is nullptr.");
         if (objectInfo) {
             delete objectInfo;
             objectInfo = nullptr;
@@ -1291,6 +1292,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create subscribeNotification string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "subscribeNotification", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -1306,13 +1308,14 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
-                    ANS_LOGI("Subscribe with NotificationSubscribeInfo");
+                    ANS_LOGD("Subscribe with NotificationSubscribeInfo excute.");
                     OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
                     subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
                     subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
                 } else {
+                    ANS_LOGD("SubscribeNotification execute.");
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
                 }
