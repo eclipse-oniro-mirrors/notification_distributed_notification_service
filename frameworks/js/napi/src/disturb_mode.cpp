@@ -297,6 +297,7 @@ napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getDoNotDisturbDate string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getDoNotDisturbDate", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -365,6 +366,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create supportDoNotDisturbMode string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "supportDoNotDisturbMode", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call

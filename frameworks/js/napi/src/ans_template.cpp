@@ -85,6 +85,7 @@ napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asyncCallbackinfo->info, promise);
 
+    ANS_LOGD("Create isSupportTemplate string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "IsSupportTemplate", NAPI_AUTO_LENGTH, &resourceName);
     // Async function call

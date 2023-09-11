@@ -114,6 +114,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
+        ANS_LOGD("ParseParameters is nullptr.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }

@@ -78,6 +78,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create unsubscribe string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "unsubscribe", NAPI_AUTO_LENGTH, &resourceName);
 
@@ -90,7 +91,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoUnsubscribe *>(data);
 
             if (asynccallbackinfo->objectInfo == nullptr) {
-                ANS_LOGE("invalid object info");
+                ANS_LOGE("invalidated object info");
                 asynccallbackinfo->info.errorCode = ERR_ANS_INVALID_PARAM;
                 return;
             }
@@ -100,6 +101,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::UnSubscribeNotification(*(asynccallbackinfo->objectInfo));
                 if (asynccallbackinfo->info.errorCode != ERR_OK) {
+                    ANS_LOGD("errorCode is not ERR_OK.");
                     DelDeletingSubscriber(asynccallbackinfo->objectInfo);
                 }
             } else {
@@ -137,6 +139,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("Unsubscribe callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

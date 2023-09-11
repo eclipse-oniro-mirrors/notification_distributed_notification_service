@@ -85,6 +85,7 @@ napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getAllActiveNotifications string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getAllActiveNotifications", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -186,12 +187,13 @@ napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        ANS_LOGD("AsyncCallbackinfo is nullptr.");
+        ANS_LOGD("AsyncCallbackinfo invalid.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getActiveNotifications string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getActiveNotifications", NAPI_AUTO_LENGTH, &resourceName);
     // Async function call
@@ -277,6 +279,7 @@ napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getActiveNotificationCount string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getActiveNotificationCount", NAPI_AUTO_LENGTH, &resourceName);
     // Async function call

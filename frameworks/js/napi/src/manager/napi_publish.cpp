@@ -33,11 +33,13 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("asynccallbackinfo is nullptr.");
         return Common::JSParaError(env, params.callback);
     }
     asynccallbackinfo->request = params.request;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create NapiPublish string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "publish", NAPI_AUTO_LENGTH, &resourceName);
 

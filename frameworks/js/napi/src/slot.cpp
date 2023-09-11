@@ -497,6 +497,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create addSlot string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "addSlot", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -507,6 +508,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
             ANS_LOGI("AddSlot work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlot *>(data);
             if (asynccallbackinfo) {
+                ANS_LOGD("asynccallbackinfo is not nullptr.");
                 if (asynccallbackinfo->isAddSlotByType) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::AddSlotByType(asynccallbackinfo->inType);
                 } else {
@@ -546,6 +548,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
     }
 
     if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("addSlot callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -569,6 +572,7 @@ napi_value AddSlots(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("AddSlots work excute.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "addSlots", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -638,6 +642,7 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create setSlotByBundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "setSlotByBundle", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -706,6 +711,7 @@ void AsyncCompleteCallbackGetSlot(napi_env env, napi_status status, void *data)
         napi_value result = Common::NapiGetNull(env);
         if (asynccallbackinfo->info.errorCode == ERR_OK) {
             if (asynccallbackinfo->slot != nullptr) {
+                ANS_LOGD("slot is not nullptr.");
                 napi_create_object(env, &result);
                 if (!Common::SetNotificationSlot(env, *asynccallbackinfo->slot, result)) {
                     asynccallbackinfo->info.errorCode = ERROR;
@@ -742,6 +748,7 @@ napi_value GetSlot(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getSlot string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getSlot", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -798,6 +805,7 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("create getSlotNumByBundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getSlotNumByBundle", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -877,12 +885,13 @@ void AsyncCompleteCallbackGetSlots(napi_env env, napi_status status, void *data)
                 napi_value nSlot = nullptr;
                 napi_create_object(env, &nSlot);
                 if (!Common::SetNotificationSlot(env, *vec, nSlot)) {
+                    ANS_LOGD("SetNotificationSlot is null.");
                     continue;
                 }
                 napi_set_element(env, arr, count, nSlot);
                 count++;
             }
-            ANS_LOGI("getSlots count = %{public}zu", count);
+            ANS_LOGI("getSlots count : %{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -911,11 +920,13 @@ napi_value GetSlots(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoGetSlots {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        ANS_LOGD("Create asynccallbackinfo failed.");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getSlots string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getSlots", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -957,12 +968,13 @@ void AsyncCompleteCallbackGetSlotsByBundle(napi_env env, napi_status status, voi
 {
     ANS_LOGI("enter");
     if (!data) {
-        ANS_LOGE("Invalid async callback data.");
+        ANS_LOGE("Invalidated async callback data.");
         return;
     }
     napi_value result = nullptr;
     auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotsByBundle *>(data);
     if (asynccallbackinfo) {
+        ANS_LOGE("asynccallbackinfo is not nullptr.");
         if (asynccallbackinfo->info.errorCode != ERR_OK) {
             result = Common::NapiGetNull(env);
         } else {
@@ -971,18 +983,19 @@ void AsyncCompleteCallbackGetSlotsByBundle(napi_env env, napi_status status, voi
             size_t count = 0;
             for (auto vec : asynccallbackinfo->slots) {
                 if (!vec) {
-                    ANS_LOGW("Invalid NotificationSlot object ptr");
+                    ANS_LOGW("Invalidity NotificationSlot object ptr");
                     continue;
                 }
                 napi_value nSlot = nullptr;
                 napi_create_object(env, &nSlot);
                 if (!Common::SetNotificationSlot(env, *vec, nSlot)) {
+                    ANS_LOGD("Set notification slot is nullptr.");
                     continue;
                 }
                 napi_set_element(env, arr, count, nSlot);
                 count++;
             }
-            ANS_LOGI("getSlots count = %{public}zu", count);
+            ANS_LOGI("GetSlotsByBundle count = %{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -1018,6 +1031,7 @@ napi_value GetSlotsByBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create getSlotsByBundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getSlotsByBundle", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -1073,6 +1087,7 @@ napi_value RemoveSlot(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create removeSlot string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "removeSlot", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -1142,6 +1157,7 @@ napi_value RemoveAllSlots(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create removeAll string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "removeAll", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -1211,7 +1227,7 @@ napi_value ParseParametersEnableSlot(
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Parameter type error. Object expected.");
+        ANS_LOGW("Parameter type is error. Object expected.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
@@ -1270,6 +1286,7 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create EnableNotificationSlot string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "EnableNotificationSlot", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -1393,6 +1410,7 @@ napi_value IsEnableNotificationSlot(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create IsEnableNotificationSlot string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "IsEnableNotificationSlot", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call

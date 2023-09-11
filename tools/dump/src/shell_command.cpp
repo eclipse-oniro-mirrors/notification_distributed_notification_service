@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@ ErrCode ShellCommand::OnCommand()
         respond = commandMap_["help"];
     }
     if (Init() == OHOS::ERR_OK) {
+        ANS_LOGD("Init is ERR_OK.");
         respond();
     } else {
         result = OHOS::ERR_INVALID_VALUE;
@@ -71,6 +72,7 @@ std::string ShellCommand::ExecCommand()
 
 std::string ShellCommand::GetCommandErrorMsg() const
 {
+    ANS_LOGD("enter");
     std::string commandErrorMsg =
         name_ + ": '" + cmd_ + "' is not a valid " + name_ + " command. See '" + name_ + " help'.\n";
     return commandErrorMsg;

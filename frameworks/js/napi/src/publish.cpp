@@ -113,6 +113,7 @@ napi_value Publish(napi_env env, napi_callback_info info)
     asynccallbackinfo->request = params.request;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create publish string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "publish", NAPI_AUTO_LENGTH, &resourceName);
 
@@ -322,6 +323,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
 
     asynccallbackinfo->request = params.request;
 
+    ANS_LOGD("Create show string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "show", NAPI_AUTO_LENGTH, &resourceName);
 
@@ -460,6 +462,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
     asynccallbackinfo->request = params.request;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
+    ANS_LOGD("Create publishasbundle string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "publishasbundle", NAPI_AUTO_LENGTH, &resourceName);
 
@@ -492,7 +495,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
-            ANS_LOGI("PublishAsBundle napi_create_async_work complete end");
+            ANS_LOGD("PublishAsBundle complete end");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
