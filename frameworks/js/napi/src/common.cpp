@@ -3095,6 +3095,10 @@ napi_value Common::GetNotificationBasicContentDetailed(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property title is empty");
+        return nullptr;
+    }
     basicContent->SetTitle(str);
     ANS_LOGD("normal::title = %{public}s", str);
 
@@ -3111,6 +3115,10 @@ napi_value Common::GetNotificationBasicContentDetailed(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property text is empty");
+        return nullptr;
+    }
     basicContent->SetText(str);
     ANS_LOGD("normal::text = %{public}s", str);
 
@@ -3199,6 +3207,10 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, long_str, LONG_STR_MAX_SIZE, &strLen));
+    if (std::strlen(long_str) == 0) {
+        ANS_LOGE("Property longText is empty");
+        return nullptr;
+    }
     longContent->SetLongText(long_str);
     ANS_LOGD("longText::longText = %{public}s", long_str);
 
@@ -3215,6 +3227,10 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property briefText is empty");
+        return nullptr;
+    }
     longContent->SetBriefText(str);
     ANS_LOGD("longText::briefText = %{public}s", str);
 
@@ -3231,6 +3247,10 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property expandedTitle is empty");
+        return nullptr;
+    }
     longContent->SetExpandedTitle(str);
     ANS_LOGD("longText::expandedTitle = %{public}s", str);
 
@@ -3301,6 +3321,10 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, pictureContentResult, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property briefText is empty");
+        return nullptr;
+    }
     pictureContent->SetBriefText(str);
 
     // expandedTitle: string
@@ -3316,6 +3340,10 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, pictureContentResult, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property expandedTitle is empty");
+        return nullptr;
+    }
     pictureContent->SetExpandedTitle(str);
 
     // picture: image.PixelMap
@@ -3865,6 +3893,10 @@ napi_value Common::GetNotificationMultiLineContent(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property briefText is empty");
+        return nullptr;
+    }
     multiLineContent->SetBriefText(str);
     ANS_LOGD("multiLine: briefText = %{public}s", str);
 
@@ -3881,6 +3913,10 @@ napi_value Common::GetNotificationMultiLineContent(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property longTitle is empty");
+        return nullptr;
+    }
     multiLineContent->SetExpandedTitle(str);
     ANS_LOGD("multiLine: longTitle = %{public}s", str);
 
