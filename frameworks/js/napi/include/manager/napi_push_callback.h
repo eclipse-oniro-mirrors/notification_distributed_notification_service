@@ -34,18 +34,18 @@ namespace Notification {
  */
 class JSPushCallBack : public PushCallBackStub {
 public:
-    JSPushCallBack(NativeEngine &engine);
+    JSPushCallBack(napi_env env);
     virtual ~JSPushCallBack();
     bool OnCheckNotification(const std::string &notificationData);
-    void SetJsPushCallBackObject(NativeValue *pushCallBackObject);
-    bool IsEqualPushCallBackObject(NativeValue *pushCallBackObject);
+    void SetJsPushCallBackObject(napi_value pushCallBackObject);
+    bool IsEqualPushCallBackObject(napi_value pushCallBackObject);
 
 private:
-    bool ConvertFunctionResult(NativeValue *funcResult);
+    bool ConvertFunctionResult(napi_value funcResult);
     void ConvertJsonStringToValue(
         const std::string &notificationData, std::string &pkgName, int32_t &notifyId, int32_t &contentType);
-    NativeEngine &engine_;
-    std::unique_ptr<NativeReference> pushCallBackObject_;
+    napi_env env_ = nullptr;
+    napi_ref pushCallBackObject_ = nullptr;
     std::mutex mutexlock;
 };
 } // namespace Notification
