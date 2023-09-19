@@ -27,16 +27,14 @@ class NapiPush {
 public:
     NapiPush() = default;
     ~NapiPush() = default;
-    static void Finalizer(NativeEngine *engine, void *data, void *hint);
-    static NativeValue *RegisterPushCallback(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *UnregisterPushCallback(NativeEngine *engine, NativeCallbackInfo *info);
-
+    static void Finalizer(napi_env env, void *data, void *hint);
+    static napi_value RegisterPushCallback(napi_env env, napi_callback_info info);
+    static napi_value UnregisterPushCallback(napi_env env, napi_callback_info info);
 private:
-    NativeValue *OnRegisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info);
-    NativeValue *OnUnregisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info);
-    bool CheckCallerIsSystemApp();
-
     sptr<OHOS::Notification::JSPushCallBack> jsPushCallBack_;
+    napi_value OnRegisterPushCallback(napi_env env, const napi_callback_info info);
+    napi_value OnUnregisterPushCallback(napi_env env, const napi_callback_info info);
+    bool CheckCallerIsSystemApp();
 };
 } // namespace NotificationNapi
 } // namespace OHOS

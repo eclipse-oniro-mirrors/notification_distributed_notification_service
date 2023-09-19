@@ -25,40 +25,43 @@ namespace Notification {
 namespace {
 constexpr size_t ARGC_ONE = 1;
 } // namespace
-JSPushCallBack::JSPushCallBack(NativeEngine &engine) : engine_(engine) {}
+JSPushCallBack::JSPushCallBack(napi_env env) : env_(env) {}
 
 JSPushCallBack::~JSPushCallBack() {}
 
-void JSPushCallBack::SetJsPushCallBackObject(NativeValue *pushCallBackObject)
+void JSPushCallBack::SetJsPushCallBackObject(napi_value pushCallBackObject)
 {
-    pushCallBackObject_ = std::unique_ptr<NativeReference>(engine_.CreateReference(pushCallBackObject, 1));
+    napi_create_reference(env_, pushCallBackObject, 1, &pushCallBackObject_);
 }
 
-bool JSPushCallBack::IsEqualPushCallBackObject(NativeValue *pushCallBackObject)
+bool JSPushCallBack::IsEqualPushCallBackObject(napi_value pushCallBackObject)
 {
     if (pushCallBackObject_ == nullptr) {
         ANS_LOGE("pushCallBackObject_ nullptr");
         return false;
     }
-
-    NativeValue *value = pushCallBackObject_->Get();
+    napi_value value = nullptr;
+    napi_get_reference_value(env_, pushCallBackObject_, &value);
     if (value == nullptr) {
         ANS_LOGE("Failed to get value");
         return false;
     }
 
-    return value->StrictEquals(pushCallBackObject);
+    bool isEquals = false;
+    napi_strict_equals(env_, value, pushCallBackObject, &isEquals);
+    return isEquals;
 }
 
 bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
 {
-    AbilityRuntime::HandleEscape handleEscape(engine_);
+    AbilityRuntime::HandleEscape handleEscape(env_);
     if (pushCallBackObject_ == nullptr) {
         ANS_LOGE("pushCallBackObject_ nullptr");
         return false;
     }
 
-    NativeValue *value = pushCallBackObject_->Get();
+    napi_value value = nullptr;
+    napi_get_reference_value(env_, pushCallBackObject_, &value);
     if (value == nullptr) {
         ANS_LOGE("Failed to get value");
         return false;
@@ -70,15 +73,36 @@ bool JSPushCallBack::OnCheckNotification(const std::string &notificationData)
     ANS_LOGI(
         "pkgName=%{public}s, notifyId=%{public}d, contentType=%{public}d ", pkgName.c_str(), notifyId, contentType);
 
-    NativeValue *jsResult = engine_.CreateObject();
-    NativeObject *result = AbilityRuntime::ConvertNativeValueTo<NativeObject>(jsResult);
-    result->SetProperty("bundleName", AbilityRuntime::CreateJsValue(engine_, pkgName));
-    result->SetProperty("notificationId", AbilityRuntime::CreateJsValue(engine_, notifyId));
-    result->SetProperty("contentType", AbilityRuntime::CreateJsValue(engine_, contentType));
+    napi_value jsResult = nullptr;
+    napi_create_object(env_, &jsResult);
 
-    NativeValue *funcResult;
-    NativeValue *argv[] = { jsResult };
-    funcResult = handleEscape.Escape(engine_.CallFunction(value, value, argv, ARGC_ONE));
+    std::string bundleName = "bundleName";
+    napi_value bundleNameNapiValue = nullptr;
+    napi_value pkgNameNapiValue = nullptr;
+    napi_create_string_utf8(env_, bundleName.c_str(), bundleName.length(), &bundleNameNapiValue);
+    napi_create_string_utf8(env_, pkgName.c_str(), pkgName.length(), &pkgNameNapiValue);
+    napi_set_property(env_, jsResult, bundleNameNapiValue, pkgNameNapiValue);
+
+    std::string notificationId = "notificationId";
+    napi_value notifyIdNapiValue = nullptr;
+    napi_value notificationIdNapiValue = nullptr;
+    napi_create_string_utf8(env_, notificationId.c_str(), notificationId.length(), &notificationIdNapiValue);
+    napi_create_int32(env_, notifyId, &notifyIdNapiValue);
+    napi_set_property(env_, jsResult, notificationIdNapiValue, notifyIdNapiValue);
+
+    std::string contentTypeName = "contentType";
+    napi_value contentTypeValueNapiValue = nullptr;
+    napi_value contentTypeNameNapiValue = nullptr;
+    napi_create_string_utf8(env_, contentTypeName.c_str(), contentTypeName.length(), &contentTypeNameNapiValue);
+    napi_create_int32(env_, contentType, &contentTypeValueNapiValue);
+    napi_set_property(env_, jsResult, contentTypeNameNapiValue, contentTypeValueNapiValue);
+
+    napi_value funcResult;
+    napi_value argv[] = { jsResult };
+
+    napi_value resultOut = nullptr;
+    napi_call_function(env_, value, value, ARGC_ONE, &argv[0], &resultOut);
+    funcResult = handleEscape.Escape(resultOut);
 
     return ConvertFunctionResult(funcResult);
 }
@@ -116,39 +140,61 @@ void JSPushCallBack::ConvertJsonStringToValue(
     }
 }
 
-bool JSPushCallBack::ConvertFunctionResult(NativeValue *funcResult)
+bool JSPushCallBack::ConvertFunctionResult(napi_value funcResult)
 {
-    if (funcResult == nullptr || funcResult->TypeOf() != NativeValueType::NATIVE_OBJECT) {
-        ANS_LOGE("funcResult TypeOf error.");
+    if (funcResult == nullptr) {
+        ANS_LOGE("The funcResult is error.");
         return false;
     }
-
-    NativeObject *obj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(funcResult);
-    if (obj == nullptr) {
-        ANS_LOGE("obj is nullptr.");
+    napi_valuetype valueType = napi_undefined;
+    NAPI_CALL_BASE(env_, napi_typeof(env_, funcResult, &valueType), false);
+    if (valueType != napi_object) {
+        ANS_LOGE("The funcResult is not napi_object.");
         return false;
     }
-
-    auto codeJsvalue = obj->GetProperty("code");
-    if (codeJsvalue == nullptr || codeJsvalue->TypeOf() != NativeValueType::NATIVE_NUMBER) {
+    bool hasProperty = false;
+    NAPI_CALL_BASE(env_, napi_has_named_property(env_, funcResult, "code", &hasProperty), false);
+    if (!hasProperty) {
         ANS_LOGE("GetProperty code failed.");
         return false;
     }
 
+    napi_value codeValue = nullptr;
+    napi_valuetype codeType = napi_undefined;
+    napi_get_named_property(env_, funcResult, "code", &codeValue);
+    NAPI_CALL_BASE(env_, napi_typeof(env_, codeValue, &codeType), false);
+
+    if (codeType != napi_number) {
+        ANS_LOGE("GetProperty code failed. Number expected.");
+        return false;
+    }
     int32_t code = -1;
-    if (!AbilityRuntime::ConvertFromJsValue(engine_, codeJsvalue, code)) {
+    if (!AbilityRuntime::ConvertFromJsValue(env_, codeValue, code)) {
         ANS_LOGE("Parse code failed.");
         return false;
     }
 
-    auto messageJsvalue = obj->GetProperty("message");
-    if (messageJsvalue == nullptr || messageJsvalue->TypeOf() != NativeValueType::NATIVE_STRING) {
-        ANS_LOGE("GetProperty message failed.");
+    bool hasMessageProperty = false;
+    NAPI_CALL_BASE(env_, napi_has_named_property(env_, funcResult, "message", &hasMessageProperty), false);
+    if (!hasMessageProperty) {
+        ANS_LOGE("Property message expected.");
+        return false;
+    }
+
+    napi_value messageValue = nullptr;
+    napi_valuetype messageType = napi_undefined;
+    napi_get_named_property(env_, funcResult, "message", &messageValue);
+    NAPI_CALL_BASE(env_, napi_typeof(env_, messageValue, &messageType), false);
+
+    if (messageType != napi_string) {
+        ANS_LOGE("GetProperty message failed. String expected.");
+        return false;
     }
 
     std::string message;
-    if (!AbilityRuntime::ConvertFromJsValue(engine_, messageJsvalue, message)) {
+    if (!AbilityRuntime::ConvertFromJsValue(env_, messageValue, message)) {
         ANS_LOGE("Parse message failed.");
+        return false;
     }
 
     ANS_LOGI("code : %{public}d ,message : %{public}s", code, message.c_str());

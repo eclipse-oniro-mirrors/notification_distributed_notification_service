@@ -30,100 +30,132 @@ constexpr int32_t INDEX_ONE = 1;
 } // namespace
 using namespace OHOS::AbilityRuntime;
 
-void NapiPush::Finalizer(NativeEngine *engine, void *data, void *hint)
+void NapiPush::Finalizer(napi_env env, void *data, void *hint)
 {
     ANS_LOGD("called");
     delete static_cast<NapiPush *>(data);
 }
 
-NativeValue *NapiPush::RegisterPushCallback(NativeEngine *engine, NativeCallbackInfo *info)
+napi_value NapiPush::RegisterPushCallback(napi_env env, napi_callback_info info)
 {
-    NapiPush *me = CheckParamsAndGetThis<NapiPush>(engine, info);
-    return (me != nullptr) ? me->OnRegisterPushCallback(*engine, *info) : nullptr;
+    NapiPush *me = CheckParamsAndGetThis<NapiPush>(env, info);
+    return (me != nullptr) ? me->OnRegisterPushCallback(env, info) : nullptr;
 }
 
-NativeValue *NapiPush::UnregisterPushCallback(NativeEngine *engine, NativeCallbackInfo *info)
+napi_value NapiPush::UnregisterPushCallback(napi_env env, napi_callback_info info)
 {
-    NapiPush *me = CheckParamsAndGetThis<NapiPush>(engine, info);
-    return (me != nullptr) ? me->OnUnregisterPushCallback(*engine, *info) : nullptr;
+    NapiPush *me = CheckParamsAndGetThis<NapiPush>(env, info);
+    return (me != nullptr) ? me->OnUnregisterPushCallback(env, info) : nullptr;
 }
 
-NativeValue *NapiPush::OnRegisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info)
+napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_info info)
 {
     ANS_LOGD("called");
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
 
-    if (info.argc < ARGC_TWO) {
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < ARGC_TWO) {
         ANS_LOGE("The param is invalid.");
-        ThrowTooFewParametersError(engine);
-        return engine.CreateUndefined();
+        ThrowTooFewParametersError(env);
+        return undefined;
     }
 
-    std::string type;
-    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
+    napi_valuetype valueType = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[INDEX_ZERO], &valueType));
+    if (valueType != napi_string) {
         ANS_LOGE("Parse type failed");
-        ThrowError(engine, ERROR_PARAM_INVALID);
-        return engine.CreateUndefined();
+        ThrowError(env, ERROR_PARAM_INVALID);
+        return undefined;
+    }
+    char str[STR_MAX_SIZE] = {0};
+    size_t strLen = 0;
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[INDEX_ZERO], str, STR_MAX_SIZE - 1, &strLen));
+    std::string type = str;
+    if (type != "checkNotification") {
+        ANS_LOGE("The type is not checkNotification");
+        ThrowError(env, ERROR_PARAM_INVALID);
+        return undefined;
     }
 
     if (!CheckCallerIsSystemApp()) {
-        ThrowError(engine, ERROR_NOT_SYSTEM_APP);
-        return engine.CreateUndefined();
+        ThrowError(env, ERROR_NOT_SYSTEM_APP);
+        return undefined;
     }
 
     if (jsPushCallBack_ == nullptr) {
-        jsPushCallBack_ = new (std::nothrow) OHOS::Notification::JSPushCallBack(engine);
+        jsPushCallBack_ = new (std::nothrow) OHOS::Notification::JSPushCallBack(env);
         if (jsPushCallBack_ == nullptr) {
             ANS_LOGE("new JSPushCallBack failed");
-            ThrowError(engine, ERROR_INTERNAL_ERROR);
-            return engine.CreateUndefined();
+            ThrowError(env, ERROR_INTERNAL_ERROR);
+            return undefined;
         }
     }
 
-    jsPushCallBack_->SetJsPushCallBackObject(info.argv[INDEX_ONE]);
+    jsPushCallBack_->SetJsPushCallBackObject(argv[INDEX_ONE]);
     NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject());
-    return engine.CreateUndefined();
+    return undefined;
 }
 
-NativeValue *NapiPush::OnUnregisterPushCallback(NativeEngine &engine, const NativeCallbackInfo &info)
+napi_value NapiPush::OnUnregisterPushCallback(napi_env env, const napi_callback_info info)
 {
     ANS_LOGD("called");
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
 
-    if (info.argc < ARGC_ONE) {
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < ARGC_ONE) {
         ANS_LOGE("The param is invalid.");
-        ThrowTooFewParametersError(engine);
-        return engine.CreateUndefined();
+        ThrowTooFewParametersError(env);
+        return undefined;
     }
 
-    std::string type;
-    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != "checkNotification") {
+    napi_valuetype valueType = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[INDEX_ZERO], &valueType));
+    if (valueType != napi_string) {
         ANS_LOGE("Failed to parse type.");
-        ThrowError(engine, ERROR_PARAM_INVALID);
-        return engine.CreateUndefined();
+        ThrowError(env, ERROR_PARAM_INVALID);
+        return undefined;
+    }
+    char str[STR_MAX_SIZE] = {0};
+    size_t strLen = 0;
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[INDEX_ZERO], str, STR_MAX_SIZE - 1, &strLen));
+    std::string type = str;
+    if (type != "checkNotification") {
+        ANS_LOGE("The type is not checkNotification");
+        ThrowError(env, ERROR_PARAM_INVALID);
+        return undefined;
     }
 
     if (!CheckCallerIsSystemApp()) {
-        ThrowError(engine, ERROR_NOT_SYSTEM_APP);
-        return engine.CreateUndefined();
+        ThrowError(env, ERROR_NOT_SYSTEM_APP);
+        return undefined;
     }
 
     if (jsPushCallBack_ == nullptr) {
-        ThrowError(engine, ERROR_INTERNAL_ERROR);
+        ThrowError(env, ERROR_INTERNAL_ERROR);
         ANS_LOGE("Never registered.");
-        return engine.CreateUndefined();
+        return undefined;
     }
 
-    if (info.argc == ARGC_TWO) {
-        if (!jsPushCallBack_->IsEqualPushCallBackObject(info.argv[INDEX_ONE])) {
+    if (argc == ARGC_TWO) {
+        if (!jsPushCallBack_->IsEqualPushCallBackObject(argv[INDEX_ONE])) {
             ANS_LOGE("inconsistent with existing callback");
-            ThrowError(engine, ERROR_PARAM_INVALID);
-            return engine.CreateUndefined();
+            ThrowError(env, ERROR_PARAM_INVALID);
+            return undefined;
         }
     }
 
     NotificationHelper::UnregisterPushCallback();
     delete jsPushCallBack_;
     jsPushCallBack_ = nullptr;
-    return engine.CreateUndefined();
+    return undefined;
 }
 
 bool NapiPush::CheckCallerIsSystemApp()

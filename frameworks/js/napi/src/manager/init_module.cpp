@@ -37,26 +37,20 @@ using namespace OHOS::Notification;
 
 EXTERN_C_START
 
-static NativeValue *NapiPushInit(NativeEngine *engine, NativeValue *exports)
+static napi_value NapiPushInit(napi_env env, napi_value exports)
 {
     ANS_LOGD("called");
-    if (engine == nullptr || exports == nullptr) {
+    if (env == nullptr || exports == nullptr) {
         ANS_LOGE("Invalid input parameters");
         return nullptr;
     }
 
-    NativeObject *object = OHOS::AbilityRuntime::ConvertNativeValueTo<NativeObject>(exports);
-    if (object == nullptr) {
-        ANS_LOGE("object is nullptr");
-        return nullptr;
-    }
-
     std::unique_ptr<NapiPush> napiPush = std::make_unique<NapiPush>();
-    object->SetNativePointer(napiPush.release(), NapiPush::Finalizer, nullptr);
+    napi_wrap(env, exports, napiPush.release(), NapiPush::Finalizer, nullptr, nullptr);
 
     const char *moduleName = "NapiPush";
-    OHOS::AbilityRuntime::BindNativeFunction(*engine, *object, "on", moduleName, NapiPush::RegisterPushCallback);
-    OHOS::AbilityRuntime::BindNativeFunction(*engine, *object, "off", moduleName, NapiPush::UnregisterPushCallback);
+    OHOS::AbilityRuntime::BindNativeFunction(env, exports, "on", moduleName, NapiPush::RegisterPushCallback);
+    OHOS::AbilityRuntime::BindNativeFunction(env, exports, "off", moduleName, NapiPush::UnregisterPushCallback);
 
     return exports;
 }
@@ -111,8 +105,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
 
-    return reinterpret_cast<napi_value>(
-        NapiPushInit(reinterpret_cast<NativeEngine *>(env), reinterpret_cast<NativeValue *>(exports)));
+    return NapiPushInit(env, exports);
 }
 
 /*
