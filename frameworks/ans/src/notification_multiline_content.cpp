@@ -63,7 +63,9 @@ std::string NotificationMultiLineContent::Dump()
     std::string lines {};
     std::for_each(
         allLines_.begin(), allLines_.end(), [&lines](const std::string &line) { lines += " " + line + ","; });
-    lines.pop_back();
+    if (!lines.empty()) {
+        lines.pop_back();
+    }
 
     return "NotificationMultiLineContent{ " + NotificationBasicContent::Dump() +
             ", briefText = " + briefText_ +

@@ -27,6 +27,16 @@ config("native_module_config") {
 }
 
 ohos_shared_library("reminderagent") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  stack_protector_ret = true
+
   include_dirs = [
     "../../include",
     "//third_party/node/src",
@@ -68,6 +78,16 @@ ohos_shared_library("reminderagent") {
 
 # used for error code
 ohos_shared_library("reminderagentmanager") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  stack_protector_ret = true
+
   include_dirs = [
     "../../include",
     "../../include/manager",

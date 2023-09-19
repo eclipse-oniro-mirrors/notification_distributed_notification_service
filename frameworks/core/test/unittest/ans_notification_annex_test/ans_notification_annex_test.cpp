@@ -25,6 +25,9 @@
 #include "ans_inner_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
+#include "reminder_request_alarm.h"
+#include "reminder_request_calendar.h"
+#include "reminder_request_timer.h"
 #include "singleton.h"
 #include "notification_subscriber.h"
 
@@ -265,7 +268,8 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishContinuousTaskNotification_0200, F
  */
 HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0100, Function | MediumTest | Level1)
 {
-    ReminderRequest reminder = ReminderRequest(ReminderRequest::ReminderType::TIMER);
+    uint64_t countDownTimeInSeconds = 0;
+    ReminderRequestTimer reminder = ReminderRequestTimer(countDownTimeInSeconds);
     ErrCode ret = ans_->PublishReminder(reminder);
     int errorcode = 201;
     EXPECT_EQ(ret, errorcode);
@@ -279,7 +283,8 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0100, Function | MediumTe
  */
 HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0200, Function | MediumTest | Level1)
 {
-    ReminderRequest reminder = ReminderRequest(ReminderRequest::ReminderType::ALARM);
+    std::vector<uint8_t> daysOfWeek;
+    ReminderRequestAlarm reminder = ReminderRequestAlarm(0, 0, daysOfWeek);
     ErrCode ret = ans_->PublishReminder(reminder);
     int errorcode = 201;
     EXPECT_EQ(ret, errorcode);
@@ -293,7 +298,10 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0200, Function | MediumTe
  */
 HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0300, Function | MediumTest | Level1)
 {
-    ReminderRequest reminder = ReminderRequest(ReminderRequest::ReminderType::CALENDAR);
+    tm dateTime {};
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    ReminderRequestCalendar reminder = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays);
     ErrCode ret = ans_->PublishReminder(reminder);
     int errorcode = 201;
     EXPECT_EQ(ret, errorcode);

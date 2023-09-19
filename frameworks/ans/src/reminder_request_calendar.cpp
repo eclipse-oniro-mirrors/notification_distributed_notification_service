@@ -266,11 +266,17 @@ bool ReminderRequestCalendar::IsRepeatReminder() const
 
 bool ReminderRequestCalendar::IsRepeatMonth(uint8_t month) const
 {
+    if (month > MAX_MONTHS_OF_YEAR) {
+        return false;
+    }
     return (repeatMonth_ & (1 << (month - 1))) > 0;
 }
 
 bool ReminderRequestCalendar::IsRepeatDay(uint8_t day) const
 {
+    if (day > MAX_DAYS_OF_MONTH) {
+        return false;
+    }
     return (repeatDay_ & (1 << (day - 1))) > 0;
 }
 

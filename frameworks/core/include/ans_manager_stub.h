@@ -762,10 +762,49 @@ private:
     ErrCode HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
-    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result);
+    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
+    {
+        if (!reply.WriteInt32(result)) {
+            ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+            return false;
+        }
+
+        if (!reply.WriteInt32(parcelableVector.size())) {
+            ANS_LOGE("write ParcelableVector size failed");
+            return false;
+        }
+
+        for (auto &parcelable : parcelableVector) {
+            if (!reply.WriteStrongParcelable(parcelable)) {
+                ANS_LOGE("write ParcelableVector failed");
+                return false;
+            }
+        }
+        return true;
+    }
 
     template<typename T>
-    bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data);
+    bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data)
+    {
+        int32_t infoSize = 0;
+        if (!data.ReadInt32(infoSize)) {
+            ANS_LOGE("Failed to read Parcelable size.");
+            return false;
+        }
+
+        parcelableInfos.clear();
+        infoSize = (infoSize < MAX_PARCELABLE_VECTOR_NUM) ? infoSize : MAX_PARCELABLE_VECTOR_NUM;
+        for (int32_t index = 0; index < infoSize; index++) {
+            sptr<T> info = data.ReadStrongParcelable<T>();
+            if (info == nullptr) {
+                ANS_LOGE("Failed to read Parcelable infos.");
+                return false;
+            }
+            parcelableInfos.emplace_back(info);
+        }
+
+        return true;
+    }
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -226,8 +226,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_009, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     sptr<NotificationBundleOption> option = new NotificationBundleOption();
     manager->UpdateAndSaveReminderLocked(reminder, option);
-    AdvancedNotificationService service;
-    manager->SetService(&service);
+    sptr<AdvancedNotificationService> service(new AdvancedNotificationService);
+    manager->SetService(service);
     manager->ShouldAlert(nullptr);
     manager->currentUserId_ = 0;
     option->SetUid(1);
@@ -262,9 +262,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_010, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
 {
-    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    sptr<ReminderRequest> reminder(new ReminderRequestTimer(10));
     reminder->SetReminderId(0);
-    sptr<NotificationBundleOption> option = new NotificationBundleOption();
+    sptr<NotificationBundleOption> option(new NotificationBundleOption());
     manager->notificationBundleOptionMap_[10] = option;
     manager->ShowReminder(reminder, true, true, true, true);
     reminder->SetReminderId(10);
