@@ -36,7 +36,7 @@ DistributedDatabase::DistributedDatabase(
 DistributedDatabase::~DistributedDatabase()
 {}
 
-void DistributedDatabase::GetKvDataManager(void)
+void DistributedDatabase::GetKvDataManager()
 {
     initCallback_ = std::make_shared<DeviceInitCallBack>();
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().InitDeviceManager(APP_ID + STORE_ID, initCallback_);
@@ -59,7 +59,7 @@ void DistributedDatabase::DeviceInitCallBack::OnRemoteDied()
     ANS_LOGW("DeviceInitCallBack OnRemoteDied");
 }
 
-bool DistributedDatabase::CheckKvDataManager(void)
+bool DistributedDatabase::CheckKvDataManager()
 {
     if (kvDataManager_ == nullptr) {
         GetKvDataManager();
@@ -71,7 +71,7 @@ bool DistributedDatabase::CheckKvDataManager(void)
     return true;
 }
 
-void DistributedDatabase::GetKvStore(void)
+void DistributedDatabase::GetKvStore()
 {
     if (!CheckKvDataManager()) {
         return;
@@ -107,7 +107,7 @@ void DistributedDatabase::GetKvStore(void)
     KvStoreFlowControlClear();
 }
 
-bool DistributedDatabase::CheckKvStore(void)
+bool DistributedDatabase::CheckKvStore()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (kvStore_ == nullptr) {

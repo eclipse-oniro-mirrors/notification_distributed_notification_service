@@ -37,7 +37,6 @@ inline bool GetBoolFromString(const std::string &str)
 DistributedPreferences::DistributedPreferences()
 {
     database_ = std::make_unique<DistributedPreferencesDatabase>();
-
     preferencesInfo_ = std::make_unique<DistributedPreferencesInfo>();
     InitDistributedAllInfo();
 }
@@ -45,7 +44,7 @@ DistributedPreferences::DistributedPreferences()
 DistributedPreferences::~DistributedPreferences()
 {}
 
-bool DistributedPreferences::InitDistributedAllInfo(void)
+bool DistributedPreferences::InitDistributedAllInfo()
 {
     std::vector<DistributedPreferencesDatabase::Entry> entries;
     if (!database_->GetEntriesFromDistributedDB(DISTRIBUTED_LABEL, entries)) {
@@ -140,7 +139,7 @@ bool DistributedPreferences::ResolveSyncWithoutAppEnable(const std::string &key,
 
 ErrCode DistributedPreferences::SetDistributedEnable(bool isEnable)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGI("start");
     std::string key;
     GetDistributedMainKey(key);
 
@@ -156,7 +155,7 @@ ErrCode DistributedPreferences::SetDistributedEnable(bool isEnable)
 
 ErrCode DistributedPreferences::GetDistributedEnable(bool &isEnable)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGI("start");
 
     isEnable = preferencesInfo_->GetDistributedEnable();
 
@@ -166,7 +165,7 @@ ErrCode DistributedPreferences::GetDistributedEnable(bool &isEnable)
 ErrCode DistributedPreferences::SetDistributedBundleEnable(
     const sptr<NotificationBundleOption> &bundleOption, bool isEnable)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGI("start");
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption is nullptr.");
         return ERR_ANS_INVALID_PARAM;
@@ -188,10 +187,14 @@ ErrCode DistributedPreferences::SetDistributedBundleEnable(
 ErrCode DistributedPreferences::GetDistributedBundleEnable(
     const sptr<NotificationBundleOption> &bundleOption, bool &isEnable)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption is nullptr.");
         return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (preferencesInfo_ == nullptr) {
+        ANS_LOGE("preferencesInfo is nullptr");
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
 
     isEnable = preferencesInfo_->GetDistributedBundleEnable(bundleOption->GetBundleName(), bundleOption->GetUid());
@@ -201,10 +204,14 @@ ErrCode DistributedPreferences::GetDistributedBundleEnable(
 
 ErrCode DistributedPreferences::DeleteDistributedBundleInfo(const sptr<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption is nullptr.");
         return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (database_ == nullptr || preferencesInfo_ == nullptr) {
+        ANS_LOGE("database or preferencesInfo is nullptr");
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
 
     std::string key;
@@ -222,6 +229,11 @@ ErrCode DistributedPreferences::DeleteDistributedBundleInfo(const sptr<Notificat
 
 ErrCode DistributedPreferences::ClearDataInRestoreFactorySettings()
 {
+    if (database_ == nullptr) {
+        ANS_LOGE("database is nullptr");
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
+
     if (!database_->ClearDatabase()) {
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
@@ -240,22 +252,24 @@ void DistributedPreferences::GetEnabledWithoutApp(const int32_t userId, std::str
 
 ErrCode DistributedPreferences::SetSyncEnabledWithoutApp(const int32_t userId, const bool enabled)
 {
+    if (database_ == nullptr || preferencesInfo_ == nullptr) {
+        ANS_LOGE("database or preferencesInfo is nullptr");
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
     std::string key;
     GetEnabledWithoutApp(userId, key);
-
     if (!database_->PutToDistributedDB(key, std::to_string(enabled))) {
         ANS_LOGE("put to distributed DB failed. key:%{public}s", key.c_str());
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
-
     preferencesInfo_->SetSyncEnabledWithoutApp(userId, enabled);
-
     return ERR_OK;
 }
 
 ErrCode DistributedPreferences::GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled)
 {
-    return preferencesInfo_->GetSyncEnabledWithoutApp(userId, enabled);
+    return preferencesInfo_ == nullptr ?
+        ERR_ANS_DISTRIBUTED_OPERATION_FAILED : preferencesInfo_->GetSyncEnabledWithoutApp(userId, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

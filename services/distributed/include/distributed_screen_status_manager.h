@@ -51,10 +51,10 @@ private:
     void OnDeviceConnected(const std::string &deviceId);
     void OnDeviceDisconnected(const std::string &deviceId);
 
-    void GetKvDataManager(void);
-    bool CheckKvDataManager(void);
-    void GetKvStore(void);
-    bool CheckKvStore(void);
+    void GetKvDataManager();
+    bool CheckKvDataManager();
+    void GetKvStore();
+    bool CheckKvStore();
 
     std::string GenerateDistributedKey(const std::string &deviceId);
 
@@ -69,9 +69,10 @@ private:
 
     bool localScreenOn_ = false;
 
-class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
-    void OnRemoteDied() override;
-};
+    class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
+    public:
+        void OnRemoteDied() override;
+    };
 
     DECLARE_DELAYED_SINGLETON(DistributedScreenStatusManager);
     DISALLOW_COPY_AND_MOVE(DistributedScreenStatusManager);

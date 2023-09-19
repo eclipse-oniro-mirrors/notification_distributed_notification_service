@@ -41,12 +41,12 @@ DistributedFlowControl::DistributedFlowControl(
       kvStoreMinuteMaxinum_(kvStoreMinuteMaxinum)
 {}
 
-bool DistributedFlowControl::KvStoreFlowControl(void)
+bool DistributedFlowControl::KvStoreFlowControl()
 {
     return g_mockKvStoreFlowControlRet;
 }
 
-bool DistributedFlowControl::KvManagerFlowControl(void)
+bool DistributedFlowControl::KvManagerFlowControl()
 {
     return g_mockKvManagerFlowControlRet;
 }

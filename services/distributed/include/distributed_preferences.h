@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,17 +91,15 @@ public:
     ErrCode GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled);
 
 private:
-    bool InitDistributedAllInfo(void);
+    bool InitDistributedAllInfo();
     void GetDistributedMainKey(std::string &key);
     void GetDistributedBundleKey(const sptr<NotificationBundleOption> &bundleOption, std::string &key);
     bool ResolveDistributedKey(const DistributedKv::Entry &entry);
     void GetEnabledWithoutApp(const int32_t userId, std::string &key);
-
     bool ResolveDistributedEnable(const std::string &value);
     bool ResolveDistributedBundleEnable(const std::string &key, const int32_t startPos, const std::string &value);
     bool ResolveSyncWithoutAppEnable(const std::string &key, const int32_t startPos, const std::string &value);
 
-private:
     std::unique_ptr<DistributedPreferencesInfo> preferencesInfo_ = nullptr;
     std::unique_ptr<DistributedPreferencesDatabase> database_ = nullptr;
 

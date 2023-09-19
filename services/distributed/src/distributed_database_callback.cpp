@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,9 +27,9 @@ DistributedDatabaseCallback::~DistributedDatabaseCallback()
 
 void DistributedDatabaseCallback::OnChange(const DistributedKv::ChangeNotification &changeNotification)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGD("start");
 
-    if (callback_.OnInsert) {
+    if (callback_.OnInsert != nullptr) {
         const std::vector<DistributedKv::Entry> &entryList = changeNotification.GetInsertEntries();
         ANS_LOGI("GetInsertEntries count %{public}zu", entryList.size());
         for (auto entry : entryList) {
@@ -37,7 +37,7 @@ void DistributedDatabaseCallback::OnChange(const DistributedKv::ChangeNotificati
         }
     }
 
-    if (callback_.OnUpdate) {
+    if (callback_.OnUpdate != nullptr) {
         const std::vector<DistributedKv::Entry> &entryList = changeNotification.GetUpdateEntries();
         ANS_LOGI("GetUpdateEntries count %{public}zu", entryList.size());
         for (auto entry : entryList) {
@@ -45,7 +45,7 @@ void DistributedDatabaseCallback::OnChange(const DistributedKv::ChangeNotificati
         }
     }
 
-    if (callback_.OnDelete) {
+    if (callback_.OnDelete != nullptr) {
         const std::vector<DistributedKv::Entry> &entryList = changeNotification.GetDeleteEntries();
         ANS_LOGI("GetDeleteEntries count %{public}zu", entryList.size());
         for (auto entry : entryList) {
