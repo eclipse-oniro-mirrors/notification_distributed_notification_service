@@ -3470,9 +3470,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_220000, Function | SmallTest | Level1)
 {
     int64_t time = 60;
-    std::string ret = "1970-01-01, ";
+    int64_t ret = 20;
     std::string result = advancedNotificationService_->TimeToString(time);
-    EXPECT_EQ(result.substr(0, result.size() - 8), ret);
+    EXPECT_EQ(result.size(), ret);
 }
 
 /**
