@@ -15,11 +15,10 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/config/features.gni")
 import("//build/test.gni")
-module_output_path = "${component_name}/fuzztest"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("NotificationRequestFuzzTest") {
-  module_out_path = module_output_path
+  module_out_path = service_fuzz_test_output_path
   fuzz_config_file =
       "${component_path}/test/fuzztest/notificationrequest_fuzzer"
 
