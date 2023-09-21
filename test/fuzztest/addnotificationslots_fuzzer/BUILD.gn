@@ -18,7 +18,7 @@ import("//build/test.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("AddNotificationSlotsFuzzTest") {
-  module_out_path = service_fuzz_test_output_path
+  module_out_path = service_fuzz_test_path
   fuzz_config_file =
       "${component_path}/test/fuzztest/addnotificationslots_fuzzer"
 
