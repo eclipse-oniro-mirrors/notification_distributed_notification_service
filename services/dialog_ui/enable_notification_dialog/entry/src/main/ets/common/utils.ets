@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,19 @@
  * limitations under the License.
  */
 
-import AbilityStage from "@ohos.app.ability.AbilityStage";
+import Constants from './constant';
 
-export default class DialogAbilityStage extends AbilityStage {
-  onCreate() {
-    console.log('DialogAbilityStage onCreate');
+/**
+ * Omit display when application name is too long
+ * @param {String} Application name
+ */
+export function titleTrim(title: string): string {
+  let length = title.length;
+  if (length > Constants.MAXIMUM_HEADER_LENGTH) {
+    let str = '';
+    str = title.substring(0, Constants.MAXIMUM_HEADER_LENGTH) + '...';
+    return str;
+  } else {
+    return title;
   }
 }
