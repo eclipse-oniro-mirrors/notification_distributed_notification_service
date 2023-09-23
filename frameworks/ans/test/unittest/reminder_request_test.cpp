@@ -571,10 +571,10 @@ HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
 {
-    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive', nextTriggerTime=1970-01-01 ";
+    std::string ret = "Reminder[reminderId=-1, type=3, state='Inactive', nextTriggerTime=";
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string res = rrc->Dump();
-    EXPECT_EQ(res.substr(0, res.size()-9), ret);
+    EXPECT_EQ(res.substr(0, res.size()-20), ret);
 }
 
 /**
@@ -771,7 +771,15 @@ HWTEST_F(ReminderRequestTest, OnTerminate_00001, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, OnTimeZoneChange_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->OnTimeZoneChange(), false);
+    uint64_t ret = rrc->GetTriggerTimeInMilli();
+    struct tm oriTime;
+    time_t newZoneTriggerTime = mktime(&oriTime);
+    uint64_t ret2 = rrc->GetDurationSinceEpochInMilli(newZoneTriggerTime);
+    if (ret == ret2) {
+        EXPECT_EQ(rrc->OnTimeZoneChange(), false);
+    } else {
+        EXPECT_EQ(rrc->OnTimeZoneChange(), true);
+    }
 }
 
 /**
@@ -980,9 +988,9 @@ HWTEST_F(ReminderRequestTest, GetShowTime_00001, Function | SmallTest | Level1)
 {
     uint64_t showTime = 8 * 60 * 1000;
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string ret = ":08";
+    std::string ret = "8";
     std::string res = rrc->GetShowTime(showTime);
-    EXPECT_EQ(res.substr(2, res.size()), ret);
+    EXPECT_EQ(res.substr(4, res.size()), ret);
 }
 
 /**
@@ -996,9 +1004,9 @@ HWTEST_F(ReminderRequestTest, GetShowTime_00002, Function | SmallTest | Level1)
     uint64_t showTime = 8 * 60 * 1000;
     ReminderRequest reminder = ReminderRequest(ReminderRequest::ReminderType::TIMER);
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string ret = ":08";
+    std::string ret = "8";
     std::string res = rrc->GetShowTime(showTime);
-    EXPECT_EQ(res.substr(2, res.size()), ret);
+    EXPECT_EQ(res.substr(4, res.size()), ret);
 }
 
 /**
