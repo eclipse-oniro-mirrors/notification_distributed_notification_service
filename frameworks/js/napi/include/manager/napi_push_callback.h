@@ -25,7 +25,6 @@
 #include "push_callback_stub.h"
 
 class NativeReference;
-class NativeValue;
 
 namespace OHOS {
 namespace Notification {
