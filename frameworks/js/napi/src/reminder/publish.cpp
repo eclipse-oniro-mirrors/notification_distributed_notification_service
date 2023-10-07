@@ -558,6 +558,9 @@ void ParseWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PKG, info);
     napi_create_string_utf8(env, (reminder.GetWantAgentInfo()->abilityName).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_ABILITY, info);
+
+    napi_create_string_utf8(env, (reminder.GetCustomButtonUri()).c_str(), NAPI_AUTO_LENGTH, &info);
+    napi_set_named_property(env, wantAgentInfo, BUTTON_WANT_AGENT_URI, info);
 }
 
 void ParseMaxScreenWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &result)
