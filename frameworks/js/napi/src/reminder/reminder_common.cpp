@@ -145,6 +145,10 @@ void ReminderCommon::GenWantAgent(
             ReminderAgentNapi::WANT_AGENT_ABILITY, str, NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->abilityName = str;
         }
+        if (GetStringUtf8(env, wantAgent,
+            ReminderAgentNapi::BUTTON_WANT_AGENT_URI, str, NotificationNapi::STR_MAX_SIZE)) {
+            reminder->SetCustomButtonUri(str);
+        }
         reminder->SetWantAgentInfo(wantAgentInfo);
     }
 }

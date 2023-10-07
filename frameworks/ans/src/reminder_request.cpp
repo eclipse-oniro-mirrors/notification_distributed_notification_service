@@ -1495,6 +1495,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWan
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetElement(element);
+    want->SetUri(customButtonUri_);
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
