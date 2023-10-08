@@ -26,7 +26,7 @@ DistributedFlowControl::DistributedFlowControl(
       kvStoreMinuteMaxinum_(kvStoreMinuteMaxinum)
 {}
 
-bool DistributedFlowControl::KvManagerFlowControl(void)
+bool DistributedFlowControl::KvManagerFlowControl()
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     kvDataManagerTimestampList_.remove_if([&](const std::chrono::system_clock::time_point &value) -> bool {
@@ -54,7 +54,7 @@ bool DistributedFlowControl::KvManagerFlowControl(void)
     return true;
 }
 
-bool DistributedFlowControl::KvStoreFlowControl(void)
+bool DistributedFlowControl::KvStoreFlowControl()
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     kvStoreTimestampList_.remove_if([&](const std::chrono::system_clock::time_point &value) -> bool {
@@ -82,12 +82,12 @@ bool DistributedFlowControl::KvStoreFlowControl(void)
     return true;
 }
 
-void DistributedFlowControl::KvManagerFlowControlClear(void)
+void DistributedFlowControl::KvManagerFlowControlClear()
 {
     kvDataManagerTimestampList_.clear();
 }
 
-void DistributedFlowControl::KvStoreFlowControlClear(void)
+void DistributedFlowControl::KvStoreFlowControlClear()
 {
     kvStoreTimestampList_.clear();
 }

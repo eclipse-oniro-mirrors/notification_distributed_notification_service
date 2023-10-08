@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,15 +43,13 @@ public:
     /**
      * @brief The deconstructor.
      */
-    ~DistributedDatabaseCallback();
+    virtual ~DistributedDatabaseCallback();
 
 private:
     void OnChange(const DistributedKv::ChangeNotification &changeNotification) override;
 
-private:
     IDatabaseChange callback_;
 };
 }  // namespace Notification
 }  // namespace OHOS
-
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_DISTRIBUTED_INCLUDE_DATABASE_CALLBACK_H

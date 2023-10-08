@@ -30,7 +30,7 @@ void DistributedPreferencesInfo::SetDistributedEnable(bool enable)
     distributedEnable_ = enable;
 }
 
-bool DistributedPreferencesInfo::GetDistributedEnable(void)
+bool DistributedPreferencesInfo::GetDistributedEnable()
 {
     return distributedEnable_;
 }

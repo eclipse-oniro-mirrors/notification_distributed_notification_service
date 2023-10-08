@@ -57,23 +57,16 @@ DistributedNotificationManager::DistributedNotificationManager()
         .OnDisconnected = std::bind(&DistributedNotificationManager::OnDeviceDisconnected, this, std::placeholders::_1),
     };
     deviceCb_ = std::make_shared<DistributedDeviceCallback>(deviceCallback);
-
     database_ = std::make_shared<DistributedDatabase>(databaseCb_, deviceCb_);
-    if (database_ == nullptr) {
-        ANS_LOGE("database_ is nullptr.");
-        return;
-    }
 }
 
 DistributedNotificationManager::~DistributedNotificationManager()
 {
     ANS_LOGI("deconstructor");
-    ANS_LOGE("ffrt start!");
     if (distributedQueue_ != nullptr) {
         ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([&]() { callback_ = {}; }));
         distributedQueue_->wait(handler);
     }
-    ANS_LOGE("ffrt end!");
 }
 
 void DistributedNotificationManager::ResetFfrtQueue()
@@ -146,14 +139,12 @@ bool DistributedNotificationManager::CheckDeviceId(const std::string &deviceId, 
 void DistributedNotificationManager::OnDatabaseInsert(
     const std::string &deviceId, const std::string &key, const std::string &value)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    ANS_LOGE("ffrt start!");
+    ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is nullptr.");
         return;
     }
     distributedQueue_->submit(std::bind([=]() {
-        ANS_LOGE("ffrt enter!");
         if (!CheckDeviceId(deviceId, key)) {
             ANS_LOGD("device id is distinct. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
         }
@@ -173,20 +164,17 @@ void DistributedNotificationManager::OnDatabaseInsert(
 
         PublishCallback(resolveKey.deviceId, resolveKey.bundleName, request);
     }));
-    ANS_LOGE("ffrt end!");
 }
 
 void DistributedNotificationManager::OnDatabaseUpdate(
     const std::string &deviceId, const std::string &key, const std::string &value)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    ANS_LOGE("ffrt start!");
+    ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return;
     }
     ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([=]() {
-        ANS_LOGE("ffrt enter!");
         if (!CheckDeviceId(deviceId, key)) {
             ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
         }
@@ -206,20 +194,17 @@ void DistributedNotificationManager::OnDatabaseUpdate(
 
         UpdateCallback(resolveKey.deviceId, resolveKey.bundleName, request);
     }));
-    ANS_LOGE("ffrt end!");
 }
 
 void DistributedNotificationManager::OnDatabaseDelete(
     const std::string &deviceId, const std::string &key, const std::string &value)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    ANS_LOGE("ffrt start!");
+    ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return;
     }
     distributedQueue_->submit(std::bind([=]() {
-        ANS_LOGE("ffrt enter!");
         if (!CheckDeviceId(deviceId, key)) {
             ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
         }
@@ -232,19 +217,16 @@ void DistributedNotificationManager::OnDatabaseDelete(
 
         DeleteCallback(resolveKey.deviceId, resolveKey.bundleName, resolveKey.label, resolveKey.id);
     }));
-    ANS_LOGE("ffrt end!");
 }
 
 void DistributedNotificationManager::OnDeviceConnected(const std::string &deviceId)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    ANS_LOGE("ffrt start!");
+    ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return;
     }
     distributedQueue_->submit(std::bind([=]() {
-        ANS_LOGE("ffrt enter!");
         if (database_ == nullptr) {
             ANS_LOGE("OnDeviceConnected failed: database is null");
             return;
@@ -253,20 +235,16 @@ void DistributedNotificationManager::OnDeviceConnected(const std::string &device
             ANS_LOGE("OnDeviceConnected failed.");
         }
     }));
-    ANS_LOGE("ffrt end!");
 }
 
 void DistributedNotificationManager::OnDeviceDisconnected(const std::string &deviceId)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    ANS_LOGE("ffrt start!");
+    ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return;
     }
     distributedQueue_->submit(std::bind([=]() {
-        ANS_LOGE("ffrt enter!");
         std::string prefixKey = deviceId + DELIMITER;
         std::vector<DistributedDatabase::Entry> entries;
         if (database_ == nullptr) {
@@ -295,18 +273,16 @@ void DistributedNotificationManager::OnDeviceDisconnected(const std::string &dev
             database_->RecreateDistributedDB();
         }
     }));
-    ANS_LOGE("ffrt end!");
-    return;
 }
 
 bool DistributedNotificationManager::PublishCallback(
     const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request)
 {
-    ANS_LOGI("callback_.OnPublish start.");
+    ANS_LOGI("start");
     if (callback_.OnPublish) {
         callback_.OnPublish(deviceId, bundleName, request);
     }
-    ANS_LOGI("callback_.OnPublish end.");
+    ANS_LOGI("end");
 
     return true;
 }
@@ -314,11 +290,11 @@ bool DistributedNotificationManager::PublishCallback(
 bool DistributedNotificationManager::UpdateCallback(
     const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request)
 {
-    ANS_LOGI("callback_.OnUpdate start.");
+    ANS_LOGI("start");
     if (callback_.OnUpdate) {
         callback_.OnUpdate(deviceId, bundleName, request);
     }
-    ANS_LOGI("callback_.OnUpdate end.");
+    ANS_LOGI("end");
 
     return true;
 }
@@ -326,11 +302,11 @@ bool DistributedNotificationManager::UpdateCallback(
 bool DistributedNotificationManager::DeleteCallback(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
-    ANS_LOGI("callback_.OnDelete start.");
+    ANS_LOGI("start");
     if (callback_.OnDelete) {
         callback_.OnDelete(deviceId, bundleName, label, id);
     }
-    ANS_LOGI("callback_.OnDelete end.");
+    ANS_LOGI("end");
 
     return true;
 }
@@ -339,7 +315,7 @@ ErrCode DistributedNotificationManager::Publish(
     const std::string &bundleName, const std::string &label, int32_t id, const sptr<NotificationRequest> &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGD("start");
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
         ANS_LOGE("Failed to generate distributed key.");
@@ -367,7 +343,7 @@ ErrCode DistributedNotificationManager::Publish(
 ErrCode DistributedNotificationManager::Update(
     const std::string &bundleName, const std::string &label, int32_t id, const sptr<NotificationRequest> &request)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGD("start");
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
         ANS_LOGE("Generate distributed key failed.");
@@ -394,7 +370,7 @@ ErrCode DistributedNotificationManager::Update(
 ErrCode DistributedNotificationManager::Delete(const std::string &bundleName, const std::string &label, int32_t id)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGD("start");
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
         ANS_LOGE("Generate distributed key failed.");
@@ -416,7 +392,7 @@ ErrCode DistributedNotificationManager::DeleteRemoteNotification(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGD("start");
 
     std::string key;
     GenerateDistributedKey(deviceId, bundleName, label, id, key);
@@ -434,36 +410,32 @@ ErrCode DistributedNotificationManager::DeleteRemoteNotification(
 
 ErrCode DistributedNotificationManager::RegisterCallback(const IDistributedCallback &callback)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
-    ANS_LOGE("ffrt start!");
+    ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([&]() { callback_ = callback; }));
     distributedQueue_->wait(handler);
-    ANS_LOGE("ffrt end!");
     return ERR_OK;
 }
 
-ErrCode DistributedNotificationManager::UngegisterCallback(void)
+ErrCode DistributedNotificationManager::UngegisterCallback()
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
-    ANS_LOGE("ffrt start!");
+    ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([&]() { callback_ = {}; }));
     distributedQueue_->wait(handler);
-    ANS_LOGE("ffrt end!");
     return ERR_OK;
 }
 
 ErrCode DistributedNotificationManager::GetCurrentDistributedNotification(
     std::vector<sptr<NotificationRequest>> &requestList)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
+    ANS_LOGD("start");
     std::string prefixKey = "";
     std::vector<DistributedDatabase::Entry> entries;
     if (database_ == nullptr) {
@@ -497,8 +469,7 @@ ErrCode DistributedNotificationManager::GetCurrentDistributedNotification(
 
 ErrCode DistributedNotificationManager::GetLocalDeviceInfo(DistributedDatabase::DeviceInfo &deviceInfo)
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
-
+    ANS_LOGD("start");
     if (database_ == nullptr) {
         ANS_LOGE("database_ is invalid.");
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
@@ -512,13 +483,8 @@ ErrCode DistributedNotificationManager::GetLocalDeviceInfo(DistributedDatabase::
 
 ErrCode DistributedNotificationManager::OnDistributedKvStoreDeathRecipient()
 {
-    ANS_LOGI("%{public}s start", __FUNCTION__);
-
+    ANS_LOGD("start");
     database_ = std::make_shared<DistributedDatabase>(databaseCb_, deviceCb_);
-    if (database_ == nullptr) {
-        ANS_LOGE("database_ is nullptr.");
-        return ERR_ANS_NO_MEMORY;
-    }
     if (!database_->RecreateDistributedDB()) {
         ANS_LOGE("RecreateDistributedDB failed.");
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;

@@ -41,24 +41,24 @@ public:
      *
      * @return True on passed, otherwise false.
      */
-    bool KvManagerFlowControl(void);
+    bool KvManagerFlowControl();
 
     /**
      * @brief Check if SingleKvStore interface flow control can pass.
      *
      * @return True on passed, otherwise false.
      */
-    bool KvStoreFlowControl(void);
+    bool KvStoreFlowControl();
 
     /**
      * @brief Clear DistributedKvDataManager interface flow control count.
      */
-    void KvManagerFlowControlClear(void);
+    void KvManagerFlowControlClear();
 
     /**
      * @brief Clear SingleKvStore interface flow control count.
      */
-    void KvStoreFlowControlClear(void);
+    void KvStoreFlowControlClear();
 
 protected:
     static const size_t KVMANAGER_MAXINUM_PER_SECOND = 50;
@@ -76,5 +76,4 @@ private:
 };
 }  // namespace Notification
 }  // namespace OHOS
-
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_DISTRIBUTED_INCLUDE_DISTRIBUTED_FLOW_CONTROL_H

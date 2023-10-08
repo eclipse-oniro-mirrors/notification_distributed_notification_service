@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ public:
     using Entry = DistributedKv::Entry;
 
     DistributedPreferencesDatabase();
-    ~DistributedPreferencesDatabase();
+    virtual ~DistributedPreferencesDatabase();
 
     /**
      * @brief Put a key-value to database.
@@ -76,16 +76,15 @@ public:
      *
      * @return Whether to clear database success.
      */
-    bool ClearDatabase(void);
+    bool ClearDatabase();
 
 private:
-    void GetKvDataManager(void);
-    bool CheckKvDataManager(void);
-    void GetKvStore(void);
-    bool CheckKvStore(void);
+    void GetKvDataManager();
+    bool CheckKvDataManager();
+    void GetKvStore();
+    bool CheckKvStore();
     void CloseKvStore();
 
-private:
     std::mutex mutex_;
     std::unique_ptr<DistributedKv::DistributedKvDataManager> kvDataManager_;
     std::shared_ptr<DistributedKv::SingleKvStore> kvStore_;

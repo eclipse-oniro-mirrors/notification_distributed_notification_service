@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +47,7 @@ public:
     /**
      * @brief The deconstructor.
      */
-    ~DistributedDatabase();
+    virtual ~DistributedDatabase();
 
     /**
      * @brief Put a key-value to database.
@@ -126,28 +126,26 @@ public:
     bool OnDeviceConnected();
 
 private:
-    void GetKvDataManager(void);
-    bool CheckKvDataManager(void);
-    void GetKvStore(void);
-    bool CheckKvStore(void);
+    void GetKvDataManager();
+    bool CheckKvDataManager();
+    void GetKvStore();
+    bool CheckKvStore();
 
-private:
     std::mutex mutex_;
     std::unique_ptr<DistributedKv::DistributedKvDataManager> kvDataManager_;
     std::shared_ptr<DistributedKv::SingleKvStore> kvStore_;
     std::shared_ptr<DistributedDatabaseCallback> databaseCb_;
     std::shared_ptr<DistributedDeviceCallback> deviceCb_;
     std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
-
     std::string localDeviceId_;
 
-class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
-    void OnRemoteDied() override;
-};
+    class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
+    public:
+        void OnRemoteDied() override;
+    };
 
     DISALLOW_COPY_AND_MOVE(DistributedDatabase);
 };
 }  // namespace Notification
 }  // namespace OHOS
-
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_DISTRIBUTED_INCLUDE_DISTRIBUTED_DATABASE_H

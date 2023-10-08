@@ -40,7 +40,7 @@ public:
      *
      * @return True if the device supports distributed notification; false otherwise.
      */
-    bool GetDistributedEnable(void);
+    bool GetDistributedEnable();
 
     /**
      * @brief Set whether an application supports distributed notifications.

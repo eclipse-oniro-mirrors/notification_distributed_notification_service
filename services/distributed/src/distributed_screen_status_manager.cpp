@@ -29,7 +29,7 @@ const std::string SCREEN_STATUS_LABEL = "screen_status";
 const std::string SCREEN_STATUS_VALUE_ON = "on";
 const std::string SCREEN_STATUS_VALUE_OFF = "off";
 constexpr char KV_STORE_PATH[] = "/data/service/el1/public/database/notification_service";
-}  // namespace
+} // namespace
 
 DistributedScreenStatusManager::DistributedScreenStatusManager() : DistributedFlowControl()
 {
@@ -83,7 +83,7 @@ void DistributedScreenStatusManager::OnDeviceDisconnected(const std::string &dev
     SetLocalScreenStatus(localScreenOn_);
 }
 
-void DistributedScreenStatusManager::GetKvDataManager(void)
+void DistributedScreenStatusManager::GetKvDataManager()
 {
     initCallback_ = std::make_shared<DeviceInitCallBack>();
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().InitDeviceManager(APP_ID + STORE_ID, initCallback_);
@@ -106,7 +106,7 @@ void DistributedScreenStatusManager::DeviceInitCallBack::OnRemoteDied()
     ANS_LOGW("DeviceInitCallBack OnRemoteDied");
 }
 
-bool DistributedScreenStatusManager::CheckKvDataManager(void)
+bool DistributedScreenStatusManager::CheckKvDataManager()
 {
     if (kvDataManager_ == nullptr) {
         GetKvDataManager();
@@ -118,7 +118,7 @@ bool DistributedScreenStatusManager::CheckKvDataManager(void)
     return true;
 }
 
-void DistributedScreenStatusManager::GetKvStore(void)
+void DistributedScreenStatusManager::GetKvStore()
 {
     if (!CheckKvDataManager()) {
         return;
@@ -145,7 +145,7 @@ void DistributedScreenStatusManager::GetKvStore(void)
     KvStoreFlowControlClear();
 }
 
-bool DistributedScreenStatusManager::CheckKvStore(void)
+bool DistributedScreenStatusManager::CheckKvStore()
 {
     if (kvStore_ == nullptr) {
         GetKvStore();

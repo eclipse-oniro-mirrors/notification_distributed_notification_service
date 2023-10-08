@@ -33,14 +33,14 @@ DistributedPreferencesDatabase::DistributedPreferencesDatabase() : DistributedFl
 DistributedPreferencesDatabase::~DistributedPreferencesDatabase()
 {}
 
-void DistributedPreferencesDatabase::GetKvDataManager(void)
+void DistributedPreferencesDatabase::GetKvDataManager()
 {
     kvDataManager_ = std::make_unique<DistributedKv::DistributedKvDataManager>();
 
     KvManagerFlowControlClear();
 }
 
-bool DistributedPreferencesDatabase::CheckKvDataManager(void)
+bool DistributedPreferencesDatabase::CheckKvDataManager()
 {
     if (kvDataManager_ == nullptr) {
         GetKvDataManager();
@@ -51,7 +51,7 @@ bool DistributedPreferencesDatabase::CheckKvDataManager(void)
     return true;
 }
 
-void DistributedPreferencesDatabase::GetKvStore(void)
+void DistributedPreferencesDatabase::GetKvStore()
 {
     if (!CheckKvDataManager()) {
         return;
@@ -77,7 +77,7 @@ void DistributedPreferencesDatabase::GetKvStore(void)
     KvStoreFlowControlClear();
 }
 
-bool DistributedPreferencesDatabase::CheckKvStore(void)
+bool DistributedPreferencesDatabase::CheckKvStore()
 {
     if (kvStore_ == nullptr) {
         GetKvStore();
@@ -183,7 +183,7 @@ bool DistributedPreferencesDatabase::DeleteToDistributedDB(const std::string &ke
     return true;
 }
 
-bool DistributedPreferencesDatabase::ClearDatabase(void)
+bool DistributedPreferencesDatabase::ClearDatabase()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
@@ -200,13 +200,13 @@ bool DistributedPreferencesDatabase::ClearDatabase(void)
     DistributedKv::StoreId storeId = {.storeId = STORE_ID};
     DistributedKv::Status status = kvDataManager_->CloseKvStore(appId, storeId);
     if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager CloseKvStore() failed ret = 0x%{public}x", status);
+        ANS_LOGE("CloseKvStore failed ret = 0x%{public}x", status);
         return false;
     }
 
     status = kvDataManager_->DeleteKvStore(appId, storeId, KV_STORE_PATH);
     if (status != DistributedKv::Status::SUCCESS) {
-        ANS_LOGE("kvDataManager DeleteKvStore() failed ret = 0x%{public}x", status);
+        ANS_LOGE("DeleteKvStore failed ret = 0x%{public}x", status);
         return false;
     }
     return true;
