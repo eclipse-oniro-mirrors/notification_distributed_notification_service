@@ -30,6 +30,7 @@ const std::string DIS_CONNECTED = "onDisconnect";
 const std::string DIE = "onDestroy";
 const std::string DISTURB_MODE_CHANGE = "onDisturbModeChange";
 const std::string DISTURB_DATE_CHANGE = "onDoNotDisturbDateChange";
+const std::string DISTURB_CHANGED = "onDoNotDisturbChanged";
 const std::string ENABLE_NOTIFICATION_CHANGED = "OnEnabledNotificationChanged";
 const std::string BADGE_CHANGED = "OnBadgeChanged";
 
@@ -674,6 +675,8 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
 {
     ANS_LOGI("enter");
 
+    onDoNotDisturbChanged(date);
+
     if (disturbDateCallbackInfo_.ref == nullptr) {
         ANS_LOGI("disturbDateCallbackInfo_ callback unset");
         return;
@@ -713,6 +716,57 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
 
     int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
         UvQueueWorkOnDoNotDisturbDateChange, uv_qos_user_initiated);
+    if (ret != 0) {
+        delete dataWorker;
+        dataWorker = nullptr;
+        delete work;
+        work = nullptr;
+    }
+}
+
+void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<NotificationDoNotDisturbDate>& date)
+{
+    ANS_LOGD("enter");
+
+    if (disturbChangedCallbackInfo_.ref == nullptr) {
+        ANS_LOGE("disturbChangedCallbackInfo_ callback unset");
+        return;
+    }
+
+    if (date == nullptr) {
+        ANS_LOGE("date is null");
+        return;
+    }
+
+    uv_loop_s* loop = nullptr;
+    napi_get_uv_event_loop(disturbChangedCallbackInfo_.env, &loop);
+    if (loop == nullptr) {
+        ANS_LOGE("loop instance is nullptr");
+        return;
+    }
+
+    NotificationReceiveDataWorker* dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
+    if (dataWorker == nullptr) {
+        ANS_LOGE("new dataWorker failed");
+        return;
+    }
+
+    dataWorker->date = *date;
+    dataWorker->env = disturbChangedCallbackInfo_.env;
+    dataWorker->ref = disturbChangedCallbackInfo_.ref;
+
+    uv_work_t* work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        ANS_LOGE("new work failed");
+        delete dataWorker;
+        dataWorker = nullptr;
+        return;
+    }
+
+    work->data = reinterpret_cast<void*>(dataWorker);
+
+    int ret = uv_queue_work_with_qos(
+        loop, work, [](uv_work_t* work) {}, UvQueueWorkOnDoNotDisturbDateChange, uv_qos_user_initiated);
     if (ret != 0) {
         delete dataWorker;
         dataWorker = nullptr;
@@ -945,6 +999,12 @@ void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const n
     disturbDateCallbackInfo_.ref = ref;
 }
 
+void SubscriberInstance::SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref)
+{
+    disturbChangedCallbackInfo_.env = env;
+    disturbChangedCallbackInfo_.ref = ref;
+}
+
 void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     setBadgeCallbackInfo_.env = env;
@@ -969,6 +1029,8 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
         SetDisturbModeCallbackInfo(env, ref);
     } else if (type == DISTURB_DATE_CHANGE) {
         SetDisturbDateCallbackInfo(env, ref);
+    } else if (type == DISTURB_CHANGED) {
+        SetDisturbChangedCallbackInfo(env, ref);
     } else if (type == ENABLE_NOTIFICATION_CHANGED) {
         SetEnabledNotificationCallbackInfo(env, ref);
     } else if (type == BADGE_CHANGED) {
@@ -1114,6 +1176,20 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnDisturbDateChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, DISTURB_DATE_CHANGE, result);
+    }
+
+    // onDoNotDisturbChanged?:(mode: notificationManager.DoNotDisturbDate) => void
+    NAPI_CALL(env, napi_has_named_property(env, value, "onDoNotDisturbChanged", &hasProperty));
+    if (hasProperty) {
+        napi_value nOnDoNotDisturbChanged = nullptr;
+        napi_get_named_property(env, value, "onDoNotDisturbChanged", &nOnDoNotDisturbChanged);
+        NAPI_CALL(env, napi_typeof(env, nOnDoNotDisturbChanged, &valuetype));
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
+        napi_create_reference(env, nOnDoNotDisturbChanged, 1, &result);
+        subscriberInfo.subscriber->SetCallbackInfo(env, DISTURB_CHANGED, result);
     }
 
     // onEnabledNotificationChanged?:(data: notification.EnabledNotificationCallbackData) => void
