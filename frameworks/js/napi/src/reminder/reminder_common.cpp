@@ -131,8 +131,8 @@ void ReminderCommon::GetButtonWantAgent(const napi_env &env, const napi_value &v
     }
 }
 
-void ReminderCommon::GenWantAgent(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+bool ReminderCommon::GenWantAgent(
+    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
@@ -146,11 +146,16 @@ void ReminderCommon::GenWantAgent(
             wantAgentInfo->abilityName = str;
         }
         if (GetStringUtf8(env, wantAgent,
-            ReminderAgentNapi::BUTTON_WANT_AGENT_URI, str, NotificationNapi::STR_MAX_SIZE)) {
-            reminder->SetCustomButtonUri(str);
+            ReminderAgentNapi::WANT_AGENT_URI, str, NotificationNapi::STR_MAX_SIZE)) {
+            if (!isSysApp) {
+                ANSR_LOGW("not system app, want uri is not support use.");
+                return false;
+            }
+            wantAgentInfo->uri = str;
         }
         reminder->SetWantAgentInfo(wantAgentInfo);
     }
+    return true;
 }
 
 void ReminderCommon::GenMaxScreenWantAgent(
@@ -300,7 +305,9 @@ napi_value ReminderCommon::GenReminder(
     }
 
     // wantAgent
-    GenWantAgent(env, value, reminder);
+    if (!GenWantAgent(env, value, reminder, isSysApp)) {
+        return nullptr;
+    }
 
     // maxScreenWantAgent
     GenMaxScreenWantAgent(env, value, reminder);

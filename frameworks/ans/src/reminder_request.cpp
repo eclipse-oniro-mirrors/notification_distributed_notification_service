@@ -646,6 +646,9 @@ void ReminderRequest::RecoverWantAgent(const std::string &wantAgentInfo, const u
             auto wai = std::make_shared<ReminderRequest::WantAgentInfo>();
             wai->pkgName = info.at(0);
             wai->abilityName = info.at(1);
+            if (info.size() > minLen) {
+                wai->uri = info.at(2);
+            }
             SetWantAgentInfo(wai);
             break;
         }
@@ -992,6 +995,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write wantAgentInfo`s pkgName");
         return false;
     }
+    if (!parcel.WriteString(wantAgentInfo_->uri)) {
+        ANSR_LOGE("Failed to write wantAgentInfo`s uri");
+        return false;
+    }
     if (!parcel.WriteString(maxScreenWantAgentInfo_->abilityName)) {
         ANSR_LOGE("Failed to write maxScreenWantAgentInfo`s abilityName");
         return false;
@@ -1140,6 +1147,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     }
     if (!parcel.ReadString(wantAgentInfo_->pkgName)) {
         ANSR_LOGE("Failed to read wantAgentInfo`s pkgName");
+        return false;
+    }
+    if (!parcel.ReadString(wantAgentInfo_->uri)) {
+        ANSR_LOGE("Failed to read wantAgentInfo`s uri");
         return false;
     }
     if (!parcel.ReadString(maxScreenWantAgentInfo_->abilityName)) {
@@ -1488,14 +1499,16 @@ void ReminderRequest::AddRemovalWantAgent()
 }
 
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWantAgent(
-    AppExecFwk::ElementName &element) const
+    AppExecFwk::ElementName &element, bool isWantAgent) const
 {
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetElement(element);
-    want->SetUri(customButtonUri_);
+    if (isWantAgent) {
+        want->SetUri(wantAgentInfo_->uri);
+    }
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
@@ -1513,13 +1526,13 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWan
 
 void ReminderRequest::SetMaxScreenWantAgent(AppExecFwk::ElementName &element)
 {
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element, false);
     notificationRequest_->SetMaxScreenWantAgent(wantAgent);
 }
 
 void ReminderRequest::SetWantAgent(AppExecFwk::ElementName &element)
 {
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element, true);
     notificationRequest_->SetWantAgent(wantAgent);
 }
 
@@ -1761,11 +1774,12 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(EXPIRED_CONTENT, reminder->GetExpiredContent());
     auto wantAgentInfo = reminder->GetWantAgentInfo();
     if (wantAgentInfo == nullptr) {
-        std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null";
+        std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null" + ReminderRequest::SEP_WANT_AGENT + "null";
         values.PutString(AGENT, info);
     } else {
-        values.PutString(AGENT, wantAgentInfo->pkgName
-            + ReminderRequest::SEP_WANT_AGENT + wantAgentInfo->abilityName);
+        std::string info = wantAgentInfo->pkgName + ReminderRequest::SEP_WANT_AGENT
+            + wantAgentInfo->abilityName + ReminderRequest::SEP_WANT_AGENT + wantAgentInfo->uri;
+        values.PutString(AGENT, info);
     }
     auto maxScreenWantAgentInfo = reminder->GetMaxScreenWantAgentInfo();
     if (maxScreenWantAgentInfo == nullptr) {
