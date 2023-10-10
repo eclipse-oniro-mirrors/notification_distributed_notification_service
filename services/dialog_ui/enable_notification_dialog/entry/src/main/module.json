@@ -1,7 +1,7 @@
 {
   "module": {
     "name": "entry",
-    "type": "entry",
+    "type": "feature",
     "srcEntrance": "./ets/Application/AbilityStage.ts",
     "description": "$string:entry_desc",
     "mainElement": "MainAbility",
@@ -13,7 +13,6 @@
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
-    "uiSyntax": "ets",
     "abilities": [],
     "extensionAbilities": [
       {

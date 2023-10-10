@@ -13,16 +13,36 @@
       "value": "NotificationDialog"
     },
     {
-      "name": "if_allow_to_publish_notification",
-      "value": "Do you allow the app to publish notification?"
+      "name": "period",
+      "value": "."
     },
     {
-      "name": "allow",
+      "name": "comma",
+      "value": ", "
+    },
+    {
+      "name": "whether_to_allow",
+      "value": "Allow \""
+    },
+    {
+      "name": "quotes",
+      "value": "\""
+    },
+    {
+      "name": "reason",
+      "value": "These may include banner notifications, lock screen notifications, notification sounds, and more. You can change this in Settings."
+    },
+    {
+      "name": "ALLOW",
       "value": "ALLOW"
     },
     {
-      "name": "ban",
+      "name": "BAN",
       "value": "BAN"
+    },
+    {
+      "name": "group_label_notification",
+      "value": " to send notifications?"
     }
   ]
 }
