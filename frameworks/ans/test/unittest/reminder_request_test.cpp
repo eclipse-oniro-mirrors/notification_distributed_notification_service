@@ -1256,7 +1256,24 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
-        reminderRequestChild->CreateWantAgent(element);
+        reminderRequestChild->CreateWantAgent(element, false);
+    ASSERT_NE(nullptr, WantAgent);
+}
+
+/**
+ * @tc.name: CreateWantAgent_00002
+ * @tc.desc: Test CreateWantAgent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI86QW2
+ */
+HWTEST_F(ReminderRequestTest, CreateWantAgent_00002, Function | SmallTest | Level1)
+{
+    AppExecFwk::ElementName element;
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
+        reminderRequestChild->CreateWantAgent(element, true);
+    ASSERT_NE(nullptr, WantAgent);
 }
 
 /**
@@ -1428,6 +1445,22 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00005, Function | SmallTest | Lev
     uint8_t type = 2;
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 2);
+    rrc->RecoverWantAgent(wantAgentInfo, type);
+}
+
+/**
+ * @tc.name: RecoverWantAgent_00006
+ * @tc.desc: Test RecoverWantAgent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI86QW2
+ */
+HWTEST_F(ReminderRequestTest, RecoverWantAgent_00006, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string wantAgentInfo = "sour<SEP#/>123<SEP#/>uri";
+    uint8_t type = 0;
+    std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
+    EXPECT_EQ(ret1.size(), 3);
     rrc->RecoverWantAgent(wantAgentInfo, type);
 }
 

@@ -59,6 +59,7 @@ const char* TIMER_COUNT_DOWN_TIME = "triggerTimeInSeconds";
 const char* WANT_AGENT = "wantAgent";
 const char* WANT_AGENT_PKG = "pkgName";
 const char* WANT_AGENT_ABILITY = "abilityName";
+const char* WANT_AGENT_URI = "uri";
 const char* BUTTON_WANT_AGENT = "wantAgent";
 const char* BUTTON_WANT_AGENT_PKG = "pkgName";
 const char* BUTTON_WANT_AGENT_ABILITY = "abilityName";
@@ -134,8 +135,8 @@ private:
     static bool GetPropertyValIfExist(const napi_env &env, const napi_value &value,
         const char* propertyName, napi_value& propertyVal);
 
-    static void GenWantAgent(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+    static bool GenWantAgent(
+        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp);
 
     static void GenMaxScreenWantAgent(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
