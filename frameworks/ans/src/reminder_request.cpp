@@ -1658,9 +1658,9 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
         extendContent = (expiredContent_ == "" ? "" : expiredContent_);
     }
     if(extendContent == ""){
-        displayContent_ == content_;
+        displayContent_ = content_;
     }else{
-        displayContent_ == extendContent;
+        displayContent_ = extendContent;
     }
     ANSR_LOGD("Display content=%{public}s", displayContent_.c_str());
 }
