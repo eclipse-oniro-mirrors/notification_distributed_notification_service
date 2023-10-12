@@ -586,7 +586,9 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     reminder->InitUid(bundleOption->GetUid());
 
     if (reminder->GetTriggerTimeInMilli() == ReminderRequest::INVALID_LONG_LONG_VALUE) {
-        ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s", reminder->Dump().c_str());
+        ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s",
+            reminder->Dump().c_str());
+        reminder->SetExpired(true);
     }
     int32_t reminderId = reminder->GetReminderId();
     ANSR_LOGD("Containers(map) add. reminderId=%{public}d", reminderId);
