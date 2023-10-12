@@ -1657,9 +1657,9 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
         // the reminder has already snoozed by period arithmetic, when the ring duration is over.
         extendContent = expiredContent_;
     }
-    if(extendContent == ""){
+    if (extendContent == ""){
         displayContent_ = content_;
-    }else{
+    } else {
         displayContent_ = extendContent;
     }
     ANSR_LOGD("Display content=%{public}s", displayContent_.c_str());
