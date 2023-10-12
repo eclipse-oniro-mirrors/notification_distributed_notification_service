@@ -1640,22 +1640,22 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
     if (setSnooze) {
         if (timeIntervalInMilli_ != 0) {
             // snooze the reminder by manual
-            extendContent = (snoozeContent_ == "" ? "" : snoozeContent_);
+            extendContent = snoozeContent_;
             notificationRequest_->SetTapDismissed(false);
         } else {
             // the reminder is expired now, when timeInterval is 0
-            extendContent = (expiredContent_ == "" ? "" : expiredContent_);
+            extendContent = expiredContent_;
         }
     } else if (IsAlerting()) {
         // the reminder is alerting, or ring duration is 0
         extendContent = "";
     } else if (snoozeTimesDynamic_ != snoozeTimes_) {
         // the reminder is snoozing by period artithmetic, when the ring duration is over.
-        extendContent = (snoozeContent_ == "" ? "" : snoozeContent_);
+        extendContent = snoozeContent_;
         notificationRequest_->SetTapDismissed(false);
     } else {
         // the reminder has already snoozed by period arithmetic, when the ring duration is over.
-        extendContent = (expiredContent_ == "" ? "" : expiredContent_);
+        extendContent = expiredContent_;
     }
     if(extendContent == ""){
         displayContent_ = content_;
