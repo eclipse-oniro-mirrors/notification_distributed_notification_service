@@ -35,7 +35,7 @@ ohos_shared_library("reminderagent") {
     cfi_cross_dso = true
     debug = false
   }
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
 
   include_dirs = [
     "../../include",
@@ -86,7 +86,7 @@ ohos_shared_library("reminderagentmanager") {
     cfi_cross_dso = true
     debug = false
   }
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
 
   include_dirs = [
     "../../include",
