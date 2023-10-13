@@ -1656,8 +1656,8 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
     } else {
         // the reminder has already snoozed by period arithmetic, when the ring duration is over.
         extendContent = expiredContent_;
-    }
-    if (extendContent == ""){
+    }   
+    if (extendContent == "") {
         displayContent_ = content_;
     } else {
         displayContent_ = extendContent;
