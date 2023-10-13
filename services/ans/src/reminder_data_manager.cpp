@@ -584,6 +584,12 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     reminder->InitReminderId();
     reminder->InitUserId(ReminderRequest::GetUserId(bundleOption->GetUid()));
     reminder->InitUid(bundleOption->GetUid());
+
+    if (reminder->GetTriggerTimeInMilli() == ReminderRequest::INVALID_LONG_LONG_VALUE) {
+        ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s",
+            reminder->Dump().c_str());
+        reminder->SetExpired(true);
+    }
     int32_t reminderId = reminder->GetReminderId();
     ANSR_LOGD("Containers(map) add. reminderId=%{public}d", reminderId);
     auto ret = notificationBundleOptionMap_.insert(
@@ -714,7 +720,13 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         if ((*it)->IsExpired()) {
             continue;
         }
-        if ((*it)->GetTriggerTimeInMilli() - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
+        uint64_t tempTriggerTime = (*it)->GetTriggerTimeInMilli();
+        if (tempTriggerTime < triggerTime) {
+            ANSR_LOGE("this reminder triggerTime is less than target triggerTime. "
+                "now trigger time is %{public}llu.", tempTriggerTime);
+            continue;
+        }
+        if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
             continue;
         }
         if (!isAlerting) {
