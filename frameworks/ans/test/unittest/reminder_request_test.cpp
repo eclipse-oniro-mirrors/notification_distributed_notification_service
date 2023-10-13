@@ -1591,7 +1591,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00400, Function | SmallT
  */
 HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00600, Function | SmallTest | Level1)
 {
-    //given
+    // given
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->InitNotificationRequest(), true);
     sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
@@ -1600,11 +1600,11 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00600, Function | SmallT
     rrc->expiredContent_ = "expiredContent";
     rrc->timeIntervalInMilli_ = 1;
 
-    //when
+    // when
     bool setSnooze = true;
     rrc->UpdateNotificationContent(setSnooze);
 
-    //then
+    // then
     EXPECT_EQ(rrc->displayContent_, "snooze");
 }
 
@@ -1616,7 +1616,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00600, Function | SmallT
  */
 HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00800, Function | SmallTest | Level1)
 {
-    //given
+    // given
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->InitNotificationRequest(), true);
     sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
@@ -1625,14 +1625,13 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00800, Function | SmallT
     rrc->expiredContent_ = "expiredContent";
     rrc->timeIntervalInMilli_ = 0;
 
-    //when
+    // when
     bool setSnooze = true;
     rrc->UpdateNotificationContent(setSnooze);
 
-    //then
+    // then
     EXPECT_EQ(rrc->displayContent_, "expiredContent");
 }
-
 
 /**
  * @tc.name: UpdateNotificationContent_00500
