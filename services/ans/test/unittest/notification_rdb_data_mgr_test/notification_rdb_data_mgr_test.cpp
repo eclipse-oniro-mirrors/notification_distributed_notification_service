@@ -298,7 +298,6 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
-
         virtual int Notify(const std::string &event)
         {
             return E_ERROR;
