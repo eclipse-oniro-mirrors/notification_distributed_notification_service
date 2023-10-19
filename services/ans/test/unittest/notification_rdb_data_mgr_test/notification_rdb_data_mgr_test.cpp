@@ -293,7 +293,7 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
-        virtual int UnRegisterAutoSyncCallback(std::shared_ptr<DetailProgressObserver> syncObserver)
+        virtual int UnregisterAutoSyncCallback(std::shared_ptr<DetailProgressObserver> syncObserver)
         {
             return E_ERROR;
         };
