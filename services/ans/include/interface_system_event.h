@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ struct ISystemEvent {
 #endif
     std::function<void(int32_t userId)> onResourceRemove;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleDataCleared;
+    std::function<void(const sptr<NotificationBundleOption> &)> onBundleAdd;
+    std::function<void(const sptr<NotificationBundleOption> &)> onBundleUpdate;
 };
 }  // namespace Notification
 }  // namespace OHOS

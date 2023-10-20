@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,6 +99,9 @@ bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOpt
 bool BundleManagerHelper::GetBundleInfoByBundleName(
     const std::string bundle, const int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
 {
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+
     if (bundleMgr_ == nullptr) {
         return false;
     }
@@ -180,5 +183,21 @@ bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &b
     return DEFAULT_DISTRIBUTED_ENABLE_IN_APPLICATION_INFO;
 }
 #endif
+
+bool BundleManagerHelper::GetBundleInfos(
+    const AppExecFwk::BundleFlag flag, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+
+    if (bundleMgr_ == nullptr) {
+        return false;
+    }
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bool ret = bundleMgr_->GetBundleInfos(flag, bundleInfos, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return ret;
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -81,6 +81,7 @@ constexpr int32_t DIALOG_DEFAULT_HEIGHT = 240;
 constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
+constexpr int32_t MAIN_USER_ID = 100;
 
 constexpr char HIDUMPER_HELP_MSG[] =
     "Usage:dump <command> [options]\n"
@@ -301,6 +302,8 @@ AdvancedNotificationService::AdvancedNotificationService()
 #endif
         std::bind(&AdvancedNotificationService::OnResourceRemove, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataCleared, this, std::placeholders::_1),
+        std::bind(&AdvancedNotificationService::OnBundleDataAdd, this, std::placeholders::_1),
+        std::bind(&AdvancedNotificationService::OnBundleDataUpdate, this, std::placeholders::_1),
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
 
@@ -589,7 +592,19 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     do {
+        bool notificationEnable = false;
         if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
+            result = CheckNotificationEnableStatus(notificationEnable);
+            if (result != ERR_OK) {
+                result = ERR_ANS_INVALID_BUNDLE;
+                ANS_LOGE("Bundle notification enable not found!");
+                break;
+            }
+            if (notificationEnable) {
+                result = PublishPreparedNotificationInner(request);
+                break;
+            }
+
             if (!AccessTokenHelper::IsSystemApp()) {
                 result = ERR_ANS_NON_SYSTEM_APP;
                 break;
@@ -607,21 +622,9 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
-        sptr<NotificationBundleOption> bundleOption;
-        result = PrepareNotificationInfo(request, bundleOption);
+        result = PublishPreparedNotificationInner(request);
         if (result != ERR_OK) {
-            break;
-        }
-
-        if (IsNeedPushCheck(request->GetSlotType())) {
-            result = PushCheck(request);
-        }
-        if (result != ERR_OK) {
-            break;
-        }
-        result = PublishPreparedNotification(request, bundleOption);
-        if (result != ERR_OK) {
-            break;
+            ANS_LOGE("Notification inner error code: %{public}d", result);
         }
     } while (0);
 
@@ -2477,6 +2480,104 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 
         NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
     }));
+}
+
+void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Bundle option sptr is null!");
+        return;
+    }
+    if (bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Bundle name empty!");
+        return;
+    }
+
+    auto bundleInstall = [bundleOption]() {
+        if (bundleOption == nullptr) {
+            ANS_LOGE("BundleOption sptr is null!");
+            return;
+        }
+
+        AppExecFwk::BundleInfo bundleInfo;
+        int32_t callingUserId = -1;
+        AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), callingUserId);
+        auto bundleMgr = BundleManagerHelper::GetInstance();
+        if (bundleMgr == nullptr) {
+            ANS_LOGE("bundleMgr instance error!");
+            return;
+        }
+        if (!bundleMgr->GetBundleInfoByBundleName(bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
+            ANS_LOGE("Get bundle info error!");
+            return;
+        }
+
+        auto errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
+                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
+        if (errCode != ERR_OK) {
+            ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
+        }
+    };
+
+    notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(bundleInstall) : bundleInstall();
+}
+
+void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Bundle option sptr is null!");
+        return;
+    }
+    if (bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Bundle name empty!");
+        return;
+    }
+
+    auto bundleUpdate = [bundleOption]() {
+        if (bundleOption == nullptr) {
+            ANS_LOGE("Bundle option sptr is null!");
+            return;
+        }
+
+        AppExecFwk::BundleInfo bundleInfo;
+        int32_t callingUserId = -1;
+        AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), callingUserId);
+        auto bundleMgr = BundleManagerHelper::GetInstance();
+        if (bundleMgr == nullptr) {
+            ANS_LOGE("bundleMgr instance error!");
+            return;
+        }
+        if (!bundleMgr->GetBundleInfoByBundleName(
+            bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
+            ANS_LOGE("Get bundle info error!");
+            return;
+        }
+
+        bool hasPopped = false;
+        auto errCode = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
+        if (errCode != ERR_OK) {
+            ANS_LOGD("Get notification user option fail, need to instert data");
+            errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
+                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
+            if (errCode != ERR_OK) {
+                ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
+            }
+            return;
+        }
+
+        if (hasPopped) {
+            ANS_LOGI("The user has made changes, subject to the user's selection");
+            return;
+        }
+
+        errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
+            bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
+        if (errCode != ERR_OK) {
+            ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
+        }
+    };
+
+    notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(bundleUpdate) : bundleUpdate();
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -4767,6 +4868,100 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
         currNotifications, nullptr, deleteReason);
     notifications.clear();
 }
+
+void AdvancedNotificationService::InitNotificationEnableList()
+{
+    auto task = [] () {
+        auto bundleMgr = BundleManagerHelper::GetInstance();
+        if (bundleMgr == nullptr) {
+            ANS_LOGE("Get bundle mgr error!");
+            return;
+        }
+
+        std::vector<int32_t> activeUserId;
+        AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+        if (activeUserId.empty()) {
+            activeUserId.push_back(MAIN_USER_ID);
+        }
+        AppExecFwk::BundleFlag flag = AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
+        std::vector<AppExecFwk::BundleInfo> bundleInfos;
+        for (auto &itemUser: activeUserId) {
+            std::vector<AppExecFwk::BundleInfo> infos;
+            if (!bundleMgr->GetBundleInfos(flag, infos, itemUser)) {
+                ANS_LOGW("Get bundle infos error");
+                continue;
+            }
+            bundleInfos.insert(bundleInfos.end(), infos.begin(), infos.end());
+        }
+
+        bool notificationEnable = false;
+        ErrCode saveRef = ERR_OK;
+        for (const auto &bundleInfo : bundleInfos) {
+            sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
+                bundleInfo.applicationInfo.bundleName, bundleInfo.uid);
+            if (bundleOption == nullptr) {
+                ANS_LOGE("New bundle option obj error! bundlename:%{public}s",
+                    bundleInfo.applicationInfo.bundleName.c_str());
+                continue;
+            }
+
+            saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
+                bundleOption, notificationEnable);
+            // record already exists
+            if (saveRef == ERR_OK) {
+                continue;
+            }
+
+            saveRef = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
+                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
+            if (saveRef != ERR_OK) {
+                ANS_LOGE("Set enable error! code: %{public}d", saveRef);
+            }
+        }
+    };
+
+    notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(task) : task();
+}
+
+ErrCode AdvancedNotificationService::CheckNotificationEnableStatus(bool &notificationEnable)
+{
+    auto bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("BundleMgr is null!");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    std::string bundleName = bundleManager->GetBundleNameByUid(uid);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("New obj error!");
+        return ERR_INVALID_VALUE;
+    }
+    return NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, notificationEnable);
+}
+
+ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        ANS_LOGE("Request obj is null!");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<NotificationBundleOption> bundleOption;
+    auto result = PrepareNotificationInfo(request, bundleOption);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    if (IsNeedPushCheck(request->GetSlotType())) {
+        result = PushCheck(request);
+        if (result != ERR_OK) {
+            return result;
+        }
+    }
+    return PublishPreparedNotification(request, bundleOption);
+}
+
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     ANS_LOGI("Push Callback died, remove the proxy object");
