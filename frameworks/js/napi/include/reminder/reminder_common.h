@@ -30,6 +30,7 @@ namespace {
 const char* ACTION_BUTTON = "actionButton";
 const char* ACTION_BUTTON_TITLE = "title";
 const char* ACTION_BUTTON_TYPE = "type";
+const char* ACTION_BUTTON_RESOURCE = "resource";
 const char* ALARM_HOUR = "hour";
 const char* ALARM_DAYS_OF_WEEK = "daysOfWeek";
 const char* ALARM_MINUTE = "minute";

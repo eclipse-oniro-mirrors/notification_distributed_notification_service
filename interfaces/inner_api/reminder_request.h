@@ -125,6 +125,11 @@ public:
         std::string title = "";
 
         /**
+         * resource key(for language)
+         */
+        std::string resource = "";
+
+        /**
          * The ability that is redirected to when the button is clicked.
          */
         std::shared_ptr<ButtonWantAgent> wantAgent;
@@ -289,6 +294,13 @@ public:
     int32_t GetUid() const;
 
     /**
+     * @brief Obtains bundle name
+     * 
+     * @return bundle name
+     */
+    std::string GetBundleName() const;
+
+    /**
      * @brief Set the app system.
      *
      */
@@ -334,6 +346,13 @@ public:
      * @param uid Indicates the uid which the reminder belong to.
      */
     void InitUid(const int32_t &uid);
+
+    /**
+     * @brief Inites reminder bundle name when publish reminder success.
+     * 
+     * @param bundleName Indicates the bundle name which the reminder belong to
+     */
+    void InitBundleName(const std::string &bundleName);
 
     /**
      * @brief Check the reminder is alerting or not.
@@ -447,10 +466,11 @@ public:
      *
      * @param title Indicates the title of the button.
      * @param type Indicates the type of the button.
+     * @param resource Indicates the resource of the button.
      * @return Current reminder self.
      */
     ReminderRequest& SetActionButton(const std::string &title, const ActionButtonType &type,
-        const std::shared_ptr<ButtonWantAgent> &buttonWantAgent = nullptr);
+        const std::string &resource, const std::shared_ptr<ButtonWantAgent> &buttonWantAgent = nullptr);
 
     /**
      * @brief Sets reminder content.
@@ -632,6 +652,13 @@ public:
      * @param extra Indicates the extra content.
      */
     void UpdateNotificationRequest(UpdateNotificationType type, std::string extra);
+
+    /**
+     * @brief When system language change, will call this function.
+     *     need load resource to update button title
+     * @param resMgr Indicates the resource manager for get button title
+     */
+    void OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr);
 
     static int32_t GetActualTime(const TimeTransferType &type, int32_t cTime);
     static int32_t GetCTime(const TimeTransferType &type, int32_t actualTime);

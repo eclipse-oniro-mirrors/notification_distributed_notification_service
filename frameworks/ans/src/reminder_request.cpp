@@ -32,12 +32,13 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const int32_t BASE_YEAR = 1900;
-const int32_t SINGLE_BUTTON_MIN_LEN = 2;
-const int32_t SINGLE_BUTTON_MAX_LEN = 4;
+const int32_t SINGLE_BUTTON_MIN_LEN = 3;
+const int32_t SINGLE_BUTTON_MAX_LEN = 5;
 const int32_t BUTTON_TYPE_INDEX = 0;
 const int32_t BUTTON_TITLE_INDEX = 1;
-const int32_t BUTTON_PKG_INDEX = 2;
-const int32_t BUTTON_ABILITY_INDEX = 3;
+const int32_t BUTTON_RESOURCE_INDEX = 2;
+const int32_t BUTTON_PKG_INDEX = 3;
+const int32_t BUTTON_ABILITY_INDEX = 4;
 }
 
 int32_t ReminderRequest::GLOBAL_ID = 0;
@@ -185,7 +186,7 @@ std::string ReminderRequest::Dump() const
 }
 
 ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, const ActionButtonType &type,
-    const std::shared_ptr<ButtonWantAgent> &buttonWantAgent)
+    const std::string &resource, const std::shared_ptr<ButtonWantAgent> &buttonWantAgent)
 {
     if ((type != ActionButtonType::CLOSE) && (type != ActionButtonType::SNOOZE) && (type != ActionButtonType::CUSTOM)) {
         ANSR_LOGI("Button type is not support: %{public}d.", static_cast<uint8_t>(type));
@@ -194,6 +195,7 @@ ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, cons
     ActionButtonInfo actionButtonInfo;
     actionButtonInfo.type = type;
     actionButtonInfo.title = title;
+    actionButtonInfo.resource = resource;
     actionButtonInfo.wantAgent = buttonWantAgent;
 
     actionButtonMap_.insert(std::pair<ActionButtonType, ActionButtonInfo>(type, actionButtonInfo));
@@ -236,6 +238,11 @@ void ReminderRequest::InitUserId(const int32_t &userId)
 void ReminderRequest::InitUid(const int32_t &uid)
 {
     uid_ = uid;
+}
+
+void ReminderRequest::InitBundleName(const std::string &bundleName)
+{
+    bundleName_ = bundleName;
 }
 
 bool ReminderRequest::IsExpired() const
@@ -605,10 +612,11 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
             buttonWantAgent->abilityName = singleButton.at(BUTTON_ABILITY_INDEX);
         }
         SetActionButton(singleButton.at(BUTTON_TITLE_INDEX),
-            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)), buttonWantAgent);
-        ANSR_LOGI("RecoverButton title:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
-            singleButton.at(BUTTON_TITLE_INDEX).c_str(), buttonWantAgent->pkgName.c_str(),
-            buttonWantAgent->abilityName.c_str());
+            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)), 
+            singleButton.at(BUTTON_RESOURCE_INDEX), buttonWantAgent);
+        ANSR_LOGI("RecoverButton title:%{public}s, resource:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
+            singleButton.at(BUTTON_TITLE_INDEX).c_str(), singleButton.at(BUTTON_RESOURCE_INDEX).c_str(),
+            buttonWantAgent->pkgName.c_str(), buttonWantAgent->abilityName.c_str());
     }
 }
 
@@ -864,6 +872,11 @@ int32_t ReminderRequest::GetUid() const
     return uid_;
 }
 
+std::string ReminderRequest::GetBundleName() const
+{
+    return bundleName_;
+}
+
 void ReminderRequest::SetSystemApp(bool isSystem)
 {
     isSystemApp_ = isSystem;
@@ -1092,6 +1105,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
             ANSR_LOGE("Failed to write action button title");
             return false;
         }
+        if (!parcel.WriteString(static_cast<std::string>(button.second.resource))) {
+            ANSR_LOGE("Failed to write action button resource");
+            return false;
+        }
         if (button.second.wantAgent == nullptr) {
             ANSR_LOGE("button wantAgent is null");
             return false;
@@ -1256,11 +1273,13 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         }
         ActionButtonType type = static_cast<ActionButtonType>(buttonType);
         std::string title = parcel.ReadString();
+        std::string resource = parcel.ReadString();
         std::string pkgName = parcel.ReadString();
         std::string abilityName = parcel.ReadString();
         ActionButtonInfo info;
         info.type = type;
         info.title = title;
+        info.resource = resource;
         info.wantAgent = std::make_shared<ButtonWantAgent>();
         info.wantAgent->pkgName = pkgName;
         info.wantAgent->abilityName = abilityName;
@@ -1324,6 +1343,7 @@ std::string ReminderRequest::GetButtonInfo() const
         }
         ActionButtonInfo buttonInfo = button.second;
         info += std::to_string(static_cast<uint8_t>(button.first)) + SEP_BUTTON_SINGLE + buttonInfo.title;
+        info += SEP_BUTTON_SINGLE + buttonInfo.resource;
         if (buttonInfo.wantAgent == nullptr) {
             continue;
         }
@@ -1837,6 +1857,24 @@ void ReminderRequest::AddColumn(
     } else {
         sqlOfAddColumns += name + " " + type;
     }
+}
+
+void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr)
+{
+    if (resMgr == nullptr) {
+        return;
+    }
+    // update title
+    for (auto &button : actionButtonMap_) {
+        std::string title;
+        resMgr->GetStringByName(button.second.resource.c_str(), title);
+        if (title.empty()) {
+            continue;
+        }
+        button.second.title = title;
+    }
+    // update action button
+    UpdateActionButtons(false);
 }
 }
 }

@@ -49,6 +49,7 @@ bool ReminderCommon::GenActionButtons(
     const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
+    char res[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_valuetype valuetype = napi_undefined;
     napi_value actionButtons = nullptr;
     if (!GetObject(env, value, ReminderAgentNapi::ACTION_BUTTON, actionButtons)) {
@@ -75,7 +76,9 @@ bool ReminderCommon::GenActionButtons(
         int32_t buttonType = static_cast<int32_t>(ReminderRequest::ActionButtonType::INVALID);
         if (GetStringUtf8(env, actionButton,
             ReminderAgentNapi::ACTION_BUTTON_TITLE, str, NotificationNapi::STR_MAX_SIZE) &&
-            GetInt32(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_TYPE, buttonType, false)) {
+            GetInt32(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_TYPE, buttonType, false) &&
+            GetStringUtf8(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_RESOURCE, res,
+                NotificationNapi::STR_MAX_SIZE)) {
             if (!(ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CLOSE ||
                 ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::SNOOZE ||
                 (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM &&
@@ -84,13 +87,15 @@ bool ReminderCommon::GenActionButtons(
                 return false;
             }
             std::string title(str);
+            std::string resource(res);
             auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
             if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
                 GetButtonWantAgent(env, actionButton, reminder, buttonWantAgent);
             }
             reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType),
-                buttonWantAgent);
-            ANSR_LOGD("button title=%{public}s, type=%{public}d", title.c_str(), buttonType);
+                resource, buttonWantAgent);
+            ANSR_LOGD("button title=%{public}s, type=%{public}d, resource=%{public}s",
+                title.c_str(), buttonType, resource.c_str());
         } else {
             ANSR_LOGW("Parse action button error.");
             return false;

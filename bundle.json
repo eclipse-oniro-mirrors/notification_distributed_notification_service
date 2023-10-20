@@ -78,10 +78,12 @@
         "device_manager",
         "kv_store",
         "ffrt",
-        "device_standby"
+        "device_standby",
+        "resource_management"
       ],
       "third_party": [
-        "libuv"
+        "libuv",
+        "icu"
       ]
     },
     "build": {
