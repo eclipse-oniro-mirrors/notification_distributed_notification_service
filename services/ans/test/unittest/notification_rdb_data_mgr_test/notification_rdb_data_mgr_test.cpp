@@ -288,6 +288,16 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
+        virtual int RegisterAutoSyncCallback(std::shared_ptr<DetailProgressObserver> syncObserver)
+        {
+            return E_ERROR;
+        };
+
+        virtual int UnregisterAutoSyncCallback(std::shared_ptr<DetailProgressObserver> syncObserver)
+        {
+            return E_ERROR;
+        };
+
         virtual int Notify(const std::string &event)
         {
             return E_ERROR;
