@@ -2495,7 +2495,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 
     auto bundleInstall = [bundleOption]() {
         if (bundleOption == nullptr) {
-            ANS_LOGE("BundleOption sptr is null!");
+            ANS_LOGE("Bundle option sptr is null!");
             return;
         }
 
@@ -2513,7 +2513,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
         }
 
         auto errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
-                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
+            bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
         if (errCode != ERR_OK) {
             ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
         }
@@ -2547,8 +2547,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             ANS_LOGE("bundleMgr instance error!");
             return;
         }
-        if (!bundleMgr->GetBundleInfoByBundleName(
-            bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
+        if (!bundleMgr->GetBundleInfoByBundleName(bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
             ANS_LOGE("Get bundle info error!");
             return;
         }
@@ -2556,7 +2555,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         bool hasPopped = false;
         auto errCode = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
         if (errCode != ERR_OK) {
-            ANS_LOGD("Get notification user option fail, need to instert data");
+            ANS_LOGD("Get notification user option fail, need to insert data");
             errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
                 bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
             if (errCode != ERR_OK) {
@@ -4871,7 +4870,7 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::InitNotificationEnableList()
 {
-    auto task = [] () {
+    auto task = []() {
         auto bundleMgr = BundleManagerHelper::GetInstance();
         if (bundleMgr == nullptr) {
             ANS_LOGE("Get bundle mgr error!");

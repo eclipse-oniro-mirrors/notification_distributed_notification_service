@@ -747,7 +747,7 @@ public:
     void ResetPushCallbackProxy();
 
     /**
-     * @brief Init The Defult Installation Package Notification Enabled.
+     * @brief Init The Default Installation Package Notification Enabled.
      */
     void InitNotificationEnableList();
 
