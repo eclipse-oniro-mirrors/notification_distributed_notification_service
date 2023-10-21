@@ -43,23 +43,27 @@ int32_t NotificationDialog::GetActiveUserId()
 
 int32_t NotificationDialog::GetUidByBundleName(const std::string &bundleName)
 {
-    auto userId = GetActiveUserId();
+    auto userId = NotificationDialog::GetActiveUserId();
     return IN_PROCESS_CALL(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId));
 }
 
-ErrCode NotificationDialog::StartEnableNotificationDialogAbility(int32_t uid, const sptr<IRemoteObject> &callerToken)
+ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
+    const std::string &serviceBundleName,
+    const std::string &serviceAbilityName,
+    int32_t uid,
+    const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
-    auto bundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
-    auto topUid = GetUidByBundleName(bundleName);
+    auto appBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    auto topUid = NotificationDialog::GetUidByBundleName(appBundleName);
     if (topUid != uid) {
-        ANS_LOGE("Current application isn't in foreground, top is %{private}s.", bundleName.c_str());
+        ANS_LOGE("Current application isn't in foreground, top is %{private}s.", appBundleName.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     AAFwk::Want want;
-    want.SetElementName("com.ohos.notificationdialog", "EnableNotificationDialog");
-    want.SetParam("from", bundleName);
+    want.SetElementName(serviceBundleName, serviceAbilityName);
+    want.SetParam("from", appBundleName);
     if (callerToken != nullptr) {
         want.SetParam("callerToken", callerToken);
     }

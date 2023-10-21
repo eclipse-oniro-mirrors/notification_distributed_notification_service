@@ -1961,19 +1961,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15000,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_15100
- * @tc.name      : ANS_SetHasPoppedDialog_0100
- * @tc.desc      : Test SetHasPoppedDialog function when the result is ERR_ANS_INVALID_PARAM
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15100, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    bool hasPopped = true;
-    EXPECT_EQ(advancedNotificationService_->SetHasPoppedDialog(bundleOption, hasPopped), (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_15200
  * @tc.name      : ANS_GetHasPoppedDialog_0100
  * @tc.desc      : Test GetHasPoppedDialog function when the result is ERR_ANS_INVALID_PARAM

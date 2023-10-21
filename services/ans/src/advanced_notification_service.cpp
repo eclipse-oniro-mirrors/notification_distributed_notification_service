@@ -39,7 +39,7 @@
 #include "ipc_skeleton.h"
 #include "nlohmann/json.hpp"
 #include "notification_constant.h"
-#include "notification_dialog.h"
+#include "notification_dialog_manager.h"
 #include "notification_filter.h"
 #include "notification_preferences.h"
 #include "notification_slot.h"
@@ -1177,7 +1177,9 @@ ErrCode AdvancedNotificationService::DeleteAll()
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         int32_t activeUserId = SUBSCRIBE_USER_INIT;
-        (void)GetActiveUserId(activeUserId);
+        if (!GetActiveUserId(activeUserId)) {
+            return;
+        }
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
@@ -1717,34 +1719,30 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(
         ANS_LOGD("bundleOption == nullptr");
         return ERR_ANS_INVALID_BUNDLE;
     }
-
     // To get the permission
     bool allowedNotify = false;
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
-    ANS_LOGI("result = %{public}d, allowedNotify = %{public}d", result, allowedNotify);
-    if (result != ERR_OK || allowedNotify) {
-        ANS_LOGD("Already granted permission");
-        return result;
+    if (result != ERR_OK) {
+        return ERROR_INTERNAL_ERROR;
     }
-
+    ANS_LOGI("allowedNotify = %{public}d", allowedNotify);
+    if (allowedNotify) {
+        return ERR_OK;
+    }
     // Check to see if it has been popover before
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
-    if (result != ERR_OK || hasPopped) {
-        ANS_LOGD("Already shown dialog");
-        return result;
+    if (result != ERR_OK) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    if (hasPopped) {
+        return ERR_ANS_NOT_ALLOWED;
     }
 
-    ANS_LOGI("hasPopped = %{public}d, allowedNotify = %{public}d", hasPopped, allowedNotify);
-    if (!hasPopped && !allowedNotify) {
-        auto notificationDialog = std::make_shared<NotificationDialog>();
-        result = notificationDialog->StartEnableNotificationDialogAbility(bundleOption->GetUid(), callerToken);
-        if (result != ERR_OK) {
-            ANS_LOGD("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
-            return result;
-        }
+    if (!CreateDialogManager()) {
+        return ERROR_INTERNAL_ERROR;
     }
-    SetHasPoppedDialog(bundleOption, true);
+    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callerToken);
     return result;
 }
 
@@ -1830,7 +1828,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
             PublishSlotChangeCommonEvent(bundle);
         }
     } else {
-        // Remote revice
+        // Remote device
     }
 
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
@@ -1896,16 +1894,17 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     }
 
     ErrCode result = ERR_OK;
-        allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
-        if (result == ERR_OK && allowed) {
-            result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, allowed);
-            if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-                result = ERR_OK;
-                allowed = CheckApiCompatibility(bundleOption);
-                SetDefaultNotificationEnabled(bundleOption, allowed);
-            }
+    allowed = false;
+    result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+    if (result == ERR_OK && allowed) {
+        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, allowed);
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            result = ERR_OK;
+            // FA model app can publish notification without user confirm
+            allowed = CheckApiCompatibility(bundleOption);
+            SetDefaultNotificationEnabled(bundleOption, allowed);
         }
+    }
     return result;
 }
 
@@ -4173,25 +4172,6 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::SetHasPoppedDialog(
-    const sptr<NotificationBundleOption> bundleOption, bool hasPopped)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ErrCode result = ERR_OK;
-    ANS_LOGE("ffrt start!");
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGE("ffrt enter!");
-        result = NotificationPreferences::GetInstance().SetHasPoppedDialog(bundleOption, hasPopped);
-    }));
-    notificationSvrQueue_->wait(handler);
-    ANS_LOGE("ffrt end!");
-    return result;
-}
-
 ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     const sptr<NotificationBundleOption> bundleOption, bool &hasPopped)
 {
@@ -4393,6 +4373,9 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
 
 bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (bundleOption == nullptr) {
+        return false;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("bundle [%{public}s : %{public}d]", bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
 
@@ -5040,6 +5023,21 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr
         }
     }
     return PublishPreparedNotification(request, bundleOption);
+}
+
+
+bool AdvancedNotificationService::CreateDialogManager()
+{
+    static std::mutex dialogManagerMutex_;
+    std::lock_guard<std::mutex> lock(dialogManagerMutex_);
+    if (dialogManager_ == nullptr) {
+        dialogManager_ = std::make_unique<NotificationDialogManager>(*this);
+        if (!dialogManager_->Init()) {
+            dialogManager_ = nullptr;
+            return false;
+        }
+    }
+    return true;
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

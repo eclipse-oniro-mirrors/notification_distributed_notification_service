@@ -16,7 +16,6 @@
 import bundleManager from '@ohos.bundle.bundleManager';
 import deviceInfo from '@ohos.deviceInfo';
 import display from '@ohos.display';
-import notification from '@ohos.notification';
 import window from '@ohos.window';
 import { titleTrim } from '../common/utils';
 import Constants from '../common/constant';
@@ -229,13 +228,8 @@ struct PermissionDialog {
 
   async enableNotification(enabled: boolean): Promise<void> {
     console.info(TAG, `NotificationDialog enableNotification: ${enabled}`);
-    let fromObj = this.dialog.want.parameters.from;
-    let bundleOption = {
-      bundle: fromObj ? fromObj.toString() : ''
-    } as notification.BundleOption;
-    console.info(TAG, 'NotificationDialog before enableNotification', JSON.stringify(bundleOption));
     try {
-      await notification.enableNotification(bundleOption, enabled);
+      await this.dialog.publishButtonClickedEvent(enabled);
     } catch (err) {
       console.error(TAG, `NotificationDialog enable error, code is ${err.code}`);
     } finally {

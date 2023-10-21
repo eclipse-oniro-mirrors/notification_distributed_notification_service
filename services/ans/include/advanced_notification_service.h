@@ -32,6 +32,7 @@
 #include "distributed_kvstore_death_recipient.h"
 #include "notification.h"
 #include "notification_bundle_option.h"
+#include "notification_dialog_manager.h"
 #include "notification_record.h"
 #include "notification_slot_filter.h"
 #include "notification_sorting_map.h"
@@ -844,7 +845,6 @@ private:
 
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
-    ErrCode SetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool hasPopped);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
     static ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
         sptr<NotificationBundleOption> &targetBundle);
@@ -879,6 +879,9 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     ErrCode CheckNotificationEnableStatus(bool &notificationEnable);
     ErrCode PublishPreparedNotificationInner(const sptr<NotificationRequest> &request);
+    // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
+    bool CreateDialogManager();
+
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
@@ -901,6 +904,7 @@ private:
 #endif
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
+    std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
 };
 
 /**
