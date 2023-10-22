@@ -87,9 +87,9 @@ bool NotificationLocalLiveViewContent::ToJson(nlohmann::json &jsonObject) const
         return false;
     }
 
-    jsonObject["type"]     = type_;
-    jsonObject["capsule"]  = capsuleObj;
-    jsonObject["button"]   = buttonObj;
+    jsonObject["type"] = type_;
+    jsonObject["capsule"] = capsuleObj;
+    jsonObject["button"] = buttonObj;
     jsonObject["progress"] = progressObj;
 
     return true;
