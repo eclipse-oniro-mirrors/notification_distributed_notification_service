@@ -24,7 +24,6 @@
 #include "notification_multiline_content.h"
 #include "notification_normal_content.h"
 #include "notification_picture_content.h"
-#include "notification_local_live_view_content.h"
 #include "parcel.h"
 
 namespace OHOS {
@@ -64,12 +63,7 @@ public:
          * Indicates notifications that include a picture.
          * Such notifications are created using NotificationPictureContent.
          */
-        PICTURE,
-        /**
-         * Indicates notifications that include system activity.
-         * Such notifications are created using NotificationLocalLiveViewContent.
-         */
-        LOCAL_LIVE_VIEW
+        PICTURE
     };
 
     /**
@@ -125,15 +119,6 @@ public:
      * @param mediaContent Indicates the NotificationMediaContent object.
      */
     explicit NotificationContent(const std::shared_ptr<NotificationMediaContent> &mediaContent);
-
-    /**
-     * @brief A constructor used to create a NotificationLocalLiveViewContent instance (obtained by calling
-     * GetNotificationContent()) and set the content type to NotificationContent::Type::LOCAL_LIVE_VIEW (obtained by calling
-     * GetContentType()).
-     *
-     * @param mediaContent Indicates the NotificationLocalLiveViewContent object.
-     */
-    explicit NotificationContent(const std::shared_ptr<NotificationLocalLiveViewContent> &localLiveViewContent);
 
     virtual ~NotificationContent();
 

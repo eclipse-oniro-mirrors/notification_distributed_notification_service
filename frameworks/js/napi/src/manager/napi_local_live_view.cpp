@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
- #include "napi_local_live_view.h"
- #include "local_live_view_subscribe.h"
- #include "ans_inner_errors.h"
- #include "common.h"
+#include "napi_local_live_view.h"
+#include "local_live_view_subscribe.h"
+#include "ans_inner_errors.h"
+#include "common.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-//const int32_t SUBSRIBE_MAX_PARA = 1;
 const int32_t TRIGGER_PARA = 3;
 
 napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
@@ -37,8 +36,9 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoSubscribeLocalLiveView {
-        .env = env, .asyncWork = nullptr, .objectInfo = objectInfo
+    AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoSubscribeLocalLiveView {
+            .env = env, .asyncWork = nullptr, .objectInfo = objectInfo
     };
     if (!asynccallbackinfo) {
         if (objectInfo) {
@@ -66,7 +66,6 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
 
             asynccallbackinfo->info.errorCode =
                 NotificationHelper::SubscribeLocalLiveViewNotification(*(asynccallbackinfo->objectInfo));
-
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGI("NapiSubscribeLocalLiveView work complete.");
@@ -150,7 +149,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
         ANS_LOGE("Wrong argument type. Number expected.");
         return nullptr;
     }
-    napi_get_value_int32(env, argv[PARAM1], &notificationId);    
+    napi_get_value_int32(env, argv[PARAM1], &notificationId);
     ANS_LOGI("notificationId = %{public}d", notificationId);
     asynccallbackinfo->notificationId = notificationId;
 
@@ -168,8 +167,9 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
     ANS_LOGI("enter");
     napi_ref callback = nullptr;
 
-    AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoSubscribeLocalLiveView {
-        .env = env, .asyncWork = nullptr,
+    AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoSubscribeLocalLiveView {
+            .env = env, .asyncWork = nullptr,
     };
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
@@ -200,7 +200,6 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
             asynccallbackinfo->info.errorCode =
                 NotificationHelper::TriggerLocalLiveView(asynccallbackinfo->bundleOption,
                     asynccallbackinfo->notificationId, asynccallbackinfo->buttonOption);
-
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGI("NapiSubscribeLocalLiveView work complete.");

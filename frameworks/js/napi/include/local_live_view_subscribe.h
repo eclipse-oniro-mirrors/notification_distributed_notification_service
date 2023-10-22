@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,7 +89,7 @@ static thread_local std::vector<LocalLiveViewSubscriberInstancesInfo> subscriber
 static std::mutex delMutex_;
 static std::vector<LocalLiveViewSubscriberInstance*> DeletingSubscriber;
 
-bool HasNotificationSubscriber(const napi_env &env, 
+bool HasNotificationSubscriber(const napi_env &env,
     const napi_value &value, LocalLiveViewSubscriberInstancesInfo &subscriberInfo);
 bool AddSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscriberInstancesInfo &subscriberInfo);
 bool DelSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscriberInstance *subscriber);

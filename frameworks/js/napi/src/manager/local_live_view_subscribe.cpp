@@ -165,7 +165,8 @@ void LocalLiveViewSubscriberInstance::SetCallbackInfo(const napi_env &env, const
     }
 }
 
-bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, LocalLiveViewSubscriberInstancesInfo &subscriberInfo)
+bool HasNotificationSubscriber(const napi_env &env, const napi_value &value,
+    LocalLiveViewSubscriberInstancesInfo &subscriberInfo)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto vec : subscriberInstances_) {

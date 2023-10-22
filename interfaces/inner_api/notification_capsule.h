@@ -56,7 +56,6 @@ public:
 
     void SetBackgroundColor(const std::string &color);
 
-
     /**
      * @brief Returns a string representation of the object.
      *
@@ -97,7 +96,6 @@ public:
     static NotificationCapsule *Unmarshalling(Parcel &parcel);
 
 private:
-
     /**
      * @brief Read a NotificationConversationalMessage object from a Parcel.
      *
