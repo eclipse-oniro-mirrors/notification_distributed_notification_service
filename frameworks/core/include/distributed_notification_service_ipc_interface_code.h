@@ -117,6 +117,9 @@ namespace Notification {
         ON_BADGE_CHANGED,
         // push_callback_interface
         ON_CHECK_NOTIFICATION,
+        ON_RESPONSE,
+        SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION,
+        TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION,
     };
 }
 }

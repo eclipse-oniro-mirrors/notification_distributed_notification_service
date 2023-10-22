@@ -62,6 +62,7 @@ public:
         CONTENT_INFORMATION,    // the notificatin type is content information
         OTHER,                  // the notificatin type is other
         CUSTOM,                 // the notification type is custom
+        LIVE_VIEW,              // the notification type is live view
     };
 
     enum class VisiblenessType {

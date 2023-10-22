@@ -21,6 +21,7 @@
 #include "ans_manager_death_recipient.h"
 #include "ans_manager_interface.h"
 #include "notification_subscriber.h"
+#include "notification_local_live_view_subscriber.h"
 
 namespace OHOS {
 namespace Notification {
@@ -298,6 +299,22 @@ public:
     ErrCode SubscribeNotification(const NotificationSubscriber &subscriber);
 
     /**
+     * @brief Subscribes to notifications from all applications. This method can be called only by applications
+     * with required system permissions.
+     * @note  To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     * notification. To subscribe to notifications published only by specified sources, for example, notifications from
+     *        certain applications, call the {SubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)}
+     * method.
+     *
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns subscribe notification result.
+     */
+    ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber);
+
+    /**
      * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only
      * by applications with required system permissions.
      * @note  After {subscribeInfo} is specified, a subscriber receives only the notifications that
@@ -346,6 +363,18 @@ public:
      * @return Returns unsubscribe notification result.
      */
     ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
+
+    /**
+     * @brief Trigger the local activity after the button has been clicked.
+     * @note Your application must have platform signature to use this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application whose notifications has been clicked.
+     * @param notificationId Indicates the id of the notification.
+     * @param buttonOption Indicates which button has been clicked.
+     * @return Returns trigger localLiveView result.
+     */
+    ErrCode TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
+        const int32_t notificationId, const NotificationButtonOption &buttonOption);
 
     /**
      * @brief Removes a specified removable notification of other applications.

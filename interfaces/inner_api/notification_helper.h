@@ -17,12 +17,14 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_HELPER_H
 
 #include "notification_bundle_option.h"
+#include "notification_button_option.h"
 #include "notification_do_not_disturb_date.h"
 #include "enabled_notification_callback_data.h"
 #include "notification_request.h"
 #include "notification_slot.h"
 #include "notification_sorting_map.h"
 #include "notification_subscriber.h"
+#include "notification_local_live_view_subscriber.h"
 
 namespace OHOS {
 namespace Notification {
@@ -320,6 +322,19 @@ public:
         const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo);
 
     /**
+     * @brief Subscribes the localLiveView button click. This method can be called only
+     * by applications with required system permissions.
+     * @note  To subscribe to a button click, inherit the {NotificationLocalLiveViewSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the button is clicked, subscribers that meet the filter criteria can receive the response
+     *
+     * @param subscriber Indicates the subscribers to receive notifications. This parameter must be specified.
+     *                   For details, see {NotificationSubscriber}.
+     * @return Returns subscribe notification result.
+     */
+    static ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber);
+
+    /**
      * @brief Unsubscribes from all notifications. This method can be called only by applications with required
      * system permissions.
      * @note Generally, you subscribe to a notification by calling the
@@ -348,6 +363,18 @@ public:
      * @return Returns unsubscribe notification result.
      */
     static ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
+
+    /**
+     * @brief Trigger the local activity after the button has been clicked.
+     * @note Your application must have platform signature to use this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application whose notifications has been clicked.
+     * @param notificationId Indicates the id of the notification.
+     * @param buttonOption Indicates which button has been clicked.
+     * @return Returns trigger localLiveView result.
+     */
+    static ErrCode TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
+        const int32_t notificationId, const NotificationButtonOption &buttonOption);
 
     /**
      * @brief Removes a specified removable notification of other applications.

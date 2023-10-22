@@ -20,6 +20,7 @@
 #include <map>
 
 #include "ans_manager_interface.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "distributed_notification_service_ipc_interface_code.h"
 #include "iremote_stub.h"
 
@@ -251,6 +252,18 @@ public:
     virtual ErrCode HasNotificationPolicyAccessPermission(bool &granted) override;
 
     /**
+     * @brief Trigger the local activity after the button has been clicked.
+     * @note Your application must have platform signature to use this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application whose notifications has been clicked.
+     * @param notificationId Indicates the id of the notification.
+     * @param buttonOption Indicates which button has been clicked.
+     * @return Returns trigger localLiveView result.
+     */
+    virtual ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
+        const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) override;
+
+    /**
      * @brief Delete notification.
      *
      * @param bundleOption Indicates the NotificationBundleOption of the notification.
@@ -390,6 +403,9 @@ public:
      */
     virtual ErrCode Subscribe(
         const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
+
+    virtual ErrCode SubscribeLocalLiveView(
+        const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
 
     /**
      * @brief Unsubscribes notifications.
@@ -760,6 +776,8 @@ private:
     ErrCode HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleTriggerLocalLiveView(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
