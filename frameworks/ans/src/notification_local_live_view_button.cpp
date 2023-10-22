@@ -155,7 +155,7 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
         auto member = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (member == nullptr) {
             buttonIcons_.clear();
-            ANS_LOGE("Failed to read LocalLiveViewButton %llu, %llu", it, vsize);
+            ANS_LOGE("Failed to read LocalLiveViewButton");
             return false;
         }
 

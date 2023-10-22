@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "ans_subscriber_interface.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "iremote_broker.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
@@ -247,6 +248,18 @@ public:
     virtual ErrCode HasNotificationPolicyAccessPermission(bool &granted) = 0;
 
     /**
+     * @brief Trigger the local live view after the button has been clicked.
+     * @note Your application must have platform signature to use this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application whose notifications has been clicked.
+     * @param notificationId Indicates the id of the notification.
+     * @param buttonOption Indicates which button has been clicked.
+     * @return Returns trigger localLiveView result.
+     */
+    virtual ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
+        const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) = 0;
+
+    /**
      * @brief Delete notification based on key.
      *
      * @param key Indicates the key to delete notification.
@@ -382,6 +395,16 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+        const sptr<NotificationSubscribeInfo> &info) = 0;
+
+    /**
+     * @brief Subscribes local live view notifications.
+     *
+     * @param subscriber Indicates the subscriber.
+     * @param info Indicates the NotificationSubscribeInfo object.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) = 0;
 
     /**

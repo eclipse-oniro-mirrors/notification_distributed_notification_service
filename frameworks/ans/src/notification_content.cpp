@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "notification_content.h"
 #include "ans_log_wrapper.h"
+#include "notification_local_live_view_content.h"
 
 namespace OHOS {
 namespace Notification {
@@ -84,6 +85,17 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationMedia
     content_ = mediaContent;
 }
 
+NotificationContent::NotificationContent(const std::shared_ptr<NotificationLocalLiveViewContent> &localLiveViewContent)
+{
+    if (!localLiveViewContent) {
+        ANS_LOGE("NotificationLocalLiveViewContent can not be null");
+        return;
+    }
+
+    contentType_ = NotificationContent::Type::LOCAL_LIVE_VIEW;
+    content_ = localLiveViewContent;
+}
+
 NotificationContent::~NotificationContent()
 {}
 
@@ -99,12 +111,14 @@ std::shared_ptr<NotificationBasicContent> NotificationContent::GetNotificationCo
 
 std::string NotificationContent::Dump()
 {
-    std::string contentTypeStr =   (contentType_ == NotificationContent::Type::BASIC_TEXT)   ? "BASIC_TEXT"
-                                 : (contentType_ == NotificationContent::Type::CONVERSATION) ? "CONVERSATION"
-                                 : (contentType_ == NotificationContent::Type::LONG_TEXT)    ? "LONG_TEXT"
-                                 : (contentType_ == NotificationContent::Type::MEDIA)        ? "MEDIA"
-                                 : (contentType_ == NotificationContent::Type::MULTILINE)    ? "MULTILINE"
-                                 : (contentType_ == NotificationContent::Type::PICTURE)      ? "PICTURE" : "NONE";
+    std::string contentTypeStr =   (contentType_ == NotificationContent::Type::BASIC_TEXT)          ? "BASIC_TEXT"
+                                 : (contentType_ == NotificationContent::Type::CONVERSATION)        ? "CONVERSATION"
+                                 : (contentType_ == NotificationContent::Type::LONG_TEXT)           ? "LONG_TEXT"
+                                 : (contentType_ == NotificationContent::Type::MEDIA)               ? "MEDIA"
+                                 : (contentType_ == NotificationContent::Type::MULTILINE)           ? "MULTILINE"
+                                 : (contentType_ == NotificationContent::Type::PICTURE)             ? "PICTURE"
+                                 : (contentType_ == NotificationContent::Type::LOCAL_LIVE_VIEW)     ? "LOCAL_LIVE_VIEW"
+                                    : "NONE";
 
     return "NotificationContent{ "
             "contentType = " + contentTypeStr +
@@ -227,6 +241,11 @@ bool NotificationContent::ReadFromParcel(Parcel &parcel)
             content_ = std::static_pointer_cast<NotificationBasicContent>(
                 std::shared_ptr<NotificationPictureContent>(parcel.ReadParcelable<NotificationPictureContent>()));
             break;
+        case NotificationContent::Type::LOCAL_LIVE_VIEW:
+            content_ = std::static_pointer_cast<NotificationBasicContent>(
+                std::shared_ptr<NotificationLocalLiveViewContent>(
+                    parcel.ReadParcelable<NotificationLocalLiveViewContent>()));
+            break;
         default:
             ANS_LOGE("Invalid contentType");
             return false;
@@ -276,6 +295,9 @@ bool NotificationContent::ConvertJsonToContent(NotificationContent *target, cons
             break;
         case NotificationContent::Type::PICTURE:
             pBasicContent = NotificationJsonConverter::ConvertFromJson<NotificationPictureContent>(contentObj);
+            break;
+        case NotificationContent::Type::LOCAL_LIVE_VIEW:
+            pBasicContent = NotificationJsonConverter::ConvertFromJson<NotificationLocalLiveViewContent>(contentObj);
             break;
         default:
             ANS_LOGE("Invalid contentType");
