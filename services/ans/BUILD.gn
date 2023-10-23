@@ -70,7 +70,7 @@ ohos_shared_library("libans") {
   defines = []
   cflags = []
 
-  deps = [ 
+  deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/icu/icu4c:shared_icuuc",
   ]
