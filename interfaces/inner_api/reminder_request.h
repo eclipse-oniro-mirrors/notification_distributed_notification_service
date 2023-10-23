@@ -295,7 +295,7 @@ public:
 
     /**
      * @brief Obtains bundle name
-     * 
+     *
      * @return bundle name
      */
     std::string GetBundleName() const;
@@ -349,7 +349,7 @@ public:
 
     /**
      * @brief Inites reminder bundle name when publish reminder success.
-     * 
+     *
      * @param bundleName Indicates the bundle name which the reminder belong to
      */
     void InitBundleName(const std::string &bundleName);

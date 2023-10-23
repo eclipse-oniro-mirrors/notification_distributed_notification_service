@@ -1769,7 +1769,7 @@ HWTEST_F(ReminderRequestTest, InitBundleName_00001, Function | SmallTest | Level
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string bundleName = "com.example.myapplication";
     rrc->InitBundleName(bundleName);
-    EXPECT_EQ(rrc->GetBundleName(), bundleName);                 
+    EXPECT_EQ(rrc->GetBundleName(), bundleName);
 }
 
 /**

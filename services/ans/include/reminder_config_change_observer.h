@@ -33,7 +33,7 @@ public:
 public:
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 };
-} // namespace Notification 
+} // namespace Notification
 } // namespace OHOS
 
 #endif

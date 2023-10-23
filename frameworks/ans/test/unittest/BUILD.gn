@@ -99,8 +99,8 @@ ohos_unittest("reminder_request_test") {
   ]
 
   sources = [
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_branch_test/mock_reminder_request.cpp",
     "${frameworks_module_ans_path}/test/unittest/mock/mock_resource_manager.cpp",
+    "${frameworks_module_ans_path}/test/unittest/reminder_request_branch_test/mock_reminder_request.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_request_test.cpp",
   ]
 

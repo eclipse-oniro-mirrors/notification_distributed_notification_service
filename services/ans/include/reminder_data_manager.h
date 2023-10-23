@@ -197,7 +197,7 @@ public:
 
     /**
      * @brief Update reminders based on the system language.
-     * 
+     *
      * Update action button title.
      */
     void UpdateReminderLanguage(const sptr<ReminderRequest> &reminder);

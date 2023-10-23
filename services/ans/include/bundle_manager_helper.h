@@ -88,7 +88,7 @@ public:
 
     /**
      * @brief Obtains bundle info by bundle name.
-     * 
+     *
      * @param bundleName Indicates the bundle name.
      * @param flag Indicates the bundle flag.
      * @param bundleInfo Indicates the bundle info.

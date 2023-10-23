@@ -612,7 +612,7 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
             buttonWantAgent->abilityName = singleButton.at(BUTTON_ABILITY_INDEX);
         }
         SetActionButton(singleButton.at(BUTTON_TITLE_INDEX),
-            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)), 
+            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)),
             singleButton.at(BUTTON_RESOURCE_INDEX), buttonWantAgent);
         ANSR_LOGI("RecoverButton title:%{public}s, resource:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
             singleButton.at(BUTTON_TITLE_INDEX).c_str(), singleButton.at(BUTTON_RESOURCE_INDEX).c_str(),
