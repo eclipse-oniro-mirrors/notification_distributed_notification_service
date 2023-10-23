@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,8 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -100,6 +102,20 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
             sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
             if (bundleOption != nullptr) {
                 callbacks_.onBundleDataCleared(bundleOption);
+            }
+        }
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
+        if (callbacks_.onBundleAdd != nullptr) {
+            sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
+            if (bundleOption != nullptr) {
+                callbacks_.onBundleAdd(bundleOption);
+            }
+        }
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
+        if (callbacks_.onBundleUpdate != nullptr) {
+            sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
+            if (bundleOption != nullptr) {
+                callbacks_.onBundleUpdate(bundleOption);
             }
         }
     }

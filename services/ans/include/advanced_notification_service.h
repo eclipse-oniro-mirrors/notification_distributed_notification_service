@@ -678,6 +678,20 @@ public:
     void OnResourceRemove(int32_t userId);
     void OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption);
 
+    /**
+     * @brief Obtains the event of bundle install.
+     *
+     * @param bundleOption Indicates the bundle info.
+     */
+    void OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains the event of bundle update.
+     *
+     * @param bundleOption Indicates the bundle info.
+     */
+    void OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption);
+
     // Distributed KvStore
 
     /**
@@ -731,6 +745,11 @@ public:
      * @brief Reset pushcallback proxy
      */
     void ResetPushCallbackProxy();
+
+    /**
+     * @brief Init The Default Installation Package Notification Enabled.
+     */
+    void InitNotificationEnableList();
 
 private:
     struct RecentInfo;
@@ -836,7 +855,8 @@ private:
     void SelfClean();
     ErrCode SetDefaultNotificationEnabled(
         const sptr<NotificationBundleOption> &bundleOption, bool enabled);
-
+    ErrCode CheckNotificationEnableStatus(bool &notificationEnable);
+    ErrCode PublishPreparedNotificationInner(const sptr<NotificationRequest> &request);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

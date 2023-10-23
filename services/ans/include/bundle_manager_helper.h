@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,7 @@ public:
 #endif
 
     /**
-     * @brief get bundle info by bundle name.
+     * @brief Obtains bundle info by bundle name.
      * 
      * @param bundleName Indicates the bundle name.
      * @param flag Indicates the bundle flag.
@@ -97,6 +97,16 @@ public:
      */
     bool GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
         int32_t userId, AppExecFwk::BundleInfo &bundleInfo);
+    
+    /**
+     * @brief Obtains BundleInfo of all bundles available in the system through the proxy object.
+     * @param flag Indicates the flag used to specify information contained in the BundleInfo that will be returned.
+     * @param bundleInfos Indicates all of the obtained BundleInfo objects.
+     * @param userId Indicates the user ID.
+     * @return Returns true if the BundleInfos is successfully obtained, returns false otherwise.
+     */
+    bool GetBundleInfos(
+        const AppExecFwk::BundleFlag flag, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
 
 private:
     void Connect();

@@ -272,6 +272,11 @@ class RdbStoreTest : public RdbStore {
         {
             return E_ERROR;
         };
+
+        virtual int Sync(const SyncOption& option, const AbsRdbPredicates& predicate, const AsyncDetail& async)
+        {
+            return E_ERROR;
+        };
         
         virtual int Sync(const SyncOption& option, const std::vector<std::string>& tables, const AsyncDetail& async)
         {
@@ -288,6 +293,16 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
+        virtual int RegisterAutoSyncCallback(std::shared_ptr<DetailProgressObserver> syncObserver)
+        {
+            return E_ERROR;
+        };
+
+        virtual int UnregisterAutoSyncCallback(std::shared_ptr<DetailProgressObserver> syncObserver)
+        {
+            return E_ERROR;
+        };
+
         virtual int Notify(const std::string &event)
         {
             return E_ERROR;
@@ -298,7 +313,7 @@ class RdbStoreTest : public RdbStore {
             return false;
         };
 
-        virtual std::map<PRIKey, Date> GetModifyTime(
+        virtual ModifyTime GetModifyTime(
             const std::string &table, const std::string &columnName, std::vector<PRIKey> &keys)
         {
             return {};
