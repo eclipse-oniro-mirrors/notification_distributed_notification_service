@@ -1841,25 +1841,25 @@ HWTEST_F(ReminderRequestTest, OnLanguageChange_00002, Function | SmallTest | Lev
             Notification::ReminderRequest::ActionButtonType::SNOOZE;
     rrc->SetActionButton(title, type, resource);
     // add button close
-    title = "this is title close"
+    title = "this is title close";
     resource = "close";
     type = Notification::ReminderRequest::ActionButtonType::CLOSE;
     rrc->SetActionButton(title, type, resource);
 
     // When
-    auto resMgr = std::make_shared<GLobal::Resource::ResourceManagerImpl>();
+    auto resMgr = std::make_shared<Global::Resource::ResourceManagerImpl>();
     resMgr->Init();
     rrc->OnLanguageChange(resMgr);
 
     // Then
     auto iter = rrc->actionButtonMap_.find(type);
     EXPECT_NE(iter, rrc->actionButtonMap_.end());
-    EXPECT_STREQ(iter->second.title, "CLOSE");
+    EXPECT_EQ(iter->second.title, "CLOSE");
 
     type = Notification::ReminderRequest::ActionButtonType::SNOOZE;
     iter = rrc->actionButtonMap_.find(type);
     EXPECT_NE(iter, rrc->actionButtonMap_.end());
-    EXPECT_STREQ(iter->second.title, "SNOOZE");
+    EXPECT_EQ(iter->second.title, "SNOOZE");
 }
 }
 }

@@ -33,11 +33,11 @@ ResourceManagerImpl::~ResourceManagerImpl() {}
 void ResourceManagerImpl::Init(bool en)
 {
     if (en) {
-        resources_.insert("snooze", "SNOOZE");
-        resources_.insert("close", "CLOSE");
+        resources_.emplace("snooze", "SNOOZE");
+        resources_.emplace("close", "CLOSE");
     } else {
-        resources_.insert("snooze", "延时");
-        resources_.insert("close", "关闭");
+        resources_.emplace("snooze", "延时");
+        resources_.emplace("close", "关闭");
     }
 }
 
