@@ -181,7 +181,7 @@ bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &b
 }
 #endif
 
-bool GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
+bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
     int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
 {
     std::lock_guard<std::mutex> lock(connectionMutex_);

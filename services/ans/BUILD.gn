@@ -102,7 +102,7 @@ ohos_shared_library("libans") {
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
-    "resource_management::global_resmgr",
+    "resource_management:global_resmgr",
     "time_service:time_client",
   ]
   external_deps += component_external_deps
