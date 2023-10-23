@@ -110,6 +110,11 @@ public:
         std::string abilityName = "";
     };
 
+    struct ButtonDataShareUpdate {
+        std::string uri = "";
+        std::string equalTo = "";
+        std::string valuesBucket = "";
+    };
     /**
      * @brief Attributes of action button.
      */
@@ -128,6 +133,10 @@ public:
          * The ability that is redirected to when the button is clicked.
          */
         std::shared_ptr<ButtonWantAgent> wantAgent;
+        /**
+         * The ability that is updata App rdb.
+         */
+        std::shared_ptr<ButtonDataShareUpdate> dataShareUpdate;
     };
 
     /**
@@ -450,7 +459,8 @@ public:
      * @return Current reminder self.
      */
     ReminderRequest& SetActionButton(const std::string &title, const ActionButtonType &type,
-        const std::shared_ptr<ButtonWantAgent> &buttonWantAgent = nullptr);
+        const std::shared_ptr<ButtonWantAgent> &buttonWantAgent = nullptr,
+        const std::shared_ptr<ButtonDataShareUpdate> &buttonDataShareUpdate = nullptr);
 
     /**
      * @brief Sets reminder content.
@@ -640,6 +650,7 @@ public:
     static int32_t GetUserId(const int32_t &uid);
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
+    static std::vector<std::string> StringSplit(std::string source, const std::string &split);
 
     static int32_t GLOBAL_ID;
     static const uint64_t INVALID_LONG_LONG_VALUE;
@@ -762,7 +773,6 @@ private:
     void SetMaxScreenWantAgent(AppExecFwk::ElementName &element);
     void SetState(bool deSet, const uint8_t newState, std::string function);
     void SetWantAgent(AppExecFwk::ElementName &element);
-    std::vector<std::string> StringSplit(std::string source, const std::string &split) const;
     void UpdateActionButtons(const bool &setSnooze);
     bool UpdateNextReminder(const bool &force);
     void UpdateNotificationContent(const bool &setSnooze);

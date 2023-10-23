@@ -64,8 +64,15 @@ const char* BUTTON_WANT_AGENT = "wantAgent";
 const char* BUTTON_WANT_AGENT_PKG = "pkgName";
 const char* BUTTON_WANT_AGENT_ABILITY = "abilityName";
 const char* BUTTON_WANT_AGENT_URI = "uri";
+const char* BUTTON_DATA_SHARE_UPDATE = "dataShareUpdate";
+const char* BUTTON_DATA_SHARE_UPDATE_URI = "uri";
+const char* BUTTON_DATA_SHARE_UPDATE_EQUALTO = "equalTo";
+const char* BUTTON_DATA_SHARE_UPDATE_VALUE = "value";
 const char* TAPDISMISSED = "tapDismissed";
 const char* AUTODELETEDTIME = "autoDeletedTime";
+const int INDEX_KEY = 0;
+const int INDEX_TYPE = 1;
+const int INDEX_VALUE = 2;
 }
 
 struct CallbackPromiseInfo {
@@ -156,6 +163,14 @@ private:
 
     static void GetButtonWantAgent(const napi_env &env, const napi_value &value,
         std::shared_ptr<ReminderRequest>& reminder, std::shared_ptr<ReminderRequest::ButtonWantAgent>& wantAgent);
+    static void GetButtonDataShareUpdate(const napi_env &env, const napi_value &value,
+        std::shared_ptr<ReminderRequest>& reminder,
+        std::shared_ptr<ReminderRequest::ButtonDataShareUpdate>& buttonDataShareUpdate);
+    static bool GetValueBucketObject(std::string &ValueBucketString, const napi_env &env, const napi_value &arg);
+    static std::string GetStringFromJS(const napi_env &env, const napi_value &param,
+        const std::string &defaultValue = "");
+    static std::string Convert2Value(const napi_env &env, const napi_value &value, bool &status, std::string &type);
+    static std::vector<uint8_t> Convert2U8Vector(const napi_env &env, const napi_value &input_array);
     static bool IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder);
 };
 }  // namespace OHOS

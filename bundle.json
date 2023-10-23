@@ -78,7 +78,8 @@
         "device_manager",
         "kv_store",
         "ffrt",
-        "device_standby"
+        "device_standby",
+        "data_share"
       ],
       "third_party": [
         "libuv"

@@ -27,6 +27,8 @@
 #include "reminder_request.h"
 #include "reminder_store.h"
 #include "reminder_timer_info.h"
+#include "datashare_predicates.h"
+#include "datashare_values_bucket.h"
 
 namespace OHOS {
 namespace Notification {
@@ -206,6 +208,40 @@ private:
     void AddToShowedReminders(const sptr<ReminderRequest> &reminder);
 
     void CancelAllReminders(const int32_t &userId);
+
+    /**
+     * @brief update app database.
+     *
+     * @param reminder Indicates the showed reminder.
+     * @param actionButtonType Button type of the button.
+     */
+    void UpdateAppDatabase(const sptr<ReminderRequest> &reminder,
+        const ReminderRequest::ActionButtonType &actionButtonType);
+
+    /**
+     * @brief generate Predicates for dataShare.
+     *
+     * @param predicates find fields from database.
+     * @param equalToVector Split from dataShareUpdate->equaleTo.
+     */
+    void GenPredicates(DataShare::DataSharePredicates &predicates, const std::vector<std::string> &equalToVector);
+
+    /**
+     * @brief generate ValuesBucket for dataShare.
+     *
+     * @param valuesBucket update fields at database.
+     * @param valuesBucketVector Split from dataShareUpdate->valuesBucket.
+     */
+    void GenValuesBucket(DataShare::DataShareValuesBucket &valuesBucket,
+        const std::vector<std::string> &valuesBucketVector);
+
+    /**
+     * @brief get bundleName from uri.
+     *
+     * @param dstBundleName The package name required to update the database.
+     * @param uri Database address.
+     */
+    void GenDstBundleName(std::string &dstBundleName, const std::string &uri) const;
 
     /**
      * @brief Cancels all the reminders of the target bundle or user.
