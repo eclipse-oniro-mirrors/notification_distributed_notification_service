@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "reminder_request.h"
+#include "mock_resource_manager_impl.h"
 #undef private
 #undef protected
 
@@ -1047,9 +1048,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00001, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
+    std::string resource = "invalid";
     Notification::ReminderRequest::ActionButtonType type =
             Notification::ReminderRequest::ActionButtonType::INVALID;
-    reminderRequestChild->SetActionButton(title, type);
+    reminderRequestChild->SetActionButton(title, type, resource);
 }
 
 /**
@@ -1063,9 +1065,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00002, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
+    std::string resource = "close";
     Notification::ReminderRequest::ActionButtonType type2 =
             Notification::ReminderRequest::ActionButtonType::CLOSE;
-    reminderRequestChild->SetActionButton(title, type2);
+    reminderRequestChild->SetActionButton(title, type2, resource);
 }
 
 /**
@@ -1079,9 +1082,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00003, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
+    std::string resource = "snooze";
     Notification::ReminderRequest::ActionButtonType type3 =
             Notification::ReminderRequest::ActionButtonType::SNOOZE;
-    reminderRequestChild->SetActionButton(title, type3);
+    reminderRequestChild->SetActionButton(title, type3, resource);
 }
 
 /**
@@ -1752,6 +1756,110 @@ HWTEST_F(ReminderRequestTest, SetCustomButtonUri_00001, Function | SmallTest | L
     std::string result = rrc->GetCustomButtonUri();
     std::string ret = "test";
     EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: InitBundleName_00001
+ * @tc.desc: Test InitBundleName with normal parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI89858
+ */
+HWTEST_F(ReminderRequestTest, InitBundleName_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string bundleName = "com.example.myapplication";
+    rrc->InitBundleName(bundleName);
+    EXPECT_EQ(rrc->GetBundleName(), bundleName);                 
+}
+
+/**
+ * @tc.name: InitBundleName_00002
+ * @tc.desc: Test InitBundleName with special parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI89858
+ */
+HWTEST_F(ReminderRequestTest, InitBundleName_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string bundleName = "com.example.myapplication.~!@#$%^&*()";
+    rrc->InitBundleName(bundleName);
+    EXPECT_EQ(rrc->GetBundleName(), bundleName);
+}
+
+/**
+ * @tc.name: OnLanguageChange_00001
+ * @tc.desc: Test OnLanguageChange with zh_CN.
+ * @tc.type: FUNC
+ * @tc.require: issueI89858
+ */
+HWTEST_F(ReminderRequestTest, OnLanguageChange_00001, Function | SmallTest | Level1)
+{
+    // Given
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    // add button snooze
+    std::string title = "this is title snooze";
+    std::string resource = "snooze";
+    Notification::ReminderRequest::ActionButtonType type =
+            Notification::ReminderRequest::ActionButtonType::SNOOZE;
+    rrc->SetActionButton(title, type, resource);
+    // add button close
+    title = "this is title close"
+    resource = "close";
+    type = Notification::ReminderRequest::ActionButtonType::CLOSE;
+    rrc->SetActionButton(title, type, resource);
+
+    // When
+    auto resMgr = std::make_shared<GLobal::Resource::ResourceManagerImpl>();
+    resMgr->Init();
+    rrc->OnLanguageChange(resMgr);
+
+    // Then
+    auto iter = rrc->actionButtonMap_.find(type);
+    EXPECT_NE(iter, rrc->actionButtonMap_.end());
+    EXPECT_STREQ(iter->second.title, "关闭");
+
+    type = Notification::ReminderRequest::ActionButtonType::SNOOZE;
+    iter = rrc->actionButtonMap_.find(type);
+    EXPECT_NE(iter, rrc->actionButtonMap_.end());
+    EXPECT_STREQ(iter->second.title, "延时");
+}
+
+/**
+ * @tc.name: OnLanguageChange_00002
+ * @tc.desc: Test OnLanguageChange with en_US.
+ * @tc.type: FUNC
+ * @tc.require: issueI89858
+ */
+HWTEST_F(ReminderRequestTest, OnLanguageChange_00002, Function | SmallTest | Level1)
+{
+    // Given
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    // add button snooze
+    std::string title = "this is title snooze";
+    std::string resource = "snooze";
+    Notification::ReminderRequest::ActionButtonType type =
+            Notification::ReminderRequest::ActionButtonType::SNOOZE;
+    rrc->SetActionButton(title, type, resource);
+    // add button close
+    title = "this is title close"
+    resource = "close";
+    type = Notification::ReminderRequest::ActionButtonType::CLOSE;
+    rrc->SetActionButton(title, type, resource);
+
+    // When
+    auto resMgr = std::make_shared<GLobal::Resource::ResourceManagerImpl>();
+    resMgr->Init();
+    rrc->OnLanguageChange(resMgr);
+
+    // Then
+    auto iter = rrc->actionButtonMap_.find(type);
+    EXPECT_NE(iter, rrc->actionButtonMap_.end());
+    EXPECT_STREQ(iter->second.title, "CLOSE");
+
+    type = Notification::ReminderRequest::ActionButtonType::SNOOZE;
+    iter = rrc->actionButtonMap_.find(type);
+    EXPECT_NE(iter, rrc->actionButtonMap_.end());
+    EXPECT_STREQ(iter->second.title, "SNOOZE");
 }
 }
 }
