@@ -1810,7 +1810,7 @@ HWTEST_F(ReminderRequestTest, OnLanguageChange_00001, Function | SmallTest | Lev
 
     // When
     auto resMgr = std::make_shared<Global::Resource::ResourceManagerImpl>();
-    resMgr->Init();
+    resMgr->Init(false);
     rrc->OnLanguageChange(resMgr);
 
     // Then
