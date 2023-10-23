@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ public:
      * @param subscribeInfo Indicates the NotificationSubscribeInfo object.
      * @return Indicates the result code.
      */
-    ErrCode RemoveLocalLiveViewSubscriber(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, 
+    ErrCode RemoveLocalLiveViewSubscriber(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -65,7 +65,7 @@ public:
      * @param notification Indicates the Notification object.
      * @param buttonOption Indicates the buttonOption object.
      */
-    void NotifyTriggerResponse(const sptr<Notification> &notification, 
+    void NotifyTriggerResponse(const sptr<Notification> &notification,
         const sptr<NotificationButtonOption> &buttonOption);
 
     /**
@@ -87,15 +87,15 @@ private:
     std::shared_ptr<LocalLiveViewSubscriberRecord> FindSubscriberRecord(
         const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber);
     std::shared_ptr<LocalLiveViewSubscriberRecord> CreateSubscriberRecord(
-        const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, 
+        const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationBundleOption> &bundleOption);
     
-    ErrCode AddSubscriberInner(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, 
+    ErrCode AddSubscriberInner(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationBundleOption> &bundleOption);
-    ErrCode RemoveSubscriberInner(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, 
+    ErrCode RemoveSubscriberInner(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
-    void NotifyTriggerResponseInner(const sptr<Notification> &notification, 
+    void NotifyTriggerResponseInner(const sptr<Notification> &notification,
         sptr<NotificationButtonOption> buttonOption);
     bool IsSystemUser(int32_t userId);
 
