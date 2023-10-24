@@ -38,6 +38,7 @@ const int32_t BUTTON_TYPE_INDEX = 0;
 const int32_t BUTTON_TITLE_INDEX = 1;
 const int32_t BUTTON_PKG_INDEX = 2;
 const int32_t BUTTON_ABILITY_INDEX = 3;
+const int32_t WANT_AGENT_URI_INDEX = 2;
 }
 
 int32_t ReminderRequest::GLOBAL_ID = 0;
@@ -647,7 +648,7 @@ void ReminderRequest::RecoverWantAgent(const std::string &wantAgentInfo, const u
             wai->pkgName = info.at(0);
             wai->abilityName = info.at(1);
             if (info.size() > minLen) {
-                wai->uri = info.at(2);
+                wai->uri = info.at(WANT_AGENT_URI_INDEX);
             }
             SetWantAgentInfo(wai);
             break;
@@ -1656,7 +1657,7 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
     } else {
         // the reminder has already snoozed by period arithmetic, when the ring duration is over.
         extendContent = expiredContent_;
-    }   
+    }
     if (extendContent == "") {
         displayContent_ = content_;
     } else {
