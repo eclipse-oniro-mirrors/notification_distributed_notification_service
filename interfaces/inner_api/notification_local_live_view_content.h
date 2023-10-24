@@ -40,11 +40,23 @@ public:
     void SetType(int32_t type);
 
     /*
+     * @brief Get the type of a local live view notification.
+     *
+     */
+    int32_t GetType();
+
+    /*
      * @brief Sets the capsule to be included in a local live view notification.
      *
      * @param capsule Indicates the type to be included.
      */
     void SetCapsule(NotificationCapsule capsule);
+
+    /*
+     * @brief Get the capsule of a local live view notification.
+     *
+     */
+    NotificationCapsule GetCapsule();
 
     /*
      * @brief Sets the button to be included in a local live view notification.
@@ -54,12 +66,24 @@ public:
     void SetButton(NotificationLocalLiveViewButton button);
 
     /*
+     * @brief Get the button of a local live view notification.
+     *
+     */
+    NotificationLocalLiveViewButton GetButton();
+
+    /*
      * @brief Sets the progress to be included in a local live view notification.
      *
      * @param progress Indicates the type to be included.
      
      */
     void SetProgress(NotificationProgress progress);
+
+    /*
+     * @brief Get the progress of a local live view notification.
+     *
+     */
+    NotificationProgress GetProgress();
 
     /**
      * @brief Returns a string representation of the object.

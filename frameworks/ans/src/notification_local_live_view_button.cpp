@@ -47,7 +47,7 @@ void NotificationLocalLiveViewButton::addSingleButtonName(const std::string &but
     buttonNames_.emplace_back(buttonName);
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> NotificationLocalLiveViewButton::GetAllButtonIcon() const
+std::vector<std::shared_ptr<Media::PixelMap>> NotificationLocalLiveViewButton::GetAllButtonIcons() const
 {
     return buttonIcons_;
 }

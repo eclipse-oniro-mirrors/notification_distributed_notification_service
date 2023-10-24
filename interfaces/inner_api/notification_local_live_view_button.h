@@ -45,7 +45,7 @@ public:
      *
      * @return Returns the time when this message arrived.
      */
-    std::vector<std::shared_ptr<Media::PixelMap>> GetAllButtonIcon() const;
+    std::vector<std::shared_ptr<Media::PixelMap>> GetAllButtonIcons() const;
 
     void addSingleButtonIcon(std::shared_ptr<Media::PixelMap> &icon);
 

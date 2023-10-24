@@ -56,6 +56,7 @@ napi_value SlotTypeInit(napi_env env, napi_value exports)
     SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::SOCIAL_COMMUNICATION, "SOCIAL_COMMUNICATION");
     SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::SERVICE_INFORMATION, "SERVICE_INFORMATION");
     SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::CONTENT_INFORMATION, "CONTENT_INFORMATION");
+    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::LIVE_VIEW, "LIVE_VIEW");
     SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::OTHER_TYPES, "OTHER_TYPES");
 
     napi_property_descriptor exportFuncs[] = {

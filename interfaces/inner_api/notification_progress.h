@@ -50,9 +50,9 @@ public:
      *
      * @return Returns the message sender.
      */
-    int32_t GetIsPercentage() const;
+    bool GetIsPercentage() const;
 
-    void SetIsPercentage(int32_t isPercentage);
+    void SetIsPercentage(bool isPercentage);
 
     /**
      * @brief Returns a string representation of the object.
@@ -105,7 +105,7 @@ private:
 private:
     int32_t maxValue_ {0};
     int32_t currentValue_ {0};
-    int32_t isPercentage_ {0};
+    bool isPercentage_ {true};
 };
 }  // namespace Notification
 }  // namespace OHOS
