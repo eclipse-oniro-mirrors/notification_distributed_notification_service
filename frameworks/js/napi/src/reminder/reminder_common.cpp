@@ -482,7 +482,7 @@ napi_value ReminderCommon::CreateReminderAlarm(
     // daysOfWeek
     std::vector<uint8_t> daysOfWeek;
     uint8_t maxDaysOfWeek = 7;
-    if (ParseInt32Array(env, value, ReminderAgentNapi::ALARM_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
+    if (ParseInt32Array(env, value, ReminderAgentNapi::REPEAT_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
         return nullptr;
     }
     reminder = std::make_shared<ReminderRequestAlarm>(
@@ -531,6 +531,13 @@ napi_value ReminderCommon::CreateReminderCalendar(
         return nullptr;
     }
 
+    // daysOfWeek
+    std::vector<uint8_t> daysOfWeek;
+    uint8_t maxDaysOfWeek = 7;
+    if (ParseInt32Array(env, value, ReminderAgentNapi::REPEAT_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
+        return nullptr;
+    }
+
     tm dateTime;
     dateTime.tm_year = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::YEAR, propertyYearVal);
     dateTime.tm_mon = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::MONTH, propertyMonthVal);
@@ -539,7 +546,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     dateTime.tm_min = propertyMinteVal;
     dateTime.tm_sec = 0;
     dateTime.tm_isdst = -1;
-    reminder = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays);
+    reminder = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     if (!(reminder->SetNextTriggerTime())) {
         return nullptr;
     }

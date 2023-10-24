@@ -29,17 +29,21 @@ namespace OHOS {
         constexpr uint16_t MINUTES = 60;
         constexpr uint16_t SECONDS = 60;
         constexpr uint8_t ENABLE = 2;
+        constexpr uint8_t WEEK = 7;
     }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         struct tm nowTime;
         uint8_t months = *data % MONTHS;
         uint8_t days = *data % DAYS;
+        uint8_t weeks = *data % WEEK;
         std::vector<uint8_t> repeatMonths;
         std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek;
+        daysOfWeek.push_back(weeks);
         repeatMonths.push_back(months);
         repeatDays.push_back(days);
-        Notification::ReminderRequestCalendar reminderRequestCalendar(nowTime, repeatMonths, repeatDays);
+        Notification::ReminderRequestCalendar reminderRequestCalendar(nowTime, repeatMonths, repeatDays, daysOfWeek);
         // test SetNextTriggerTime function
         reminderRequestCalendar.SetNextTriggerTime();
         // test InitDateTime function
@@ -51,6 +55,8 @@ namespace OHOS {
         reminderRequestCalendar.SetDay(days, enabled);
         // test SetMonth function
         reminderRequestCalendar.SetMonth(months, enabled);
+        // test SetRepeatDaysOfWeek function
+        reminderRequestCalendar.SetRepeatDaysOfWeek(enabled, daysOfWeek);
         // test SetRepeatMonths function
         reminderRequestCalendar.SetRepeatMonths(repeatMonths);
         // test SetRepeatDaysOfMonth function

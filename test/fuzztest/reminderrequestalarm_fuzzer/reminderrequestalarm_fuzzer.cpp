@@ -35,9 +35,9 @@ namespace OHOS {
         std::vector<uint8_t> daysOfWeek;
         daysOfWeek.push_back(week);
         auto rrc = std::make_shared<Notification::ReminderRequestAlarm>(hour, minute, daysOfWeek);
-        // test SetDaysOfWeek function
+        // test SetRepeatDaysOfWeek function
         bool enabled = *data % ENABLE;
-        rrc->SetDaysOfWeek(enabled, daysOfWeek);
+        rrc->SetRepeatDaysOfWeek(enabled, daysOfWeek);
         // test GetDaysOfWeek function
         rrc->GetDaysOfWeek();
         // test CheckParamValid function
@@ -48,20 +48,17 @@ namespace OHOS {
         rrc->PreGetNextTriggerTimeIgnoreSnooze(enabled, enabled);
         // test GetNextTriggerTime function
         rrc->GetNextTriggerTime(enabled);
-        // test GetNextAlarm function
+        // test GetNextDaysOfWeek function
         time_t now;
         (void)time(&now);  // unit is seconds.
         time_t target = *data % ENABLE;
-        rrc->GetNextAlarm(now, target);
-        // test IsRepeatDay function
-        int32_t day = static_cast<int32_t>(GetU32Data(data));
-        rrc->IsRepeatDay(day);
+        rrc->GetNextDaysOfWeek(now, target);
         // test GetHour function
         rrc->GetHour();
         // test GetMinute function
         rrc->GetMinute();
-        // test GetRepeatDay function
-        rrc->GetRepeatDay();
+        // test GetRepeatDaysOfWeek function
+        rrc->GetRepeatDaysOfWeek();
         // test OnDateTimeChange function
         rrc->OnDateTimeChange();
         // test OnTimeZoneChange function

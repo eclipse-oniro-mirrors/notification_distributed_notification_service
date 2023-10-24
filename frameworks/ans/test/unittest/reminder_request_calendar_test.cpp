@@ -56,9 +56,11 @@ public:
         nowTime.tm_min = 1;
         std::vector<uint8_t> repeatMonths;
         std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek;
         repeatMonths.push_back(1);
         repeatDays.push_back(1);
-        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+        daysOfWeek.push_back(1);
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
         calendar->SetNextTriggerTime();
         return calendar;
     }
@@ -145,9 +147,11 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00400, Function | SmallTest |
 
     std::vector<uint8_t> repeatMonths;
     std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(1);
     repeatMonths.push_back(1);
     repeatDays.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     std::vector<uint8_t> actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatMonths, actualRepeatMonths))
@@ -155,7 +159,7 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00400, Function | SmallTest |
 
     repeatMonths.clear();
     repeatMonths.push_back(12);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatMonths, actualRepeatMonths))
@@ -165,7 +169,7 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00400, Function | SmallTest |
     for (uint8_t i = 1; i <= 12; i++) {
         repeatMonths.push_back(i);
     }
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatMonths, actualRepeatMonths))
@@ -188,16 +192,18 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00500, Function | SmallTest |
     nowTime.tm_year += 1;
     std::vector<uint8_t> repeatMonth;
     std::vector<uint8_t> repeatDay;
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(1);
     repeatMonth.push_back(-1);
     repeatDay.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay);
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay, daysOfWeek);
     calendar->SetNextTriggerTime();
     std::vector<uint8_t> actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with -1 error.";
 
     repeatMonth.clear();
     repeatMonth.push_back(13);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay);
+    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay, daysOfWeek);
     calendar->SetNextTriggerTime();
     actualRepeatMonths = calendar->GetRepeatMonths();
     EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with 13 error.";
@@ -218,9 +224,11 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00600, Function | SmallTest |
     tm nowTime = *tmp;
     std::vector<uint8_t> repeatMonths;
     std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(1);
     repeatMonths.push_back(1);
     repeatDays.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     std::vector<uint8_t> actualRepeatDays = calendar->GetRepeatDays();
     EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatDays, actualRepeatDays))
@@ -228,7 +236,7 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00600, Function | SmallTest |
 
     repeatDays.clear();
     repeatDays.push_back(31);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     actualRepeatDays = calendar->GetRepeatDays();
     EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatDays, actualRepeatDays))
@@ -238,7 +246,7 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00600, Function | SmallTest |
     for (uint8_t i = 1; i <= 31; i++) {
         repeatDays.push_back(i);
     }
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     actualRepeatDays = calendar->GetRepeatDays();
     EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatDays, actualRepeatDays))
@@ -261,16 +269,18 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00700, Function | SmallTest |
     nowTime.tm_year += 1;
     std::vector<uint8_t> repeatMonths;
     std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(-1);
     repeatMonths.push_back(-1);
     repeatDays.push_back(-1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     std::vector<uint8_t> actualRepeatDays = calendar->GetRepeatDays();
     EXPECT_TRUE(actualRepeatDays.size() == 0) << "Set repeat day with -1 error.";
 
     repeatDays.clear();
     repeatDays.push_back(32);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetNextTriggerTime();
     actualRepeatDays = calendar->GetRepeatDays();
     EXPECT_TRUE(actualRepeatDays.size() == 0) << "Set repeat day with 32 error.";
@@ -418,9 +428,11 @@ HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_02000, F
     nowTime.tm_year += 1;
     std::vector<uint8_t> repeatMonths;
     std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(-1);
     repeatMonths.push_back(-1);
-    repeatDays.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays);
+    repeatDays.push_back(-1);
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext), 0);
 }
 
@@ -641,6 +653,10 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00001, Function | Small
     uint8_t month = 1;
     calendar->SetMonth(month, isSet);
 
+    std::vector<uint8_t> repeatDaysOfWeek;
+    repeatDaysOfWeek.push_back(1);
+    calendar->SetRepeatDaysOfWeek(isSet, repeatDaysOfWeek);
+
     auto rrc = std::make_shared<ReminderRequest>();
     rrc->SetSnoozeTimes(0);
     EXPECT_EQ(rrc->GetSnoozeTimes(), 0) << "Get snoozeTimes not 1";
@@ -654,8 +670,10 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00001, Function | Small
 
     uint32_t ret = calendar->GetRepeatDay();
     uint16_t ret2 = calendar->GetRepeatMonth();
+    uint8_t ret3 = calendar->GetRepeatMonth();
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(ret2, 0);
+    EXPECT_EQ(ret3, 0);
 
     bool result3 = calendar->UpdateNextReminder();
     EXPECT_EQ(result3, false);

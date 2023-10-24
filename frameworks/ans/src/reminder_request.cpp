@@ -65,7 +65,11 @@ const std::string ReminderRequest::PARAM_REMINDER_ID = "REMINDER_ID";
 const std::string ReminderRequest::SEP_BUTTON_SINGLE = "<SEP,/>";
 const std::string ReminderRequest::SEP_BUTTON_MULTI = "<SEP#/>";
 const std::string ReminderRequest::SEP_WANT_AGENT = "<SEP#/>";
-const int32_t ReminderRequest::SUNDAY = 7;
+const uint8_t ReminderRequest::DAYS_PER_WEEK = 7;
+const uint8_t ReminderRequest::MONDAY = 1;
+const uint8_t ReminderRequest::SUNDAY = 7;
+const uint8_t ReminderRequest::HOURS_PER_DAY = 24;
+const uint16_t ReminderRequest::SECONDS_PER_HOUR = 3600;
 
 // For database recovery.
 const std::string ReminderRequest::REMINDER_ID = "reminder_id";
@@ -99,6 +103,7 @@ const std::string ReminderRequest::AGENT = "agent";
 const std::string ReminderRequest::MAX_SCREEN_AGENT = "maxScreen_agent";
 const std::string ReminderRequest::TAP_DISMISSED = "tapDismissed";
 const std::string ReminderRequest::AUTO_DELETED_TIME = "autoDeletedTime";
+const std::string ReminderRequest::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
 
 std::string ReminderRequest::sqlOfAddColumns = "";
 std::vector<std::string> ReminderRequest::columns;
@@ -135,6 +140,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->tapDismissed_= other.tapDismissed_;
     this->autoDeletedTime_ = other.autoDeletedTime_;
     this->customButtonUri_ = other.customButtonUri_;
+    this->repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -536,6 +542,8 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
     // state
     state_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, STATE, DbRecoveryType::INT));
 
+    //repeatDaysOfWeek_
+    repeatDaysOfWeek_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, REPEAT_DAYS_OF_WEEK, DbRecoveryType::INT));
     // action buttons
     RecoverActionButton(resultSet);
 
@@ -1067,6 +1075,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write state");
         return false;
     }
+    if (!parcel.WriteUint8(repeatDaysOfWeek_)) {
+        ANSR_LOGE("Failed to write repeatDaysOfWeek");
+        return false;
+    }
 
     // write enum
     if (!parcel.WriteUint8(static_cast<uint8_t>(reminderType_))) {
@@ -1222,6 +1234,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     }
     if (!parcel.ReadUint8(state_)) {
         ANSR_LOGE("Failed to read state");
+        return false;
+    }
+    if (!parcel.ReadUint8(repeatDaysOfWeek_)) {
+        ANSR_LOGE("Failed to read repeatDaysOfWeek");
         return false;
     }
 
@@ -1656,7 +1672,7 @@ void ReminderRequest::UpdateNotificationContent(const bool &setSnooze)
     } else {
         // the reminder has already snoozed by period arithmetic, when the ring duration is over.
         extendContent = expiredContent_;
-    }   
+    }
     if (extendContent == "") {
         displayContent_ = content_;
     } else {
@@ -1772,6 +1788,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(CONTENT, reminder->GetContent());
     values.PutString(SNOOZE_CONTENT, reminder->GetSnoozeContent());
     values.PutString(EXPIRED_CONTENT, reminder->GetExpiredContent());
+    values.PutInt(REPEAT_DAYS_OF_WEEK, reminder->GetRepeatDaysOfWeek());
     auto wantAgentInfo = reminder->GetWantAgentInfo();
     if (wantAgentInfo == nullptr) {
         std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null" + ReminderRequest::SEP_WANT_AGENT + "null";
@@ -1826,6 +1843,7 @@ void ReminderRequest::InitDbColumns()
     AddColumn(MAX_SCREEN_AGENT, "TEXT", false);
     AddColumn(TAP_DISMISSED, "TEXT", false);
     AddColumn(AUTO_DELETED_TIME, "BIGINT", false);
+    AddColumn(REPEAT_DAYS_OF_WEEK, "INT", false);
 }
 
 void ReminderRequest::AddColumn(
@@ -1837,6 +1855,101 @@ void ReminderRequest::AddColumn(
     } else {
         sqlOfAddColumns += name + " " + type;
     }
+}
+
+int64_t ReminderRequest::GetNextDaysOfWeek(const time_t now, const time_t target) const
+{
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    int32_t today = GetActualTime(TimeTransferType::WEEK, nowTime.tm_wday);
+    int32_t dayCount = now >= target ? 1 : 0;
+    for (; dayCount <= DAYS_PER_WEEK; dayCount++) {
+        int32_t day = (today + dayCount) % DAYS_PER_WEEK;
+        day = (day == 0) ? SUNDAY : day;
+        if (IsRepeatDaysOfWeek(day)) {
+            break;
+        }
+    }
+    ANSR_LOGI("NextDayInterval is %{public}d", dayCount);
+    time_t nextTriggerTime = target + dayCount * HOURS_PER_DAY * SECONDS_PER_HOUR;
+    return GetTriggerTime(now, nextTriggerTime);
+}
+
+bool ReminderRequest::IsRepeatDaysOfWeek(int32_t day) const
+{
+    return (repeatDaysOfWeek_ & (1 << (day - 1))) > 0;
+}
+
+time_t ReminderRequest::GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const
+{
+    time_t triggerTime = nextTriggerTime;
+    struct tm nowLocal;
+    struct tm nextLocal;
+    (void)localtime_r(&now, &nowLocal);
+    (void)localtime_r(&nextTriggerTime, &nextLocal);
+    if (nowLocal.tm_isdst == 0 && nextLocal.tm_isdst > 0) {
+        triggerTime -= SECONDS_PER_HOUR;
+    } else if (nowLocal.tm_isdst > 0 && nextLocal.tm_isdst == 0) {
+        triggerTime += SECONDS_PER_HOUR;
+    }
+    return triggerTime;
+}
+
+uint8_t ReminderRequest::GetRepeatDaysOfWeek() const
+{
+    return repeatDaysOfWeek_;
+}
+
+void ReminderRequest::SetRepeatDaysOfWeek(bool set, std::vector<uint8_t> daysOfWeek)
+{
+    if (daysOfWeek.size() == 0) {
+        return;
+    }
+    if (daysOfWeek.size() > DAYS_PER_WEEK) {
+        ANSR_LOGE("The length of daysOfWeek should not larger than 7");
+        return;
+    }
+    for (std::vector<uint8_t>::iterator it = daysOfWeek.begin(); it != daysOfWeek.end(); ++it) {
+        if (*it < MONDAY || *it > SUNDAY) {
+            continue;
+        }
+        if (set) {
+            repeatDaysOfWeek_ |= 1 << (*it - 1);
+        } else {
+            repeatDaysOfWeek_ &= ~(1 << (*it - 1));
+        }
+    }
+}
+
+std::vector<int32_t> ReminderRequest::GetDaysOfWeek() const
+{
+    std::vector<int32_t> repeatDays;
+    int32_t days[] = {1, 2, 3, 4, 5, 6, 7};
+    int32_t len = sizeof(days) / sizeof(int32_t);
+    for (int32_t i = 0; i < len; i++) {
+        if (IsRepeatDaysOfWeek(days[i])) {
+            repeatDays.push_back(days[i]);
+        }
+    }
+    return repeatDays;
+}
+
+uint64_t ReminderRequest::GetTriggerTime(const time_t now, const time_t nextTriggerTime) const
+{
+    time_t triggerTime = GetTriggerTimeWithDST(now, nextTriggerTime);
+    struct tm test;
+    (void)localtime_r(&triggerTime, &test);
+    ANSR_LOGI("NextTriggerTime: year=%{public}d, mon=%{public}d, day=%{public}d, hour=%{public}d, "
+        "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
+        GetActualTime(TimeTransferType::YEAR, test.tm_year),
+        GetActualTime(TimeTransferType::MONTH, test.tm_mon),
+        test.tm_mday, test.tm_hour, test.tm_min, test.tm_sec,
+        GetActualTime(TimeTransferType::WEEK, test.tm_wday), (long long)triggerTime);
+
+    if (static_cast<int64_t>(triggerTime) <= 0) {
+        return 0;
+    }
+    return GetDurationSinceEpochInMilli(triggerTime);
 }
 }
 }

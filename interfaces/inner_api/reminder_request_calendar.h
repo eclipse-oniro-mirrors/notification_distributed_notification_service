@@ -49,8 +49,8 @@ public:
      *                   the value {2, 4} indicates that the reminder will be triggered on the second
      *                   and fourth day of the specific months.
      */
-    ReminderRequestCalendar(const tm &dateTime,
-        const std::vector<uint8_t> &repeatMonths, const std::vector<uint8_t> &repeatDays);
+    ReminderRequestCalendar(const tm &dateTime, const std::vector<uint8_t> &repeatMonths,
+        const std::vector<uint8_t> &repeatDays, const std::vector<uint8_t> &daysOfWeek);
 
     /**
      * @brief This constructor should only be used in background proxy service process

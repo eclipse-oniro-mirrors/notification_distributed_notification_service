@@ -301,7 +301,8 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0300, Function | MediumTe
     tm dateTime {};
     std::vector<uint8_t> repeatMonths;
     std::vector<uint8_t> repeatDays;
-    ReminderRequestCalendar reminder = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays);
+    std::vector<uint8_t> daysOfWeek;
+    ReminderRequestCalendar reminder = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays, daysOfWeek);
     ErrCode ret = ans_->PublishReminder(reminder);
     int errorcode = 201;
     EXPECT_EQ(ret, errorcode);

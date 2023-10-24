@@ -20,17 +20,10 @@
 
 namespace OHOS {
 namespace Notification {
-const uint8_t ReminderRequestAlarm::DAYS_PER_WEEK = 7;
-const uint8_t ReminderRequestAlarm::MONDAY = 1;
-const uint8_t ReminderRequestAlarm::SUNDAY = 7;
-const uint8_t ReminderRequestAlarm::HOURS_PER_DAY = 24;
-const uint16_t ReminderRequestAlarm::SECONDS_PER_HOUR = 3600;
 const uint8_t ReminderRequestAlarm::MINUTES_PER_HOUR = 60;
-const int8_t ReminderRequestAlarm::INVALID_INT_VALUE = -1;
 const int8_t ReminderRequestAlarm::DEFAULT_SNOOZE_TIMES = 3;
 
 // For database recovery.
-const std::string ReminderRequestAlarm::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
 const std::string ReminderRequestAlarm::ALARM_HOUR = "alarm_hour";
 const std::string ReminderRequestAlarm::ALARM_MINUTE = "alarm_minute";
 
@@ -41,7 +34,7 @@ ReminderRequestAlarm::ReminderRequestAlarm(uint8_t hour, uint8_t minute, const s
     hour_ = hour;
     minute_ = minute;
     CheckParamValid();
-    SetDaysOfWeek(true, daysOfWeek);
+    SetRepeatDaysOfWeek(true, daysOfWeek);
     SetTriggerTimeInMilli(GetNextTriggerTime(true));
 }
 
@@ -49,8 +42,7 @@ ReminderRequestAlarm::ReminderRequestAlarm(const ReminderRequestAlarm &other) : 
 {
     this->hour_ = other.hour_;
     this->minute_ = other.minute_;
-    this->repeatDays_ = other.repeatDays_;
-    ANSR_LOGD("hour_=%{public}d, minute_=%{public}d, repeatDays_=%{public}d", hour_, minute_, repeatDays_);
+    ANSR_LOGD("hour_=%{public}d, minute_=%{public}d, repeatDaysOfWeek_=%{public}d", hour_, minute_, other.repeatDaysOfWeek_);
 }
 
 void ReminderRequestAlarm::CheckParamValid() const
@@ -67,37 +59,17 @@ void ReminderRequestAlarm::CheckParamValid() const
 
 bool ReminderRequestAlarm::IsRepeatReminder() const
 {
-    if ((repeatDays_ != 0) || ((GetTimeInterval() > 0) && (GetSnoozeTimes() > 0))) {
+    if ((repeatDaysOfWeek_ != 0) || ((GetTimeInterval() > 0) && (GetSnoozeTimes() > 0))) {
         return true;
     } else {
         return false;
     }
 }
 
-void ReminderRequestAlarm::SetDaysOfWeek(bool set, std::vector<uint8_t> daysOfWeek)
-{
-    if (daysOfWeek.size() == 0) {
-        return;
-    }
-    if (daysOfWeek.size() > DAYS_PER_WEEK) {
-        ANSR_LOGE("The length of daysOfWeek should not larger than 7");
-        return;
-    }
-    for (std::vector<uint8_t>::iterator it = daysOfWeek.begin(); it != daysOfWeek.end(); ++it) {
-        if (*it < MONDAY || *it > SUNDAY) {
-            continue;
-        }
-        if (set) {
-            repeatDays_ |= 1 << (*it - 1);
-        } else {
-            repeatDays_ &= ~(1 << (*it - 1));
-        }
-    }
-}
 
 uint64_t ReminderRequestAlarm::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const
 {
-    if (ignoreRepeat || (repeatDays_)) {
+    if (ignoreRepeat || (repeatDaysOfWeek_)) {
         return GetNextTriggerTime(forceToGetNext);
     } else {
         return INVALID_LONG_LONG_VALUE;
@@ -127,86 +99,19 @@ uint64_t ReminderRequestAlarm::GetNextTriggerTime(bool forceToGetNext) const
     tar.tm_isdst = -1;
 
     const time_t target = mktime(&tar);
-    int8_t nextDayInterval = GetNextAlarm(now, target);
+    if (repeatDaysOfWeek_ > 0) {
+        return GetNextDaysOfWeek(now, target);
+    }
+
     time_t nextTriggerTime = 0;
-    if (nextDayInterval == INVALID_INT_VALUE) {
-        if (now >= target) {
-            if (forceToGetNext) {
-                nextTriggerTime = target + 1 * HOURS_PER_DAY * SECONDS_PER_HOUR;
-            }
-        } else {
-            nextTriggerTime = target;
+    if (now >= target) {
+        if (forceToGetNext) {
+            nextTriggerTime = target + 1 * HOURS_PER_DAY * SECONDS_PER_HOUR;
         }
     } else {
-        nextTriggerTime = target + nextDayInterval * HOURS_PER_DAY * SECONDS_PER_HOUR;
+        nextTriggerTime = target;
     }
-    time_t triggerTime = GetTriggerTimeWithDST(now, nextTriggerTime);
-    struct tm test;
-    (void)localtime_r(&triggerTime, &test);
-    ANSR_LOGI("NextTriggerTime: year=%{public}d, mon=%{public}d, day=%{public}d, hour=%{public}d, "
-        "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
-        GetActualTime(TimeTransferType::YEAR, test.tm_year),
-        GetActualTime(TimeTransferType::MONTH, test.tm_mon),
-        test.tm_mday, test.tm_hour, test.tm_min, test.tm_sec,
-        GetActualTime(TimeTransferType::WEEK, test.tm_wday), (long long)triggerTime);
-
-    if (static_cast<int64_t>(triggerTime) <= 0) {
-        return 0;
-    }
-    return ReminderRequest::GetDurationSinceEpochInMilli(triggerTime);
-}
-
-time_t ReminderRequestAlarm::GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const
-{
-    time_t triggerTime = nextTriggerTime;
-    struct tm nowLocal;
-    struct tm nextLocal;
-    (void)localtime_r(&now, &nowLocal);
-    (void)localtime_r(&nextTriggerTime, &nextLocal);
-    if (nowLocal.tm_isdst == 0 && nextLocal.tm_isdst > 0) {
-        triggerTime -= SECONDS_PER_HOUR;
-    } else if (nowLocal.tm_isdst > 0 && nextLocal.tm_isdst == 0) {
-        triggerTime += SECONDS_PER_HOUR;
-    }
-    return triggerTime;
-}
-
-int8_t ReminderRequestAlarm::GetNextAlarm(const time_t now, const time_t target) const
-{
-    if (repeatDays_ == 0) {
-        return INVALID_INT_VALUE;
-    }
-    struct tm nowTime;
-    (void)localtime_r(&now, &nowTime);
-    int32_t today = GetActualTime(TimeTransferType::WEEK, nowTime.tm_wday);
-    int32_t dayCount = now >= target ? 1 : 0;
-    for (; dayCount <= DAYS_PER_WEEK; dayCount++) {
-        int32_t day = (today + dayCount) % DAYS_PER_WEEK;
-        day = (day == 0) ? SUNDAY : day;
-        if (IsRepeatDay(day)) {
-            break;
-        }
-    }
-    ANSR_LOGI("NextDayInterval is %{public}d", dayCount);
-    return dayCount;
-}
-
-bool ReminderRequestAlarm::IsRepeatDay(int32_t day) const
-{
-    return (repeatDays_ & (1 << (day - 1))) > 0;
-}
-
-std::vector<int32_t> ReminderRequestAlarm::GetDaysOfWeek() const
-{
-    std::vector<int32_t> repeatDays;
-    int32_t days[] = {1, 2, 3, 4, 5, 6, 7};
-    int32_t len = sizeof(days) / sizeof(int32_t);
-    for (int32_t i = 0; i < len; i++) {
-        if (IsRepeatDay(days[i])) {
-            repeatDays.push_back(days[i]);
-        }
-    }
-    return repeatDays;
+    return GetTriggerTime(now, nextTriggerTime);
 }
 
 uint8_t ReminderRequestAlarm::GetHour() const
@@ -217,11 +122,6 @@ uint8_t ReminderRequestAlarm::GetHour() const
 uint8_t ReminderRequestAlarm::GetMinute() const
 {
     return minute_;
-}
-
-uint8_t ReminderRequestAlarm::GetRepeatDay() const
-{
-    return repeatDays_;
 }
 
 bool ReminderRequestAlarm::OnDateTimeChange()
@@ -245,7 +145,7 @@ bool ReminderRequestAlarm::UpdateNextReminder()
             SetSnoozeTimesDynamic(--letfSnoozeTimes);
         } else {
             SetSnoozeTimesDynamic(GetSnoozeTimes());
-            if (repeatDays_ == 0) {
+            if (repeatDaysOfWeek_ == 0) {
                 ANSR_LOGI("No need to update next triggerTime");
                 SetExpired(true);
                 return false;
@@ -282,10 +182,6 @@ bool ReminderRequestAlarm::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write minute");
         return false;
     }
-    if (!parcel.WriteUint8(repeatDays_)) {
-        ANSR_LOGE("Failed to write daysOfWeek");
-        return false;
-    }
     return true;
 }
 
@@ -317,21 +213,14 @@ bool ReminderRequestAlarm::ReadFromParcel(Parcel &parcel)
         ANSR_LOGE("Failed to read minute");
         return false;
     }
-    if (!parcel.ReadUint8(repeatDays_)) {
-        ANSR_LOGE("Failed to read repeatDays");
-        return false;
-    }
-    ANSR_LOGD("hour_=%{public}d, minute_=%{public}d, repeatDays_=%{public}d", hour_, minute_, repeatDays_);
+
+    ANSR_LOGD("hour_=%{public}d, minute_=%{public}d", hour_, minute_);
     return true;
 }
 
 void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
     ReminderRequest::RecoverFromDb(resultSet);
-
-    // repeatDays
-    repeatDays_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, REPEAT_DAYS_OF_WEEK, DbRecoveryType::INT));
 
     // hour
     hour_ =
@@ -345,23 +234,19 @@ void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::Result
 void ReminderRequestAlarm::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values)
 {
-    uint8_t repeatDays = 0;
     uint8_t hour = 0;
     uint8_t minute = 0;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::ALARM) {
         ReminderRequestAlarm* alarm = static_cast<ReminderRequestAlarm*>(reminder.GetRefPtr());
-        repeatDays = alarm->GetRepeatDay();
         hour = alarm->GetHour();
         minute = alarm->GetMinute();
     }
-    values.PutInt(REPEAT_DAYS_OF_WEEK, repeatDays);
     values.PutInt(ALARM_HOUR, hour);
     values.PutInt(ALARM_MINUTE, minute);
 }
 
 void ReminderRequestAlarm::InitDbColumns()
 {
-    ReminderRequest::AddColumn(REPEAT_DAYS_OF_WEEK, "INT", false);
     ReminderRequest::AddColumn(ALARM_HOUR, "INT", false);
     ReminderRequest::AddColumn(ALARM_MINUTE, "INT", true);
 }
