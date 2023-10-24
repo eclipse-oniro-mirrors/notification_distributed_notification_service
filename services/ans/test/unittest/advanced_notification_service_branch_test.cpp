@@ -69,7 +69,19 @@ void AnsBranchTest::SetUpTestCase() {}
 
 void AnsBranchTest::TearDownTestCase() {}
 
-void AnsBranchTest::SetUp() {}
+void AnsBranchTest::SetUp() 
+{
+    GTEST_LOG_(INFO) << "SetUp start";
+
+    advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+    advancedNotificationService_->CancelAll();
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+
+    GTEST_LOG_(INFO) << "SetUp end";
+}
 
 void AnsBranchTest::TearDown()
 {
