@@ -27,11 +27,15 @@
 #include "reminder_store.h"
 #include "system_ability_definition.h"
 #include "want_agent_helper.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace Notification {
 namespace {
 const int32_t BASE_YEAR = 1900;
+const int32_t SINGLE_BUTTON_INVALID = 0;
+const int32_t SINGLE_BUTTON_JSONSTRING = 0;
+const int32_t SINGLE_BUTTON_ONLY_ONE = 1;
 const int32_t SINGLE_BUTTON_MIN_LEN = 2;
 const int32_t SINGLE_BUTTON_MAX_LEN = 4;
 const int32_t BUTTON_TYPE_INDEX = 0;
@@ -186,7 +190,8 @@ std::string ReminderRequest::Dump() const
 }
 
 ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, const ActionButtonType &type,
-    const std::shared_ptr<ButtonWantAgent> &buttonWantAgent)
+    const std::shared_ptr<ButtonWantAgent> &buttonWantAgent,
+    const std::shared_ptr<ButtonDataShareUpdate> &buttonDataShareUpdate)
 {
     if ((type != ActionButtonType::CLOSE) && (type != ActionButtonType::SNOOZE) && (type != ActionButtonType::CUSTOM)) {
         ANSR_LOGI("Button type is not support: %{public}d.", static_cast<uint8_t>(type));
@@ -196,6 +201,7 @@ ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, cons
     actionButtonInfo.type = type;
     actionButtonInfo.title = title;
     actionButtonInfo.wantAgent = buttonWantAgent;
+    actionButtonInfo.dataShareUpdate = buttonDataShareUpdate;
 
     actionButtonMap_.insert(std::pair<ActionButtonType, ActionButtonInfo>(type, actionButtonInfo));
     return *this;
@@ -596,6 +602,33 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
     std::vector<std::string> multiButton = StringSplit(actionButtonInfo, SEP_BUTTON_MULTI);
     for (auto button : multiButton) {
         std::vector<std::string> singleButton = StringSplit(button, SEP_BUTTON_SINGLE);
+        if (singleButton.size() <= SINGLE_BUTTON_INVALID) {
+            ANSR_LOGW("RecoverButton fail");
+            return;
+        }
+        if (singleButton.size() == SINGLE_BUTTON_ONLY_ONE) {
+            std::string jsonString = singleButton.at(SINGLE_BUTTON_JSONSTRING);
+            nlohmann::json root = nlohmann::json::parse(jsonString);
+            std::string type = root.at("type").get<std::string>();
+            std::string title = root.at("title").get<std::string>();
+            auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+            if (!root["wantAgent"].empty()) {
+                nlohmann::json wantAgent = root["wantAgent"];
+                buttonWantAgent->pkgName = wantAgent.at("pkgName").get<std::string>();
+                buttonWantAgent->abilityName = wantAgent.at("abilityName").get<std::string>();
+            }
+            auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+            if (!root["dataShareUpdate"].empty()) {
+                nlohmann::json dataShareUpdate = root["dataShareUpdate"];
+                buttonDataShareUpdate->uri = dataShareUpdate.at("uri").get<std::string>();
+                buttonDataShareUpdate->equalTo = dataShareUpdate.at("equalTo").get<std::string>();
+                buttonDataShareUpdate->valuesBucket = dataShareUpdate.at("valuesBucket").get<std::string>();
+            }
+            SetActionButton(title, ActionButtonType(std::stoi(type, nullptr)),
+                buttonWantAgent, buttonDataShareUpdate);
+            continue;
+        }
+        // old method Soon to be deleted
         if (singleButton.size() < SINGLE_BUTTON_MIN_LEN) {
             ANSR_LOGW("RecoverButton fail");
             return;
@@ -605,15 +638,17 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
             buttonWantAgent->pkgName = singleButton.at(BUTTON_PKG_INDEX);
             buttonWantAgent->abilityName = singleButton.at(BUTTON_ABILITY_INDEX);
         }
+        auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
         SetActionButton(singleButton.at(BUTTON_TITLE_INDEX),
-            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)), buttonWantAgent);
+            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)),
+            buttonWantAgent, buttonDataShareUpdate);
         ANSR_LOGI("RecoverButton title:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
             singleButton.at(BUTTON_TITLE_INDEX).c_str(), buttonWantAgent->pkgName.c_str(),
             buttonWantAgent->abilityName.c_str());
     }
 }
 
-std::vector<std::string> ReminderRequest::StringSplit(std::string source, const std::string &split) const
+std::vector<std::string> ReminderRequest::StringSplit(std::string source, const std::string &split)
 {
     std::vector<std::string> result;
     if (source.empty()) {
@@ -1105,6 +1140,22 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
             ANSR_LOGE("Failed to write action button abilityName");
             return false;
         }
+        if (button.second.dataShareUpdate == nullptr) {
+            ANSR_LOGE("button dataShareUpdate is null");
+            return false;
+        }
+        if (!parcel.WriteString(button.second.dataShareUpdate->uri)) {
+            ANSR_LOGE("Failed to write action button dataShareUpdate uri");
+            return false;
+        }
+        if (!parcel.WriteString(button.second.dataShareUpdate->equalTo)) {
+            ANSR_LOGE("Failed to write action button dataShareUpdate equalTo");
+            return false;
+        }
+        if (!parcel.WriteString(button.second.dataShareUpdate->valuesBucket)) {
+            ANSR_LOGE("Failed to write action button dataShareUpdate valuesBucket");
+            return false;
+        }
     }
     return true;
 }
@@ -1259,12 +1310,19 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         std::string title = parcel.ReadString();
         std::string pkgName = parcel.ReadString();
         std::string abilityName = parcel.ReadString();
+        std::string uri = parcel.ReadString();
+        std::string equalTo = parcel.ReadString();
+        std::string valuesBucket = parcel.ReadString();
         ActionButtonInfo info;
         info.type = type;
         info.title = title;
         info.wantAgent = std::make_shared<ButtonWantAgent>();
         info.wantAgent->pkgName = pkgName;
         info.wantAgent->abilityName = abilityName;
+        info.dataShareUpdate = std::make_shared<ButtonDataShareUpdate>();
+        info.dataShareUpdate->uri = uri;
+        info.dataShareUpdate->equalTo = equalTo;
+        info.dataShareUpdate->valuesBucket = valuesBucket;
         actionButtonMap_.insert(std::pair<ActionButtonType, ActionButtonInfo>(type, info));
     }
     if (!InitNotificationRequest()) {
@@ -1324,12 +1382,25 @@ std::string ReminderRequest::GetButtonInfo() const
             info += SEP_BUTTON_MULTI;
         }
         ActionButtonInfo buttonInfo = button.second;
-        info += std::to_string(static_cast<uint8_t>(button.first)) + SEP_BUTTON_SINGLE + buttonInfo.title;
-        if (buttonInfo.wantAgent == nullptr) {
-            continue;
+        nlohmann::json root;
+        root["type"] = std::to_string(static_cast<uint8_t>(button.first));
+        root["title"] = buttonInfo.title;
+        if (buttonInfo.wantAgent != nullptr) {
+            nlohmann::json wantAgentfriends;
+            wantAgentfriends["pkgName"] = buttonInfo.wantAgent->pkgName;
+            wantAgentfriends["abilityName"] = buttonInfo.wantAgent->abilityName;
+            root["wantAgent"]  = wantAgentfriends;
         }
-        info += (SEP_BUTTON_SINGLE + buttonInfo.wantAgent->pkgName + SEP_BUTTON_SINGLE
-            + buttonInfo.wantAgent->abilityName);
+
+        if (buttonInfo.dataShareUpdate != nullptr) {
+            nlohmann::json dataShareUpdatefriends;
+            dataShareUpdatefriends["uri"] = buttonInfo.dataShareUpdate->uri;
+            dataShareUpdatefriends["equalTo"] = buttonInfo.dataShareUpdate->equalTo;
+            dataShareUpdatefriends["valuesBucket"] = buttonInfo.dataShareUpdate->valuesBucket;
+            root["dataShareUpdate"]  = dataShareUpdatefriends;
+        }
+        std::string str = root.dump();
+        info += str;
         isFirst = false;
     }
     return info;

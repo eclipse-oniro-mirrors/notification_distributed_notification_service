@@ -17,9 +17,11 @@
 
 #include "ans_log_wrapper.h"
 #include "common.h"
+#include "reminder_request.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -504,6 +506,108 @@ void ParseReminder(
     }
 }
 
+napi_status ParseArray(const napi_env &env, std::vector<std::string>& temp, napi_value &jsObject)
+{
+    if (temp.size() <= INDEX_VALUE) {
+        return napi_invalid_arg;
+    }
+    // key
+    napi_value keyInfo = nullptr;
+    napi_create_string_utf8(env, temp[INDEX_KEY].c_str(), NAPI_AUTO_LENGTH, &keyInfo);
+    // value
+    napi_value valueInfo = nullptr;
+    napi_status status = napi_ok;
+    if (temp[INDEX_TYPE] == "string") {
+        napi_create_string_utf8(env, temp[INDEX_VALUE].c_str(), NAPI_AUTO_LENGTH, &valueInfo);
+    } else if (temp[INDEX_TYPE] == "double") {
+        napi_create_double(env, std::stod(temp[INDEX_VALUE]), &valueInfo);
+    } else if (temp[INDEX_TYPE] == "bool") {
+        bool valueBool = false;
+        if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true" || temp[INDEX_VALUE] == "True") {
+            valueBool = true;
+        }
+        napi_get_boolean(env, valueBool, &valueInfo);
+    } else if (temp[INDEX_TYPE] == "null") {
+        napi_get_null(env, &valueInfo);
+    } else if (temp[INDEX_TYPE] == "vector") {
+        std::vector<std::string> arr = ReminderRequest::StringSplit(temp[INDEX_VALUE], ",");
+        std::vector<uint8_t> value;
+        for (auto &num : arr) {
+            value.push_back(static_cast<uint8_t>(std::stoi(num)));
+        }
+        // vector<uint8_t> to napi_value
+        if (value.size() <= 0) {
+            return napi_invalid_arg;
+        }
+        void* data = nullptr;
+        napi_value buffer = nullptr;
+        status = napi_create_arraybuffer(env, value.size(), &data, &buffer);
+        if (status != napi_ok) {
+            ANSR_LOGW("create array buffer failed!");
+            return napi_invalid_arg;
+        }
+        if (memcpy_s(data, value.size(), value.data(), value.size()) != EOK) {
+            ANSR_LOGW("memcpy_s not EOK");
+            return napi_invalid_arg;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, value.size(), buffer, 0, &valueInfo);
+        if (status != napi_ok) {
+            ANSR_LOGW("napi_create_typedarray failed!");
+            return napi_invalid_arg;
+        }
+    }
+    // write keyInfo and valueInfo
+    napi_set_property(env, jsObject, keyInfo, valueInfo);
+    return status;
+}
+
+// parse equalTo,valueBucket
+void ParseValueBucket(const napi_env &env, std::vector<std::string> valueBucketVector,
+    napi_value &result, const std::string &arrayName)
+{
+    // create array
+    napi_value array = nullptr;
+    napi_create_array(env, &array);
+    napi_set_named_property(env, result, arrayName.c_str(), array);
+    int32_t index = 0;
+    // write equalTo or valuesBucket
+    for (auto &str : valueBucketVector) {
+        std::vector<std::string> temp = ReminderRequest::StringSplit(str, ":");
+        if (temp.size() <= INDEX_VALUE) {
+            continue;
+        }
+        // key:value
+        napi_value jsObject = nullptr;
+        napi_create_object(env, &jsObject);
+        napi_status status = ParseArray(env, temp, jsObject);
+        if (status != napi_ok) {
+            continue;
+        }
+        // write object to array
+        napi_set_element(env, array, index++, jsObject);
+    }
+}
+
+// parse uri,equalTo,valuesBucket  c++ -> js
+void ParseButtonDataShareUpdate(const napi_env &env,
+    std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> &dataShareUpdate, napi_value &result)
+{
+    // create obj
+    napi_value buttonDataShareUpdate = nullptr;
+    napi_create_object(env, &buttonDataShareUpdate);
+    napi_set_named_property(env, result, BUTTON_DATA_SHARE_UPDATE, buttonDataShareUpdate);
+    // uri
+    napi_value uriInfo = nullptr;
+    napi_create_string_utf8(env, dataShareUpdate->uri.c_str(), NAPI_AUTO_LENGTH, &uriInfo);
+    napi_set_named_property(env, buttonDataShareUpdate, BUTTON_DATA_SHARE_UPDATE_URI, uriInfo);
+    // equalTo
+    std::vector<std::string> equalToVector = ReminderRequest::StringSplit(dataShareUpdate->equalTo, ";");
+    ParseValueBucket(env, equalToVector, buttonDataShareUpdate, BUTTON_DATA_SHARE_UPDATE_EQUALTO);
+    // valuesBucket
+    std::vector<std::string> valuesBucketVector = ReminderRequest::StringSplit(dataShareUpdate->valuesBucket, ";");
+    ParseValueBucket(env, valuesBucketVector, buttonDataShareUpdate, BUTTON_DATA_SHARE_UPDATE_VALUE);
+}
+
 void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_value &result)
 {
     auto actionButtonsMap = reminder.GetActionButtons();
@@ -539,7 +643,11 @@ void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_val
             napi_create_string_utf8(env, (reminder.GetCustomButtonUri()).c_str(), NAPI_AUTO_LENGTH, &info);
             napi_set_named_property(env, wantAgentInfo, BUTTON_WANT_AGENT_URI, info);
         }
-
+        // Parse ButtonDataShareUpdate
+        if (it->second.type == ReminderRequest::ActionButtonType::CLOSE ||
+            it->second.type == ReminderRequest::ActionButtonType::SNOOZE) {
+            ParseButtonDataShareUpdate(env, it->second.dataShareUpdate, actionButton);
+        }
         // add obj to array
         napi_set_element(env, array, index, actionButton);
         index++;
