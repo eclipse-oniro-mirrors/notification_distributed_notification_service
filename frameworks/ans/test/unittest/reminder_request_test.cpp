@@ -1099,13 +1099,14 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00004, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
+    std::string resource = "CLOSE";
     Notification::ReminderRequest::ActionButtonType type2 =
             Notification::ReminderRequest::ActionButtonType::CLOSE;
     std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent =
         std::make_shared<ReminderRequest::ButtonWantAgent>();
     std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
         std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
-    reminderRequestChild->SetActionButton(title, type2, buttonWantAgent, buttonDataShareUpdate);
+    reminderRequestChild->SetActionButton(title, type2, resource, buttonWantAgent, buttonDataShareUpdate);
 }
 
 /**
@@ -1119,13 +1120,14 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00005, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::string title = "this is title";
+    std::string resource = "SNOOZE";
     Notification::ReminderRequest::ActionButtonType type3 =
             Notification::ReminderRequest::ActionButtonType::SNOOZE;
     std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent =
         std::make_shared<ReminderRequest::ButtonWantAgent>();
     std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
         std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
-    reminderRequestChild->SetActionButton(title, type3, buttonWantAgent, buttonDataShareUpdate);
+    reminderRequestChild->SetActionButton(title, type3, resource, buttonWantAgent, buttonDataShareUpdate);
 }
 
 /**
