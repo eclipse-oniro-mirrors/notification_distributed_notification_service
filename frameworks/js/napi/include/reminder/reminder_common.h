@@ -70,6 +70,7 @@ const char* BUTTON_DATA_SHARE_UPDATE_EQUALTO = "equalTo";
 const char* BUTTON_DATA_SHARE_UPDATE_VALUE = "value";
 const char* TAPDISMISSED = "tapDismissed";
 const char* AUTODELETEDTIME = "autoDeletedTime";
+const char* GROUP_ID = "groupId";
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;

@@ -232,6 +232,13 @@ public:
     int32_t GetNotificationId() const;
 
     /**
+     * @brief Obtains group id.
+     *
+     * @return group id.
+     */
+    std::string GetGroupId() const;
+
+    /**
      * @brief Obtains notification request.
      *
      * @return notification request instance.
@@ -389,6 +396,11 @@ public:
     void OnSameNotificationIdCovered();
 
     /**
+     * Set the reminder state is InActive, so that it will be removed when expired
+     */
+    void SetStateToInActive();
+
+    /**
      * @brief Shows the reminder on panel. TriggerTime will be updated to next.
      *
      * @param isPlaySoundOrVibration true means it is play sound or vibration.
@@ -494,6 +506,14 @@ public:
      * @return Current reminder self.
      */
     ReminderRequest& SetNotificationId(int32_t notificationId);
+
+    /**
+     * @brief Sets group id.
+     *
+     * @param notificationId Indicates group id.
+     * @return Current reminder self.
+     */
+    ReminderRequest& SetGroupId(const std::string &groupId);
 
     /**
      * @brief Sets reminder id.
@@ -728,6 +748,7 @@ public:
     static const std::string MAX_SCREEN_AGENT;
     static const std::string TAP_DISMISSED;
     static const std::string AUTO_DELETED_TIME;
+    static const std::string GROUP_ID;
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
 
@@ -816,6 +837,7 @@ private:
     uint8_t snoozeTimesDynamic_ {0};
     uint8_t state_ {0};
     int32_t notificationId_ {0};
+    std::string groupId_ {};
     int32_t reminderId_ {-1};
     int32_t userId_ {-1};
     int32_t uid_ {-1};

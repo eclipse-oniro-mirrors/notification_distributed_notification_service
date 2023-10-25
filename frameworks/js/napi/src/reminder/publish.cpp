@@ -756,6 +756,10 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     // actionButtons
     ParseActionButtons(env, reminder, result);
     return NotificationNapi::Common::NapiGetBoolean(env, true);
+
+    // group id
+    napi_create_string_utf8(env, reminder.GetGroupId().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, GROUP_ID, value);
 }
 
 void GetValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest>>& validReminders, napi_value& arr)

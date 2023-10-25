@@ -520,6 +520,12 @@ napi_value ReminderCommon::GenReminder(
     if (!GenActionButtons(env, value, reminder, isSysApp)) {
         return nullptr;
     }
+
+    // group id
+    if (GetStringUtf8(env, value, ReminderAgentNapi::GROUP_ID, str, NotificationNapi::STR_MAX_SIZE)) {
+        reminder->SetGroupId(std::string(str));
+    }
+
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
