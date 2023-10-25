@@ -767,7 +767,7 @@ protected:
      * @return nextTriggerTime.
      */
     int64_t GetNextDaysOfWeek(const time_t now, const time_t target) const;
-    void SetRepeatDaysOfWeek(bool set, std::vector<uint8_t> daysOfWeek);
+    void SetRepeatDaysOfWeek(bool set, const std::vector<uint8_t> &daysOfWeek);
     uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;

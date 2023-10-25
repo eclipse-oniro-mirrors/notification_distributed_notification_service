@@ -542,8 +542,9 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
     // state
     state_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, STATE, DbRecoveryType::INT));
 
-    //repeatDaysOfWeek_
+    // repeatDaysOfWeek_
     repeatDaysOfWeek_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, REPEAT_DAYS_OF_WEEK, DbRecoveryType::INT));
+    
     // action buttons
     RecoverActionButton(resultSet);
 
@@ -1900,7 +1901,7 @@ uint8_t ReminderRequest::GetRepeatDaysOfWeek() const
     return repeatDaysOfWeek_;
 }
 
-void ReminderRequest::SetRepeatDaysOfWeek(bool set, std::vector<uint8_t> daysOfWeek)
+void ReminderRequest::SetRepeatDaysOfWeek(bool set, const std::vector<uint8_t> &daysOfWeek)
 {
     if (daysOfWeek.size() == 0) {
         return;
@@ -1909,7 +1910,7 @@ void ReminderRequest::SetRepeatDaysOfWeek(bool set, std::vector<uint8_t> daysOfW
         ANSR_LOGE("The length of daysOfWeek should not larger than 7");
         return;
     }
-    for (std::vector<uint8_t>::iterator it = daysOfWeek.begin(); it != daysOfWeek.end(); ++it) {
+    for (auto it = daysOfWeek.begin(); it != daysOfWeek.end(); ++it) {
         if (*it < MONDAY || *it > SUNDAY) {
             continue;
         }
