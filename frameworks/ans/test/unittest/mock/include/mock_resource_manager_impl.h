@@ -29,7 +29,7 @@ public:
     ~ResourceManagerImpl();
 
 public:
-    void Init(bool en = true);
+    void Init();
 
     /**
      * Add resource path to hap paths

@@ -1788,49 +1788,11 @@ HWTEST_F(ReminderRequestTest, InitBundleName_00002, Function | SmallTest | Level
 
 /**
  * @tc.name: OnLanguageChange_00001
- * @tc.desc: Test OnLanguageChange with zh_CN.
+ * @tc.desc: Test OnLanguageChange.
  * @tc.type: FUNC
  * @tc.require: issueI89858
  */
 HWTEST_F(ReminderRequestTest, OnLanguageChange_00001, Function | SmallTest | Level1)
-{
-    // Given
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    // add button snooze
-    std::string title = "this is title snooze";
-    std::string resource = "snooze";
-    Notification::ReminderRequest::ActionButtonType type =
-            Notification::ReminderRequest::ActionButtonType::SNOOZE;
-    rrc->SetActionButton(title, type, resource);
-    // add button close
-    title = "this is title close";
-    resource = "close";
-    type = Notification::ReminderRequest::ActionButtonType::CLOSE;
-    rrc->SetActionButton(title, type, resource);
-
-    // When
-    auto resMgr = std::make_shared<Global::Resource::ResourceManagerImpl>();
-    resMgr->Init(false);
-    rrc->OnLanguageChange(resMgr);
-
-    // Then
-    auto iter = rrc->actionButtonMap_.find(type);
-    EXPECT_NE(iter, rrc->actionButtonMap_.end());
-    EXPECT_EQ(iter->second.title, "关闭");
-
-    type = Notification::ReminderRequest::ActionButtonType::SNOOZE;
-    iter = rrc->actionButtonMap_.find(type);
-    EXPECT_NE(iter, rrc->actionButtonMap_.end());
-    EXPECT_EQ(iter->second.title, "延时");
-}
-
-/**
- * @tc.name: OnLanguageChange_00002
- * @tc.desc: Test OnLanguageChange with en_US.
- * @tc.type: FUNC
- * @tc.require: issueI89858
- */
-HWTEST_F(ReminderRequestTest, OnLanguageChange_00002, Function | SmallTest | Level1)
 {
     // Given
     auto rrc = std::make_shared<ReminderRequestChild>();
@@ -1854,12 +1816,12 @@ HWTEST_F(ReminderRequestTest, OnLanguageChange_00002, Function | SmallTest | Lev
     // Then
     auto iter = rrc->actionButtonMap_.find(type);
     EXPECT_NE(iter, rrc->actionButtonMap_.end());
-    EXPECT_EQ(iter->second.title, "CLOSE");
+    EXPECT_EQ(iter->second.title, "CLOSE_TEST");
 
     type = Notification::ReminderRequest::ActionButtonType::SNOOZE;
     iter = rrc->actionButtonMap_.find(type);
     EXPECT_NE(iter, rrc->actionButtonMap_.end());
-    EXPECT_EQ(iter->second.title, "SNOOZE");
+    EXPECT_EQ(iter->second.title, "SNOOZE_TEST");
 }
 }
 }

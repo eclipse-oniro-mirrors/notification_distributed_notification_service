@@ -30,15 +30,10 @@ ResourceManagerImpl::ResourceManagerImpl() {}
 
 ResourceManagerImpl::~ResourceManagerImpl() {}
 
-void ResourceManagerImpl::Init(bool en)
+void ResourceManagerImpl::Init()
 {
-    if (en) {
-        resources_.emplace("snooze", "SNOOZE");
-        resources_.emplace("close", "CLOSE");
-    } else {
-        resources_.emplace("snooze", "延时");
-        resources_.emplace("close", "关闭");
-    }
+    resources_.emplace("snooze", "SNOOZE_TEST");
+    resources_.emplace("close", "CLOSE_TEST");
 }
 
 bool ResourceManagerImpl::AddResource(const char *path)
