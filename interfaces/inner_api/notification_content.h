@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "notification_multiline_content.h"
 #include "notification_normal_content.h"
 #include "notification_picture_content.h"
+#include "notification_local_live_view_content.h"
 #include "parcel.h"
 
 namespace OHOS {
@@ -63,7 +64,12 @@ public:
          * Indicates notifications that include a picture.
          * Such notifications are created using NotificationPictureContent.
          */
-        PICTURE
+        PICTURE,
+        /**
+         * Indicates notifications that include local live view.
+         * Such notifications are created using NotificationLocalLiveViewContent.
+         */
+        LOCAL_LIVE_VIEW
     };
 
     /**
@@ -119,6 +125,15 @@ public:
      * @param mediaContent Indicates the NotificationMediaContent object.
      */
     explicit NotificationContent(const std::shared_ptr<NotificationMediaContent> &mediaContent);
+
+    /**
+     * @brief A constructor used to create a NotificationLocalLiveViewContent instance (obtained by calling
+     * GetNotificationContent()) and set the content type to NotificationContent::Type::LOCAL_LIVE_VIEW
+     * (obtained by calling GetContentType()).
+     *
+     * @param localLiveViewContent Indicates the NotificationLocalLiveViewContent object.
+     */
+    explicit NotificationContent(const std::shared_ptr<NotificationLocalLiveViewContent> &localLiveViewContent);
 
     virtual ~NotificationContent();
 

@@ -58,6 +58,7 @@
         "napi",
         "hilog",
         "relational_store",
+        "data_share",
         "device_usage_statistics",
         "bundle_framework",
         "time_service",

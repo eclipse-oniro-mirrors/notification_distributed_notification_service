@@ -45,6 +45,7 @@
 #include "notification_slot.h"
 #include "notification_slot_filter.h"
 #include "notification_subscriber_manager.h"
+#include "notification_local_live_view_subscriber_manager.h"
 #include "os_account_manager.h"
 #include "permission_filter.h"
 #include "push_callback_proxy.h"
@@ -1515,6 +1516,42 @@ ErrCode AdvancedNotificationService::Subscribe(
     return errCode;
 }
 
+ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
+    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    ErrCode errCode = ERR_OK;
+    do {
+        if (subscriber == nullptr) {
+            errCode = ERR_ANS_INVALID_PARAM;
+            break;
+        }
+
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+            ANS_LOGE("Client is not a system app or subsystem");
+            errCode = ERR_ANS_NON_SYSTEM_APP;
+            break;
+        }
+
+        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            errCode = ERR_ANS_PERMISSION_DENIED;
+            break;
+        }
+
+        errCode = NotificationLocalLiveViewSubscriberManager::GetInstance()->AddLocalLiveViewSubscriber(
+            subscriber, info);
+        if (errCode != ERR_OK) {
+            break;
+        }
+    } while (0);
+
+    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
+    return errCode;
+}
+
 ErrCode AdvancedNotificationService::Unsubscribe(
     const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
@@ -2673,6 +2710,50 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
     return result;
 }
 
+ErrCode AdvancedNotificationService::TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
+    const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("CheckPermission is bogus.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        sptr<Notification> notification = nullptr;
+
+        for (auto record : notificationList_) {
+            if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+                (record->bundleOption->GetUid() == bundle->GetUid()) &&
+                (record->notification->GetId() == notificationId)) {
+                notification = record->notification;
+                result = ERR_OK;
+                break;
+            }
+        }
+
+        if (notification != nullptr) {
+            NotificationLocalLiveViewSubscriberManager::GetInstance()->NotifyTriggerResponse(notification,
+                buttonOption);
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
+}
 ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
     int32_t notificationId, const std::string &label, int32_t removeReason)
 {

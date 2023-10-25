@@ -22,6 +22,7 @@
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
 #include "tokenid_kit.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -92,8 +93,14 @@ bool ReminderCommon::GenActionButtons(
             if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
                 GetButtonWantAgent(env, actionButton, reminder, buttonWantAgent);
             }
+            // gen buttonDataShareUpdate
+            auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+            if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CLOSE ||
+                ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::SNOOZE) {
+                GetButtonDataShareUpdate(env, actionButton, reminder, buttonDataShareUpdate);
+            }
             reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType),
-                resource, buttonWantAgent);
+                resource, buttonWantAgent, buttonDataShareUpdate);
             ANSR_LOGD("button title=%{public}s, type=%{public}d, resource=%{public}s",
                 title.c_str(), buttonType, resource.c_str());
         } else {
@@ -134,6 +141,203 @@ void ReminderCommon::GetButtonWantAgent(const napi_env &env, const napi_value &v
             reminder->SetCustomButtonUri(str);
         }
     }
+}
+
+// uri:string  equalTo{key:value}  valuesBucket{key:value}
+void ReminderCommon::GetButtonDataShareUpdate(const napi_env &env, const napi_value &value,
+    std::shared_ptr<ReminderRequest>& reminder,
+    std::shared_ptr<ReminderRequest::ButtonDataShareUpdate>& buttonDataShareUpdate)
+{
+    napi_value dataShare = nullptr;
+    if (GetObject(env, value, BUTTON_DATA_SHARE_UPDATE, dataShare)) {
+        // dataShare uri
+        char str[NotificationNapi::STR_MAX_SIZE] = {0};
+        if (GetStringUtf8(env, dataShare, BUTTON_DATA_SHARE_UPDATE_URI, str, NotificationNapi::STR_MAX_SIZE)) {
+            ANSR_LOGD("gen dataShareUri success");
+            buttonDataShareUpdate->uri = str;
+        }
+        // dataShare equalTo
+        napi_value equalTo = nullptr;
+        std::string valueBucketString;
+        if (GetObject(env, dataShare, BUTTON_DATA_SHARE_UPDATE_EQUALTO, equalTo)) {
+            if (GetValueBucketObject(valueBucketString, env, equalTo)) {
+                ANSR_LOGD("gen dataShareEqualTo success");
+                buttonDataShareUpdate->equalTo = valueBucketString;
+            }
+        }
+        // dataShare valuesBucket
+        napi_value valuesBucket = nullptr;
+        valueBucketString.clear();
+        if (GetObject(env, dataShare, BUTTON_DATA_SHARE_UPDATE_VALUE, valuesBucket)) {
+            if (GetValueBucketObject(valueBucketString, env, valuesBucket)) {
+                ANSR_LOGD("gen dataShareValuesBucket success");
+                buttonDataShareUpdate->valuesBucket = valueBucketString;
+            }
+        }
+    }
+}
+
+// get {key:value} to string(key:type:value)
+bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const napi_env &env, const napi_value &arg)
+{
+    // arrary
+    napi_value keys = 0;
+    napi_get_property_names(env, arg, &keys);
+    uint32_t arrlen = 0;
+    napi_status status = napi_get_array_length(env, keys, &arrlen);
+    if (status != napi_ok) {
+        ANSR_LOGW("valuesBucket err");
+        return false;
+    }
+    for (size_t i = 0; i < arrlen; ++i) {
+        // key
+        napi_value key = 0;
+        status = napi_get_element(env, keys, i, &key);
+        if (status != napi_ok) {
+            ANSR_LOGW("valuesBucket err");
+            continue;
+        }
+        std::string keyStr = GetStringFromJS(env, key);
+        // value
+        napi_value value = 0;
+        napi_get_property(env, arg, key, &value);
+        bool ret;
+        std::string type;
+        std::string valueObject = Convert2Value(env, value, ret, type);
+        if (!ret) {
+            ANSR_LOGW("valuesBucket err");
+            continue;
+        }
+        valueBucketString += keyStr + ":" + type + ":" + valueObject;
+        if (i < arrlen - 1) {
+            valueBucketString += ";";
+        }
+    }
+    return true;
+}
+
+// get string
+std::string ReminderCommon::GetStringFromJS(const napi_env &env, const napi_value &param,
+    const std::string &defaultValue)
+{
+    size_t size = 0;
+    if (napi_get_value_string_utf8(env, param, nullptr, 0, &size) != napi_ok) {
+        return defaultValue;
+    }
+    std::string value("");
+    if (size == 0) {
+        return defaultValue;
+    }
+
+    char *buf = new (std::nothrow) char[size + 1];
+    if (buf == nullptr) {
+        return value;
+    }
+    (void)memset_s(buf, size + 1, 0, size + 1);
+    bool rev = napi_get_value_string_utf8(env, param, buf, size + 1, &size) == napi_ok;
+    if (rev) {
+        value = buf;
+    } else {
+        value = defaultValue;
+    }
+
+    if (buf != nullptr) {
+        delete[] buf;
+        buf = nullptr;
+    }
+    return value;
+}
+
+// get type and value
+std::string ReminderCommon::Convert2Value(const napi_env &env, const napi_value &value, bool &status, std::string &type)
+{
+    // array type
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    status = true;
+    // gen value
+    std::string valueString;
+    std::vector<uint8_t> valueBlob;
+    switch (valueType) {
+        case napi_null: {
+            type = "null";
+            valueString = type;
+            break;
+        }
+        case napi_boolean: {
+            type = "bool";
+            bool valueBool = false;
+            napi_get_value_bool(env, value, &valueBool);
+            valueString = std::to_string(valueBool);
+            break;
+        }
+        case napi_number: {
+            type = "double";
+            double valueNumber = 0;
+            napi_get_value_double(env, value, &valueNumber);
+            valueString = std::to_string(valueNumber);
+            break;
+        }
+        case napi_string: {
+            type = "string";
+            valueString = GetStringFromJS(env, value);
+            break;
+        }
+        case napi_object: {
+            type = "vector";
+            valueBlob = Convert2U8Vector(env, value);
+            for (auto it = valueBlob.begin(); it != valueBlob.end(); ++it) {
+                valueString += std::to_string(*it);
+                if (it != valueBlob.end()) {
+                    valueString += ",";
+                }
+            }
+            break;
+        }
+        default: {
+            ANSR_LOGE("Convert2Value err");
+            status = false;
+            break;
+        }
+    }
+    return valueString;
+}
+
+// get vector<uint8_t>
+std::vector<uint8_t> ReminderCommon::Convert2U8Vector(const napi_env &env, const napi_value &input_array)
+{
+    bool isTypedArray = false;
+    bool isArrayBuffer = false;
+    // type is array?
+    napi_is_typedarray(env, input_array, &isTypedArray);
+    if (!isTypedArray) {
+        // buffer whether or not it exists?
+        napi_is_arraybuffer(env, input_array, &isArrayBuffer);
+        if (!isArrayBuffer) {
+            ANSR_LOGE("unknow type");
+            return {};
+        }
+    }
+    size_t length = 0;
+    void *data = nullptr;
+    // get array
+    if (isTypedArray) {
+        napi_typedarray_type type;
+        napi_value input_buffer = nullptr;
+        size_t byte_offset = 0;
+        napi_get_typedarray_info(env, input_array, &type, &length, &data, &input_buffer, &byte_offset);
+        if (type != napi_uint8_array || data == nullptr) {
+            ANSR_LOGW("napi_get_typedarray_info err");
+            return {};
+        }
+    } else {
+        napi_get_arraybuffer_info(env, input_array, &data, &length);
+        if (data == nullptr || length <= 0) {
+            ANSR_LOGW("napi_get_arraybuffer_info err");
+            return {};
+        }
+    }
+    return std::vector<uint8_t>((uint8_t *)data, ((uint8_t *)data) + length);
 }
 
 bool ReminderCommon::GenWantAgent(

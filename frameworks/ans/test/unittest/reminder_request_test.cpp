@@ -1089,6 +1089,46 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00003, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetActionButton_00004
+ * @tc.desc: Test SetActionButton parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI89IQR
+ */
+HWTEST_F(ReminderRequestTest, SetActionButton_00004, Function | SmallTest | Level1)
+{
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
+    std::string title = "this is title";
+    Notification::ReminderRequest::ActionButtonType type2 =
+            Notification::ReminderRequest::ActionButtonType::CLOSE;
+    std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent =
+        std::make_shared<ReminderRequest::ButtonWantAgent>();
+    std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
+        std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    reminderRequestChild->SetActionButton(title, type2, buttonWantAgent, buttonDataShareUpdate);
+}
+
+/**
+ * @tc.name: SetActionButton_00005
+ * @tc.desc: Test SetActionButton parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI89IQR
+ */
+HWTEST_F(ReminderRequestTest, SetActionButton_00005, Function | SmallTest | Level1)
+{
+    std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
+    ASSERT_NE(nullptr, reminderRequestChild);
+    std::string title = "this is title";
+    Notification::ReminderRequest::ActionButtonType type3 =
+            Notification::ReminderRequest::ActionButtonType::SNOOZE;
+    std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent =
+        std::make_shared<ReminderRequest::ButtonWantAgent>();
+    std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
+        std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    reminderRequestChild->SetActionButton(title, type3, buttonWantAgent, buttonDataShareUpdate);
+}
+
+/**
  * @tc.name: AddActionButtons_00001
  * @tc.desc: Test AddActionButtons parameters.
  * @tc.type: FUNC

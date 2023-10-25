@@ -32,6 +32,10 @@
 #include "singleton.h"
 #include "locale_config.h"
 #include "bundle_manager_helper.h"
+#include "datashare_predicates_object.h"
+#include "datashare_value_object.h"
+#include "datashare_helper.h"
+#include "datashare_template.h"
 
 namespace OHOS {
 namespace Notification {
@@ -41,6 +45,9 @@ const int32_t MAIN_USER_ID = 100;
 #ifdef DEVICE_STANDBY_ENABLE
 const int REASON_APP_API = 1;
 #endif
+const int INDEX_KEY = 0;
+const int INDEX_TYPE = 1;
+const int INDEX_VALUE = 2;
 }
 
 /**
@@ -493,6 +500,7 @@ void ReminderDataManager::CloseReminder(const sptr<ReminderRequest> &reminder, b
     }
     reminder->OnClose(true);
     RemoveFromShowedReminders(reminder);
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
     if (cancelNotification) {
         CancelNotification(reminder);
@@ -513,6 +521,146 @@ std::shared_ptr<ReminderDataManager> ReminderDataManager::InitInstance(
         ReminderEventManager reminderEventManager(REMINDER_DATA_MANAGER);
     }
     return REMINDER_DATA_MANAGER;
+}
+
+void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminder,
+    const ReminderRequest::ActionButtonType &actionButtonType)
+{
+    if (!reminder->IsSystemApp()) {
+        ANSR_LOGI("UpdateAppDatabase faild, is not SystemApp");
+        return;
+    }
+    if (actionButtonType == ReminderRequest::ActionButtonType::CUSTOM ||
+        actionButtonType == ReminderRequest::ActionButtonType::INVALID) {
+        ANSR_LOGI("actionButtonType is CUSTOM or INVALID");
+        return;
+    }
+    auto actionButtonMap = reminder->GetActionButtons();
+    if (actionButtonMap.count(actionButtonType) && actionButtonMap.at(actionButtonType).dataShareUpdate == nullptr) {
+        ANSR_LOGI("dataShareUpdate is null");
+        return;
+    }
+    if (actionButtonMap.at(actionButtonType).dataShareUpdate->uri == "" ||
+        actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo == "" ||
+        actionButtonMap.at(actionButtonType).dataShareUpdate->valuesBucket == "") {
+        ANSR_LOGI("not have uri");
+        return;
+    }
+    // init default dstBundleName
+    std::string dstBundleName;
+    auto mit = notificationBundleOptionMap_.find(reminder->GetReminderId());
+    if (mit != notificationBundleOptionMap_.end()) {
+        dstBundleName = mit->second->GetBundleName();
+    }
+    GenDstBundleName(dstBundleName, actionButtonMap.at(actionButtonType).dataShareUpdate->uri);
+
+    DataShare::CreateOptions options;
+    options.enabled_ = true;
+    auto userID = reminder->GetUserId();
+    auto tokenID = IPCSkeleton::GetSelfTokenID();
+    std::string uriStr = actionButtonMap.at(actionButtonType).dataShareUpdate->uri + "?user=" + std::to_string(userID) +
+        "&srcToken=" + std::to_string(tokenID) + "&dstBundleName=" + dstBundleName;
+
+    // create datashareHelper
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = DataShare::DataShareHelper::Creator(uriStr, options);
+    if (dataShareHelper == nullptr) {
+        ANSR_LOGE("create datashareHelper failed");
+        return;
+    }
+    // gen uri equalTo valuesBucket
+    Uri uri(uriStr);
+
+    DataShare::DataSharePredicates predicates;
+    std::vector<std::string> equalToVector =
+        ReminderRequest::StringSplit(actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo, ";");
+    GenPredicates(predicates, equalToVector);
+
+    DataShare::DataShareValuesBucket valuesBucket;
+    std::vector<std::string> valuesBucketVector =
+        ReminderRequest::StringSplit(actionButtonMap.at(actionButtonType).dataShareUpdate->valuesBucket, ";");
+    GenValuesBucket(valuesBucket, valuesBucketVector);
+
+    // update app store
+    int retVal = dataShareHelper->Update(uri, predicates, valuesBucket);
+    if (retVal > 0) {
+        // update success
+        ANSR_LOGI("update app store success retval:%{public}d", retVal);
+    }
+}
+
+void ReminderDataManager::GenPredicates(DataShare::DataSharePredicates & predicates,
+    const std::vector<std::string> &equalToVector)
+{
+    // predicates
+    for (auto &it : equalToVector) {
+        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ":");
+        if (temp.size() <= INDEX_VALUE) {
+            continue;
+        }
+        if (temp[INDEX_TYPE] == "string") {
+            predicates.EqualTo(temp[INDEX_KEY], temp[INDEX_VALUE]);
+        } else if (temp[INDEX_TYPE] == "double") {
+            predicates.EqualTo(temp[INDEX_KEY], std::stod(temp[INDEX_VALUE]));
+        } else if (temp[INDEX_TYPE] == "bool") {
+            bool valueBool = false;
+            if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true" || temp[INDEX_VALUE] == "True") {
+                valueBool = true;
+            }
+            predicates.EqualTo(temp[INDEX_KEY], valueBool);
+        }
+    }
+}
+
+void ReminderDataManager::GenValuesBucket(DataShare::DataShareValuesBucket & valuesBucket,
+    const std::vector<std::string> &valuesBucketVector)
+{
+    // valuesBucket
+    for (auto &it : valuesBucketVector) {
+        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ":");
+        if (temp.size() <= INDEX_VALUE) {
+            continue;
+        }
+        if (temp[INDEX_TYPE] == "string") {
+            valuesBucket.Put(temp[INDEX_KEY], temp[INDEX_VALUE]);
+        } else if (temp[INDEX_TYPE] == "double") {
+            valuesBucket.Put(temp[INDEX_KEY], std::stod(temp[INDEX_VALUE]));
+        } else if (temp[INDEX_TYPE] == "bool") {
+            bool valueBool = false;
+            if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true") {
+                valueBool = true;
+            }
+            valuesBucket.Put(temp[INDEX_KEY], valueBool);
+        } else if (temp[INDEX_TYPE] == "null") {
+            valuesBucket.Put(temp[INDEX_KEY]);
+        } else if (temp[INDEX_TYPE] == "vector") {
+            std::vector<std::string> arr = ReminderRequest::StringSplit(temp[INDEX_VALUE], ",");
+            std::vector<uint8_t> value;
+            for (auto &num : arr) {
+                value.push_back(static_cast<uint8_t>(std::stoi(num)));
+            }
+            valuesBucket.Put(temp[INDEX_KEY], value);
+        }
+    }
+}
+
+void ReminderDataManager::GenDstBundleName(std::string &dstBundleName, const std::string &uri) const
+{
+    size_t left = 0;
+    size_t right = 0;
+    left = uri.find("/", left);
+    right = uri.find("/", left + 1);
+    while (right != std::string::npos && right - left <= 1) {
+        left = right + 1;
+        right = uri.find("/", left);
+    }
+    if (left == std::string::npos) {
+        return;
+    }
+    if (right != std::string::npos) {
+        dstBundleName = uri.substr(left, right - left);
+    } else {
+        dstBundleName = uri.substr(left);
+    }
 }
 
 void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
@@ -842,6 +990,7 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
     reminder->OnSnooze();
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
 
     // 2) Show the notification dialog in the systemUI

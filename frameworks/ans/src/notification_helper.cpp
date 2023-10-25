@@ -164,6 +164,11 @@ ErrCode NotificationHelper::SubscribeNotification(const NotificationSubscriber &
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber);
 }
 
+ErrCode NotificationHelper::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(subscriber);
+}
+
 ErrCode NotificationHelper::SubscribeNotification(
     const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo)
 {
@@ -179,6 +184,13 @@ ErrCode NotificationHelper::UnSubscribeNotification(
     NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber, subscribeInfo);
+}
+
+ErrCode NotificationHelper::TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
+    const int32_t notificationId, const NotificationButtonOption &buttonOption)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->TriggerLocalLiveView(
+        bundleOption, notificationId, buttonOption);
 }
 
 ErrCode NotificationHelper::RemoveNotification(const std::string &key, int32_t removeReason)
