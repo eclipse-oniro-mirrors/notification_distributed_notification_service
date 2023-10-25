@@ -47,12 +47,12 @@ void NotificationProgress::SetCurrentValue(int32_t curValue)
     currentValue_ = curValue;
 }
 
-int32_t NotificationProgress::GetIsPercentage() const
+bool NotificationProgress::GetIsPercentage() const
 {
     return isPercentage_;
 }
 
-void NotificationProgress::SetIsPercentage(int32_t isPercentage)
+void NotificationProgress::SetIsPercentage(bool isPercentage)
 {
     isPercentage_ = isPercentage;
 }
@@ -69,9 +69,9 @@ std::string NotificationProgress::Dump()
 
 bool NotificationProgress::ToJson(nlohmann::json &jsonObject) const
 {
-    jsonObject["maxValue"]             = maxValue_;
-    jsonObject["currentValue"]            = currentValue_;
-    jsonObject["isPercentage"]        = isPercentage_;
+    jsonObject["maxValue"] = maxValue_;
+    jsonObject["currentValue"] = currentValue_;
+    jsonObject["isPercentage"] = isPercentage_;
 
     return true;
 }
@@ -98,8 +98,8 @@ NotificationProgress *NotificationProgress::FromJson(const nlohmann::json &jsonO
         progress->currentValue_ = jsonObject.at("currentValue").get<int32_t>();
     }
 
-    if (jsonObject.find("isPercentage") != jsonEnd && jsonObject.at("isPercentage").is_number_integer()) {
-        progress->isPercentage_ = jsonObject.at("isPercentage_").get<int32_t>();
+    if (jsonObject.find("isPercentage") != jsonEnd && jsonObject.at("isPercentage").is_boolean()) {
+        progress->isPercentage_ = jsonObject.at("isPercentage_").get<bool>();
     }
 
     return progress;
@@ -117,7 +117,7 @@ bool NotificationProgress::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(isPercentage_)) {
+    if (!parcel.WriteBool(isPercentage_)) {
         ANS_LOGE("Failed to write isPercentage");
         return false;
     }
@@ -128,7 +128,7 @@ bool NotificationProgress::ReadFromParcel(Parcel &parcel)
 {
     maxValue_ = parcel.ReadInt32();
     currentValue_ = parcel.ReadInt32();
-    isPercentage_ = parcel.ReadInt32();
+    isPercentage_ = parcel.ReadBool();
 
     return true;
 }

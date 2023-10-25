@@ -18,8 +18,10 @@
 #include "ans_log_wrapper.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "notification_button_option.h"
 #include "notification_helper.h"
 #include "notification_local_live_view_button.h"
+#include "notification_progress.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -477,6 +479,47 @@ public:
      */
     static napi_value SetNotificationMultiLineContent(
         const napi_env &env, NotificationBasicContent *basicContent, napi_value &result);
+
+    /**
+     * @brief Sets a js NotificationLocalLiveViewContent object by specified NotificationBasicContent object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param basicContent Indicates a NotificationBasicContent object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationLocalLiveViewContent(
+        const napi_env &env, NotificationBasicContent *basicContent, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationCapsule object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsule Indicates a NotificationCapsule object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetCapsule(const napi_env &env, const NotificationCapsule &capsule, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationLocalLiveViewButton object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsule Indicates a NotificationLocalLiveViewButton object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationProgress object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsule Indicates a NotificationProgress object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetProgress(const napi_env &env, const NotificationProgress &progress, napi_value &result);
 
     /**
      * @brief Sets a js object by specified MessageUser object

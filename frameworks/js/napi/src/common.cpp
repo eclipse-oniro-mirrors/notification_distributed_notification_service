@@ -922,6 +922,12 @@ napi_value Common::SetNotificationContentDetailed(const napi_env &env, const Con
         if (ret) {
             napi_set_named_property(env, result, "multiLine", contentResult);
         }
+    } else if (type == ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW) {
+        // systemLiveView?: NotificationLocalLiveViewContent
+        ret = SetNotificationLocalLiveViewContent(env, basicContent.get(), contentResult);
+        if (ret) {
+            napi_set_named_property(env, result, "systemLiveView", contentResult);
+        }
     } else {
         ANS_LOGE("ContentType is does not exist");
     }
@@ -1150,6 +1156,149 @@ napi_value Common::SetNotificationMultiLineContent(
         count++;
     }
     napi_set_named_property(env, result, "lines", arr);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetNotificationLocalLiveViewContent(
+    const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
+{
+    ANS_LOGI("enter");
+    napi_value value = nullptr;
+    if (basicContent == nullptr) {
+        ANS_LOGE("basicContent is null");
+        return NapiGetBoolean(env, false);
+    }
+    OHOS::Notification::NotificationLocalLiveViewContent *localLiveViewContent =
+        static_cast<OHOS::Notification::NotificationLocalLiveViewContent *>(basicContent);
+    if (localLiveViewContent == nullptr) {
+        ANS_LOGE("localLiveViewContent is null");
+        return NapiGetBoolean(env, false);
+    }
+
+    if (!SetNotificationBasicContent(env, localLiveViewContent, result)) {
+        ANS_LOGE("SetNotificationBasicContent call failed");
+        return NapiGetBoolean(env, false);
+    }
+
+    // type: int32_t
+    napi_create_int32(env, localLiveViewContent->GetType(), &value);
+    napi_set_named_property(env, result, "type", value);
+
+    // capsule: NotificationCapsule
+    napi_value capsule = nullptr;
+    napi_create_object(env, &capsule);
+    if (!SetCapsule(env, localLiveViewContent->GetCapsule(), capsule)) {
+        ANS_LOGE("SetMessageUser call failed");
+        return NapiGetBoolean(env, false);
+    }
+    napi_set_named_property(env, result, "capsule", capsule);
+
+    // button: NotificationLocalLiveViewButton
+    napi_value button = nullptr;
+    napi_create_object(env, &button);
+    if (!SetButton(env, localLiveViewContent->GetButton(), button)) {
+        ANS_LOGE("SetMessageUser call failed");
+        return NapiGetBoolean(env, false);
+    }
+    napi_set_named_property(env, result, "button", button);
+
+    // progress: NotificationProgress
+    napi_value progress = nullptr;
+    napi_create_object(env, &progress);
+    if (!SetProgress(env, localLiveViewContent->GetProgress(), progress)) {
+        ANS_LOGE("SetMessageUser call failed");
+        return NapiGetBoolean(env, false);
+    }
+    napi_set_named_property(env, result, "progress", progress);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetCapsule(const napi_env &env, const NotificationCapsule &capsule, napi_value &result)
+{
+    ANS_LOGI("enter");
+
+    napi_value value = nullptr;
+    // title: string
+    napi_create_string_utf8(env, capsule.GetTitle().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "title", value);
+
+    // backgroundColor: string
+    napi_create_string_utf8(env, capsule.GetBackgroundColor().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "backgroundColor", value);
+
+    // icon?: image.PixelMap
+    std::shared_ptr<Media::PixelMap> icon = capsule.GetIcon();
+    if (icon) {
+        napi_value iconResult = nullptr;
+        napi_valuetype valuetype = napi_undefined;
+        iconResult = Media::PixelMapNapi::CreatePixelMap(env, icon);
+        NAPI_CALL(env, napi_typeof(env, iconResult, &valuetype));
+        if (valuetype == napi_undefined) {
+            ANS_LOGW("iconResult is undefined");
+            napi_set_named_property(env, result, "icon", NapiGetNull(env));
+        } else {
+            napi_set_named_property(env, result, "icon", iconResult);
+        }
+    }
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result)
+{
+    ANS_LOGI("enter");
+
+    napi_value value = nullptr;
+
+    // buttonNames: Array<String>
+    napi_value arr = nullptr;
+    int count = 0;
+    napi_create_array(env, &arr);
+    for (auto vec : button.GetAllButtonNames()) {
+        napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &value);
+        napi_set_element(env, arr, count, value);
+        count++;
+    }
+    napi_set_named_property(env, result, "buttonNames", arr);
+
+    // buttonIcons: Array<PixelMap>
+    napi_value iconArr = nullptr;
+    int iconCount = 0;
+    napi_create_array(env, &iconArr);
+
+    std::vector<std::shared_ptr<Media::PixelMap>> icons = button.GetAllButtonIcons();
+    for (auto vec : icons) {
+        if (!vec) {
+            continue;
+        }
+        // buttonIcon
+        napi_value iconResult = nullptr;
+        iconResult = Media::PixelMapNapi::CreatePixelMap(env, vec);
+        napi_set_element(env, iconArr, iconCount, iconResult);
+        iconCount++;
+    }
+    napi_set_named_property(env, result, "buttonIcons", iconArr);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetProgress(const napi_env &env, const NotificationProgress &progress, napi_value &result)
+{
+    ANS_LOGI("enter");
+
+    napi_value value = nullptr;
+    // currentValue: int32_t
+    napi_create_int32(env, progress.GetCurrentValue(), &value);
+    napi_set_named_property(env, result, "currentValue", value);
+
+    // maxValue: int32_t
+    napi_create_int32(env, progress.GetMaxValue(), &value);
+    napi_set_named_property(env, result, "maxValue", value);
+
+    // isPercentage: bool
+    napi_get_boolean(env, progress.GetIsPercentage(), &value);
+    napi_set_named_property(env, result, "isPercentage", value);
 
     return NapiGetBoolean(env, true);
 }
@@ -4007,12 +4156,12 @@ napi_value Common::GetNotificationLocalLiveViewContent(
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
     bool hasProperty = false;
-    NAPI_CALL(env, napi_has_named_property(env, result, "localLiveView", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, result, "systemLiveView", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property localLiveView expected.");
         return nullptr;
     }
-    napi_get_named_property(env, result, "localLiveView", &contentResult);
+    napi_get_named_property(env, result, "systemLiveView", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
@@ -4031,6 +4180,9 @@ napi_value Common::GetNotificationLocalLiveViewContent(
     }
 
     request.SetContent(std::make_shared<NotificationContent>(localLiveViewContent));
+    
+    // set isOnGoing of live view true
+    request.SetInProgress(true);
 
     return NapiGetNull(env);
 }
@@ -4100,7 +4252,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
             return nullptr;
         }
         capsule.SetIcon(pixelMap);
-        ANS_LOGD("capsule icon = %{public}s", str);
+        ANS_LOGD("capsule icon = %{public}d", pixelMap->GetWidth());
     }
 
     content->SetCapsule(capsule);
@@ -4182,6 +4334,7 @@ napi_value Common::GetNotificationLocalLiveViewButton(
         }
     }
     ANS_LOGD("button buttonIcon = %{public}s", str);
+    content->SetButton(button);
 
     return NapiGetNull(env);
 }
@@ -4193,6 +4346,7 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
     int32_t intValue = -1;
+    bool boolValue = false;
     napi_value progressResult = nullptr;
 
     ANS_LOGI("enter");
@@ -4236,13 +4390,13 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
     if (hasProperty) {
         napi_get_named_property(env, progressResult, "isPercentage", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-        if (valuetype != napi_number) {
-            ANS_LOGE("Wrong argument type. Number expected.");
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. bool expected.");
             return nullptr;
         }
-        napi_get_value_int32(env, result, &intValue);
-        progress.SetIsPercentage(intValue);
-        ANS_LOGD("progress isPercentage = %{public}d", intValue);
+        napi_get_value_bool(env, result, &boolValue);
+        progress.SetIsPercentage(boolValue);
+        ANS_LOGD("progress isPercentage = %{public}d", boolValue);
     }
 
     content->SetProgress(progress);
@@ -4294,7 +4448,7 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
         return nullptr;
     }
 
-    //progess?
+    //progress?
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "progress", &hasProperty));
     if (hasProperty && GetNotificationLocalLiveViewProgress(env, contentResult, content) == nullptr) {
         return nullptr;
@@ -4770,6 +4924,9 @@ bool Common::SlotTypeJSToC(const SlotType &inType, NotificationConstant::SlotTyp
         case SlotType::CONTENT_INFORMATION:
             outType = NotificationConstant::SlotType::CONTENT_INFORMATION;
             break;
+        case SlotType::LIVE_VIEW:
+            outType = NotificationConstant::SlotType::LIVE_VIEW;
+            break;
         case SlotType::UNKNOWN_TYPE:
         case SlotType::OTHER_TYPES:
             outType = NotificationConstant::SlotType::OTHER;
@@ -4795,6 +4952,9 @@ bool Common::SlotTypeCToJS(const NotificationConstant::SlotType &inType, SlotTyp
             break;
         case NotificationConstant::SlotType::CONTENT_INFORMATION:
             outType = SlotType::CONTENT_INFORMATION;
+            break;
+        case NotificationConstant::SlotType::LIVE_VIEW:
+            outType = SlotType::LIVE_VIEW;
             break;
         case NotificationConstant::SlotType::OTHER:
             outType = SlotType::OTHER_TYPES;

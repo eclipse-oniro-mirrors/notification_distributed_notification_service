@@ -37,9 +37,19 @@ void NotificationLocalLiveViewContent::SetType(int32_t type)
     type_ = type;
 }
 
+int32_t NotificationLocalLiveViewContent::GetType()
+{
+    return type_;
+}
+
 void NotificationLocalLiveViewContent::SetCapsule(NotificationCapsule capsule)
 {
     capsule_ = capsule;
+}
+
+NotificationCapsule NotificationLocalLiveViewContent::GetCapsule()
+{
+    return capsule_;
 }
 
 void NotificationLocalLiveViewContent::SetButton(NotificationLocalLiveViewButton button)
@@ -47,9 +57,19 @@ void NotificationLocalLiveViewContent::SetButton(NotificationLocalLiveViewButton
     button_ = button;
 }
 
+NotificationLocalLiveViewButton NotificationLocalLiveViewContent::GetButton()
+{
+    return button_;
+}
+
 void NotificationLocalLiveViewContent::SetProgress(NotificationProgress progress)
 {
     progress_ = progress;
+}
+
+NotificationProgress NotificationLocalLiveViewContent::GetProgress()
+{
+    return progress_;
 }
 
 std::string NotificationLocalLiveViewContent::Dump()
