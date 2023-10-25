@@ -145,12 +145,12 @@ int32_t NotificationDataMgr::Destroy()
 int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value)
 {
     ANS_LOGD("InsertData start");
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
         int64_t rowId = -1;
         NativeRdb::ValuesBucket valuesBucket;
         valuesBucket.PutString(NOTIFICATION_KEY, key);
@@ -169,12 +169,12 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
 int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values)
 {
     ANS_LOGD("InsertBatchData start");
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
         int64_t rowId = -1;
         for (auto &value : values) {
             NativeRdb::ValuesBucket valuesBucket;
@@ -195,12 +195,12 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
 int32_t NotificationDataMgr::DeleteData(const std::string &key)
 {
     ANS_LOGD("DeleteData start");
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
         int32_t rowId = -1;
         NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
         absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
@@ -217,12 +217,12 @@ int32_t NotificationDataMgr::DeleteData(const std::string &key)
 int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &keys)
 {
     ANS_LOGD("Delete Bathch Data start");
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
         for (auto key : keys) {
             NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
             int32_t rowId = -1;
@@ -241,12 +241,12 @@ int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &ke
 int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value)
 {
     ANS_LOGD("QueryData start");
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
         NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
         absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
         auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
@@ -274,12 +274,12 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     const std::string &key, std::unordered_map<std::string, std::string> &values)
 {
     ANS_LOGD("QueryData BeginWithKey start");
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
         NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
         absRdbPredicates.BeginsWith(NOTIFICATION_KEY, key);
         auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
@@ -320,12 +320,12 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &datas)
 {
     ANS_LOGD("QueryAllData start");
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
         NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
         auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
         if (absSharedResultSet == nullptr) {
