@@ -632,7 +632,7 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
                 buttonDataShareUpdate->valuesBucket = dataShareUpdate.at("valuesBucket").get<std::string>();
             }
             SetActionButton(title, ActionButtonType(std::stoi(type, nullptr)),
-                buttonWantAgent, buttonDataShareUpdate);
+                resource, buttonWantAgent, buttonDataShareUpdate);
             continue;
         }
         // old method Soon to be deleted
