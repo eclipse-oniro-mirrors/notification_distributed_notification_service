@@ -87,6 +87,18 @@ public:
 #endif
 
     /**
+     * @brief Obtains bundle info by bundle name.
+     *
+     * @param bundleName Indicates the bundle name.
+     * @param flag Indicates the bundle flag.
+     * @param bundleInfo Indicates the bundle info.
+     * @param userId Indicates the user id.
+     * @return Returns the check result.
+     */
+    bool GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
+        int32_t userId, AppExecFwk::BundleInfo &bundleInfo);
+    
+    /**
      * @brief Obtains BundleInfo of all bundles available in the system through the proxy object.
      * @param flag Indicates the flag used to specify information contained in the BundleInfo that will be returned.
      * @param bundleInfos Indicates all of the obtained BundleInfo objects.

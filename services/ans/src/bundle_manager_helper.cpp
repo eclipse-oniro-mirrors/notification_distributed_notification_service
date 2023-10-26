@@ -184,6 +184,24 @@ bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &b
 }
 #endif
 
+bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
+    int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
+{
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+
+    Connect();
+    
+    if (bundleMgr_ == nullptr) {
+        return false;
+    }
+    int32_t callingUserId;
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(userId, callingUserId);
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bool ret = bundleMgr_->GetBundleInfo(bundleName, flag, bundleInfo, callingUserId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return ret;
+}
+
 bool BundleManagerHelper::GetBundleInfos(
     const AppExecFwk::BundleFlag flag, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId)
 {

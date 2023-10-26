@@ -30,6 +30,8 @@
 #include "reminder_event_manager.h"
 #include "time_service_client.h"
 #include "singleton.h"
+#include "locale_config.h"
+#include "bundle_manager_helper.h"
 #include "datashare_predicates_object.h"
 #include "datashare_value_object.h"
 #include "datashare_helper.h"
@@ -732,6 +734,7 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     reminder->InitReminderId();
     reminder->InitUserId(ReminderRequest::GetUserId(bundleOption->GetUid()));
     reminder->InitUid(bundleOption->GetUid());
+    reminder->InitBundleName(bundleOption->GetBundleName());
 
     if (reminder->GetTriggerTimeInMilli() == ReminderRequest::INVALID_LONG_LONG_VALUE) {
         ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s",
@@ -747,6 +750,7 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
         return;
     }
     ANSR_LOGD("Containers(vector) add. reminderId=%{public}d", reminderId);
+    UpdateReminderLanguage(reminder);
     reminderVector_.push_back(reminder);
     totalCount_++;
     store_->UpdateOrInsert(reminder, bundleOption);
@@ -1215,6 +1219,11 @@ void ReminderDataManager::Init(bool isFromBootComplete)
     if (IsReminderAgentReady()) {
         return;
     }
+    // Register config observer for language change
+    if (!RegisterConfigurationObserver()) {
+        ANSR_LOGW("Register configuration observer failed.");
+        return;
+    }
     if (store_ == nullptr) {
         store_ = std::make_shared<ReminderStore>();
     }
@@ -1239,6 +1248,27 @@ void ReminderDataManager::InitUserId()
         currentUserId_ = MAIN_USER_ID;
         ANSR_LOGE("Failed to get active user id.");
     }
+}
+
+bool ReminderDataManager::RegisterConfigurationObserver()
+{
+    if (configChangeObserver_ != nullptr) {
+        return true;
+    }
+
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    if (appMgrClient->ConnectAppMgrService() != ERR_OK) {
+        ANSR_LOGW("Connect to app mgr service failed.");
+        return false;
+    }
+
+    configChangeObserver_ = sptr<AppExecFwk::IConfigurationObserver>(
+        new (std::nothrow) ReminderConfigChangeObserver());
+    if (appMgrClient->RegisterConfigurationObserver(configChangeObserver_) != ERR_OK) {
+        ANSR_LOGE("Register configuration observer failed.");
+        return false;
+    }
+    return true;
 }
 
 void ReminderDataManager::GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const
@@ -1596,6 +1626,65 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     if (result != 0) {
         ANSR_LOGE("Start ability failed, result = %{public}d", result);
         return;
+    }
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundleResMgr(
+    const AppExecFwk::BundleInfo &bundleInfo)
+{
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    if (!resourceManager) {
+        ANSR_LOGE("create resourceManager failed.");
+        return nullptr;
+    }
+    // obtains the resource path.
+    for (const auto &hapModuleInfo : bundleInfo.hapModuleInfos) {
+        std::string moduleResPath = hapModuleInfo.hapPath.empty() ? hapModuleInfo.resourcePath : hapModuleInfo.hapPath;
+        if (moduleResPath.empty()) {
+            continue;
+        }
+        ANSR_LOGD("GetBundleResMgr, moduleResPath: %{private}s", moduleResPath.c_str());
+        if (!resourceManager->AddResource(moduleResPath.c_str())) {
+            ANSR_LOGW("GetBundleResMgr AddResource failed");
+        }
+    }
+    // obtains the current system language.
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    resConfig->SetLocaleInfo(locale);
+    resourceManager->UpdateResConfig(*resConfig);
+    return resourceManager;
+}
+
+void ReminderDataManager::UpdateReminderLanguage(const sptr<ReminderRequest> &reminder)
+{
+    // obtains the bundle info by bundle name
+    const std::string bundleName = reminder->GetBundleName();
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, reminder->GetUid(), bundleInfo)) {
+        ANSR_LOGE("Get reminder request[%{public}d][%{public}s] bundle info failed.",
+            reminder->GetReminderId(), bundleName.c_str());
+        return;
+    }
+    // obtains the resource manager
+    auto resourceMgr = GetBundleResMgr(bundleInfo);
+    if (resourceMgr == nullptr) {
+        ANSR_LOGE("Get reminder request[%{public}d][%{public}s] resource manager failed.",
+            reminder->GetReminderId(), bundleName.c_str());
+        return;
+    }
+    // update action button title
+    reminder->OnLanguageChange(resourceMgr);
+}
+
+void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)
+{
+    ANSR_LOGI("System language config changed.");
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        UpdateReminderLanguage(*it);
     }
 }
 }

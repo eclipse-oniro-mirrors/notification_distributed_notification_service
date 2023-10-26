@@ -50,6 +50,7 @@ bool ReminderCommon::GenActionButtons(
     const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
+    char res[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_valuetype valuetype = napi_undefined;
     napi_value actionButtons = nullptr;
     if (!GetObject(env, value, ReminderAgentNapi::ACTION_BUTTON, actionButtons)) {
@@ -84,6 +85,13 @@ bool ReminderCommon::GenActionButtons(
                 ANSR_LOGW("Wrong argument type:%{public}s. buttonType not support.", ACTION_BUTTON);
                 return false;
             }
+
+            std::string resource = "";
+            if (GetStringUtf8(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_RESOURCE, res,
+                NotificationNapi::STR_MAX_SIZE)) {
+                resource = std::string(res);
+            }
+
             std::string title(str);
             auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
             if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
@@ -96,8 +104,9 @@ bool ReminderCommon::GenActionButtons(
                 GetButtonDataShareUpdate(env, actionButton, reminder, buttonDataShareUpdate);
             }
             reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType),
-                buttonWantAgent, buttonDataShareUpdate);
-            ANSR_LOGD("button title=%{public}s, type=%{public}d", title.c_str(), buttonType);
+                resource, buttonWantAgent, buttonDataShareUpdate);
+            ANSR_LOGD("button title=%{public}s, type=%{public}d, resource=%{public}s",
+                title.c_str(), buttonType, resource.c_str());
         } else {
             ANSR_LOGW("Parse action button error.");
             return false;

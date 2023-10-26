@@ -24,9 +24,11 @@
 #ifdef PLAYER_FRAMEWORK_ENABLE
 #include "player.h"
 #endif
+#include "app_mgr_client.h"
 #include "reminder_request.h"
 #include "reminder_store.h"
 #include "reminder_timer_info.h"
+#include "reminder_config_change_observer.h"
 #include "datashare_predicates.h"
 #include "datashare_values_bucket.h"
 
@@ -103,6 +105,11 @@ public:
     void Init(bool isFromBootComplete);
 
     void InitUserId();
+
+    /**
+     * @brief Register configuration observer, the listening system language is changed.
+     */
+    bool RegisterConfigurationObserver();
 
     void OnUserRemove(const int32_t& userId);
 
@@ -183,6 +190,24 @@ public:
      * @param want Which contains the given reminder.
      */
     void TerminateAlerting(const OHOS::EventFwk::Want &want);
+
+    /**
+     * @brief Get resource manager by handle info.
+     */
+    std::shared_ptr<Global::Resource::ResourceManager> GetBundleResMgr(
+        const AppExecFwk::BundleInfo &bundleInfo);
+
+    /**
+     * @brief Update reminders based on the system language.
+     *
+     * Update action button title.
+     */
+    void UpdateReminderLanguage(const sptr<ReminderRequest> &reminder);
+
+    /**
+     * @brief System language change
+     */
+    void OnConfigurationChanged(const AppExecFwk::Configuration &configuration);
 
     static const uint8_t TIME_ZONE_CHANGE;
     static const uint8_t DATE_TIME_CHANGE;
@@ -552,6 +577,11 @@ private:
     int currentUserId_ {0};
     sptr<AdvancedNotificationService> advancedNotificationService_ = nullptr;
     std::shared_ptr<ReminderStore> store_ = nullptr;
+
+    /**
+     * Indicates config change observer for language
+     */
+    sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
 };
 }  // namespace OHOS
 }  // namespace Notification

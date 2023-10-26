@@ -190,7 +190,7 @@ std::string ReminderRequest::Dump() const
 }
 
 ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, const ActionButtonType &type,
-    const std::shared_ptr<ButtonWantAgent> &buttonWantAgent,
+    const std::string &resource, const std::shared_ptr<ButtonWantAgent> &buttonWantAgent,
     const std::shared_ptr<ButtonDataShareUpdate> &buttonDataShareUpdate)
 {
     if ((type != ActionButtonType::CLOSE) && (type != ActionButtonType::SNOOZE) && (type != ActionButtonType::CUSTOM)) {
@@ -200,6 +200,7 @@ ReminderRequest& ReminderRequest::SetActionButton(const std::string &title, cons
     ActionButtonInfo actionButtonInfo;
     actionButtonInfo.type = type;
     actionButtonInfo.title = title;
+    actionButtonInfo.resource = resource;
     actionButtonInfo.wantAgent = buttonWantAgent;
     actionButtonInfo.dataShareUpdate = buttonDataShareUpdate;
 
@@ -243,6 +244,11 @@ void ReminderRequest::InitUserId(const int32_t &userId)
 void ReminderRequest::InitUid(const int32_t &uid)
 {
     uid_ = uid;
+}
+
+void ReminderRequest::InitBundleName(const std::string &bundleName)
+{
+    bundleName_ = bundleName;
 }
 
 bool ReminderRequest::IsExpired() const
@@ -611,6 +617,7 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
             nlohmann::json root = nlohmann::json::parse(jsonString);
             std::string type = root.at("type").get<std::string>();
             std::string title = root.at("title").get<std::string>();
+            std::string resource = root.at("resource").get<std::string>();
             auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
             if (!root["wantAgent"].empty()) {
                 nlohmann::json wantAgent = root["wantAgent"];
@@ -625,7 +632,7 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
                 buttonDataShareUpdate->valuesBucket = dataShareUpdate.at("valuesBucket").get<std::string>();
             }
             SetActionButton(title, ActionButtonType(std::stoi(type, nullptr)),
-                buttonWantAgent, buttonDataShareUpdate);
+                resource, buttonWantAgent, buttonDataShareUpdate);
             continue;
         }
         // old method Soon to be deleted
@@ -638,10 +645,11 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
             buttonWantAgent->pkgName = singleButton.at(BUTTON_PKG_INDEX);
             buttonWantAgent->abilityName = singleButton.at(BUTTON_ABILITY_INDEX);
         }
+        std::string resource = "";
         auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
         SetActionButton(singleButton.at(BUTTON_TITLE_INDEX),
             ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)),
-            buttonWantAgent, buttonDataShareUpdate);
+            resource, buttonWantAgent, buttonDataShareUpdate);
         ANSR_LOGI("RecoverButton title:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
             singleButton.at(BUTTON_TITLE_INDEX).c_str(), buttonWantAgent->pkgName.c_str(),
             buttonWantAgent->abilityName.c_str());
@@ -900,6 +908,11 @@ int32_t ReminderRequest::GetUid() const
     return uid_;
 }
 
+std::string ReminderRequest::GetBundleName() const
+{
+    return bundleName_;
+}
+
 void ReminderRequest::SetSystemApp(bool isSystem)
 {
     isSystemApp_ = isSystem;
@@ -1128,6 +1141,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
             ANSR_LOGE("Failed to write action button title");
             return false;
         }
+        if (!parcel.WriteString(static_cast<std::string>(button.second.resource))) {
+            ANSR_LOGE("Failed to write action button resource");
+            return false;
+        }
         if (button.second.wantAgent == nullptr) {
             ANSR_LOGE("button wantAgent is null");
             return false;
@@ -1308,6 +1325,7 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         }
         ActionButtonType type = static_cast<ActionButtonType>(buttonType);
         std::string title = parcel.ReadString();
+        std::string resource = parcel.ReadString();
         std::string pkgName = parcel.ReadString();
         std::string abilityName = parcel.ReadString();
         std::string uri = parcel.ReadString();
@@ -1316,6 +1334,7 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
         ActionButtonInfo info;
         info.type = type;
         info.title = title;
+        info.resource = resource;
         info.wantAgent = std::make_shared<ButtonWantAgent>();
         info.wantAgent->pkgName = pkgName;
         info.wantAgent->abilityName = abilityName;
@@ -1385,6 +1404,7 @@ std::string ReminderRequest::GetButtonInfo() const
         nlohmann::json root;
         root["type"] = std::to_string(static_cast<uint8_t>(button.first));
         root["title"] = buttonInfo.title;
+        root["resource"] = buttonInfo.resource;
         if (buttonInfo.wantAgent != nullptr) {
             nlohmann::json wantAgentfriends;
             wantAgentfriends["pkgName"] = buttonInfo.wantAgent->pkgName;
@@ -1909,6 +1929,24 @@ void ReminderRequest::AddColumn(
     } else {
         sqlOfAddColumns += name + " " + type;
     }
+}
+
+void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr)
+{
+    if (resMgr == nullptr) {
+        return;
+    }
+    // update title
+    for (auto &button : actionButtonMap_) {
+        std::string title;
+        resMgr->GetStringByName(button.second.resource.c_str(), title);
+        if (title.empty()) {
+            continue;
+        }
+        button.second.title = title;
+    }
+    // update action button
+    UpdateActionButtons(false);
 }
 }
 }
