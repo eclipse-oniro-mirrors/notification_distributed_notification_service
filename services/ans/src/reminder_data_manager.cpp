@@ -1638,7 +1638,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundl
         return nullptr;
     }
     // obtains the resource path.
-    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+    for (const auto &hapModuleInfo : bundleInfo.hapModuleInfos) {
         std::string moduleResPath = hapModuleInfo.hapPath.empty() ? hapModuleInfo.resourcePath : hapModuleInfo.hapPath;
         if (moduleResPath.empty()) {
             continue;
