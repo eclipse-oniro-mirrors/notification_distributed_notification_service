@@ -77,9 +77,7 @@ bool ReminderCommon::GenActionButtons(
         int32_t buttonType = static_cast<int32_t>(ReminderRequest::ActionButtonType::INVALID);
         if (GetStringUtf8(env, actionButton,
             ReminderAgentNapi::ACTION_BUTTON_TITLE, str, NotificationNapi::STR_MAX_SIZE) &&
-            GetInt32(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_TYPE, buttonType, false) &&
-            GetStringUtf8(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_RESOURCE, res,
-                NotificationNapi::STR_MAX_SIZE)) {
+            GetInt32(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_TYPE, buttonType, false)) {
             if (!(ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CLOSE ||
                 ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::SNOOZE ||
                 (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM &&
@@ -87,8 +85,14 @@ bool ReminderCommon::GenActionButtons(
                 ANSR_LOGW("Wrong argument type:%{public}s. buttonType not support.", ACTION_BUTTON);
                 return false;
             }
+
+            std::string resource = "";
+            if (GetStringUtf8(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_RESOURCE, res,
+                NotificationNapi::STR_MAX_SIZE)) {
+                resource = std::string(res);
+            }
+
             std::string title(str);
-            std::string resource(res);
             auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
             if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
                 GetButtonWantAgent(env, actionButton, reminder, buttonWantAgent);
