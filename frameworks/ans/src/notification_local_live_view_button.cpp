@@ -71,7 +71,7 @@ bool NotificationLocalLiveViewButton::ToJson(nlohmann::json &jsonObject) const
 {
     nlohmann::json buttonsArr = nlohmann::json::array();
 
-    jsonObject["buttonNames"] = nlohmann::json(buttonNames_);
+    jsonObject["names"] = nlohmann::json(buttonNames_);
 
     nlohmann::json iconsArr = nlohmann::json::array();
     for (auto &btn : buttonIcons_) {
@@ -81,7 +81,7 @@ bool NotificationLocalLiveViewButton::ToJson(nlohmann::json &jsonObject) const
         nlohmann::json btnObj = AnsImageUtil::PackImage(btn);
         iconsArr.emplace_back(btnObj);
     }
-    jsonObject["buttonIcons"] = iconsArr;
+    jsonObject["icons"] = iconsArr;
 
     return true;
 }
@@ -101,12 +101,12 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
 
     const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("buttonNames") != jsonEnd && jsonObject.at("buttonNames").is_array()) {
-        button->buttonNames_ = jsonObject.at("buttonNames").get<std::vector<std::string>>();
+    if (jsonObject.find("names") != jsonEnd && jsonObject.at("names").is_array()) {
+        button->buttonNames_ = jsonObject.at("names").get<std::vector<std::string>>();
     }
 
-    if (jsonObject.find("buttonIcons") != jsonEnd) {
-        auto iconArr = jsonObject.at("buttonIcons");
+    if (jsonObject.find("icons") != jsonEnd) {
+        auto iconArr = jsonObject.at("icons");
         for (auto &iconObj : iconArr) {
             auto pIcon = AnsImageUtil::UnPackImage(iconObj.get<std::string>());
             if (pIcon == nullptr) {

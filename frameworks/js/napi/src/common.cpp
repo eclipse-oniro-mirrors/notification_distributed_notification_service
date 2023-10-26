@@ -1182,9 +1182,9 @@ napi_value Common::SetNotificationLocalLiveViewContent(
         return NapiGetBoolean(env, false);
     }
 
-    // type: int32_t
+    // typeCode: int32_t
     napi_create_int32(env, localLiveViewContent->GetType(), &value);
-    napi_set_named_property(env, result, "type", value);
+    napi_set_named_property(env, result, "typeCode", value);
 
     // capsule: NotificationCapsule
     napi_value capsule = nullptr;
@@ -1261,7 +1261,7 @@ napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveVie
         napi_set_element(env, arr, count, value);
         count++;
     }
-    napi_set_named_property(env, result, "buttonNames", arr);
+    napi_set_named_property(env, result, "names", arr);
 
     // buttonIcons: Array<PixelMap>
     napi_value iconArr = nullptr;
@@ -1279,7 +1279,7 @@ napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveVie
         napi_set_element(env, iconArr, iconCount, iconResult);
         iconCount++;
     }
-    napi_set_named_property(env, result, "buttonIcons", iconArr);
+    napi_set_named_property(env, result, "icons", iconArr);
 
     return NapiGetBoolean(env, true);
 }
@@ -4322,12 +4322,12 @@ napi_value Common::GetNotificationLocalLiveViewButton(
 
     NotificationLocalLiveViewButton button;
 
-    NAPI_CALL(env, napi_has_named_property(env, buttonResult, "buttonNames", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, buttonResult, "names", &hasProperty));
     if (hasProperty) {
-        napi_get_named_property(env, buttonResult, "buttonNames", &result);
+        napi_get_named_property(env, buttonResult, "names", &result);
         napi_is_array(env, result, &isArray);
         if (!isArray) {
-            ANS_LOGE("Property buttonNames is expected to be an array.");
+            ANS_LOGE("Property names is expected to be an array.");
             return nullptr;
         }
         napi_get_array_length(env, result, &length);
@@ -4345,12 +4345,12 @@ napi_value Common::GetNotificationLocalLiveViewButton(
         }
     }
 
-    NAPI_CALL(env, napi_has_named_property(env, buttonResult, "buttonIcons", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, buttonResult, "icons", &hasProperty));
     if (hasProperty) {
-        napi_get_named_property(env, buttonResult, "buttonIcons", &result);
+        napi_get_named_property(env, buttonResult, "icons", &result);
         napi_is_array(env, result, &isArray);
         if (!isArray) {
-            ANS_LOGE("Property buttonIcons is expected to be an array.");
+            ANS_LOGE("Property icons is expected to be an array.");
             return nullptr;
         }
         napi_get_array_length(env, result, &length);
@@ -4458,16 +4458,16 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
         return nullptr;
     }
 
-    //type
-    NAPI_CALL(env, napi_has_named_property(env, contentResult, "type", &hasProperty));
+    // typeCode
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "typeCode", &hasProperty));
     if (!hasProperty) {
-        ANS_LOGE("Property type expected.");
+        ANS_LOGE("Property typeCode expected.");
         return nullptr;
     }
-    napi_get_named_property(env, contentResult, "type", &result);
+    napi_get_named_property(env, contentResult, "typeCode", &result);
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
+        ANS_LOGE("Wrong argument typeCode. Number expected.");
         return nullptr;
     }
     napi_get_value_int32(env, result, &type);
