@@ -726,6 +726,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["classification"]    = classification_;
 
     jsonObject["slotType"]       = static_cast<int32_t>(slotType_);
+    jsonObject["notificationSlotType"] = static_cast<int32_t>(slotType_);
     jsonObject["badgeIconStyle"] = static_cast<int32_t>(badgeStyle_);
 
     jsonObject["showDeliveryTime"] = showDeliveryTime_;

@@ -436,6 +436,7 @@ napi_value Common::SetNotificationRequestByNumber(
     }
     napi_create_int32(env, (int32_t)outType, &value);
     napi_set_named_property(env, result, "slotType", value);
+    napi_set_named_property(env, result, "notificationSlotType", value);
 
     // deliveryTime?: number
     napi_create_int64(env, request->GetDeliveryTime(), &value);
@@ -1880,11 +1881,31 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
-    bool hasProperty = false;
+    bool hasSlotType = false;
+    bool hasNotificationSlotType = false;
     int32_t slotType = 0;
 
-    NAPI_CALL(env, napi_has_named_property(env, value, "slotType", &hasProperty));
-    if (hasProperty) {
+    NAPI_CALL(env, napi_has_named_property(env, value, "notificationSlotType", &hasNotificationSlotType));
+    if (hasNotificationSlotType) {
+        napi_get_named_property(env, value, "notificationSlotType", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, result, &slotType);
+
+        NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+        if (!SlotTypeJSToC(SlotType(slotType), outType)) {
+            return nullptr;
+        }
+        request.SetSlotType(outType);
+        ANS_LOGI("notificationSlotType = %{public}d", slotType);
+        return NapiGetNull(env);
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "slotType", &hasSlotType));
+    if (hasSlotType) {
         napi_get_named_property(env, value, "slotType", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
@@ -3189,21 +3210,38 @@ napi_value Common::GetNotificationContentType(const napi_env &env, const napi_va
 
     napi_value contentResult = nullptr;
     napi_valuetype valuetype = napi_undefined;
-    bool hasProperty = false;
+    bool hasNotificationContentType = false;
+    bool hasContentType = false;
 
-    NAPI_CALL(env, napi_has_named_property(env, result, "contentType", &hasProperty));
-    if (!hasProperty) {
+    NAPI_CALL(env, napi_has_named_property(env, result, "notificationContentType", &hasNotificationContentType));
+    if (hasNotificationContentType) {
+        napi_get_named_property(env, result, "notificationContentType", &contentResult);
+        NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, contentResult, &type);
+
+        return NapiGetNull(env);
+    } else {
+        ANS_LOGE("Property notificationContentType expected.");
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, result, "contentType", &hasContentType));
+    if (hasContentType) {
+        napi_get_named_property(env, result, "contentType", &contentResult);
+        NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, contentResult, &type);
+
+        return NapiGetNull(env);
+    } else {
         ANS_LOGE("Property contentType expected.");
-        return nullptr;
     }
-
-    napi_get_named_property(env, result, "contentType", &contentResult);
-    NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
-        return nullptr;
-    }
-    napi_get_value_int32(env, contentResult, &type);
 
     return NapiGetNull(env);
 }
@@ -4463,22 +4501,38 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
 
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
-    bool hasProperty = false;
-
-    // type: notification.SlotType
+    bool hasType = false;
+    bool hasNotificationType = false;
     int slotType = 0;
-    NAPI_CALL(env, napi_has_named_property(env, value, "type", &hasProperty));
-    if (!hasProperty) {
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "notificationType", &hasNotificationType));
+    if (hasNotificationType) {
+        napi_get_named_property(env, value, "notificationType", &nobj);
+        NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+    } else {
+        ANS_LOGE("Property notificationType expected.");
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "type", &hasType));
+    if (!hasNotificationType && hasType) {
+        napi_get_named_property(env, value, "type", &nobj);
+        NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+    } else {
         ANS_LOGE("Property type expected.");
-        return nullptr;
     }
-    napi_get_named_property(env, value, "type", &nobj);
-    NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
-        return nullptr;
+
+    if (nobj != nullptr) {
+        napi_get_value_int32(env, nobj, &slotType);
     }
-    napi_get_value_int32(env, nobj, &slotType);
+
     NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
     if (!Common::SlotTypeJSToC(SlotType(slotType), outType)) {
         return nullptr;

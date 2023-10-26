@@ -129,6 +129,7 @@ std::string NotificationContent::Dump()
 bool NotificationContent::ToJson(nlohmann::json &jsonObject) const
 {
     jsonObject["contentType"] = static_cast<int32_t>(contentType_);
+    jsonObject["notificationContentType"] = static_cast<int32_t>(contentType_);
 
     if (!content_) {
         ANS_LOGE("Invalid content. Cannot convert to JSON.");
