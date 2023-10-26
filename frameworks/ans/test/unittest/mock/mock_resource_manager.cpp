@@ -66,6 +66,9 @@ RState ResourceManagerImpl::GetStringById(uint32_t id, std::string &outValue)
 
 RState ResourceManagerImpl::GetStringByName(const char *name, std::string &outValue)
 {
+    if (name == nullptr) {
+        return NOT_FOUND;
+    }
     std::string key(name);
     auto iter = resources_.find(key);
     if (iter == resources_.end()) {
