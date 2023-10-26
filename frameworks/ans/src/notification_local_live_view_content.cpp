@@ -27,6 +27,7 @@
 #include "notification_json_convert.h"
 #include "notification_progress.h"
 #include "notification_local_live_view_button.h"
+#include "notification_time.h"
 #include "parcel.h"                          // for Parcel
 
 namespace OHOS {
@@ -72,6 +73,16 @@ NotificationProgress NotificationLocalLiveViewContent::GetProgress()
     return progress_;
 }
 
+void NotificationLocalLiveViewContent::SetTime(NotificationTime time)
+{
+    time_ = time;
+}
+
+NotificationTime NotificationLocalLiveViewContent::GetTime()
+{
+    return time_;
+}
+
 std::string NotificationLocalLiveViewContent::Dump()
 {
     return "NotificationLocalLiveViewContent{ " + NotificationBasicContent::Dump() +
@@ -79,6 +90,7 @@ std::string NotificationLocalLiveViewContent::Dump()
             ", capsule = " + capsule_.Dump() +
             ", button = " + button_.Dump() +
             ", progress = " + progress_.Dump() +
+            ", time = " + time_.Dump() +
             " }";
 }
 
@@ -107,10 +119,17 @@ bool NotificationLocalLiveViewContent::ToJson(nlohmann::json &jsonObject) const
         return false;
     }
 
+    nlohmann::json timeObj;
+    if (!NotificationJsonConverter::ConvertToJson(&time_, timeObj)) {
+        ANS_LOGE("Cannot convert time to JSON");
+        return false;
+    }
+
     jsonObject["type"] = type_;
     jsonObject["capsule"] = capsuleObj;
     jsonObject["button"] = buttonObj;
     jsonObject["progress"] = progressObj;
+    jsonObject["time"] = timeObj;
 
     return true;
 }
@@ -165,6 +184,16 @@ NotificationLocalLiveViewContent *NotificationLocalLiveViewContent::FromJson(con
         }
     }
 
+    if (jsonObject.find("time") != jsonEnd) {
+        auto timeObj = jsonObject.at("time");
+        auto pTime = NotificationJsonConverter::ConvertFromJson<NotificationTime>(timeObj);
+        if (pTime != nullptr) {
+            pContent->time_ = *pTime;
+            delete pTime;
+            pTime = nullptr;
+        }
+    }
+
     return pContent;
 }
 
@@ -192,6 +221,11 @@ bool NotificationLocalLiveViewContent::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteParcelable(&progress_)) {
         ANS_LOGE("Failed to write progress");
+        return false;
+    }
+
+    if (!parcel.WriteParcelable(&time_)) {
+        ANS_LOGE("Failed to write time");
         return false;
     }
 
@@ -241,12 +275,21 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
 
     auto pProgress = parcel.ReadParcelable<NotificationProgress>();
     if (pProgress == nullptr) {
-        ANS_LOGE("Failed to read capsule");
+        ANS_LOGE("Failed to read progress");
         return false;
     }
     progress_ = *pProgress;
     delete pProgress;
     pProgress = nullptr;
+
+    auto pTime = parcel.ReadParcelable<NotificationTime>();
+    if (pTime == nullptr) {
+        ANS_LOGE("Failed to read time");
+        return false;
+    }
+    time_ = *pTime;
+    delete pTime;
+    pTime = nullptr;
 
     return true;
 }
