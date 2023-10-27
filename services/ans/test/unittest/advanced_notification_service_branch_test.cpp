@@ -69,7 +69,7 @@ void AnsBranchTest::SetUpTestCase() {}
 
 void AnsBranchTest::TearDownTestCase() {}
 
-void AnsBranchTest::SetUp() 
+void AnsBranchTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp start";
 
