@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,12 @@
 #include "reminder_event_manager.h"
 #include "time_service_client.h"
 #include "singleton.h"
+#include "locale_config.h"
+#include "bundle_manager_helper.h"
+#include "datashare_predicates_object.h"
+#include "datashare_value_object.h"
+#include "datashare_helper.h"
+#include "datashare_template.h"
 
 namespace OHOS {
 namespace Notification {
@@ -39,6 +45,9 @@ const int32_t MAIN_USER_ID = 100;
 #ifdef DEVICE_STANDBY_ENABLE
 const int REASON_APP_API = 1;
 #endif
+const int INDEX_KEY = 0;
+const int INDEX_TYPE = 1;
+const int INDEX_VALUE = 2;
 }
 
 /**
@@ -491,6 +500,7 @@ void ReminderDataManager::CloseReminder(const sptr<ReminderRequest> &reminder, b
     }
     reminder->OnClose(true);
     RemoveFromShowedReminders(reminder);
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
     if (cancelNotification) {
         CancelNotification(reminder);
@@ -511,6 +521,146 @@ std::shared_ptr<ReminderDataManager> ReminderDataManager::InitInstance(
         ReminderEventManager reminderEventManager(REMINDER_DATA_MANAGER);
     }
     return REMINDER_DATA_MANAGER;
+}
+
+void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminder,
+    const ReminderRequest::ActionButtonType &actionButtonType)
+{
+    if (!reminder->IsSystemApp()) {
+        ANSR_LOGI("UpdateAppDatabase faild, is not SystemApp");
+        return;
+    }
+    if (actionButtonType == ReminderRequest::ActionButtonType::CUSTOM ||
+        actionButtonType == ReminderRequest::ActionButtonType::INVALID) {
+        ANSR_LOGI("actionButtonType is CUSTOM or INVALID");
+        return;
+    }
+    auto actionButtonMap = reminder->GetActionButtons();
+    if (actionButtonMap.count(actionButtonType) && actionButtonMap.at(actionButtonType).dataShareUpdate == nullptr) {
+        ANSR_LOGI("dataShareUpdate is null");
+        return;
+    }
+    if (actionButtonMap.at(actionButtonType).dataShareUpdate->uri == "" ||
+        actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo == "" ||
+        actionButtonMap.at(actionButtonType).dataShareUpdate->valuesBucket == "") {
+        ANSR_LOGI("not have uri");
+        return;
+    }
+    // init default dstBundleName
+    std::string dstBundleName;
+    auto mit = notificationBundleOptionMap_.find(reminder->GetReminderId());
+    if (mit != notificationBundleOptionMap_.end()) {
+        dstBundleName = mit->second->GetBundleName();
+    }
+    GenDstBundleName(dstBundleName, actionButtonMap.at(actionButtonType).dataShareUpdate->uri);
+
+    DataShare::CreateOptions options;
+    options.enabled_ = true;
+    auto userID = reminder->GetUserId();
+    auto tokenID = IPCSkeleton::GetSelfTokenID();
+    std::string uriStr = actionButtonMap.at(actionButtonType).dataShareUpdate->uri + "?user=" + std::to_string(userID) +
+        "&srcToken=" + std::to_string(tokenID) + "&dstBundleName=" + dstBundleName;
+
+    // create datashareHelper
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = DataShare::DataShareHelper::Creator(uriStr, options);
+    if (dataShareHelper == nullptr) {
+        ANSR_LOGE("create datashareHelper failed");
+        return;
+    }
+    // gen uri equalTo valuesBucket
+    Uri uri(uriStr);
+
+    DataShare::DataSharePredicates predicates;
+    std::vector<std::string> equalToVector =
+        ReminderRequest::StringSplit(actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo, ";");
+    GenPredicates(predicates, equalToVector);
+
+    DataShare::DataShareValuesBucket valuesBucket;
+    std::vector<std::string> valuesBucketVector =
+        ReminderRequest::StringSplit(actionButtonMap.at(actionButtonType).dataShareUpdate->valuesBucket, ";");
+    GenValuesBucket(valuesBucket, valuesBucketVector);
+
+    // update app store
+    int retVal = dataShareHelper->Update(uri, predicates, valuesBucket);
+    if (retVal > 0) {
+        // update success
+        ANSR_LOGI("update app store success retval:%{public}d", retVal);
+    }
+}
+
+void ReminderDataManager::GenPredicates(DataShare::DataSharePredicates & predicates,
+    const std::vector<std::string> &equalToVector)
+{
+    // predicates
+    for (auto &it : equalToVector) {
+        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ":");
+        if (temp.size() <= INDEX_VALUE) {
+            continue;
+        }
+        if (temp[INDEX_TYPE] == "string") {
+            predicates.EqualTo(temp[INDEX_KEY], temp[INDEX_VALUE]);
+        } else if (temp[INDEX_TYPE] == "double") {
+            predicates.EqualTo(temp[INDEX_KEY], std::stod(temp[INDEX_VALUE]));
+        } else if (temp[INDEX_TYPE] == "bool") {
+            bool valueBool = false;
+            if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true" || temp[INDEX_VALUE] == "True") {
+                valueBool = true;
+            }
+            predicates.EqualTo(temp[INDEX_KEY], valueBool);
+        }
+    }
+}
+
+void ReminderDataManager::GenValuesBucket(DataShare::DataShareValuesBucket & valuesBucket,
+    const std::vector<std::string> &valuesBucketVector)
+{
+    // valuesBucket
+    for (auto &it : valuesBucketVector) {
+        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ":");
+        if (temp.size() <= INDEX_VALUE) {
+            continue;
+        }
+        if (temp[INDEX_TYPE] == "string") {
+            valuesBucket.Put(temp[INDEX_KEY], temp[INDEX_VALUE]);
+        } else if (temp[INDEX_TYPE] == "double") {
+            valuesBucket.Put(temp[INDEX_KEY], std::stod(temp[INDEX_VALUE]));
+        } else if (temp[INDEX_TYPE] == "bool") {
+            bool valueBool = false;
+            if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true") {
+                valueBool = true;
+            }
+            valuesBucket.Put(temp[INDEX_KEY], valueBool);
+        } else if (temp[INDEX_TYPE] == "null") {
+            valuesBucket.Put(temp[INDEX_KEY]);
+        } else if (temp[INDEX_TYPE] == "vector") {
+            std::vector<std::string> arr = ReminderRequest::StringSplit(temp[INDEX_VALUE], ",");
+            std::vector<uint8_t> value;
+            for (auto &num : arr) {
+                value.push_back(static_cast<uint8_t>(std::stoi(num)));
+            }
+            valuesBucket.Put(temp[INDEX_KEY], value);
+        }
+    }
+}
+
+void ReminderDataManager::GenDstBundleName(std::string &dstBundleName, const std::string &uri) const
+{
+    size_t left = 0;
+    size_t right = 0;
+    left = uri.find("/", left);
+    right = uri.find("/", left + 1);
+    while (right != std::string::npos && right - left <= 1) {
+        left = right + 1;
+        right = uri.find("/", left);
+    }
+    if (left == std::string::npos) {
+        return;
+    }
+    if (right != std::string::npos) {
+        dstBundleName = uri.substr(left, right - left);
+    } else {
+        dstBundleName = uri.substr(left);
+    }
 }
 
 void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
@@ -584,6 +734,7 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     reminder->InitReminderId();
     reminder->InitUserId(ReminderRequest::GetUserId(bundleOption->GetUid()));
     reminder->InitUid(bundleOption->GetUid());
+    reminder->InitBundleName(bundleOption->GetBundleName());
 
     if (reminder->GetTriggerTimeInMilli() == ReminderRequest::INVALID_LONG_LONG_VALUE) {
         ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s",
@@ -599,6 +750,7 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
         return;
     }
     ANSR_LOGD("Containers(vector) add. reminderId=%{public}d", reminderId);
+    UpdateReminderLanguage(reminder);
     reminderVector_.push_back(reminder);
     totalCount_++;
     store_->UpdateOrInsert(reminder, bundleOption);
@@ -838,6 +990,7 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
     reminder->OnSnooze();
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
 
     // 2) Show the notification dialog in the systemUI
@@ -1058,7 +1211,17 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
+
+    if (isFromBootComplete && advancedNotificationService_ != nullptr) {
+        advancedNotificationService_->InitNotificationEnableList();
+    }
+
     if (IsReminderAgentReady()) {
+        return;
+    }
+    // Register config observer for language change
+    if (!RegisterConfigurationObserver()) {
+        ANSR_LOGW("Register configuration observer failed.");
         return;
     }
     if (store_ == nullptr) {
@@ -1085,6 +1248,27 @@ void ReminderDataManager::InitUserId()
         currentUserId_ = MAIN_USER_ID;
         ANSR_LOGE("Failed to get active user id.");
     }
+}
+
+bool ReminderDataManager::RegisterConfigurationObserver()
+{
+    if (configChangeObserver_ != nullptr) {
+        return true;
+    }
+
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    if (appMgrClient->ConnectAppMgrService() != ERR_OK) {
+        ANSR_LOGW("Connect to app mgr service failed.");
+        return false;
+    }
+
+    configChangeObserver_ = sptr<AppExecFwk::IConfigurationObserver>(
+        new (std::nothrow) ReminderConfigChangeObserver());
+    if (appMgrClient->RegisterConfigurationObserver(configChangeObserver_) != ERR_OK) {
+        ANSR_LOGE("Register configuration observer failed.");
+        return false;
+    }
+    return true;
 }
 
 void ReminderDataManager::GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const
@@ -1442,6 +1626,65 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     if (result != 0) {
         ANSR_LOGE("Start ability failed, result = %{public}d", result);
         return;
+    }
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundleResMgr(
+    const AppExecFwk::BundleInfo &bundleInfo)
+{
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    if (!resourceManager) {
+        ANSR_LOGE("create resourceManager failed.");
+        return nullptr;
+    }
+    // obtains the resource path.
+    for (const auto &hapModuleInfo : bundleInfo.hapModuleInfos) {
+        std::string moduleResPath = hapModuleInfo.hapPath.empty() ? hapModuleInfo.resourcePath : hapModuleInfo.hapPath;
+        if (moduleResPath.empty()) {
+            continue;
+        }
+        ANSR_LOGD("GetBundleResMgr, moduleResPath: %{private}s", moduleResPath.c_str());
+        if (!resourceManager->AddResource(moduleResPath.c_str())) {
+            ANSR_LOGW("GetBundleResMgr AddResource failed");
+        }
+    }
+    // obtains the current system language.
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    resConfig->SetLocaleInfo(locale);
+    resourceManager->UpdateResConfig(*resConfig);
+    return resourceManager;
+}
+
+void ReminderDataManager::UpdateReminderLanguage(const sptr<ReminderRequest> &reminder)
+{
+    // obtains the bundle info by bundle name
+    const std::string bundleName = reminder->GetBundleName();
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, reminder->GetUid(), bundleInfo)) {
+        ANSR_LOGE("Get reminder request[%{public}d][%{public}s] bundle info failed.",
+            reminder->GetReminderId(), bundleName.c_str());
+        return;
+    }
+    // obtains the resource manager
+    auto resourceMgr = GetBundleResMgr(bundleInfo);
+    if (resourceMgr == nullptr) {
+        ANSR_LOGE("Get reminder request[%{public}d][%{public}s] resource manager failed.",
+            reminder->GetReminderId(), bundleName.c_str());
+        return;
+    }
+    // update action button title
+    reminder->OnLanguageChange(resourceMgr);
+}
+
+void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)
+{
+    ANSR_LOGI("System language config changed.");
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        UpdateReminderLanguage(*it);
     }
 }
 }

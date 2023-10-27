@@ -30,6 +30,7 @@
 #include "napi_template.h"
 #include "pixel_map_napi.h"
 #include "napi_push.h"
+#include "napi_local_live_view.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -101,6 +102,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getDeviceRemindType", NapiGetDeviceRemindType),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),
+        DECLARE_NAPI_FUNCTION("subscribeSystemLiveView", NapiSubscriteLocalAcitvity),
+        DECLARE_NAPI_FUNCTION("triggerSystemLiveView", NapiTriggerLocalLiveView),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

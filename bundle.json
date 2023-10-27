@@ -58,6 +58,7 @@
         "napi",
         "hilog",
         "relational_store",
+        "data_share",
         "device_usage_statistics",
         "bundle_framework",
         "time_service",
@@ -78,10 +79,12 @@
         "device_manager",
         "kv_store",
         "ffrt",
-        "device_standby"
+        "device_standby",
+        "resource_management"
       ],
       "third_party": [
-        "libuv"
+        "libuv",
+        "icu"
       ]
     },
     "build": {

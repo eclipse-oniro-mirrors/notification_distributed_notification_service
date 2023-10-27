@@ -264,6 +264,18 @@ public:
     ErrCode HasNotificationPolicyAccessPermission(bool &granted) override;
 
     /**
+     * @brief Trigger the local live view after the button has been clicked.
+     * @note Your application must have platform signature to use this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application whose notifications has been clicked.
+     * @param notificationId Indicates the id of the notification.
+     * @param buttonOption Indicates which button has been clicked.
+     * @return Returns trigger localLiveView result.
+     */
+    ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
+        const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) override;
+
+    /**
      * @brief Delete notification.
      *
      * @param bundleOption Indicates the NotificationBundleOption of the notification.
@@ -399,6 +411,16 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+        const sptr<NotificationSubscribeInfo> &info) override;
+
+    /**
+     * @brief Subscribes notifications.
+     *
+     * @param subscriber Indicates the subscriber.
+     * @param info Indicates the NotificationSubscribeInfo object.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
 
     /**
@@ -678,6 +700,20 @@ public:
     void OnResourceRemove(int32_t userId);
     void OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption);
 
+    /**
+     * @brief Obtains the event of bundle install.
+     *
+     * @param bundleOption Indicates the bundle info.
+     */
+    void OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains the event of bundle update.
+     *
+     * @param bundleOption Indicates the bundle info.
+     */
+    void OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption);
+
     // Distributed KvStore
 
     /**
@@ -731,6 +767,11 @@ public:
      * @brief Reset pushcallback proxy
      */
     void ResetPushCallbackProxy();
+
+    /**
+     * @brief Init The Default Installation Package Notification Enabled.
+     */
+    void InitNotificationEnableList();
 
 private:
     struct RecentInfo;
@@ -836,7 +877,8 @@ private:
     void SelfClean();
     ErrCode SetDefaultNotificationEnabled(
         const sptr<NotificationBundleOption> &bundleOption, bool enabled);
-
+    ErrCode CheckNotificationEnableStatus(bool &notificationEnable);
+    ErrCode PublishPreparedNotificationInner(const sptr<NotificationRequest> &request);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

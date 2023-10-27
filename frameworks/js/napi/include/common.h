@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,11 @@
 #include "ans_log_wrapper.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "notification_button_option.h"
 #include "notification_helper.h"
+#include "notification_local_live_view_button.h"
+#include "notification_progress.h"
+#include "notification_time.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -38,7 +42,8 @@ enum class ContentType {
     NOTIFICATION_CONTENT_LONG_TEXT,
     NOTIFICATION_CONTENT_PICTURE,
     NOTIFICATION_CONTENT_CONVERSATION,
-    NOTIFICATION_CONTENT_MULTILINE
+    NOTIFICATION_CONTENT_MULTILINE,
+    NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW
 };
 
 enum class SlotType {
@@ -46,6 +51,7 @@ enum class SlotType {
     SOCIAL_COMMUNICATION = 1,
     SERVICE_INFORMATION = 2,
     CONTENT_INFORMATION = 3,
+    LIVE_VIEW = 4,
     OTHER_TYPES = 0xFFFF,
 };
 
@@ -225,6 +231,16 @@ public:
      */
     static void SetCallback(
         const napi_env &env, const napi_ref &callbackIn, const napi_value &result);
+
+    /**
+     * @brief Calls the callback with the result
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param callbackIn Indicates the callback to be called
+     * @param result Indicates the result returned by the callback
+     */
+    static void SetCallbackArg2(
+        const napi_env &env, const napi_ref &callbackIn, const napi_value &result0, const napi_value &result1);
 
     /**
      * @brief Processes the promise with the result and error code
@@ -464,6 +480,57 @@ public:
      */
     static napi_value SetNotificationMultiLineContent(
         const napi_env &env, NotificationBasicContent *basicContent, napi_value &result);
+
+    /**
+     * @brief Sets a js NotificationLocalLiveViewContent object by specified NotificationBasicContent object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param basicContent Indicates a NotificationBasicContent object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationLocalLiveViewContent(
+        const napi_env &env, NotificationBasicContent *basicContent, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationCapsule object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsule Indicates a NotificationCapsule object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetCapsule(const napi_env &env, const NotificationCapsule &capsule, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationLocalLiveViewButton object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsule Indicates a NotificationLocalLiveViewButton object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationProgress object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsule Indicates a NotificationProgress object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetProgress(const napi_env &env, const NotificationProgress &progress, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationTime object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param time Indicates a NotificationTime object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetTime(const napi_env &env, const NotificationTime &time, napi_value &result);
 
     /**
      * @brief Sets a js object by specified MessageUser object
@@ -1204,6 +1271,77 @@ public:
         std::shared_ptr<OHOS::Notification::NotificationPictureContent> &pictureContent);
 
     /**
+     * @brief Gets a NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param result Indicates a js object to be converted
+     * @param request Indicates a NotificationLocalLiveViewContent object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewContent(
+        const napi_env &env, const napi_value &result, NotificationRequest &request);
+
+    /**
+     * @brief Gets a capsule of NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param content Indicates a capsule object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewCapsule(
+        const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
+
+    /**
+     * @brief Gets a button of NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param content Indicates a button object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewButton(
+        const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
+
+    /**
+     * @brief Gets a time of NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param content Indicates a time object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewTime(
+        const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
+
+    /**
+     * @brief Gets a progress of NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param content Indicates a progress object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewProgress(
+        const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
+
+    /**
+     * @brief Gets a NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param content Indicates a NotificationLocalLiveViewContent object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewContentDetailed(
+        const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
+
+    /**
      * @brief Gets a conversational content of NotificationRequest object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1368,6 +1506,16 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetBundleOption(const napi_env &env, const napi_value &value, NotificationBundleOption &option);
+
+    /**
+     * @brief Gets a NotificationButtonOption object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param option Indicates a NotificationButtonOption object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetButtonOption(const napi_env &env, const napi_value &value, NotificationButtonOption &option);
 
     static napi_value GetHashCodes(const napi_env &env, const napi_value &value, std::vector<std::string> &hashCodes);
 

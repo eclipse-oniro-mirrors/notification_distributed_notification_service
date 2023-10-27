@@ -17,8 +17,10 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "message_option.h"
 #include "message_parcel.h"
+#include "notification_button_option.h"
 #include "parcel.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
@@ -250,6 +252,12 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
                 std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::UNREGISTER_PUSH_CALLBACK,
             std::bind(&AnsManagerStub::HandleUnregisterPushCallback, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION,
+            std::bind(&AnsManagerStub::HandleSubscribeLocalLiveView, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION,
+            std::bind(&AnsManagerStub::HandleTriggerLocalLiveView, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
 };
 
@@ -745,6 +753,34 @@ ErrCode AnsManagerStub::HandleIsNotificationPolicyAccessGranted(MessageParcel &d
     return ERR_OK;
 }
 
+ErrCode AnsManagerStub::HandleTriggerLocalLiveView(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleTriggerLocalLiveView] fail: read bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t notificationId = 0;
+    if (!data.ReadInt32(notificationId)) {
+        ANS_LOGE("[HandleTriggerLocalLiveView] fail: read notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    sptr<NotificationButtonOption> buttonOption = data.ReadStrongParcelable<NotificationButtonOption>();
+    if (buttonOption == nullptr) {
+        ANS_LOGE("[HandleTriggerLocalLiveView] fail: read button failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = TriggerLocalLiveView(bundleOption, notificationId, buttonOption);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleTriggerLocalLiveView] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode AnsManagerStub::HandleRemoveNotification(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
@@ -1098,6 +1134,37 @@ ErrCode AnsManagerStub::HandleSubscribe(MessageParcel &data, MessageParcel &repl
     ErrCode result = Subscribe(iface_cast<AnsSubscriberInterface>(subscriber), info);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSubscribe] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> subscriber = data.ReadRemoteObject();
+    if (subscriber == nullptr) {
+        ANS_LOGE("[HandleSubscribeLocalLiveView] fail: read subscriber failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool subcribeInfo = false;
+    if (!data.ReadBool(subcribeInfo)) {
+        ANS_LOGE("[HandleSubscribeLocalLiveView] fail: read isSubcribeInfo failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    sptr<NotificationSubscribeInfo> info = nullptr;
+    if (subcribeInfo) {
+        info = data.ReadParcelable<NotificationSubscribeInfo>();
+        if (info == nullptr) {
+            ANS_LOGE("[HandleSubscribeLocalLiveView] fail: read info failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
+    ErrCode result = SubscribeLocalLiveView(iface_cast<AnsSubscriberLocalLiveViewInterface>(subscriber), info);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSubscribeLocalLiveView] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -1884,6 +1951,13 @@ ErrCode AnsManagerStub::HasNotificationPolicyAccessPermission(bool &granted)
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
+    const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption)
+{
+    ANS_LOGE("AnsManagerStub::TriggerLocalLiveView called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
     int notificationId, const std::string &label, int32_t removeReason)
 {
@@ -1982,6 +2056,13 @@ ErrCode AnsManagerStub::Subscribe(const sptr<AnsSubscriberInterface> &subscriber
     const sptr<NotificationSubscribeInfo> &info)
 {
     ANS_LOGE("AnsManagerStub::Subscribe called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    const sptr<NotificationSubscribeInfo> &info)
+{
+    ANS_LOGE("AnsManagerStub::SubscribeLocalLiveView called!");
     return ERR_INVALID_OPERATION;
 }
 

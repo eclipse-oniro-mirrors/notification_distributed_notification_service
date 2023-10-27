@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,7 @@ enum class BundleType {
     BUNDLE_SHOW_BADGE_TYPE,
     BUNDLE_BADGE_TOTAL_NUM_TYPE,
     BUNDLE_ENABLE_NOTIFICATION_TYPE,
+    BUNDLE_ENABLE_NOTIFICATION_USER_OPTION,
     BUNDLE_POPPED_DIALOG_TYPE,
 };
 }  // namespace Notification

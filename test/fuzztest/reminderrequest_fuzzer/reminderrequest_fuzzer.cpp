@@ -38,7 +38,7 @@ namespace OHOS {
         uint8_t types = *data % ACTION_BUTTON_TYPE;
         Notification::ReminderRequest::ActionButtonType type =
             Notification::ReminderRequest::ActionButtonType(types);
-        reminderRequest.SetActionButton(stringData, type);
+        reminderRequest.SetActionButton(stringData, type, stringData);
         reminderRequest.SetContent(stringData);
         reminderRequest.SetExpiredContent(stringData);
         bool enabled = *data % ENABLE;

@@ -19,6 +19,8 @@
 #include "ans_log_wrapper.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
+#include "notification_button_option.h"
+#include "notification_local_live_view_subscriber.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
@@ -377,6 +379,22 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
     return ansManagerProxy_->Subscribe(subscriberSptr, nullptr);
 }
 
+ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl> subscriberSptr = subscriber.GetImpl();
+    if (subscriberSptr == nullptr) {
+        ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ansManagerProxy_->SubscribeLocalLiveView(subscriberSptr, nullptr);
+}
+
 ErrCode AnsNotification::SubscribeNotification(
     const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo)
 {
@@ -437,6 +455,30 @@ ErrCode AnsNotification::UnSubscribeNotification(
         return ERR_ANS_INVALID_PARAM;
     }
     return ansManagerProxy_->Unsubscribe(subscriberSptr, sptrInfo);
+}
+
+ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
+    const int32_t notificationId, const NotificationButtonOption &buttonOption)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (buttonOption.GetButtonName().empty()) {
+        ANS_LOGE("Invalid button name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    sptr<NotificationButtonOption> button(new (std::nothrow) NotificationButtonOption(buttonOption));
+    return ansManagerProxy_->TriggerLocalLiveView(bo, notificationId, button);
 }
 
 ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t removeReason)

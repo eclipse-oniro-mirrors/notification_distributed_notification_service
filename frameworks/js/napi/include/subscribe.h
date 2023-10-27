@@ -80,6 +80,13 @@ public:
     virtual void OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
+     * @brief Called when the Do Not Disturb mode type changes.
+     *
+     * @param date Indicates the NotificationDoNotDisturbDate object.
+     */
+    void onDoNotDisturbChanged(const std::shared_ptr<NotificationDoNotDisturbDate> &date);
+
+    /**
      * @brief Called when the enabled notification changes.
      *
      * @param callbackData Indicates the EnabledNotificationCallbackData object.
@@ -120,6 +127,8 @@ private:
 
     void SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref);
+
     void SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     void SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref);
@@ -138,6 +147,7 @@ private:
     CallbackInfo dieCallbackInfo_;
     CallbackInfo disturbModeCallbackInfo_;
     CallbackInfo disturbDateCallbackInfo_;
+    CallbackInfo disturbChangedCallbackInfo_;
     CallbackInfo enabledNotificationCallbackInfo_;
     CallbackInfo setBadgeCallbackInfo_;
 };

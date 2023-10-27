@@ -35,7 +35,7 @@ ohos_shared_library("notificationmanager") {
     cfi_cross_dso = true
     debug = false
   }
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
@@ -60,12 +60,14 @@ ohos_shared_library("notificationmanager") {
     "../publish.cpp",
     "../slot.cpp",
     "init_module.cpp",
+    "local_live_view_subscribe.cpp",
     "napi_cancel.cpp",
     "napi_display_badge.cpp",
     "napi_distributed.cpp",
     "napi_disturb_mode.cpp",
     "napi_enable_notification.cpp",
     "napi_get_active.cpp",
+    "napi_local_live_view.cpp",
     "napi_publish.cpp",
     "napi_push.cpp",
     "napi_push_callback.cpp",

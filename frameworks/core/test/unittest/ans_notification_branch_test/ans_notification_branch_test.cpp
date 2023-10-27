@@ -246,6 +246,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+        const sptr<NotificationSubscribeInfo> &info) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode Unsubscribe(
         const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override
     {
@@ -422,6 +428,12 @@ public:
     }
 
     ErrCode UnregisterPushCallback() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
+        const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

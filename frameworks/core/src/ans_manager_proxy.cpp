@@ -18,6 +18,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "distributed_notification_service_ipc_interface_code.h"
 #include "message_option.h"
 #include "message_parcel.h"
@@ -739,6 +740,52 @@ ErrCode AnsManagerProxy::HasNotificationPolicyAccessPermission(bool &granted)
     return result;
 }
 
+ErrCode AnsManagerProxy::TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
+    const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[TriggerLocalLiveView] fail: bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[TriggerLocalLiveView] fail:, write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteStrongParcelable(bundleOption)) {
+        ANS_LOGE("[TriggerLocalLiveView] fail:: write bundle failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(notificationId)) {
+        ANS_LOGE("[TriggerLocalLiveView] fail: write notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteStrongParcelable(buttonOption)) {
+        ANS_LOGE("[TriggerLocalLiveView] fail: write label failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION,
+        option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[TriggerLocalLiveView] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[TriggerLocalLiveView] fail: read result error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
     int32_t notificationId, const std::string &label, int32_t removeReason)
 {
@@ -1345,6 +1392,55 @@ ErrCode AnsManagerProxy::Subscribe(const sptr<AnsSubscriberInterface> &subscribe
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[Subscribe] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[Subscribe] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    const sptr<NotificationSubscribeInfo> &info)
+{
+    if (subscriber == nullptr) {
+        ANS_LOGE("[Subscribe] fail: subscriber is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[Subscribe] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool ret = data.WriteRemoteObject(subscriber->AsObject());
+    if (!ret) {
+        ANS_LOGE("[Subscribe] fail: write subscriber failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteBool(info != nullptr)) {
+        ANS_LOGE("[Subscribe] fail: write isSubcribeInfo failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (info != nullptr) {
+        if (!data.WriteParcelable(info)) {
+            ANS_LOGE("[Subscribe] fail: write subcribeInfo failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[Subscribe] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
