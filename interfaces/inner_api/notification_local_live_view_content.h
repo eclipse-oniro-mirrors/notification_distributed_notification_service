@@ -23,6 +23,7 @@
 #include "notification_basic_content.h"
 #include "notification_conversational_message.h"
 #include "notification_json_convert.h"
+#include "notification_time.h"
 #include "parcel.h"
 
 namespace OHOS {
@@ -85,6 +86,20 @@ public:
      */
     NotificationProgress GetProgress();
 
+    /*
+     * @brief Sets the time to be included in a local live view notification.
+     *
+     * @param time Indicates the type to be included.
+     
+     */
+    void SetTime(NotificationTime time);
+
+    /*
+     * @brief Get the time of a local live view notification.
+     *
+     */
+    NotificationTime GetTime();
+
     /**
      * @brief Returns a string representation of the object.
      *
@@ -138,6 +153,7 @@ private:
     NotificationCapsule capsule_ {};
     NotificationLocalLiveViewButton button_ {};
     NotificationProgress progress_ {};
+    NotificationTime time_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

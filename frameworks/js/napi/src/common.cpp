@@ -19,6 +19,7 @@
 #include "notification_action_button.h"
 #include "notification_capsule.h"
 #include "notification_progress.h"
+#include "notification_time.h"
 #include "pixel_map_napi.h"
 
 namespace OHOS {
@@ -1190,7 +1191,7 @@ napi_value Common::SetNotificationLocalLiveViewContent(
     napi_value capsule = nullptr;
     napi_create_object(env, &capsule);
     if (!SetCapsule(env, localLiveViewContent->GetCapsule(), capsule)) {
-        ANS_LOGE("SetMessageUser call failed");
+        ANS_LOGE("SetCapsule call failed");
         return NapiGetBoolean(env, false);
     }
     napi_set_named_property(env, result, "capsule", capsule);
@@ -1199,7 +1200,7 @@ napi_value Common::SetNotificationLocalLiveViewContent(
     napi_value button = nullptr;
     napi_create_object(env, &button);
     if (!SetButton(env, localLiveViewContent->GetButton(), button)) {
-        ANS_LOGE("SetMessageUser call failed");
+        ANS_LOGE("SetButton call failed");
         return NapiGetBoolean(env, false);
     }
     napi_set_named_property(env, result, "button", button);
@@ -1208,10 +1209,19 @@ napi_value Common::SetNotificationLocalLiveViewContent(
     napi_value progress = nullptr;
     napi_create_object(env, &progress);
     if (!SetProgress(env, localLiveViewContent->GetProgress(), progress)) {
-        ANS_LOGE("SetMessageUser call failed");
+        ANS_LOGE("SetProgress call failed");
         return NapiGetBoolean(env, false);
     }
     napi_set_named_property(env, result, "progress", progress);
+
+    // time: NotificationTime
+    napi_value time = nullptr;
+    napi_create_object(env, &time);
+    if (!SetTime(env, localLiveViewContent->GetTime(), time)) {
+        ANS_LOGE("SetMessageUser call failed");
+        return NapiGetBoolean(env, false);
+    }
+    napi_set_named_property(env, result, "time", time);
 
     return NapiGetBoolean(env, true);
 }
@@ -1300,6 +1310,30 @@ napi_value Common::SetProgress(const napi_env &env, const NotificationProgress &
     // isPercentage: bool
     napi_get_boolean(env, progress.GetIsPercentage(), &value);
     napi_set_named_property(env, result, "isPercentage", value);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetTime(const napi_env &env, const NotificationTime &time, napi_value &result)
+{
+    ANS_LOGI("enter");
+
+    napi_value value = nullptr;
+    // initialTime: int32_t
+    napi_create_int32(env, time.GetInitialTime(), &value);
+    napi_set_named_property(env, result, "initialTime", value);
+
+    // isCountDown: bool
+    napi_get_boolean(env, time.GetIsCountDown(), &value);
+    napi_set_named_property(env, result, "isCountDown", value);
+
+    // isPaused: bool
+    napi_get_boolean(env, time.GetIsPaused(), &value);
+    napi_set_named_property(env, result, "isPaused", value);
+
+    // isInTitle: bool
+    napi_get_boolean(env, time.GetIsInTitle(), &value);
+    napi_set_named_property(env, result, "isInTitle", value);
 
     return NapiGetBoolean(env, true);
 }
@@ -4441,6 +4475,83 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
     return NapiGetNull(env);
 }
 
+napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const napi_value &contentResult,
+    std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content)
+{
+    napi_value result = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+    bool hasProperty = false;
+    int32_t intValue = -1;
+    bool boolValue = false;
+    napi_value timeResult = nullptr;
+
+    ANS_LOGI("enter");
+    
+    napi_get_named_property(env, contentResult, "time", &timeResult);
+    NAPI_CALL(env, napi_typeof(env, timeResult, &valuetype));
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
+
+    NotificationTime time;
+
+    NAPI_CALL(env, napi_has_named_property(env, timeResult, "initialTime", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, timeResult, "initialTime", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, result, &intValue);
+        time.SetInitialTime(intValue);
+        ANS_LOGD("time initialTime = %{public}d", intValue);
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, timeResult, "isCountDown", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, timeResult, "isCountDown", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. bool expected.");
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &boolValue);
+        time.SetIsCountDown(boolValue);
+        ANS_LOGD("time isCountDown = %{public}d", boolValue);
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, timeResult, "isPaused", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, timeResult, "isPaused", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. bool expected.");
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &boolValue);
+        time.SetIsPaused(boolValue);
+        ANS_LOGD("time isPaused = %{public}d", boolValue);
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, timeResult, "isInTitle", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, timeResult, "isInTitle", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. bool expected.");
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &boolValue);
+        time.SetIsInTitle(boolValue);
+        ANS_LOGD("time isInTitle = %{public}d", boolValue);
+    }
+
+    content->SetTime(time);
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content)
@@ -4489,6 +4600,12 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     //progress?
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "progress", &hasProperty));
     if (hasProperty && GetNotificationLocalLiveViewProgress(env, contentResult, content) == nullptr) {
+        return nullptr;
+    }
+
+    //time?
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "time", &hasProperty));
+    if (hasProperty && GetNotificationLocalLiveViewTime(env, contentResult, content) == nullptr) {
         return nullptr;
     }
 

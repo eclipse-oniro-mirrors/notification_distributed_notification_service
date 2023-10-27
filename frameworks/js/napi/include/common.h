@@ -22,6 +22,7 @@
 #include "notification_helper.h"
 #include "notification_local_live_view_button.h"
 #include "notification_progress.h"
+#include "notification_time.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -520,6 +521,16 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value SetProgress(const napi_env &env, const NotificationProgress &progress, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationTime object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param time Indicates a NotificationTime object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetTime(const napi_env &env, const NotificationTime &time, napi_value &result);
 
     /**
      * @brief Sets a js object by specified MessageUser object
