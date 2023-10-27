@@ -787,8 +787,8 @@ protected:
 private:
     void AddActionButtons(const bool includeSnooze);
     void AddRemovalWantAgent();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element
-        , bool isWantAgent) const;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element,
+        bool isWantAgent) const;
     std::string GetButtonInfo() const;
     uint64_t GetNowInstantMilli() const;
     std::string GetShowTime(const uint64_t showTime) const;
