@@ -32,7 +32,7 @@ namespace {
 const std::string REMINDER_DB_DIR = "/data/service/el1/public/notification/";
 const std::string REMINDER_DB_NAME = "notification.db";
 const std::string REMINDER_DB_TABLE = "reminder";
-const uint32_t REMINDER_RDB_VERSION = 1;
+const uint32_t REMINDER_RDB_VERSION = 2;
 const int32_t STATE_FAIL = -1;
 std::vector<std::string> columns;
 std::string g_sqlColumns;
@@ -52,6 +52,11 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnCreate(NativeRdb::RdbStore &
 int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
     NativeRdb::RdbStore &store, int32_t oldVersion, int32_t newVersion)
 {
+    ANSR_LOGI("OnUpgrade oldVersion is %{public}d, newVersion is %{public}d", oldVersion, newVersion);
+    if (oldVersion < newVersion && newVersion == REMINDER_RDB_VERSION) {
+        store.ExecuteSql("ALTER TABLE " + REMINDER_DB_TABLE + " ADD groupId TEXT DEFAULT '';");
+    }
+    store.SetVersion(newVersion);
     return NativeRdb::E_OK;
 }
 
