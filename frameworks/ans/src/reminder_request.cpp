@@ -104,6 +104,7 @@ const std::string ReminderRequest::AGENT = "agent";
 const std::string ReminderRequest::MAX_SCREEN_AGENT = "maxScreen_agent";
 const std::string ReminderRequest::TAP_DISMISSED = "tapDismissed";
 const std::string ReminderRequest::AUTO_DELETED_TIME = "autoDeletedTime";
+const std::string ReminderRequest::GROUP_ID = "groupId";
 
 std::string ReminderRequest::sqlOfAddColumns = "";
 std::vector<std::string> ReminderRequest::columns;
@@ -140,6 +141,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->tapDismissed_= other.tapDismissed_;
     this->autoDeletedTime_ = other.autoDeletedTime_;
     this->customButtonUri_ = other.customButtonUri_;
+    this->groupId_ = other.groupId_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -723,6 +725,12 @@ ReminderRequest& ReminderRequest::SetNotificationId(int32_t notificationId)
     return *this;
 }
 
+ReminderRequest& ReminderRequest::SetGroupId(const std::string &groupId)
+{
+    groupId_ = groupId;
+    return *this;
+}
+
 ReminderRequest& ReminderRequest::SetSlotType(const NotificationConstant::SlotType &slotType)
 {
     slotType_ = slotType;
@@ -820,6 +828,11 @@ std::shared_ptr<ReminderRequest::MaxScreenAgentInfo> ReminderRequest::GetMaxScre
 int32_t ReminderRequest::GetNotificationId() const
 {
     return notificationId_;
+}
+
+std::string ReminderRequest::GetGroupId() const
+{
+    return groupId_;
 }
 
 sptr<NotificationRequest> ReminderRequest::GetNotificationRequest() const
@@ -1088,6 +1101,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write notificationId");
         return false;
     }
+    if (!parcel.WriteString(groupId_)) {
+        ANSR_LOGE("Failed to write groupId");
+        return false;
+    }
     if (!parcel.WriteUint64(triggerTimeInMilli_)) {
         ANSR_LOGE("Failed to write triggerTimeInMilli");
         return false;
@@ -1263,6 +1280,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 
     if (!parcel.ReadInt32(notificationId_)) {
         ANSR_LOGE("Failed to read notificationId");
+        return false;
+    }
+    if (!parcel.ReadString(groupId_)) {
+        ANSR_LOGE("Failed to read groupId");
         return false;
     }
     if (!parcel.ReadUint64(triggerTimeInMilli_)) {
@@ -1640,6 +1661,11 @@ void ReminderRequest::SetState(bool deSet, const uint8_t newState, std::string f
         reminderId_, GetState(oldState).c_str(), GetState(state_).c_str(), function.c_str());
 }
 
+void ReminderRequest::SetStateToInActive()
+{
+    SetState(false, (REMINDER_STATUS_SHOWING | REMINDER_STATUS_ALERTING | REMINDER_STATUS_ACTIVE), "SetStateToInActive");
+}
+
 void ReminderRequest::UpdateActionButtons(const bool &setSnooze)
 {
     if (notificationRequest_ == nullptr) {
@@ -1864,6 +1890,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(CONTENT, reminder->GetContent());
     values.PutString(SNOOZE_CONTENT, reminder->GetSnoozeContent());
     values.PutString(EXPIRED_CONTENT, reminder->GetExpiredContent());
+    values.PutString(GROUP_ID, reminder->GetGroupId());
     auto wantAgentInfo = reminder->GetWantAgentInfo();
     if (wantAgentInfo == nullptr) {
         std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null" + ReminderRequest::SEP_WANT_AGENT + "null";
@@ -1918,6 +1945,7 @@ void ReminderRequest::InitDbColumns()
     AddColumn(MAX_SCREEN_AGENT, "TEXT", false);
     AddColumn(TAP_DISMISSED, "TEXT", false);
     AddColumn(AUTO_DELETED_TIME, "BIGINT", false);
+    AddColumn(GROUP_ID, "TEXT", false);
 }
 
 void ReminderRequest::AddColumn(

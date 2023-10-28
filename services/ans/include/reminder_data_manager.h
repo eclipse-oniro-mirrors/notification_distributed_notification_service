@@ -277,6 +277,16 @@ private:
     void CancelRemindersImplLocked(const std::string &packageName, const int32_t &userId);
 
     /**
+     * @brief Close reminders with the same group id.
+     *
+     * @param oldReminderId Indicates the reminderId that are currently bing showed.
+     * @param packageName Indicates the packageName need to cancel.
+     * @param groupId Indicates the group id to cancel.
+     */
+    void CloseRemindersByGroupId(const int32_t &oldReminderId, const std::string &packageName,
+        const std::string &groupId);
+
+    /**
      * Cancels the notification relative to the reminder.
      *
      * @param reminder Indicates the reminder.
@@ -384,6 +394,17 @@ private:
      * @return true If the reminder is matched with the bundleOption or userId.
      */
     bool IsMatched(const sptr<ReminderRequest> &reminder, const std::string &packageName, const int32_t &userId) const;
+
+    /**
+     * @brief Judges whether the reminder is matched with the packageName or groupId.
+     *
+     * @param reminder Indicates the target reminder.
+     * @param packageName Indicates the package name.
+     * @param groupId Indicates the group id.
+     * @return true If the reminder is matched with the packageName and groupId.
+     */
+    bool IsMatchedForGroupIdAndPkgName(const sptr<ReminderRequest> &reminder, const std::string &packageName,
+        const std::string &groupId) const;
 
     bool IsAllowedNotify(const sptr<ReminderRequest> &reminder) const;
 
