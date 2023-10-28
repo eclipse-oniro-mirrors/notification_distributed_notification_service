@@ -42,7 +42,8 @@ ReminderRequestAlarm::ReminderRequestAlarm(const ReminderRequestAlarm &other) : 
 {
     this->hour_ = other.hour_;
     this->minute_ = other.minute_;
-    ANSR_LOGD("hour_=%{public}d, minute_=%{public}d, repeatDaysOfWeek_=%{public}d", hour_, minute_, other.repeatDaysOfWeek_);
+    ANSR_LOGD("hour_=%{public}d, minute_=%{public}d, repeatDaysOfWeek_=%{public}d",
+        hour_, minute_, other.repeatDaysOfWeek_);
 }
 
 void ReminderRequestAlarm::CheckParamValid() const
