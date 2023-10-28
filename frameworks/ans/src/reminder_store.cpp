@@ -35,7 +35,7 @@ const std::string REMINDER_DB_TABLE = "reminder";
 const uint32_t REMINDER_RDB_VERSION = 1;
 const int32_t STATE_FAIL = -1;
 std::vector<std::string> columns;
-std::string sqlColumns;
+std::string g_sqlColumns;
 }
 
 const int32_t ReminderStore::STATE_OK = 0;
@@ -74,10 +74,10 @@ int32_t ReminderStore::Init()
     columns.insert(columns.begin(),
         ReminderRequest::columns.begin(), ReminderRequest::columns.end());
     for (std::vector<std::string>::const_iterator it = columns.begin(); it != columns.end(); ++it) {
-        sqlColumns += *it + ",";
+        g_sqlColumns += *it + ",";
     }
-    sqlColumns = sqlColumns.substr(0, sqlColumns.size() - 1);
-    ANSR_LOGD("ReminderStore sqlColumns =%{public}s", sqlColumns.c_str());
+    g_sqlColumns = g_sqlColumns.substr(0, g_sqlColumns.size() - 1);
+    ANSR_LOGD("ReminderStore g_sqlColumns =%{public}s", g_sqlColumns.c_str());
 
     std::string dbConfig = REMINDER_DB_DIR + REMINDER_DB_NAME;
     NativeRdb::RdbStoreConfig config_(dbConfig);
@@ -316,7 +316,7 @@ int32_t ReminderStore::GetMaxId()
 
 std::vector<sptr<ReminderRequest>> ReminderStore::GetAllValidReminders()
 {
-    std::string queryCondition = "select " + sqlColumns + " from " + REMINDER_DB_TABLE + " where "
+    std::string queryCondition = "select " + g_sqlColumns + " from " + REMINDER_DB_TABLE + " where "
         + ReminderRequest::IS_EXPIRED + " is false order by "
         + ReminderRequest::TRIGGER_TIME + " asc";
     ANSR_LOGD("Get all reminders");
