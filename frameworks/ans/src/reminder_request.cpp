@@ -2043,6 +2043,7 @@ uint64_t ReminderRequest::GetTriggerTime(const time_t now, const time_t nextTrig
         return 0;
     }
     return GetDurationSinceEpochInMilli(triggerTime);
+}
 
 void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr)
 {
