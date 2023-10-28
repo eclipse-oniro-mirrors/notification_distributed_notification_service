@@ -91,7 +91,7 @@ HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00100, Function | SmallTest | 
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
     uint8_t expectedVal = 7;
-    EXPECT_TRUE(rrc->GetRepeatDay() == expectedVal) << "repeatDays (1, 2, 3) should be 7";
+    EXPECT_TRUE(rrc->GetRepeatDaysOfWeek() == expectedVal) << "repeatDays (1, 2, 3) should be 7";
 }
 
 /**
@@ -105,7 +105,7 @@ HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00200, Function | SmallTest | 
     uint8_t arr[] = {1, 7};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
-    EXPECT_TRUE(rrc->GetRepeatDay() == 65) << "repeatDays (1, 12) should be 65";
+    EXPECT_TRUE(rrc->GetRepeatDaysOfWeek() == 65) << "repeatDays (1, 12) should be 65";
 }
 
 /**
@@ -119,7 +119,7 @@ HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00300, Function | SmallTest | 
     uint8_t arr[] = {1, 1, 5, 5, 7, 7, 7};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
-    EXPECT_TRUE(rrc->GetRepeatDay() == 81) << "repeatDays (1, 1, 5 12) should be 81";
+    EXPECT_TRUE(rrc->GetRepeatDaysOfWeek() == 81) << "repeatDays (1, 1, 5 12) should be 81";
 }
 
 /**
@@ -134,7 +134,7 @@ HWTEST_F(ReminderRequestAlarmTest, initDaysOfWeek_00400, Function | SmallTest | 
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
     uint8_t expectedVal = 0;
-    EXPECT_TRUE(rrc->GetRepeatDay() == expectedVal) << "repeatDays () should be 0";
+    EXPECT_TRUE(rrc->GetRepeatDaysOfWeek() == expectedVal) << "repeatDays () should be 0";
 }
 
 /**
@@ -352,7 +352,7 @@ HWTEST_F(ReminderRequestAlarmTest, RecoverFromDb_00100, Function | SmallTest | L
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
     std::shared_ptr<NativeRdb::ResultSet> resultSet = nullptr;
     rrc->RecoverFromDb(resultSet);
-    uint8_t ret = rrc->GetRepeatDay();
+    uint8_t ret = rrc->GetRepeatDaysOfWeek();
     EXPECT_EQ(ret, 0);
 }
 
@@ -444,7 +444,7 @@ HWTEST_F(ReminderRequestAlarmTest, CheckParamValid_00200, Function | SmallTest |
 
 /**
  * @tc.name: SetDaysOfWeek_00100
- * @tc.desc: Test SetDaysOfWeek parameters.
+ * @tc.desc: Test SetRepeatDaysOfWeek parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -455,14 +455,14 @@ HWTEST_F(ReminderRequestAlarmTest, SetDaysOfWeek_00100, Function | SmallTest | L
     auto rrc = std::make_shared<ReminderRequestAlarm>(1, 1, daysOfWeek);
 
     bool set = true;
-    rrc->SetDaysOfWeek(set, daysOfWeek);
+    rrc->SetRepeatDaysOfWeek(set, daysOfWeek);
     std::vector<int32_t> result = rrc->GetDaysOfWeek();
     EXPECT_EQ(result.size(), 0);
 }
 
 /**
  * @tc.name: SetDaysOfWeek_00200
- * @tc.desc: Test SetDaysOfWeek parameters.
+ * @tc.desc: Test SetRepeatDaysOfWeek parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -473,7 +473,7 @@ HWTEST_F(ReminderRequestAlarmTest, SetDaysOfWeek_00200, Function | SmallTest | L
     auto rrc = std::make_shared<ReminderRequestAlarm>(1, 1, daysOfWeek);
 
     bool set = false;
-    rrc->SetDaysOfWeek(set, daysOfWeek);
+    rrc->SetRepeatDaysOfWeek(set, daysOfWeek);
     std::vector<int32_t> result = rrc->GetDaysOfWeek();
     EXPECT_EQ(result.size(), 0);
 }
@@ -522,7 +522,7 @@ HWTEST_F(ReminderRequestAlarmTest, UpdateNextReminder_00200, Function | SmallTes
 
     ret->SetSnoozeTimesDynamic(0);
     EXPECT_EQ(ret->GetSnoozeTimesDynamic(), 0);
-    uint8_t result = reminderRequestAlarm->GetRepeatDay();
+    uint8_t result = reminderRequestAlarm->GetRepeatDaysOfWeek();
     EXPECT_EQ(result, 0);
     EXPECT_EQ(reminderRequestAlarm->IsRepeatReminder(), true);
     EXPECT_EQ(reminderRequestAlarm->UpdateNextReminder(), true);

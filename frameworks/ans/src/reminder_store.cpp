@@ -35,6 +35,7 @@ const std::string REMINDER_DB_TABLE = "reminder";
 const uint32_t REMINDER_RDB_VERSION = 2;
 const int32_t STATE_FAIL = -1;
 std::vector<std::string> columns;
+std::string g_sqlColumns;
 }
 
 const int32_t ReminderStore::STATE_OK = 0;
@@ -77,6 +78,11 @@ int32_t ReminderStore::Init()
     ReminderRequestAlarm::InitDbColumns();
     columns.insert(columns.begin(),
         ReminderRequest::columns.begin(), ReminderRequest::columns.end());
+    for (std::vector<std::string>::const_iterator it = columns.begin(); it != columns.end(); ++it) {
+        g_sqlColumns += *it + ",";
+    }
+    g_sqlColumns = g_sqlColumns.substr(0, g_sqlColumns.size() - 1);
+    ANSR_LOGD("ReminderStore g_sqlColumns =%{public}s", g_sqlColumns.c_str());
 
     std::string dbConfig = REMINDER_DB_DIR + REMINDER_DB_NAME;
     NativeRdb::RdbStoreConfig config_(dbConfig);
@@ -315,54 +321,11 @@ int32_t ReminderStore::GetMaxId()
 
 std::vector<sptr<ReminderRequest>> ReminderStore::GetAllValidReminders()
 {
-    std::string queryCondition = "select reminder_id,\
-        package_name,\
-        user_id,\
-        uid,\
-        system_app,\
-        app_label,\
-        reminder_type,\
-        reminder_time,\
-        trigger_time,\
-        rtc_trigger_time,\
-        time_interval,\
-        snooze_times,\
-        dynamic_snooze_times,\
-        ring_duration,\
-        is_expired,\
-        is_active,\
-        state,\
-        zone_id,\
-        has_ScheduledTimeout,\
-        button_info,\
-        custom_button_uri,\
-        slot_id,\
-        notification_id,\
-        title,\
-        content,\
-        snooze_content,\
-        expired_content,\
-        agent,\
-        maxScreen_agent,\
-        tapDismissed,\
-        autoDeletedTime,\
-        groupId,\
-        repeat_days,\
-        repeat_months,\
-        first_designate_year,\
-        first_designate_month,\
-        first_designate_day,\
-        calendar_year,\
-        calendar_month,\
-        calendar_day,\
-        calendar_hour,\
-        calendar_minute,\
-        repeat_days_of_week,\
-        alarm_hour,\
-        alarm_minute from " + REMINDER_DB_TABLE + " where "
+    std::string queryCondition = "select " + g_sqlColumns + " from " + REMINDER_DB_TABLE + " where "
         + ReminderRequest::IS_EXPIRED + " is false order by "
         + ReminderRequest::TRIGGER_TIME + " asc";
     ANSR_LOGD("Get all reminders");
+    ANSR_LOGD("ReminderStore GetAllValidReminders queryCondition =%{public}s", queryCondition.c_str());
     return GetReminders(queryCondition);
 }
 

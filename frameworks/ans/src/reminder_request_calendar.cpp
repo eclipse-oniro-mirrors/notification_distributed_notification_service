@@ -45,8 +45,8 @@ const uint16_t ReminderRequestCalendar::SOLAR_YEAR      = 400;
 const uint8_t ReminderRequestCalendar::LEAP_PARAM_MIN   = 4;
 const uint8_t ReminderRequestCalendar::LEAP_PARAM_MAX   = 100;
 
-ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime,
-    const std::vector<uint8_t> &repeatMonths, const std::vector<uint8_t> &repeatDays)
+ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime, const std::vector<uint8_t> &repeatMonths,
+    const std::vector<uint8_t> &repeatDays, const std::vector<uint8_t> &daysOfWeek)
     : ReminderRequest(ReminderRequest::ReminderType::CALENDAR)
 {
     // 1. record the information which designated by user at first time.
@@ -55,6 +55,7 @@ ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime,
     firstDesignateDay_ = dateTime.tm_mday;
     SetRepeatMonths(repeatMonths);
     SetRepeatDaysOfMonth(repeatDays);
+    SetRepeatDaysOfWeek(true, daysOfWeek);
     SetSnoozeTimes(DEFAULT_SNOOZE_TIMES);
 
     // 2. should SetNextTriggerTime() after constructor
@@ -164,12 +165,20 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime() const
     tarTime.tm_min = minute_;
     tarTime.tm_sec = 0;
     tarTime.tm_isdst = -1;
-
+    const time_t target = mktime(&tarTime);
     ANSR_LOGD("Now time is: %{public}s", GetDateTimeInfo(now).c_str());
-    if (!(repeatMonth_ > 0 && repeatDay_ > 0)) {
+    if (repeatMonth_ > 0 && repeatDay_ > 0) {
+        triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
+    } else if (repeatDaysOfWeek_ > 0 && (target <= now)) {
+        nowTime.tm_hour = tarTime.tm_hour;
+        nowTime.tm_min = tarTime.tm_min;
+        nowTime.tm_sec = tarTime.tm_sec;
+        nowTime.tm_isdst = tarTime.tm_isdst;
+        const time_t tar = mktime(&nowTime);
+        triggerTimeInMilli = GetNextDaysOfWeek(now, tar);
+    } else {
         ANSR_LOGD("tarTime: %{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
             tarTime.tm_year, tarTime.tm_mon, tarTime.tm_mday, tarTime.tm_hour, tarTime.tm_min, tarTime.tm_sec);
-        const time_t target = mktime(&tarTime);
         if (target == -1) {
             ANSR_LOGW("mktime return error.");
         }
@@ -177,9 +186,7 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime() const
             triggerTimeInMilli = ReminderRequest::GetDurationSinceEpochInMilli(target);
             ANSR_LOGD("Next calendar time:%{public}s", GetDateTimeInfo(target).c_str());
         }
-        return triggerTimeInMilli;
     }
-    triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
     return triggerTimeInMilli;
 }
 
@@ -260,7 +267,8 @@ void ReminderRequestCalendar::InitDateTime(const tm &dateTime)
 
 bool ReminderRequestCalendar::IsRepeatReminder() const
 {
-    return (repeatMonth_ > 0 && repeatDay_ > 0) || (GetTimeInterval() > 0 && GetSnoozeTimes() > 0);
+    return (repeatMonth_ > 0 && repeatDay_ > 0) || (repeatDaysOfWeek_ > 0)
+        || (GetTimeInterval() > 0 && GetSnoozeTimes() > 0);
 }
 
 
@@ -376,7 +384,7 @@ bool ReminderRequestCalendar::UpdateNextReminder()
         SetSnoozeTimesDynamic(--leftSnoozeTimes);
     } else {
         SetSnoozeTimesDynamic(GetSnoozeTimes());
-        if (repeatMonth_ == 0 || repeatDay_ == 0) {
+        if ((repeatMonth_ == 0 || repeatDay_ == 0) && (repeatDaysOfWeek_ == 0)) {
             ANSR_LOGI("Not a day repeat reminder, no need to update to next trigger time.");
             SetExpired(true);
             return false;
@@ -397,7 +405,7 @@ bool ReminderRequestCalendar::UpdateNextReminder()
 
 uint64_t ReminderRequestCalendar::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const
 {
-    if (ignoreRepeat || (repeatMonth_ > 0 && repeatDay_ > 0)) {
+    if (ignoreRepeat || (repeatMonth_ > 0 && repeatDay_ > 0) || (repeatDaysOfWeek_ > 0)) {
         return GetNextTriggerTime();
     } else {
         return INVALID_LONG_LONG_VALUE;

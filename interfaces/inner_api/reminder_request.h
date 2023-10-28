@@ -684,6 +684,13 @@ public:
     void UpdateNotificationRequest(UpdateNotificationType type, std::string extra);
 
     /**
+     * @brief Get repeated days of the week.
+     *
+     * @return  Array of the int type.
+     */
+    std::vector<int32_t> GetDaysOfWeek() const;
+
+    /**
      * @brief When system language change, will call this function.
      *     need load resource to update button title
      * @param resMgr Indicates the resource manager for get button title
@@ -706,8 +713,12 @@ public:
     static const uint16_t MILLI_SECONDS;
     static const uint16_t SAME_TIME_DISTINGUISH_MILLISECONDS;
     static const std::string NOTIFICATION_LABEL;
-    static const int32_t SUNDAY;
-
+    static const uint8_t MONDAY;
+    static const uint8_t SUNDAY;
+    static const uint8_t DAYS_PER_WEEK;
+    static const uint8_t HOURS_PER_DAY;
+    static const uint16_t SECONDS_PER_HOUR;
+    static const uint8_t MINUTES_PER_HOUR;
     /**
      * @brief Show the reminder with a notification.
      */
@@ -775,6 +786,7 @@ public:
     static const std::string MAX_SCREEN_AGENT;
     static const std::string TAP_DISMISSED;
     static const std::string AUTO_DELETED_TIME;
+    static const std::string REPEAT_DAYS_OF_WEEK;
     static const std::string GROUP_ID;
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
@@ -805,6 +817,21 @@ protected:
      */
     static void AddColumn(const std::string &name, const std::string &type, const bool &isEnd);
 
+    uint8_t repeatDaysOfWeek_{0};
+
+    /**
+     * Obtains the next triggerTime if it is a week repeat.
+     *
+     * @param now Indicates current time.
+     * @param now Indicatet target time.
+     * @return nextTriggerTime.
+     */
+    int64_t GetNextDaysOfWeek(const time_t now, const time_t target) const;
+    void SetRepeatDaysOfWeek(bool set, const std::vector<uint8_t> &daysOfWeek);
+    uint8_t GetRepeatDaysOfWeek() const;
+    time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
+    uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
+
 private:
     void AddActionButtons(const bool includeSnooze);
     void AddRemovalWantAgent();
@@ -826,6 +853,13 @@ private:
     bool UpdateNextReminder(const bool &force);
     void UpdateNotificationContent(const bool &setSnooze);
     void UpdateNotificationCommon();
+
+    /**
+     * @brief Determine whether it is repeated every week.
+     *
+     * @return  True if repeate.
+     */
+    bool IsRepeatDaysOfWeek(int32_t day) const;
 
     /**
      * @brief Used for reminder recovery from database.

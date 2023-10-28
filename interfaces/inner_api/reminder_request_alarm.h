@@ -58,13 +58,6 @@ public:
     ~ReminderRequestAlarm() override {};
 
     /**
-     * Obtains the repeat days vector.
-     *
-     * @return vector of repeat days.
-     */
-    std::vector<int32_t> GetDaysOfWeek() const;
-
-    /**
      * @brief Obtains the setted {@link hour_}.
      *
      * @return setted hour.
@@ -77,7 +70,6 @@ public:
      * @return setted minute.
      */
     uint8_t GetMinute() const;
-    uint8_t GetRepeatDay() const;
     virtual bool OnDateTimeChange() override;
     virtual bool OnTimeZoneChange() override;
     virtual bool UpdateNextReminder() override;
@@ -130,43 +122,15 @@ private:
      * @return next trigger time in milli.
      */
     uint64_t GetNextTriggerTime(bool forceToGetNext) const;
-
-    /**
-     * Judge is it the repeat day setted by user or not.
-     *
-     * @param day Indicates the day of week.
-     * @return true if it is a repeat day.
-     */
-    bool IsRepeatDay(int32_t day) const;
     bool IsRepeatReminder() const;
-    void SetDaysOfWeek(bool set, std::vector<uint8_t> daysOfWeek);
 
-    /**
-     * Obtains the next day interval if it is a week repeat alarm.
-     *
-     * @param now Indicates current time.
-     * @param now Indicatet target time.
-     * @return next day interval. Returns {@link INVALID_INT_VALUE} if it is not a week repeat alarm.
-     */
-    int8_t GetNextAlarm(const time_t now, const time_t target) const;
-
-    time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
-
-    static const uint8_t DAYS_PER_WEEK;
-    static const uint8_t MONDAY;
-    static const uint8_t SUNDAY;
-    static const uint8_t HOURS_PER_DAY;
-    static const uint16_t SECONDS_PER_HOUR;
     static const uint8_t MINUTES_PER_HOUR;
-    static const int8_t INVALID_INT_VALUE;
     static const int8_t DEFAULT_SNOOZE_TIMES;
 
     uint8_t hour_ = {0};
     uint8_t minute_ = {0};
-    uint8_t repeatDays_ = {0};
 
     // For database recovery.
-    static const std::string REPEAT_DAYS_OF_WEEK;
     static const std::string ALARM_HOUR;
     static const std::string ALARM_MINUTE;
 };

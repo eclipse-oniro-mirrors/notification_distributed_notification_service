@@ -427,9 +427,9 @@ void ParseReminderAlarm(const napi_env &env, const ReminderRequest &reminder, na
 
     // daysOfWeek
     napi_create_array(env, &value);
-    napi_set_named_property(env, result, ALARM_DAYS_OF_WEEK, value);
+    napi_set_named_property(env, result, REPEAT_DAYS_OF_WEEK, value);
     int32_t count = 0;
-    for (auto day : alarm.GetDaysOfWeek()) {
+    for (auto day : reminder.GetDaysOfWeek()) {
         if (day) {
             napi_value napiDay = nullptr;
             napi_create_int32(env, day, &napiDay);
@@ -481,6 +481,19 @@ void ParseReminderCalendar(const napi_env &env, const ReminderRequest &reminder,
         napi_create_int32(env, day, &napiDay);
         napi_set_element(env, value, count, napiDay);
         count++;
+    }
+
+    // daysOfWeek
+    napi_create_array(env, &value);
+    napi_set_named_property(env, result, REPEAT_DAYS_OF_WEEK, value);
+    count = 0;
+    for (auto day : reminder.GetDaysOfWeek()) {
+        if (day) {
+            napi_value napiDay = nullptr;
+            napi_create_int32(env, day, &napiDay);
+            napi_set_element(env, value, count, napiDay);
+            count++;
+        }
     }
 }
 
