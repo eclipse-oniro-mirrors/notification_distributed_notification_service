@@ -4252,7 +4252,7 @@ napi_value Common::GetNotificationLocalLiveViewContent(
     }
 
     request.SetContent(std::make_shared<NotificationContent>(localLiveViewContent));
-    
+
     // set isOnGoing of live view true
     request.SetInProgress(true);
 
@@ -4422,7 +4422,7 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
     napi_value progressResult = nullptr;
 
     ANS_LOGI("enter");
-    
+
     napi_get_named_property(env, contentResult, "progress", &progressResult);
     NAPI_CALL(env, napi_typeof(env, progressResult, &valuetype));
     if (valuetype != napi_object) {
@@ -4486,7 +4486,7 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
     napi_value timeResult = nullptr;
 
     ANS_LOGI("enter");
-    
+
     napi_get_named_property(env, contentResult, "time", &timeResult);
     NAPI_CALL(env, napi_typeof(env, timeResult, &valuetype));
     if (valuetype != napi_object) {
@@ -4584,7 +4584,7 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     napi_get_value_int32(env, result, &type);
     content->SetType(type);
     ANS_LOGD("localLiveView type = %{public}d", type);
-    
+
     //capsule?
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "capsule", &hasProperty));
     if (hasProperty && GetNotificationLocalLiveViewCapsule(env, contentResult, content) == nullptr) {
@@ -5600,6 +5600,9 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
             break;
         case ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED:
             ExternalCode = ERROR_READ_TEMPLATE_CONFIG_FAILED;
+            break;
+        case ERR_ANS_DIALOG_IS_POPPING:
+            ExternalCode = ERROR_DIALOG_IS_POPPING;
             break;
         default:
             ExternalCode = ERROR_INTERNAL_ERROR;

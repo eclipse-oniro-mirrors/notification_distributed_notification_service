@@ -57,6 +57,7 @@ ohos_shared_library("notificationmanager") {
     "../disturb_mode.cpp",
     "../enable_notification.cpp",
     "../get_active.cpp",
+    "../js_ans_dialog_callback.cpp",
     "../publish.cpp",
     "../slot.cpp",
     "init_module.cpp",

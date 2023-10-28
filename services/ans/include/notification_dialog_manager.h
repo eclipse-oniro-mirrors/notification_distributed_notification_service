@@ -26,12 +26,13 @@
 #include "common_event_subscribe_info.h"
 #include "refbase.h"
 
+#include "ans_dialog_callback_interface.h"
 #include "ans_inner_errors.h"
 
 namespace OHOS::Notification {
+class AdvancedNotificationService;
 class NotificationBundleOption;
 class NotificationDialogManager;
-class AdvancedNotificationService;
 
 enum class DialogStatus {
     ALLOW_CLICKED,
@@ -70,6 +71,7 @@ public:
     struct DialogInfo {
         sptr<NotificationBundleOption> bundleOption;
         // When multi devices are going to be supported, a deviceId need to be stored
+        sptr<AnsDialogCallback> callback;
     };
 
     /**
@@ -79,6 +81,7 @@ public:
      */
     ErrCode RequestEnableNotificationDailog(
         const sptr<NotificationBundleOption>& bundle,
+        const sptr<AnsDialogCallback>& callback,
         const sptr<IRemoteObject>& callerToken
     );
 
@@ -99,7 +102,7 @@ private:
     static bool SetHasPoppedDialog(const sptr<NotificationBundleOption>& bundleOption, bool hasPopped);
 
     // bundle need to be not null
-    bool AddDialogInfoIfNotExist(const sptr<NotificationBundleOption>& bundle);
+    bool AddDialogInfoIfNotExist(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
     sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName);
     // bundle need to be not null
     void RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
@@ -110,7 +113,7 @@ private:
     bool OnDialogCrashed(const std::string& bundleName);
     bool OnDialogServiceDestroyed();
 
-    bool HandleOneDialogClosed(sptr<NotificationBundleOption> bundleOption);
+    bool HandleOneDialogClosed(sptr<NotificationBundleOption> bundleOption, EnabledDialogStatus status);
     bool HandleAllDialogsClosed();
 
     std::shared_ptr<NotificationDialogEventSubscriber> dialogEventSubscriber = nullptr;

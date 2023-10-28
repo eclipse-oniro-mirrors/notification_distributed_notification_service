@@ -348,15 +348,13 @@ HWTEST_F(AnsNotificationUnitTest, IsAllowedNotify_0100, Function | MediumTest | 
  */
 HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0100, Function | MediumTest | Level1)
 {
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::string deviceId = "this is deviceId";
     sptr<IRemoteObject> callerToken = nullptr;
-    ErrCode ret1 = ans_->RequestEnableNotification(deviceId, callerToken);
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+    ErrCode ret1 = ans_->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
     bool hasPermission = true;
     ErrCode ret3 = ans_->HasNotificationPolicyAccessPermission(hasPermission);

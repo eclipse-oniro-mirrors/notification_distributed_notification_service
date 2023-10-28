@@ -1097,9 +1097,11 @@ ErrCode AnsManagerProxy::UpdateSlots(
     return result;
 }
 
-ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callerToken)
+ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId,
+    const sptr<AnsDialogCallback> &callback,
+    const sptr<IRemoteObject> &callerToken)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
         ANS_LOGE("[RequestEnableNotification] fail: write interface token failed.");
@@ -1108,6 +1110,11 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId, 
 
     if (!data.WriteString(deviceId)) {
         ANS_LOGE("[RequestEnableNotification] fail: write deviceId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (callback == nullptr || !data.WriteRemoteObject(callback->AsObject())) {
+        ANS_LOGE("[RequestEnableNotification] fail: write callback failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

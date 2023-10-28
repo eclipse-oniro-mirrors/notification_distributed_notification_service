@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "ans_dialog_host_client.h"
 #include "ans_manager_death_recipient.h"
 #include "ans_manager_interface.h"
 #include "notification_subscriber.h"
@@ -263,7 +264,9 @@ public:
      *                 only be null or an empty string, indicating the current device.
      * @return Returns set notifications enabled for default bundle result.
      */
-    ErrCode RequestEnableNotification(std::string &deviceId, sptr<IRemoteObject> &callerToken);
+    ErrCode RequestEnableNotification(std::string &deviceId,
+        sptr<AnsDialogHostClient> &hostClient,
+        sptr<IRemoteObject> &callerToken);
 
     /**
      * @brief Checks whether this application has permission to modify the Do Not Disturb (DND) notification policy.

@@ -73,7 +73,7 @@ HWTEST_F(AnsManagerStubTest, OnRemoteRequest0002, Function | SmallTest | Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -163,7 +163,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancel01, Function | SmallTest | Level1)
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(notificationId);
     data.WriteString(label);
-    
+
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);
 }
@@ -270,7 +270,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle02, Function | SmallTest | Leve
 
     std::string representativeBundle = "this is a representativeBundle";
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(representativeBundle);
     data.WriteInt32(userId);
@@ -294,7 +294,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle03, Function | SmallTest | Leve
 
     int32_t notificationId = 3;
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(notificationId);
     data.WriteInt32(userId);
@@ -318,7 +318,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle04, Function | SmallTest | Leve
 
     int32_t notificationId = 3;
     std::string representativeBundle = "this is a representativeBundle";
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(notificationId);
     data.WriteString(representativeBundle);
@@ -339,7 +339,7 @@ HWTEST_F(AnsManagerStubTest, HandleAddSlotByType01, Function | SmallTest | Level
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -358,7 +358,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveSlotByType01, Function | SmallTest | Le
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -377,7 +377,7 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveAllSlots01, Function | SmallTest | Leve
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -396,7 +396,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotByType01, Function | SmallTest | Level
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -456,7 +456,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetActiveNotifications01, Function | SmallTes
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -475,7 +475,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetActiveNotificationNums01, Function | Small
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -494,7 +494,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetAllActiveNotifications01, Function | Small
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -515,7 +515,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent01, Function | SmallTest 
     MessageOption option = {MessageOption::TF_SYNC};
 
     std::string agent = "this is a agent";
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(agent);
 
@@ -535,7 +535,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent02, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -554,7 +554,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetNotificationAgent01, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -575,7 +575,7 @@ HWTEST_F(AnsManagerStubTest, HandleCanPublishAsBundle01, Function | SmallTest | 
     MessageOption option = {MessageOption::TF_SYNC};
 
     std::string representativeBundle = "this is a representativeBundle";
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(representativeBundle);
 
@@ -595,7 +595,7 @@ HWTEST_F(AnsManagerStubTest, HandleCanPublishAsBundle02, Function | SmallTest | 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -618,7 +618,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle01, Function | SmallTest | Lev
     sptr<NotificationRequest> notification = new NotificationRequest();
 
     std::string representativeBundle = "this is a representativeBundle";
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteParcelable(notification);
     data.WriteString(representativeBundle);
@@ -1371,7 +1371,7 @@ HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification01, Function | Small
     data.WriteBool(false);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -2496,7 +2496,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
     std::string cmd = "this is cmd";
     std::string bundle = "this is bundle";
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(cmd);
     data.WriteString(bundle);
@@ -2521,7 +2521,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump02, Function | SmallTest | Level1)
 
     std::string cmd = "this is cmd";
     std::string bundle = "this is bundle";
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(cmd);
     data.WriteString(bundle);
@@ -2544,7 +2544,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump03, Function | SmallTest | Level1)
 
     std::string bundle = "this is bundle";
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(bundle);
     data.WriteInt32(userId);
@@ -2567,7 +2567,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump04, Function | SmallTest | Level1)
 
     std::string cmd = "this is cmd";
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(cmd);
     data.WriteInt32(userId);
@@ -2592,8 +2592,8 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder01, Function | SmallTest | Lev
     uint8_t typeInfo = static_cast<uint8_t>(ReminderRequest::ReminderType::ALARM);
     sptr<ReminderRequest> reminder = new ReminderRequest();
     sptr<ReminderRequestAlarm> reminderRequestAlarm = new ReminderRequestAlarm();
-    
-    
+
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteUint8(typeInfo);
     data.WriteStrongParcelable(reminder);
@@ -2618,7 +2618,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder02, Function | SmallTest | Lev
 
     uint8_t typeInfo = static_cast<uint8_t>(ReminderRequest::ReminderType::INVALID);
     sptr<ReminderRequest> reminder = new ReminderRequest();
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteUint8(typeInfo);
     data.WriteParcelable(reminder);
@@ -2639,7 +2639,7 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder03, Function | SmallTest | Lev
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -2662,8 +2662,8 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder04, Function | SmallTest | Lev
     uint8_t typeInfo = static_cast<uint8_t>(ReminderRequest::ReminderType::TIMER);
     sptr<ReminderRequest> reminder = new ReminderRequest();
     sptr<ReminderRequestTimer> reminderRequestTimer = new ReminderRequestTimer();
-    
-    
+
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteUint8(typeInfo);
     data.WriteStrongParcelable(reminder);
@@ -2689,8 +2689,8 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder05, Function | SmallTest | Lev
     uint8_t typeInfo = static_cast<uint8_t>(ReminderRequest::ReminderType::CALENDAR);
     sptr<ReminderRequest> reminder = new ReminderRequest();
     sptr<ReminderRequestCalendar> reminderRequestCalendar = new ReminderRequestCalendar();
-    
-    
+
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteUint8(typeInfo);
     data.WriteStrongParcelable(reminder);
@@ -2715,8 +2715,8 @@ HWTEST_F(AnsManagerStubTest, HandlePublishReminder06, Function | SmallTest | Lev
 
     sptr<ReminderRequest> reminder = new ReminderRequest();
     sptr<ReminderRequestCalendar> reminderRequestCalendar = new ReminderRequestCalendar();
-    
-    
+
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(reminder);
     data.WriteParcelable(reminderRequestCalendar);
@@ -2739,7 +2739,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelReminder01, Function | SmallTest | Leve
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t reminderId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(reminderId);
 
@@ -2759,7 +2759,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelReminder02, Function | SmallTest | Leve
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -2778,7 +2778,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAllReminders01, Function | SmallTest | 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -2797,7 +2797,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetValidReminders01, Function | SmallTest | L
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -2854,7 +2854,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate01, Function | SmallTest | L
     MessageOption option = {MessageOption::TF_SYNC};
 
     std::string templateName = "this is templateName";
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(templateName);
 
@@ -2874,7 +2874,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSupportTemplate02, Function | SmallTest | L
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -2895,7 +2895,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser01, Function 
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
 
@@ -2915,7 +2915,7 @@ HWTEST_F(AnsManagerStubTest, HandleIsSpecialUserAllowedNotifyByUser02, Function 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -2937,7 +2937,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser01, Function | S
 
     int32_t userId = 4;
     bool enabled = true;
-    
+
     parcels.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     parcels.WriteInt32(userId);
     parcels.WriteBool(enabled);
@@ -2960,7 +2960,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser02, Function | S
     MessageOption option = {MessageOption::TF_SYNC};
 
     bool enabled = true;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteBool(enabled);
 
@@ -2982,7 +2982,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetNotificationsEnabledByUser03, Function | S
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
 
@@ -3004,7 +3004,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser01, Function | SmallTest | Lev
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
 
@@ -3024,7 +3024,7 @@ HWTEST_F(AnsManagerStubTest, HandleDeleteAllByUser02, Function | SmallTest | Lev
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -3046,7 +3046,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser01, Function | Small
 
     int32_t userId = 4;
     sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
     data.WriteStrongParcelable(date);
@@ -3069,7 +3069,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser02, Function | Small
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteParcelable(date);
 
@@ -3091,7 +3091,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetDoNotDisturbDateByUser03, Function | Small
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
 
@@ -3114,7 +3114,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser01, Function | Small
 
     int32_t userId = 4;
     sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteParcelable(date);
     data.WriteInt32(userId);
@@ -3135,7 +3135,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetDoNotDisturbDateByUser02, Function | Small
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -3158,7 +3158,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTe
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t type = 4;
     bool enabled = true;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(type);
@@ -3183,7 +3183,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot02, Function | SmallTe
 
     int32_t type = 4;
     bool enabled = true;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(type);
     data.WriteBool(enabled);
@@ -3207,7 +3207,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot03, Function | SmallTe
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     bool enabled = true;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteBool(enabled);
@@ -3231,7 +3231,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot04, Function | SmallTe
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t type = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(type);
@@ -3255,7 +3255,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot01, Function | SmallTe
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t type = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(type);
@@ -3278,7 +3278,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot02, Function | SmallTe
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t type = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(type);
 
@@ -3300,7 +3300,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot03, Function | SmallTe
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
 
@@ -3323,7 +3323,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp01, Function |
 
     int32_t userId = 4;
     bool enabled = true;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
     data.WriteBool(enabled);
@@ -3346,7 +3346,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp02, Function |
     MessageOption option = {MessageOption::TF_SYNC};
 
     bool enabled = true;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteBool(enabled);
 
@@ -3368,7 +3368,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedSetEnabledWithoutApp03, Function |
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
 
@@ -3390,7 +3390,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedGetEnabledWithoutApp01, Function |
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(userId);
 
@@ -3410,7 +3410,7 @@ HWTEST_F(AnsManagerStubTest, HandleDistributedGetEnabledWithoutApp02, Function |
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
@@ -3617,8 +3617,9 @@ HWTEST_F(AnsManagerStubTest, UpdateSlots01, Function | SmallTest | Level1)
 HWTEST_F(AnsManagerStubTest, RequestEnableNotification01, Function | SmallTest | Level1)
 {
     std::string deviceId = "this is deviceId";
+    sptr<AnsDialogCallback> callback = nullptr;
     sptr<IRemoteObject> callerToken = nullptr;
-    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, callerToken);
+    ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, callback, callerToken);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 
@@ -4207,7 +4208,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber01, Function | SmallTest | Leve
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t badgeNumber = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(badgeNumber);
 
@@ -4227,7 +4228,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber02, Function | SmallTest | Leve
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);

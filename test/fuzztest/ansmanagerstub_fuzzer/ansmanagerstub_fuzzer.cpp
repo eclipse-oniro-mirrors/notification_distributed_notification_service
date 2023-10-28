@@ -148,8 +148,9 @@ namespace OHOS {
         ansManagerStub.DeleteAll();
         ansManagerStub.GetSlotsByBundle(bundleOption, slots);
         ansManagerStub.UpdateSlots(bundleOption, slots);
+        sptr<Notification::AnsDialogCallback> dialogCallback = nullptr;
         sptr<IRemoteObject> callerToken = nullptr;
-        ansManagerStub.RequestEnableNotification(stringData, callerToken);
+        ansManagerStub.RequestEnableNotification(stringData, dialogCallback, callerToken);
         bool enabled = *data % ENABLE;
         ansManagerStub.SetNotificationsEnabledForBundle(stringData, enabled);
         ansManagerStub.SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);

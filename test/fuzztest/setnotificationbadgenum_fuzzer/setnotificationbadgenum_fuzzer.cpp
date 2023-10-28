@@ -15,6 +15,7 @@
 
 #include "setnotificationbadgenum_fuzzer.h"
 
+#include "ans_dialog_host_client.h"
 #include "notification_helper.h"
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
@@ -22,7 +23,10 @@ namespace OHOS {
         // test RequestEnableNotification function
         std::string deviceId(data);
         sptr<IRemoteObject> callerToken = nullptr;
-        Notification::NotificationHelper::RequestEnableNotification(deviceId, callerToken);
+        sptr<Notification::AnsDialogHostClient> client = nullptr;
+        Notification::AnsDialogHostClient::CreateIfNullptr(client);
+        client = Notification::AnsDialogHostClient::GetInstance();
+        Notification::NotificationHelper::RequestEnableNotification(deviceId, client, callerToken);
         // test HasNotificationPolicyAccessPermission function
         bool hasPermission = true;
         Notification::NotificationHelper::HasNotificationPolicyAccessPermission(hasPermission);

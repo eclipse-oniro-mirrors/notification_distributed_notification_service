@@ -74,6 +74,7 @@ ohos_shared_library("notification") {
     "src/enable_notification.cpp",
     "src/get_active.cpp",
     "src/init.cpp",
+    "src/js_ans_dialog_callback.cpp",
     "src/publish.cpp",
     "src/remove.cpp",
     "src/slot.cpp",

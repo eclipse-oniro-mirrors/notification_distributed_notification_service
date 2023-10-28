@@ -606,7 +606,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     do {
-        
+
         if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
             bool notificationEnable = false;
             result = CheckNotificationEnableStatus(notificationEnable);
@@ -1717,10 +1717,15 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::RequestEnableNotification(
-    const std::string &deviceId, const sptr<IRemoteObject> &callerToken)
+ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId,
+    const sptr<AnsDialogCallback> &callback,
+    const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (callback == nullptr) {
+        ANS_LOGE("callback == nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
 
     ErrCode result = ERR_OK;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
@@ -1751,7 +1756,10 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(
     if (!CreateDialogManager()) {
         return ERROR_INTERNAL_ERROR;
     }
-    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callerToken);
+    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken);
+    if (result == ERR_OK) {
+        result = ERR_ANS_DIALOG_POP_SUCCEEDED;
+    }
     return result;
 }
 
@@ -5007,7 +5015,6 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr
     }
     return PublishPreparedNotification(request, bundleOption);
 }
-
 
 bool AdvancedNotificationService::CreateDialogManager()
 {
