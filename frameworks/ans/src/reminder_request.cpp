@@ -1680,7 +1680,8 @@ void ReminderRequest::SetState(bool deSet, const uint8_t newState, std::string f
 
 void ReminderRequest::SetStateToInActive()
 {
-    SetState(false, (REMINDER_STATUS_SHOWING | REMINDER_STATUS_ALERTING | REMINDER_STATUS_ACTIVE), "SetStateToInActive");
+    SetState(false, (REMINDER_STATUS_SHOWING | REMINDER_STATUS_ALERTING | REMINDER_STATUS_ACTIVE),
+        "SetStateToInActive");
 }
 
 void ReminderRequest::UpdateActionButtons(const bool &setSnooze)
