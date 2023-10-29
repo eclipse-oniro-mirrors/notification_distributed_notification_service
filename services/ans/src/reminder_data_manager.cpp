@@ -174,8 +174,8 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
     StartRecentReminder();
 }
 
-bool ReminderDataManager::IsMatchedForGroupIdAndPkgName(const sptr<ReminderRequest> &reminder, const std::string &packageName,
-        const std::string &groupId) const
+bool ReminderDataManager::IsMatchedForGroupIdAndPkgName(const sptr<ReminderRequest> &reminder,
+    const std::string &packageName, const std::string &groupId) const
 {
     sptr<NotificationRequest> notification = reminder->GetNotificationRequest();
     if (notification == nullptr) {
@@ -527,7 +527,7 @@ void ReminderDataManager::CloseRemindersByGroupId(const int32_t &oldReminderId, 
     for (auto vit = reminderVector_.begin(); vit != reminderVector_.end(); vit++) {
         sptr<ReminderRequest> reminder = *vit;
         if (reminder == nullptr) {
-            ANSR_LOGD("reminder is null"); 
+            ANSR_LOGD("reminder is null");
             continue;
         }
         int32_t reminderId = reminder->GetReminderId();
@@ -539,6 +539,7 @@ void ReminderDataManager::CloseRemindersByGroupId(const int32_t &oldReminderId, 
             reminder->SetExpired(true);
             reminder->SetStateToInActive();
             store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
+            ResetStates(TimerType::TRIGGER_TIMER);
             ANSR_LOGD("Cancel reminders by groupid, reminder is %{public}s", reminder->Dump().c_str());
         }
     }
