@@ -715,6 +715,11 @@ public:
      */
     void OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption);
 
+    /**
+     * @brief Boot system completed event callback.
+     */
+    void OnBootSystemCompleted();
+
     // Distributed KvStore
 
     /**
@@ -882,6 +887,8 @@ private:
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
 
+    static bool GetBundleInfoByNotificationBundleOption(
+        const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

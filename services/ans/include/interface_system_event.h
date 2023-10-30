@@ -33,6 +33,7 @@ struct ISystemEvent {
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleDataCleared;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleAdd;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleUpdate;
+    std::function<void()> onBootSystemCompleted;
 };
 }  // namespace Notification
 }  // namespace OHOS

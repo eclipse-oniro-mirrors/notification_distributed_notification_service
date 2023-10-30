@@ -1270,11 +1270,6 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
-
-    if (isFromBootComplete && advancedNotificationService_ != nullptr) {
-        advancedNotificationService_->InitNotificationEnableList();
-    }
-
     if (IsReminderAgentReady()) {
         return;
     }
