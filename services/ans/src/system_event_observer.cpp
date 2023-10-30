@@ -37,6 +37,7 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -44,6 +45,7 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
         commonEventSubscribeInfo, std::bind(&SystemEventObserver::OnReceiveEvent, this, std::placeholders::_1));
 
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    InitEventList();
 }
 
 SystemEventObserver::~SystemEventObserver()
@@ -104,20 +106,62 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
                 callbacks_.onBundleDataCleared(bundleOption);
             }
         }
-    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
-        if (callbacks_.onBundleAdd != nullptr) {
-            sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
-            if (bundleOption != nullptr) {
-                callbacks_.onBundleAdd(bundleOption);
-            }
+    } else {
+        OnReceiveEventInner(data);
+    }
+}
+
+void SystemEventObserver::InitEventList()
+{
+    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED] =
+        &SystemEventObserver::OnBundleAddEventInner;
+    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED] =
+        &SystemEventObserver::OnBundleUpdateEventInner;
+    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED] =
+        &SystemEventObserver::OnBootSystemCompletedEventInner;
+}
+
+void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &data)
+{
+    std::string action = data.GetWant().GetAction();
+    auto itFunc = memberFuncMap_.find(action);
+    if (itFunc == memberFuncMap_.end()) {
+        ANS_LOGE("Action %{public}s callback is not found.", action.c_str());
+        return;
+    }
+
+    if (itFunc->second == nullptr) {
+        ANS_LOGE("Action [%{public}s] callback is nullptr.", action.c_str());
+        return;
+    }
+
+    (this->*(itFunc->second))(data);
+}
+
+void SystemEventObserver::OnBundleAddEventInner(const EventFwk::CommonEventData &data)
+{
+    if (callbacks_.onBundleAdd != nullptr) {
+        sptr<NotificationBundleOption> bundleOption = GetBundleOption(data.GetWant());
+        if (bundleOption != nullptr) {
+            callbacks_.onBundleAdd(bundleOption);
         }
-    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
-        if (callbacks_.onBundleUpdate != nullptr) {
-            sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
-            if (bundleOption != nullptr) {
-                callbacks_.onBundleUpdate(bundleOption);
-            }
+    }
+}
+
+void SystemEventObserver::OnBundleUpdateEventInner(const EventFwk::CommonEventData &data)
+{
+    if (callbacks_.onBundleUpdate != nullptr) {
+        sptr<NotificationBundleOption> bundleOption = GetBundleOption(data.GetWant());
+        if (bundleOption != nullptr) {
+            callbacks_.onBundleUpdate(bundleOption);
         }
+    }
+}
+
+void SystemEventObserver::OnBootSystemCompletedEventInner(const EventFwk::CommonEventData &data)
+{
+    if (callbacks_.onBootSystemCompleted != nullptr) {
+        callbacks_.onBootSystemCompleted();
     }
 }
 }  // namespace Notification
