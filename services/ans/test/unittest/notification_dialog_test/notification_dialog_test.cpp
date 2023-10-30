@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 #include "notification_dialog.h"
+#include "notification_dialog_manager.h"
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
@@ -44,9 +45,8 @@ public:
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00100, Function | SmallTest | Level1)
 {
-    NotificationDialog notificationDialog;
     MockQueryActiveOsAccountIds(true, 0);
-    int32_t result = notificationDialog.GetActiveUserId();
+    int32_t result = NotificationDialog::GetActiveUserId();
     int32_t activeUserId = 100;
     EXPECT_EQ(result, activeUserId);
 }
@@ -58,14 +58,13 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00100, Function | SmallTest 
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00200, Function | SmallTest | Level1)
 {
-    NotificationDialog notificationDialog;
     MockQueryActiveOsAccountIds(false, 1);
-    int32_t result = notificationDialog.GetActiveUserId();
+    int32_t result = NotificationDialog::GetActiveUserId();
     int32_t activeUserId = -4;
     EXPECT_EQ(result, activeUserId);
 
     std::string bundleName = "BundleName";
-    int32_t result2 =  notificationDialog.GetUidByBundleName(bundleName);
+    int32_t result2 =  NotificationDialog::GetUidByBundleName(bundleName);
     int32_t code = -1;
     EXPECT_EQ(result2, code);
 }
@@ -77,20 +76,23 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00200, Function | SmallTest 
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest | Level1)
 {
-    NotificationDialog notificationDialog;
     MockQueryActiveOsAccountIds(false, 1);
-    int32_t result = notificationDialog.GetActiveUserId();
+    int32_t result = NotificationDialog::GetActiveUserId();
     int32_t activeUserId = -4;
     EXPECT_EQ(result, activeUserId);
 
     std::string bundleName = "BundleName";
-    int32_t result2 =  notificationDialog.GetUidByBundleName(bundleName);
+    int32_t result2 =  NotificationDialog::GetUidByBundleName(bundleName);
     int32_t code = -1;
     EXPECT_EQ(result2, code);
 
     int32_t uid = 2;
     sptr<IRemoteObject> callerToken = nullptr;
-    ErrCode result3 =  notificationDialog.StartEnableNotificationDialogAbility(uid, callerToken);
+    ErrCode result3 =  NotificationDialog::StartEnableNotificationDialogAbility(
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
+        uid,
+        callerToken);
     EXPECT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -101,20 +103,23 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest 
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest | Level1)
 {
-    NotificationDialog notificationDialog;
     MockQueryActiveOsAccountIds(false, 1);
-    int32_t result = notificationDialog.GetActiveUserId();
+    int32_t result = NotificationDialog::GetActiveUserId();
     int32_t activeUserId = -4;
     EXPECT_EQ(result, activeUserId);
 
     std::string bundleName = "BundleName";
-    int32_t result2 =  notificationDialog.GetUidByBundleName(bundleName);
+    int32_t result2 =  NotificationDialog::GetUidByBundleName(bundleName);
     int32_t code = -1;
     EXPECT_EQ(result2, code);
 
     int32_t uid = 100;
     sptr<IRemoteObject> callerToken = nullptr;
-    ErrCode result3 =  notificationDialog.StartEnableNotificationDialogAbility(uid, callerToken);
+    ErrCode result3 =  NotificationDialog::StartEnableNotificationDialogAbility(
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
+        uid,
+        callerToken);
     EXPECT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
 }  // namespace Notification

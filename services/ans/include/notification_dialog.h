@@ -15,28 +15,30 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_DIALOG_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_DIALOG_H
 
+#include <string>
+
 #include "iremote_object.h"
 
 namespace OHOS {
 namespace Notification {
 class NotificationDialog {
 public:
-    NotificationDialog() = default;
-    ~NotificationDialog() = default;
-
     /**
      * @brief To start the enableNotificationDialog ability.
      *
      * @param uid The uid of application that want launch notification dialog.
      * @return ERR_OK if success, else not.
      */
-    ErrCode StartEnableNotificationDialogAbility(int32_t uid, const sptr<IRemoteObject> &callerToken);
+    static ErrCode StartEnableNotificationDialogAbility(
+        const std::string &serviceBundleName,
+        const std::string &serviceAbilityName,
+        int32_t uid,
+        const sptr<IRemoteObject> &callerToken);
 
-private:
-    int32_t GetActiveUserId();
-    int32_t GetUidByBundleName(const std::string &bundleName);
+    static int32_t GetActiveUserId();
+    static int32_t GetUidByBundleName(const std::string &bundleName);
 };
-}  // namespace Notification
-}  // namespace OHOS
+} // namespace Notification
+} // namespace OHOS
 
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_DIALOG_H

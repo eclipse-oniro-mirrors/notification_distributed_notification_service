@@ -16,8 +16,8 @@
 import display from '@ohos.display';
 import emitter from '@ohos.events.emitter';
 import extension from '@ohos.app.ability.ServiceExtensionAbility';
-import notification from '@ohos.notification';
 import window from '@ohos.window';
+import CommonEventManager from '@ohos.commonEventManager';
 import type Want from '@ohos.app.ability.Want';
 
 const TAG = 'NotificationDialog_Service ';
@@ -27,10 +27,23 @@ const enableNotificationDialogDestroyedEvent = {
   priority: emitter.EventPriority.LOW
 };
 
+const COMMON_EVENT_NAME = 'OnNotificationServiceDialogClicked';
+enum DialogStatus {
+  ALLOW_CLICKED,
+  DENY_CLICKED,
+  DIALOG_CRASHED,
+  DIALOG_SERVICE_DESTROYED
+};
+
 async function handleDialogQuitException(want: Want): Promise<void> {
-  await notification.enableNotification({
-    'bundle': want.parameters.from.toString()
-  }, false);
+  CommonEventManager.publish(
+    COMMON_EVENT_NAME,
+    {
+      code: DialogStatus.DIALOG_CRASHED,
+      data: want.parameters.from.toString(),
+    } as CommonEventManager.CommonEventPublishData,
+    () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
+  );
 }
 
 
@@ -85,6 +98,17 @@ export class EnableNotificationDialog {
       console.error(TAG, 'window create failed!');
       throw new Error('Failed to create window');
     }
+  }
+
+  async publishButtonClickedEvent(enabled: boolean): Promise<void> {
+    CommonEventManager.publish(
+      COMMON_EVENT_NAME,
+      {
+        code: enabled ? DialogStatus.ALLOW_CLICKED : DialogStatus.DENY_CLICKED,
+        data: this.want.parameters.from.toString(),
+      } as CommonEventManager.CommonEventPublishData,
+      () => { console.info(TAG, 'publish CLICKED succeeded'); }
+    );
   }
 
   async destroyException(): Promise<void> {
@@ -162,6 +186,13 @@ class NotificationDialogServiceExtensionAbility extends extension {
 
   onDestroy(): void {
     console.info(TAG, 'onDestroy.');
+    CommonEventManager.publish(
+      COMMON_EVENT_NAME,
+      {
+        code: DialogStatus.DIALOG_SERVICE_DESTROYED
+      } as CommonEventManager.CommonEventPublishData,
+      () => { console.info(TAG, 'publish DIALOG_SERVICE_DESTROYED succeeded'); }
+    );
   }
 
   private async removeExceededDialog(): Promise<void> {
