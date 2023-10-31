@@ -72,6 +72,7 @@ export class EnableNotificationDialog {
       };
       let win = await window.createWindow(winArgs);
       this.window = win;
+      let shouldHide = true;
 
       if (windowType === window.WindowType.TYPE_DIALOG) {
         await win.bindDialogTarget(this.want.parameters.callerToken['value'],
@@ -88,6 +89,7 @@ export class EnableNotificationDialog {
       await win.moveWindowTo(displayRect.left, displayRect.top);
       await win.resize(displayRect.width, displayRect.height);
       await win.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
+      await win.hideNonSystemFloatingWindows(shouldHide);
       await win.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
       await win.showWindow();
       await win.setWindowLayoutFullScreen(true);
