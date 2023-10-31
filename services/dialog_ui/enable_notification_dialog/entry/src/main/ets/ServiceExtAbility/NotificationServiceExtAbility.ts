@@ -76,7 +76,7 @@ export class EnableNotificationDialog {
       await win.moveWindowTo(displayRect.left, displayRect.top);
       await win.resize(displayRect.width, displayRect.height);
       await win.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
-      await win.hideNonSystemFloatingWindows(shouldHide)
+      await win.hideNonSystemFloatingWindows(shouldHide);
       await win.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
       await win.showWindow();
       await win.setWindowLayoutFullScreen(true);
