@@ -25,6 +25,7 @@
 #include "reminder_data_manager.h"
 #include "reminder_event_manager.h"
 #include "reminder_request_timer.h"
+#include "reminder_request_alarm.h"
 #undef private
 #undef protected
 
@@ -355,6 +356,55 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     manager->IsAllowedNotify(nullptr);
     manager->IsReminderAgentReady();
     system("rm -rf /data/service/el1/public/notification/");
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_016
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issuesI8CAQB
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
+{
+    // not SystemApp
+    std::vector<uint8_t> daysOfWeek;
+    sptr<ReminderRequest> reminder = new ReminderRequestAlarm(0, 1, daysOfWeek);
+    std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent =
+        std::make_shared<ReminderRequest::ButtonWantAgent>();
+    std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
+        std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    reminder->SetSystemApp(false);
+    reminder->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE, "",
+        buttonWantAgent, buttonDataShareUpdate);
+    manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
+
+    // INVALID ActionButtonType
+    reminder->SetSystemApp(true);
+    reminder->SetActionButton("无效的", ReminderRequest::ActionButtonType::INVALID, "",
+        buttonWantAgent, buttonDataShareUpdate);
+    manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::INVALID);
+
+    // null ButtonDataShareUpdate
+    reminder->SetActionButton("稍后提醒", ReminderRequest::ActionButtonType::SNOOZE, "", buttonWantAgent);
+    manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
+
+    // not have uri
+    manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
+
+    // update datashare
+    sptr<ReminderRequest> reminder1 = new ReminderRequestAlarm(2, 3, daysOfWeek);
+    std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent1 =
+        std::make_shared<ReminderRequest::ButtonWantAgent>();
+    std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate1 =
+        std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    reminder1->SetSystemApp(true);
+    reminder1->InitUserId(100);
+    buttonDataShareUpdate1->uri = "datashareproxy://com:huawei.calendardataTest/CalendarAlerts";
+    buttonDataShareUpdate1->equalTo = "name:string:li;id:double:3.0;status:bool:true";
+    buttonDataShareUpdate1->valuesBucket = "name:string:wang;id:double:4.0;status:bool:true;actionId:null:null";
+    reminder1->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE, "", buttonWantAgent1, buttonDataShareUpdate1);
+    manager->UpdateAppDatabase(reminder1, ReminderRequest::ActionButtonType::CLOSE);
     EXPECT_TRUE(manager != nullptr);
 }
 
