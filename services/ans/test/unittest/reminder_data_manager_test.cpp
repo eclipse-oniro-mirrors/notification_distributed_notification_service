@@ -400,7 +400,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
         std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     reminder1->SetSystemApp(true);
     reminder1->InitUserId(100);
-    buttonDataShareUpdate1->uri = "datashareproxy://com:huawei.calendardataTest/CalendarAlerts";
+    buttonDataShareUpdate1->uri = "datashareTest://com:huawei.dataShareTest/dataShareTest";
     buttonDataShareUpdate1->equalTo = "name:string:li;id:double:3.0;status:bool:true";
     buttonDataShareUpdate1->valuesBucket = "name:string:wang;id:double:4.0;status:bool:true;actionId:null:null";
     reminder1->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE, "", buttonWantAgent1, buttonDataShareUpdate1);
