@@ -33,6 +33,7 @@ using namespace testing::ext;
 using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
+std::string URI = "datashareTest:///com:huawei.dataShareTest";
 static auto manager = std::make_shared<ReminderDataManager>();
 class ReminderDataManagerTest : public testing::Test {
 public:
@@ -400,7 +401,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
         std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     reminder1->SetSystemApp(true);
     reminder1->InitUserId(100);
-    buttonDataShareUpdate1->uri = "datashareTest://com:huawei.dataShareTest/dataShareTest";
+    buttonDataShareUpdate1->uri = URI;
     buttonDataShareUpdate1->equalTo = "name:string:li;id:double:3.0;status:bool:true";
     buttonDataShareUpdate1->valuesBucket = "name:string:wang;id:double:4.0;status:bool:true;actionId:null:null";
     reminder1->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE, "",
