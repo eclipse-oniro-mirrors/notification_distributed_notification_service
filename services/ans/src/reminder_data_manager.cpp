@@ -505,7 +505,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
     }
     std::string bundleName = notificationRequest->GetCreatorBundleName();
     std::string groupId = reminder->GetGroupId();
-    if (groupId.empty()   ) {
+    if (groupId.empty()) {
         ANSR_LOGD("default close reminder, the group id is not set.");
         CloseReminder(reminder, cancelNotification);
         StartRecentReminder();

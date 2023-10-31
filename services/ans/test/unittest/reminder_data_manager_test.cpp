@@ -151,6 +151,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_005, Level1)
     reminder->SetReminderId(3);
     manager->CloseReminder(reminder, true);
     manager->CloseReminder(reminder, false);
+    reminder->SetReminderId(4);
+    reminder->SetGroupId("");
+    manager->CloseReminder(reminder, true);
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -356,6 +359,37 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     manager->IsReminderAgentReady();
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_017
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_017, Level1)
+{
+    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(10);
+    sptr<ReminderRequest> reminder2 = new ReminderRequestTimer(10);
+    sptr<ReminderRequest> reminder3 = new ReminderRequestTimer(10);
+    int32_t oldReminderId = 1;
+    reminder1->SetReminderId(1);
+    reminder2->SetReminderId(2);
+    reminder3->SetReminderId(3);
+    reminder1->SetGroupId("123");
+    reminder2->SetGroupId("123");
+    reminder3->SetGroupId("124");
+    sptr<NotificationBundleOption> option1 = new NotificationBundleOption();
+    sptr<NotificationBundleOption> option2 = new NotificationBundleOption();
+    sptr<NotificationBundleOption> option3 = new NotificationBundleOption();
+    option1->SetBundleName("test");
+    option2->SetBundleName("test");
+    manager->PublishReminder(reminder1, option1);
+    manager->PublishReminder(reminder2, option2);
+    manager->PublishReminder(reminder3, option3);
+    manager->CloseRemindersByGroupId(oldReminderId, "test", "123");
+    system("rm -rf /data/service/el1/public/notification/");
+    EXPECT_TRUE(reminder2->isExpired_);
 }
 
 /**
