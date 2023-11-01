@@ -1826,5 +1826,19 @@ HWTEST_F(ReminderRequestTest, InitBundleName_00002, Function | SmallTest | Level
     rrc->InitBundleName(bundleName);
     EXPECT_EQ(rrc->GetBundleName(), bundleName);
 }
+
+/**
+ * @tc.name: SetGroupId_00001
+ * @tc.desc: Test SetGroupId parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetGroupId_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string groupId = "123";
+    rrc->SetGroupId(groupId);
+    EXPECT_EQ(rrc->GetGroupId(), groupId);
+}
 }
 }
