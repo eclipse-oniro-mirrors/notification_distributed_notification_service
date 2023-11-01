@@ -361,7 +361,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
-
+/**
  * @tc.name: ReminderDataManagerTest_016
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
