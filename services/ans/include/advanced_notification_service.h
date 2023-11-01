@@ -778,6 +778,10 @@ public:
      * @brief Init The Default Installation Package Notification Enabled.
      */
     void InitNotificationEnableList();
+    /**
+     * @brief Remove Local Live Notifications
+     */
+    ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName);
 
 private:
     struct RecentInfo;
@@ -889,6 +893,10 @@ private:
 
     static bool GetBundleInfoByNotificationBundleOption(
         const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
+    
+    ErrCode GetTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
+        NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
+    ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
