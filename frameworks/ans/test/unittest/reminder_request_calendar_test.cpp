@@ -738,6 +738,10 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00003, Function | Small
     bool isSet1 = true;
     calendar->SetMonth(month, isSet1);
 
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(1);
+    calendar->SetRepeatDaysOfWeek(isSet, daysOfWeek);
+
     auto rrc = std::make_shared<ReminderRequest>();
     rrc->SetSnoozeTimesDynamic(0);
     EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0);
@@ -781,6 +785,12 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00004, Function | Small
     bool result7 = calendar->IsRepeatMonth(month);
     EXPECT_EQ(result7, false);
 
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(1);
+    calendar->SetRepeatDaysOfWeek(isSet, daysOfWeek);
+    bool result2 = calendar->IsRepeatDaysOfWeek(1);
+    EXPECT_EQ(result2, false);
+
     auto reminderRequest = std::make_shared<ReminderRequest>();
     reminderRequest->SetSnoozeTimes(1);
     EXPECT_EQ(reminderRequest->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
@@ -820,6 +830,10 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00005, Function | Small
     bool result1 = calendar->IsRepeatMonth(month);
     EXPECT_EQ(result1, false);
 
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(1);
+    calendar->SetRepeatDaysOfWeek(isSet1, daysOfWeek);
+
     auto rrc = std::make_shared<ReminderRequest>();
     rrc->SetSnoozeTimes(1);
     EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
@@ -833,6 +847,61 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00005, Function | Small
 
     bool result3 = calendar->UpdateNextReminder();
     EXPECT_EQ(result3, false);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_00006
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: I8CZ6P
+ */
+HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00006, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    uint8_t day = 2;
+    bool isSet = false;
+    bool isSet1 = true;
+    calendar->SetDay(day, isSet);
+    bool result = calendar->IsRepeatDay(day);
+    EXPECT_EQ(result, false);
+
+    uint8_t month = 2;
+    calendar->SetMonth(month, isSet);
+    bool result1 = calendar->IsRepeatMonth(month);
+    EXPECT_EQ(result1, false);
+
+    std::vector<uint8_t> daysOfWeek;
+    daysOfWeek.push_back(1);
+    daysOfWeek.push_back(3);
+    daysOfWeek.push_back(4);
+    daysOfWeek.push_back(5);
+    daysOfWeek.push_back(6);
+    calendar->SetRepeatDaysOfWeek(isSet1, daysOfWeek);
+
+    bool result2 = calendar->IsRepeatDaysOfWeek(1);
+    EXPECT_EQ(result2, true);
+
+    bool result3 = calendar->IsRepeatReminder();
+    EXPECT_EQ(result3, true);
+
+    auto rrc = std::make_shared<ReminderRequest>();
+    rrc->SetSnoozeTimes(1);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
+    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1) << "Get snoozeTimesDynamic not 1";
+
+    uint32_t minTimeIntervalInSecond = 5 * 60;
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+
+    bool result4 = calendar->UpdateNextReminder();
+    EXPECT_EQ(result4, true);
+
+    uint16_t ret2 = calendar->GetRepeatDaysOfWeek();
+    uint16_t ret3 = 61;
+    EXPECT_EQ(ret2, ret3);
 }
 
 /**
