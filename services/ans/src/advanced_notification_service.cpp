@@ -606,15 +606,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     do {
-        
         if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
-            bool notificationEnable = false;
-            result = CheckNotificationEnableStatus(notificationEnable);
-            if (notificationEnable) {
-                result = PublishPreparedNotificationInner(request);
-                break;
-            }
-
             if (!AccessTokenHelper::IsSystemApp()) {
                 result = ERR_ANS_NON_SYSTEM_APP;
                 break;
@@ -631,10 +623,21 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             ANS_LOGE("DLP hap not allowed to send notifications");
             break;
         }
-
-        result = PublishPreparedNotificationInner(request);
+        sptr<NotificationBundleOption> bundleOption;
+        result = PrepareNotificationInfo(request, bundleOption);
         if (result != ERR_OK) {
-            ANS_LOGE("Notification inner error code: %{public}d", result);
+            break;
+        }
+
+        if (IsNeedPushCheck(request->GetSlotType())) {
+            result = PushCheck(request);
+        }
+        if (result != ERR_OK) {
+            break;
+        }
+        result = PublishPreparedNotification(request, bundleOption);
+        if (result != ERR_OK) {
+            break;
         }
     } while (0);
 
@@ -5045,46 +5048,6 @@ void AdvancedNotificationService::InitNotificationEnableList()
     };
     notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(task) : task();
 }
-
-ErrCode AdvancedNotificationService::CheckNotificationEnableStatus(bool &notificationEnable)
-{
-    auto bundleManager = BundleManagerHelper::GetInstance();
-    if (bundleManager == nullptr) {
-        ANS_LOGE("BundleMgr is null!");
-        return ERR_INVALID_VALUE;
-    }
-
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    std::string bundleName = bundleManager->GetBundleNameByUid(uid);
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
-    if (bundleOption == nullptr) {
-        ANS_LOGE("New obj error!");
-        return ERR_INVALID_VALUE;
-    }
-    return NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, notificationEnable);
-}
-
-ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr<NotificationRequest> &request)
-{
-    if (request == nullptr) {
-        ANS_LOGE("Request obj is null!");
-        return ERR_INVALID_VALUE;
-    }
-    sptr<NotificationBundleOption> bundleOption;
-    auto result = PrepareNotificationInfo(request, bundleOption);
-    if (result != ERR_OK) {
-        return result;
-    }
-
-    if (IsNeedPushCheck(request->GetSlotType())) {
-        result = PushCheck(request);
-        if (result != ERR_OK) {
-            return result;
-        }
-    }
-    return PublishPreparedNotification(request, bundleOption);
-}
-
 
 bool AdvancedNotificationService::CreateDialogManager()
 {
