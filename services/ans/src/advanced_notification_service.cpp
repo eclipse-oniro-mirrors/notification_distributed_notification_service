@@ -2918,7 +2918,11 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
         ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
-            if (!record->notification->IsRemoveAllowed()) {
+            bool isAllowedNotification = true;
+            if (IsAllowedNotifySelf(bundleOption, isAllowedNotification) != ERR_OK) {
+                ANSR_LOGW("The application does not request enable notification");
+            }
+            if (!record->notification->IsRemoveAllowed() && isAllowedNotification) {
                 continue;
             }
 
