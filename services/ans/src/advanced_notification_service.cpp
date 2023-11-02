@@ -2693,6 +2693,83 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
     return result;
 }
 
+ErrCode AdvancedNotificationService::GetTargetRecordList(const std::string& bundleName,
+    NotificationConstant::SlotType slotType, NotificationContent::Type contentType,
+    std::vector<std::shared_ptr<NotificationRecord>>& recordList)
+{
+    for (auto& notification : notificationList_) {
+        if (notification->request != nullptr && notification->request->GetOwnerBundleName() == bundleName &&
+                notification->request->GetSlotType()== slotType &&
+                notification->request->GetNotificationType() == contentType) {
+                recordList.emplace_back(notification);
+        }
+    }
+    if (recordList.empty()) {
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
+    const std::vector<std::shared_ptr<NotificationRecord>>& recordList)
+{
+    ErrCode result = ERR_OK;
+        std::vector<sptr<Notification>> notifications;
+        for (auto& record : recordList) {
+            std::string key = record->notification->GetKey();
+            sptr<Notification> notification = nullptr;
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
+#endif
+            result = RemoveFromNotificationList(key, notification, true,
+                NotificationConstant::USER_STOPPED_REASON_DELETE);
+            if (result != ERR_OK) {
+                continue;
+            }
+            if (notification != nullptr) {
+                int32_t reason = NotificationConstant::USER_STOPPED_REASON_DELETE;
+                UpdateRecentNotification(notification, true, reason);
+                notifications.emplace_back(notification);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            DoDistributedDelete(deviceId, bundleName, notification);
+#endif
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, NotificationConstant::USER_STOPPED_REASON_DELETE);
+                notifications.clear();
+            }
+        }
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::USER_STOPPED_REASON_DELETE);
+        }
+        return result;
+}
+
+ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std::string& bundleName)
+{
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    if (GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
+        NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) {
+        ANS_LOGE("Get Target record list fail.");
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        result = RemoveNotificationFromRecordList(recordList);
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
+}
+
 ErrCode AdvancedNotificationService::TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
     const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption)
 {

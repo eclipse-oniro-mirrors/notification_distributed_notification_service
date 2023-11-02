@@ -30,6 +30,7 @@
 #include "os_account_manager.h"
 #include "remote_death_recipient.h"
 #include "bundle_manager_helper.h"
+#include "advanced_notification_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -156,6 +157,7 @@ void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemote
         std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
             ANS_LOGW("subscriber removed.");
+            AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotifications(record->bundleName);
             buttonRecordList_.remove(record);
         }
     }));
