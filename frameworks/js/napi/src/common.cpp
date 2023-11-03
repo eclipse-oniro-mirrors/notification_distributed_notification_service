@@ -816,6 +816,7 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     }
     napi_create_int32(env, (int32_t)outType, &value);
     napi_set_named_property(env, result, "type", value);
+    napi_set_named_property(env, result, "notificationType", value);
 
     // level?: number
     SlotLevel outLevel = SlotLevel::LEVEL_NONE;
@@ -954,6 +955,7 @@ napi_value Common::SetNotificationContent(
     }
     napi_create_int32(env, (int32_t)outType, &value);
     napi_set_named_property(env, result, "contentType", value);
+    napi_set_named_property(env, result, "notificationContentType", value);
 
     if (!SetNotificationContentDetailed(env, outType, content, result)) {
         return NapiGetBoolean(env, false);
