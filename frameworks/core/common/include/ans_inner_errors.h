@@ -80,6 +80,7 @@ enum ErrorCode : uint32_t {
     ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED,
     ERR_ANS_DLP_HAP,
     ERR_ANS_NOTIFICATION_PUSH_CHECK_FAILED,
+    ERR_ANS_DIALOG_POP_SUCCEEDED,
     ERR_ANS_DIALOG_IS_POPPING,
 };
 
@@ -119,6 +120,7 @@ const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;    // Over max numbe
 const int32_t ERROR_DISTRIBUTED_OPERATION_FAILED = 1600010;    // Distributed operation failed.
 const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Read template config failed.
 const int32_t ERROR_NO_MEMORY                    = 1600012;    // No memory space.
+const int32_t ERROR_DIALOG_IS_POPPING            = 1600013;    // Enable notification dialog is popping.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification
 }  // namespace OHOS

@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_HELPER_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_HELPER_H
 
+#include "ans_dialog_host_client.h"
 #include "notification_bundle_option.h"
 #include "notification_button_option.h"
 #include "notification_do_not_disturb_date.h"
@@ -266,7 +267,9 @@ public:
      *                 only be null or an empty string, indicating the current device.
      * @return Returns set notifications enabled for default bundle result.
      */
-    static ErrCode RequestEnableNotification(std::string &deviceId, sptr<IRemoteObject> &callerToken);
+    static ErrCode RequestEnableNotification(std::string &deviceId,
+        sptr<AnsDialogHostClient> &hostClient,
+        sptr<IRemoteObject> &callerToken);
 
     /**
      * @brief Checks whether this application has permission to modify the Do Not Disturb (DND) notification policy.

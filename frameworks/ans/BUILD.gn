@@ -23,6 +23,7 @@ config("ans_innerkits_public_config") {
 
   include_dirs = [
     "${inner_api_path}",
+    "${interfaces_path}/kits/native",
     "${core_path}/common/include",
     "${core_path}/include",
     "//third_party/json/single_include",
@@ -49,6 +50,9 @@ ohos_shared_library("ans_innerkits") {
   sources = [
     "${core_path}/common/src/ans_log_wrapper.cpp",
     "${core_path}/common/src/ans_watchdog.cpp",
+    "${core_path}/src/ans_dialog_callback_interface.cpp",
+    "${core_path}/src/ans_dialog_callback_proxy.cpp",
+    "${core_path}/src/ans_dialog_callback_stub.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_manager_death_recipient.cpp",
     "${core_path}/src/ans_manager_proxy.cpp",
@@ -58,6 +62,7 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/ans_subscriber_local_live_view_stub.cpp",
     "${core_path}/src/ans_subscriber_proxy.cpp",
     "${core_path}/src/ans_subscriber_stub.cpp",
+    "${frameworks_module_ans_path}/src/ans_dialog_host_client.cpp",
     "${frameworks_module_ans_path}/src/badge_number_callback_data.cpp",
     "${frameworks_module_ans_path}/src/enabled_notification_callback_data.cpp",
     "${frameworks_module_ans_path}/src/message_user.cpp",

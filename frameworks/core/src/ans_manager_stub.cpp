@@ -956,6 +956,12 @@ ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, Mes
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    if (callback == nullptr) {
+        ANS_LOGE("[HandleRequestEnableNotification] fail: read callback failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
         ANS_LOGE("fail: read hasCallerToken failed.");
@@ -967,7 +973,8 @@ ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, Mes
         callerToken = data.ReadRemoteObject();
     }
 
-    ErrCode result = RequestEnableNotification(deviceId, callerToken);
+    ErrCode result = RequestEnableNotification(deviceId,
+        iface_cast<AnsDialogCallback>(callback), callerToken);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2009,7 +2016,9 @@ ErrCode AnsManagerStub::UpdateSlots(
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callerToken)
+ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId,
+    const sptr<AnsDialogCallback> &callback,
+    const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
     return ERR_INVALID_OPERATION;

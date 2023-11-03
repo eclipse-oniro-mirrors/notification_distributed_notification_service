@@ -23,6 +23,7 @@
 #undef private
 #undef protected
 #include "ans_const_define.h"
+#include "ans_dialog_host_client.h"
 #include "ans_manager_interface.h"
 #include "ans_inner_errors.h"
 #include "message_parcel.h"
@@ -894,7 +895,10 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0100, Function |
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "Device";
     sptr<IRemoteObject> callerToken = nullptr;
-    int32_t result = proxy->RequestEnableNotification(deviceId, callerToken);
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -915,7 +919,10 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0200, Function |
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "";
     sptr<IRemoteObject> callerToken = nullptr;
-    int32_t result = proxy->RequestEnableNotification(deviceId, callerToken);
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -938,7 +945,10 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0300, Function |
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "Device";
     sptr<IRemoteObject> callerToken = nullptr;
-    int32_t result = proxy->RequestEnableNotification(deviceId, callerToken);
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ERR_OK, result);
 }
 
@@ -960,7 +970,10 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0400, Function |
     ASSERT_NE(nullptr, proxy);
     std::string deviceId = "Device";
     sptr<IRemoteObject> callerToken = nullptr;
-    int32_t result = proxy->RequestEnableNotification(deviceId, callerToken);
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -7110,7 +7123,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishReminder_0100, Function | MediumTest | 
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequest();
     ErrCode res = proxy->PublishReminder(reminder);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
@@ -7131,7 +7144,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishReminder_0200, Function | MediumTest | 
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    
+
     sptr<ReminderRequest> reminder = nullptr;
     ErrCode res = proxy->PublishReminder(reminder);
     EXPECT_EQ(ERR_ANS_INVALID_PARAM, res);
@@ -7152,7 +7165,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishReminder_0300, Function | MediumTest | 
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequest();
     ErrCode res = proxy->PublishReminder(reminder);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
@@ -7172,7 +7185,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ReadReminders_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    
+
     uint8_t count = 10;
     MessageParcel reply;
     std::vector<sptr<ReminderRequest>> reminders;
