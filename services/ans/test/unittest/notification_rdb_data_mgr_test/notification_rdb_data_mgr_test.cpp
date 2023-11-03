@@ -318,6 +318,11 @@ class RdbStoreTest : public RdbStore {
         {
             return {};
         };
+
+        virtual int CleanDirtyData(const std::string &table, uint64_t cursor)
+        {
+            return E_ERROR;
+        };
 };
 
 /**
