@@ -888,8 +888,6 @@ private:
     void SelfClean();
     ErrCode SetDefaultNotificationEnabled(
         const sptr<NotificationBundleOption> &bundleOption, bool enabled);
-    ErrCode CheckNotificationEnableStatus(bool &notificationEnable);
-    ErrCode PublishPreparedNotificationInner(const sptr<NotificationRequest> &request);
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
 
