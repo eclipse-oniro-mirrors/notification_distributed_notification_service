@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "ans_dialog_callback_interface.h"
 #include "ans_subscriber_interface.h"
 #include "ans_subscriber_local_live_view_interface.h"
 #include "iremote_broker.h"
@@ -331,7 +332,9 @@ public:
      * @param deviceId Indicates the device Id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callerToken) = 0;
+    virtual ErrCode RequestEnableNotification(const std::string &deviceId,
+        const sptr<AnsDialogCallback> &callback,
+        const sptr<IRemoteObject> &callerToken) = 0;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.

@@ -84,12 +84,13 @@ bool NotificationDialogManager::Init()
 
 ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
     const sptr<NotificationBundleOption>& bundle,
+    const sptr<AnsDialogCallback>& callback,
     const sptr<IRemoteObject>& callerToken)
 {
-    if (bundle == nullptr) {
+    if (bundle == nullptr || callback == nullptr) {
         return ERROR_INTERNAL_ERROR;
     }
-    if (!AddDialogInfoIfNotExist(bundle)) {
+    if (!AddDialogInfoIfNotExist(bundle, callback)) {
         ANS_LOGE("AddDialogIfNotExist failed. Dialog already exists.");
         return ERR_ANS_DIALOG_IS_POPPING;
     }
@@ -135,7 +136,8 @@ ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
 }
 
 bool NotificationDialogManager::AddDialogInfoIfNotExist(
-    const sptr<NotificationBundleOption>& bundle)
+    const sptr<NotificationBundleOption>& bundle,
+    const sptr<AnsDialogCallback>& callback)
 {
     std::lock_guard<std::mutex> lock(dialogsMutex_);
     std::string name = bundle->GetBundleName();
@@ -148,6 +150,7 @@ bool NotificationDialogManager::AddDialogInfoIfNotExist(
     }
     auto dialogInfo = std::make_unique<DialogInfo>();
     dialogInfo->bundleOption = bundle;
+    dialogInfo->callback = callback;
     dialogsOpening_.push_back(std::move(dialogInfo));
     return true;
 }
@@ -221,7 +224,8 @@ bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleN
         ANS_LOGE("SetNotificationsEnabledForSpecialBundle Failed, code is %{public}d", result);
         // Do not return here, need to clear the data
     }
-    return HandleOneDialogClosed(bundleOption);
+    EnabledDialogStatus status = enabled ? EnabledDialogStatus::ALLOW_CLICKED : EnabledDialogStatus::DENY_CLICKED;
+    return HandleOneDialogClosed(bundleOption, status);
 }
 
 bool NotificationDialogManager::OnDialogCrashed(const std::string& bundleName)
@@ -239,7 +243,7 @@ bool NotificationDialogManager::OnDialogCrashed(const std::string& bundleName)
         ANS_LOGE("SetNotificationsEnabledForSpecialBundle Failed, code is %{public}d", result);
         // Do not return here, need to clear the data
     }
-    return HandleOneDialogClosed(bundleOption);
+    return HandleOneDialogClosed(bundleOption, EnabledDialogStatus::CRASHED);
 }
 
 bool NotificationDialogManager::OnDialogServiceDestroyed()
@@ -248,13 +252,19 @@ bool NotificationDialogManager::OnDialogServiceDestroyed()
     return HandleAllDialogsClosed();
 }
 
-bool NotificationDialogManager::HandleOneDialogClosed(sptr<NotificationBundleOption> bundleOption)
+bool NotificationDialogManager::HandleOneDialogClosed(
+    sptr<NotificationBundleOption> bundleOption,
+    EnabledDialogStatus status)
 {
     if (bundleOption == nullptr) {
         return false;
     }
     std::unique_ptr<DialogInfo> dialogInfoRemoved = nullptr;
     RemoveDialogInfoByBundleOption(bundleOption, dialogInfoRemoved);
+    if (dialogInfoRemoved != nullptr && dialogInfoRemoved->callback != nullptr) {
+        DialogStatusData statusData(status);
+        dialogInfoRemoved->callback->OnDialogStatusChanged(statusData);
+    }
     return true;
 }
 
@@ -262,6 +272,12 @@ bool NotificationDialogManager::HandleAllDialogsClosed()
 {
     std::list<std::unique_ptr<DialogInfo>> dialogInfosRemoved;
     RemoveAllDialogInfos(dialogInfosRemoved);
+    for (auto& dialogInfoSP : dialogInfosRemoved) {
+        if (dialogInfoSP != nullptr && dialogInfoSP->callback != nullptr) {
+            DialogStatusData statusData(EnabledDialogStatus::CRASHED);
+            dialogInfoSP->callback->OnDialogStatusChanged(statusData);
+        }
+    }
     return true;
 }
 

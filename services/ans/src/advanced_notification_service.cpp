@@ -1720,10 +1720,15 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::RequestEnableNotification(
-    const std::string &deviceId, const sptr<IRemoteObject> &callerToken)
+ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId,
+    const sptr<AnsDialogCallback> &callback,
+    const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (callback == nullptr) {
+        ANS_LOGE("callback == nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
 
     ErrCode result = ERR_OK;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
@@ -1754,7 +1759,10 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(
     if (!CreateDialogManager()) {
         return ERROR_INTERNAL_ERROR;
     }
-    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callerToken);
+    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken);
+    if (result == ERR_OK) {
+        result = ERR_ANS_DIALOG_POP_SUCCEEDED;
+    }
     return result;
 }
 
@@ -2921,7 +2929,11 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
         ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
-            if (!record->notification->IsRemoveAllowed()) {
+            bool isAllowedNotification = true;
+            if (IsAllowedNotifySelf(bundleOption, isAllowedNotification) != ERR_OK) {
+                ANSR_LOGW("The application does not request enable notification");
+            }
+            if (!record->notification->IsRemoveAllowed() && isAllowedNotification) {
                 continue;
             }
 

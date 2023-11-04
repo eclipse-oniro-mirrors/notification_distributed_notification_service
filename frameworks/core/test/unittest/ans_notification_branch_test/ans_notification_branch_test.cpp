@@ -23,6 +23,7 @@
 #include "ans_manager_proxy.h"
 #undef private
 #undef protected
+#include "ans_dialog_callback_interface.h"
 #include "ans_inner_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
@@ -204,7 +205,9 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode RequestEnableNotification(const std::string &deviceId, const sptr<IRemoteObject> &callerToken) override
+    ErrCode RequestEnableNotification(const std::string &deviceId,
+        const sptr<AnsDialogCallback> &callback,
+        const sptr<IRemoteObject> &callerToken) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

@@ -13,9 +13,15 @@
  * limitations under the License.
  */
 
-#include <uv.h>
 #include "enable_notification.h"
+
+#include <uv.h>
+
 #include "ability_manager_client.h"
+
+#include "ans_dialog_host_client.h"
+#include "ans_inner_errors.h"
+#include "js_ans_dialog_callback.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -355,10 +361,31 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
     }
 }
 
+void AsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data)
+{
+    ANS_LOGD("enter");
+    if (data == nullptr) {
+        ANS_LOGE("Invalid async callback data.");
+        return;
+    }
+    auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
+    if (asynccallbackinfo->newInterface) {
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    } else {
+        Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    }
+    if (asynccallbackinfo->info.callback != nullptr) {
+        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    }
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+}
+
 napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
-
+    ANS_LOGD("enter");
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         return Common::NapiGetUndefined(env);
@@ -376,27 +403,59 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "RequestEnableNotification", NAPI_AUTO_LENGTH, &resourceName);
+
+    auto ipcCall = [](napi_env env, void* data) {
+        ANS_LOGD("enter");
+        if (data == nullptr) {
+            ANS_LOGE("data is invalid");
+            return;
+        }
+        auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
+        std::string deviceId {""};
+        sptr<AnsDialogHostClient> client = nullptr;
+        if (!AnsDialogHostClient::CreateIfNullptr(client)) {
+            asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_IS_POPPING;
+            return;
+        }
+        asynccallbackinfo->info.errorCode =
+            NotificationHelper::RequestEnableNotification(deviceId, client,
+                asynccallbackinfo->params.callerToken);
+        ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
+    };
+    auto jsCb = [](napi_env env, napi_status status, void* data) {
+        ANS_LOGD("enter");
+        if (data == nullptr) {
+            AnsDialogHostClient::Destroy();
+            return;
+        }
+        auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
+        ErrCode errCode = asynccallbackinfo->info.errorCode;
+        if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+            ANS_LOGE("error, code is %{public}d.", errCode);
+            AnsDialogHostClient::Destroy();
+            AsyncCompleteCallbackRequestEnableNotification(env, static_cast<void*>(asynccallbackinfo));
+            return;
+        }
+        // Dialog is popped
+        auto jsCallback = std::make_unique<JsAnsDialogCallback>();
+        if (!jsCallback->Init(env, asynccallbackinfo, AsyncCompleteCallbackRequestEnableNotification) ||
+            !AnsDialogHostClient::SetDialogCallbackInterface(std::move(jsCallback))
+        ) {
+            ANS_LOGE("error");
+            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+            AnsDialogHostClient::Destroy();
+            AsyncCompleteCallbackRequestEnableNotification(env, static_cast<void*>(asynccallbackinfo));
+            return;
+        }
+    };
+
     // Asynchronous function call
     napi_create_async_work(env,
         nullptr,
         resourceName,
-        [](napi_env env, void *data) {
-            ANS_LOGD("RequestEnableNotification work excute.");
-            AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-            if (asynccallbackinfo) {
-                std::string deviceId {""};
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::RequestEnableNotification(deviceId, asynccallbackinfo->params.callerToken);
-            }
-        },
-        [](napi_env env, napi_status status, void *data) {
-            ANS_LOGD("RequestEnableNotification work complete.");
-            AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
-            if (asynccallbackinfo) {
-                AsyncCompleteCallbackIsNotificationEnabled(env, status, data);
-            }
-        },
-        (void *)asynccallbackinfo,
+        ipcCall,
+        jsCb,
+        static_cast<void*>(asynccallbackinfo),
         &asynccallbackinfo->asyncWork);
 
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
