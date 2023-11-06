@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
+#include "notification_content.h"
+#include "notification_record.h"
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <thread>
 
 #include "gtest/gtest.h"
+#include <vector>
 
 #define private public
 
@@ -3719,6 +3723,163 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00013,
     EXPECT_NE(advancedNotificationService_, nullptr);
     advancedNotificationService_->SendPublishHiSysEvent(request, errCode);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00013 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00014
+ * @tc.name      : GetTargetRecordList
+ * @tc.desc      : Test GetTargetRecordList function and get empty.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00014, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00014 test start";
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = new NotificationRequest();
+    record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    std::string bundleName = "testBundle";
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
+    advancedNotificationService_->notificationList_.clear();
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    EXPECT_EQ(advancedNotificationService_->GetTargetRecordList(bundleName, slotType, contentType, recordList),
+        ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00014 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00015
+ * @tc.name      : GetTargetRecordList
+ * @tc.desc      : Test GetTargetRecordList function and get success.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00015, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00015 test start";
+    std::string bundleName = "testBundle";
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    auto liveContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    request->SetOwnerBundleName(bundleName);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    EXPECT_EQ(advancedNotificationService_->GetTargetRecordList(bundleName, slotType, contentType, recordList),
+        ERR_OK);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00015 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00016
+ * @tc.name      : RemoveNotificationFromRecordList
+ * @tc.desc      : Test RemoveNotificationFromRecordList function and remove success.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00016, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00016 test start";
+    std::string bundleName = "testBundle";
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    auto liveContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    request->SetOwnerBundleName(bundleName);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    recordList.push_back(record);
+    EXPECT_EQ(advancedNotificationService_->RemoveNotificationFromRecordList(recordList), ERR_OK);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00016 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00017
+ * @tc.name      : RemoveSystemLiveViewNotifications
+ * @tc.desc      : Test RemoveNotificationFromRecordList function and remove success.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00017, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00016 test start";
+    std::string bundleName = "testBundle";
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    auto liveContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    request->SetOwnerBundleName(bundleName);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_OK);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00017 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00018
+ * @tc.name      : RemoveSystemLiveViewNotifications
+ * @tc.desc      : Test RemoveNotificationFromRecordList function and remove success.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00018, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test start";
+    std::string bundleName = "testBundle";
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00019
+ * @tc.name      : RemoveSystemLiveViewNotifications
+ * @tc.desc      : Test RemoveNotificationFromRecordList function and remove success.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test start";
+    std::string bundleName = "testBundle";
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    auto liveContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    request->SetOwnerBundleName(bundleName);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_ANS_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test end";
 }
 }  // namespace Notification
 }  // namespace OHOS
