@@ -20,6 +20,7 @@
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
 #include "common_event_support.h"
+#include "common_event_manager.h"
 #ifdef DEVICE_STANDBY_ENABLE
 #include "standby_service_client.h"
 #include "allow_type.h"
@@ -1798,7 +1799,9 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
         }
 
         EventFwk::Want want;
-        want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_REMINDER_STATUS_CHANGE);
+        // common event not add COMMON_EVENT_REMINDER_STATUS_CHANGE, Temporary use of string
+        // want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_REMINDER_STATUS_CHANGE);
+        want.SetAction("usual.event.REMINDER_STATUS_CHANGE");
         EventFwk::CommonEventData eventData(want);
 
         std::string data;

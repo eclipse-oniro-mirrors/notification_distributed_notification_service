@@ -149,6 +149,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->customButtonUri_ = other.customButtonUri_;
     this->repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
     this->groupId_ = other.groupId_;
+    this->isNotifyStatusChanged_ = other.isNotifyStatusChanged_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -1934,7 +1935,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(EXPIRED_CONTENT, reminder->GetExpiredContent());
     values.PutInt(REPEAT_DAYS_OF_WEEK, reminder->GetRepeatDaysOfWeek());
     values.PutString(GROUP_ID, reminder->GetGroupId());
-    values.PutString(IS_NOTIFY_STATUS_CHANGED, reminder->IsNotifyStatusChanged() ? "true", "false");
+    values.PutString(IS_NOTIFY_STATUS_CHANGED, reminder->IsNotifyStatusChanged() ? "true" : "false");
     auto wantAgentInfo = reminder->GetWantAgentInfo();
     if (wantAgentInfo == nullptr) {
         std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null" + ReminderRequest::SEP_WANT_AGENT + "null";
