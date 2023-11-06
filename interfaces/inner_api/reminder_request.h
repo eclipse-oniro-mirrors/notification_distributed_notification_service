@@ -371,14 +371,16 @@ public:
     void InitBundleName(const std::string &bundleName);
 
     /**
-     *
+     * @brief Set the notify status Flag.
      */
     void SetNotifyStatusChanged(const bool isNotifyStatusChanged);
 
     /**
+     * @brief Check the reminder need to notify the application
      *
+     * @return true is the reminder need notify status.
      */
-    bool IsNotifyStatusChanged();
+    bool IsNotifyStatusChanged() const;
 
     /**
      * @brief Check the reminder is alerting or not.

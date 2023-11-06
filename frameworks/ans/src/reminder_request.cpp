@@ -266,7 +266,7 @@ void ReminderRequest::SetNotifyStatusChanged(const bool isNotifyStatusChanged)
     isNotifyStatusChanged_ = isNotifyStatusChanged;
 }
 
-bool ReminderRequest::IsNotifyStatusChanged()
+bool ReminderRequest::IsNotifyStatusChanged() const
 {
     return isNotifyStatusChanged_;
 }

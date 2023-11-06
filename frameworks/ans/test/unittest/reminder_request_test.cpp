@@ -1845,7 +1845,7 @@ HWTEST_F(ReminderRequestTest, SetGroupId_00001, Function | SmallTest | Level1)
  * @tc.name: SetNotifyStatusChanged_00001
  * @tc.desc: Test SetNotifyStatusChanged
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: issueI8E64Q
  */
 HWTEST_F(ReminderRequestTest, SetNotifyStatusChanged_00001, Function | SmallTest | Level1)
 {
@@ -1860,7 +1860,7 @@ HWTEST_F(ReminderRequestTest, SetNotifyStatusChanged_00001, Function | SmallTest
  * @tc.name: IsNotifyStatusChanged_00001
  * @tc.desc: Test IsNotifyStatusChanged
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: issueI8E64Q
  */
 HWTEST_F(ReminderRequestTest, IsNotifyStatusChanged_00001, Function | SmallTest | Level1)
 {

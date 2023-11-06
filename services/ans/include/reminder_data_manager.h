@@ -524,12 +524,17 @@ private:
     static bool cmp(sptr<ReminderRequest> &reminderRequest, sptr<ReminderRequest> &other);
 
     /**
-     *
+     * @brief Connect App Manager to get the current foreground application.
      */
     bool ConnectAppMgr();
 
     /**
+     * @brief Check need to notify the application, if the current foreground application
+     *     is the creator of the reminder, notify the application of the reminder status
+     *     change; otherwise, do not noitfy.
      *
+     * @param reminder Indicates a reminder.
+     * @param buttonType The type of button clicked by the user.
      */
     void CheckNeedNotifyStatus(const sptr<ReminderRequest> &reminder,
         const ReminderRequest::ActionButtonType buttonType);
