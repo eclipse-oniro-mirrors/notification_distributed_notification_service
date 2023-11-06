@@ -1800,7 +1800,6 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
 
         EventFwk::Want want;
         // common event not add COMMON_EVENT_REMINDER_STATUS_CHANGE, Temporary use of string
-        // want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_REMINDER_STATUS_CHANGE);
         want.SetAction("usual.event.REMINDER_STATUS_CHANGE");
         EventFwk::CommonEventData eventData(want);
 

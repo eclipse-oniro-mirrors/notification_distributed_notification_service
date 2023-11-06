@@ -537,7 +537,7 @@ napi_value ReminderCommon::GenReminder(
 
     // isNotifyStatusChanged
     bool isNotifyStatusChanged = false;
-    if (GetBool(env, value, ReminderAgentNapi::IS_NOTIFY_STATUS, isNotifyStatusChanged)) {
+    if (GetBool(env, value, ReminderAgentNapi::NEED_BROADCAST, isNotifyStatusChanged)) {
         reminder->SetNotifyStatusChanged(isNotifyStatusChanged);
     }
 
