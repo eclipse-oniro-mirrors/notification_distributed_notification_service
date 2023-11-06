@@ -1840,5 +1840,36 @@ HWTEST_F(ReminderRequestTest, SetGroupId_00001, Function | SmallTest | Level1)
     rrc->SetGroupId(groupId);
     EXPECT_EQ(rrc->GetGroupId(), groupId);
 }
+
+/**
+ * @tc.name: SetNotifyStatusChanged_00001
+ * @tc.desc: Test SetNotifyStatusChanged
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ReminderRequestTest, SetNotifyStatusChanged_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetNotifyStatusChanged(false);
+    EXPECT_EQ(rrc->isNotifyStatusChanged_, false);
+    rrc->SetNotifyStatusChanged(true);
+    EXPECT_EQ(rrc->isNotifyStatusChanged_, true);
+}
+
+/**
+ * @tc.name: IsNotifyStatusChanged_00001
+ * @tc.desc: Test IsNotifyStatusChanged
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ReminderRequestTest, IsNotifyStatusChanged_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->IsNotifyStatusChanged(), false);
+    rrc->SetNotifyStatusChanged(true);
+    EXPECT_EQ(rrc->IsNotifyStatusChanged(), true);
+    rrc->SetNotifyStatusChanged(false);
+    EXPECT_EQ(rrc->IsNotifyStatusChanged(), false);
+}
 }
 }

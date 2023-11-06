@@ -31,6 +31,7 @@
 #include "reminder_config_change_observer.h"
 #include "datashare_predicates.h"
 #include "datashare_values_bucket.h"
+#include "app_mgr_interface.h"
 
 namespace OHOS {
 namespace Notification {
@@ -522,6 +523,17 @@ private:
 
     static bool cmp(sptr<ReminderRequest> &reminderRequest, sptr<ReminderRequest> &other);
 
+    /**
+     *
+     */
+    bool ConnectAppMgr();
+
+    /**
+     *
+     */
+    void CheckNeedNotifyStatus(const sptr<ReminderRequest> &reminder,
+        const ReminderRequest::ActionButtonType buttonType);
+
    /**
     * Single instance.
     */
@@ -603,6 +615,12 @@ private:
      * Indicates config change observer for language
      */
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
+
+    /**
+     * Indicates
+     */
+    std::mutex appMgrMutex_;
+    sptr<AppExecFwk::IAppMgr> appMgrProxy_ = nullptr;
 };
 }  // namespace OHOS
 }  // namespace Notification

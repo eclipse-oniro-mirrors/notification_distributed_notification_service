@@ -36,6 +36,9 @@
 #include "datashare_value_object.h"
 #include "datashare_helper.h"
 #include "datashare_template.h"
+#include "system_ability_definition.h"
+#include "app_mgr_constants.h"
+#include "iservice_registry.h"
 
 namespace OHOS {
 namespace Notification {
@@ -501,19 +504,18 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         ANSR_LOGW("notificationRequest is not find, this reminder can`t close by groupId");
         CloseReminder(reminder, cancelNotification);
         StartRecentReminder();
+        CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
         return;
     }
     std::string bundleName = notificationRequest->GetCreatorBundleName();
     std::string groupId = reminder->GetGroupId();
-    if (groupId.empty()) {
-        ANSR_LOGD("default close reminder, the group id is not set.");
-        CloseReminder(reminder, cancelNotification);
-        StartRecentReminder();
-        return;
+    if (!groupId.empty()) {
+        ANSR_LOGD("close reminder, the group id is set.");
+        CloseRemindersByGroupId(reminderId, bundleName, groupId);
     }
-    CloseRemindersByGroupId(reminderId, bundleName, groupId);
     CloseReminder(reminder, cancelNotification);
     StartRecentReminder();
+    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
 }
 
 void ReminderDataManager::CloseRemindersByGroupId(const int32_t &oldReminderId, const std::string &packageName,
@@ -1031,6 +1033,7 @@ void ReminderDataManager::SnoozeReminder(const OHOS::EventFwk::Want &want)
         return;
     }
     SnoozeReminderImpl(reminder);
+    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::SNOOZE);
 }
 
 void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
@@ -1739,6 +1742,76 @@ void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         UpdateReminderLanguage(*it);
+    }
+}
+
+bool ReminderDataManager::ConnectAppMgr()
+{
+    if (appMgrProxy_ != nullptr) {
+        return true;
+    }
+
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        ANSR_LOGE("get SystemAbilityManager failed");
+        return false;
+    }
+
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
+    if (remoteObject == nullptr) {
+        ANSR_LOGE("get app manager service failed");
+        return false;
+    }
+
+    appMgrProxy_ = iface_cast<AppExecFwk::IAppMgr>(remoteObject);
+    if (!appMgrProxy_ || !appMgrProxy_->AsObject()) {
+        ANSR_LOGE("get app mgr proxy failed!");
+        return false;
+    }
+    return true;
+}
+
+void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &reminder,
+    const ReminderRequest::ActionButtonType buttonType)
+{
+    const std::string bundleName = reminder->GetBundleName();
+    if (!reminder->IsNotifyStatusChanged() || bundleName.empty()) {
+        return;
+    }
+    // get foreground application
+    std::vector<AppExecFwk::AppStateData> apps;
+    {
+        std::lock_guard<std::mutex> lock(appMgrMutex_);
+        if (!ConnectAppMgr()) {
+            return;
+        }
+        if (appMgrProxy_->GetForegroundApplications(apps) != ERR_OK) {
+            ANS_LOGW("get foreground application failed");
+            return;
+        }
+    }
+    // notify application
+    for (auto &eachApp : apps) {
+        if (eachApp.bundleName != bundleName) {
+            continue;
+        }
+
+        EventFwk::Want want;
+        want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_REMINDER_STATUS_CHANGE);
+        EventFwk::CommonEventData eventData(want);
+
+        std::string data;
+        data.append(std::to_string(static_cast<int>(buttonType))).append(",");
+        data.append(std::to_string(reminder->GetReminderId()));
+        eventData.SetData(data);
+
+        EventFwk::CommonEventPublishInfo info;
+        info.SetBundleName(bundleName);
+        if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
+            ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
+        }
+        break;
     }
 }
 }
