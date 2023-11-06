@@ -641,6 +641,8 @@ void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_val
         napi_set_named_property(env, actionButton, ACTION_BUTTON_TYPE, buttonInfo);
         napi_create_string_utf8(env, (it->second.title).c_str(), NAPI_AUTO_LENGTH, &buttonInfo);
         napi_set_named_property(env, actionButton, ACTION_BUTTON_TITLE, buttonInfo);
+        napi_create_string_utf8(env, (it->second.resource).c_str(), NAPI_AUTO_LENGTH, &buttonInfo);
+        napi_set_named_property(env, actionButton, ACTION_BUTTON_RESOURCE, buttonInfo);
 
         // create obj
         napi_value wantAgentInfo = nullptr;
@@ -759,6 +761,10 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     NotificationNapi::Common::SlotTypeCToJS(reminder.GetSlotType(), jsSlotType);
     napi_create_int32(env, static_cast<int32_t>(jsSlotType), &value);
     napi_set_named_property(env, result, SLOT_TYPE, value);
+
+    // needBroadcast
+    napi_get_boolean(env, reminder.IsNotifyStatusChanged(), &value);
+    napi_set_named_property(env, result, NEED_BROADCAST, value);
 
     // wantAgent
     ParseWantAgent(env, reminder, result);
