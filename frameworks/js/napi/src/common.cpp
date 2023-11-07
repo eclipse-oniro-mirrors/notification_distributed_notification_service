@@ -18,6 +18,7 @@
 #include "napi_common.h"
 #include "notification_action_button.h"
 #include "notification_capsule.h"
+#include "notification_constant.h"
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "pixel_map_napi.h"
@@ -5100,6 +5101,9 @@ bool Common::SlotTypeJSToC(const SlotType &inType, NotificationConstant::SlotTyp
         case SlotType::LIVE_VIEW:
             outType = NotificationConstant::SlotType::LIVE_VIEW;
             break;
+        case SlotType::CUSTOMER_SERVICE:
+            outType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
+            break;
         case SlotType::UNKNOWN_TYPE:
         case SlotType::OTHER_TYPES:
             outType = NotificationConstant::SlotType::OTHER;
@@ -5128,6 +5132,9 @@ bool Common::SlotTypeCToJS(const NotificationConstant::SlotType &inType, SlotTyp
             break;
         case NotificationConstant::SlotType::LIVE_VIEW:
             outType = SlotType::LIVE_VIEW;
+            break;
+        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
+            outType = SlotType::CUSTOMER_SERVICE;
             break;
         case NotificationConstant::SlotType::OTHER:
             outType = SlotType::OTHER_TYPES;
