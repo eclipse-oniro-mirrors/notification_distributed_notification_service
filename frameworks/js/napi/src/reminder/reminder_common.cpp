@@ -535,12 +535,6 @@ napi_value ReminderCommon::GenReminder(
         reminder->SetGroupId(std::string(str));
     }
 
-    // isNotifyStatusChanged
-    bool isNotifyStatusChanged = false;
-    if (GetBool(env, value, ReminderAgentNapi::NEED_BROADCAST, isNotifyStatusChanged)) {
-        reminder->SetNotifyStatusChanged(isNotifyStatusChanged);
-    }
-
     return NotificationNapi::Common::NapiGetNull(env);
 }
 

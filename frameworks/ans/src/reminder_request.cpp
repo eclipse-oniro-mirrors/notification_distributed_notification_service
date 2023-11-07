@@ -110,7 +110,6 @@ const std::string ReminderRequest::TAP_DISMISSED = "tapDismissed";
 const std::string ReminderRequest::AUTO_DELETED_TIME = "autoDeletedTime";
 const std::string ReminderRequest::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
 const std::string ReminderRequest::GROUP_ID = "groupId";
-const std::string ReminderRequest::IS_NOTIFY_STATUS_CHANGED = "is_notify_status_changed";
 
 std::string ReminderRequest::sqlOfAddColumns = "";
 std::vector<std::string> ReminderRequest::columns;
@@ -149,7 +148,6 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->customButtonUri_ = other.customButtonUri_;
     this->repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
     this->groupId_ = other.groupId_;
-    this->isNotifyStatusChanged_ = other.isNotifyStatusChanged_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -259,16 +257,6 @@ void ReminderRequest::InitUid(const int32_t &uid)
 void ReminderRequest::InitBundleName(const std::string &bundleName)
 {
     bundleName_ = bundleName;
-}
-
-void ReminderRequest::SetNotifyStatusChanged(const bool isNotifyStatusChanged)
-{
-    isNotifyStatusChanged_ = isNotifyStatusChanged;
-}
-
-bool ReminderRequest::IsNotifyStatusChanged() const
-{
-    return isNotifyStatusChanged_;
 }
 
 bool ReminderRequest::IsExpired() const
@@ -618,11 +606,6 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
 
     // customButtonUri
     resultSet->GetString(ReminderStore::GetColumnIndex(CUSTOM_BUTTON_URI), customButtonUri_);
-
-    // isNotifyStatusChanged
-    std::string isNotifyStatusChanged;
-    resultSet->GetString(ReminderStore::GetColumnIndex(IS_NOTIFY_STATUS_CHANGED), isNotifyStatusChanged);
-    isNotifyStatusChanged_ = isNotifyStatusChanged == "true";
 }
 
 void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
@@ -1113,10 +1096,6 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         ANSR_LOGE("Failed to write tapDismissed");
         return false;
     }
-    if (!parcel.WriteBool(isNotifyStatusChanged_)) {
-        ANSR_LOGE("Failed to write isNotifyStatusChanged");
-        return false;
-    }
 
     // write int
     if (!parcel.WriteInt64(autoDeletedTime_)) {
@@ -1297,10 +1276,6 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     }
     if (!parcel.ReadBool(tapDismissed_)) {
         ANSR_LOGE("Failed to read tapDismissed");
-        return false;
-    }
-    if (!parcel.ReadBool(isNotifyStatusChanged_)) {
-        ANSR_LOGE("Failed to read isNotifyStatusChanged");
         return false;
     }
 
@@ -1935,7 +1910,6 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(EXPIRED_CONTENT, reminder->GetExpiredContent());
     values.PutInt(REPEAT_DAYS_OF_WEEK, reminder->GetRepeatDaysOfWeek());
     values.PutString(GROUP_ID, reminder->GetGroupId());
-    values.PutString(IS_NOTIFY_STATUS_CHANGED, reminder->IsNotifyStatusChanged() ? "true" : "false");
     auto wantAgentInfo = reminder->GetWantAgentInfo();
     if (wantAgentInfo == nullptr) {
         std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null" + ReminderRequest::SEP_WANT_AGENT + "null";
@@ -1992,7 +1966,6 @@ void ReminderRequest::InitDbColumns()
     AddColumn(AUTO_DELETED_TIME, "BIGINT", false);
     AddColumn(REPEAT_DAYS_OF_WEEK, "INT", false);
     AddColumn(GROUP_ID, "TEXT", false);
-    AddColumn(IS_NOTIFY_STATUS_CHANGED, "TEXT", false);
 }
 
 void ReminderRequest::AddColumn(

@@ -371,18 +371,6 @@ public:
     void InitBundleName(const std::string &bundleName);
 
     /**
-     * @brief Set the notify status Flag.
-     */
-    void SetNotifyStatusChanged(const bool isNotifyStatusChanged);
-
-    /**
-     * @brief Check the reminder need to notify the application
-     *
-     * @return true is the reminder need notify status.
-     */
-    bool IsNotifyStatusChanged() const;
-
-    /**
      * @brief Check the reminder is alerting or not.
      *
      * @return true if the reminder is playing sound or vibrating.
@@ -800,7 +788,6 @@ public:
     static const std::string AUTO_DELETED_TIME;
     static const std::string REPEAT_DAYS_OF_WEEK;
     static const std::string GROUP_ID;
-    static const std::string IS_NOTIFY_STATUS_CHANGED;
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
 
@@ -932,9 +919,6 @@ private:
     std::shared_ptr<WantAgentInfo> wantAgentInfo_ = nullptr;
     std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ = nullptr;
     std::map<ActionButtonType, ActionButtonInfo> actionButtonMap_ {};
-
-    // When the reminder action button is clicked, whether to notify the foreground app
-    bool isNotifyStatusChanged_ = false;
 };
 }  // namespace Reminder
 }  // namespace OHOS
