@@ -622,7 +622,7 @@ private:
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
 
     /**
-     * Indicates
+     * Indicates app mananger for get foreground application
      */
     std::mutex appMgrMutex_;
     sptr<AppExecFwk::IAppMgr> appMgrProxy_ = nullptr;
