@@ -760,6 +760,10 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     napi_create_int32(env, static_cast<int32_t>(jsSlotType), &value);
     napi_set_named_property(env, result, SLOT_TYPE, value);
 
+    // group id
+    napi_create_string_utf8(env, reminder.GetGroupId().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, GROUP_ID, value);
+    
     // wantAgent
     ParseWantAgent(env, reminder, result);
 
@@ -768,11 +772,8 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
 
     // actionButtons
     ParseActionButtons(env, reminder, result);
-    return NotificationNapi::Common::NapiGetBoolean(env, true);
 
-    // group id
-    napi_create_string_utf8(env, reminder.GetGroupId().c_str(), NAPI_AUTO_LENGTH, &value);
-    napi_set_named_property(env, result, GROUP_ID, value);
+    return NotificationNapi::Common::NapiGetBoolean(env, true);
 }
 
 void GetValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest>>& validReminders, napi_value& arr)

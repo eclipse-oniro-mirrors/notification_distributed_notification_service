@@ -606,6 +606,9 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
 
     // customButtonUri
     resultSet->GetString(ReminderStore::GetColumnIndex(CUSTOM_BUTTON_URI), customButtonUri_);
+
+    // groupId
+    resultSet->GetString(ReminderStore::GetColumnIndex(GROUP_ID), groupId_);
 }
 
 void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
