@@ -1777,10 +1777,10 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
     const ReminderRequest::ActionButtonType buttonType)
 {
     const std::string bundleName = reminder->GetBundleName();
-    ANS_LOGI("notify bundleName is: %{public}s", bundleName.c_str());
     if (bundleName.empty()) {
         return;
     }
+    ANS_LOGI("notify bundleName is: %{public}s", bundleName.c_str());
     // get foreground application
     std::vector<AppExecFwk::AppStateData> apps;
     {
