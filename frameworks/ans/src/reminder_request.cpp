@@ -1042,167 +1042,69 @@ void ReminderRequest::UpdateNotificationRequest(UpdateNotificationType type, std
 bool ReminderRequest::Marshalling(Parcel &parcel) const
 {
     // write string
-    if (!parcel.WriteString(content_)) {
-        ANSR_LOGE("Failed to write content");
-        return false;
-    }
-    if (!parcel.WriteString(expiredContent_)) {
-        ANSR_LOGE("Failed to write expiredContent");
-        return false;
-    }
-    if (!parcel.WriteString(snoozeContent_)) {
-        ANSR_LOGE("Failed to write snoozeContent");
-        return false;
-    }
-    if (!parcel.WriteString(title_)) {
-        ANSR_LOGE("Failed to write title");
-        return false;
-    }
-    if (!parcel.WriteString(wantAgentInfo_->abilityName)) {
-        ANSR_LOGE("Failed to write wantAgentInfo`s abilityName");
-        return false;
-    }
-    if (!parcel.WriteString(wantAgentInfo_->pkgName)) {
-        ANSR_LOGE("Failed to write wantAgentInfo`s pkgName");
-        return false;
-    }
-    if (!parcel.WriteString(wantAgentInfo_->uri)) {
-        ANSR_LOGE("Failed to write wantAgentInfo`s uri");
-        return false;
-    }
-    if (!parcel.WriteString(maxScreenWantAgentInfo_->abilityName)) {
-        ANSR_LOGE("Failed to write maxScreenWantAgentInfo`s abilityName");
-        return false;
-    }
-    if (!parcel.WriteString(maxScreenWantAgentInfo_->pkgName)) {
-        ANSR_LOGE("Failed to write maxScreenWantAgentInfo`s pkgName");
-        return false;
-    }
-    if (!parcel.WriteString(customButtonUri_)) {
-        ANSR_LOGE("Failed to write customButtonUri");
-        return false;
-    }
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, content_, "content");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, expiredContent_, "expiredContent");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, snoozeContent_, "snoozeContent");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, title_, "title");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
 
     // write bool
-    if (!parcel.WriteBool(isExpired_)) {
-        ANSR_LOGE("Failed to write isExpired");
-        return false;
-    }
-    if (!parcel.WriteBool(isSystemApp_)) {
-        ANSR_LOGE("Failed to write isSystemApp");
-        return false;
-    }
-    if (!parcel.WriteBool(tapDismissed_)) {
-        ANSR_LOGE("Failed to write tapDismissed");
-        return false;
-    }
+    WRITE_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
+    WRITE_BOOL_RETURN_FALSE_LOG(parcel, isSystemApp_, "isSystemApp");
+    WRITE_BOOL_RETURN_FALSE_LOG(parcel, tapDismissed_, "tapDismissed");
 
     // write int
-    if (!parcel.WriteInt64(autoDeletedTime_)) {
-        ANSR_LOGE("Failed to write autoDeletedTime");
-        return false;
-    }
-    if (!parcel.WriteInt32(reminderId_)) {
-        ANSR_LOGE("Failed to write reminderId");
-        return false;
-    }
-    if (!parcel.WriteInt32(notificationId_)) {
-        ANSR_LOGE("Failed to write notificationId");
-        return false;
-    }
-    if (!parcel.WriteString(groupId_)) {
-        ANSR_LOGE("Failed to write groupId");
-        return false;
-    }
-    if (!parcel.WriteUint64(triggerTimeInMilli_)) {
-        ANSR_LOGE("Failed to write triggerTimeInMilli");
-        return false;
-    }
-    if (!parcel.WriteUint64(timeIntervalInMilli_)) {
-        ANSR_LOGE("Failed to write timeIntervalInMilli");
-        return false;
-    }
-    if (!parcel.WriteUint64(ringDurationInMilli_)) {
-        ANSR_LOGE("Failed to write ringDurationInMilli");
-        return false;
-    }
-    if (!parcel.WriteUint64(reminderTimeInMilli_)) {
-        ANSR_LOGE("Failed to write reminderTimeInMilli");
-        return false;
-    }
-    if (!parcel.WriteUint8(snoozeTimes_)) {
-        ANSR_LOGE("Failed to write snoozeTimes");
-        return false;
-    }
-    if (!parcel.WriteUint8(snoozeTimesDynamic_)) {
-        ANSR_LOGE("Failed to write snoozeTimesDynamic");
-        return false;
-    }
-    if (!parcel.WriteUint8(state_)) {
-        ANSR_LOGE("Failed to write state");
-        return false;
-    }
-    if (!parcel.WriteUint8(repeatDaysOfWeek_)) {
-        ANSR_LOGE("Failed to write repeatDaysOfWeek");
-        return false;
-    }
+    WRITE_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, reminderId_, "reminderId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
+
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, reminderTimeInMilli_, "reminderTimeInMilli");
+    WRITE_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimes_, "snoozeTimes");
+    WRITE_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimesDynamic_, "snoozeTimesDynamic");
+    WRITE_UINT8_RETURN_FALSE_LOG(parcel, state_, "state");
+    WRITE_UINT8_RETURN_FALSE_LOG(parcel, repeatDaysOfWeek_, "repeatDaysOfWeek");
 
     // write enum
-    if (!parcel.WriteUint8(static_cast<uint8_t>(reminderType_))) {
-        ANSR_LOGE("Failed to write reminder type");
-        return false;
-    }
-    if (!parcel.WriteInt32(static_cast<int32_t>(slotType_))) {
-        ANSR_LOGE("Failed to write slot type");
-        return false;
-    }
+    uint8_t reminderType = static_cast<uint8_t>(reminderType_);
+    WRITE_UINT8_RETURN_FALSE_LOG(parcel, reminderType, "reminderType");
+
+    int32_t slotType = static_cast<int32_t>(slotType_);
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
 
     // write map
-    if (!parcel.WriteUint64(static_cast<uint64_t>(actionButtonMap_.size()))) {
-        ANSR_LOGE("Failed to write action button size");
-        return false;
-    }
+    uint64_t actionButtonMapSize = static_cast<uint64_t>(actionButtonMap_.size());
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, actionButtonMapSize, "actionButtonMapSize");
     for (auto button : actionButtonMap_) {
-        if (!parcel.WriteUint8(static_cast<uint8_t>(button.first))) {
-            ANSR_LOGE("Failed to write action button type");
-            return false;
-        }
-        if (!parcel.WriteString(static_cast<std::string>(button.second.title))) {
-            ANSR_LOGE("Failed to write action button title");
-            return false;
-        }
-        if (!parcel.WriteString(static_cast<std::string>(button.second.resource))) {
-            ANSR_LOGE("Failed to write action button resource");
-            return false;
-        }
+        uint8_t buttonType = static_cast<uint8_t>(button.first);
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, buttonType, "buttonType");
+        WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.title, "buttonTitle");
+        WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.resource, "buttonResource");
+
         if (button.second.wantAgent == nullptr) {
             ANSR_LOGE("button wantAgent is null");
             return false;
         }
-        if (!parcel.WriteString(button.second.wantAgent->pkgName)) {
-            ANSR_LOGE("Failed to write action button pkgName");
-            return false;
-        }
-        if (!parcel.WriteString(button.second.wantAgent->abilityName)) {
-            ANSR_LOGE("Failed to write action button abilityName");
-            return false;
-        }
+
+        WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.wantAgent->pkgName, "wantAgent's pkgName");
+        WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.wantAgent->abilityName, "wantAgent's abilityName");
+
         if (button.second.dataShareUpdate == nullptr) {
             ANSR_LOGE("button dataShareUpdate is null");
             return false;
         }
-        if (!parcel.WriteString(button.second.dataShareUpdate->uri)) {
-            ANSR_LOGE("Failed to write action button dataShareUpdate uri");
-            return false;
-        }
-        if (!parcel.WriteString(button.second.dataShareUpdate->equalTo)) {
-            ANSR_LOGE("Failed to write action button dataShareUpdate equalTo");
-            return false;
-        }
-        if (!parcel.WriteString(button.second.dataShareUpdate->valuesBucket)) {
-            ANSR_LOGE("Failed to write action button dataShareUpdate valuesBucket");
-            return false;
-        }
+        WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.dataShareUpdate->uri, "dataShareUpdate's uri");
+        WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.dataShareUpdate->equalTo, "dataShareUpdate's equalTo");
+        WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.dataShareUpdate->valuesBucket, "dataShareUpdate's valuesBucket");
+
     }
     return true;
 }
@@ -1223,144 +1125,54 @@ ReminderRequest *ReminderRequest::Unmarshalling(Parcel &parcel)
 
 bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 {
-    // read string
-    if (!parcel.ReadString(content_)) {
-        ANSR_LOGE("Failed to read content");
-        return false;
-    }
-    if (!parcel.ReadString(expiredContent_)) {
-        ANSR_LOGE("to read expiredContent");
-        return false;
-    }
-    if (!parcel.ReadString(snoozeContent_)) {
-        ANSR_LOGE("to read snoozeContent");
-        return false;
-    }
-    if (!parcel.ReadString(title_)) {
-        ANSR_LOGE("Failed to read title");
-        return false;
-    }
-    if (!parcel.ReadString(wantAgentInfo_->abilityName)) {
-        ANSR_LOGE("Failed to read wantAgentInfo`s abilityName");
-        return false;
-    }
-    if (!parcel.ReadString(wantAgentInfo_->pkgName)) {
-        ANSR_LOGE("Failed to read wantAgentInfo`s pkgName");
-        return false;
-    }
-    if (!parcel.ReadString(wantAgentInfo_->uri)) {
-        ANSR_LOGE("Failed to read wantAgentInfo`s uri");
-        return false;
-    }
-    if (!parcel.ReadString(maxScreenWantAgentInfo_->abilityName)) {
-        ANSR_LOGE("Failed to read maxScreenWantAgentInfo`s abilityName");
-        return false;
-    }
-    if (!parcel.ReadString(maxScreenWantAgentInfo_->pkgName)) {
-        ANSR_LOGE("Failed to read maxScreenWantAgentInfo`s pkgName");
-        return false;
-    }
-    if (!parcel.ReadString(customButtonUri_)) {
-        ANSR_LOGE("Failed to read customButtonUri");
-        return false;
-    }
+    READ_STRING_RETURN_FALSE_LOG(parcel, content_, "content");
+    READ_STRING_RETURN_FALSE_LOG(parcel, expiredContent_, "expiredContent");
+    READ_STRING_RETURN_FALSE_LOG(parcel, snoozeContent_, "snoozeContent");
+    READ_STRING_RETURN_FALSE_LOG(parcel, title_, "title");
+    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
+    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
+    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
+    READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
+    READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
+    READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
 
-    // read bool
-    if (!parcel.ReadBool(isExpired_)) {
-        ANSR_LOGE("Failed to read isExpired");
-        return false;
-    }
-    if (!parcel.ReadBool(isSystemApp_)) {
-        ANSR_LOGE("Failed to read isSystemApp");
-        return false;
-    }
-    if (!parcel.ReadBool(tapDismissed_)) {
-        ANSR_LOGE("Failed to read tapDismissed");
-        return false;
-    }
+    READ_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
+    READ_BOOL_RETURN_FALSE_LOG(parcel, isSystemApp_, "isSystemApp");
+    READ_BOOL_RETURN_FALSE_LOG(parcel, tapDismissed_, "tapDismissed");
 
-    // read int
-    if (!parcel.ReadInt64(autoDeletedTime_)) {
-        ANSR_LOGE("Failed to read autoDeletedTime");
-        return false;
-    }
+    READ_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
+
     int32_t tempReminderId = -1;
-    if (!parcel.ReadInt32(tempReminderId)) {
-        ANSR_LOGE("Failed to read tempReminderId");
-        return false;
-    }
+    READ_INT32_RETURN_FALSE_LOG(parcel, tempReminderId, "reminderId");
     reminderId_ = (tempReminderId == -1) ? reminderId_ : tempReminderId;
 
-    if (!parcel.ReadInt32(notificationId_)) {
-        ANSR_LOGE("Failed to read notificationId");
-        return false;
-    }
-    if (!parcel.ReadString(groupId_)) {
-        ANSR_LOGE("Failed to read groupId");
-        return false;
-    }
-    if (!parcel.ReadUint64(triggerTimeInMilli_)) {
-        ANSR_LOGE("Failed to read triggerTimeInMilli");
-        return false;
-    }
-    if (!parcel.ReadUint64(timeIntervalInMilli_)) {
-        ANSR_LOGE("Failed to read timeIntervalInMilli");
-        return false;
-    }
-    if (!parcel.ReadUint64(ringDurationInMilli_)) {
-        ANSR_LOGE("Failed to read ringDurationInMilli");
-        return false;
-    }
-    if (!parcel.ReadUint64(reminderTimeInMilli_)) {
-        ANSR_LOGE("Failed to read reminderTimeInMilli");
-        return false;
-    }
-    if (!parcel.ReadUint8(snoozeTimes_)) {
-        ANSR_LOGE("Failed to read snoozeTimes");
-        return false;
-    }
-    if (!parcel.ReadUint8(snoozeTimesDynamic_)) {
-        ANSR_LOGE("Failed to read snoozeTimesDynamic");
-        return false;
-    }
-    if (!parcel.ReadUint8(state_)) {
-        ANSR_LOGE("Failed to read state");
-        return false;
-    }
-    if (!parcel.ReadUint8(repeatDaysOfWeek_)) {
-        ANSR_LOGE("Failed to read repeatDaysOfWeek");
-        return false;
-    }
+    READ_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
 
-    // read enum
+    READ_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
+    READ_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
+    READ_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
+    READ_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
+    READ_UINT64_RETURN_FALSE_LOG(parcel, reminderTimeInMilli_, "reminderTimeInMilli");
+
+    READ_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimes_, "snoozeTimes");
+    READ_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimesDynamic_, "snoozeTimesDynamic");
+    READ_UINT8_RETURN_FALSE_LOG(parcel, state_, "state");
+    READ_UINT8_RETURN_FALSE_LOG(parcel, repeatDaysOfWeek_, "repeatDaysOfWeek");
+
     uint8_t reminderType = static_cast<uint8_t>(ReminderType::INVALID);
-    if (!parcel.ReadUint8(reminderType)) {
-        ANSR_LOGE("Failed to read reminderType");
-        return false;
-    }
+    READ_UINT8_RETURN_FALSE_LOG(parcel, reminderType, "reminderType");
     reminderType_ = static_cast<ReminderType>(reminderType);
 
     int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
-    if (!parcel.ReadInt32(slotType)) {
-        ANSR_LOGE("Failed to read slotType");
-        return false;
-    }
+    READ_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
     slotType_ = static_cast<NotificationConstant::SlotType>(slotType);
 
-    // read map
     uint64_t buttonMapSize = 0;
-    if (!parcel.ReadUint64(buttonMapSize)) {
-        ANSR_LOGE("Failed to read buttonMapSize");
-        return false;
-    }
-
+    READ_UINT64_RETURN_FALSE_LOG(parcel, buttonMapSize, "actionButtonMapSize");
     buttonMapSize = (buttonMapSize < MAX_ACTION_BUTTON_NUM) ? buttonMapSize : MAX_ACTION_BUTTON_NUM;
     for (uint64_t i = 0; i < buttonMapSize; i++) {
         uint8_t buttonType = static_cast<uint8_t>(ActionButtonType::INVALID);
-        if (!parcel.ReadUint8(buttonType)) {
-            ANSR_LOGE("Failed to read buttonType");
-            return false;
-        }
+        READ_UINT8_RETURN_FALSE_LOG(parcel, buttonType, "buttonType");
         ActionButtonType type = static_cast<ActionButtonType>(buttonType);
         std::string title = parcel.ReadString();
         std::string resource = parcel.ReadString();
