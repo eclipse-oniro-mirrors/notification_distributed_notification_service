@@ -128,10 +128,6 @@ private:
 
     uint8_t hour_ = {0};
     uint8_t minute_ = {0};
-
-    // For database recovery.
-    static const std::string ALARM_HOUR;
-    static const std::string ALARM_MINUTE;
 };
 }  // namespace Notification
 }  // namespace OHOS

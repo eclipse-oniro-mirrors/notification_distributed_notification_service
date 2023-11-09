@@ -22,6 +22,7 @@
 
 #include "ability_context.h"
 #include "ans_log_wrapper.h"
+#include "reminder_table.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
@@ -31,7 +32,6 @@ namespace Notification {
 namespace {
 const uint32_t REMINDER_RDB_VERSION = 2;
 const int32_t STATE_FAIL = -1;
-std::vector<std::string> columns;
 std::string g_sqlColumns;
 }
 
@@ -44,7 +44,7 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnCreate(NativeRdb::RdbStore &
 {
     ANSR_LOGD("Create table.");
     std::string CREATE_REMINDER_TABLE = "CREATE TABLE IF NOT EXISTS " + REMINDER_DB_TABLE + " ("
-        + ReminderRequest::sqlOfAddColumns + ")";
+        + ReminderTable::sqlOfAddColumns + ")";
     ANSR_LOGD("CreateTable:%{public}s", CREATE_REMINDER_TABLE.c_str());
     return store.ExecuteSql(CREATE_REMINDER_TABLE);
 }
@@ -73,12 +73,10 @@ int32_t ReminderStore::Init()
         }
     }
 
-    ReminderRequest::InitDbColumns();
-    ReminderRequestCalendar::InitDbColumns();
-    ReminderRequestAlarm::InitDbColumns();
-    columns.insert(columns.begin(),
-        ReminderRequest::columns.begin(), ReminderRequest::columns.end());
-    for (std::vector<std::string>::const_iterator it = columns.begin(); it != columns.end(); ++it) {
+    ReminderTable::InitDbColumns();
+    for (std::vector<std::string>::const_iterator it = ReminderTable::columns.begin();
+        it != ReminderTable::columns.end();
+        ++it) {
         g_sqlColumns += *it + ",";
     }
     g_sqlColumns = g_sqlColumns.substr(0, g_sqlColumns.size() - 1);
@@ -103,12 +101,12 @@ int32_t ReminderStore::InitData()
         ANSR_LOGE("Rdb store is not initialized.");
         return STATE_FAIL;
     }
-    std::string deleteCondition = ReminderRequest::IS_EXPIRED + " is true";
+    std::string deleteCondition = ReminderTable::IS_EXPIRED + " is true";
     ReminderStore::Delete(deleteCondition);
 
     int32_t statusChangedRows = STATE_FAIL;
     NativeRdb::ValuesBucket statusValues;
-    statusValues.PutInt(ReminderRequest::STATE, ReminderRequest::REMINDER_STATUS_INACTIVE);
+    statusValues.PutInt(ReminderTable::STATE, ReminderRequest::REMINDER_STATUS_INACTIVE);
     int32_t statusResult = rdbStore_->Update(statusChangedRows, REMINDER_DB_TABLE, statusValues);
     ANSR_LOGD("Change status to inactive, changed rows: %{public}d.", statusChangedRows);
     if (statusResult != NativeRdb::E_OK) {
@@ -118,8 +116,8 @@ int32_t ReminderStore::InitData()
 
     int32_t activeChangedRows = STATE_FAIL;
     NativeRdb::ValuesBucket activeValues;
-    activeValues.PutString(ReminderRequest::IS_ACTIVE, "false");
-    std::string activeUpdateCondition = ReminderRequest::IS_ACTIVE + " is true";
+    activeValues.PutString(ReminderTable::IS_ACTIVE, "false");
+    std::string activeUpdateCondition = ReminderTable::IS_ACTIVE + " is true";
     std::vector<std::string> activeWhereArgs;
     int32_t activeResult = rdbStore_->Update(
         activeChangedRows, REMINDER_DB_TABLE, activeValues, activeUpdateCondition, activeWhereArgs);
@@ -131,8 +129,8 @@ int32_t ReminderStore::InitData()
 
     int32_t scheduledChangedRows = STATE_FAIL;
     NativeRdb::ValuesBucket scheduledValues;
-    scheduledValues.PutString(ReminderRequest::HAS_SCHEDULED_TIMEOUT, "false");
-    std::string scheduledUpdateCondition = ReminderRequest::HAS_SCHEDULED_TIMEOUT + " is true";
+    scheduledValues.PutString(ReminderTable::HAS_SCHEDULED_TIMEOUT, "false");
+    std::string scheduledUpdateCondition = ReminderTable::HAS_SCHEDULED_TIMEOUT + " is true";
     std::vector<std::string> scheduledWhereArgs;
     int32_t scheduledResult = rdbStore_->Update(
         scheduledChangedRows, REMINDER_DB_TABLE, scheduledValues, scheduledUpdateCondition, scheduledWhereArgs);
@@ -146,21 +144,21 @@ int32_t ReminderStore::InitData()
 
 int32_t ReminderStore::Delete(int32_t reminderId)
 {
-    std::string deleteCondition = ReminderRequest::REMINDER_ID
+    std::string deleteCondition = ReminderTable ::REMINDER_ID
         + " = " + std::to_string(reminderId);
     return ReminderStore::Delete(deleteCondition);
 }
 
 int32_t ReminderStore::DeleteUser(int32_t userId)
 {
-    std::string deleteCondition = ReminderRequest::USER_ID + " = " + std::to_string(userId);
+    std::string deleteCondition = ReminderTable::USER_ID + " = " + std::to_string(userId);
     return ReminderStore::Delete(deleteCondition);
 }
 
 int32_t ReminderStore::Delete(const std::string &pkg, int32_t userId)
 {
-    std::string deleteCondition = ReminderRequest::PKG_NAME + " = \"" + pkg + "\" and "
-        + ReminderRequest::USER_ID + " = " + std::to_string(userId);
+    std::string deleteCondition = ReminderTable::PKG_NAME + " = \"" + pkg + "\" and "
+        + ReminderTable::USER_ID + " = " + std::to_string(userId);
     return ReminderStore::Delete(deleteCondition);
 }
 
@@ -236,7 +234,7 @@ int64_t ReminderStore::Update(
     int32_t changedRows = STATE_FAIL;
     NativeRdb::ValuesBucket values;
     ReminderStore::GenerateData(reminder, bundleOption, values);
-    std::string updateCondition = ReminderRequest::REMINDER_ID
+    std::string updateCondition = ReminderTable::REMINDER_ID
         + " = " + std::to_string(reminder->GetReminderId());
     std::vector<std::string> whereArgs;
     int32_t result = rdbStore_->Update(changedRows, REMINDER_DB_TABLE, values, updateCondition, whereArgs);
@@ -253,7 +251,7 @@ int64_t ReminderStore::Update(
 bool ReminderStore::IsReminderExist(const sptr<ReminderRequest> &reminder)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
-    absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminder->GetReminderId()));
+    absRdbPredicates.EqualTo(ReminderTable::REMINDER_ID, std::to_string(reminder->GetReminderId()));
     auto queryResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
         ANSR_LOGE("QueryResultSet is null.");
@@ -284,9 +282,9 @@ int32_t ReminderStore::GetMaxId()
         ANSR_LOGE("Rdb store is not initialized.");
         return STATE_FAIL;
     }
-    std::string queryCondition = "select " + ReminderRequest::REMINDER_ID
+    std::string queryCondition = "select " + ReminderTable::REMINDER_ID
         + " from " + REMINDER_DB_TABLE + " order by "
-        + ReminderRequest::REMINDER_ID + " desc";
+        + ReminderTable::REMINDER_ID + " desc";
     auto queryResultSet = ReminderStore::Query(queryCondition);
     if (queryResultSet == nullptr) {
         ANSR_LOGE("QueryResultSet is null.");
@@ -310,12 +308,11 @@ int32_t ReminderStore::GetMaxId()
 
 std::vector<sptr<ReminderRequest>> ReminderStore::GetAllValidReminders()
 {
-    std::string queryCondition = "select " + g_sqlColumns + " from " + REMINDER_DB_TABLE + " where "
-        + ReminderRequest::IS_EXPIRED + " is false order by "
-        + ReminderRequest::TRIGGER_TIME + " asc";
-    ANSR_LOGD("Get all reminders");
-    ANSR_LOGD("ReminderStore GetAllValidReminders queryCondition =%{public}s", queryCondition.c_str());
-    return GetReminders(queryCondition);
+    std::string sql = "select " + g_sqlColumns + " from " + REMINDER_DB_TABLE + " where "
+        + ReminderTable::IS_EXPIRED + " = 'false' order by "
+        + ReminderTable::TRIGGER_TIME + " asc";
+    ANSR_LOGD("GetAllValidReminders sql =%{public}s", sql.c_str());
+    return GetReminders(sql);
 }
 
 std::vector<sptr<ReminderRequest>> ReminderStore::GetReminders(const std::string &queryCondition)
@@ -347,8 +344,8 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
 {
     int32_t reminderType;
     int32_t reminderId;
-    GetInt32Val(resultSet, ReminderRequest::REMINDER_TYPE, reminderType);
-    GetInt32Val(resultSet, ReminderRequest::REMINDER_ID, reminderId);
+    GetInt32Val(resultSet, ReminderTable::REMINDER_TYPE, reminderType);
+    GetInt32Val(resultSet, ReminderTable::REMINDER_ID, reminderId);
 
     sptr<ReminderRequest> reminder = nullptr;
     switch (reminderType) {
@@ -385,7 +382,7 @@ bool ReminderStore::GetBundleOption(const int32_t &reminderId, sptr<Notification
         return false;
     }
     NativeRdb::AbsRdbPredicates absRdbPredicates(REMINDER_DB_TABLE);
-    absRdbPredicates.EqualTo(ReminderRequest::REMINDER_ID, std::to_string(reminderId));
+    absRdbPredicates.EqualTo(ReminderTable ::REMINDER_ID, std::to_string(reminderId));
     std::shared_ptr<OHOS::NativeRdb::ResultSet> queryResultSet =
         rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (queryResultSet == nullptr) {
@@ -398,9 +395,9 @@ bool ReminderStore::GetBundleOption(const int32_t &reminderId, sptr<Notification
     }
     queryResultSet->GoToNextRow();
     std::string pkgName;
-    GetStringVal(queryResultSet, ReminderRequest::PKG_NAME, pkgName);
+    GetStringVal(queryResultSet, ReminderTable ::PKG_NAME, pkgName);
     int32_t uid;
-    GetInt32Val(queryResultSet, ReminderRequest::UID, uid);
+    GetInt32Val(queryResultSet, ReminderTable::UID, uid);
     bundleOption->SetBundleName(pkgName);
     bundleOption->SetUid(uid);
     return true;
@@ -449,5 +446,6 @@ void ReminderStore::GenerateData(const sptr<ReminderRequest> &reminder,
     ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
     ReminderRequestAlarm::AppendValuesBucket(reminder, bundleOption, values);
 }
+
 }  // namespace Notification
 }  // namespace OHOS
