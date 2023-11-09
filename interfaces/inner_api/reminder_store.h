@@ -39,10 +39,19 @@ public:
     bool GetBundleOption(const int32_t &reminderId, sptr<NotificationBundleOption> &bundleOption) const;
     int32_t GetMaxId();
     int64_t UpdateOrInsert(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &bundleOption);
-    static uint8_t GetColumnIndex(const std::string& name);
+
+    static void GetInt32Val(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
+        const std::string& name, int32_t& value);
+    static void GetInt64Val(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
+        const std::string& name, int64_t& value);
+    static void GetStringVal(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
+        const std::string& name, std::string& value);
 
     static const int32_t STATE_OK;
 
+    static const std::string REMINDER_DB_DIR;
+    static const std::string REMINDER_DB_NAME;
+    static const std::string REMINDER_DB_TABLE;
 private:
     /**
      * @brief Inits the data in database when system boot on or proxy process reboot on.
@@ -57,10 +66,6 @@ private:
     int32_t InitData();
     sptr<ReminderRequest> BuildReminder(const std::shared_ptr<NativeRdb::ResultSet> &resultSet);
     int32_t Delete(const std::string &deleteCondition);
-    void GetInt32Val(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
-        const std::string &name, int32_t &value) const;
-    void GetStringVal(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
-        const std::string &name, std::string &value) const;
     std::vector<sptr<ReminderRequest>> GetReminders(const std::string &queryCondition);
     void GenerateData(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values) const;

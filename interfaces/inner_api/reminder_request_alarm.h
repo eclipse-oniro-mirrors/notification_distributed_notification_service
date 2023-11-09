@@ -70,8 +70,7 @@ public:
      * @return setted minute.
      */
     uint8_t GetMinute() const;
-    virtual bool OnDateTimeChange() override;
-    virtual bool OnTimeZoneChange() override;
+
     virtual bool UpdateNextReminder() override;
 
     /**

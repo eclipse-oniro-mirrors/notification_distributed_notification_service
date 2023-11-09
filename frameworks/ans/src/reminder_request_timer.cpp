@@ -114,18 +114,13 @@ void ReminderRequestTimer::UpdateTimeInfo(const std::string &description)
 
 bool ReminderRequestTimer::Marshalling(Parcel &parcel) const
 {
-    ReminderRequest::Marshalling(parcel);
-
-    // write int
-    if (!parcel.WriteUint64(firstRealTimeInMilliSeconds_)) {
-        ANSR_LOGE("Failed to write firstRealTimeInMilliSeconds");
-        return false;
+    if (ReminderRequest::Marshalling(parcel)) {
+        // write int
+        WRITE_UINT64_RETURN_FALSE_LOG(parcel, firstRealTimeInMilliSeconds_, "firstRealTimeInMilliSeconds");
+        WRITE_UINT64_RETURN_FALSE_LOG(parcel, countDownTimeInSeconds_, "countDownTimeInSeconds");
+        return true;
     }
-    if (!parcel.WriteUint64(countDownTimeInSeconds_)) {
-        ANSR_LOGE("Failed to write countDownTimeInSeconds");
-        return false;
-    }
-    return true;
+    return false;
 }
 
 ReminderRequestTimer *ReminderRequestTimer::Unmarshalling(Parcel &parcel)
@@ -144,18 +139,13 @@ ReminderRequestTimer *ReminderRequestTimer::Unmarshalling(Parcel &parcel)
 
 bool ReminderRequestTimer::ReadFromParcel(Parcel &parcel)
 {
-    ReminderRequest::ReadFromParcel(parcel);
-
-    // read int
-    if (!parcel.ReadUint64(firstRealTimeInMilliSeconds_)) {
-        ANSR_LOGE("Failed to read firstRealTimeInMilliSeconds");
-        return false;
+    if (ReminderRequest::ReadFromParcel(parcel)) {
+        // read int
+        READ_UINT64_RETURN_FALSE_LOG(parcel, firstRealTimeInMilliSeconds_, "firstRealTimeInMilliSeconds");
+        READ_UINT64_RETURN_FALSE_LOG(parcel, countDownTimeInSeconds_, "countDownTimeInSeconds");
+        return true;
     }
-    if (!parcel.ReadUint64(countDownTimeInSeconds_)) {
-        ANSR_LOGE("Failed to read countDownTimeInSeconds");
-        return false;
-    }
-    return true;
+    return false;
 }
 }
 }

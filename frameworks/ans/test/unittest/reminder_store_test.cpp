@@ -42,6 +42,7 @@ public:
     void TearDown()
     {
         ReminderHelper::CancelAllReminders();
+        NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + ReminderStore::REMINDER_DB_NAME);
     }
     static sptr<NotificationBundleOption> bundleOption_;
 };
@@ -157,7 +158,6 @@ HWTEST_F(ReminderStoreTest, Query_00001, Function | SmallTest | Level1)
     std::string queryCondition = "queryCondition";
     std::string name = "it";
     ReminderStore reminderStore;
-    reminderStore.GetColumnIndex(name);
     std::shared_ptr<NativeRdb::ResultSet> ret = reminderStore.Query(queryCondition);
     EXPECT_EQ(ret, nullptr);
 }
