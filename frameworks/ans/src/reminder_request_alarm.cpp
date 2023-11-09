@@ -125,16 +125,6 @@ uint8_t ReminderRequestAlarm::GetMinute() const
     return minute_;
 }
 
-bool ReminderRequestAlarm::OnDateTimeChange()
-{
-    return ReminderRequest::OnDateTimeChange();
-}
-
-bool ReminderRequestAlarm::OnTimeZoneChange()
-{
-    return ReminderRequest::OnTimeZoneChange();
-}
-
 bool ReminderRequestAlarm::UpdateNextReminder()
 {
     ANSR_LOGD("UpdateNextReminder alarm time");
@@ -172,18 +162,12 @@ bool ReminderRequestAlarm::UpdateNextReminder()
 
 bool ReminderRequestAlarm::Marshalling(Parcel &parcel) const
 {
-    ReminderRequest::Marshalling(parcel);
-
-    // write int
-    if (!parcel.WriteUint8(hour_)) {
-        ANSR_LOGE("Failed to write hour");
-        return false;
+    if (ReminderRequest::Marshalling(parcel)) {
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
+        return true;
     }
-    if (!parcel.WriteUint8(minute_)) {
-        ANSR_LOGE("Failed to write minute");
-        return false;
-    }
-    return true;
+    return false;
 }
 
 ReminderRequestAlarm *ReminderRequestAlarm::Unmarshalling(Parcel &parcel)
@@ -203,20 +187,14 @@ ReminderRequestAlarm *ReminderRequestAlarm::Unmarshalling(Parcel &parcel)
 
 bool ReminderRequestAlarm::ReadFromParcel(Parcel &parcel)
 {
-    ReminderRequest::ReadFromParcel(parcel);
+    if (ReminderRequest::ReadFromParcel(parcel)) {
+        READ_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
 
-    // read int
-    if (!parcel.ReadUint8(hour_)) {
-        ANSR_LOGE("Failed to read hour");
-        return false;
+        ANSR_LOGD("hour_=%{public}d, minute_=%{public}d", hour_, minute_);
+        return true;
     }
-    if (!parcel.ReadUint8(minute_)) {
-        ANSR_LOGE("Failed to read minute");
-        return false;
-    }
-
-    ANSR_LOGD("hour_=%{public}d, minute_=%{public}d", hour_, minute_);
-    return true;
+    return false;
 }
 
 void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)

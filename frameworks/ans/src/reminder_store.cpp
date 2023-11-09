@@ -29,9 +29,6 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-const std::string REMINDER_DB_DIR = "/data/service/el1/public/notification/";
-const std::string REMINDER_DB_NAME = "notification.db";
-const std::string REMINDER_DB_TABLE = "reminder";
 const uint32_t REMINDER_RDB_VERSION = 2;
 const int32_t STATE_FAIL = -1;
 std::vector<std::string> columns;
@@ -39,6 +36,9 @@ std::string g_sqlColumns;
 }
 
 const int32_t ReminderStore::STATE_OK = 0;
+const std::string ReminderStore::REMINDER_DB_DIR = "/data/service/el1/public/notification/";
+const std::string ReminderStore::REMINDER_DB_NAME = "notification.db";
+const std::string ReminderStore::REMINDER_DB_TABLE = "reminder";
 
 int32_t ReminderStore::ReminderStoreDataCallBack::OnCreate(NativeRdb::RdbStore &store)
 {
@@ -277,17 +277,6 @@ std::shared_ptr<NativeRdb::ResultSet> ReminderStore::Query(const std::string &qu
     return rdbStore_->QuerySql(queryCondition, whereArgs);
 }
 
-uint8_t ReminderStore::GetColumnIndex(const std::string& name)
-{
-    uint8_t index = 0;
-    for (auto it = columns.begin(); it != columns.end(); ++it) {
-        if (name == (*it)) {
-            break;
-        }
-        index++;
-    }
-    return index;
-}
 
 int32_t ReminderStore::GetMaxId()
 {
@@ -344,9 +333,10 @@ std::vector<sptr<ReminderRequest>> ReminderStore::GetReminders(const std::string
     queryResultSet->IsAtLastRow(isAtLastRow);
     while (!isAtLastRow) {
         queryResultSet->GoToNextRow();
-        sptr<ReminderRequest> reminder;
-        reminder = BuildReminder(queryResultSet);
-        reminders.push_back(reminder);
+        sptr<ReminderRequest> reminder = BuildReminder(queryResultSet);
+        if (reminder != nullptr) {
+            reminders.push_back(reminder);
+        }
         queryResultSet->IsAtLastRow(isAtLastRow);
     }
     ANSR_LOGD("Size=%{public}zu", reminders.size());
@@ -357,8 +347,8 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
 {
     int32_t reminderType;
     int32_t reminderId;
-    resultSet->GetInt(ReminderStore::GetColumnIndex(ReminderRequest::REMINDER_TYPE), reminderType);
-    resultSet->GetInt(ReminderStore::GetColumnIndex(ReminderRequest::REMINDER_ID), reminderId);
+    GetInt32Val(resultSet, ReminderRequest::REMINDER_TYPE, reminderType);
+    GetInt32Val(resultSet, ReminderRequest::REMINDER_ID, reminderId);
 
     sptr<ReminderRequest> reminder = nullptr;
     switch (reminderType) {
@@ -416,19 +406,39 @@ bool ReminderStore::GetBundleOption(const int32_t &reminderId, sptr<Notification
     return true;
 }
 
-void ReminderStore::GetInt32Val(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
-    const std::string &name, int32_t &value) const
+void ReminderStore::GetInt32Val(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
+    const std::string &name, int32_t &value)
 {
-    int32_t columnIndex;
+    int32_t columnIndex = -1;
     resultSet->GetColumnIndex(name, columnIndex);
+    if (columnIndex == -1) {
+        ANSR_LOGE("the column %{public}s does not exsit.", name.c_str());
+        return;
+    }
     resultSet->GetInt(columnIndex, value);
 }
 
-void ReminderStore::GetStringVal(std::shared_ptr<NativeRdb::ResultSet> &resultSet,
-    const std::string &name, std::string &value) const
+void ReminderStore::GetInt64Val(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
+    const std::string& name, int64_t& value)
 {
-    int32_t columnIndex;
+    int32_t columnIndex = -1;
     resultSet->GetColumnIndex(name, columnIndex);
+    if (columnIndex == -1) {
+        ANSR_LOGE("the column %{public}s does not exsit.", name.c_str());
+        return;
+    }
+    resultSet->GetLong(columnIndex, value);
+}
+
+void ReminderStore::GetStringVal(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
+    const std::string &name, std::string &value)
+{
+    int32_t columnIndex = -1;
+    resultSet->GetColumnIndex(name, columnIndex);
+    if (columnIndex == -1) {
+        ANSR_LOGE("the column %{public}s does not exsit.", name.c_str());
+        return;
+    }
     resultSet->GetString(columnIndex, value);
 }
 

@@ -478,12 +478,12 @@ int64_t ReminderRequest::RecoverInt64FromDb(const std::shared_ptr<NativeRdb::Res
     switch (columnType) {
         case (DbRecoveryType::INT): {
             int32_t value;
-            resultSet->GetInt(ReminderStore::GetColumnIndex(columnName), value);
+            ReminderStore::GetInt32Val(resultSet, columnName, value);
             return static_cast<int64_t>(value);
         }
         case (DbRecoveryType::LONG): {
             int64_t value;
-            resultSet->GetLong(ReminderStore::GetColumnIndex(columnName), value);
+            ReminderStore::GetInt64Val(resultSet, columnName, value);
             return value;
         }
         default: {
@@ -503,25 +503,25 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
     }
 
     // reminderId
-    resultSet->GetInt(ReminderStore::GetColumnIndex(REMINDER_ID), reminderId_);
+    ReminderStore::GetInt32Val(resultSet, REMINDER_ID, reminderId_);
 
     // userId
-    resultSet->GetInt(ReminderStore::GetColumnIndex(USER_ID), userId_);
+    ReminderStore::GetInt32Val(resultSet, USER_ID, userId_);
 
     // bundleName
-    resultSet->GetString(ReminderStore::GetColumnIndex(PKG_NAME), bundleName_);
+    ReminderStore::GetStringVal(resultSet, PKG_NAME, bundleName_);
 
     // uid
-    resultSet->GetInt(ReminderStore::GetColumnIndex(UID), uid_);
+    ReminderStore::GetInt32Val(resultSet, UID, uid_);
 
     // isSystemApp
     std::string isSysApp;
-    resultSet->GetString(ReminderStore::GetColumnIndex(SYS_APP), isSysApp);
+    ReminderStore::GetStringVal(resultSet, SYS_APP, isSysApp);
     isSystemApp_ = isSysApp == "true" ? true : false;
 
     // reminderType
     int32_t reminderType;
-    resultSet->GetInt(ReminderStore::GetColumnIndex(REMINDER_TYPE), reminderType);
+    ReminderStore::GetInt32Val(resultSet, REMINDER_TYPE, reminderType);
     reminderType_ = ReminderType(reminderType);
 
     // reminderTime
@@ -551,7 +551,7 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
 
     // isExpired
     std::string isExpired;
-    resultSet->GetString(ReminderStore::GetColumnIndex(IS_EXPIRED), isExpired);
+    ReminderStore::GetStringVal(resultSet, IS_EXPIRED, isExpired);
     isExpired_ = isExpired == "true" ? true : false;
 
     // state
@@ -565,39 +565,38 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
 
     // slotType
     int32_t slotType;
-    resultSet->GetInt(ReminderStore::GetColumnIndex(SLOT_ID), slotType);
+    ReminderStore::GetInt32Val(resultSet, SLOT_ID, slotType);
     slotType_ = NotificationConstant::SlotType(slotType);
 
     // notification id
-    resultSet->GetInt(ReminderStore::GetColumnIndex(NOTIFICATION_ID), notificationId_);
-
+    ReminderStore::GetInt32Val(resultSet, NOTIFICATION_ID, notificationId_);
     // title
-    resultSet->GetString(ReminderStore::GetColumnIndex(TITLE), title_);
+    ReminderStore::GetStringVal(resultSet, TITLE, title_);
 
     // content
-    resultSet->GetString(ReminderStore::GetColumnIndex(CONTENT), content_);
+    ReminderStore::GetStringVal(resultSet, CONTENT, content_);
 
     // snoozeContent
-    resultSet->GetString(ReminderStore::GetColumnIndex(SNOOZE_CONTENT), snoozeContent_);
+    ReminderStore::GetStringVal(resultSet, SNOOZE_CONTENT, snoozeContent_);
 
     // expiredContent
-    resultSet->GetString(ReminderStore::GetColumnIndex(EXPIRED_CONTENT), expiredContent_);
+    ReminderStore::GetStringVal(resultSet, EXPIRED_CONTENT, expiredContent_);
 
     InitNotificationRequest();  // must set before wantAgent & maxScreenWantAgent
 
     // wantAgent
     std::string wantAgent;
-    resultSet->GetString(ReminderStore::GetColumnIndex(AGENT), wantAgent);
+    ReminderStore::GetStringVal(resultSet, AGENT, wantAgent);
     RecoverWantAgent(wantAgent, 0);
 
     // maxScreenWantAgent
     std::string maxScreenWantAgent;
-    resultSet->GetString(ReminderStore::GetColumnIndex(MAX_SCREEN_AGENT), maxScreenWantAgent);
+    ReminderStore::GetStringVal(resultSet, MAX_SCREEN_AGENT, maxScreenWantAgent);
     RecoverWantAgent(maxScreenWantAgent, 1);
 
     // tapDismissed
     std::string tapDismissed;
-    resultSet->GetString(ReminderStore::GetColumnIndex(TAP_DISMISSED), tapDismissed);
+    ReminderStore::GetStringVal(resultSet, TAP_DISMISSED, tapDismissed);
     tapDismissed_ = tapDismissed == "true" ? true : false;
 
     // autoDeletedTime
@@ -605,10 +604,10 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
         static_cast<int64_t>(RecoverInt64FromDb(resultSet, AUTO_DELETED_TIME, DbRecoveryType::LONG));
 
     // customButtonUri
-    resultSet->GetString(ReminderStore::GetColumnIndex(CUSTOM_BUTTON_URI), customButtonUri_);
+    ReminderStore::GetStringVal(resultSet, CUSTOM_BUTTON_URI, customButtonUri_);
 
     // groupId
-    resultSet->GetString(ReminderStore::GetColumnIndex(GROUP_ID), groupId_);
+    ReminderStore::GetStringVal(resultSet, GROUP_ID, groupId_);
 }
 
 void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
@@ -618,7 +617,7 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
         return;
     }
     std::string actionButtonInfo;
-    resultSet->GetString(ReminderStore::GetColumnIndex(ACTION_BUTTON_INFO), actionButtonInfo);
+    ReminderStore::GetStringVal(resultSet, ACTION_BUTTON_INFO, actionButtonInfo);
     std::vector<std::string> multiButton = StringSplit(actionButtonInfo, SEP_BUTTON_MULTI);
     for (auto button : multiButton) {
         std::vector<std::string> singleButton = StringSplit(button, SEP_BUTTON_SINGLE);
@@ -1107,7 +1106,6 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
         WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.dataShareUpdate->uri, "dataShareUpdate's uri");
         WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.dataShareUpdate->equalTo, "dataShareUpdate's equalTo");
         WRITE_STRING_RETURN_FALSE_LOG(parcel, button.second.dataShareUpdate->valuesBucket, "dataShareUpdate's valuesBucket");
-
     }
     return true;
 }

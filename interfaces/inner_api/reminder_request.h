@@ -29,73 +29,97 @@ namespace OHOS {
 namespace Notification {
 
 #define READ_STRING_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.ReadString(value)) {                      \
+    if (!((parcel).ReadString(value))) {                 \
         ANSR_LOGE("Failed to read %s", msg);             \
         return false;                                    \
     }                                                    \
 
 #define READ_BOOL_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.ReadBool(value)) {                      \
+    if (!((parcel).ReadBool(value))) {                 \
         ANSR_LOGE("Failed to read %s", msg);           \
         return false;                                  \
     }                                                  \
 
 #define READ_INT64_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.ReadInt64(value)) {                      \
+    if (!((parcel).ReadInt64(value))) {                 \
         ANSR_LOGE("Failed to read %s", msg);            \
         return false;                                   \
     }                                                   \
 
 #define READ_INT32_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.ReadInt32(value)) {                      \
+    if (!((parcel).ReadInt32(value))) {                 \
         ANSR_LOGE("Failed to read %s", msg);            \
         return false;                                   \
     }                                                   \
 
 #define READ_UINT64_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.ReadUint64(value)) {                      \
+    if (!((parcel).ReadUint64(value))) {                 \
+        ANSR_LOGE("Failed to read %s", msg);             \
+        return false;                                    \
+    }                                                    \
+
+#define READ_UINT32_RETURN_FALSE_LOG(parcel, value, msg) \
+    if (!((parcel).ReadUint32(value))) {                 \
+        ANSR_LOGE("Failed to read %s", msg);             \
+        return false;                                    \
+    }                                                    \
+
+#define READ_UINT16_RETURN_FALSE_LOG(parcel, value, msg) \
+    if (!((parcel).ReadUint16(value))) {                 \
         ANSR_LOGE("Failed to read %s", msg);             \
         return false;                                    \
     }                                                    \
 
 #define READ_UINT8_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.ReadUint8(value)) {                      \
+    if (!((parcel).ReadUint8(value))) {                 \
         ANSR_LOGE("Failed to read %s", msg);            \
         return false;                                   \
     }                                                   \
 
 #define WRITE_STRING_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.WriteString(value)) {                      \
+    if (!((parcel).WriteString(value))) {                 \
         ANSR_LOGE("Failed to write %s", msg);             \
         return false;                                     \
     }                                                     \
 
 #define WRITE_BOOL_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.WriteBool(value)) {                      \
+    if (!((parcel).WriteBool(value))) {                 \
         ANSR_LOGE("Failed to write %s", msg);           \
         return false;                                   \
     }                                                   \
 
 #define WRITE_INT64_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.WriteInt64(value)) {                      \
+    if (!(parcel.WriteInt64(value))) {                   \
         ANSR_LOGE("Failed to write %s", msg);            \
         return false;                                    \
     }                                                    \
 
 #define WRITE_INT32_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.WriteInt32(value)) {                      \
+    if (!((parcel).WriteInt32(value))) {                 \
         ANSR_LOGE("Failed to write %s", msg);            \
         return false;                                    \
     }                                                    \
 
 #define WRITE_UINT64_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.WriteUint64(value)) {                      \
+    if (!((parcel).WriteUint64(value))) {                 \
+        ANSR_LOGE("Failed to write %s", msg);             \
+        return false;                                     \
+    }                                                     \
+
+#define WRITE_UINT32_RETURN_FALSE_LOG(parcel, value, msg) \
+    if (!((parcel).WriteUint32(value))) {                 \
+        ANSR_LOGE("Failed to write %s", msg);             \
+        return false;                                     \
+    }                                                     \
+
+#define WRITE_UINT16_RETURN_FALSE_LOG(parcel, value, msg) \
+    if (!((parcel).WriteUint16(value))) {                 \
         ANSR_LOGE("Failed to write %s", msg);             \
         return false;                                     \
     }                                                     \
 
 #define WRITE_UINT8_RETURN_FALSE_LOG(parcel, value, msg) \
-    if(!parcel.WriteUint8(value)) {                      \
+    if (!((parcel).WriteUint8(value))) {                 \
         ANSR_LOGE("Failed to write %s", msg);            \
         return false;                                    \
     }                                                    \
@@ -211,6 +235,7 @@ public:
          * The ability that is redirected to when the button is clicked.
          */
         std::shared_ptr<ButtonWantAgent> wantAgent;
+
         /**
          * The ability that is updata App rdb.
          */

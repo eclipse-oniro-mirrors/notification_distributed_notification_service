@@ -112,8 +112,6 @@ public:
     std::vector<uint8_t> GetRepeatMonths() const;
     std::vector<uint8_t> GetRepeatDays() const;
 
-    virtual bool OnDateTimeChange() override;
-    virtual bool OnTimeZoneChange() override;
     virtual bool UpdateNextReminder() override;
 
     /**

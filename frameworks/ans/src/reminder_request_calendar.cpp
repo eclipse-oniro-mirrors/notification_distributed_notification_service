@@ -358,16 +358,6 @@ std::vector<uint8_t> ReminderRequestCalendar::GetRepeatDays() const
     return repeatDays;
 }
 
-bool ReminderRequestCalendar::OnDateTimeChange()
-{
-    return ReminderRequest::OnDateTimeChange();
-}
-
-bool ReminderRequestCalendar::OnTimeZoneChange()
-{
-    return ReminderRequest::OnTimeZoneChange();
-}
-
 bool ReminderRequestCalendar::UpdateNextReminder()
 {
     ANSR_LOGD("UpdateNextReminder calendar time");
@@ -414,54 +404,22 @@ uint64_t ReminderRequestCalendar::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreR
 
 bool ReminderRequestCalendar::Marshalling(Parcel &parcel) const
 {
-    ReminderRequest::Marshalling(parcel);
-
-    // write int
-    if (!parcel.WriteUint16(year_)) {
-        ANSR_LOGE("Failed to write year");
-        return false;
+    if (ReminderRequest::Marshalling(parcel)) {
+        // write int
+        WRITE_UINT16_RETURN_FALSE_LOG(parcel, year_, "year");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, month_, "month");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, day_, "day");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
+        WRITE_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
+        WRITE_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
+        WRITE_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateDay_, "firstDesignateDay");
+        return true;
     }
-    if (!parcel.WriteUint8(month_)) {
-        ANSR_LOGE("Failed to write month");
-        return false;
-    }
-    if (!parcel.WriteUint8(day_)) {
-        ANSR_LOGE("Failed to write day");
-        return false;
-    }
-    if (!parcel.WriteUint8(hour_)) {
-        ANSR_LOGE("Failed to write hour");
-        return false;
-    }
-    if (!parcel.WriteUint8(minute_)) {
-        ANSR_LOGE("Failed to write minute");
-        return false;
-    }
-    if (!parcel.WriteUint8(second_)) {
-        ANSR_LOGE("Failed to write second");
-        return false;
-    }
-    if (!parcel.WriteUint16(repeatMonth_)) {
-        ANSR_LOGE("Failed to write repeatMonth");
-        return false;
-    }
-    if (!parcel.WriteUint32(repeatDay_)) {
-        ANSR_LOGE("Failed to write repeateDay");
-        return false;
-    }
-    if (!parcel.WriteUint16(firstDesignateYear_)) {
-        ANSR_LOGE("Failed to write firstDesignateYear");
-        return false;
-    }
-    if (!parcel.WriteUint8(firstDesignateMonth_)) {
-        ANSR_LOGE("Failed to write firstDesignateMonth");
-        return false;
-    }
-    if (!parcel.WriteUint8(firstDesignateDay_)) {
-        ANSR_LOGE("Failed to write firstDesignateDay");
-        return false;
-    }
-    return true;
+    return false;
 }
 
 ReminderRequestCalendar *ReminderRequestCalendar::Unmarshalling(Parcel &parcel)
@@ -481,55 +439,26 @@ ReminderRequestCalendar *ReminderRequestCalendar::Unmarshalling(Parcel &parcel)
 
 bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
 {
-    ReminderRequest::ReadFromParcel(parcel);
+    if (ReminderRequest::ReadFromParcel(parcel)) {
+        // read int
+        READ_UINT16_RETURN_FALSE_LOG(parcel, year_, "year");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, month_, "month");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, day_, "day");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
+        READ_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
+        READ_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
 
-    // read int
-    if (!parcel.ReadUint16(year_)) {
-        ANSR_LOGE("Failed to read year");
-        return false;
+        InitDateTime();
+
+        READ_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateDay_, "firstDesignateDay");
+
+        return true;
     }
-    if (!parcel.ReadUint8(month_)) {
-        ANSR_LOGE("Failed to read month");
-        return false;
-    }
-    if (!parcel.ReadUint8(day_)) {
-        ANSR_LOGE("Failed to read day");
-        return false;
-    }
-    if (!parcel.ReadUint8(hour_)) {
-        ANSR_LOGE("Failed to read hour");
-        return false;
-    }
-    if (!parcel.ReadUint8(minute_)) {
-        ANSR_LOGE("Failed to read minute");
-        return false;
-    }
-    if (!parcel.ReadUint8(second_)) {
-        ANSR_LOGE("Failed to read second");
-        return false;
-    }
-    if (!parcel.ReadUint16(repeatMonth_)) {
-        ANSR_LOGE("Failed to read repeatMonth");
-        return false;
-    }
-    if (!parcel.ReadUint32(repeatDay_)) {
-        ANSR_LOGE("Failed to read repeateDay");
-        return false;
-    }
-    InitDateTime();
-    if (!parcel.ReadUint16(firstDesignateYear_)) {
-        ANSR_LOGE("Failed to read firstDesignateYear");
-        return false;
-    }
-    if (!parcel.ReadUint8(firstDesignateMonth_)) {
-        ANSR_LOGE("Failed to read firstDesignateMonth");
-        return false;
-    }
-    if (!parcel.ReadUint8(firstDesignateDay_)) {
-        ANSR_LOGE("Failed to read firstDesignateDay");
-        return false;
-    }
-    return true;
+    return false;
 }
 
 void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
