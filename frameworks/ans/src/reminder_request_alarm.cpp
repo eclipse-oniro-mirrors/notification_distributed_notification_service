@@ -15,6 +15,7 @@
 
 #include "reminder_request_alarm.h"
 
+#include "reminder_table.h"
 #include "ans_log_wrapper.h"
 #include "reminder_store.h"
 
@@ -22,10 +23,6 @@ namespace OHOS {
 namespace Notification {
 const uint8_t ReminderRequestAlarm::MINUTES_PER_HOUR = 60;
 const int8_t ReminderRequestAlarm::DEFAULT_SNOOZE_TIMES = 3;
-
-// For database recovery.
-const std::string ReminderRequestAlarm::ALARM_HOUR = "alarm_hour";
-const std::string ReminderRequestAlarm::ALARM_MINUTE = "alarm_minute";
 
 ReminderRequestAlarm::ReminderRequestAlarm(uint8_t hour, uint8_t minute, const std::vector<uint8_t> daysOfWeek)
     : ReminderRequest(ReminderRequest::ReminderType::ALARM)
@@ -203,11 +200,13 @@ void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::Result
 
     // hour
     hour_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ALARM_HOUR, DbRecoveryType::INT));
+        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::ALARM_HOUR,
+            DbRecoveryType::INT));
 
     // minute
     minute_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ALARM_MINUTE, DbRecoveryType::INT));
+        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::ALARM_MINUTE,
+            DbRecoveryType::INT));
 }
 
 void ReminderRequestAlarm::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
@@ -220,14 +219,9 @@ void ReminderRequestAlarm::AppendValuesBucket(const sptr<ReminderRequest> &remin
         hour = alarm->GetHour();
         minute = alarm->GetMinute();
     }
-    values.PutInt(ALARM_HOUR, hour);
-    values.PutInt(ALARM_MINUTE, minute);
+    values.PutInt(ReminderTable::ALARM_HOUR, hour);
+    values.PutInt(ReminderTable::ALARM_MINUTE, minute);
 }
 
-void ReminderRequestAlarm::InitDbColumns()
-{
-    ReminderRequest::AddColumn(ALARM_HOUR, "INT", false);
-    ReminderRequest::AddColumn(ALARM_MINUTE, "INT", true);
-}
 }
 }

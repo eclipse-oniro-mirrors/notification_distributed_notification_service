@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "reminder_request.h"
+#include "reminder_table.h"
 #undef private
 #undef protected
 
@@ -1329,14 +1330,11 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00002, Function | SmallTest | Leve
  */
 HWTEST_F(ReminderRequestTest, AddColumn_00002, Function | SmallTest | Level1)
 {
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->InitDbColumns();
     std::string name = "this is name";
     std::string type = "this is type";
-    rrc->AddColumn(name, type, true);
-    rrc->AddColumn(name, type, false);
-    int32_t result = rrc->GetReminderId();
-    EXPECT_EQ(result, -1);
+    ReminderTable::AddColumn(name, type, true);
+    ReminderTable::AddColumn(name, type, false);
+    EXPECT_EQ(ReminderTable::columns.size(), 2);
 }
 
 /**

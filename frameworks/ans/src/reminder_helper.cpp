@@ -58,5 +58,6 @@ ErrCode ReminderHelper::RemoveNotificationSlot(const NotificationConstant::SlotT
     ANSR_LOGI("RemoveNotificationSlot start");
     return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationSlot(slotType);
 }
+
 }
 }

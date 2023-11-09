@@ -94,6 +94,7 @@ void ReminderRequestTimer::UpdateTimeInfo(const std::string &description)
     if (IsExpired()) {
         return;
     }
+
     ANSR_LOGD("%{public}s, update countdown time trigger time", description.c_str());
     time_t now;
     (void)time(&now);  // unit is seconds.
@@ -147,5 +148,6 @@ bool ReminderRequestTimer::ReadFromParcel(Parcel &parcel)
     }
     return false;
 }
+
 }
 }

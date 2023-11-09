@@ -577,8 +577,6 @@ public:
      * @param resultSet Indicates the resultSet with pointer to the row of record data.
      */
     virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet);
-    void RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet> &resultSet);
-    void RecoverWantAgent(const std::string &wantAgentInfo, const uint8_t &type);
 
     /**
      * @brief Sets action button.
@@ -901,6 +899,7 @@ protected:
     {
         return INVALID_LONG_LONG_VALUE;
     }
+
     int64_t RecoverInt64FromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
         const std::string &columnName, const DbRecoveryType &columnType);
 
@@ -979,6 +978,17 @@ private:
      * 2. Remove the snooze action button.
      */
     void UpdateNotificationStateForSnooze();
+
+    static void AppendWantAgentValuesBucket(const sptr<ReminderRequest>& reminder,
+        NativeRdb::ValuesBucket& values);
+
+    bool MarshallingActionButton(Parcel& parcel) const;
+    bool ReadActionButtonFromParcel(Parcel& parcel);
+
+    void RecoverBasicFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    void RecoverActionButtonJsonMode(const std::string& jsonString);
+    void RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    void RecoverWantAgent(const std::string& wantAgentInfo, const uint8_t& type);
 
     static const uint32_t MIN_TIME_INTERVAL_IN_MILLI;
     static const std::string SEP_BUTTON_SINGLE;

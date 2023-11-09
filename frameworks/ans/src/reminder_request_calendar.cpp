@@ -15,6 +15,7 @@
 
 #include "reminder_request_calendar.h"
 
+#include "reminder_table.h"
 #include "ans_log_wrapper.h"
 
 namespace OHOS {
@@ -24,18 +25,6 @@ const uint8_t ReminderRequestCalendar::MAX_DAYS_OF_MONTH = 31;
 const uint8_t ReminderRequestCalendar::JANUARY = 1;
 const uint8_t ReminderRequestCalendar::DECEMBER = 12;
 const uint8_t ReminderRequestCalendar::DEFAULT_SNOOZE_TIMES = 3;
-
-// For database recovery.
-const std::string ReminderRequestCalendar::REPEAT_DAYS = "repeat_days";
-const std::string ReminderRequestCalendar::REPEAT_MONTHS = "repeat_months";
-const std::string ReminderRequestCalendar::FIRST_DESIGNATE_YEAR = "first_designate_year";
-const std::string ReminderRequestCalendar::FIRST_DESIGNATE_MONTH = "first_designate_month";
-const std::string ReminderRequestCalendar::FIRST_DESIGNATE_DAY = "first_designate_day";
-const std::string ReminderRequestCalendar::CALENDAR_YEAR = "calendar_year";
-const std::string ReminderRequestCalendar::CALENDAR_MONTH = "calendar_month";
-const std::string ReminderRequestCalendar::CALENDAR_DAY = "calendar_day";
-const std::string ReminderRequestCalendar::CALENDAR_HOUR = "calendar_hour";
-const std::string ReminderRequestCalendar::CALENDAR_MINUTE = "calendar_minute";
 
 const uint8_t ReminderRequestCalendar::DAY_ARRAY[12]    = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 const uint8_t ReminderRequestCalendar::FEBRUARY         = 2;
@@ -466,38 +455,48 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
     ReminderRequest::RecoverFromDb(resultSet);
 
     // repeatDay
-    repeatDay_ = static_cast<uint32_t>(RecoverInt64FromDb(resultSet, REPEAT_DAYS, DbRecoveryType::INT));
+    repeatDay_ = static_cast<uint32_t>(RecoverInt64FromDb(resultSet, ReminderTable::REPEAT_DAYS,
+        DbRecoveryType::INT));
 
     // repeatMonth
     repeatMonth_ =
-        static_cast<uint16_t>(RecoverInt64FromDb(resultSet, REPEAT_MONTHS, DbRecoveryType::INT));
+        static_cast<uint16_t>(RecoverInt64FromDb(resultSet, ReminderTable::REPEAT_MONTHS,
+            DbRecoveryType::INT));
 
     // firstDesignateYear
     firstDesignateYear_ =
-        static_cast<uint16_t>(RecoverInt64FromDb(resultSet, FIRST_DESIGNATE_YEAR, DbRecoveryType::INT));
+        static_cast<uint16_t>(RecoverInt64FromDb(resultSet, ReminderTable::FIRST_DESIGNATE_YEAR,
+            DbRecoveryType::INT));
 
     // firstDesignateMonth
     firstDesignateMonth_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, FIRST_DESIGNATE_MONTH, DbRecoveryType::INT));
+        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::FIRST_DESIGNATE_MONTH,
+            DbRecoveryType::INT));
 
     // firstDesignateDay
     firstDesignateDay_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, FIRST_DESIGNATE_DAY, DbRecoveryType::INT));
+        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::FIRST_DESIGNATE_DAY,
+            DbRecoveryType::INT));
 
     // year
-    year_ = static_cast<uint16_t>(RecoverInt64FromDb(resultSet, CALENDAR_YEAR, DbRecoveryType::INT));
+    year_ = static_cast<uint16_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_YEAR,
+        DbRecoveryType::INT));
 
     // month
-    month_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, CALENDAR_MONTH, DbRecoveryType::INT));
+    month_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_MONTH,
+        DbRecoveryType::INT));
 
     // day
-    day_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, CALENDAR_DAY, DbRecoveryType::INT));
+    day_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_DAY,
+        DbRecoveryType::INT));
 
     // hour
-    hour_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, CALENDAR_HOUR, DbRecoveryType::INT));
+    hour_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_HOUR,
+        DbRecoveryType::INT));
 
     // minute
-    minute_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, CALENDAR_MINUTE, DbRecoveryType::INT));
+    minute_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_MINUTE,
+        DbRecoveryType::INT));
 }
 
 void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
@@ -528,30 +527,17 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
             minute = calendar->GetMinute();
         }
     }
-    values.PutInt(REPEAT_DAYS, repeatDay);
-    values.PutInt(REPEAT_MONTHS, repeatMonth);
-    values.PutInt(FIRST_DESIGNATE_YEAR, firstDesignateYear);
-    values.PutInt(FIRST_DESIGNATE_MONTH, firstDesignateMonth);
-    values.PutInt(FIRST_DESIGNATE_DAY, firstDesignateDay);
-    values.PutInt(CALENDAR_YEAR, year);
-    values.PutInt(CALENDAR_MONTH, month);
-    values.PutInt(CALENDAR_DAY, day);
-    values.PutInt(CALENDAR_HOUR, hour);
-    values.PutInt(CALENDAR_MINUTE, minute);
+    values.PutInt(ReminderTable::REPEAT_DAYS, repeatDay);
+    values.PutInt(ReminderTable::REPEAT_MONTHS, repeatMonth);
+    values.PutInt(ReminderTable::FIRST_DESIGNATE_YEAR, firstDesignateYear);
+    values.PutInt(ReminderTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth);
+    values.PutInt(ReminderTable::FIRST_DESIGNATE_DAY, firstDesignateDay);
+    values.PutInt(ReminderTable::CALENDAR_YEAR, year);
+    values.PutInt(ReminderTable::CALENDAR_MONTH, month);
+    values.PutInt(ReminderTable::CALENDAR_DAY, day);
+    values.PutInt(ReminderTable::CALENDAR_HOUR, hour);
+    values.PutInt(ReminderTable::CALENDAR_MINUTE, minute);
 }
 
-void ReminderRequestCalendar::InitDbColumns()
-{
-    ReminderRequest::AddColumn(REPEAT_DAYS, "INT", false);
-    ReminderRequest::AddColumn(REPEAT_MONTHS, "INT", false);
-    ReminderRequest::AddColumn(FIRST_DESIGNATE_YEAR, "INT", false);
-    ReminderRequest::AddColumn(FIRST_DESIGNATE_MONTH, "INT", false);
-    ReminderRequest::AddColumn(FIRST_DESIGNATE_DAY, "INT", false);
-    ReminderRequest::AddColumn(CALENDAR_YEAR, "INT", false);
-    ReminderRequest::AddColumn(CALENDAR_MONTH, "INT", false);
-    ReminderRequest::AddColumn(CALENDAR_DAY, "INT", false);
-    ReminderRequest::AddColumn(CALENDAR_HOUR, "INT", false);
-    ReminderRequest::AddColumn(CALENDAR_MINUTE, "INT", false);
-}
 }
 }
