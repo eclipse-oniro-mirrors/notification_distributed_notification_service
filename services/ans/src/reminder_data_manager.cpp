@@ -1746,6 +1746,12 @@ void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration
     }
 }
 
+void ReminderDataManager::OnRemoveAppMgr()
+{
+    std::lock_guard<std::mutex> lock(appMgrMutex_);
+    appMgrProxy_ = nullptr;
+}
+
 bool ReminderDataManager::ConnectAppMgr()
 {
     if (appMgrProxy_ != nullptr) {

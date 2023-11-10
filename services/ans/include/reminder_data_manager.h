@@ -210,6 +210,11 @@ public:
      */
     void OnConfigurationChanged(const AppExecFwk::Configuration &configuration);
 
+    /**
+     * @brief When OnRemoveSystemAbility occurs.
+     */
+    void OnRemoveAppMgr();
+
     static const uint8_t TIME_ZONE_CHANGE;
     static const uint8_t DATE_TIME_CHANGE;
 
