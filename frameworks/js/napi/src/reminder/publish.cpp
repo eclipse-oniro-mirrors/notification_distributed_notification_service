@@ -641,6 +641,8 @@ void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_val
         napi_set_named_property(env, actionButton, ACTION_BUTTON_TYPE, buttonInfo);
         napi_create_string_utf8(env, (it->second.title).c_str(), NAPI_AUTO_LENGTH, &buttonInfo);
         napi_set_named_property(env, actionButton, ACTION_BUTTON_TITLE, buttonInfo);
+        napi_create_string_utf8(env, (it->second.resource).c_str(), NAPI_AUTO_LENGTH, &buttonInfo);
+        napi_set_named_property(env, actionButton, ACTION_BUTTON_RESOURCE, buttonInfo);
 
         // create obj
         napi_value wantAgentInfo = nullptr;

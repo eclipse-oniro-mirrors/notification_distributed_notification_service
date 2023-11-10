@@ -31,6 +31,7 @@
 #include "reminder_config_change_observer.h"
 #include "datashare_predicates.h"
 #include "datashare_values_bucket.h"
+#include "app_mgr_interface.h"
 
 namespace OHOS {
 namespace Notification {
@@ -208,6 +209,11 @@ public:
      * @brief System language change
      */
     void OnConfigurationChanged(const AppExecFwk::Configuration &configuration);
+
+    /**
+     * @brief When OnRemoveSystemAbility occurs.
+     */
+    void OnRemoveAppMgr();
 
     static const uint8_t TIME_ZONE_CHANGE;
     static const uint8_t DATE_TIME_CHANGE;
@@ -522,6 +528,22 @@ private:
 
     static bool cmp(sptr<ReminderRequest> &reminderRequest, sptr<ReminderRequest> &other);
 
+    /**
+     * @brief Connect App Manager to get the current foreground application.
+     */
+    bool ConnectAppMgr();
+
+    /**
+     * @brief Check need to notify the application, if the current foreground application
+     *     is the creator of the reminder, notify the application of the reminder status
+     *     change; otherwise, do not noitfy.
+     *
+     * @param reminder Indicates a reminder.
+     * @param buttonType The type of button clicked by the user.
+     */
+    void CheckNeedNotifyStatus(const sptr<ReminderRequest> &reminder,
+        const ReminderRequest::ActionButtonType buttonType);
+
    /**
     * Single instance.
     */
@@ -603,6 +625,12 @@ private:
      * Indicates config change observer for language
      */
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
+
+    /**
+     * Indicates app mananger for get foreground application
+     */
+    std::mutex appMgrMutex_;
+    sptr<AppExecFwk::IAppMgr> appMgrProxy_ = nullptr;
 };
 }  // namespace OHOS
 }  // namespace Notification
