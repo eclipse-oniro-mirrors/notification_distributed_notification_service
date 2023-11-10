@@ -225,16 +225,16 @@ void ReminderEventManager::SystemAbilityStatusChangeListener::OnAddSystemAbility
     int32_t systemAbilityId, const std::string& deviceId)
 {
     ANSR_LOGD("OnAddSystemAbilityInner");
-    switch(systemAbilityId) {
-    case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
-        ANSR_LOGD("OnAddSystemAbilityInner: BUNDLE_MGR_SERVICE_SYS_ABILITY");
-        reminderDataManager_->OnServiceStart();
-        break;
-    case APP_MGR_SERVICE_ID:
-        ANSR_LOGD("OnAddSystemAbilityInner: APP_MGR_SERVICE");
-        break;
-    default:
-        break;
+    switch (systemAbilityId) {
+        case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
+            ANSR_LOGD("OnAddSystemAbilityInner: BUNDLE_MGR_SERVICE_SYS_ABILITY");
+            reminderDataManager_->OnServiceStart();
+            break;
+        case APP_MGR_SERVICE_ID:
+            ANSR_LOGD("OnAddSystemAbilityInner: APP_MGR_SERVICE");
+            break;
+        default:
+            break;
     }
 }
 
@@ -242,16 +242,16 @@ void ReminderEventManager::SystemAbilityStatusChangeListener::OnRemoveSystemAbil
     int32_t systemAbilityId, const std::string& deviceId)
 {
     ANSR_LOGD("OnRemoveSystemAbilityInner");
-    switch(systemAbilityId) {
-    case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
-        ANSR_LOGD("OnRemoveSystemAbilityInner: BUNDLE_MGR_SERVICE_SYS_ABILITY");
-        break;
-    case APP_MGR_SERVICE_ID:
-        ANSR_LOGD("OnRemoveSystemAbilityInner: APP_MGR_SERVICE");
-        reminderDataManager_->OnRemoveAppMgr();
-        break;
-    default:
-        break;
+    switch (systemAbilityId) {
+        case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
+            ANSR_LOGD("OnRemoveSystemAbilityInner: BUNDLE_MGR_SERVICE_SYS_ABILITY");
+            break;
+        case APP_MGR_SERVICE_ID:
+            ANSR_LOGD("OnRemoveSystemAbilityInner: APP_MGR_SERVICE");
+            reminderDataManager_->OnRemoveAppMgr();
+            break;
+        default:
+            break;
     }
 }
 }  // namespace OHOS
