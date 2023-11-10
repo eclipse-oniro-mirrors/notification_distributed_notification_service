@@ -40,6 +40,7 @@ const std::string ReminderTable::HAS_SCHEDULED_TIMEOUT = "has_ScheduledTimeout";
 const std::string ReminderTable::ACTION_BUTTON_INFO = "button_info";
 const std::string ReminderTable::CUSTOM_BUTTON_URI = "custom_button_uri";
 const std::string ReminderTable::SLOT_ID = "slot_id";
+const std::string ReminderTable::SNOOZE_SLOT_ID = "snooze_slot_id";
 const std::string ReminderTable::NOTIFICATION_ID = "notification_id";
 const std::string ReminderTable::TITLE = "title";
 const std::string ReminderTable::CONTENT = "content";
@@ -102,6 +103,7 @@ void ReminderTable::InitBasicColumns()
     AddColumn(ACTION_BUTTON_INFO, "TEXT");
     AddColumn(CUSTOM_BUTTON_URI, "TEXT");
     AddColumn(SLOT_ID, "INT");
+    AddColumn(SNOOZE_SLOT_ID, "INT");
     AddColumn(NOTIFICATION_ID, "INT NOT NULL");
     AddColumn(TITLE, "TEXT");
     AddColumn(CONTENT, "TEXT");

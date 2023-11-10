@@ -138,6 +138,11 @@ public:
     static const std::string SLOT_ID;
 
     /*
+     * snoozeslot type
+     */
+    static const std::string SNOOZE_SLOT_ID;
+
+    /*
      * notification id
      */
     static const std::string NOTIFICATION_ID;

@@ -780,7 +780,7 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
         return;
     }
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
-    UpdateNotification(reminder);
+    UpdateNotification(reminder, false);
     if (advancedNotificationService_ == nullptr) {
         ANSR_LOGE("Ans instance is null.");
         return;
@@ -982,7 +982,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     bool toPlaySound = isNeedToPlaySound && ShouldAlert(reminder) ? true : false;
     reminder->OnShow(toPlaySound, isSysTimeChanged, true);
     AddToShowedReminders(reminder);
-    UpdateNotification(reminder);  // this should be called after OnShow
+    UpdateNotification(reminder, false);  // this should be called after OnShow
 
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
@@ -1010,7 +1010,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     }
 }
 
-void ReminderDataManager::UpdateNotification(const sptr<ReminderRequest> &reminder)
+void ReminderDataManager::UpdateNotification(const sptr<ReminderRequest> &reminder, bool isSnooze)
 {
     int32_t reminderId = reminder->GetReminderId();
     sptr<NotificationBundleOption> bundleOption = FindNotificationBundleOption(reminderId);
@@ -1018,7 +1018,11 @@ void ReminderDataManager::UpdateNotification(const sptr<ReminderRequest> &remind
         ANSR_LOGE("Get bundle option fail, reminderId=%{public}d", reminderId);
         return;
     }
-    reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::COMMON, "");
+    if (isSnooze) {
+        reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::COMMON, "snooze");
+    } else {
+        reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::COMMON, "");
+    }
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::REMOVAL_WANT_AGENT, "");
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::WANT_AGENT, "");
     reminder->UpdateNotificationRequest(ReminderRequest::UpdateNotificationType::MAX_SCREEN_WANT_AGENT, "");
@@ -1064,7 +1068,7 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
         return;
     }
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
-    UpdateNotification(reminder);
+    UpdateNotification(reminder, true);
     if (advancedNotificationService_ == nullptr) {
         ANSR_LOGE("Ans instance is null");
         return;
