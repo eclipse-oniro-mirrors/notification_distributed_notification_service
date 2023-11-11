@@ -66,7 +66,7 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
     }
 }
 
-bool PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
+int32_t PushCallBackProxy::OnCheckNotification(const std::string &notificationData)
 {
     MessageParcel data;
     MessageParcel reply;

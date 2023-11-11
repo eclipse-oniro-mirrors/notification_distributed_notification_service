@@ -5430,7 +5430,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
 {
     ANS_LOGD("start.");
     if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
-        return ERR_ANS_NOTIFICATION_PUSH_CHECK_UNREGISTERED;
+        return ERR_ANS_PUSH_CHECK_UNREGISTERED;
     }
     sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
     sptr<NotificationCheckRequest> checkRequest = checkRequests_[request->GetSlotType()];
@@ -5444,28 +5444,37 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
     jsonObject["creatorUserId"] = request->GetCreatorUserId();
     jsonObject["slotType"] = static_cast<int32_t>(request->GetSlotType());
+    jsonObject["label"] = request->GetLabel();
 
+    std::shared_ptr<NotificationContent> content = request->GetContent();
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
     auto extraInfo = request->GetAdditionalData();
-    std::shared_ptr<AAFwk::WantParams> checkExtraInfo = std::make_shared<AAFwk::WantParams>();
-    for (auto key : checkRequest->GetExtraKeys()) {
-        if (extraInfo->HasParam(key)) {
-            checkExtraInfo->SetParam(key, extraInfo->GetParam(key));
+    if (extraInfo != nullptr) {
+        std::shared_ptr<AAFwk::WantParams> checkExtraInfo = std::make_shared<AAFwk::WantParams>();
+        if (checkRequest->GetExtraKeys().size() == 0) {
+            checkExtraInfo = extraInfo;
+        } else {
+            for (auto key : checkRequest->GetExtraKeys()) {
+                if (extraInfo->HasParam(key)) {
+                    checkExtraInfo->SetParam(key, extraInfo->GetParam(key));
+                }
+            }
+        }
+
+        if (checkExtraInfo) {
+            AAFwk::WantParamWrapper wWrapper(*checkExtraInfo);
+            jsonObject["extraInfo"] = wWrapper.ToString();
         }
     }
-    if (checkExtraInfo) {
-        AAFwk::WantParamWrapper wWrapper(*checkExtraInfo);
-        jsonObject["extraInfo"] = wWrapper.ToString();
-    }
+
     ErrCode result;
+    int32_t pushCheckCode;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        if (!(pushCallBack->OnCheckNotification(jsonObject.dump()))) {
-            ANS_LOGE("Notification push check failed.");
-            result = ERR_ANS_NOTIFICATION_PUSH_CHECK_FAILED;
-        } else {
-            result = ERR_OK;
-        }
+        pushCheckCode = pushCallBack->OnCheckNotification(jsonObject.dump());
+        result = ConvertPushCheckCodeToErrCode(pushCheckCode);
     }));
+
     notificationSvrQueue_->wait(handler);
     return result;
 }

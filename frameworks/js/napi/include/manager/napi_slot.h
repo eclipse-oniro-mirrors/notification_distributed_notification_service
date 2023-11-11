@@ -130,6 +130,7 @@ struct ParametersInfoEnableSlot {
     NotificationBundleOption option;
     NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
     bool enable = false;
+    bool isForceControl = false;
     napi_ref callback = nullptr;
 };
 

@@ -36,6 +36,7 @@ constexpr uint8_t PARAM0 = 0;
 constexpr uint8_t PARAM1 = 1;
 constexpr uint8_t PARAM2 = 2;
 constexpr uint8_t PARAM3 = 3;
+constexpr uint8_t PARAM4 = 4;
 
 enum class ContentType {
     NOTIFICATION_CONTENT_BASIC_TEXT,
@@ -43,7 +44,8 @@ enum class ContentType {
     NOTIFICATION_CONTENT_PICTURE,
     NOTIFICATION_CONTENT_CONVERSATION,
     NOTIFICATION_CONTENT_MULTILINE,
-    NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW
+    NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW,
+    NOTIFICATION_CONTENT_LIVE_VIEW
 };
 
 enum class SlotType {
@@ -138,11 +140,6 @@ struct NotificationSubscribeInfo {
     std::vector<std::string> bundleNames;
     int32_t userId = 0;
     bool hasSubscribeInfo = false;
-};
-
-struct NotificationKey {
-    int32_t id {};
-    std::string label {};
 };
 
 struct CallbackPromiseInfo {
@@ -532,6 +529,27 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value SetTime(const napi_env &env, const NotificationTime &time, napi_value &result);
+
+    /**
+     * @brief Sets a js NotificationLiveViewContent object by specified NotificationBasicContent object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param basicContent Indicates a NotificationBasicContent object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationLiveViewContent(
+        const napi_env &env, NotificationBasicContent *basicContent, napi_value &result);
+
+    /**
+     * @brief Sets a js liveview picturemap object by specified liveview picturemap
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param pictureMap Indicates a picturemap object to be converted
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetLiveViewPictureMap(
+        const napi_env &env, const std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap);
 
     /**
      * @brief Sets a js object by specified MessageUser object
@@ -1150,6 +1168,17 @@ public:
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
+     * @brief Gets the overlay icon of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationOverlayIcon(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
      * @brief Gets the distributed options of NotificationRequest object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1499,6 +1528,50 @@ public:
         std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent);
 
     /**
+     * @brief Gets the liveView content of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param result Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLiveViewContent(
+        const napi_env &env, const napi_value &result, NotificationRequest &request);
+
+    /**
+     * @brief Gets a NotificationLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param liveViewContent Indicates a NotificationMultiLineContent object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLiveViewContentDetailed(const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<NotificationLiveViewContent> &liveViewContent);
+
+    /**
+     * @brief Gets a GetLiveViewPictures from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param picturesObj Indicates a js object to be converted
+     * @param pictures Indicates pictures object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetLiveViewPictures(const napi_env &env, const napi_value &picturesObj,
+        std::vector<std::shared_ptr<Media::PixelMap>> &pictures);
+
+    /**
+     * @brief Gets a GetLiveViewPictures from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param pictureMapObj Indicates a js object to be converted
+     * @param pictureMap Indicates picturemap from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetLiveViewPictureMap(const napi_env &env, const napi_value &pictureMapObj,
+        std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap);
+
+    /**
      * @brief Gets a NotificationBundleOption object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1726,6 +1799,7 @@ private:
     static const int32_t ONLY_CALLBACK_MIN_PARA = 0;
     static std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> wantAgent_;
     static std::mutex mutex_;
+    static const char *GetPropertyNameByContentType(ContentType type);
 };
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -269,6 +269,16 @@ const std::shared_ptr<Media::PixelMap> NotificationRequest::GetBigIcon() const
     return bigIcon_;
 }
 
+void NotificationRequest::SetOverlayIcon(const std::shared_ptr<Media::PixelMap> &overlayIcon)
+{
+    overlayIcon_ = overlayIcon;
+}
+
+const std::shared_ptr<Media::PixelMap> NotificationRequest::GetOverlayIcon() const
+{
+    return overlayIcon_;
+}
+
 void NotificationRequest::SetClassification(const std::string &classification)
 {
     classification_ = classification;
@@ -1534,6 +1544,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->additionalParams_ = other.additionalParams_;
     this->littleIcon_ = other.littleIcon_;
     this->bigIcon_ = other.bigIcon_;
+    this->overlayIcon_ = other.overlayIcon_;
     this->notificationContent_ = other.notificationContent_;
 
     this->actionButtons_ = other.actionButtons_;
