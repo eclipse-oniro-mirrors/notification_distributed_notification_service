@@ -23,6 +23,7 @@
 #include "native_engine/native_value.h"
 #include "parcel.h"
 #include "push_callback_stub.h"
+#include "want.h"
 
 class NativeReference;
 
@@ -35,17 +36,21 @@ class JSPushCallBack : public PushCallBackStub {
 public:
     JSPushCallBack(napi_env env);
     virtual ~JSPushCallBack();
-    bool OnCheckNotification(const std::string &notificationData);
+    int32_t OnCheckNotification(const std::string &notificationData);
     void SetJsPushCallBackObject(napi_value pushCallBackObject);
     bool IsEqualPushCallBackObject(napi_value pushCallBackObject);
+    int32_t HandleCheckPromise(napi_value funcResult);
+    static napi_value CheckPromiseCallback(napi_env env, napi_callback_info info);
 
 private:
-    bool ConvertFunctionResult(napi_value funcResult);
-    void ConvertJsonStringToValue(
-        const std::string &notificationData, std::string &pkgName, int32_t &notifyId, int32_t &contentType);
+    static bool ConvertFunctionResult(napi_env env, napi_value funcResult);
+    void SetJsPropertyString(std::string key, std::string value, napi_value& jsResult);
+    void SetJsPropertyInt32(std::string key, int32_t value, napi_value& jsResult);
+    void SetJsPropertyWantParams(std::string key, std::shared_ptr<AAFwk::WantParams> wantParams, napi_value& jsResult);
     napi_env env_ = nullptr;
     napi_ref pushCallBackObject_ = nullptr;
     std::mutex mutexlock;
+    static int32_t checkResult_;
 };
 } // namespace Notification
 } // namespace OHOS

@@ -279,6 +279,21 @@ public:
     bool GetEnable() const;
 
     /**
+     * @brief Set whether the application slot is force control.
+     * @note If the slot is force control, the notification ability is not affected by the bundle.
+     *
+     * @param isForceControl Specifies whether is force control.
+     */
+    void SetForceControl(bool isForceControl);
+
+    /**
+     * @brief Obtains whether the application slot is force control.
+     *
+     * @return Returns true if the slot is force control; returns false otherwise.
+     */
+    bool GetForceControl() const;
+
+    /**
      * @brief Dumps a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -352,6 +367,7 @@ private:
     Uri sound_;
     std::vector<int64_t> vibrationValues_ {};
     bool enabled_ {true};
+    bool isForceControl_ {false};
 
     // no object in parcel
     static constexpr int32_t VALUE_NULL = -1;

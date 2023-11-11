@@ -79,9 +79,15 @@ enum ErrorCode : uint32_t {
     ERR_ANS_SUBSCRIBER_IS_DELETING,
     ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED,
     ERR_ANS_DLP_HAP,
-    ERR_ANS_NOTIFICATION_PUSH_CHECK_FAILED,
+    ERR_ANS_PUSH_CHECK_FAILED,
     ERR_ANS_DIALOG_POP_SUCCEEDED,
     ERR_ANS_DIALOG_IS_POPPING,
+    ERR_ANS_PUSH_CHECK_UNREGISTERED,
+    ERR_ANS_REPEAT_CREATE,
+    ERR_ANS_END_NOTIFICATION,
+    ERR_ANS_EXPIRED_NOTIFICATION,
+    ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE,
+    ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID,
 };
 
 enum ReminderErrorCode : uint32_t {
@@ -121,6 +127,10 @@ const int32_t ERROR_DISTRIBUTED_OPERATION_FAILED = 1600010;    // Distributed op
 const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Read template config failed.
 const int32_t ERROR_NO_MEMORY                    = 1600012;    // No memory space.
 const int32_t ERROR_DIALOG_IS_POPPING            = 1600013;    // Enable notification dialog is popping.
+const int32_t ERROR_NO_RIGHT                     = 1600014;    // No right.
+const int32_t ERROR_REPEAT_SET                   = 1600015;    // Repeat create or end.
+const int32_t ERROR_EXPIRED_NOTIFICATION         = 1600016;    // Low update version.
+const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification
 }  // namespace OHOS

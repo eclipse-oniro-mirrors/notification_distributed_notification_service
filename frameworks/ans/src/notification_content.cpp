@@ -96,6 +96,17 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationLocal
     content_ = localLiveViewContent;
 }
 
+NotificationContent::NotificationContent(const std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
+{
+    if (!liveViewContent) {
+        ANS_LOGE("NotificationLiveViewContent can not be null");
+        return;
+    }
+
+    contentType_ = NotificationContent::Type::LIVE_VIEW;
+    content_ = liveViewContent;
+}
+
 NotificationContent::~NotificationContent()
 {}
 
@@ -118,8 +129,8 @@ std::string NotificationContent::Dump()
                                  : (contentType_ == NotificationContent::Type::MULTILINE)           ? "MULTILINE"
                                  : (contentType_ == NotificationContent::Type::PICTURE)             ? "PICTURE"
                                  : (contentType_ == NotificationContent::Type::LOCAL_LIVE_VIEW)     ? "LOCAL_LIVE_VIEW"
-                                    : "NONE";
-
+                                 : (contentType_ == NotificationContent::Type::LIVE_VIEW)           ? "LIVE_VIEW"
+                                 : "NONE";
     return "NotificationContent{ "
             "contentType = " + contentTypeStr +
             ", content = " + (content_ ? content_->Dump() : "null") +
@@ -211,8 +222,7 @@ bool NotificationContent::ReadFromParcel(Parcel &parcel)
 {
     contentType_ = static_cast<NotificationContent::Type>(parcel.ReadInt32());
 
-    auto valid = parcel.ReadBool();
-    if (!valid) {
+    if (!parcel.ReadBool()) {
         return true;
     }
 
@@ -247,6 +257,10 @@ bool NotificationContent::ReadFromParcel(Parcel &parcel)
                 std::shared_ptr<NotificationLocalLiveViewContent>(
                     parcel.ReadParcelable<NotificationLocalLiveViewContent>()));
             break;
+        case NotificationContent::Type::LIVE_VIEW:
+            content_ = std::static_pointer_cast<NotificationBasicContent>(
+                std::shared_ptr<NotificationLiveViewContent>(parcel.ReadParcelable<NotificationLiveViewContent>()));
+            break;
         default:
             ANS_LOGE("Invalid contentType");
             return false;
@@ -271,8 +285,7 @@ bool NotificationContent::ConvertJsonToContent(NotificationContent *target, cons
         ANS_LOGE("ContentType is not integer");
         return false;
     }
-    auto contentTypeValue  = contentType.get<int32_t>();
-    target->contentType_   = static_cast<NotificationContent::Type>(contentTypeValue);
+    target->contentType_   = static_cast<NotificationContent::Type>(contentType.get<int32_t>());
 
     auto contentObj = jsonObject.at("content");
     if (contentObj.is_null()) {
@@ -299,6 +312,9 @@ bool NotificationContent::ConvertJsonToContent(NotificationContent *target, cons
             break;
         case NotificationContent::Type::LOCAL_LIVE_VIEW:
             pBasicContent = NotificationJsonConverter::ConvertFromJson<NotificationLocalLiveViewContent>(contentObj);
+            break;
+        case NotificationContent::Type::LIVE_VIEW:
+            pBasicContent = NotificationJsonConverter::ConvertFromJson<NotificationLiveViewContent>(contentObj);
             break;
         default:
             ANS_LOGE("Invalid contentType");

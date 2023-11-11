@@ -35,6 +35,8 @@ private:
     napi_value OnRegisterPushCallback(napi_env env, const napi_callback_info info);
     napi_value OnUnregisterPushCallback(napi_env env, const napi_callback_info info);
     bool CheckCallerIsSystemApp();
+    napi_value ParseCheckRequest(const napi_env &env,
+        const napi_value &obj, sptr<NotificationCheckRequest> &checkRequest);
 };
 } // namespace NotificationNapi
 } // namespace OHOS
