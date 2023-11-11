@@ -52,6 +52,7 @@ enum class SlotType {
     SERVICE_INFORMATION = 2,
     CONTENT_INFORMATION = 3,
     LIVE_VIEW = 4,
+    CUSTOMER_SERVICE = 5,
     OTHER_TYPES = 0xFFFF,
 };
 

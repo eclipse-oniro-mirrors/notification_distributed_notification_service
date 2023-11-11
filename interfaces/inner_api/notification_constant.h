@@ -63,6 +63,7 @@ public:
         OTHER,                  // the notificatin type is other
         CUSTOM,                 // the notification type is custom
         LIVE_VIEW,              // the notification type is live view
+        CUSTOMER_SERVICE,       // the notification type is customer service
     };
 
     enum class VisiblenessType {
