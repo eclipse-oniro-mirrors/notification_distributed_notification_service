@@ -58,7 +58,7 @@ ohos_executable("anm") {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
   }
 
-  if (build_variant == "user"){
+  if (build_variant == "user") {
     defines += [ "ANM_BUILD_VARIANT_USER" ]
   }
 
