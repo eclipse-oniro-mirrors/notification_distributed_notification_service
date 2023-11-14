@@ -57,12 +57,12 @@ HWTEST_F(NotificationLocalLiveViewContentTest, ToJson_00001, Function | SmallTes
 }
 
 /**
- * @tc.name: FromJson_00002
+ * @tc.name: FromJson_00001
  * @tc.desc: Test FromJson parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00002, Function | SmallTest | Level1)
+HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<NotificationLocalLiveViewContent>();
     nlohmann::json jsonObject = nlohmann::json{"typeCode", "capsule", "button", "progress", "time"};
@@ -90,12 +90,11 @@ HWTEST_F(NotificationLocalLiveViewContentTest, Marshalling_00001, Function | Sma
  * @tc.type: FUNC
  * @tc.require: issueI5WBBH
  */
-HWTEST_F(NotificationLocalLiveViewContentTest, Unmarshalling_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationLocalLiveViewContentTest, Unmarshalling_00001, Function | SmallTest | Level1)
 {
     bool unmarshalling = true;
     Parcel parcel;
-    std::shared_ptr<NotificationLocalLiveViewContent> result =
-    std::make_shared<NotificationLocalLiveViewContent>();
+    auto result = std::make_shared<NotificationLocalLiveViewContent>();
 
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {
@@ -106,12 +105,12 @@ HWTEST_F(NotificationLocalLiveViewContentTest, Unmarshalling_001, Function | Sma
 }
 
 /**
- * @tc.name: FromJson_00004
+ * @tc.name: FromJson_00002
  * @tc.desc: Test FromJson parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00004, Function | SmallTest | Level1)
+HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00002, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<NotificationLocalLiveViewContent>();
     nlohmann::json jsonObject = nlohmann::json{

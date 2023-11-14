@@ -1550,11 +1550,6 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
             break;
         }
 
-        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            errCode = ERR_ANS_PERMISSION_DENIED;
-            break;
-        }
-
         errCode = NotificationLocalLiveViewSubscriberManager::GetInstance()->AddLocalLiveViewSubscriber(
             subscriber, info);
         if (errCode != ERR_OK) {

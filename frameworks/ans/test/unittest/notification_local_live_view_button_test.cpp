@@ -30,12 +30,12 @@ public:
 };
 
 /**
- * @tc.name: AddSingleButtonName__00001
+ * @tc.name: AddSingleButtonName_00001
  * @tc.desc: Test buttonNames_ parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName__00001, Function | SmallTest | Level1)
+HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName_00001, Function | SmallTest | Level1)
 {
     std::string buttonName = "testOneButton";
     auto rrc = std::make_shared<NotificationLocalLiveViewButton>();
@@ -44,12 +44,12 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName__00001, Functi
 }
 
 /**
- * @tc.name: AddSingleButtonName__00002
+ * @tc.name: AddSingleButtonName_00002
  * @tc.desc: Test buttonNames_ parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName__00002, Function | SmallTest | Level1)
+HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName_00002, Function | SmallTest | Level1)
 {
     std::string buttonName = "testOneButton";
     auto rrc = std::make_shared<NotificationLocalLiveViewButton>();
@@ -58,12 +58,12 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName__00002, Functi
 }
 
 /**
- * @tc.name: AddSingleButtonName__00003
+ * @tc.name: AddSingleButtonName_00003
  * @tc.desc: Test buttonNames_ parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName__00003, Function | SmallTest | Level1)
+HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName_00003, Function | SmallTest | Level1)
 {
     std::string buttonNameOne = "testOneButton";
     std::string buttonNameTwo = "testTwoButton";
@@ -124,12 +124,12 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, Marshalling_00001, Function | Smal
  * @tc.type: FUNC
  * @tc.require: issueI5WBBH
  */
-HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00001, Function | SmallTest | Level1)
 {
     bool unmarshalling = true;
     Parcel parcel;
     std::shared_ptr<NotificationLocalLiveViewButton> result =
-    std::make_shared<NotificationLocalLiveViewButton>();
+        std::make_shared<NotificationLocalLiveViewButton>();
 
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {
