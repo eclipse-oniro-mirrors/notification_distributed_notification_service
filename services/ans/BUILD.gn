@@ -101,7 +101,6 @@ ohos_shared_library("libans") {
     "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
     "ffrt:libffrt",
-    "hitrace:hitrace_meter",
     "i18n:intl_util",
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
@@ -130,6 +129,11 @@ ohos_shared_library("libans") {
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+
+  if (ans_hitrace_usage) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+    defines += [ "HITRACE_METER_ENABLE" ]
   }
 
   subsystem_name = "${subsystem_name}"

@@ -109,6 +109,8 @@ ohos_shared_library("ans_innerkits") {
 
   public_configs = [ ":ans_innerkits_public_config" ]
 
+  defines = []
+
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
@@ -119,7 +121,6 @@ ohos_shared_library("ans_innerkits") {
     "eventhandler:libeventhandler",
     "hicollie:libhicollie",
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "i18n:intl_util",
     "image_framework:image_native",
     "ipc:ipc_core",
@@ -131,6 +132,11 @@ ohos_shared_library("ans_innerkits") {
 
   if (is_double_framework) {
     cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]
+  }
+
+  if (ans_hitrace_usage) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+    defines += [ "HITRACE_METER_ENABLE" ]
   }
 
   subsystem_name = "${subsystem_name}"

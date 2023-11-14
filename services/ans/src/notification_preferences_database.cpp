@@ -17,7 +17,7 @@
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
-#include "hitrace_meter.h"
+#include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
 
 #include "uri.h"

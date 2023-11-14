@@ -15,7 +15,7 @@
 
 #include "notification_subscriber.h"
 
-#include "hitrace_meter.h"
+#include "hitrace_meter_adapter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 

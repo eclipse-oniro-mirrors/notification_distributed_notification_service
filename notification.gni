@@ -53,6 +53,7 @@ declare_args() {
   hisysevent_usage = true
   standby_enable = true
   player_framework = true
+  ans_hitrace_usage = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
@@ -74,5 +75,11 @@ declare_args() {
     player_framework = false
   }
 
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.hiviewdfx_hitrace)) {
+    ans_hitrace_usage = false
+  }
+
   print("hisysevent_usage = " + "$hisysevent_usage")
+  print("ans_hitrace_usage = " + "$ans_hitrace_usage")
 }

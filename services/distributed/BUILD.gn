@@ -46,6 +46,8 @@ ohos_shared_library("libans_distributed") {
 
   include_dirs = [ "include" ]
 
+  defines = []
+
   configs = [
     ":ans_distributed_config",
     "${frameworks_module_ans_path}:ans_innerkits_public_config",
@@ -61,9 +63,13 @@ ohos_shared_library("libans_distributed") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "kv_store:distributeddata_inner",
   ]
+
+  if (ans_hitrace_usage) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+    defines += [ "HITRACE_METER_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

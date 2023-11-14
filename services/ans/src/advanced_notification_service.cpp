@@ -35,7 +35,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "event_report.h"
-#include "hitrace_meter.h"
+#include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "nlohmann/json.hpp"
 #include "notification_constant.h"
