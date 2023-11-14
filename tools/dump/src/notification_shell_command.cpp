@@ -248,6 +248,10 @@ void NotificationShellCommand::CheckDumpOpt()
 
 ErrCode NotificationShellCommand::RunAsSettingCommand()
 {
+#ifdef ANM_BUILD_VARIANT_USER
+     resultReceiver_.append("error: user version cannot use setting.\n");
+     return ERR_INVALID_VALUE;
+#endif
     int option = getopt_long(argc_, argv_, SETTING_SHORT_OPTIONS, SETTING_LONG_OPTIONS, nullptr);
     if (option == '?') {
         if (optopt == 'c') {
