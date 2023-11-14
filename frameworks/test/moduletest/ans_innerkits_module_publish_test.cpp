@@ -17,6 +17,8 @@
 
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
+#include "notification_local_live_view_content.h"
+#include "notification_local_live_view_subscriber.h"
 #define private public
 #include "advanced_notification_service.h"
 #undef private
@@ -60,6 +62,8 @@ const int32_t CASE_FOURTEEN = 14;
 const int32_t CASE_FIFTEEN = 15;
 const int32_t CASE_SIXTEEN = 16;
 const int32_t CASE_SEVENTEEN = 17;
+const int32_t CASE_EIGHTEEN = 18;
+const int32_t CASE_NINETEEN = 19;
 
 const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
@@ -73,8 +77,32 @@ std::mutex g_unsubscribe_mtx;
 std::mutex g_send_finished_mtx;
 AAFwk::Want g_want;
 
+std::mutex g_system_live_view_subscribe_mtx;
+std::mutex g_system_live_view_subscribe_response_mtx;
+std::string g_onResponseReceivedButtonName {"testButton"};
+int32_t g_onResponseReceivedId = -1;
+
 const time_t TIME_OUT_SECONDS_LIMIT = 5;
 const std::string CLASSIFICATION_ALARM {"alarm"};
+
+class TestLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber {
+    void OnConnected()
+    {}
+
+    void OnDisconnected()
+    {}
+
+    void OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption)
+    {
+        GTEST_LOG_(INFO) << "OnResponse notificationId : " << notificationId;
+        g_onResponseReceivedId = notificationId;
+        g_onResponseReceivedButtonName = buttonOption->GetButtonName();
+        g_system_live_view_subscribe_response_mtx.unlock();
+    }
+
+    void OnDied()
+    {}
+};
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
@@ -430,6 +458,7 @@ public:
     void WaitOnSubscribeResult();
     void WaitOnConsumed();
     void WaitOnUnsubscribeResult();
+    void WaitOnResponse(int32_t notificationId, std::string buttonName);
     void CheckJsonConverter(const NotificationRequest *request);
 
     static sptr<AdvancedNotificationService> service_;
@@ -512,6 +541,25 @@ void AnsInnerKitsModulePublishTest::WaitOnUnsubscribeResult()
             break;
         }
     }
+}
+
+void AnsInnerKitsModulePublishTest::WaitOnResponse(int32_t notificationId, std::string buttonName)
+{
+    struct tm publishTime = {0};
+    EXPECT_EQ(OHOS::GetSystemCurrentTime(&publishTime), true);
+    struct tm publishDoingTime = {0};
+    EXPECT_EQ(OHOS::GetSystemCurrentTime(&publishDoingTime), true);
+    int64_t publishSeconds = 0;
+    while (!g_system_live_view_subscribe_response_mtx.try_lock()) {
+        EXPECT_EQ(OHOS::GetSystemCurrentTime(&publishDoingTime), true);
+        publishSeconds = OHOS::GetSecondsBetween(publishTime, publishDoingTime);
+        if (publishSeconds >= TIME_OUT_SECONDS_LIMIT) {
+            GTEST_LOG_(INFO) << "g_system_live_view_subscribe_response_mtx.try_lock overtime";
+            break;
+        }
+    }
+    EXPECT_EQ(g_onResponseReceivedButtonName, buttonName);
+    EXPECT_EQ(g_onResponseReceivedId, notificationId);
 }
 
 void AnsInnerKitsModulePublishTest::CheckJsonConverter(const NotificationRequest *request)
@@ -1591,6 +1639,45 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    WaitOnUnsubscribeResult();
+}
+
+/**
+ * @tc.number    : ANS_Interface_MT_Publish_10001
+ * @tc.name      : Publish_10001
+ * @tc.desc      : Add notification slot(type is LIVE_VIEW), make a subscriber, a system live view subscriber
+ *                 and publish a system live view notification. Then trigger a button.
+ * @tc.expected  : Add notification slot success, make a subscriber, publish a notification
+ *                 and trigger a buuton success.
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function | MediumTest | Level1)
+{
+    NotificationSlot slot(NotificationConstant::LIVE_VIEW);
+    EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
+    auto subscriber = TestAnsSubscriber();
+    g_subscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    WaitOnSubscribeResult();
+
+    MessageUser messageUser;
+    std::shared_ptr<NotificationLocalLiveViewContent> liveContent =
+        std::make_shared<NotificationLocalLiveViewContent>();
+    EXPECT_NE(liveContent, nullptr);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveContent);
+    EXPECT_NE(content, nullptr);
+
+    NotificationRequest req;
+    int32_t notificationId = CASE_EIGHTEEN;
+    req.SetContent(content);
+    req.SetSlotType(NotificationConstant::LIVE_VIEW);
+    req.SetNotificationId(notificationId);
+
+    g_consumed_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
+    WaitOnConsumed();
+
+    g_unsubscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
     WaitOnUnsubscribeResult();
 }
 
