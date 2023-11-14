@@ -63,7 +63,6 @@ const int32_t CASE_FIFTEEN = 15;
 const int32_t CASE_SIXTEEN = 16;
 const int32_t CASE_SEVENTEEN = 17;
 const int32_t CASE_EIGHTEEN = 18;
-const int32_t CASE_NINETEEN = 19;
 
 const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;

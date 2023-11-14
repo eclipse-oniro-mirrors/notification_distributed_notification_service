@@ -40,5 +40,84 @@ HWTEST_F(NotificationLocalLiveViewContentTest, SetTypeCode_00001, Function | Sma
     rrc->SetType(typeCode);
     EXPECT_EQ(rrc->GetType(), typeCode);
 }
+
+
+/**
+ * @tc.name: ToJson_00001
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, ToJson_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    auto rrc = std::make_shared<NotificationLocalLiveViewContent>();
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrc->ToJson(jsonObject), true);
+}
+
+/**
+ * @tc.name: FromJson_00001
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLocalLiveViewContent>();
+    nlohmann::json jsonObject = nlohmann::json{"typeCode", "capsule", "button", "progress", "time"};
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    EXPECT_EQ(rrc->FromJson(jsonObject), NULL);
+}
+
+/**
+ * @tc.name: Marshalling_00001
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, Marshalling_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto rrc = std::make_shared<NotificationLocalLiveViewContent>();
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+}
+
+/**
+ * @tc.name: Unmarshalling_00001
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, Unmarshalling_00001, Function | SmallTest | Level1)
+{
+    bool unmarshalling = true;
+    Parcel parcel;
+    auto result = std::make_shared<NotificationLocalLiveViewContent>();
+
+    if (nullptr != result) {
+        if (nullptr == result->Unmarshalling(parcel)) {
+            unmarshalling = false;
+        }
+    }
+    EXPECT_EQ(unmarshalling, false);
+}
+
+/**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLocalLiveViewContent>();
+    nlohmann::json jsonObject = nlohmann::json{
+        {"longText", "test"},
+        {"expandedTitle", "test"},
+        {"briefText", "test"}};
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
 }
 }
