@@ -5263,7 +5263,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
-        if (!record->bundleOption.GetBundleName().empty()) {
+        if (!record->bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record);
             if (ret != ERR_OK) {
                 ANS_LOGE("Can not assign valid slot!");
