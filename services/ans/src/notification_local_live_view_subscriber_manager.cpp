@@ -23,7 +23,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_watchdog.h"
-#include "hitrace_meter.h"
+#include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
 #include "notification_button_option.h"

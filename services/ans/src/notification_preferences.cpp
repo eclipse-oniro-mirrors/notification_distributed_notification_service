@@ -21,7 +21,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "bundle_manager_helper.h"
-#include "hitrace_meter.h"
+#include "hitrace_meter_adapter.h"
 #include "nlohmann/json.hpp"
 #include "os_account_manager.h"
 
