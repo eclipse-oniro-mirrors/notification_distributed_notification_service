@@ -931,5 +931,64 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0560
     int32_t userId = 1;
     EXPECT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, userId), false);
 }
+
+/**
+ * @tc.name      : NotificationPreferences_05700
+ * @tc.number    :
+ * @tc.desc      : Test set k-v to db
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_05700, Function | SmallTest | Level1)
+{
+    MockInit(true);
+    MockInsertData(false);
+    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test")), NativeRdb::E_ERROR);
+    MockInsertData(true);
+    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test")), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : NotificationPreferences_05701
+ * @tc.number    :
+ * @tc.desc      : Test get k-v from db
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_05701, Function | SmallTest | Level1)
+{
+    MockInit(true);
+    MockQueryData(false);
+    string value;
+    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value), NativeRdb::E_ERROR);
+    MockQueryData(true);
+    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value), NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name      : NotificationPreferences_05702
+ * @tc.number    :
+ * @tc.desc      : Test batch get kv from db
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_05702, Function | SmallTest | Level1)
+{
+    MockInit(true);
+    MockQueryDataBeginWithKey(false);
+    std::unordered_map<std::string, std::string> value;
+    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value), NativeRdb::E_ERROR);
+    MockQueryDataBeginWithKey(true);
+    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : NotificationPreferences_05703
+ * @tc.number    :
+ * @tc.desc      : Test batch get kv from db
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_05703, Function | SmallTest | Level1)
+{
+    MockInit(true);
+    MockDeleteData(false);
+    std::unordered_map<std::string, std::string> value;
+    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test")), NativeRdb::E_ERROR);
+    MockDeleteData(true);
+    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test")), NativeRdb::E_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

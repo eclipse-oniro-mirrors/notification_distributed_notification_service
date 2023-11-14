@@ -148,6 +148,27 @@ void NotificationSubscriberManager::NotifyConsumed(
     ANS_LOGE("ffrt end!");
 }
 
+void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGI("Start batch notifyConsumed.");
+    if (notifications.empty() || notificationMap == nullptr || record == nullptr) {
+        ANS_LOGE("Invalid input.");
+        return;
+    }
+
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("Queue is nullptr");
+        return;
+    }
+
+    AppExecFwk::EventHandler::Callback batchNotifyConsumedFunc = std::bind(
+        &NotificationSubscriberManager::BatchNotifyConsumedInner, this, notifications, notificationMap, record);
+
+    notificationSubQueue_->submit(batchNotifyConsumedFunc);
+}
+
 void NotificationSubscriberManager::NotifyCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
@@ -333,7 +354,11 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     }
 
     AddRecordInfo(record, subscribeInfo);
+    if (onSubscriberAddCallback_ != nullptr) {
+        onSubscriberAddCallback_(record);
+    }
 
+    ANS_LOGI("Add subscriber success.");
     return ERR_OK;
 }
 
@@ -382,6 +407,43 @@ void NotificationSubscriberManager::NotifyConsumedInner(
             IsSystemUser(record->userId) ||  // Delete this, When the systemui subscribe carry the user ID.
             IsSystemUser(sendUserId))) {
             record->subscriber->OnConsumed(notification, notificationMap);
+        }
+    }
+}
+
+void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (notifications.empty() || notificationMap == nullptr || record == nullptr) {
+        ANS_LOGE("Invalid input.");
+        return;
+    }
+
+    ANS_LOGD("Record->userId = <%{public}d>", record->userId);
+    std::vector<sptr<Notification>> currNotifications;
+    for (size_t i = 0; i < notifications.size(); i ++) {
+        sptr<Notification> notification = notifications[i];
+        if (notification == nullptr) {
+            continue;
+        }
+        auto bundleName = notification->GetBundleName();
+        auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleName);
+        int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
+        int32_t sendUserId = notification->GetUserId();
+        if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
+            ((record->userId == sendUserId) ||
+            (record->userId == SUBSCRIBE_USER_ALL) ||
+            (record->userId == recvUserId) ||
+            IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
+            IsSystemUser(sendUserId))) {
+            currNotifications.emplace_back(notification);
+        }
+    }
+    if (!currNotifications.empty()) {
+        ANS_LOGD("OnConsumedList currNotifications size = <%{public}zu>", currNotifications.size());
+        if (record->subscriber != nullptr) {
+            record->subscriber->OnConsumedList(currNotifications, notificationMap);
         }
     }
 }
@@ -493,5 +555,28 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
     notificationSubQueue_->submit(setBadgeNumberFunc);
     ANS_LOGE("ffrt end!");
 }
+
+void NotificationSubscriberManager::RegisterOnSubscriberAddCallback(
+    std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback)
+{
+    if (callback == nullptr) {
+        ANS_LOGE("Callback is nullptr");
+        return;
+    }
+
+    onSubscriberAddCallback_ = callback;
+}
+
+void NotificationSubscriberManager::UnRegisterOnSubscriberAddCallback()
+{
+    onSubscriberAddCallback_ = nullptr;
+}
+
+std::list<std::shared_ptr<NotificationSubscriberManager::SubscriberRecord>>
+    NotificationSubscriberManager::GetSubscriberRecords()
+{
+    return subscriberRecordList_;
+}
+
 }  // namespace Notification
 }  // namespace OHOS

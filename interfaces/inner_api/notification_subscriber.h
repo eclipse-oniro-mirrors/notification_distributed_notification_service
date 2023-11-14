@@ -120,6 +120,9 @@ private:
         void OnConsumed(
             const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
 
+        void OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+            const sptr<NotificationSortingMap> &notificationMap) override;
+
         void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
             int32_t deleteReason) override;
 

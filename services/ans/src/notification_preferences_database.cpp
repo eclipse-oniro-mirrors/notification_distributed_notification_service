@@ -1362,7 +1362,7 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userI
         beginDateKey,
         endDateKey
     };
-    
+
     int32_t result = rdbDataManager_->DeleteBathchData(keys);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete DoNotDisturb date failed.");
@@ -1389,6 +1389,71 @@ bool NotificationPreferencesDatabase::RemoveAnsBundleDbInfo(std::string bundleNa
 
     ANS_LOGE("Remove ans bundle db info, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
     return true;
+}
+
+int32_t NotificationPreferencesDatabase::SetKvToDb(
+    const std::string &key, const std::string &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+    int32_t result = rdbDataManager_->InsertData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationPreferencesDatabase::GetKvFromDb(
+    const std::string &key, std::string &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->QueryData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get key-value failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationPreferencesDatabase::GetBatchKvsFromDb(
+    const std::string &key, std::unordered_map<std::string, std::string>  &values)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(key, values);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get batch notification request failed, key %{public}s, result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->DeleteData(key);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Delete key-value failed, key %{public}s, result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

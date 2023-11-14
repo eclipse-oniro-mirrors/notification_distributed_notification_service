@@ -19,10 +19,13 @@
 #define private public
 #include "notification_subscriber.h"
 #include "notification_subscriber_manager.h"
+#include "mock_ans_subscriber.h"
 
 #include "ans_inner_errors.h"
 
 using namespace testing::ext;
+using namespace testing;
+
 namespace OHOS {
 namespace Notification {
 class NotificationSubscriberManagerTest : public testing::Test {
@@ -168,5 +171,121 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ(notificationSubscriberManager_->RemoveSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
 }
+
+/**
+ * @tc.number    : RegisterOnSubscriberAddCallbackTest_001
+ * @tc.name      : RegisterOnSubscriberAddCallback and callback is not nullptr
+ * @tc.desc      : Test RegisterOnSubscriberAddCallback .
+ */
+void OnSubscriberAddFake(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &recode) {}
+HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_001, Function | SmallTest | Level1)
+{
+    std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
+        std::bind(OnSubscriberAddFake, std::placeholders::_1);
+
+    notificationSubscriberManager_->RegisterOnSubscriberAddCallback(callback);
+    EXPECT_NE(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
+}
+
+/**
+ * @tc.number    : RegisterOnSubscriberAddCallbackTest_002
+ * @tc.name      : RegisterOnSubscriberAddCallback and callback is nullptr
+ * @tc.desc      : Test RegisterOnSubscriberAddCallback .
+ */
+HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_002, Function | SmallTest | Level1)
+{
+    std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
+        std::bind(OnSubscriberAddFake, std::placeholders::_1);
+    notificationSubscriberManager_->RegisterOnSubscriberAddCallback(callback);
+    EXPECT_NE(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
+
+    // if callback exist, re-register a nullptr func will fail.
+    notificationSubscriberManager_->RegisterOnSubscriberAddCallback(nullptr);
+    EXPECT_NE(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
+}
+
+/**
+ * @tc.number    : UnRegisterOnSubscriberAddCallbackTest_001
+ * @tc.name      : UnRegisterOnSubscriberAddCallback
+ * @tc.desc      : Test UnRegisterOnSubscriberAddCallback .
+ */
+HWTEST_F(NotificationSubscriberManagerTest, UnRegisterOnSubscriberAddCallbackTest_001, Function | SmallTest | Level1)
+{
+    std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
+        std::bind(OnSubscriberAddFake, std::placeholders::_1);
+    notificationSubscriberManager_->RegisterOnSubscriberAddCallback(callback);
+    EXPECT_NE(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
+
+    notificationSubscriberManager_->UnRegisterOnSubscriberAddCallback();
+    EXPECT_EQ(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
+}
+
+/**
+ * @tc.number    : BatchNotifyConsumedInner_001
+ * @tc.name      : BatchNotifyConsumedInner
+ * @tc.desc      : Test BatchNotifyConsumedInner .
+ */
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Function | SmallTest | Level1)
+{
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
+    EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(1);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("test");
+    sptr<Notification> notification = new Notification(request);
+
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager_->CreateSubscriberRecord(mockSubscriber);
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppName("test");
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    notificationSubscriberManager_->AddRecordInfo(record, subscribeInfo);
+    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record);
+}
+
+/**
+ * @tc.number    : BatchNotifyConsumedInner_002
+ * @tc.name      : BatchNotifyConsumedInner and params is invalid
+ * @tc.desc      : Test BatchNotifyConsumedInner .
+ */
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_002, Function | SmallTest | Level1)
+{
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
+    EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(0);
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, nullptr, nullptr);
+}
+
+/**
+ * @tc.number    : BatchNotifyConsumedInner_003
+ * @tc.name      : BatchNotifyConsumedInner and subscriber isn't subscribed to this notification
+ * @tc.desc      : Test BatchNotifyConsumedInner .
+ */
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_003, Function | SmallTest | Level1)
+{
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
+    EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(0);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("test");
+    sptr<Notification> notification = new Notification(request);
+
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager_->CreateSubscriberRecord(mockSubscriber);
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppName("test_1");
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    notificationSubscriberManager_->AddRecordInfo(record, subscribeInfo);
+    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

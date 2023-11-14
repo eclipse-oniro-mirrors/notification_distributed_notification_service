@@ -16,11 +16,12 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_BUNDLE_OPTION_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_BUNDLE_OPTION_H
 
+#include "notification_json_convert.h"
 #include "parcel.h"
 
 namespace OHOS {
 namespace Notification {
-class NotificationBundleOption : public Parcelable {
+class NotificationBundleOption : public Parcelable, public NotificationJsonConvertionBase {
 public:
     NotificationBundleOption() = default;
 
@@ -84,6 +85,22 @@ public:
      * @return Returns the NotificationBundleOption
      */
     static NotificationBundleOption *Unmarshalling(Parcel &parcel);
+
+    /**
+     * @brief Converts a notification bundle option object into a Json.
+     *
+     * @param jsonObject Indicates the Json object.
+     * @return Returns true if succeed; returns false otherwise.
+     */
+    bool ToJson(nlohmann::json &jsonObject) const override;
+
+    /**
+     * @brief Creates a bundle option object from a Json.
+     *
+     * @param jsonObject Indicates the Json object.
+     * @return Returns the NotificationBundleOption.
+     */
+    static NotificationBundleOption *FromJson(const nlohmann::json &jsonObject);
 
 private:
     /**

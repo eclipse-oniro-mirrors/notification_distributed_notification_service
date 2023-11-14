@@ -104,6 +104,7 @@ ohos_unittest("ans_unit_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/../framworks/core/include",
   ]
 
   defines = []
@@ -132,6 +133,7 @@ ohos_unittest("ans_unit_test") {
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
+    "//third_party/googletest:gmock_main",
   ]
 
   if (distributed_notification_supported) {

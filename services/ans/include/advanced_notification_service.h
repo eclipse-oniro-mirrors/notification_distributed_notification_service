@@ -39,11 +39,17 @@
 #include "permission_filter.h"
 #include "push_callback_interface.h"
 #include "system_event_observer.h"
+#include "notification_subscriber_manager.h"
 
 namespace OHOS {
 namespace Notification {
 class AdvancedNotificationService final : public AnsManagerStub {
 public:
+    struct NotificationRequestDb {
+        sptr<NotificationRequest> request {nullptr};
+        sptr<NotificationBundleOption> bundleOption {nullptr};
+    };
+
     ~AdvancedNotificationService() override;
 
     DISALLOW_COPY_AND_MOVE(AdvancedNotificationService);
@@ -195,6 +201,10 @@ public:
     ErrCode GetSpecialActiveNotifications(
         const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications) override;
 
+    ErrCode GetActiveNotificationByFilter(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
+        const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request) override;
+
     /**
      * @brief Allows another application to act as an agent to publish notifications in the name of your application
      * bundle.
@@ -297,6 +307,9 @@ public:
     ErrCode RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption) override;
 
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
+
+    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationSlot> &slot);
 
     /**
      * @brief Delete notification based on key.
@@ -658,9 +671,10 @@ public:
      */
     ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled) override;
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) override;
+    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) override;
 
     // SystemEvent
 
@@ -760,9 +774,11 @@ public:
      * @brief Register Push Callback.
      *
      * @param pushCallback PushCallBack.
+     * @param notificationCheckRequest Filter conditions for push check
      * @return Returns register push Callback result.
      */
-    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback) override;
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback,
+        const sptr<NotificationCheckRequest> &notificationCheckRequest) override;
 
     /**
      * @brief Unregister Push Callback.
@@ -802,6 +818,7 @@ private:
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
         const int32_t &userId, sptr<Notification> &notification);
+    std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);
     void SortNotificationList();
@@ -878,10 +895,10 @@ private:
         const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
     void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
-    bool IsNeedPushCheck(NotificationConstant::SlotType slotType);
+    bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
-    void StartAutoDelete(const std::shared_ptr<NotificationRecord> &record);
-    void TriggerAutoDelete(std::string hashCode);
+    uint64_t StartAutoDelete(const std::string &key, int64_t deleteTimePoint, int32_t reason);
+    void TriggerAutoDelete(const std::string &hashCode, int32_t reason);
     void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
@@ -897,11 +914,35 @@ private:
     ErrCode GetTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
+    ErrCode CheckNotificationEnableStatus(bool &notificationEnable);
+    ErrCode PublishPreparedNotificationInner(const sptr<NotificationRequest> &request);
+    void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
+    void RecoverLiveViewFromDb();
+    bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
+    ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
+        std::shared_ptr<NotificationRecord> record);
+    static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
+    static int32_t GetNotificationRequestFromDb(const std::string &key, NotificationRequestDb &requestDb);
+    static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests);
+    static int32_t DeleteNotificationRequestFromDb(const std::string &key);
+    void CancelAutoDeleteTimer(uint64_t timerId);
+    ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    void CancelFinishTimer(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode SetUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode StartUpdateTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    void CancelUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
+    void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
+    void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
+    void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode CheckCommonParams();
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
     static std::mutex pushMutex_;
-    static sptr<IPushCallBack> pushCallBack_;
+    static std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> pushCallBacks_;
+    static std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> checkRequests_;
 
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;

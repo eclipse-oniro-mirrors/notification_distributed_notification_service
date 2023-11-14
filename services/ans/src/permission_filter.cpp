@@ -30,6 +30,7 @@ void PermissionFilter::OnStop()
 
 ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &record)
 {
+    bool isForceControl = false;
     bool enable = false;
     ErrCode result =
         NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(record->bundleOption, enable);
@@ -40,8 +41,21 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
             enable = bundleManager->CheckApiCompatibility(record->bundleOption);
         }
     }
+
+    sptr<NotificationSlot> slot;
+    NotificationConstant::SlotType slotType = record->request->GetSlotType();
+    result = NotificationPreferences::GetInstance().GetNotificationSlot(record->bundleOption, slotType, slot);
     if (result == ERR_OK) {
-        if (!enable) {
+        if (slot != nullptr) {
+            isForceControl = slot->GetForceControl();
+        } else {
+            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
+            ANS_LOGE("Type[%{public}d] slot does not exist", slotType);
+        }
+    }
+
+    if (result == ERR_OK) {
+        if (!enable && !isForceControl) {
             ANS_LOGE("Enable notifications for bundle is OFF");
             return ERR_ANS_NOT_ALLOWED;
         }

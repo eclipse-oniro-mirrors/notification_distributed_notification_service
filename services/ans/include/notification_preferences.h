@@ -244,7 +244,10 @@ public:
     void InitSettingFromDisturbDB();
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
-
+    int32_t SetKvToDb(const std::string &key, const std::string &value);
+    int32_t GetKvFromDb(const std::string &key, std::string &value);
+    int32_t GetBatchKvsFromDb(const std::string &key, std::unordered_map<std::string, std::string>  &values);
+    int32_t DeleteKvFromDb(const std::string &key);
 private:
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const;

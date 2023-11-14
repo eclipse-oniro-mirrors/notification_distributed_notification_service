@@ -699,5 +699,40 @@ void NotificationPreferences::RemoveAnsBundleDbInfo(const sptr<NotificationBundl
         preferncesDB_->RemoveAnsBundleDbInfo(bundleOption->GetBundleName(), bundleOption->GetUid());
     }
 }
+
+int32_t NotificationPreferences::SetKvToDb(
+    const std::string &key, const std::string &value)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->SetKvToDb(key, value);
+}
+
+int32_t NotificationPreferences::GetKvFromDb(
+    const std::string &key, std::string &value)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->GetKvFromDb(key, value);
+}
+
+int32_t NotificationPreferences::GetBatchKvsFromDb(
+    const std::string &key, std::unordered_map<std::string, std::string> &values)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->GetBatchKvsFromDb(key, values);
+}
+
+int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->DeleteKvFromDb(key);
+}
 }  // namespace Notification
 }  // namespace OHOS
