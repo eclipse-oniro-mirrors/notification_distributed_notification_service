@@ -191,6 +191,11 @@ public:
 
     static const int64_t MAX_UPDATE_TIME = 4 * HOUR_TO_MS;
 
+    static const int64_t INVALID_AUTO_DELETE_TIME = -1;
+
+    /* one hour */
+    static const int64_t DEFAULT_AUTO_DELETE_TIME = 3600;
+
     static constexpr uint64_t INVALID_TIMER_ID = 0ULL;
 
     static constexpr uint64_t NOTIFICATION_MAX_LIVE_VIEW_SIZE = 520ULL * 1024ULL;

@@ -604,8 +604,12 @@ void AdvancedNotificationService::CancelUpdateTimer(const std::shared_ptr<Notifi
 
 void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record)
 {
+    auto deleteTime = record->request->GetAutoDeletedTime();
+    if (deleteTime <= NotificationConstant::INVALID_AUTO_DELETE_TIME) {
+        deleteTime = NotificationConstant::DEFAULT_AUTO_DELETE_TIME;
+    }
     int64_t maxExpiredTime = GetCurrentTime() +
-        NotificationConstant::SECOND_TO_MS * record->request->GetAutoDeletedTime();
+        NotificationConstant::SECOND_TO_MS * deleteTime;
     uint64_t timerId = StartAutoDelete(record->notification->GetKey(),
         maxExpiredTime, NotificationConstant::APP_CANCEL_REASON_DELETE);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
@@ -5663,9 +5667,6 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
     }
 
     for (const auto &requestObj : requestsdb) {
-        // for debug lmx
-        ANS_LOGI("Recover request: %{public}s.", requestObj.request->Dump().c_str());
-
         if (!IsLiveViewCanRecover(requestObj.request)) {
             if (DeleteNotificationRequestFromDb(requestObj.request->GetKey()) != ERR_OK) {
                 ANS_LOGE("Delete notification failed.");
@@ -5704,15 +5705,8 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
 
 int32_t AdvancedNotificationService::SetNotificationRequestToDb(const NotificationRequestDb &requestDb)
 {
-    // for debug lmx
-    ANS_LOGI("Enter.");
-
     auto request = requestDb.request;
     if (!request->IsCommonLiveView()) {
-        // for debug lmx
-        ANS_LOGI("Slot type %{public}d, content type %{public}d.",
-            request->GetSlotType(), request->GetNotificationType());
-
         return ERR_OK;
     }
 
