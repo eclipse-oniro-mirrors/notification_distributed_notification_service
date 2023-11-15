@@ -17,7 +17,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "hitrace_meter.h"
+#include "hitrace_meter_adapter.h"
 #include "iservice_registry.h"
 #include "notification_button_option.h"
 #include "notification_local_live_view_subscriber.h"
