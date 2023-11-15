@@ -208,18 +208,6 @@ private:
     uint16_t repeatMonth_ {0};
     uint32_t repeatDay_ {0};
 
-    // For database recovery.
-    static const std::string REPEAT_DAYS;
-    static const std::string REPEAT_MONTHS;
-    static const std::string FIRST_DESIGNATE_YEAR;
-    static const std::string FIRST_DESIGNATE_MONTH;
-    static const std::string FIRST_DESIGNATE_DAY;
-    static const std::string CALENDAR_YEAR;
-    static const std::string CALENDAR_MONTH;
-    static const std::string CALENDAR_DAY;
-    static const std::string CALENDAR_HOUR;
-    static const std::string CALENDAR_MINUTE;
-
     static const uint8_t DAY_ARRAY[12];
     static const uint8_t FEBRUARY;
     static const uint8_t LEAP_MONTH;
