@@ -498,7 +498,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00100, Function | S
     int32_t notificationId_ = 0;
     reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::TIMER;
-    reminderRequest->UpdateNotificationCommon();
+    reminderRequest->UpdateNotificationCommon(false);
 }
 
 /**
@@ -515,7 +515,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00200, Function | S
     int32_t notificationId_ = 0;
     reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::ALARM;
-    reminderRequest->UpdateNotificationCommon();
+    reminderRequest->UpdateNotificationCommon(false);
 }
 
 /**
@@ -532,7 +532,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00300, Function | S
     int32_t notificationId_ = 0;
     reminderRequest->notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::INVALID;
-    reminderRequest->UpdateNotificationCommon();
+    reminderRequest->UpdateNotificationCommon(false);
 }
 
 /**

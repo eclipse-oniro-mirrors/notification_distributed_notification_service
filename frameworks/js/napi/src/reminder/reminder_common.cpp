@@ -503,6 +503,17 @@ napi_value ReminderCommon::GenReminder(
         reminder->SetSlotType(actureType);
     }
 
+    // snoozeSlotType
+    int32_t snoozeSlotType = 0;
+    if (GetInt32(env, value, ReminderAgentNapi::SNOOZE_SLOT_TYPE, snoozeSlotType, false)) {
+        enum NotificationConstant::SlotType actureSnoozeType = NotificationConstant::SlotType::OTHER;
+        if (!NotificationNapi::Common::SlotTypeJSToC(NotificationNapi::SlotType(snoozeSlotType), actureSnoozeType)) {
+            ANSR_LOGW("snooze slot type not support.");
+            return nullptr;
+        }
+        reminder->SetSnoozeSlotType(actureSnoozeType);
+    }
+
     // tapDismissed
     bool tapDismissed = false;
     if (GetBool(env, value, ReminderAgentNapi::TAPDISMISSED, tapDismissed)) {

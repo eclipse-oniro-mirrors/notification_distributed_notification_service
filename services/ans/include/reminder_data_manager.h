@@ -524,7 +524,7 @@ private:
     void UpdateAndSaveReminderLocked(
         const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &bundleOption);
 
-    void UpdateNotification(const sptr<ReminderRequest> &reminder);
+    void UpdateNotification(const sptr<ReminderRequest> &reminder, bool isSnooze);
 
     static bool cmp(sptr<ReminderRequest> &reminderRequest, sptr<ReminderRequest> &other);
 
