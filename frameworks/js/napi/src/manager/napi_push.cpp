@@ -15,18 +15,22 @@
 #include "napi_push.h"
 
 #include "ans_inner_errors.h"
+#include "common.h"
 #include "ipc_skeleton.h"
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
 #include "tokenid_kit.h"
+#include "napi_common_util.h"
 
 namespace OHOS {
 namespace NotificationNapi {
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_THREE = 3;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t INDEX_TWO = 2;
 } // namespace
 using namespace OHOS::AbilityRuntime;
 
@@ -54,11 +58,10 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
 
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < ARGC_TWO) {
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, NULL));
+    if (argc < ARGC_THREE) {
         ANS_LOGE("The param is invalid.");
         ThrowTooFewParametersError(env);
         return undefined;
@@ -81,6 +84,13 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
         return undefined;
     }
 
+    sptr<NotificationCheckRequest> checkRequest = new NotificationCheckRequest();
+    if (ParseCheckRequest(env, argv[INDEX_ONE], checkRequest) == nullptr) {
+        ANS_LOGE("Failed to get check request info from param");
+        ThrowError(env, ERROR_PARAM_INVALID);
+        return undefined;
+    }
+
     if (!CheckCallerIsSystemApp()) {
         ThrowError(env, ERROR_NOT_SYSTEM_APP);
         return undefined;
@@ -95,7 +105,7 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
         }
     }
 
-    jsPushCallBack_->SetJsPushCallBackObject(argv[INDEX_ONE]);
+    jsPushCallBack_->SetJsPushCallBackObject(argv[INDEX_TWO]);
     NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject());
     return undefined;
 }
@@ -167,5 +177,53 @@ bool NapiPush::CheckCallerIsSystemApp()
     }
     return true;
 }
+
+napi_value NapiPush::ParseCheckRequest(const napi_env &env,
+    const napi_value &obj, sptr<NotificationCheckRequest> &checkRequest)
+{
+    ANS_LOGI("enter");
+
+    if (!AppExecFwk::IsTypeForNapiValue(env, obj, napi_object)) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
+
+    // contentType
+    int32_t value = 0;
+    if (!AppExecFwk::UnwrapInt32ByPropertyName(env, obj, "contentType", value)) {
+        ANS_LOGE("Failed to get contentType from checkRequest.");
+        return nullptr;
+    }
+    NotificationContent::Type outContentType = NotificationContent::Type::NONE;
+    if (!Common::ContentTypeJSToC(ContentType(value), outContentType)) {
+        ANS_LOGE("Failed to convert contentType.");
+        return nullptr;
+    }
+    checkRequest->SetContentType(outContentType);
+
+    // slotType
+    if (!AppExecFwk::UnwrapInt32ByPropertyName(env, obj, "slotType", value)) {
+        ANS_LOGE("Failed to get slotType from checkRequest.");
+        return nullptr;
+    }
+    NotificationConstant::SlotType outSlotType = NotificationConstant::SlotType::OTHER;
+    if (!Common::SlotTypeJSToC(SlotType(value), outSlotType)) {
+        ANS_LOGE("Failed to convert slotType.");
+        return nullptr;
+    }
+    checkRequest->SetSlotType(outSlotType);
+
+    // extraInfoKeys
+    std::vector<std::string> extraInfoKeys;
+    if (!AppExecFwk::UnwrapStringArrayByPropertyName(env, obj, "extraInfoKeys", extraInfoKeys)) {
+        ANS_LOGE("Failed to get extraInfoKeys from checkRequest.");
+        return nullptr;
+    }
+    checkRequest->SetExtraKeys(extraInfoKeys);
+
+    ANS_LOGI("end");
+    return Common::NapiGetNull(env);
+}
+
 } // namespace NotificationNapi
 } // namespace OHOS

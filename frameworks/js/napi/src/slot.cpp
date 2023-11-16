@@ -14,6 +14,8 @@
  */
 
 #include "slot.h"
+#include "common.h"
+#include "napi_common_util.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -25,7 +27,8 @@ const int32_t GET_SLOT_NUM_AS_BUNDLE_MAX_PARA = 2;
 const int32_t GET_SLOTS_AS_BUNDLE_MAX_PARA = 2;
 const int32_t REMOVE_SLOT_MAX_PARA = 2;
 const int32_t GET_ENABLE_SLOT_MAX_PARA = 3;
-const int32_t SET_ENABLE_SLOT_MAX_PARA = 4;
+const int32_t SET_ENABLE_SLOT_MIN_PARA = 3;
+const int32_t SET_ENABLE_SLOT_MAX_PARA = 5;
 
 struct ParametersInfoAddSlot {
     NotificationSlot slot;
@@ -136,6 +139,7 @@ struct ParametersInfoEnableSlot {
     NotificationBundleOption option;
     NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
     bool enable = false;
+    bool isForceControl = false;
     napi_ref callback = nullptr;
 };
 
@@ -1209,6 +1213,23 @@ napi_value RemoveAllSlots(napi_env env, napi_callback_info info)
     }
 }
 
+static napi_value ParseEnableSlotCallBackParam(
+    const napi_env &env, size_t argc, napi_value *argv, ParametersInfoEnableSlot &params)
+{
+    // argv[4]: callback
+    if (argc < SET_ENABLE_SLOT_MAX_PARA) {
+        return Common::NapiGetNull(env);
+    }
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM4], &valuetype));
+    if (valuetype != napi_function) {
+        ANS_LOGW("Callback is not function excute promise.");
+        return Common::NapiGetNull(env);
+    }
+    napi_create_reference(env, argv[PARAM4], 1, &params.callback);
+    return Common::NapiGetNull(env);
+}
+
 napi_value ParseParametersEnableSlot(
     const napi_env &env, const napi_callback_info &info, ParametersInfoEnableSlot &params)
 {
@@ -1216,18 +1237,16 @@ napi_value ParseParametersEnableSlot(
 
     size_t argc = SET_ENABLE_SLOT_MAX_PARA;
     napi_value argv[SET_ENABLE_SLOT_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    napi_valuetype valuetype = napi_undefined;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < SET_ENABLE_SLOT_MAX_PARA - 1) {
+
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
+    if (argc < SET_ENABLE_SLOT_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
         return nullptr;
     }
 
     // argv[0]: bundle
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_object) {
-        ANS_LOGW("Parameter type is error. Object expected.");
+    if (!OHOS::AppExecFwk::IsTypeForNapiValue(env, argv[PARAM0], napi_object)) {
+        ANS_LOGE("Parameter type is error. Object expected.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
@@ -1237,9 +1256,8 @@ napi_value ParseParametersEnableSlot(
     }
 
     // argv[1]: SlotType
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Parameter type error. Number expected.");
+    if (!OHOS::AppExecFwk::IsTypeForNapiValue(env, argv[PARAM1], napi_number)) {
+        ANS_LOGE("Parameter type error. Number expected.");
         return nullptr;
     }
     int slotType = 0;
@@ -1249,24 +1267,30 @@ napi_value ParseParametersEnableSlot(
     }
 
     // argv[2]: enable
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-    if (valuetype != napi_boolean) {
-        ANS_LOGW("Wrong argument type. Bool expected.");
+    if (!OHOS::AppExecFwk::IsTypeForNapiValue(env, argv[PARAM2], napi_boolean)) {
+        ANS_LOGE("Wrong argument type. Bool expected.");
         return nullptr;
     }
     napi_get_value_bool(env, argv[PARAM2], &params.enable);
 
-    // argv[3]:callback
-    if (argc >= SET_ENABLE_SLOT_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM3], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGW("Callback is not function excute promise.");
-            return Common::NapiGetNull(env);
-        }
-        napi_create_reference(env, argv[PARAM3], 1, &params.callback);
+    if (argc < SET_ENABLE_SLOT_MAX_PARA - 1) {
+        return Common::NapiGetNull(env);
     }
 
-    return Common::NapiGetNull(env);
+    // argv[3]: maybe isForceControl or callback
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM3], &valuetype));
+    if (valuetype == napi_boolean) {
+        napi_get_value_bool(env, argv[PARAM3], &params.isForceControl);
+    } else if (valuetype == napi_function) {
+        napi_create_reference(env, argv[PARAM3], 1, &params.callback);
+        return Common::NapiGetNull(env);
+    } else {
+        ANS_LOGI("Callback is not function excute promise.");
+        return Common::NapiGetNull(env);
+    }
+
+    return ParseEnableSlotCallBackParam(env, argc, argv, params);
 }
 
 napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)

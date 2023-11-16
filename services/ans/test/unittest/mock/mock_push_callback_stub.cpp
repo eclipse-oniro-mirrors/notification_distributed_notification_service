@@ -18,7 +18,7 @@
 namespace OHOS {
 MockPushCallBackStub::MockPushCallBackStub() {}
 MockPushCallBackStub::~MockPushCallBackStub() {}
-bool MockPushCallBackStub::OnCheckNotification(const std::string &notificationData)
+int32_t MockPushCallBackStub::OnCheckNotification(const std::string &notificationData)
 {
     return false;
 }

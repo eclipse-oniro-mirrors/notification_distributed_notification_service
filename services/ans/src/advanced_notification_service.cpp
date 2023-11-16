@@ -4963,7 +4963,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
         jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
         if (!(pushCallBack_->OnCheckNotification(jsonObject.dump()))) {
             ANS_LOGE("Notification push check failed.");
-            return ERR_ANS_NOTIFICATION_PUSH_CHECK_FAILED;
+            return ERR_ANS_PUSH_CHECK_FAILED;
         }
     }
     return ERR_OK;

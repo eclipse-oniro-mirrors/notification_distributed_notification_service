@@ -28,9 +28,22 @@
 #include "pixel_map.h"
 #include "want_agent.h"
 #include "want_params.h"
+#include "notification_check_request.h"
+#include "notification_bundle_option.h"
 
 namespace OHOS {
 namespace Notification {
+struct NotificationKey {
+    int32_t id {};
+    std::string label {};
+};
+
+struct LiveViewFilter {
+    NotificationBundleOption bundle;
+    NotificationKey notificationKey;
+    std::vector<std::string> extraInfoKeys;
+};
+
 class NotificationRequest : public Parcelable, public NotificationJsonConvertionBase {
 public:
     enum class BadgeStyle {
@@ -441,6 +454,20 @@ public:
     const std::shared_ptr<Media::PixelMap> GetBigIcon() const;
 
     /**
+     * @brief Sets the overlay icon of this notification.
+     *
+     * @param overlayIcon Indicates the overlay icon of the notification.
+     */
+    void SetOverlayIcon(const std::shared_ptr<Media::PixelMap> &overlayIcon);
+
+    /**
+     * @brief Obtains the overlay icon of this notification.
+     *
+     * @return Returns the overlay icon of this notification.
+     */
+    const std::shared_ptr<Media::PixelMap> GetOverlayIcon() const;
+
+    /**
      * @brief Sets the classification of this notification, which describes the purpose of this notification.
      * Notification classifications are used to filter and sort notifications.
      *
@@ -517,7 +544,8 @@ public:
      * NotificationContent::Type::PICTURE,
      * NotificationContent::Type::CONVERSATION,
      * NotificationContent::Type::MULTILINE,
-     * or NotificationContent::Type::MEDIA.
+     * NotificationContent::Type::MEDIA,
+     * or NotificationContent::Type::LIVE_VIEW
      */
     NotificationContent::Type GetNotificationType() const;
 
@@ -1181,6 +1209,7 @@ private:
     std::shared_ptr<AAFwk::WantParams> additionalParams_ {};
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
     std::shared_ptr<Media::PixelMap> bigIcon_ {};
+    std::shared_ptr<Media::PixelMap> overlayIcon_ {};
     std::shared_ptr<NotificationContent> notificationContent_ {};
 
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};

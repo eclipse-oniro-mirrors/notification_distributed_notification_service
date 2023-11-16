@@ -26,7 +26,7 @@ class MockPushCallBackStub : public IRemoteStub<Notification::IPushCallBack> {
 public:
     MockPushCallBackStub();
     virtual ~MockPushCallBackStub();
-    virtual bool OnCheckNotification(const std::string &notificationData) override;
+    virtual int32_t OnCheckNotification(const std::string &notificationData) override;
 };
 }  // namespace OHOS
 #endif  // ANS_MOCK_PUSH_CALL_BACK_STUB_H
