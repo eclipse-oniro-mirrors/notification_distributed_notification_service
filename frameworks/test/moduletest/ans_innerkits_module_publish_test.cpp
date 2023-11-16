@@ -188,6 +188,10 @@ public:
         EXPECT_EQ(badgeData->GetBadgeNumber(), BADGE_NUMBER);
     }
 
+    void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
+        &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
+    {}
+
 private:
     void CheckCaseOneResult(NotificationRequest notificationRequest)
     {

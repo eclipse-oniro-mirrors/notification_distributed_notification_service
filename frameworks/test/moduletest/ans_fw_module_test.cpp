@@ -333,6 +333,10 @@ public:
         const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
 
+    void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
+        &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
+    {}
+
     std::list<std::shared_ptr<SubscriberEvent>> GetEvents()
     {
         std::unique_lock<std::mutex> lck(mtx_);

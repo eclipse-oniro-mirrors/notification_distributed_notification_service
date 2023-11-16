@@ -14,7 +14,7 @@
  */
 
 #include "subscribe.h"
-
+#include "ans_inner_errors.h"
 #include <mutex>
 #include <uv.h>
 
@@ -33,11 +33,13 @@ const std::string DISTURB_DATE_CHANGE = "onDoNotDisturbDateChange";
 const std::string DISTURB_CHANGED = "onDoNotDisturbChanged";
 const std::string ENABLE_NOTIFICATION_CHANGED = "OnEnabledNotificationChanged";
 const std::string BADGE_CHANGED = "OnBadgeChanged";
+const std::string BATCH_CANCEL = "onBatchCancel";
 
 struct NotificationReceiveDataWorker {
     napi_env env = nullptr;
     napi_ref ref = nullptr;
     std::shared_ptr<OHOS::Notification::Notification> request;
+    std::vector<std::shared_ptr<OHOS::Notification::Notification>> requestList;
     std::shared_ptr<NotificationSortingMap> sortingMap;
     NotificationDoNotDisturbDate date;
     EnabledNotificationCallbackData callbackData;
@@ -147,6 +149,9 @@ SubscriberInstance::~SubscriberInstance()
     if (enabledNotificationCallbackInfo_.ref != nullptr) {
         napi_delete_reference(enabledNotificationCallbackInfo_.env, enabledNotificationCallbackInfo_.ref);
     }
+    if (batchCancelCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(batchCancelCallbackInfo_.env, batchCancelCallbackInfo_.ref);
+    }
 }
 
 void UvQueueWorkOnCanceled(uv_work_t *work, int status)
@@ -246,6 +251,113 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         delete work;
         work = nullptr;
     }
+}
+
+void UvQueueWorkOnBatchCanceled(uv_work_t *work, int status)
+{
+    ANS_LOGI("OnBatchCancel uv_work_t start");
+
+    if (work == nullptr) {
+        ANS_LOGE("work is null");
+        return;
+    }
+
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    if (dataWorkerData == nullptr) {
+        ANS_LOGE("Create dataWorkerData failed.");
+        delete work;
+        work = nullptr;
+        return;
+    }
+
+    napi_value resultArray = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
+    napi_create_array(dataWorkerData->env, &resultArray);
+    int index = 0;
+    for (auto request : dataWorkerData->requestList) {
+        napi_value result = nullptr;
+        napi_create_object(dataWorkerData->env, &result);
+        if (SetSubscribeCallbackData(dataWorkerData->env, request,
+            dataWorkerData->sortingMap, dataWorkerData->deleteReason, result)) {
+            napi_set_element(dataWorkerData->env, resultArray, index, result);
+            index++;
+        }
+    }
+    uint32_t elementCount = 0;
+    napi_get_array_length(dataWorkerData->env, resultArray, &elementCount);
+    ANS_LOGI("notification array length: %{public}d ", elementCount);
+    if (elementCount > 0) {
+        Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, resultArray);
+    }
+
+    napi_close_handle_scope(dataWorkerData->env, scope);
+
+    delete dataWorkerData;
+    dataWorkerData = nullptr;
+    delete work;
+}
+
+void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS::Notification::Notification>>
+    &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
+{
+    ANS_LOGI("OnBatchCancel");
+    if (batchCancelCallbackInfo_.ref == nullptr) {
+        ANS_LOGI("batchCancelCallbackInfo_ callback unset");
+        return;
+    }
+    if (requestList.empty()) {
+        ANS_LOGE("requestList is empty");
+        return;
+    }
+    if (sortingMap == nullptr) {
+        ANS_LOGE("sortingMap is null");
+        return;
+    }
+    ANS_LOGI("OnBatchCancel sortingMap size = %{public}zu", sortingMap->GetKey().size());
+    ANS_LOGI("OnBatchCancel deleteReason = %{public}d", deleteReason);
+    uv_loop_s *loop = nullptr;
+    napi_get_uv_event_loop(batchCancelCallbackInfo_.env, &loop);
+    if (loop == nullptr) {
+        ANS_LOGE("loop instance is nullptr");
+        return;
+    }
+    NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
+    if (dataWorker == nullptr) {
+        ANS_LOGE("DataWorker is nullptr.");
+        return;
+    }
+    dataWorker->requestList = requestList;
+    dataWorker->sortingMap = sortingMap;
+    dataWorker->deleteReason = deleteReason;
+    dataWorker->env = batchCancelCallbackInfo_.env;
+    dataWorker->ref = batchCancelCallbackInfo_.ref;
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        ANS_LOGE("new work failed");
+        delete dataWorker;
+        dataWorker = nullptr;
+        return;
+    }
+    work->data = reinterpret_cast<void *>(dataWorker);
+    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+        UvQueueWorkOnBatchCanceled, uv_qos_user_initiated);
+    if (ret != 0) {
+        delete dataWorker;
+        dataWorker = nullptr;
+        delete work;
+        work = nullptr;
+    }
+    return;
+}
+
+bool SubscriberInstance::HasOnBatchCancelCallback()
+{
+    if (batchCancelCallbackInfo_.ref == nullptr) {
+        ANS_LOGI("batchCancelCallbackInfo_ callback unset");
+        return false;
+    }
+    return true;
 }
 
 void UvQueueWorkOnConsumed(uv_work_t *work, int status)
@@ -945,6 +1057,7 @@ void SubscriberInstance::OnBadgeChanged(
     }
 }
 
+
 void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     canceCallbackInfo_.env = env;
@@ -1011,6 +1124,12 @@ void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_re
     setBadgeCallbackInfo_.ref = ref;
 }
 
+void SubscriberInstance::SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
+{
+    batchCancelCallbackInfo_.env = env;
+    batchCancelCallbackInfo_.ref = ref;
+}
+
 void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string &type, const napi_ref &ref)
 {
     if (type == CONSUME) {
@@ -1035,6 +1154,8 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
         SetEnabledNotificationCallbackInfo(env, ref);
     } else if (type == BADGE_CHANGED) {
         SetBadgeCallbackInfo(env, ref);
+    } else if (type == BATCH_CANCEL) {
+        SetBatchCancelCallbackInfo(env, ref);
     } else {
         ANS_LOGW("type is error");
     }
@@ -1218,6 +1339,19 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnBadgeChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, BADGE_CHANGED, result);
+    }
+    // onBatchCancel?:(data: Array<SubscribeCallbackData>) => void
+    NAPI_CALL(env, napi_has_named_property(env, value, "onBatchCancel", &hasProperty));
+    if (hasProperty) {
+        napi_value onBatchCancel = nullptr;
+        napi_get_named_property(env, value, "onBatchCancel", &onBatchCancel);
+        NAPI_CALL(env, napi_typeof(env, onBatchCancel, &valuetype));
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            return nullptr;
+        }
+        napi_create_reference(env, onBatchCancel, 1, &result);
+        subscriberInfo.subscriber->SetCallbackInfo(env, BATCH_CANCEL, result);
     }
 
     return Common::NapiGetNull(env);

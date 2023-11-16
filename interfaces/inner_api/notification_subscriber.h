@@ -94,6 +94,19 @@ public:
      */
     virtual void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) = 0;
 
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    virtual void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) = 0;
+
+    virtual bool HasOnBatchCancelCallback()
+    {
+        return false;
+    }
+
 private:
     class SubscriberImpl final : public AnsSubscriberStub {
     public:
@@ -125,6 +138,9 @@ private:
 
         void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
             const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
+
+        void OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
+            const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
 
         void OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override;
 

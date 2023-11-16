@@ -80,11 +80,30 @@ void NotificationSubscriber::SubscriberImpl::OnCanceled(
     }
 }
 
+void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    std::vector<std::shared_ptr<Notification>> notificationList;
+    for (auto notification : notifications) {
+        notificationList.emplace_back(std::make_shared<Notification>(*notification));
+    }
+    if (notificationMap == nullptr) {
+        subscriber_.OnBatchCanceled(notificationList,
+            std::make_shared<NotificationSortingMap>(), deleteReason);
+    } else if (notificationMap != nullptr) {
+        subscriber_.OnBatchCanceled(notificationList,
+            std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
+    }
+}
+
 
 void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (subscriber_.HasOnBatchCancelCallback()) {
+        OnBatchCanceled(notifications, notificationMap, deleteReason);
+    }
     for (auto notification : notifications) {
         OnCanceled(notification, notificationMap, deleteReason);
     }
