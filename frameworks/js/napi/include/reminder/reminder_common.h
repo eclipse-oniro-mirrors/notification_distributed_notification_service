@@ -72,6 +72,7 @@ const char* BUTTON_DATA_SHARE_UPDATE_VALUE = "value";
 const char* TAPDISMISSED = "tapDismissed";
 const char* AUTODELETEDTIME = "autoDeletedTime";
 const char* GROUP_ID = "groupId";
+const char* CUSTOM_RING_URI = "customRingUri";
 const char* SNOOZE_SLOT_TYPE = "snoozeSlotType";
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;

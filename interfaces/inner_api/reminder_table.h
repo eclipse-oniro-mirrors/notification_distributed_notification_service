@@ -197,6 +197,11 @@ public:
      */
     static const std::string GROUP_ID;
 
+    /*
+     * reminder ring uri
+     */
+    static const std::string CUSTOM_RING_URI;
+
     // Reminder Table Calendar Columns.
     static const std::string REPEAT_DAYS;
     static const std::string REPEAT_MONTHS;
