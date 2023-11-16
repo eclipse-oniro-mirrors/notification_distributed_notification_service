@@ -1682,6 +1682,58 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function
 }
 
 /**
+ * @tc.number    : ANS_Interface_MT_Publish_10002
+ * @tc.name      : Publish_10002
+ * @tc.desc      : Add notification slot(type is LIVE_VIEW), make a subscriber, a system live view subscriber
+ *                 and publish a system live view notification. Then trigger a button.
+ * @tc.expected  : Add notification slot success, make a subscriber, publish a notification
+ *                 and trigger a buuton success.
+ */
+HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10002, Function | MediumTest | Level1)
+{
+    NotificationSlot slot(NotificationConstant::LIVE_VIEW);
+    EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
+    auto subscriber = TestAnsSubscriber();
+    g_subscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    WaitOnSubscribeResult();
+
+    auto systemLiveViewSubscriber = TestLocalLiveViewSubscriber();
+    EXPECT_EQ(0, NotificationHelper::SubscribeLocalLiveViewNotification(systemLiveViewSubscriber));
+
+    MessageUser messageUser;
+    std::shared_ptr<NotificationLocalLiveViewContent> liveContent =
+        std::make_shared<NotificationLocalLiveViewContent>();
+    EXPECT_NE(liveContent, nullptr);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveContent);
+    EXPECT_NE(content, nullptr);
+
+    NotificationRequest req;
+    int32_t notificationId = CASE_NINETEEN;
+    req.SetContent(content);
+    req.SetSlotType(NotificationConstant::LIVE_VIEW);
+    req.SetNotificationId(notificationId);
+
+    g_consumed_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
+    WaitOnConsumed();
+
+    std::string buttonName = "testButton";
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    NotificationButtonOption buttonOption;
+    buttonOption.SetButtonName(buttonName);
+    g_system_live_view_subscribe_response_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::TriggerLocalLiveView(bundleOption, notificationId, buttonOption));
+    WaitOnResponse(CASE_NINETEEN, buttonName);
+
+    g_unsubscribe_mtx.lock();
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    WaitOnUnsubscribeResult();
+}
+
+/**
  * @tc.name: ANS_Interface_MT_SetBadgeNumber_00100
  * @tc.desc: check SetBadgeNumber interface return value.
  * @tc.type: FUNC

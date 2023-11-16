@@ -381,6 +381,7 @@ void AdvancedNotificationService::SelfClean()
 
     NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
+    NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
 }
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
