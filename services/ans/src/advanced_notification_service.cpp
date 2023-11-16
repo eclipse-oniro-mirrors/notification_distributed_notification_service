@@ -4802,9 +4802,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_INVALID_UID;
     }
     std::string bundle = "";
-    ErrCode res = PrePublishNotificationBySa(request, uid, bundle);
-    if (res != ERR_OK) {
-        return res;
+    ErrCode result = PrePublishNotificationBySa(request, uid, bundle);
+    if (result != ERR_OK) {
+        return result;
     }
 
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
