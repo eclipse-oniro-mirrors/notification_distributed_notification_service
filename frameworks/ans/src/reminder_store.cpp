@@ -468,7 +468,7 @@ void ReminderStore::AddRdbColum(NativeRdb::RdbStore &store, const std::string &c
     ANSR_LOGD("AddRdbColum sqlStr = %{public}s", sqlStr.c_str());
     int errorCode = store.ExecuteSql(sqlStr);
     if (errorCode != NativeRdb::E_OK) {
-        ANSR_LOGD("AddRdbColum error,errorCode is = %{public}d", errorCode);
+        ANSR_LOGE("AddRdbColum error,errorCode is = %{public}d", errorCode);
     };
 }
 }  // namespace Notification
