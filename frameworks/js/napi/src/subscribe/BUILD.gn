@@ -50,6 +50,7 @@ ohos_shared_library("notificationsubscribe") {
 
   sources = [
     "../common.cpp",
+    "../common_utils.cpp",
     "../constant.cpp",
     "../remove.cpp",
     "../subscribe.cpp",

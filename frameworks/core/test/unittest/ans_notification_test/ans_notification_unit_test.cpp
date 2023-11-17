@@ -689,7 +689,8 @@ HWTEST_F(AnsNotificationUnitTest, SetEnabledForBundleSlot_0100, Function | Mediu
     bundleOption.SetBundleName(bundleName);
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
     bool enabled = true;
-    ErrCode ret1 = ans_->SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    bool isForceControl = false;
+    ErrCode ret1 = ans_->SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
     ErrCode ret2 = ans_->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
     EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);

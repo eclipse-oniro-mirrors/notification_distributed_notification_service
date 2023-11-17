@@ -270,12 +270,13 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "inProgress = false, groupOverview = false, isRemoveAllowed = true, progressIndeterminate = false, "
     "unremovable = false, floatingIcon = false, onlyLocal = false, permitted = true, "
     "isAgent = false, removalWantAgent = null, maxScreenWantAgent = null, additionalParams = null, "
-    "littleIcon = null, bigIcon = null, notificationContent = null, "
+    "littleIcon = null, bigIcon = null, overlayIcon = null, notificationContent = null, "
     "notificationTemplate = null, actionButtons = empty, messageUsers = empty, "
     "userInputHistory = empty, distributedOptions = NotificationDistributedOptions"
     "{ isDistributed = true, devicesSupportDisplay = [], devicesSupportOperate = [] }, "
-    "notificationFlags = null, creatorUserId = -1, ownerUserId = -1, receiverUserId = -1 }, "
-    "postTime = 0, sound = nullptr, vibrationStyle = [] }";
+    "notificationFlags = null, creatorUserId = -1, ownerUserId = -1, receiverUserId = -1, "
+    "maxUpdateTime = 0, maxFinishTime = 0 }, postTime = 0, sound = nullptr, vibrationStyle = [], "
+    "updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
@@ -517,6 +518,34 @@ HWTEST_F(NotificationTest, Marshalling_00003, Function | SmallTest | Level1)
     rrc->SetEnableSound(enable);
 
     EXPECT_EQ(rrc->Marshalling(parcel), true);
+}
+
+/**
+ * @tc.name: GetUpdateTimer_00001
+ * @tc.desc: Test get update timer.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetUpdateTimer_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetUpdateTimer(1);
+    EXPECT_EQ(rrc->GetUpdateTimer(), 1);
+}
+
+/**
+ * @tc.name: GetFinishTimer_00001
+ * @tc.desc: Test get finish timer.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetFinishTimer_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetFinishTimer(1);
+    EXPECT_EQ(rrc->GetFinishTimer(), 1);
 }
 }
 }

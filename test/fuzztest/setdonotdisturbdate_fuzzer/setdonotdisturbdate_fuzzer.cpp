@@ -41,7 +41,7 @@ namespace OHOS {
         uint8_t types = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(types);
         bool enabled = *data % ENABLE;
-        Notification::NotificationHelper::SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+        Notification::NotificationHelper::SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         // test GetEnabledForBundleSlot function
         Notification::NotificationHelper::GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         // test SetSyncNotificationEnabledWithoutApp function

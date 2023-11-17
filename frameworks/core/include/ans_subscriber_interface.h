@@ -56,6 +56,9 @@ public:
     virtual void OnConsumed(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) = 0;
 
+    virtual void OnConsumedList(
+        const std::vector<sptr<Notification>> &notifications, const sptr<NotificationSortingMap> &notificationMap) = 0;
+
     /**
      * @brief The callback function on a notification canceled.
      *

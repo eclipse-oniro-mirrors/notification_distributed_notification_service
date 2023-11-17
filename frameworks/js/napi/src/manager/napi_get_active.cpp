@@ -410,6 +410,8 @@ void AsyncGetLiveViewExecute(napi_env env, void *data)
 
     auto asyncLiveViewCallBackInfo = static_cast<AsyncLiveViewCallBackInfo *>(data);
     if (asyncLiveViewCallBackInfo) {
+        asyncLiveViewCallBackInfo->info.errorCode = NotificationHelper::GetActiveNotificationByFilter(
+            asyncLiveViewCallBackInfo->filter, asyncLiveViewCallBackInfo->notificationRequest);
     }
 }
 

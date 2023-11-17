@@ -2444,7 +2444,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_OK);
 
     EXPECT_EQ(advancedNotificationService_->SetEnabledForBundleSlot(bundleOption,
-        NotificationConstant::SlotType::OTHER, enable, isForceControl), ERR_OK);
+        NotificationConstant::SlotType::OTHER, enable, false), ERR_OK);
 
     EXPECT_EQ(advancedNotificationService_->GetEnabledForBundleSlot(bundleOption,
         NotificationConstant::SlotType::OTHER, enable), ERR_OK);
@@ -3288,6 +3288,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21600,
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
 
     EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
+
     advancedNotificationService_->UnregisterPushCallback();
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0100 test end";
@@ -3312,6 +3313,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21700,
     EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest),
         (int)ERR_ANS_NON_SYSTEM_APP);
     advancedNotificationService_->UnregisterPushCallback();
+
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";
 }

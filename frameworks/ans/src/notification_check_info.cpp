@@ -21,8 +21,8 @@ namespace OHOS {
 namespace Notification {
 
 NotificationCheckInfo::NotificationCheckInfo(std::string pkgName, int32_t notifyId, int32_t contentType,
-    int32_t creatorUserId, int32_t slotType, std::shared_ptr<AAFwk::WantParams> extraInfo) :
-    pkgName_(pkgName), notifyId_(notifyId), contentType_(contentType),
+    int32_t creatorUserId, int32_t slotType, std::shared_ptr<AAFwk::WantParams> extraInfo)
+    : pkgName_(pkgName), notifyId_(notifyId), contentType_(contentType),
     creatorUserId_(creatorUserId), slotType_(slotType), extraInfo_(extraInfo)
 {}
 
@@ -128,46 +128,22 @@ void NotificationCheckInfo::ConvertJsonStringToValue(const std::string &notifica
     }
 
     const auto &jsonEnd = jsonobj.cend();
-    if (jsonobj.find("pkgName") != jsonEnd) {
-        if (!jsonobj.at("pkgName").is_string()) {
-            ANS_LOGE("Invalid JSON object pkgName");
-            return;
-        }
+    if (jsonobj.find("pkgName") != jsonEnd && jsonobj.at("pkgName").is_string()) {
         pkgName_ = jsonobj.at("pkgName").get<std::string>();
     }
-    if (jsonobj.find("notifyId") != jsonEnd) {
-        if (!jsonobj.at("notifyId").is_number()) {
-            ANS_LOGE("Invalid JSON object notifyId");
-            return;
-        }
+    if (jsonobj.find("notifyId") != jsonEnd && jsonobj.at("notifyId").is_number()) {
         notifyId_ = jsonobj.at("notifyId").get<int32_t>();
     }
-    if (jsonobj.find("contentType") != jsonEnd) {
-        if (!jsonobj.at("contentType").is_number()) {
-            ANS_LOGE("Invalid JSON object contentType");
-            return;
-        }
+    if (jsonobj.find("contentType") != jsonEnd && jsonobj.at("contentType").is_number()) {
         contentType_ = jsonobj.at("contentType").get<int32_t>();
     }
-    if (jsonobj.find("creatorUserId") != jsonEnd) {
-        if (!jsonobj.at("creatorUserId").is_number()) {
-            ANS_LOGE("Invalid JSON object creatorUserId");
-            return;
-        }
+    if (jsonobj.find("creatorUserId") != jsonEnd && jsonobj.at("creatorUserId").is_number()) {
         creatorUserId_ = jsonobj.at("creatorUserId").get<int32_t>();
     }
-    if (jsonobj.find("slotType") != jsonEnd) {
-        if (!jsonobj.at("slotType").is_number()) {
-            ANS_LOGE("Invalid JSON object slotType");
-            return;
-        }
+    if (jsonobj.find("slotType") != jsonEnd && jsonobj.at("slotType").is_number()) {
         slotType_ = jsonobj.at("slotType").get<int32_t>();
     }
-    if (jsonobj.find("label") != jsonEnd) {
-        if (!jsonobj.at("label").is_string()) {
-            ANS_LOGE("Invalid JSON object label");
-            return;
-        }
+    if (jsonobj.find("label") != jsonEnd && jsonobj.at("label").is_string()) {
         label_ = jsonobj.at("label").get<std::string>();
     }
     ConvertJsonExtraInfoToValue(jsonobj);

@@ -473,7 +473,7 @@ public:
         const std::vector<std::string> key, std::vector<sptr<Notification>> &notification);
 
     /**
-     * @brief Obtains the active notifications by filter. 
+     * @brief Obtains the active notifications by filter.
      * @param filter
      * @param extraInfo
      * @return

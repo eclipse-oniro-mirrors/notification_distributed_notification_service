@@ -32,6 +32,8 @@ AnsSubscriberStub::AnsSubscriberStub()
         std::bind(&AnsSubscriberStub::HandleOnDisconnected, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(NotificationInterfaceCode::ON_CONSUMED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnConsumedMap, this, std::placeholders::_1, std::placeholders::_2));
+    interfaces_.emplace(NotificationInterfaceCode::ON_CONSUMED_LIST_MAP,
+        std::bind(&AnsSubscriberStub::HandleOnConsumedListMap, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(NotificationInterfaceCode::ON_CANCELED_MAP,
         std::bind(&AnsSubscriberStub::HandleOnCanceledMap, this, std::placeholders::_1, std::placeholders::_2));
     interfaces_.emplace(NotificationInterfaceCode::ON_CANCELED_LIST_MAP,
@@ -113,6 +115,35 @@ ErrCode AnsSubscriberStub::HandleOnConsumedMap(MessageParcel &data, MessageParce
     }
 
     OnConsumed(notification, notificationMap);
+    return ERR_OK;
+}
+
+ErrCode AnsSubscriberStub::HandleOnConsumedListMap(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGI("Start handle notifications in consumed list.");
+
+    std::vector<sptr<Notification>> notifications;
+    if (!ReadParcelableVector(notifications, data)) {
+        ANS_LOGE("read notifications failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool existMap = false;
+    if (!data.ReadBool(existMap)) {
+        ANS_LOGE("read existMap failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+    if (existMap) {
+        notificationMap = data.ReadParcelable<NotificationSortingMap>();
+        if (notificationMap == nullptr) {
+            ANS_LOGE("read NotificationSortingMap failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
+    OnConsumedList(notifications, notificationMap);
     return ERR_OK;
 }
 
@@ -260,6 +291,10 @@ void AnsSubscriberStub::OnDisconnected()
 
 void AnsSubscriberStub::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
+{}
+
+void AnsSubscriberStub::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap)
 {}
 
 void AnsSubscriberStub::OnCanceled(

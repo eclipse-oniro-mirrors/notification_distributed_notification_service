@@ -793,7 +793,8 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetEnabledForBundleSlot(
                     asynccallbackinfo->params.option,
                     asynccallbackinfo->params.outType,
-                    asynccallbackinfo->params.enable);
+                    asynccallbackinfo->params.enable,
+                    asynccallbackinfo->params.isForceControl);
             }
         },
         [](napi_env env, napi_status status, void *data) {

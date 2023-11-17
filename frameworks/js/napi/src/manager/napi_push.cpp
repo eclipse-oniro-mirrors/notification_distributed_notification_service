@@ -106,7 +106,7 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     }
 
     jsPushCallBack_->SetJsPushCallBackObject(argv[INDEX_TWO]);
-    NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject());
+    NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject(), checkRequest);
     return undefined;
 }
 

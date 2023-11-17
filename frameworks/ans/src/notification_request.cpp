@@ -15,10 +15,15 @@
 
 #include "notification_request.h"
 
+#include "ans_inner_errors.h"
 #include "ans_image_util.h"
 #include "ans_log_wrapper.h"
+#include "errors.h"
+#include "notification_live_view_content.h"
+#include "refbase.h"
 #include "want_agent_helper.h"
 #include "want_params_wrapper.h"
+#include <memory>
 
 namespace OHOS {
 namespace Notification {
@@ -45,6 +50,7 @@ const uint32_t NotificationRequest::COLOR_MASK {0xFF000000};
 const std::size_t NotificationRequest::MAX_USER_INPUT_HISTORY {5};
 const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
+const std::string NotificationRequest::KEY_PREFIX {"ans_live_view"};
 
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
@@ -247,6 +253,36 @@ void NotificationRequest::SetAutoDeletedTime(int64_t deletedTime)
 int64_t NotificationRequest::GetAutoDeletedTime() const
 {
     return autoDeletedTime_;
+}
+
+void NotificationRequest::SetMaxUpdateTime(int64_t maxUpdateTime)
+{
+        maxUpdateTime_ = maxUpdateTime;
+}
+
+int64_t NotificationRequest::GetMaxUpdateTime() const
+{
+    return maxUpdateTime_;
+}
+
+void NotificationRequest::SetMaxFinishTime(int64_t maxFinishTime)
+{
+    maxFinishTime_ = maxFinishTime;
+}
+
+int64_t NotificationRequest::GetMaxFinishTime() const
+{
+    return maxFinishTime_;
+}
+
+void NotificationRequest::SetMaxArchiveTime(int64_t maxArchiveTime)
+{
+    maxArchiveTime_ = maxArchiveTime;
+}
+
+int64_t NotificationRequest::GetMaxArchiveTime() const
+{
+    return maxArchiveTime_;
 }
 
 void NotificationRequest::SetLittleIcon(const std::shared_ptr<Media::PixelMap> &littleIcon)
@@ -678,9 +714,8 @@ std::string NotificationRequest::Dump()
             ", creatorUid = " + std::to_string(static_cast<int32_t>(creatorUid_)) +
             ", ownerBundleName = " + ownerBundleName_ +
             ", ownerUid = " + std::to_string(static_cast<int32_t>(ownerUid_)) +
-            ", groupName = " + groupName_ +
-            ", statusBarText = " + statusBarText_ + ", label = " + label_ + ", shortcutId = " + shortcutId_ +
-            ", sortingKey = " + sortingKey_ +
+            ", groupName = " + groupName_ + ", statusBarText = " + statusBarText_ + ", label = " + label_ +
+            ", shortcutId = " + shortcutId_ + ", sortingKey = " + sortingKey_ +
             ", groupAlertType = " + std::to_string(static_cast<int32_t>(groupAlertType_)) +
             ", color = " + std::to_string(color_) + ", badgeNumber = " + std::to_string(badgeNumber_) +
             ", visiblenessType = " + std::to_string(static_cast<int32_t>(visiblenessType_)) +
@@ -714,10 +749,10 @@ std::string NotificationRequest::Dump()
             ", userInputHistory = " + (!userInputHistory_.empty() ? userInputHistory_.at(0) : "empty") +
             ", distributedOptions = " + distributedOptions_.Dump() +
             ", notificationFlags = " + (notificationFlags_ ? "not null" : "null") +
-            ", creatorUserId = " + std::to_string(creatorUserId_) +
+            ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", ownerUserId = " + std::to_string(ownerUserId_) +
-            ", receiverUserId = " + std::to_string(receiverUserId_) +
-            " }";
+            ", receiverUserId = " + std::to_string(receiverUserId_) + ", maxUpdateTime = " +
+            std::to_string(maxUpdateTime_) + ", maxFinishTime = " + std::to_string(maxFinishTime_) + " }";
 }
 
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
@@ -1615,6 +1650,20 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
     return true;
 }
 
+void NotificationRequest::ConvertJsonToNumExt(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("maxUpdateTime") != jsonEnd && jsonObject.at("maxUpdateTime").is_number_integer()) {
+        target->maxUpdateTime_ = jsonObject.at("maxUpdateTime").get<int64_t>();
+    }
+
+    if (jsonObject.find("maxFinishTime") != jsonEnd && jsonObject.at("maxFinishTime").is_number_integer()) {
+        target->maxFinishTime_ = jsonObject.at("maxFinishTime").get<int64_t>();
+    }
+}
+
 void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
@@ -1659,6 +1708,8 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
     if (jsonObject.find("badgeNumber") != jsonEnd && jsonObject.at("badgeNumber").is_number_integer()) {
         target->badgeNumber_ = jsonObject.at("badgeNumber").get<uint32_t>();
     }
+
+    ConvertJsonToNumExt(target, jsonObject);
 }
 
 void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject)
@@ -1884,5 +1935,242 @@ bool NotificationRequest::ConvertJsonToNotificationFlags(
 
     return true;
 }
+
+bool NotificationRequest::IsCommonLiveView() const
+{
+    return (slotType_ == NotificationConstant::SlotType::LIVE_VIEW) &&
+        (notificationContentType_ == NotificationContent::Type::LIVE_VIEW);
+}
+
+ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRequest) const
+{
+    auto content = notificationContent_->GetNotificationContent();
+    auto liveView = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto oldContent = oldRequest->GetContent()->GetNotificationContent();
+    auto oldLiveView = std::static_pointer_cast<NotificationLiveViewContent>(oldContent);
+
+    if (oldLiveView->GetVersion() == NotificationLiveViewContent::MAX_VERSION) {
+        return ERR_OK;
+    }
+    if (liveView->GetVersion() == NotificationLiveViewContent::MAX_VERSION) {
+        ANS_LOGE("Invalid version, creator bundle name %{public}s, id %{public}d, "
+            "old version %{public}u, new version %{public}u.", GetCreatorBundleName().c_str(),
+            GetNotificationId(), oldLiveView->GetVersion(), liveView->GetVersion());
+        return ERR_ANS_EXPIRED_NOTIFICATION;
+    }
+    if (oldLiveView->GetVersion() >= liveView->GetVersion()) {
+        ANS_LOGE("Live view has finished, creator bundle name %{public}s, id %{public}d, "
+            "old version %{public}u, new version %{public}u.", GetCreatorBundleName().c_str(),
+            GetNotificationId(), oldLiveView->GetVersion(), liveView->GetVersion());
+        return ERR_ANS_EXPIRED_NOTIFICATION;
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationRequest> &oldRequest) const
+{
+    if (!IsCommonLiveView()) {
+        return ERR_OK;
+    }
+
+    using StatusType = NotificationLiveViewContent::LiveViewStatus;
+    auto content = notificationContent_->GetNotificationContent();
+    auto liveView = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto status = liveView->GetLiveViewStatus();
+    if (oldRequest == nullptr) {
+        if (status != StatusType::LIVE_VIEW_CREATE) {
+            ANS_LOGE("Doesn't exist live view, bundle name %{public}s, id %{public}d.",
+                GetCreatorBundleName().c_str(), GetNotificationId());
+            return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        }
+        return ERR_OK;
+    }
+
+    if (!oldRequest->IsCommonLiveView()) {
+        ANS_LOGE("Invalid old request param, slot type %{public}d, content type %{public}d.",
+            oldRequest->GetSlotType(), oldRequest->GetNotificationType());
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (status == StatusType::LIVE_VIEW_CREATE) {
+        ANS_LOGW("Repeat create live view, bundle name %{public}s, id %{public}d.",
+            GetCreatorBundleName().c_str(), GetNotificationId());
+        return ERR_ANS_REPEAT_CREATE;
+    }
+
+    auto oldContent = oldRequest->GetContent()->GetNotificationContent();
+    auto oldLiveView = std::static_pointer_cast<NotificationLiveViewContent>(oldContent);
+    auto oldStatus = oldLiveView->GetLiveViewStatus();
+    if (oldStatus == StatusType::LIVE_VIEW_END) {
+        ANS_LOGW("Live view has finished, bundle name %{public}s, id %{public}d.",
+            GetCreatorBundleName().c_str(), GetNotificationId());
+        return ERR_ANS_END_NOTIFICATION;
+    }
+
+    return CheckVersion(oldRequest);
+}
+
+void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> &oldRequest)
+{
+    if (!IsCommonLiveView() || (oldRequest == nullptr)) {
+        return;
+    }
+
+    maxUpdateTime_ = oldRequest->maxUpdateTime_;
+    maxFinishTime_ = oldRequest->maxFinishTime_;
+    if (autoDeletedTime_ == NotificationConstant::INVALID_AUTO_DELETE_TIME) {
+        autoDeletedTime_ = oldRequest->autoDeletedTime_;
+    }
+    if (wantAgent_ == nullptr) {
+        wantAgent_ = oldRequest->wantAgent_;
+    }
+
+    auto content = notificationContent_->GetNotificationContent();
+    auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (newLiveViewContent->GetLiveViewStatus() ==
+        NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE) {
+        return;
+    }
+    auto newExtraInfo = newLiveViewContent->GetExtraInfo();
+    auto oldContent = oldRequest->GetContent()->GetNotificationContent();
+    auto oldLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(oldContent);
+    auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
+    if (newExtraInfo == nullptr) {
+        newLiveViewContent->SetExtraInfo(oldExtraInfo);
+    } else {
+        auto oldKeySet = oldExtraInfo->KeySet();
+        for (const auto &key : oldKeySet) {
+            if (!newExtraInfo->HasParam(key)) {
+                newExtraInfo->SetParam(key, oldExtraInfo->GetParam(key));
+            }
+        }
+    }
+
+    auto newPicture = newLiveViewContent->GetPicture();
+    auto oldPicture = oldLiveViewContent->GetPicture();
+    for (const auto &pictureRecord : oldPicture) {
+        if (newPicture.find(pictureRecord.first) != newPicture.end()) {
+            continue;
+        }
+        newPicture[pictureRecord.first] = pictureRecord.second;
+    }
+}
+
+std::string NotificationRequest::GenerateNotificationRequestKey(
+    int32_t creatorUserId, int32_t creatorUid, const std::string &label, int32_t notificationId)
+{
+    const char *keySpliter = "_";
+
+    std::stringstream stream;
+    stream << KEY_PREFIX << keySpliter << creatorUserId << keySpliter <<
+        creatorUid << keySpliter<< label << keySpliter << notificationId;
+    return stream.str();
+}
+
+std::string NotificationRequest::GetKey()
+{
+    const char *keySpliter = "_";
+
+    std::stringstream stream;
+    stream << KEY_PREFIX << keySpliter << creatorUserId_ << keySpliter <<
+        creatorUid_ << keySpliter << label_ << keySpliter << notificationId_;
+    return stream.str();
+}
+
+bool NotificationRequest::CheckImageOverSizeForPixelMap(
+    const std::shared_ptr<Media::PixelMap> &pixelMap, uint32_t maxSize)
+{
+    if (pixelMap == nullptr) {
+        return false;
+    }
+
+    auto size = static_cast<uint32_t>(pixelMap->GetByteCount());
+    return size > maxSize;
+}
+
+ErrCode NotificationRequest::CheckImageSizeForConverSation(std::shared_ptr<NotificationBasicContent> &content)
+{
+    auto conversationalContent = std::static_pointer_cast<NotificationConversationalContent>(content);
+    auto picture = conversationalContent->GetMessageUser().GetPixelMap();
+    if (CheckImageOverSizeForPixelMap(picture, MAX_ICON_SIZE)) {
+        ANS_LOGE("The size of picture in ConversationalContent's message user exceeds limit");
+        return ERR_ANS_ICON_OVER_SIZE;
+    }
+
+    auto messages = conversationalContent->GetAllConversationalMessages();
+    for (auto &msg : messages) {
+        if (!msg) {
+            continue;
+        }
+        auto img = msg->GetSender().GetPixelMap();
+        if (CheckImageOverSizeForPixelMap(img, MAX_ICON_SIZE)) {
+            ANS_LOGE("The size of picture in ConversationalContent's message exceeds limit");
+            return ERR_ANS_ICON_OVER_SIZE;
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationRequest::CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content)
+{
+    auto pictureContent = std::static_pointer_cast<NotificationPictureContent>(content);
+    auto bigPicture = pictureContent->GetBigPicture();
+    if (CheckImageOverSizeForPixelMap(bigPicture, MAX_PICTURE_SIZE)) {
+        ANS_LOGE("The size of big picture in PictureContent exceeds limit");
+        return ERR_ANS_PICTURE_OVER_SIZE;
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationRequest::CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content)
+{
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto pictureMap = liveViewContent->GetPicture();
+    for (const auto &pixelMapRecord : pictureMap) {
+        if (pixelMapRecord.second.empty()) {
+            ANS_LOGE("Picture key exist, but picture content is empty.");
+            return ERR_ANS_INVALID_PARAM;
+        }
+        if (pixelMapRecord.second.size() > MAX_LIVE_VIEW_ICON_NUM) {
+            ANS_LOGE("Picture key exist, but picture content is empty.");
+            return ERR_ANS_INVALID_PARAM;
+        }
+        for (const auto &pixelMap : pixelMapRecord.second) {
+            if (CheckImageOverSizeForPixelMap(pixelMap, MAX_ICON_SIZE)) {
+                ANS_LOGE("The size of big picture in PictureContent exceeds limit.");
+                return ERR_ANS_ICON_OVER_SIZE;
+            }
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationRequest::CheckImageSizeForContent() const
+{
+    auto content = GetContent();
+    if (content == nullptr) {
+        ANS_LOGE("Invalid content in NotificationRequest");
+        return ERR_OK;
+    }
+
+    auto basicContent = GetContent()->GetNotificationContent();
+    if (basicContent == nullptr) {
+        ANS_LOGE("Invalid content in NotificationRequest");
+        return ERR_OK;
+    }
+
+    auto contentType = GetNotificationType();
+    switch (contentType) {
+        case NotificationContent::Type::CONVERSATION:
+            return CheckImageSizeForConverSation(basicContent);
+        case NotificationContent::Type::PICTURE:
+            return CheckImageSizeForPicture(basicContent);
+        case NotificationContent::Type::LIVE_VIEW:
+            return CheckImageSizeForLiveView(basicContent);
+        default:
+            return ERR_OK;
+    }
+}
+
 }  // namespace Notification
 }  // namespace OHOS

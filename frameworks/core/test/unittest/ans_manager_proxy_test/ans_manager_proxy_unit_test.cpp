@@ -6561,7 +6561,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0100, Function | M
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetEnabledForBundleSlot(bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true);
+    int32_t result = proxy->SetEnabledForBundleSlot(
+        bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -6581,7 +6582,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0200, Function | M
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = nullptr;
-    int32_t result = proxy->SetEnabledForBundleSlot(bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true);
+    int32_t result = proxy->SetEnabledForBundleSlot(
+        bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
     EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
@@ -6603,7 +6605,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0300, Function | M
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetEnabledForBundleSlot(bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true);
+    int32_t result = proxy->SetEnabledForBundleSlot(
+        bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
     EXPECT_EQ(ERR_OK, result);
 }
 
@@ -6624,7 +6627,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0400, Function | M
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetEnabledForBundleSlot(bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true);
+    int32_t result = proxy->SetEnabledForBundleSlot(
+        bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -6646,7 +6650,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0500, Function | M
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetEnabledForBundleSlot(bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true);
+    int32_t result = proxy->SetEnabledForBundleSlot(
+        bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
