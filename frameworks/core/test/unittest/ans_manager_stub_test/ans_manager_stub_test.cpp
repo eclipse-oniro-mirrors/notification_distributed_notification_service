@@ -3158,11 +3158,13 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTe
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t type = 4;
     bool enabled = true;
+    bool isForceControl = false;
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(type);
     data.WriteBool(enabled);
+    data.WriteBool(isForceControl);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
@@ -4099,7 +4101,7 @@ HWTEST_F(AnsManagerStubTest, SetEnabledForBundleSlot01, Function | SmallTest | L
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
     bool enabled = true;
 
-    ErrCode result = ansManagerStub_->SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    ErrCode result = ansManagerStub_->SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

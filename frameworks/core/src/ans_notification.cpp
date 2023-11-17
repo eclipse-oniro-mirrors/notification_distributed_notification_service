@@ -143,6 +143,11 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (!CanPublishLiveViewContent(request)) {
+        ANS_LOGE("Refuse to publish the notification without valid live view content.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode checkErr = CheckImageSize(request);
     if (checkErr != ERR_OK) {
         ANS_LOGE("The size of one picture exceeds the limit");
@@ -625,6 +630,28 @@ ErrCode AnsNotification::GetAllActiveNotifications(
     return ansManagerProxy_->GetSpecialActiveNotifications(key, notification);
 }
 
+ErrCode AnsNotification::GetActiveNotificationByFilter(const LiveViewFilter &filter,
+    sptr<NotificationRequest> &request)
+{
+    if (filter.bundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ANS_LOGD("Bundle name %{public}s, uid %{public}d, notification id %{public}d, label %{public}s.",
+        filter.bundle.GetBundleName().c_str(), filter.bundle.GetUid(), filter.notificationKey.id,
+        filter.notificationKey.label.c_str());
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(filter.bundle));
+    return ansManagerProxy_->GetActiveNotificationByFilter(bo, filter.notificationKey.id, filter.notificationKey.label,
+        filter.extraInfoKeys, request);
+}
+
 ErrCode AnsNotification::IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed)
 {
     if (bundleOption.GetBundleName().empty()) {
@@ -1050,90 +1077,60 @@ bool AnsNotification::CanPublishMediaContent(const NotificationRequest &request)
     return true;
 }
 
-bool AnsNotification::CheckImageOverSizeForPixelMap(const std::shared_ptr<Media::PixelMap> &pixelMap, uint32_t maxSize)
+bool AnsNotification::CanPublishLiveViewContent(const NotificationRequest &request) const
 {
-    if (!pixelMap) {
+    if (!request.IsCommonLiveView()) {
+        return true;
+    }
+
+    if (request.GetContent() == nullptr) {
+        ANS_LOGE("Failed to publish notification with null content.");
         return false;
     }
 
-    uint32_t size = static_cast<uint32_t>(pixelMap->GetByteCount());
-    if (size > maxSize) {
-        return true;
-    }
-    return false;
-}
-
-ErrCode AnsNotification::CheckImageSizeForContent(const NotificationRequest &request)
-{
-    auto content = request.GetContent();
-    if (!content) {
-        ANS_LOGW("Invalid content in NotificationRequest");
-        return ERR_OK;
+    auto content = request.GetContent()->GetNotificationContent();
+    auto liveView = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (liveView == nullptr) {
+        ANS_LOGE("Failed to get live view content.");
+        return false;
     }
 
-    auto basicContent = request.GetContent()->GetNotificationContent();
-    if (!basicContent) {
-        ANS_LOGW("Invalid content in NotificationRequest");
-        return ERR_OK;
+    auto status = liveView->GetLiveViewStatus();
+    if (status >= NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT) {
+        ANS_LOGE("Invalid status %{public}u.", status);
+        return false;
     }
 
-    auto contentType = request.GetNotificationType();
-    switch (contentType) {
-        case NotificationContent::Type::CONVERSATION: {
-            auto conversationalContent = std::static_pointer_cast<NotificationConversationalContent>(basicContent);
-
-            auto picture = conversationalContent->GetMessageUser().GetPixelMap();
-            if (CheckImageOverSizeForPixelMap(picture, MAX_ICON_SIZE)) {
-                ANS_LOGE("The size of picture in ConversationalContent's message user exceeds limit");
-                return ERR_ANS_ICON_OVER_SIZE;
-            }
-
-            auto messages = conversationalContent->GetAllConversationalMessages();
-            for (auto &msg : messages) {
-                if (!msg) {
-                    continue;
-                }
-
-                auto img = msg->GetSender().GetPixelMap();
-                if (CheckImageOverSizeForPixelMap(img, MAX_ICON_SIZE)) {
-                    ANS_LOGE("The size of picture in ConversationalContent's message exceeds limit");
-                    return ERR_ANS_ICON_OVER_SIZE;
-                }
-            }
-            break;
-        }
-        case NotificationContent::Type::PICTURE: {
-            auto pictureContent = std::static_pointer_cast<NotificationPictureContent>(basicContent);
-
-            auto bigPicture = pictureContent->GetBigPicture();
-            if (CheckImageOverSizeForPixelMap(bigPicture, MAX_PICTURE_SIZE)) {
-                ANS_LOGE("The size of big picture in PictureContent exceeds limit");
-                return ERR_ANS_PICTURE_OVER_SIZE;
-            }
-            break;
-        }
-        default:
-            break;
+    auto extraInfo = liveView->GetExtraInfo();
+    if ((extraInfo == nullptr) && (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END)) {
+        ANS_LOGE("Extrainfo is empty.");
+        return false;
     }
 
-    return ERR_OK;
+    return true;
 }
 
 ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 {
     auto littleIcon = request.GetLittleIcon();
-    if (CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
+    if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
         ANS_LOGE("The size of little icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
     auto bigIcon = request.GetBigIcon();
-    if (CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
+    if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
         ANS_LOGE("The size of big icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    ErrCode err = CheckImageSizeForContent(request);
+    auto overlayIcon = request.GetOverlayIcon();
+    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
+        ANS_LOGE("The size of big icon exceeds limit");
+        return ERR_ANS_ICON_OVER_SIZE;
+    }
+
+    ErrCode err = request.CheckImageSizeForContent();
     if (err != ERR_OK) {
         return err;
     }
@@ -1144,7 +1141,7 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
             continue;
         }
         auto icon = btn->GetIcon();
-        if (CheckImageOverSizeForPixelMap(icon, MAX_ICON_SIZE)) {
+        if (NotificationRequest::CheckImageOverSizeForPixelMap(icon, MAX_ICON_SIZE)) {
             ANS_LOGE("The size of icon in ActionButton exceeds limit");
             return ERR_ANS_ICON_OVER_SIZE;
         }
@@ -1156,7 +1153,7 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
             continue;
         }
         auto icon = user->GetPixelMap();
-        if (CheckImageOverSizeForPixelMap(icon, MAX_ICON_SIZE)) {
+        if (NotificationRequest::CheckImageOverSizeForPixelMap(icon, MAX_ICON_SIZE)) {
             ANS_LOGE("The size of picture in MessageUser exceeds limit");
             return ERR_ANS_ICON_OVER_SIZE;
         }
@@ -1177,7 +1174,9 @@ ErrCode AnsNotification::IsSupportTemplate(const std::string &templateName, bool
 
 bool AnsNotification::IsNonDistributedNotificationType(const NotificationContent::Type &type)
 {
-    return ((type == NotificationContent::Type::CONVERSATION) || (type == NotificationContent::Type::PICTURE));
+    return ((type == NotificationContent::Type::CONVERSATION) ||
+        (type == NotificationContent::Type::PICTURE) ||
+        (type == NotificationContent::Type::LIVE_VIEW));
 }
 
 ErrCode AnsNotification::IsAllowedNotify(const int32_t &userId, bool &allowed)
@@ -1275,8 +1274,8 @@ ErrCode AnsNotification::GetDoNotDisturbDate(const int32_t &userId, Notification
     return ret;
 }
 
-ErrCode AnsNotification::SetEnabledForBundleSlot(
-    const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled)
+ErrCode AnsNotification::SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption.GetBundleName().empty()) {
@@ -1290,7 +1289,7 @@ ErrCode AnsNotification::SetEnabledForBundleSlot(
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->SetEnabledForBundleSlot(bo, slotType, enabled);
+    return ansManagerProxy_->SetEnabledForBundleSlot(bo, slotType, enabled, isForceControl);
 }
 
 ErrCode AnsNotification::GetEnabledForBundleSlot(
@@ -1308,6 +1307,16 @@ ErrCode AnsNotification::GetEnabledForBundleSlot(
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     return ansManagerProxy_->GetEnabledForBundleSlot(bo, slotType, enabled);
+}
+
+ErrCode AnsNotification::GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetEnabledForBundleSlotSelf fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->GetEnabledForBundleSlotSelf(slotType, enabled);
 }
 
 ErrCode AnsNotification::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
@@ -1361,14 +1370,15 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
     return ansManagerProxy_->SetBadgeNumber(badgeNumber);
 }
 
-ErrCode AnsNotification::RegisterPushCallback(const sptr<IRemoteObject>& pushCallback)
+ErrCode AnsNotification::RegisterPushCallback(
+    const sptr<IRemoteObject>& pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("RegisterPushCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->RegisterPushCallback(pushCallback);
+    return ansManagerProxy_->RegisterPushCallback(pushCallback, notificationCheckRequest);
 }
 
 ErrCode AnsNotification::UnregisterPushCallback()

@@ -244,6 +244,48 @@ public:
      */
     static Notification *Unmarshalling(Parcel &parcel);
 
+    /**
+     * @brief Obtains the update timer id.
+     *
+     * @return Returns the id of the notification update timer.
+     */
+    uint64_t GetUpdateTimer() const;
+
+    /**
+     * @brief Obtains the update timer id.
+     *
+     * @param updateTimerId the id of the notification update timer.
+     */
+    void SetUpdateTimer(uint64_t updateTimerId);
+
+    /**
+     * @brief Obtains the finish timer id of notification.
+     *
+     * @return Returns the id of the notification finish timer.
+     */
+    uint64_t GetFinishTimer() const;
+
+    /**
+     * @brief Obtains the finish timer id.
+     *
+     * @param finishTimerId the id of the notification finish timer.
+     */
+    void SetFinishTimer(uint64_t finishTimerId);
+
+    /**
+     * @brief Obtains the archive timer id of notification.
+     *
+     * @return Returns the id of the notification archive timer.
+     */
+    uint64_t GetArchiveTimer() const;
+
+    /**
+     * @brief Obtains the archive timer id.
+     *
+     * @param archiveTimerId the id of the notification archive timer.
+     */
+    void SetArchiveTimer(uint64_t archiveTimerId);
+
 private:
     Notification();
     void SetEnableSound(const bool &enable);
@@ -264,11 +306,13 @@ private:
     void ReadFromParcelString(Parcel &parcel);
     void ReadFromParcelInt32(Parcel &parcel);
     void ReadFromParcelInt64(Parcel &parcel);
+    void ReadFromParcelUint64(Parcel &parcel);
     void ReadFromParcelParcelable(Parcel &parcel);
     bool MarshallingBool(Parcel &parcel) const;
     bool MarshallingString(Parcel &parcel) const;
     bool MarshallingInt32(Parcel &parcel) const;
     bool MarshallingInt64(Parcel &parcel) const;
+    bool MarshallingUint64(Parcel &parcel) const;
     bool MarshallingParcelable(Parcel &parcel) const;
 
 private:
@@ -284,6 +328,9 @@ private:
     NotificationConstant::SourceType sourceType_ {NotificationConstant::SourceType::TYPE_NORMAL};
     sptr<NotificationRequest> request_ {nullptr};
     int64_t postTime_ {0};
+    uint64_t updateTimerId_ {0};
+    uint64_t finishTimerId_ {0};
+    uint64_t archiveTimerId_ {0};
     std::shared_ptr<Uri> sound_ {nullptr};
     std::vector<int64_t> vibrationStyle_ {};
 

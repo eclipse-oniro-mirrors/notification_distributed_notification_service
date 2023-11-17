@@ -75,6 +75,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_SPECIAL_ACTIVE_NOTIFICATIONS,
             std::bind(&AnsManagerStub::HandleGetSpecialActiveNotifications, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_BY_FILTER,
+            std::bind(&AnsManagerStub::HandleGetActiveNotificationByFilter, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::SET_NOTIFICATION_AGENT,
             std::bind(&AnsManagerStub::HandleSetNotificationAgent, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
@@ -237,6 +240,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
                 std::placeholders::_3)},
         {NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT,
             std::bind(&AnsManagerStub::HandleGetEnabledForBundleSlot, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT_SELF,
+            std::bind(&AnsManagerStub::HandleGetEnabledForBundleSlotSelf, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
         {NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
             std::bind(&AnsManagerStub::HandleDistributedSetEnabledWithoutApp, std::placeholders::_1,
@@ -532,6 +538,46 @@ ErrCode AnsManagerStub::HandleGetSpecialActiveNotifications(MessageParcel &data,
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetActiveNotificationByFilter(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleGetActiveNotificationByFilter] fail: read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t notificationId = 0;
+    if (!data.ReadInt32(notificationId)) {
+        ANS_LOGE("[HandleGetActiveNotificationByFilter] fail: read notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::string label;
+    if (!data.ReadString(label)) {
+        ANS_LOGE("[HandleGetActiveNotificationByFilter] fail: read label failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::vector<std::string> extraInfoKeys;
+    if (!data.ReadStringVector(&extraInfoKeys)) {
+        ANS_LOGE("[HandleGetActiveNotificationByFilter] fail: read extraInfoKeys failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    sptr<NotificationRequest> request;
+    ErrCode result = GetActiveNotificationByFilter(bundleOption, notificationId, label, extraInfoKeys, request);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetActiveNotificationByFilter] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteParcelable(request)) {
+        ANS_LOGE("[HandleGetActiveNotificationByFilter] fail: get extra info by filter failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 
 ErrCode AnsManagerStub::HandleSetNotificationAgent(MessageParcel &data, MessageParcel &reply)
@@ -1694,7 +1740,13 @@ ErrCode AnsManagerStub::HandleSetEnabledForBundleSlot(MessageParcel &data, Messa
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    bool isForceControl = false;
+    if (!data.ReadBool(isForceControl)) {
+        ANS_LOGE("[HandleSetEnabledForBundleSlot] fail: read isForceControl failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetEnabledForBundleSlot] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1727,6 +1779,30 @@ ErrCode AnsManagerStub::HandleGetEnabledForBundleSlot(MessageParcel &data, Messa
 
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleGetEnabledForBundleSlot] fail: write enabled failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetEnabledForBundleSlotSelf(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        ANS_LOGE("[HandleGetEnabledForBundleSlotSelf] fail: read slot type failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(type);
+
+    bool enabled = false;
+    ErrCode result = GetEnabledForBundleSlotSelf(slotType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetEnabledForBundleSlotSelf] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteBool(enabled)) {
+        ANS_LOGE("[HandleGetEnabledForBundleSlotSelf] fail: write enabled failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1806,7 +1882,13 @@ ErrCode AnsManagerStub::HandleRegisterPushCallback(MessageParcel &data, MessageP
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = RegisterPushCallback(pushCallBack);
+    sptr<NotificationCheckRequest> notificationCheckRequest = data.ReadParcelable<NotificationCheckRequest>();
+    if (notificationCheckRequest == nullptr) {
+        ANS_LOGE("fail: read notificationCheckRequest failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = RegisterPushCallback(pushCallBack, notificationCheckRequest);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1912,6 +1994,14 @@ ErrCode AnsManagerStub::GetSpecialActiveNotifications(
     const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications)
 {
     ANS_LOGE("AnsManagerStub::GetSpecialActiveNotifications called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetActiveNotificationByFilter(
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
+    std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
+{
+    ANS_LOGE("AnsManagerStub::GetActiveNotificationByFilter called!");
     return ERR_INVALID_OPERATION;
 }
 
@@ -2239,8 +2329,8 @@ ErrCode AnsManagerStub::GetDoNotDisturbDate(const int32_t &userId, sptr<Notifica
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::SetEnabledForBundleSlot(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled)
+ErrCode AnsManagerStub::SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
     ANS_LOGE("AnsManagerStub::SetEnabledForBundleSlot called!");
     return ERR_INVALID_OPERATION;
@@ -2253,6 +2343,11 @@ ErrCode AnsManagerStub::GetEnabledForBundleSlot(
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled)
+{
+    ANS_LOGE("AnsManagerStub::GetEnabledForBundleSlotSelf called!");
+    return ERR_INVALID_OPERATION;
+}
 
 ErrCode AnsManagerStub::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
     std::vector<std::string> &dumpInfo)
@@ -2279,7 +2374,8 @@ ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::RegisterPushCallback(const sptr<IRemoteObject>& pushCallback)
+ErrCode AnsManagerStub::RegisterPushCallback(
+    const sptr<IRemoteObject>& pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {
     ANS_LOGE("RegisterPushCallback called!");
     return ERR_INVALID_OPERATION;

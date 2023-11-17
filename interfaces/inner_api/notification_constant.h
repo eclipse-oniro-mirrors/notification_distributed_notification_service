@@ -183,6 +183,23 @@ public:
      */
     static const std::string EXTRA_INPUTS_SOURCE;
 
+    static const int64_t HOUR_TO_MS = 3600000;
+
+    static const int64_t SECOND_TO_MS = 1000;
+
+    static const int64_t MAX_FINISH_TIME = 8 * HOUR_TO_MS;
+
+    static const int64_t MAX_UPDATE_TIME = 4 * HOUR_TO_MS;
+
+    static const int64_t INVALID_AUTO_DELETE_TIME = -1;
+
+    /* one hour */
+    static const int64_t DEFAULT_AUTO_DELETE_TIME = 3600;
+
+    static constexpr uint64_t INVALID_TIMER_ID = 0ULL;
+
+    static constexpr uint64_t NOTIFICATION_MAX_LIVE_VIEW_SIZE = 520ULL * 1024ULL;
+
     // rdb
     constexpr static const char* NOTIFICATION_RDB_NAME = "/notificationdb.db";
     constexpr static const char* NOTIFICATION_RDB_TABLE_NAME = "notification_table";

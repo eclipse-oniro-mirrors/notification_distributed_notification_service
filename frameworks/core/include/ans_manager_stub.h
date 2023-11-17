@@ -182,6 +182,10 @@ public:
     virtual ErrCode GetSpecialActiveNotifications(
         const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications) override;
 
+    virtual ErrCode GetActiveNotificationByFilter(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
+        std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request) override;
+
     /**
      * @brief Allows another application to act as an agent to publish notifications in the name of your application
      * bundle.
@@ -644,9 +648,10 @@ public:
      */
     virtual ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
     virtual ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled) override;
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
     virtual ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) override;
+    virtual ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) override;
 
     /**
      * @brief Obtains specific datas via specified dump option.
@@ -690,9 +695,11 @@ public:
      * @brief Register Push Callback.
      *
      * @param pushCallback PushCallBack.
+     * @param notificationCheckRequest Filter conditions for push check
      * @return Returns register PushCallback result.
      */
-    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback) override;
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback,
+        const sptr<NotificationCheckRequest>& notificationCheckRequest) override;
 
     /**
      * @brief Unregister Push Callback.
@@ -720,6 +727,7 @@ private:
     ErrCode HandleGetActiveNotificationNums(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllActiveNotifications(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSpecialActiveNotifications(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetActiveNotificationByFilter(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationAgent(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetNotificationAgent(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCanPublishAsBundle(MessageParcel &data, MessageParcel &reply);
@@ -773,6 +781,7 @@ private:
     ErrCode HandleGetDoNotDisturbDateByUser(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetEnabledForBundleSlotSelf(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedSetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedGetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply);

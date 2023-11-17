@@ -251,6 +251,12 @@ ErrCode NotificationHelper::GetAllActiveNotifications(
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllActiveNotifications(key, notification);
 }
 
+ErrCode NotificationHelper::GetActiveNotificationByFilter(
+    const LiveViewFilter &filter, sptr<NotificationRequest> &request)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationByFilter(filter, request);
+}
+
 ErrCode NotificationHelper::IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(bundleOption, allowed);
@@ -386,16 +392,22 @@ ErrCode NotificationHelper::GetDoNotDisturbDate(const int32_t &userId, Notificat
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(userId, doNotDisturbDate);
 }
 
-ErrCode NotificationHelper::SetEnabledForBundleSlot(
-    const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled)
+ErrCode NotificationHelper::SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetEnabledForBundleSlot(bundleOption,
+        slotType, enabled, isForceControl);
 }
 
 ErrCode NotificationHelper::GetEnabledForBundleSlot(
     const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
+}
+
+ErrCode NotificationHelper::GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlotSelf(slotType, enabled);
 }
 
 ErrCode NotificationHelper::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
@@ -415,9 +427,11 @@ ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber)
     return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber);
 }
 
-ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
+ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback,
+    const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->RegisterPushCallback(pushCallback);
+    return DelayedSingleton<AnsNotification>::GetInstance()->RegisterPushCallback(pushCallback,
+        notificationCheckRequest);
 }
 
 ErrCode NotificationHelper::UnregisterPushCallback()

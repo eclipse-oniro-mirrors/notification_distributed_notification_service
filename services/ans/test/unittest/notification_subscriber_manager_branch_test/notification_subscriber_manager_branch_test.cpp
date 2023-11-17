@@ -1249,7 +1249,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled),
+    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false),
         ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -1270,7 +1270,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled),
+    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false),
         ERR_ANS_INVALID_BUNDLE);
 }
 

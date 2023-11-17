@@ -318,8 +318,8 @@ HWTEST_F(AnsNotificationUnitAnnexTest, CheckImageSizeForContent_0100, Function |
 {
     NotificationRequest request;
     request.SetContent(nullptr);
-    
-    ErrCode ret = ans_->CheckImageSizeForContent(request);
+
+    ErrCode ret = request.CheckImageSizeForContent();
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification

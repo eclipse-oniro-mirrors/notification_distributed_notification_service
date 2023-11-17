@@ -658,7 +658,7 @@ public:
      */
     ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled) override;
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) override;
 
@@ -762,7 +762,8 @@ public:
      * @param pushCallback PushCallBack.
      * @return Returns register push Callback result.
      */
-    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback) override;
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback,
+        const sptr<NotificationCheckRequest> &notificationCheckRequest) override;
 
     /**
      * @brief Unregister Push Callback.

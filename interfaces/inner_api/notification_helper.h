@@ -26,6 +26,7 @@
 #include "notification_sorting_map.h"
 #include "notification_subscriber.h"
 #include "notification_local_live_view_subscriber.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace Notification {
@@ -472,6 +473,16 @@ public:
         const std::vector<std::string> key, std::vector<sptr<Notification>> &notification);
 
     /**
+     * @brief Obtains the live view notification extra info by the extraInfoKeys. To call this method
+     * to obtain particular live view notification extra info by filter, you must
+     * @param filter
+     * @param extraInfo
+     * @return
+     */
+    static ErrCode GetActiveNotificationByFilter(
+        const LiveViewFilter &filter, sptr<NotificationRequest> &request);
+
+    /**
      * @brief Checks whether a specified application has the permission to publish notifications. If bundle specifies
      * the current application, no permission is required for calling this method. If bundle specifies another
      * application, the caller must have system permissions.
@@ -732,10 +743,11 @@ public:
      * @param bundleOption Indicates the bundle name and uid of the application.
      * @param slotType Indicates type of slot.
      * @param enabled the type of slot enabled.
+     * @param isForceControl Indicates whether the slot is affected by the notification switch.
      * @return Returns get slot number by bundle result.
      */
-    static ErrCode SetEnabledForBundleSlot(
-        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled);
+    static ErrCode SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
 
     /**
      * Obtains whether the application slot is enabled.
@@ -747,6 +759,15 @@ public:
      */
     static ErrCode GetEnabledForBundleSlot(
         const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled);
+
+    /**
+     * Obtains whether the current application slot is enabled.
+     *
+     * @param slotType Indicates type of slot.
+     * @param enabled the type of slot enabled to get.
+     * @return Returns get enabled result.
+     */
+    static ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
 
     /**
      * @brief Set whether to sync notifications to devices that do not have the app installed.
@@ -778,9 +799,11 @@ public:
      * @brief Register Push Callback.
      *
      * @param pushCallback push appliction's Callback.
+     * @param notificationCheckRequest Filter conditions for push check.
      * @return Returns register push callback result.
      */
-    static ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback);
+    static ErrCode RegisterPushCallback(
+        const sptr<IRemoteObject>& pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest);
 
     /**
      * @brief Unregister Push Callback.

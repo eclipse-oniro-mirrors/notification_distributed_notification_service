@@ -191,7 +191,7 @@ namespace OHOS {
         ansManagerStub.DeleteAllByUser(userId);
         ansManagerStub.SetDoNotDisturbDate(date);
         ansManagerStub.GetDoNotDisturbDate(date);
-        ansManagerStub.SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+        ansManagerStub.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         ansManagerStub.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
         ansManagerStub.ShellDump(stringData, stringData, userId, dumpInfo);

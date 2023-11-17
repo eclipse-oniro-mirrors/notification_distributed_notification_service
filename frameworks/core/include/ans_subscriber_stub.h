@@ -58,6 +58,9 @@ public:
     void OnConsumed(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
 
+    void OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap) override;
+
     /**
      * @brief The callback function on a notification canceled.
      *
@@ -105,6 +108,7 @@ private:
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDisconnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnConsumedMap(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleOnConsumedListMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnCanceledMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnCanceledListMap(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnUpdated(MessageParcel &data, MessageParcel &reply);

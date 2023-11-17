@@ -131,5 +131,23 @@ HWTEST_F(NotificationBundleOptionTest, ReadFromParcel_00001, Function | SmallTes
     auto rrc = std::make_shared<NotificationBundleOption>(bundleName, uid);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: JsonConvert_00001
+ * @tc.desc: Test json convert
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationBundleOptionTest, JsonConvert_00001, Function | SmallTest | Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t uid = 10;
+    auto rrc = std::make_shared<NotificationBundleOption>(bundleName, uid);
+    nlohmann::json jsonObject;
+    EXPECT_TRUE(rrc->ToJson(jsonObject));
+    auto *rrcNew = rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrcNew->GetBundleName(), rrc->GetBundleName());
+    EXPECT_EQ(rrcNew->GetUid(), rrc->GetUid());
+}
 }
 }

@@ -226,7 +226,7 @@ private:
 
         EXPECT_NE(nullptr, notificationRequest.GetBigIcon());
         EXPECT_NE(nullptr, notificationRequest.GetLittleIcon());
-        EXPECT_NE(nullptr, notificationRequest.GetLittleIcon());
+        EXPECT_NE(nullptr, notificationRequest.GetOverlayIcon());
         std::vector<std::shared_ptr<MessageUser>> messageUser = notificationRequest.GetMessageUsers();
         for (auto user : messageUser) {
             if (user != nullptr) {
@@ -1537,13 +1537,15 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
 
     bool enable = false;
     NotificationBundleOption bo("bundleName", 1);
-    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, enable));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
+        bo, NotificationConstant::CONTENT_INFORMATION, enable, false));
     sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, enable));
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00100::end:" << enable;
     EXPECT_EQ(enable, false);
     EXPECT_EQ(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, NotificationHelper::PublishNotification(req));
-    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, true));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
+        bo, NotificationConstant::CONTENT_INFORMATION, true, false));
 }
 
 /**
@@ -1572,14 +1574,16 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
     bool enable = false;
     NotificationBundleOption bo("bundleName", 1);
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00200::end:" << enable;
-    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
+        bo, NotificationConstant::SERVICE_REMINDER, enable, false));
     sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, false);
     EXPECT_EQ((uint32_t)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, NotificationHelper::PublishNotification(req));
 
     enable = true;
-    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
+        bo, NotificationConstant::SERVICE_REMINDER, enable, false));
     sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, true);

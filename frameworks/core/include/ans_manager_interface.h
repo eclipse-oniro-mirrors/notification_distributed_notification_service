@@ -180,6 +180,20 @@ public:
         const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications) = 0;
 
     /**
+     * @brief Obtains the live view notification extra info by the extraInfoKeys. To call this method
+     * to obtain particular live view notification extra info, you must have received the
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param notificationId Indicates the id of the notification to get the extra info by extra info keys.
+     * @param extraInfoKeys
+     * @param extraInfo
+     * @return
+     */
+    virtual ErrCode GetActiveNotificationByFilter(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
+        std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request) = 0;
+
+    /**
      * @brief Allows another application to act as an agent to publish notifications in the name of your application
      * bundle.
      *
@@ -642,9 +656,10 @@ public:
      */
     virtual ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) = 0;
     virtual ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled) = 0;
+        const NotificationConstant::SlotType &slotType, bool enabled,  bool isForceControl) = 0;
     virtual ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) = 0;
+    virtual ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) = 0;
 
     /**
      * @brief Obtains specific datas via specified dump option.
@@ -690,7 +705,8 @@ public:
      * @param pushCallback PushCallBack.
      * @return Returns register PushCallback result.
      */
-    virtual ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback) = 0;
+    virtual ErrCode RegisterPushCallback(
+        const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest) = 0;
 
     /**
      * @brief Unregister Push Callback.

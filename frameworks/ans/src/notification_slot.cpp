@@ -116,6 +116,15 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetEnableVibration(false);
             SetLevel(LEVEL_LOW);
             break;
+        case NotificationConstant::SlotType::LIVE_VIEW:
+            id_ = "LIVE_VIEW";
+            SetName("LIVE_VIEW");
+            SetLockscreenVisibleness(NotificationConstant::VisiblenessType::PUBLIC);
+            SetSound(DEFAULT_NOTIFICATION_SOUND);
+            SetVibrationStyle(DEFAULT_NOTIFICATION_VIBRATION);
+            SetLevel(LEVEL_DEFAULT);
+            SetForceControl(true);
+            break;
         case NotificationConstant::SlotType::OTHER:
             id_ = "OTHER";
             SetName("OTHER");
@@ -198,6 +207,16 @@ void NotificationSlot::SetEnable(bool enabled)
 bool NotificationSlot::GetEnable() const
 {
     return enabled_;
+}
+
+void NotificationSlot::SetForceControl(bool isForceControl)
+{
+    isForceControl_ = isForceControl;
+}
+
+bool NotificationSlot::GetForceControl() const
+{
+    return isForceControl_;
 }
 
 std::string NotificationSlot::Dump() const

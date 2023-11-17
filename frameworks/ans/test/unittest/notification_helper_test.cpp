@@ -983,7 +983,7 @@ HWTEST_F(NotificationHelperTest, SetEnabledForBundleSlot_00001, Function | Small
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
     bool enabled = true;
     NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    ErrCode ret = notificationHelper.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 

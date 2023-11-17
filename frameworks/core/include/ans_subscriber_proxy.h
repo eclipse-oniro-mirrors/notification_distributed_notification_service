@@ -48,6 +48,9 @@ public:
     void OnConsumed(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
 
+    void OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap) override;
+
     /**
      * @brief The callback function on a notification canceled.
      *

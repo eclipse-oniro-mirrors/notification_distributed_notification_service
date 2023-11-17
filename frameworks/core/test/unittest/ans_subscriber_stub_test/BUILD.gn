@@ -19,11 +19,18 @@ module_output_path = "${component_name}/unittest"
 
 ohos_unittest("ans_subscriber_stub_test") {
   module_out_path = module_output_path
-  include_dirs = [ "${core_path}/include" ]
+  include_dirs = [
+    "${core_path}/include",
+    "../mock/",
+  ]
 
   sources = [ "ans_subscriber_stub_unit_test.cpp" ]
 
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
 
   external_deps = [
     "ability_base:want",
