@@ -1622,22 +1622,24 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
     const std::string &key, sptr<Notification> &notification, bool isCancel, int32_t removeReason)
 {
     for (auto record : notificationList_) {
-        if (record->notification->GetKey() == key) {
-            if (!isCancel && !record->notification->IsRemoveAllowed()) {
-                return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
-            }
-            notification = record->notification;
-            // delete or delete all, call the function
-            if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
-                ProcForDeleteLiveView(record);
-                if (!isCancel) {
-                    TriggerRemoveWantAgent(record->request);
-                }
-            }
-
-            notificationList_.remove(record);
-            return ERR_OK;
+        if (record->notification->GetKey() != key) {
+            continue;
         }
+
+        if (!isCancel && !record->notification->IsRemoveAllowed()) {
+            return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
+        }
+        notification = record->notification;
+        // delete or delete all, call the function
+        if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
+            ProcForDeleteLiveView(record);
+            if (!isCancel) {
+                TriggerRemoveWantAgent(record->request);
+            }
+        }
+
+        notificationList_.remove(record);
+        return ERR_OK;
     }
 
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
@@ -1952,32 +1954,32 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
             }
 
             if (extraInfoKeys.empty()) {
-                // retrun all liveViewExtraInfo because no extraInfoKeys
+                // return all liveViewExtraInfo because no extraInfoKeys
                 request = record->request;
-            } else {
-                // obtain extraInfo by extraInfoKeys
-                auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(record->request->GetContent()->GetNotificationContent());
-                auto liveViewExtraInfo = liveViewContent->GetExtraInfo();
-
-                request = sptr<NotificationRequest>::MakeSptr(*(record->request));
-                auto requestLiveViewContent = std::make_shared<NotificationLiveViewContent>();
-
-                requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
-                requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
-
-                std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
-                for (const auto &extraInfoKey : extraInfoKeys) {
-                    auto paramValue = liveViewExtraInfo->GetParam(extraInfoKey);
-                    if (paramValue != nullptr) {
-                        requestExtraInfo->SetParam(extraInfoKey, paramValue);
-                    }
-                }
-                requestLiveViewContent->SetExtraInfo(requestExtraInfo);
-
-                auto requestContent = std::make_shared<NotificationContent>(requestLiveViewContent);
-                request->SetContent(requestContent);
+                result = ERR_OK;
+                break;
             }
+            // obtain extraInfo by extraInfoKeys
+            auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(record->request->GetContent()->GetNotificationContent());
+            auto liveViewExtraInfo = liveViewContent->GetExtraInfo();
 
+            request = sptr<NotificationRequest>::MakeSptr(*(record->request));
+            auto requestLiveViewContent = std::make_shared<NotificationLiveViewContent>();
+
+            requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
+            requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
+
+            std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
+            for (const auto &extraInfoKey : extraInfoKeys) {
+                auto paramValue = liveViewExtraInfo->GetParam(extraInfoKey);
+                if (paramValue != nullptr) {
+                    requestExtraInfo->SetParam(extraInfoKey, paramValue);
+                }
+            }
+            requestLiveViewContent->SetExtraInfo(requestExtraInfo);
+
+            auto requestContent = std::make_shared<NotificationContent>(requestLiveViewContent);
+            request->SetContent(requestContent);
             result = ERR_OK;
             break;
         }
@@ -3201,10 +3203,10 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
         ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
-		    bool isAllowedNotification = true;
-			if (IsAllowedNotifySelf(bundleOption, isAllowedNotification) != ERR_OK) {
-			    ANSR_LOGW("The application does not request enable notification.");
-			}
+            bool isAllowedNotification = true;
+            if (IsAllowedNotifySelf(bundleOption, isAllowedNotification) != ERR_OK) {
+                ANSR_LOGW("The application does not request enable notification.");
+            }
             if (!record->notification->IsRemoveAllowed() && isAllowedNotification) {
                 continue;
             }
@@ -3342,26 +3344,24 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
             if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundle->GetUid()) &&
                 (record->request->GetSlotType() == slot->GetType())) {
-                if (!record->notification->IsRemoveAllowed()) {
+                if (!record->notification->IsRemoveAllowed() || !record->request->IsCommonLiveView()) {
                     continue;
                 }
 
-                if (record->request->IsCommonLiveView()) {
-                    notification = record->notification;
-                    notificationRequest = record->request;
+                notification = record->notification;
+                notificationRequest = record->request;
 
-                    ProcForDeleteLiveView(record);
-                    notificationList_.remove(record);
+                ProcForDeleteLiveView(record);
+                notificationList_.remove(record);
 
-                    if (notification != nullptr) {
-                        UpdateRecentNotification(notification, true, NotificationConstant::CANCEL_REASON_DELETE);
-                        NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr,
-                            NotificationConstant::CANCEL_REASON_DELETE);
-                    }
-
-                    TriggerRemoveWantAgent(notificationRequest);
-                    result = ERR_OK;
+                if (notification != nullptr) {
+                    UpdateRecentNotification(notification, true, NotificationConstant::CANCEL_REASON_DELETE);
+                    NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr,
+                        NotificationConstant::CANCEL_REASON_DELETE);
                 }
+
+                TriggerRemoveWantAgent(notificationRequest);
+                result = ERR_OK;
             }
         }
     }));
@@ -5375,6 +5375,31 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     return false;
 }
 
+void AdvancedNotificationService::FillExtraInfoToJson(
+    const sptr<NotificationRequest> &request, sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject)
+{
+    std::shared_ptr<NotificationContent> content = request->GetContent();
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
+    auto extraInfo = liveViewContent->GetExtraInfo();
+    if (extraInfo != nullptr) {
+        std::shared_ptr<AAFwk::WantParams> checkExtraInfo = std::make_shared<AAFwk::WantParams>();
+        if (checkRequest->GetExtraKeys().size() == 0) {
+            checkExtraInfo = extraInfo;
+        } else {
+            for (auto key : checkRequest->GetExtraKeys()) {
+                if (extraInfo->HasParam(key)) {
+                    checkExtraInfo->SetParam(key, extraInfo->GetParam(key));
+                }
+            }
+        }
+
+        if (checkExtraInfo) {
+            AAFwk::WantParamWrapper wWrapper(*checkExtraInfo);
+            jsonObject["extraInfo"] = wWrapper.ToString();
+        }
+    }
+}
+
 ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("start.");
@@ -5394,27 +5419,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     jsonObject["creatorUserId"] = request->GetCreatorUserId();
     jsonObject["slotType"] = static_cast<int32_t>(request->GetSlotType());
     jsonObject["label"] = request->GetLabel();
-
-    std::shared_ptr<NotificationContent> content = request->GetContent();
-    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
-    auto extraInfo = request->GetAdditionalData();
-    if (extraInfo != nullptr) {
-        std::shared_ptr<AAFwk::WantParams> checkExtraInfo = std::make_shared<AAFwk::WantParams>();
-        if (checkRequest->GetExtraKeys().size() == 0) {
-            checkExtraInfo = extraInfo;
-        } else {
-            for (auto key : checkRequest->GetExtraKeys()) {
-                if (extraInfo->HasParam(key)) {
-                    checkExtraInfo->SetParam(key, extraInfo->GetParam(key));
-                }
-            }
-        }
-
-        if (checkExtraInfo) {
-            AAFwk::WantParamWrapper wWrapper(*checkExtraInfo);
-            jsonObject["extraInfo"] = wWrapper.ToString();
-        }
-    }
+    FillExtraInfoToJson(request, checkRequest, jsonObject);
 
     ErrCode result;
     int32_t pushCheckCode;
@@ -5428,26 +5433,35 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     return result;
 }
 
+enum class PushCheckErrCode {
+    SUCCESS = 0,
+    FIXED_PARAMETER_INVALID = 1,
+    NETWORK_UNREACHABLE = 2,
+    SPECIFIED_NOTIFICATIONS_FAILED = 3,
+    SYSTEM_ERROR = 4,
+    OPTIONAL_PARAMETER_INVALID = 5
+};
+
 ErrCode AdvancedNotificationService::ConvertPushCheckCodeToErrCode(int32_t pushCheckCode)
 {
     ErrCode errCode;
     switch (pushCheckCode) {
-        case 0:
+        case PushCheckErrCode::SUCCESS:
             errCode = ERR_OK;
             break;
-        case 1:
+        case PushCheckErrCode::FIXED_PARAMETER_INVALID:
             errCode = ERR_ANS_TASK_ERR;
             break;
-        case 2:
+        case PushCheckErrCode::NETWORK_UNREACHABLE:
             errCode = ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE;
             break;
-        case 3:
+        case PushCheckErrCode::SPECIFIED_NOTIFICATIONS_FAILED:
             errCode = ERR_ANS_PUSH_CHECK_FAILED;
             break;
-        case 4:
+        case PushCheckErrCode::SYSTEM_ERROR:
             errCode = ERR_ANS_TASK_ERR;
             break;
-        case 5:
+        case PushCheckErrCode::OPTIONAL_PARAMETER_INVALID:
             errCode = ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID;
             break;
         default:

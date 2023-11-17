@@ -896,6 +896,8 @@ private:
     void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
+    void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
+        sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
     ErrCode ConvertPushCheckCodeToErrCode(int32_t pushCheckCode);
     uint64_t StartAutoDelete(const std::string &key, int64_t deleteTimePoint, int32_t reason);
@@ -911,7 +913,7 @@ private:
 
     static bool GetBundleInfoByNotificationBundleOption(
         const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
-    
+
     ErrCode GetTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
