@@ -393,13 +393,18 @@ public:
     }
 
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled) override
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -425,12 +430,20 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback) override
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback,
+        const sptr<NotificationCheckRequest> &notificationCheckRequest) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode UnregisterPushCallback() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetActiveNotificationByFilter(const sptr<NotificationBundleOption> &bundleOption,
+        const int32_t notificationId, const std::string &label, std::vector<std::string> extraInfoKeys,
+        sptr<NotificationRequest> &request) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -530,7 +543,8 @@ HWTEST_F(AnsNotificationBranchTest, RegisterPushCallback_0100, Function | Medium
     EXPECT_NE(ansNotification, nullptr);
     sptr<IRemoteObject> pushCallback = nullptr;
     MockGetAnsManagerProxy(false);
-    ErrCode ret = ansNotification->RegisterPushCallback(pushCallback);
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
+    ErrCode ret = ansNotification->RegisterPushCallback(pushCallback, checkRequest);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
@@ -548,7 +562,8 @@ HWTEST_F(AnsNotificationBranchTest, RegisterPushCallback_0200, Function | Medium
     sptr<IRemoteObject> pushCallback = nullptr;
     MockGetAnsManagerProxy(true);
     ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
-    ansNotification->RegisterPushCallback(pushCallback);
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
+    ansNotification->RegisterPushCallback(pushCallback, checkRequest);
 }
 
 /*

@@ -1543,7 +1543,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12100,
     auto result = advancedNotificationService_->SetEnabledForBundleSlot(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
         NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
-        false);
+        false, false);
     EXPECT_EQ(result, (int)ERR_OK);
 
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
@@ -2443,7 +2443,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_OK);
 
     EXPECT_EQ(advancedNotificationService_->SetEnabledForBundleSlot(bundleOption,
-        NotificationConstant::SlotType::OTHER, enable), ERR_OK);
+        NotificationConstant::SlotType::OTHER, enable, false), ERR_OK);
 
     EXPECT_EQ(advancedNotificationService_->GetEnabledForBundleSlot(bundleOption,
         NotificationConstant::SlotType::OTHER, enable), ERR_OK);
@@ -3285,8 +3285,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21600,
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
 
-    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
     advancedNotificationService_->pushCallBack_ = nullptr;
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0100 test end";
@@ -3306,8 +3307,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21700,
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
 
-    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback), (int)ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest),
+        (int)ERR_ANS_NON_SYSTEM_APP);
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";
 }
@@ -3326,8 +3329,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21800,
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
     advancedNotificationService_->pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
 
-    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback), (int)ERR_ALREADY_EXISTS);
+    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), (int)ERR_ALREADY_EXISTS);
     advancedNotificationService_->pushCallBack_ = nullptr;
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";

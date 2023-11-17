@@ -996,7 +996,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_270000, Function | SmallTest | Level1)
     bool enabled = false;
     auto result = advancedNotificationService_->SetEnabledForBundleSlot(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
-            NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled);
+            NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled, false);
     EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
     auto result1 = advancedNotificationService_->GetEnabledForBundleSlot(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),

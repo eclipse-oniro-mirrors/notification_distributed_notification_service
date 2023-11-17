@@ -96,6 +96,12 @@ void AnsSubscriberProxy::OnConsumed(
     }
 
     MessageParcel data;
+    if (notification->GetNotificationRequest().IsCommonLiveView()) {
+        if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+            ANS_LOGE("[OnConsumed] fail: set max capacity failed.");
+            return;
+        }
+    }
     if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
         ANS_LOGE("[OnConsumed] fail: write interface token failed.");
         return;
@@ -127,6 +133,47 @@ void AnsSubscriberProxy::OnConsumed(
     }
 }
 
+void AnsSubscriberProxy::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap)
+{
+    ANS_LOGI("Start consumed list in proxy.");
+    if (notifications.empty() || notificationMap == nullptr) {
+        ANS_LOGE("Invalid notification to consumed.");
+        return;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return;
+    }
+
+    if (!WriteParcelableVector(notifications, data)) {
+        ANS_LOGE("Write notifications failed");
+        return;
+    }
+
+    if (!data.WriteBool(notificationMap != nullptr)) {
+        ANS_LOGE("Write existMap failed");
+        return;
+    }
+
+    if (notificationMap != nullptr) {
+        if (!data.WriteParcelable(notificationMap)) {
+            ANS_LOGE("Write notificationMap failed");
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_ASYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_CONSUMED_LIST_MAP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact ErrCode=ERR_ANS_TRANSACT_FAILED");
+        return;
+    }
+}
+
 void AnsSubscriberProxy::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
@@ -136,6 +183,12 @@ void AnsSubscriberProxy::OnCanceled(
     }
 
     MessageParcel data;
+    if (notification->GetNotificationRequest().IsCommonLiveView()) {
+        if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+            ANS_LOGE("[OnCanceled] fail: set max capacity failed.");
+            return;
+        }
+    }
     if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
         ANS_LOGE("[OnCanceled] fail: write interface token failed.");
         return;

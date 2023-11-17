@@ -123,7 +123,7 @@ namespace OHOS {
         advancedNotificationService.DeleteAllByUser(userId);
         advancedNotificationService.SetDoNotDisturbDate(date);
         advancedNotificationService.GetDoNotDisturbDate(date);
-        advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled);
+        advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
         advancedNotificationService.ShellDump(stringData, stringData, userId, dumpInfo);

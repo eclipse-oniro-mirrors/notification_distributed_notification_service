@@ -397,7 +397,8 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
 
     bool enable = false;
     NotificationBundleOption bo("bundlename", 1);
-    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
+        bo, NotificationConstant::SOCIAL_COMMUNICATION, enable, false));
     sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
     EXPECT_EQ(enable, false);
@@ -413,7 +414,8 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
 {
     bool enable = true;
     NotificationBundleOption bo("bundleName", 1);
-    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
+        bo, NotificationConstant::SOCIAL_COMMUNICATION, enable, false));
     sleep(SLEEP_TIME);
     enable = false;
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
@@ -435,7 +437,8 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
 {
     bool enable = false;
     NotificationBundleOption bo("bundleName", 1);
-    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
+    EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
+        bo, NotificationConstant::SERVICE_REMINDER, enable, false));
     sleep(SLEEP_TIME);
     enable = true;
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));

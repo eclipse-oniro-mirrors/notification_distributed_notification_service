@@ -67,6 +67,15 @@ void NotificationSubscriber::SubscriberImpl::OnConsumed(
         std::make_shared<Notification>(*notification), std::make_shared<NotificationSortingMap>(*notificationMap));
 }
 
+void NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+    const sptr<NotificationSortingMap> &notificationMap)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    for (auto notification : notifications) {
+        OnConsumed(notification, notificationMap);
+    }
+}
+
 void NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
@@ -79,7 +88,6 @@ void NotificationSubscriber::SubscriberImpl::OnCanceled(
             std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
     }
 }
-
 
 void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)

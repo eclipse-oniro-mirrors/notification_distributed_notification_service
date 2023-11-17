@@ -4333,8 +4333,8 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
     notificationSvrQueue_->wait(handler);
 }
 
-ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled)
+ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d", slotType, enabled);
@@ -4872,7 +4872,8 @@ void AdvancedNotificationService::ResetPushCallbackProxy()
     pushCallBack_ = nullptr;
 }
 
-ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
+ErrCode AdvancedNotificationService::RegisterPushCallback(
+    const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {
     if (!AccessTokenHelper::IsSystemApp()) {
         ANS_LOGW("Not system app!");
