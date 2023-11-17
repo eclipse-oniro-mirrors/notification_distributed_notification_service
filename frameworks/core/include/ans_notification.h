@@ -23,6 +23,7 @@
 #include "ans_manager_interface.h"
 #include "notification_subscriber.h"
 #include "notification_local_live_view_subscriber.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace Notification {
@@ -469,6 +470,16 @@ public:
         const std::vector<std::string> key, std::vector<sptr<Notification>> &notification);
 
     /**
+     * @brief Obtains the live view notification extra info by the extraInfoKeys. To call this method
+     * to obtain particular live view notification extra info, you must have received the
+     * @param filter
+     * @param extraInfo
+     * @return
+     */
+    ErrCode GetActiveNotificationByFilter(
+        const LiveViewFilter &filter, sptr<NotificationRequest> &request);
+
+    /**
      * @brief Checks whether a specified application has the permission to publish notifications. If bundle specifies
      * the current application, no permission is required for calling this method. If bundle specifies another
      * application, the caller must have system permissions.
@@ -766,10 +777,11 @@ public:
      * @param bundleOption Indicates the bundle name and uid of the application.
      * @param slotType Indicates type of slot.
      * @param enable the type of slot enabled.
+     * @param isForceControl Indicates whether the slot is affected by the notification switch.
      * @return Returns get slot number by bundle result.
      */
-    ErrCode SetEnabledForBundleSlot(
-        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled);
+    ErrCode SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
 
     /**
      * Obtains whether the application slot is enabled.
@@ -781,6 +793,15 @@ public:
      */
     ErrCode GetEnabledForBundleSlot(
         const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled);
+
+    /**
+     * Obtains whether the current application slot is enabled.
+     *
+     * @param slotType Indicates type of slot.
+     * @param enable the type of slot enabled to get.
+     * @return Returns get enabled result.
+     */
+    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
 
     /**
      * @brief Obtains specific datas via specified dump option.
@@ -824,9 +845,11 @@ public:
      * @brief Register Push Callback.
      *
      * @param pushCallback PushCallBack.
+     * @param notificationCheckRequest Filter conditions for push check
      * @return Returns register PushCallback result.
      */
-    ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback);
+    ErrCode RegisterPushCallback(
+        const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest);
 
     /**
      * @brief Unregister Push Callback.
@@ -852,24 +875,6 @@ private:
     bool CanPublishMediaContent(const NotificationRequest &request) const;
 
     /**
-     * @brief Checks whether the picture size exceeds the limit in PixelMap.
-     *
-     * @param pixelMap Indicates the specified image.
-     * @param maxSize Indicates the limit size.
-     * @return Returns true if the limit size is exceeded; returns false otherwise.
-     */
-    bool CheckImageOverSizeForPixelMap(
-        const std::shared_ptr<Media::PixelMap> &pixelMap, uint32_t maxSize);
-
-    /**
-     * @brief Checks whether the picture size exceeds the limit in NotificationRequest's content.
-     *
-     * @param request Indicates the specified request.
-     * @return Returns the ErrCode.
-     */
-    ErrCode CheckImageSizeForContent(const NotificationRequest &request);
-
-    /**
      * @brief Checks whether the picture size exceeds the limit.
      *
      * @param request Indicates the specified request.
@@ -884,6 +889,14 @@ private:
      * @return Returns true if the notification doesn't support distribution; returns false otherwise.
      */
     bool IsNonDistributedNotificationType(const NotificationContent::Type &type);
+
+    /**
+     * @brief Checks if the LiveViewContent can be published.
+     *
+     * @param request Indicates the specified request.
+     * @return Returns true if the MediaContent can be published; returns false otherwise.
+     */
+    bool CanPublishLiveViewContent(const NotificationRequest &request) const;
 
 private:
     std::mutex mutex_;

@@ -40,6 +40,7 @@ const std::string ReminderTable::HAS_SCHEDULED_TIMEOUT = "has_ScheduledTimeout";
 const std::string ReminderTable::ACTION_BUTTON_INFO = "button_info";
 const std::string ReminderTable::CUSTOM_BUTTON_URI = "custom_button_uri";
 const std::string ReminderTable::SLOT_ID = "slot_id";
+const std::string ReminderTable::SNOOZE_SLOT_ID = "snooze_slot_id";
 const std::string ReminderTable::NOTIFICATION_ID = "notification_id";
 const std::string ReminderTable::TITLE = "title";
 const std::string ReminderTable::CONTENT = "content";
@@ -51,6 +52,7 @@ const std::string ReminderTable::TAP_DISMISSED = "tapDismissed";
 const std::string ReminderTable::AUTO_DELETED_TIME = "autoDeletedTime";
 const std::string ReminderTable::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
 const std::string ReminderTable::GROUP_ID = "groupId";
+const std::string ReminderTable::CUSTOM_RING_URI = "custom_ring_uri";
 
 // Reminder Table Calendar Columns.
 const std::string ReminderTable::REPEAT_DAYS = "repeat_days";
@@ -102,6 +104,7 @@ void ReminderTable::InitBasicColumns()
     AddColumn(ACTION_BUTTON_INFO, "TEXT");
     AddColumn(CUSTOM_BUTTON_URI, "TEXT");
     AddColumn(SLOT_ID, "INT");
+    AddColumn(SNOOZE_SLOT_ID, "INT");
     AddColumn(NOTIFICATION_ID, "INT NOT NULL");
     AddColumn(TITLE, "TEXT");
     AddColumn(CONTENT, "TEXT");
@@ -113,6 +116,7 @@ void ReminderTable::InitBasicColumns()
     AddColumn(AUTO_DELETED_TIME, "BIGINT");
     AddColumn(REPEAT_DAYS_OF_WEEK, "INT");
     AddColumn(GROUP_ID, "TEXT");
+    AddColumn(CUSTOM_RING_URI, "TEXT", false);
 }
 
 void ReminderTable::InitCalendarColumns()

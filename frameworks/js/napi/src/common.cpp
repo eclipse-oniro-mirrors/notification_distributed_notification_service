@@ -15,7 +15,11 @@
 
 #include "common.h"
 #include "ans_inner_errors.h"
+#include "ans_log_wrapper.h"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
 #include "napi_common.h"
+#include "napi_common_util.h"
 #include "notification_action_button.h"
 #include "notification_capsule.h"
 #include "notification_constant.h"
@@ -28,217 +32,11 @@ namespace NotificationNapi {
 std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> Common::wantAgent_;
 std::mutex Common::mutex_;
 
-namespace {
-static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
-    {ERROR_PERMISSION_DENIED, "Permission denied"},
-    {ERROR_NOT_SYSTEM_APP, "The application isn't system application"},
-    {ERROR_PARAM_INVALID, "Invalid parameter"},
-    {ERROR_SYSTEM_CAP_ERROR, "SystemCapability not found"},
-    {ERROR_INTERNAL_ERROR, "Internal error"},
-    {ERROR_IPC_ERROR, "Marshalling or unmarshalling error"},
-    {ERROR_SERVICE_CONNECT_ERROR, "Failed to connect service"},
-    {ERROR_NOTIFICATION_CLOSED, "Notification is not enabled"},
-    {ERROR_SLOT_CLOSED, "Notification slot is not enabled"},
-    {ERROR_NOTIFICATION_UNREMOVABLE, "Notification is not allowed to remove"},
-    {ERROR_NOTIFICATION_NOT_EXIST, "The notification is not exist"},
-    {ERROR_USER_NOT_EXIST, "The user is not exist"},
-    {ERROR_OVER_MAX_NUM_PER_SECOND, "Over max number notifications per second"},
-    {ERROR_DISTRIBUTED_OPERATION_FAILED, "Distributed operation failed"},
-    {ERROR_READ_TEMPLATE_CONFIG_FAILED, "Read template config failed"},
-    {ERROR_NO_MEMORY, "No memory space"},
-    {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
-};
-}
-
 Common::Common()
 {}
 
 Common::~Common()
 {}
-
-napi_value Common::NapiGetBoolean(napi_env env, const bool &isValue)
-{
-    napi_value result = nullptr;
-    napi_get_boolean(env, isValue, &result);
-    return result;
-}
-
-napi_value Common::NapiGetNull(napi_env env)
-{
-    napi_value result = nullptr;
-    napi_get_null(env, &result);
-    return result;
-}
-
-napi_value Common::NapiGetUndefined(napi_env env)
-{
-    napi_value result = nullptr;
-    napi_get_undefined(env, &result);
-    return result;
-}
-
-napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
-{
-    ANS_LOGI("enter, errorCode[%{public}d]", errCode);
-    napi_value error = Common::NapiGetNull(env);
-    if (errCode == ERR_OK && newType) {
-        return error;
-    }
-
-    napi_value code = nullptr;
-    napi_create_int32(env, errCode, &code);
-
-    auto iter = ERROR_CODE_MESSAGE.find(errCode);
-    std::string errMsg = iter != ERROR_CODE_MESSAGE.end() ? iter->second : "";
-    napi_value message = nullptr;
-    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
-
-    napi_create_error(env, nullptr, message, &error);
-    napi_set_named_property(env, error, "code", code);
-    return error;
-}
-
-void Common::NapiThrow(napi_env env, int32_t errCode)
-{
-    ANS_LOGI("enter");
-
-    napi_throw(env, CreateErrorValue(env, errCode, true));
-}
-
-napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
-{
-    napi_value result = nullptr;
-    napi_value eCode = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, errCode, &eCode));
-    NAPI_CALL(env, napi_create_object(env, &result));
-    NAPI_CALL(env, napi_set_named_property(env, result, "code", eCode));
-    return result;
-}
-
-void Common::PaddingCallbackPromiseInfo(
-    const napi_env &env, const napi_ref &callback, CallbackPromiseInfo &info, napi_value &promise)
-{
-    ANS_LOGI("enter");
-
-    if (callback) {
-        ANS_LOGD("Callback is not nullptr.");
-        info.callback = callback;
-        info.isCallback = true;
-    } else {
-        napi_deferred deferred = nullptr;
-        NAPI_CALL_RETURN_VOID(env, napi_create_promise(env, &deferred, &promise));
-        info.deferred = deferred;
-        info.isCallback = false;
-    }
-}
-
-void Common::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
-{
-    ANS_LOGI("enter errorCode=%{public}d", info.errorCode);
-    if (info.isCallback) {
-        SetCallback(env, info.callback, info.errorCode, result, false);
-    } else {
-        SetPromise(env, info.deferred, info.errorCode, result, false);
-    }
-    ANS_LOGI("end");
-}
-
-void Common::SetCallback(
-    const napi_env &env, const napi_ref &callbackIn, const int32_t &errorCode, const napi_value &result, bool newType)
-{
-    ANS_LOGI("enter");
-    napi_value undefined = nullptr;
-    napi_get_undefined(env, &undefined);
-
-    napi_value callback = nullptr;
-    napi_value resultout = nullptr;
-    napi_get_reference_value(env, callbackIn, &callback);
-    napi_value results[ARGS_TWO] = {nullptr};
-    results[PARAM0] = CreateErrorValue(env, errorCode, newType);
-    results[PARAM1] = result;
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout));
-    ANS_LOGI("end");
-}
-
-void Common::SetCallback(
-    const napi_env &env, const napi_ref &callbackIn, const napi_value &result)
-{
-    ANS_LOGI("enter");
-    napi_value undefined = nullptr;
-    napi_get_undefined(env, &undefined);
-
-    napi_value callback = nullptr;
-    napi_value resultout = nullptr;
-    napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_ONE, &result, &resultout));
-    ANS_LOGI("end");
-}
-
-void Common::SetCallbackArg2(
-    const napi_env &env, const napi_ref &callbackIn, const napi_value &result0, const napi_value &result1)
-{
-    ANS_LOGI("enter");
-    napi_value result[ARGS_TWO] = {result0, result1};
-    napi_value undefined = nullptr;
-    napi_get_undefined(env, &undefined);
-
-    napi_value callback = nullptr;
-    napi_value resultout = nullptr;
-    napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, result, &resultout));
-    ANS_LOGI("end");
-}
-
-void Common::SetPromise(const napi_env &env,
-    const napi_deferred &deferred, const int32_t &errorCode, const napi_value &result, bool newType)
-{
-    ANS_LOGI("enter");
-    if (errorCode == ERR_OK) {
-        napi_resolve_deferred(env, deferred, result);
-    } else {
-        napi_reject_deferred(env, deferred, CreateErrorValue(env, errorCode, newType));
-    }
-    ANS_LOGI("end");
-}
-
-napi_value Common::JSParaError(const napi_env &env, const napi_ref &callback)
-{
-    if (callback) {
-        return Common::NapiGetNull(env);
-    }
-    napi_value promise = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_create_promise(env, &deferred, &promise);
-    SetPromise(env, deferred, ERROR, Common::NapiGetNull(env), false);
-    return promise;
-}
-
-napi_value Common::ParseParaOnlyCallback(const napi_env &env, const napi_callback_info &info, napi_ref &callback)
-{
-    ANS_LOGI("enter");
-
-    size_t argc = ONLY_CALLBACK_MAX_PARA;
-    napi_value argv[ONLY_CALLBACK_MAX_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < ONLY_CALLBACK_MIN_PARA) {
-        ANS_LOGE("Wrong number of arguments");
-        return nullptr;
-    }
-
-    // argv[0]:callback
-    napi_valuetype valuetype = napi_undefined;
-    if (argc >= ONLY_CALLBACK_MAX_PARA) {
-        NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Callback is not function excute promise.");
-            return Common::NapiGetNull(env);
-        }
-        napi_create_reference(env, argv[PARAM0], 1, &callback);
-    }
-
-    return Common::NapiGetNull(env);
-}
 
 napi_value Common::SetNotificationByDistributedOptions(
     const napi_env &env, const OHOS::Notification::Notification *notification, napi_value &result)
@@ -603,6 +401,21 @@ napi_value Common::SetNotificationRequestByPixelMap(
         }
     }
 
+    // overlayIcon?: image.PixelMap
+    std::shared_ptr<Media::PixelMap> overlayIcon = request->GetOverlayIcon();
+    if (overlayIcon) {
+        napi_value overlayIconResult = nullptr;
+        napi_valuetype valuetype = napi_undefined;
+        overlayIconResult = Media::PixelMapNapi::CreatePixelMap(env, overlayIcon);
+        NAPI_CALL(env, napi_typeof(env, overlayIconResult, &valuetype));
+        if (valuetype == napi_undefined) {
+            ANS_LOGI("overlayIconResult is undefined");
+            napi_set_named_property(env, result, "overlayIcon", NapiGetNull(env));
+        } else {
+            napi_set_named_property(env, result, "overlayIcon", overlayIconResult);
+        }
+    }
+
     return NapiGetBoolean(env, true);
 }
 
@@ -878,6 +691,29 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     return NapiGetBoolean(env, true);
 }
 
+const char *Common::GetPropertyNameByContentType(ContentType type)
+{
+    switch (type) {
+        case ContentType::NOTIFICATION_CONTENT_BASIC_TEXT: // normal?: NotificationBasicContent
+            return "normal";
+        case ContentType::NOTIFICATION_CONTENT_LONG_TEXT: // longText?: NotificationLongTextContent
+            return "longText";
+        case ContentType::NOTIFICATION_CONTENT_PICTURE: // picture?: NotificationPictureContent
+            return "picture";
+        case ContentType::NOTIFICATION_CONTENT_CONVERSATION: // conversation?: NotificationConversationalContent
+            return "conversation";
+        case ContentType::NOTIFICATION_CONTENT_MULTILINE: // multiLine?: NotificationMultiLineContent
+            return "multiLine";
+        case ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW: // systemLiveView?: NotificationLocalLiveViewContent
+            return "systemLiveView";
+        case ContentType::NOTIFICATION_CONTENT_LIVE_VIEW: // liveView?: NotificationLiveViewContent
+            return "liveView";
+        default:
+            ANS_LOGE("ContentType is does not exist");
+            return "null";
+    }
+}
+
 napi_value Common::SetNotificationContentDetailed(const napi_env &env, const ContentType &type,
     const std::shared_ptr<NotificationContent> &content, napi_value &result)
 {
@@ -896,45 +732,37 @@ napi_value Common::SetNotificationContentDetailed(const napi_env &env, const Con
 
     napi_value contentResult = nullptr;
     napi_create_object(env, &contentResult);
-    if (type == ContentType::NOTIFICATION_CONTENT_BASIC_TEXT) {
-        // normal?: NotificationBasicContent
-        ret = SetNotificationBasicContent(env, basicContent.get(), contentResult);
-        if (ret) {
-            napi_set_named_property(env, result, "normal", contentResult);
-        }
-    } else if (type == ContentType::NOTIFICATION_CONTENT_LONG_TEXT) {
-        // longText?: NotificationLongTextContent
-        ret = SetNotificationLongTextContent(env, basicContent.get(), contentResult);
-        if (ret) {
-            napi_set_named_property(env, result, "longText", contentResult);
-        }
-    } else if (type == ContentType::NOTIFICATION_CONTENT_PICTURE) {
-        // picture?: NotificationPictureContent
-        ret = SetNotificationPictureContent(env, basicContent.get(), contentResult);
-        if (ret) {
-            napi_set_named_property(env, result, "picture", contentResult);
-        }
-    } else if (type == ContentType::NOTIFICATION_CONTENT_CONVERSATION) {
-        // conversation?: NotificationConversationalContent
-        ret = SetNotificationConversationalContent(env, basicContent.get(), contentResult);
-        if (ret) {
-            napi_set_named_property(env, result, "conversation", contentResult);
-        }
-    } else if (type == ContentType::NOTIFICATION_CONTENT_MULTILINE) {
-        // multiLine?: NotificationMultiLineContent
-        ret = SetNotificationMultiLineContent(env, basicContent.get(), contentResult);
-        if (ret) {
-            napi_set_named_property(env, result, "multiLine", contentResult);
-        }
-    } else if (type == ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW) {
-        // systemLiveView?: NotificationLocalLiveViewContent
-        ret = SetNotificationLocalLiveViewContent(env, basicContent.get(), contentResult);
-        if (ret) {
-            napi_set_named_property(env, result, "systemLiveView", contentResult);
-        }
-    } else {
-        ANS_LOGE("ContentType is does not exist");
+    switch (type) {
+        case ContentType::NOTIFICATION_CONTENT_BASIC_TEXT: // normal?: NotificationBasicContent
+            ret = SetNotificationBasicContent(env, basicContent.get(), contentResult);
+            break;
+        case ContentType::NOTIFICATION_CONTENT_LONG_TEXT: // longText?: NotificationLongTextContent
+            ret = SetNotificationLongTextContent(env, basicContent.get(), contentResult);
+            break;
+        case ContentType::NOTIFICATION_CONTENT_PICTURE: // picture?: NotificationPictureContent
+            ret = SetNotificationPictureContent(env, basicContent.get(), contentResult);
+            break;
+        case ContentType::NOTIFICATION_CONTENT_CONVERSATION: // conversation?: NotificationConversationalContent
+            ret = SetNotificationConversationalContent(env, basicContent.get(), contentResult);
+            break;
+        case ContentType::NOTIFICATION_CONTENT_MULTILINE: // multiLine?: NotificationMultiLineContent
+            ret = SetNotificationMultiLineContent(env, basicContent.get(), contentResult);
+            break;
+        case ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW: // systemLiveView?: NotificationLocalLiveViewContent
+            ret = SetNotificationLocalLiveViewContent(env, basicContent.get(), contentResult);
+            break;
+        case ContentType::NOTIFICATION_CONTENT_LIVE_VIEW: // liveView?: NotificationLiveViewContent
+            ret = SetNotificationLiveViewContent(env, basicContent.get(), contentResult);
+            break;
+        default:
+            ANS_LOGE("ContentType is does not exist");
+            return nullptr;
     }
+    if (ret) {
+        const char *propertyName = GetPropertyNameByContentType(type);
+        napi_set_named_property(env, result, propertyName, contentResult);
+    }
+
     return ret;
 }
 
@@ -1339,6 +1167,79 @@ napi_value Common::SetTime(const napi_env &env, const NotificationTime &time, na
     napi_set_named_property(env, result, "isInTitle", value);
 
     return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetNotificationLiveViewContent(
+    const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
+{
+    ANS_LOGI("enter");
+    napi_value value = nullptr;
+    if (basicContent == nullptr) {
+        ANS_LOGE("BasicContent is null");
+        return NapiGetBoolean(env, false);
+    }
+
+    auto liveViewContent = static_cast<NotificationLiveViewContent *>(basicContent);
+    if (liveViewContent == nullptr) {
+        ANS_LOGE("LiveViewContent is null");
+        return NapiGetBoolean(env, false);
+    }
+
+    // status: LiveViewStatus
+    napi_create_int32(env, (int32_t)(liveViewContent->GetLiveViewStatus()), &value);
+    napi_set_named_property(env, result, "status", value);
+
+    // version?: uint32_t
+    napi_create_uint32(env, liveViewContent->GetVersion(), &value);
+    napi_set_named_property(env, result, "version", value);
+
+    // extraInfo?: {[key:string] : any}
+    std::shared_ptr<AAFwk::WantParams> extraInfoData = liveViewContent->GetExtraInfo();
+    if (extraInfoData != nullptr) {
+        napi_value extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *extraInfoData);
+        napi_set_named_property(env, result, "extraInfo", extraInfo);
+    }
+
+    // pictureMap?: {[key, string]: Array<image.pixelMap>}
+    if (liveViewContent->GetPicture().empty()) {
+        ANS_LOGI("No pictures in live view.");
+        return NapiGetBoolean(env, true);
+    }
+
+    napi_value pictureMapObj = SetLiveViewPictureMap(env, liveViewContent->GetPicture());
+    if (pictureMapObj == nullptr) {
+        ANS_LOGE("Set live view picture map failed.");
+        return NapiGetBoolean(env, false);
+    }
+    napi_set_named_property(env, result, "pictureMap", pictureMapObj);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetLiveViewPictureMap(
+    const napi_env &env, const std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
+{
+    ANS_LOGI("enter");
+
+    napi_value pictureMapObj = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &pictureMapObj));
+
+    for (auto iter = pictureMap.begin(); iter != pictureMap.end(); iter++) {
+        int count = 0;
+        napi_value picturesObj = nullptr;
+        napi_create_array(env, &picturesObj);
+        for (auto picture : iter->second) {
+            napi_value pictureObj = Media::PixelMapNapi::CreatePixelMap(env, picture);
+            napi_set_element(env, picturesObj, count, pictureObj);
+            count++;
+        }
+
+        if (count > 0) {
+            napi_set_named_property(env, pictureMapObj, iter->first.c_str(), picturesObj);
+        }
+    }
+
+    return pictureMapObj;
 }
 
 napi_value Common::SetMessageUser(const napi_env &env, const MessageUser &messageUser, napi_value &result)
@@ -1855,6 +1756,10 @@ napi_value Common::GetNotificationRequestByCustom(
     if (GetNotificationLargeIcon(env, value, request) == nullptr) {
         return nullptr;
     }
+    // overlayIcon?: image.PixelMap
+    if (GetNotificationOverlayIcon(env, value, request) == nullptr) {
+        return nullptr;
+    }
     // distributedOption?:DistributedOptions
     if (GetNotificationRequestDistributedOptions(env, value, request) == nullptr) {
         return nullptr;
@@ -1969,23 +1874,13 @@ napi_value Common::GetNotificationContent(const napi_env &env, const napi_value 
 {
     ANS_LOGI("enter");
 
-    napi_valuetype valuetype = napi_undefined;
-    napi_value result = nullptr;
-    bool hasProperty = false;
+    napi_value result = AppExecFwk::GetPropertyValueByPropertyName(env, value, "content", napi_object);
+    if (result == nullptr) {
+        ANS_LOGE("No content.");
+        return nullptr;
+    }
+
     int32_t type = 0;
-
-    NAPI_CALL(env, napi_has_named_property(env, value, "content", &hasProperty));
-    if (!hasProperty) {
-        ANS_LOGE("Property content expected.");
-        return nullptr;
-    }
-
-    napi_get_named_property(env, value, "content", &result);
-    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-    if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
-        return nullptr;
-    }
     if (GetNotificationContentType(env, result, type) == nullptr) {
         return nullptr;
     }
@@ -2021,6 +1916,11 @@ napi_value Common::GetNotificationContent(const napi_env &env, const napi_value 
             break;
         case NotificationContent::Type::LOCAL_LIVE_VIEW:
             if (GetNotificationLocalLiveViewContent(env, result, request) == nullptr) {
+                return nullptr;
+            }
+            break;
+        case NotificationContent::Type::LIVE_VIEW:
+            if (GetNotificationLiveViewContent(env, result, request) == nullptr) {
                 return nullptr;
             }
             break;
@@ -3088,6 +2988,35 @@ napi_value Common::GetNotificationLargeIcon(const napi_env &env, const napi_valu
     return NapiGetNull(env);
 }
 
+napi_value Common::GetNotificationOverlayIcon(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGI("enter");
+
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "overlayIcon", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "overlayIcon", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return nullptr;
+        }
+        std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+        pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
+        if (pixelMap == nullptr) {
+            ANS_LOGE("Invalid object pixelMap");
+            return nullptr;
+        }
+        request.SetOverlayIcon(pixelMap);
+    }
+
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetNotificationRequestDistributedOptions(const napi_env &env,
     const napi_value &value, NotificationRequest &request)
 {
@@ -3663,6 +3592,160 @@ napi_value Common::GetNotificationConversationalContent(
     }
 
     request.SetContent(std::make_shared<NotificationContent>(conversationalContent));
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationLiveViewContent(
+    const napi_env &env, const napi_value &result, NotificationRequest &request)
+{
+    ANS_LOGI("enter");
+
+    napi_value contentResult = AppExecFwk::GetPropertyValueByPropertyName(env, result, "liveView", napi_object);
+    if (contentResult == nullptr) {
+        ANS_LOGE("Property liveView expected.");
+        return nullptr;
+    }
+
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    if (liveViewContent == nullptr) {
+        ANS_LOGE("LiveViewContent is null");
+        return nullptr;
+    }
+
+    if (GetNotificationLiveViewContentDetailed(env, contentResult, liveViewContent) == nullptr) {
+        return nullptr;
+    }
+
+    request.SetContent(std::make_shared<NotificationContent>(liveViewContent));
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationLiveViewContentDetailed(
+    const napi_env &env, const napi_value &contentResult,
+    std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
+{
+    ANS_LOGI("enter");
+
+    // status: NotificationLiveViewContent::LiveViewStatus
+    int32_t status = 0;
+    if (!AppExecFwk::UnwrapInt32ByPropertyName(env, contentResult, "status", status)) {
+        ANS_LOGE("Failed to get status from liveView content.");
+        return nullptr;
+    }
+    liveViewContent->SetLiveViewStatus(static_cast<NotificationLiveViewContent::LiveViewStatus>(status));
+
+    // version?: uint32_t
+    napi_value jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult,
+        "version", napi_number);
+    if (jsValue != nullptr) {
+        uint32_t version = NotificationLiveViewContent::MAX_VERSION;
+        NAPI_CALL(env, napi_get_value_uint32(env, jsValue, &version));
+        liveViewContent->SetVersion(version);
+    }
+
+    // extraInfo?: {[key:string] : any}
+    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "extraInfo", napi_object);
+    if (jsValue != nullptr) {
+        std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>();
+        if (!OHOS::AppExecFwk::UnwrapWantParams(env, jsValue, *extras)) {
+            return nullptr;
+        }
+        liveViewContent->SetExtraInfo(extras);
+    }
+
+    // pictureMap?: {[key, string]: Array<image.pixelMap>}
+    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "pictureMap", napi_object);
+    if (jsValue == nullptr) {
+        ANS_LOGI("No picture maps.");
+        return NapiGetNull(env);
+    }
+
+    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap;
+    if (GetLiveViewPictureMap(env, jsValue, pictureMap) == nullptr) {
+        ANS_LOGE("Failed to get picture map from liveView content.");
+        return nullptr;
+    }
+    liveViewContent->SetPicture(pictureMap);
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetLiveViewPictures(
+    const napi_env &env, const napi_value &picturesObj,
+    std::vector<std::shared_ptr<Media::PixelMap>> &pictures)
+{
+    ANS_LOGI("enter");
+
+    bool isArray = false;
+    napi_is_array(env, picturesObj, &isArray);
+    if (!isArray) {
+        ANS_LOGE("The picture is not array.");
+        return nullptr;
+    }
+
+    uint32_t length = 0;
+    napi_get_array_length(env, picturesObj, &length);
+    if (length == 0) {
+        ANS_LOGE("The array is empty.");
+        return nullptr;
+    }
+
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value pictureObj = nullptr;
+        napi_get_element(env, picturesObj, i, &pictureObj);
+        if (!AppExecFwk::IsTypeForNapiValue(env, pictureObj, napi_object)) {
+            ANS_LOGE("Wrong argument type. object expected.");
+            break;
+        }
+
+        std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMapNapi::GetPixelMap(env, pictureObj);
+        if (pixelMap == nullptr) {
+            ANS_LOGE("Invalid pixelMap.");
+            break;
+        }
+
+        pictures.emplace_back(pixelMap);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetLiveViewPictureMap(
+    const napi_env &env, const napi_value &pictureMapObj,
+    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
+{
+    ANS_LOGI("enter");
+
+    napi_value pictureNamesObj = nullptr;
+    uint32_t length = 0;
+    if (napi_get_property_names(env, pictureMapObj, &pictureNamesObj) != napi_ok) {
+        ANS_LOGE("Get picture names failed.");
+        return nullptr;
+    }
+    napi_get_array_length(env, pictureNamesObj, &length);
+    if (length == 0) {
+        ANS_LOGE("The pictures name is empty.");
+        return nullptr;
+    }
+
+    napi_value pictureNameObj = nullptr;
+    napi_value picturesObj = nullptr;
+    for (uint32_t index = 0; index < length; index++) {
+        napi_get_element(env, pictureNamesObj, index, &pictureNameObj);
+        std::string pictureName = AppExecFwk::UnwrapStringFromJS(env, pictureNameObj);
+        ANS_LOGD("%{public}s called, get pictures of %{public}s.", __func__, pictureName.c_str());
+        napi_get_named_property(env, pictureMapObj, pictureName.c_str(), &picturesObj);
+
+        std::vector<std::shared_ptr<Media::PixelMap>> pictures;
+        if (!GetLiveViewPictures(env, picturesObj, pictures)) {
+            ANS_LOGE("Get pictures of %{public}s failed.", pictureName.c_str());
+            break;
+        }
+
+        pictureMap[pictureName] = pictures;
+    }
 
     return NapiGetNull(env);
 }
@@ -5051,6 +5134,9 @@ bool Common::ContentTypeJSToC(const ContentType &inType, NotificationContent::Ty
         case ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW:
             outType = NotificationContent::Type::LOCAL_LIVE_VIEW;
             break;
+        case ContentType::NOTIFICATION_CONTENT_LIVE_VIEW:
+            outType = NotificationContent::Type::LIVE_VIEW;
+            break;
         default:
             ANS_LOGE("ContentType %{public}d is an invalid value", inType);
             return false;
@@ -5078,6 +5164,9 @@ bool Common::ContentTypeCToJS(const NotificationContent::Type &inType, ContentTy
             break;
         case NotificationContent::Type::LOCAL_LIVE_VIEW:
             outType = ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW;
+            break;
+        case NotificationContent::Type::LIVE_VIEW:
+            outType = ContentType::NOTIFICATION_CONTENT_LIVE_VIEW;
             break;
         default:
             ANS_LOGE("ContentType %{public}d is an invalid value", inType);
@@ -5535,91 +5624,6 @@ napi_value Common::GetNotificationBadgeNumber(
     }
 
     return NapiGetNull(env);
-}
-
-void Common::CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
-{
-    ANS_LOGI("enter errorCode=%{public}d", info.errorCode);
-    int32_t errorCode = info.errorCode == ERR_OK ? ERR_OK : ErrorToExternal(info.errorCode);
-    if (info.isCallback) {
-        SetCallback(env, info.callback, errorCode, result, true);
-    } else {
-        SetPromise(env, info.deferred, errorCode, result, true);
-    }
-    ANS_LOGI("end");
-}
-
-int32_t Common::ErrorToExternal(uint32_t errCode)
-{
-    int32_t ExternalCode = ERROR_INTERNAL_ERROR;
-    switch (errCode) {
-        case ERR_ANS_PERMISSION_DENIED:
-            ExternalCode = ERROR_PERMISSION_DENIED;
-            break;
-        case ERR_ANS_NON_SYSTEM_APP:
-        case ERR_ANS_NOT_SYSTEM_SERVICE:
-            ExternalCode = ERROR_NOT_SYSTEM_APP;
-            break;
-        case ERR_ANS_INVALID_PARAM:
-        case ERR_ANS_INVALID_UID:
-        case ERR_ANS_ICON_OVER_SIZE:
-        case ERR_ANS_PICTURE_OVER_SIZE:
-            ExternalCode = ERROR_PARAM_INVALID;
-            break;
-        case ERR_ANS_NO_MEMORY:
-            ExternalCode = ERROR_NO_MEMORY;
-            break;
-        case ERR_ANS_TASK_ERR:
-            ExternalCode = ERROR_INTERNAL_ERROR;
-            break;
-        case ERR_ANS_PARCELABLE_FAILED:
-        case ERR_ANS_TRANSACT_FAILED:
-        case ERR_ANS_REMOTE_DEAD:
-            ExternalCode = ERROR_IPC_ERROR;
-            break;
-        case ERR_ANS_SERVICE_NOT_READY:
-        case ERR_ANS_SERVICE_NOT_CONNECTED:
-            ExternalCode = ERROR_SERVICE_CONNECT_ERROR;
-            break;
-        case ERR_ANS_NOT_ALLOWED:
-            ExternalCode = ERROR_NOTIFICATION_CLOSED;
-            break;
-        case ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED:
-            ExternalCode = ERROR_SLOT_CLOSED;
-            break;
-        case ERR_ANS_NOTIFICATION_IS_UNREMOVABLE:
-            ExternalCode = ERROR_NOTIFICATION_UNREMOVABLE;
-            break;
-        case ERR_ANS_NOTIFICATION_NOT_EXISTS:
-            ExternalCode = ERROR_NOTIFICATION_NOT_EXIST;
-            break;
-        case ERR_ANS_GET_ACTIVE_USER_FAILED:
-            ExternalCode = ERROR_USER_NOT_EXIST;
-            break;
-        case ERR_ANS_INVALID_PID:
-        case ERR_ANS_INVALID_BUNDLE:
-            ExternalCode = ERROR_BUNDLE_NOT_FOUND;
-            break;
-        case ERR_ANS_OVER_MAX_ACTIVE_PERSECOND:
-            ExternalCode = ERROR_OVER_MAX_NUM_PER_SECOND;
-            break;
-        case ERR_ANS_DISTRIBUTED_OPERATION_FAILED:
-        case ERR_ANS_DISTRIBUTED_GET_INFO_FAILED:
-            ExternalCode = ERROR_DISTRIBUTED_OPERATION_FAILED;
-            break;
-        case ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED:
-            ExternalCode = ERROR_READ_TEMPLATE_CONFIG_FAILED;
-            break;
-        case ERR_ANS_DIALOG_IS_POPPING:
-            ExternalCode = ERROR_DIALOG_IS_POPPING;
-            break;
-        default:
-            ExternalCode = ERROR_INTERNAL_ERROR;
-            break;
-    }
-
-    ANS_LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, ExternalCode);
-    return ExternalCode;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

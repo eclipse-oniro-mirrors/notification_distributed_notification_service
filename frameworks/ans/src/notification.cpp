@@ -55,6 +55,9 @@ Notification::Notification(const Notification &other)
     isRemoveAllowed_ = other.isRemoveAllowed_;
     sourceType_ = other.sourceType_;
     deviceId_ = other.deviceId_;
+    updateTimerId_ = other.updateTimerId_;
+    finishTimerId_ = other.finishTimerId_;
+    archiveTimerId_ = other.archiveTimerId_;
 }
 
 Notification::~Notification()
@@ -308,6 +311,26 @@ bool Notification::MarshallingInt64(Parcel &parcel) const
     return true;
 }
 
+bool Notification::MarshallingUint64(Parcel &parcel) const
+{
+    if (!parcel.WriteUint64(updateTimerId_)) {
+        ANS_LOGE("Can't write update timer id.");
+        return false;
+    }
+
+    if (!parcel.WriteUint64(finishTimerId_)) {
+        ANS_LOGE("Can't write finish timer id.");
+        return false;
+    }
+
+    if (!parcel.WriteUint64(archiveTimerId_)) {
+        ANS_LOGE("Can't write archive timer id.");
+        return false;
+    }
+
+    return true;
+}
+
 bool Notification::MarshallingParcelable(Parcel &parcel) const
 {
     if (!parcel.WriteStrongParcelable(request_)) {
@@ -330,6 +353,9 @@ bool Notification::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!MarshallingInt64(parcel)) {
+        return false;
+    }
+    if (!MarshallingUint64(parcel)) {
         return false;
     }
     if (!MarshallingParcelable(parcel)) {
@@ -392,6 +418,13 @@ void Notification::ReadFromParcelInt64(Parcel &parcel)
     parcel.ReadInt64Vector(&vibrationStyle_);
 }
 
+void Notification::ReadFromParcelUint64(Parcel &parcel)
+{
+    updateTimerId_ = parcel.ReadUint64();
+    finishTimerId_ = parcel.ReadUint64();
+    archiveTimerId_ = parcel.ReadUint64();
+}
+
 void Notification::ReadFromParcelParcelable(Parcel &parcel)
 {
     // Read request_
@@ -404,6 +437,7 @@ bool Notification::ReadFromParcel(Parcel &parcel)
     ReadFromParcelString(parcel);
     ReadFromParcelInt32(parcel);
     ReadFromParcelInt64(parcel);
+    ReadFromParcelUint64(parcel);
     ReadFromParcelParcelable(parcel);
 
     return true;
@@ -505,7 +539,41 @@ std::string Notification::Dump() const
             ", postTime = " + std::to_string(postTime_) +
             ", sound = " + (sound_ == nullptr ? "nullptr" : sound_->ToString()) +
             ", vibrationStyle = [" + vibrationStyle + "]" +
+            ", updateTimer = " + std::to_string(updateTimerId_) +
+            ", finishTimer = " + std::to_string(finishTimerId_) +
+            ", archiveTimer = " + std::to_string(archiveTimerId_) +
             " }";
 }
+
+uint64_t Notification::GetUpdateTimer() const
+{
+    return updateTimerId_;
+}
+
+void Notification::SetUpdateTimer(uint64_t updateTimerId)
+{
+    updateTimerId_ = updateTimerId;
+}
+
+uint64_t Notification::GetFinishTimer() const
+{
+    return finishTimerId_;
+}
+
+void Notification::SetFinishTimer(uint64_t finishTimerId)
+{
+    finishTimerId_ = finishTimerId;
+}
+
+void Notification::SetArchiveTimer(uint64_t archiveTimerId)
+{
+    archiveTimerId_ = archiveTimerId;
+}
+
+uint64_t Notification::GetArchiveTimer() const
+{
+    return archiveTimerId_;
+}
+
 }  // namespace Notification
 }  // namespace OHOS

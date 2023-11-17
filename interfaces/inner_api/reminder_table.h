@@ -138,6 +138,11 @@ public:
     static const std::string SLOT_ID;
 
     /*
+     * snoozeslot type
+     */
+    static const std::string SNOOZE_SLOT_ID;
+
+    /*
      * notification id
      */
     static const std::string NOTIFICATION_ID;
@@ -191,6 +196,11 @@ public:
      * reminder group id
      */
     static const std::string GROUP_ID;
+
+    /*
+     * reminder ring uri
+     */
+    static const std::string CUSTOM_RING_URI;
 
     // Reminder Table Calendar Columns.
     static const std::string REPEAT_DAYS;

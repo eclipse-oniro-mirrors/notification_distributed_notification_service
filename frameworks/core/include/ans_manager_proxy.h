@@ -19,6 +19,7 @@
 #include "ans_manager_interface.h"
 #include "distributed_notification_service_ipc_interface_code.h"
 #include "iremote_proxy.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace Notification {
@@ -165,6 +166,21 @@ public:
      */
     ErrCode GetSpecialActiveNotifications(
         const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications) override;
+
+    /**
+     * @brief Obtains the live view notification extra info by the extraInfoKeys. To call this method
+     * to obtain particular live view notification extra info, you must have received the
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param notificationId Indicates the id of the notification to get the extra info by extra info keys.
+     * @param label
+     * @param extraInfoKeys
+     * @param extraInfo
+     * @return
+     */
+    ErrCode GetActiveNotificationByFilter(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
+        const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request) override;
 
     /**
      * @brief Allows another application to act as an agent to publish notifications in the name of your application
@@ -629,9 +645,10 @@ public:
      */
     ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled) override;
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool &enabled) override;
+    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) override;
 
     /**
      * @brief Obtains specific datas via specified dump option.
@@ -675,9 +692,11 @@ public:
      * @brief Register Push Callback.
      *
      * @param pushCallback PushCallBack.
+     * @param notificationCheckRequest Filter conditions for push check.
      * @return Returns register PushCallback result.
      */
-    ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback) override;
+    ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback,
+        const sptr<NotificationCheckRequest> &notificationCheckRequest) override;
 
     /**
      * @brief Unregister Push Callback.

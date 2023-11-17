@@ -73,7 +73,8 @@ private:
     int64_t Insert(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &bundleOption);
     std::shared_ptr<NativeRdb::ResultSet> Query(const std::string &queryCondition) const;
     int64_t Update(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &bundleOption);
-
+    static void AddRdbColum(NativeRdb::RdbStore &rdbStore, const std::string &columName,
+        const std::string &type);
 class ReminderStoreDataCallBack : public NativeRdb::RdbOpenCallback {
 public:
     int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override;

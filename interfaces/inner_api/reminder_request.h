@@ -378,6 +378,13 @@ public:
      */
     NotificationConstant::SlotType GetSlotType() const;
 
+    /**
+     * @brief Obtains snoozeSlot type.
+     *
+     * @return snoozeSlot type.
+     */
+    NotificationConstant::SlotType GetSnoozeSlotType() const;
+
     std::string GetSnoozeContent() const;
     uint8_t GetSnoozeTimes() const;
     uint8_t GetSnoozeTimesDynamic() const;
@@ -655,7 +662,7 @@ public:
      * @return Current reminder self.
      */
     ReminderRequest& SetSlotType(const NotificationConstant::SlotType &slotType);
-
+    ReminderRequest& SetSnoozeSlotType(const NotificationConstant::SlotType &snoozeSlotType);
     ReminderRequest& SetSnoozeContent(const std::string &snoozeContent);
 
     /**
@@ -768,6 +775,20 @@ public:
     std::string GetCustomButtonUri() const;
 
     /**
+     * @brief Gets custom ring uri.
+     *
+     * @return custom ring uri.
+     */
+    std::string GetCustomRingUri() const;
+
+     /**
+     * @brief Sets custom ring uri.
+     *
+     * @param uri Indicates uri.
+     */
+    void SetCustomRingUri(const std::string &uri);
+
+    /**
      * @brief Update notification attributes.
      *
      * Some attributes need to be updated after the reminder published or before the notification publish.
@@ -873,6 +894,7 @@ public:
     static const std::string ACTION_BUTTON_INFO;
     static const std::string CUSTOM_BUTTON_URI;
     static const std::string SLOT_ID;
+    static const std::string SNOOZE_SLOT_ID;
     static const std::string NOTIFICATION_ID;
     static const std::string TITLE;
     static const std::string CONTENT;
@@ -884,6 +906,7 @@ public:
     static const std::string AUTO_DELETED_TIME;
     static const std::string REPEAT_DAYS_OF_WEEK;
     static const std::string GROUP_ID;
+    static const std::string CUSTOM_RING_URI;
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
 
@@ -949,7 +972,7 @@ private:
     void UpdateActionButtons(const bool &setSnooze);
     bool UpdateNextReminder(const bool &force);
     void UpdateNotificationContent(const bool &setSnooze);
-    void UpdateNotificationCommon();
+    void UpdateNotificationCommon(bool isSnooze);
 
     /**
      * @brief Determine whether it is repeated every week.
@@ -1014,6 +1037,7 @@ private:
     bool tapDismissed_ {true};
     int64_t autoDeletedTime_ {0};
     std::string customButtonUri_ {};
+    std::string customRingUri_ {};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.
@@ -1023,6 +1047,7 @@ private:
     uint64_t timeIntervalInMilli_ {0};
     ReminderType reminderType_ {ReminderType::INVALID};
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::SOCIAL_COMMUNICATION};
+    NotificationConstant::SlotType snoozeSlotType_ {NotificationConstant::SlotType::OTHER};
     sptr<NotificationRequest> notificationRequest_ = nullptr;
     std::shared_ptr<WantAgentInfo> wantAgentInfo_ = nullptr;
     std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ = nullptr;

@@ -368,6 +368,7 @@ void AdvancedNotificationService::SelfClean()
 
     NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
+    NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
 }
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
@@ -4332,8 +4333,8 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
     notificationSvrQueue_->wait(handler);
 }
 
-ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType, bool enabled)
+ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d", slotType, enabled);
@@ -4767,11 +4768,20 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
     std::string bundle = bundleManager->GetBundleNameByUid(uid);
-    if (request->GetCreatorBundleName().empty()) {
-        request->SetCreatorBundleName(bundle);
-    }
-    if (request->GetOwnerBundleName().empty()) {
-        request->SetOwnerBundleName(bundle);
+    if (!bundle.empty()) {
+        if (request->GetCreatorBundleName().empty()) {
+            request->SetCreatorBundleName(bundle);
+        }
+        if (request->GetOwnerBundleName().empty()) {
+            request->SetOwnerBundleName(bundle);
+        }
+    } else {
+        if (!request->GetCreatorBundleName().empty()) {
+            bundle = request->GetCreatorBundleName();
+        }
+        if (!request->GetOwnerBundleName().empty()) {
+            bundle = request->GetOwnerBundleName();
+        }
     }
 
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
@@ -4789,17 +4799,14 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return result;
     }
 
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
-    if (bundleOption == nullptr) {
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (record->bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
-
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->request = request;
-    record->bundleOption = bundleOption;
     record->notification = new (std::nothrow) Notification(request);
-
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
         return ERR_ANS_NO_MEMORY;
@@ -4810,6 +4817,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
+        if (!record->bundleOption->GetBundleName().empty()) {
+            ErrCode ret = AssignValidNotificationSlot(record);
+            if (ret != ERR_OK) {
+                ANS_LOGE("Can not assign valid slot!");
+            }
+        }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             return;
@@ -4859,7 +4872,8 @@ void AdvancedNotificationService::ResetPushCallbackProxy()
     pushCallBack_ = nullptr;
 }
 
-ErrCode AdvancedNotificationService::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback)
+ErrCode AdvancedNotificationService::RegisterPushCallback(
+    const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {
     if (!AccessTokenHelper::IsSystemApp()) {
         ANS_LOGW("Not system app!");
@@ -4950,7 +4964,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
         jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
         if (!(pushCallBack_->OnCheckNotification(jsonObject.dump()))) {
             ANS_LOGE("Notification push check failed.");
-            return ERR_ANS_NOTIFICATION_PUSH_CHECK_FAILED;
+            return ERR_ANS_PUSH_CHECK_FAILED;
         }
     }
     return ERR_OK;

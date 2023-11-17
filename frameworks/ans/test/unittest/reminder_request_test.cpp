@@ -1798,6 +1798,20 @@ HWTEST_F(ReminderRequestTest, SetCustomButtonUri_00001, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SetGroupId_00001
+ * @tc.desc: Test SetGroupId parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetGroupId_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string groupId = "123";
+    rrc->SetGroupId(groupId);
+    EXPECT_EQ(rrc->GetGroupId(), groupId);
+}
+
+/**
  * @tc.name: InitBundleName_00001
  * @tc.desc: Test InitBundleName with normal parameters.
  * @tc.type: FUNC
@@ -1826,17 +1840,70 @@ HWTEST_F(ReminderRequestTest, InitBundleName_00002, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: SetGroupId_00001
- * @tc.desc: Test SetGroupId parameters.
+ * @tc.name: UpdateNotificationCommon_00100
+ * @tc.desc: Test UpdateNotificationCommon when snooze is true.
  * @tc.type: FUNC
- * @tc.require: issueI8CDH3
+ * @tc.require: issueII8F9EZ
  */
-HWTEST_F(ReminderRequestTest, SetGroupId_00001, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00100, Function | SmallTest | Level1)
 {
+    // given
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string groupId = "123";
-    rrc->SetGroupId(groupId);
-    EXPECT_EQ(rrc->GetGroupId(), groupId);
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+    sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
+    rrc->snoozeSlotType_ = NotificationConstant::SlotType::OTHER;
+    bool isSnooze = true;
+
+    // when
+    rrc->UpdateNotificationCommon(isSnooze);
+
+    // then
+    EXPECT_EQ(ret->GetSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
+}
+
+/**
+ * @tc.name: UpdateNotificationCommon_00200
+ * @tc.desc: Test UpdateNotificationCommon when snooze is true.
+ * @tc.type: FUNC
+ * @tc.require: issueII8F9EZ
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00200, Function | SmallTest | Level1)
+{
+    // given
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+    sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
+    rrc->snoozeSlotType_ = NotificationConstant::SlotType::SERVICE_REMINDER;
+    bool isSnooze = true;
+
+    // when
+    rrc->UpdateNotificationCommon(isSnooze);
+
+    // then
+    EXPECT_EQ(ret->GetSlotType(), NotificationConstant::SlotType::SERVICE_REMINDER);
+}
+
+/**
+ * @tc.name: UpdateNotificationCommon_00300
+ * @tc.desc: Test UpdateNotificationCommon when snooze is false.
+ * @tc.type: FUNC
+ * @tc.require: issueII8F9EZ
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00300, Function | SmallTest | Level1)
+{
+    // given
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->InitNotificationRequest(), true);
+    sptr<NotificationRequest> ret = rrc->GetNotificationRequest();
+    rrc->snoozeSlotType_ = NotificationConstant::SlotType::SERVICE_REMINDER;
+    rrc->slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    bool isSnooze = false;
+
+    // when
+    rrc->UpdateNotificationCommon(isSnooze);
+
+    // then
+    EXPECT_EQ(ret->GetSlotType(), NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 }
 }
 }

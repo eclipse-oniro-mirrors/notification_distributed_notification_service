@@ -105,6 +105,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->timeIntervalInMilli_ = other.timeIntervalInMilli_;
     this->reminderType_ = other.reminderType_;
     this->slotType_ = other.slotType_;
+    this->snoozeSlotType_ = other.snoozeSlotType_;
     this->notificationRequest_ = other.notificationRequest_;
     this->wantAgentInfo_ = other.wantAgentInfo_;
     this->maxScreenWantAgentInfo_ = other.maxScreenWantAgentInfo_;
@@ -114,6 +115,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->customButtonUri_ = other.customButtonUri_;
     this->repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
     this->groupId_ = other.groupId_;
+    this->customRingUri_ = other.customRingUri_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -538,8 +540,14 @@ void ReminderRequest::RecoverBasicFromDb(const std::shared_ptr<NativeRdb::Result
     ReminderStore::GetInt32Val(resultSet, ReminderTable::SLOT_ID, slotType);
     slotType_ = NotificationConstant::SlotType(slotType);
 
+    // snoozeSlotType
+    int32_t snoozeSlotType;
+    ReminderStore::GetInt32Val(resultSet, ReminderTable::SNOOZE_SLOT_ID, snoozeSlotType);
+    snoozeSlotType_ = NotificationConstant::SlotType(snoozeSlotType);
+
     // notification id
     ReminderStore::GetInt32Val(resultSet, ReminderTable::NOTIFICATION_ID, notificationId_);
+
     // title
     ReminderStore::GetStringVal(resultSet, ReminderTable::TITLE, title_);
 
@@ -589,6 +597,9 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
 
     // groupId
     ReminderStore::GetStringVal(resultSet, ReminderTable::GROUP_ID, groupId_);
+
+    // customRingUri
+    ReminderStore::GetStringVal(resultSet, ReminderTable::CUSTOM_RING_URI, customRingUri_);
 }
 
 void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
@@ -734,6 +745,12 @@ ReminderRequest& ReminderRequest::SetSlotType(const NotificationConstant::SlotTy
     return *this;
 }
 
+ReminderRequest& ReminderRequest::SetSnoozeSlotType(const NotificationConstant::SlotType &snoozeSlotType)
+{
+    snoozeSlotType_ = snoozeSlotType;
+    return *this;
+}
+
 ReminderRequest& ReminderRequest::SetSnoozeContent(const std::string &snoozeContent)
 {
     snoozeContent_ = snoozeContent;
@@ -873,6 +890,11 @@ NotificationConstant::SlotType ReminderRequest::GetSlotType() const
     return slotType_;
 }
 
+NotificationConstant::SlotType ReminderRequest::GetSnoozeSlotType() const
+{
+    return snoozeSlotType_;
+}
+
 std::string ReminderRequest::GetSnoozeContent() const
 {
     return snoozeContent_;
@@ -963,6 +985,16 @@ std::string ReminderRequest::GetCustomButtonUri() const
     return customButtonUri_;
 }
 
+void ReminderRequest::SetCustomRingUri(const std::string &uri)
+{
+    customRingUri_ = uri;
+}
+
+std::string ReminderRequest::GetCustomRingUri() const
+{
+    return customRingUri_;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
@@ -993,7 +1025,11 @@ void ReminderRequest::UpdateNotificationRequest(UpdateNotificationType type, std
     switch (type) {
         case UpdateNotificationType::COMMON: {
             ANSR_LOGI("UpdateNotification common information");
-            UpdateNotificationCommon();
+            if (extra == "snooze") {
+                UpdateNotificationCommon(true);
+            } else {
+                UpdateNotificationCommon(false);
+            }
             break;
         }
         case UpdateNotificationType::REMOVAL_WANT_AGENT: {
@@ -1073,6 +1109,7 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
 
     // write bool
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
@@ -1100,6 +1137,9 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
 
     int32_t slotType = static_cast<int32_t>(slotType_);
     WRITE_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
+
+    int32_t snoozeSlotType = static_cast<int32_t>(snoozeSlotType_);
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
 
     if (!MarshallingActionButton(parcel)) {
         return false;
@@ -1165,6 +1205,7 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    READ_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
 
     READ_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
     READ_BOOL_RETURN_FALSE_LOG(parcel, isSystemApp_, "isSystemApp");
@@ -1196,6 +1237,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
     READ_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
     slotType_ = static_cast<NotificationConstant::SlotType>(slotType);
+
+    int32_t snoozeSlotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
+    READ_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
+    snoozeSlotType_ = static_cast<NotificationConstant::SlotType>(snoozeSlotType);
 
     if (!ReadActionButtonFromParcel(parcel)) {
         return false;
@@ -1541,14 +1586,22 @@ bool ReminderRequest::UpdateNextReminder(const bool &force)
     return result;
 }
 
-void ReminderRequest::UpdateNotificationCommon()
+void ReminderRequest::UpdateNotificationCommon(bool isSnooze)
 {
     time_t now;
     (void)time(&now);  // unit is seconds.
     notificationRequest_->SetDeliveryTime(GetDurationSinceEpochInMilli(now));
     notificationRequest_->SetLabel(NOTIFICATION_LABEL);
     notificationRequest_->SetShowDeliveryTime(true);
-    notificationRequest_->SetSlotType(slotType_);
+    if (isSnooze) {
+        if (snoozeSlotType_ == NotificationConstant::SlotType::OTHER) {
+            notificationRequest_->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+        } else {
+            notificationRequest_->SetSlotType(snoozeSlotType_);
+        }
+    } else {
+        notificationRequest_->SetSlotType(slotType_);
+    }
     notificationRequest_->SetTapDismissed(tapDismissed_);
     notificationRequest_->SetAutoDeletedTime(autoDeletedTime_);
     auto notificationNormalContent = std::make_shared<NotificationNormalContent>();
@@ -1745,6 +1798,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ReminderTable::ACTION_BUTTON_INFO, reminder->GetButtonInfo());
     values.PutString(ReminderTable::CUSTOM_BUTTON_URI, reminder->GetCustomButtonUri());
     values.PutInt(ReminderTable::SLOT_ID, reminder->GetSlotType());
+    values.PutInt(ReminderTable::SNOOZE_SLOT_ID, reminder->GetSnoozeSlotType());
     values.PutInt(ReminderTable::NOTIFICATION_ID, reminder->GetNotificationId());
     values.PutString(ReminderTable::TITLE, reminder->GetTitle());
     values.PutString(ReminderTable::CONTENT, reminder->GetContent());
@@ -1752,6 +1806,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ReminderTable::EXPIRED_CONTENT, reminder->GetExpiredContent());
     values.PutInt(ReminderTable::REPEAT_DAYS_OF_WEEK, reminder->GetRepeatDaysOfWeek());
     values.PutString(ReminderTable::GROUP_ID, reminder->GetGroupId());
+    values.PutString(ReminderTable::CUSTOM_RING_URI, reminder->GetCustomRingUri());
 
     AppendWantAgentValuesBucket(reminder, values);
 

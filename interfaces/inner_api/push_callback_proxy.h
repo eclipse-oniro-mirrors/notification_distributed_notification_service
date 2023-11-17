@@ -39,7 +39,7 @@ public:
      * @param notificationData notification data.
      * @return Returns true display, false no display.
      */
-    bool OnCheckNotification(const std::string &notificationData) override;
+    int32_t OnCheckNotification(const std::string &notificationData) override;
 
 private:
     static inline BrokerDelegator<PushCallBackProxy> delegator_;

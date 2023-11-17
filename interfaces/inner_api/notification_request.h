@@ -19,6 +19,7 @@
 #include "ans_const_define.h"
 #include "message_user.h"
 #include "notification_action_button.h"
+#include "notification_constant.h"
 #include "notification_content.h"
 #include "notification_distributed_options.h"
 #include "notification_flags.h"
@@ -28,9 +29,22 @@
 #include "pixel_map.h"
 #include "want_agent.h"
 #include "want_params.h"
+#include "notification_check_request.h"
+#include "notification_bundle_option.h"
 
 namespace OHOS {
 namespace Notification {
+struct NotificationKey {
+    int32_t id {};
+    std::string label {};
+};
+
+struct LiveViewFilter {
+    NotificationBundleOption bundle;
+    NotificationKey notificationKey;
+    std::vector<std::string> extraInfoKeys;
+};
+
 class NotificationRequest : public Parcelable, public NotificationJsonConvertionBase {
 public:
     enum class BadgeStyle {
@@ -413,6 +427,54 @@ public:
     int64_t GetAutoDeletedTime() const;
 
     /**
+     * @brief Sets the update deadline time before deleting a notification.
+     *
+     * @param maxUpdateTime Indicates the time in milliseconds.
+     * The default value is 0, indicating that the notification will not be automatically deleted.
+     * To enable the notification to be automatically deleted, set this parameter to an integer greater than 0.
+     */
+    void SetMaxUpdateTime(int64_t maxUpdateTime);
+
+    /**
+     * @brief Obtains the time point which a notification must be updated.
+     *
+     * @return Returns the time point in milliseconds.
+     */
+    int64_t GetMaxUpdateTime() const;
+
+    /**
+     * @brief Sets the finish deadline time before deleting a notification.
+     *
+     * @param maxFinishTime Indicates the time in milliseconds.
+     * The default value is 0, indicating that the notification will not be automatically deleted.
+     * To enable the notification to be automatically deleted, set this parameter to an integer greater than 0.
+     */
+    void SetMaxFinishTime(int64_t maxUpdateTime);
+
+    /**
+     * @brief Obtains the time point which a notification must be finished.
+     *
+     * @return Returns the time point in milliseconds.
+     */
+    int64_t GetMaxFinishTime() const;
+
+    /**
+     * @brief Sets the finish deadline time before deleting a notification.
+     *
+     * @param maxFinishTime Indicates the time in milliseconds.
+     * The default value is 0, indicating that the notification will not be automatically deleted.
+     * To enable the notification to be automatically deleted, set this parameter to an integer greater than 0.
+     */
+    void SetMaxArchiveTime(int64_t maxArchiveTime);
+
+    /**
+     * @brief Obtains the time point which a notification must be finished.
+     *
+     * @return Returns the time point in milliseconds.
+     */
+    int64_t GetMaxArchiveTime() const;
+
+    /**
      * @brief Sets the little icon of the notification.
      *
      * @param littleIcon Indicates the icon of the notification.
@@ -439,6 +501,20 @@ public:
      * @return Returns the large icon of this notification.
      */
     const std::shared_ptr<Media::PixelMap> GetBigIcon() const;
+
+    /**
+     * @brief Sets the overlay icon of this notification.
+     *
+     * @param overlayIcon Indicates the overlay icon of the notification.
+     */
+    void SetOverlayIcon(const std::shared_ptr<Media::PixelMap> &overlayIcon);
+
+    /**
+     * @brief Obtains the overlay icon of this notification.
+     *
+     * @return Returns the overlay icon of this notification.
+     */
+    const std::shared_ptr<Media::PixelMap> GetOverlayIcon() const;
 
     /**
      * @brief Sets the classification of this notification, which describes the purpose of this notification.
@@ -517,7 +593,8 @@ public:
      * NotificationContent::Type::PICTURE,
      * NotificationContent::Type::CONVERSATION,
      * NotificationContent::Type::MULTILINE,
-     * or NotificationContent::Type::MEDIA.
+     * NotificationContent::Type::MEDIA,
+     * or NotificationContent::Type::LIVE_VIEW
      */
     NotificationContent::Type GetNotificationType() const;
 
@@ -1073,6 +1150,62 @@ public:
 
     void SetRemoveAllowed(bool isRemoveAllowed);
 
+    bool IsCommonLiveView() const;
+
+    /**
+     * @brief Checks whether the image size exceeds the limit in content.
+     *
+     * @param pixelMap Indicates the image smart pointer.
+     * @param maxSize The max size of image.
+     * @return Returns the ErrCode.
+     */
+    static bool CheckImageOverSizeForPixelMap(const std::shared_ptr<Media::PixelMap> &pixelMap, uint32_t maxSize);
+
+    /**
+     * @brief Checks whether the picture size exceeds the limit in content.
+     *
+     * @param request Indicates the specified request.
+     * @return Returns the ErrCode.
+     */
+    ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &oldRequest) const;
+
+    /**
+     * @brief Fill missing parameters of the current notification request.
+     *
+     * @param oldRequest Indicates the old request.
+     */
+    void FillMissingParameters(const sptr<NotificationRequest> &oldRequest);
+
+    /**
+     * @brief Generate notification request key.
+     *
+     * @param creatorUserId Indicates the user id of creator.
+     * @param creatorUid Indicates the uid of creator.
+     * @param label Indicates the label of notification request.
+     * @param notificationId Indicates the ID of notification request, different apps may have same value.
+     * @return Return the unique key of notification request.
+     */
+    static std::string GenerateNotificationRequestKey(int32_t creatorUserId,
+        int32_t creatorUid, const std::string &label, int32_t notificationId);
+
+    /**
+     * @brief Get notification request key.
+     *
+     * @return Return the unique key of notification request.
+     */
+    std::string GetKey();
+
+    /**
+     * @brief Check the image size in content.
+     *
+     * @return Return the check result, ERR_OK: check pass, others: not pass.
+     */
+    ErrCode CheckImageSizeForContent() const;
+    /**
+     * Key prefix of notification request
+     */
+    static const std::string KEY_PREFIX;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1114,8 +1247,10 @@ private:
     void CopyOther(const NotificationRequest &other);
 
     bool ConvertObjectsToJson(nlohmann::json &jsonObject) const;
+    ErrCode CheckVersion(const sptr<NotificationRequest> &oldRequest) const;
 
     static void ConvertJsonToNum(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static void ConvertJsonToNumExt(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToEnum(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToBool(NotificationRequest *target, const nlohmann::json &jsonObject);
@@ -1125,6 +1260,9 @@ private:
     static bool ConvertJsonToNotificationDistributedOptions(
         NotificationRequest *target, const nlohmann::json &jsonObject);
     static bool ConvertJsonToNotificationFlags(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static ErrCode CheckImageSizeForConverSation(std::shared_ptr<NotificationBasicContent> &content);
+    static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
+    static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
 
 private:
     int32_t notificationId_ {0};
@@ -1134,8 +1272,11 @@ private:
     int32_t progressMax_ {0};
     int64_t createTime_ {0};
     int64_t deliveryTime_ {0};
-    int64_t autoDeletedTime_ {0};
 
+    int64_t autoDeletedTime_ {NotificationConstant::INVALID_AUTO_DELETE_TIME};
+    int64_t maxUpdateTime_ {0};
+    int64_t maxFinishTime_ {0};
+    int64_t maxArchiveTime_ {0};
     pid_t creatorPid_ {0};
     int32_t creatorUid_ {0};
     int32_t ownerUid_ {0};
@@ -1181,6 +1322,7 @@ private:
     std::shared_ptr<AAFwk::WantParams> additionalParams_ {};
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
     std::shared_ptr<Media::PixelMap> bigIcon_ {};
+    std::shared_ptr<Media::PixelMap> overlayIcon_ {};
     std::shared_ptr<NotificationContent> notificationContent_ {};
 
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};

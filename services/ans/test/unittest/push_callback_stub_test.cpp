@@ -38,9 +38,9 @@ public:
     TestPushCallBackStub() = default;
     virtual ~TestPushCallBackStub()
     {};
-    bool OnCheckNotification(const std::string &notificationData) override
+    int32_t OnCheckNotification(const std::string &notificationData) override
     {
-        return {};
+        return 0;
     }
 };
 

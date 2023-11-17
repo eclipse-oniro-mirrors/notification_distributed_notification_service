@@ -33,7 +33,7 @@ public:
      * @param notificationData, notification param.
      * @return Returns push check result.
      */
-    virtual bool OnCheckNotification(const std::string &notificationData) = 0;
+    virtual int32_t OnCheckNotification(const std::string &notificationData) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

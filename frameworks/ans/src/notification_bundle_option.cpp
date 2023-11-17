@@ -94,5 +94,38 @@ bool NotificationBundleOption::ReadFromParcel(Parcel &parcel)
 
     return true;
 }
+
+bool NotificationBundleOption::ToJson(nlohmann::json &jsonObject) const
+{
+    jsonObject["uid"] = uid_;
+    jsonObject["bundleName"] = bundleName_;
+    return true;
+}
+
+NotificationBundleOption *NotificationBundleOption::FromJson(const nlohmann::json &jsonObject)
+{
+    if (jsonObject.is_null() or !jsonObject.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return nullptr;
+    }
+
+    auto *pBundle = new (std::nothrow) NotificationBundleOption();
+    if (pBundle == nullptr) {
+        ANS_LOGE("Failed to create bundle option instance");
+        return nullptr;
+    }
+
+    const auto &jsonEnd = jsonObject.cend();
+    if (jsonObject.find("uid") != jsonEnd && jsonObject.at("uid").is_number_integer()) {
+        pBundle->uid_ = jsonObject.at("uid").get<int32_t>();
+    }
+
+    if (jsonObject.find("bundleName") != jsonEnd && jsonObject.at("bundleName").is_string()) {
+        pBundle->bundleName_ = jsonObject.at("bundleName").get<std::string>();
+    }
+
+    return pBundle;
+}
+
 }  // namespace Notification
 }  // namespace OHOS

@@ -762,9 +762,19 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     napi_create_int32(env, static_cast<int32_t>(jsSlotType), &value);
     napi_set_named_property(env, result, SLOT_TYPE, value);
 
+    // snoozeSlotType
+    NotificationNapi::SlotType jsSnoozeSlotType;
+    NotificationNapi::Common::SlotTypeCToJS(reminder.GetSnoozeSlotType(), jsSnoozeSlotType);
+    napi_create_int32(env, static_cast<int32_t>(jsSnoozeSlotType), &value);
+    napi_set_named_property(env, result, SNOOZE_SLOT_TYPE, value);
+
     // group id
     napi_create_string_utf8(env, reminder.GetGroupId().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, GROUP_ID, value);
+
+    // custom ring uri
+    napi_create_string_utf8(env, reminder.GetCustomRingUri().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, CUSTOM_RING_URI, value);
     
     // wantAgent
     ParseWantAgent(env, reminder, result);

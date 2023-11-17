@@ -24,6 +24,7 @@
 #include "notification_multiline_content.h"
 #include "notification_normal_content.h"
 #include "notification_picture_content.h"
+#include "notification_live_view_content.h"
 #include "notification_local_live_view_content.h"
 #include "parcel.h"
 
@@ -69,7 +70,12 @@ public:
          * Indicates notifications that include local live view.
          * Such notifications are created using NotificationLocalLiveViewContent.
          */
-        LOCAL_LIVE_VIEW
+        LOCAL_LIVE_VIEW,
+		/**
+         * Indicates notifications that include a live view.
+         * Such notifications are created using NotificationLiveViewContent.
+         */
+        LIVE_VIEW
     };
 
     /**
@@ -135,6 +141,14 @@ public:
      */
     explicit NotificationContent(const std::shared_ptr<NotificationLocalLiveViewContent> &localLiveViewContent);
 
+    /**
+     * @brief A constructor used to create a NotificationLiveViewContent instance (obtained by calling
+     * GetNotificationContent()) and set the content type to NotificationContent::Type::LIVE_VIEW (obtained by calling
+     * GetContentType()).
+     *
+     * @param liveViewContent Indicates the NotificationMediaContent object.
+     */
+    explicit NotificationContent(const std::shared_ptr<NotificationLiveViewContent> &liveViewContent);
     virtual ~NotificationContent();
 
     /**
@@ -145,8 +159,10 @@ public:
      * NotificationContent::Type::LONG_TEXT,
      * NotificationContent::Type::PICTURE,
      * NotificationContent::Type::CONVERSATION,
-     * NotificationContent::Type::MULTILINE, or
-     * NotificationContent::Type::MEDIA.
+     * NotificationContent::Type::MULTILINE,
+     * NotificationContent::Type::MEDIA,
+     * NotificationContent::Type::LIVE_VIEW, or
+     * NotificationContent::Type::LOCAL_LIVE_VIEW
      */
     NotificationContent::Type GetContentType() const;
 
