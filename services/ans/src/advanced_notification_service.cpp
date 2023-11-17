@@ -680,9 +680,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
             return;
         }
 
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
+        if (Filter(record) != ERR_OK) {
+            ANS_LOGE("Reject by filters.");
             return;
         }
 
