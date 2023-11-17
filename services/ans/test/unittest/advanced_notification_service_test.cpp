@@ -3442,7 +3442,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500,
     GTEST_LOG_(INFO) << "PushCheck_0100 test start";
 
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
-    EXPECT_EQ(advancedNotificationService_->PushCheck(req), ERR_ANS_NOTIFICATION_PUSH_CHECK_UNREGISTERED);
+    EXPECT_EQ(advancedNotificationService_->PushCheck(req), ERR_ANS_PUSH_CHECK_UNREGISTERED);
 
     GTEST_LOG_(INFO) << "PushCheck_0100 test end";
 }
