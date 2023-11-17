@@ -869,6 +869,7 @@ private:
     static ErrCode GetDistributedEnableInApplicationInfo(
         const sptr<NotificationBundleOption> bundleOption, bool &enable);
     bool CheckPublishWithoutApp(const int32_t userId, const sptr<NotificationRequest> &request);
+    void InitDistributeCallBack();
 #endif
 
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);

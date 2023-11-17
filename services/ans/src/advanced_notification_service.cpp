@@ -5434,7 +5434,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     return result;
 }
 
-enum class PushCheckErrCode {
+enum PushCheckErrCode : int32_t {
     SUCCESS = 0,
     FIXED_PARAMETER_INVALID = 1,
     NETWORK_UNREACHABLE = 2,
@@ -5446,7 +5446,9 @@ enum class PushCheckErrCode {
 ErrCode AdvancedNotificationService::ConvertPushCheckCodeToErrCode(int32_t pushCheckCode)
 {
     ErrCode errCode;
-    switch (pushCheckCode) {
+    PushCheckErrCode checkCode = static_cast<PushCheckErrCode>(pushCheckCode);
+
+    switch (checkCode) {
         case PushCheckErrCode::SUCCESS:
             errCode = ERR_OK;
             break;
