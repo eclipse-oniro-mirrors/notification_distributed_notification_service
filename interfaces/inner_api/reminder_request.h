@@ -775,6 +775,20 @@ public:
     std::string GetCustomButtonUri() const;
 
     /**
+     * @brief Gets custom ring uri.
+     *
+     * @return custom ring uri.
+     */
+    std::string GetCustomRingUri() const;
+
+     /**
+     * @brief Sets custom ring uri.
+     *
+     * @param uri Indicates uri.
+     */
+    void SetCustomRingUri(const std::string &uri);
+
+    /**
      * @brief Update notification attributes.
      *
      * Some attributes need to be updated after the reminder published or before the notification publish.
@@ -892,6 +906,7 @@ public:
     static const std::string AUTO_DELETED_TIME;
     static const std::string REPEAT_DAYS_OF_WEEK;
     static const std::string GROUP_ID;
+    static const std::string CUSTOM_RING_URI;
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
 
@@ -1022,6 +1037,7 @@ private:
     bool tapDismissed_ {true};
     int64_t autoDeletedTime_ {0};
     std::string customButtonUri_ {};
+    std::string customRingUri_ {};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.

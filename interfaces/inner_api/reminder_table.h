@@ -26,17 +26,17 @@ public:
     static void InitDbColumns();
 
     // Reminder Table Basic Columns.
-    
+
     /*
      * reminder id
      */
     static const std::string REMINDER_ID;
-    
+
     /*
      * package name
      */
     static const std::string PKG_NAME;
-    
+
     /*
      * user id
      */
@@ -196,6 +196,11 @@ public:
      * reminder group id
      */
     static const std::string GROUP_ID;
+
+    /*
+     * reminder ring uri
+     */
+    static const std::string CUSTOM_RING_URI;
 
     // Reminder Table Calendar Columns.
     static const std::string REPEAT_DAYS;

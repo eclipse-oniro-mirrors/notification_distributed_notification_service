@@ -115,6 +115,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->customButtonUri_ = other.customButtonUri_;
     this->repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
     this->groupId_ = other.groupId_;
+    this->customRingUri_ = other.customRingUri_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -596,6 +597,9 @@ void ReminderRequest::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> 
 
     // groupId
     ReminderStore::GetStringVal(resultSet, ReminderTable::GROUP_ID, groupId_);
+
+    // customRingUri
+    ReminderStore::GetStringVal(resultSet, ReminderTable::CUSTOM_RING_URI, customRingUri_);
 }
 
 void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
@@ -981,6 +985,16 @@ std::string ReminderRequest::GetCustomButtonUri() const
     return customButtonUri_;
 }
 
+void ReminderRequest::SetCustomRingUri(const std::string &uri)
+{
+    customRingUri_ = uri;
+}
+
+std::string ReminderRequest::GetCustomRingUri() const
+{
+    return customRingUri_;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
@@ -1095,6 +1109,7 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
 
     // write bool
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
@@ -1190,6 +1205,7 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    READ_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
 
     READ_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
     READ_BOOL_RETURN_FALSE_LOG(parcel, isSystemApp_, "isSystemApp");
@@ -1790,6 +1806,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ReminderTable::EXPIRED_CONTENT, reminder->GetExpiredContent());
     values.PutInt(ReminderTable::REPEAT_DAYS_OF_WEEK, reminder->GetRepeatDaysOfWeek());
     values.PutString(ReminderTable::GROUP_ID, reminder->GetGroupId());
+    values.PutString(ReminderTable::CUSTOM_RING_URI, reminder->GetCustomRingUri());
 
     AppendWantAgentValuesBucket(reminder, values);
 

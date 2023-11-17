@@ -771,6 +771,10 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     // group id
     napi_create_string_utf8(env, reminder.GetGroupId().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, GROUP_ID, value);
+
+    // custom ring uri
+    napi_create_string_utf8(env, reminder.GetCustomRingUri().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, CUSTOM_RING_URI, value);
     
     // wantAgent
     ParseWantAgent(env, reminder, result);
