@@ -1414,6 +1414,13 @@ void ReminderDataManager::PlaySoundAndVibrationLocked(const sptr<ReminderRequest
     PlaySoundAndVibration(reminder);
 }
 
+std::string ReminderDataManager::GetCustomRingUri(const sptr<ReminderRequest> &reminder) {
+    if (reminder == nullptr) {
+        return "";
+    }
+    return reminder->GetCustomRingUri();
+}
+
 void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &reminder)
 {
     if (reminder == nullptr) {
@@ -1432,7 +1439,9 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
             return;
         }
     }
-    Uri soundUri = DEFAULT_REMINDER_SOUND;
+    std::string ringUri = GetCustomRingUri(reminder);
+    Uri reminderSound(ringUri);
+    Uri soundUri = ringUri.empty() ? DEFAULT_REMINDER_SOUND : reminderSound;
     std::string uri = soundUri.GetSchemeSpecificPart();
     ANSR_LOGD("uri:%{public}s", uri.c_str());
     soundPlayer_->SetSource(uri);

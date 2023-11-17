@@ -443,6 +443,21 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_017, Level1)
 }
 
 /**
+ * @tc.name: ReminderDataManagerTest_018
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI8E7Z1
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_018, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    std::string ringUri = "123";
+    reminder->SetCustomRingUri(ringUri);
+    std::string getRingUri = manager->GetCustomRingUri(reminder);
+    EXPECT_EQ(ringUri, getRingUri);
+}
+
+/**
  * @tc.name: ReminderEventManagerTest_001
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
