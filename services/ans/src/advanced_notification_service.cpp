@@ -5381,22 +5381,24 @@ void AdvancedNotificationService::FillExtraInfoToJson(
     std::shared_ptr<NotificationContent> content = request->GetContent();
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
     auto extraInfo = liveViewContent->GetExtraInfo();
-    if (extraInfo != nullptr) {
-        std::shared_ptr<AAFwk::WantParams> checkExtraInfo = std::make_shared<AAFwk::WantParams>();
-        if (checkRequest->GetExtraKeys().size() == 0) {
-            checkExtraInfo = extraInfo;
-        } else {
-            for (auto key : checkRequest->GetExtraKeys()) {
-                if (extraInfo->HasParam(key)) {
-                    checkExtraInfo->SetParam(key, extraInfo->GetParam(key));
-                }
+    if (extraInfo == nullptr) {
+        return;
+    }
+
+    std::shared_ptr<AAFwk::WantParams> checkExtraInfo = std::make_shared<AAFwk::WantParams>();
+    if (checkRequest->GetExtraKeys().size() == 0) {
+        checkExtraInfo = extraInfo;
+    } else {
+        for (auto key : checkRequest->GetExtraKeys()) {
+            if (extraInfo->HasParam(key)) {
+                checkExtraInfo->SetParam(key, extraInfo->GetParam(key));
             }
         }
+    }
 
-        if (checkExtraInfo) {
-            AAFwk::WantParamWrapper wWrapper(*checkExtraInfo);
-            jsonObject["extraInfo"] = wWrapper.ToString();
-        }
+    if (checkExtraInfo) {
+        AAFwk::WantParamWrapper wWrapper(*checkExtraInfo);
+        jsonObject["extraInfo"] = wWrapper.ToString();
     }
 }
 
