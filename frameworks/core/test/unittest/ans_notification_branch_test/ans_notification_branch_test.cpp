@@ -249,6 +249,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override
     {

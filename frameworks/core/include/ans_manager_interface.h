@@ -401,6 +401,14 @@ public:
         const sptr<NotificationSubscribeInfo> &info) = 0;
 
     /**
+     * @brief Subscribes notifications self.
+     *
+     * @param subscriber Indicates the subscriber.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) = 0;
+
+    /**
      * @brief Subscribes local live view notifications.
      *
      * @param subscriber Indicates the subscriber.

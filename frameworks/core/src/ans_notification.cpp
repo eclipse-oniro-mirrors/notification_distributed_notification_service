@@ -18,6 +18,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "hitrace_meter_adapter.h"
+#include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "notification_button_option.h"
 #include "notification_local_live_view_subscriber.h"
@@ -379,6 +380,22 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
         return ERR_ANS_INVALID_PARAM;
     }
     return ansManagerProxy_->Subscribe(subscriberSptr, nullptr);
+}
+
+ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationSubscriber::SubscriberImpl> subscriberSptr = subscriber.GetImpl();
+    if (subscriberSptr == nullptr) {
+        ANS_LOGE("Failed to subscribeSelf with SubscriberImpl null ptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ansManagerProxy_->SubscribeSelf(subscriberSptr);
 }
 
 ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber)
