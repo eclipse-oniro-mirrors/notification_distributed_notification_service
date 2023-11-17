@@ -1404,6 +1404,8 @@ int32_t NotificationPreferencesDatabase::SetKvToDb(
         return NativeRdb::E_ERROR;
     }
 
+    ANS_LOGD("Key:%{public}s, value:%{public}s.", key.c_str(), value.c_str());
+
     return NativeRdb::E_OK;
 }
 
@@ -1421,6 +1423,8 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
         return NativeRdb::E_ERROR;
     }
 
+    ANS_LOGD("Key:%{public}s, value:%{public}s.", key.c_str(), value.c_str());
+
     return NativeRdb::E_OK;
 }
 
@@ -1437,6 +1441,7 @@ int32_t NotificationPreferencesDatabase::GetBatchKvsFromDb(
         ANS_LOGE("Get batch notification request failed, key %{public}s, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
+    ANS_LOGD("Key:%{public}s.", key.c_str());
     return NativeRdb::E_OK;
 }
 
@@ -1452,6 +1457,8 @@ int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key)
         ANS_LOGE("Delete key-value failed, key %{public}s, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
+
+    ANS_LOGD("Delete key:%{public}s.", key.c_str());
 
     return NativeRdb::E_OK;
 }
