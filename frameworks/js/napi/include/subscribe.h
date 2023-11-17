@@ -102,6 +102,21 @@ public:
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override;
 
     /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    virtual void OnBatchCanceled(const std::vector<std::shared_ptr<OHOS::Notification::Notification>> &requestList,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
+
+    /**
+     * @brief The callback function on the badge number changed.
+     *
+     * @param badgeData Indicates the BadgeNumberCallbackData object.
+     */
+    virtual bool HasOnBatchCancelCallback() override;
+
+    /**
      * @brief Sets the callback information by type.
      *
      * @param env Indicates the environment that the API is invoked under.
@@ -133,6 +148,8 @@ private:
 
     void SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
+
 private:
     struct CallbackInfo {
         napi_env env = nullptr;
@@ -150,6 +167,7 @@ private:
     CallbackInfo disturbChangedCallbackInfo_;
     CallbackInfo enabledNotificationCallbackInfo_;
     CallbackInfo setBadgeCallbackInfo_;
+    CallbackInfo batchCancelCallbackInfo_;
 };
 
 struct SubscriberInstancesInfo {
