@@ -348,7 +348,7 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnBundleDataCleared, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataAdd, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataUpdate, this, std::placeholders::_1),
-		std::bind(&AdvancedNotificationService::OnBootSystemCompleted, this),
+        std::bind(&AdvancedNotificationService::OnBootSystemCompleted, this),
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
 
@@ -675,8 +675,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = AssignValidNotificationSlot(record);
-        if (result != ERR_OK) {
+        if (AssignValidNotificationSlot(record) != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
             return;
         }
@@ -687,8 +686,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
             return;
         }
 
-        result = AssignToNotificationList(record);
-        if (result != ERR_OK) {
+        if (AssignToNotificationList(record) != ERR_OK) {
             return;
         }
         UpdateRecentNotification(record->notification, false, 0);
@@ -1918,6 +1916,20 @@ ErrCode AdvancedNotificationService::CheckCommonParams()
     return ERR_OK;
 }
 
+std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNotificationList(
+    int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName)
+{
+    for (auto &record : notificationList_) {
+        if ((record->notification->GetLabel() == label) &&
+            (record->notification->GetId() == notificationId) &&
+            (record->bundleOption->GetUid() == uid) &&
+            (record->bundleOption->GetBundleName() == bundleName)) {
+            return record;
+        }
+    }
+    return nullptr;
+}
+
 ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
     const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
@@ -1941,48 +1953,38 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 
-        for (const auto &record : notificationList_) {
-            if ((record->notification->GetLabel() != label) ||
-                (record->notification->GetId() != notificationId) ||
-                (record->bundleOption->GetUid() != bundle->GetUid()) ||
-                (record->bundleOption->GetBundleName() != bundle->GetBundleName())) {
-                continue;
-            }
-
-            if (!record->request->IsCommonLiveView()) {
-                break;
-            }
-
-            if (extraInfoKeys.empty()) {
-                // return all liveViewExtraInfo because no extraInfoKeys
-                request = record->request;
-                result = ERR_OK;
-                break;
-            }
-            // obtain extraInfo by extraInfoKeys
-            auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(record->request->GetContent()->GetNotificationContent());
-            auto liveViewExtraInfo = liveViewContent->GetExtraInfo();
-
-            request = sptr<NotificationRequest>::MakeSptr(*(record->request));
-            auto requestLiveViewContent = std::make_shared<NotificationLiveViewContent>();
-
-            requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
-            requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
-
-            std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
-            for (const auto &extraInfoKey : extraInfoKeys) {
-                auto paramValue = liveViewExtraInfo->GetParam(extraInfoKey);
-                if (paramValue != nullptr) {
-                    requestExtraInfo->SetParam(extraInfoKey, paramValue);
-                }
-            }
-            requestLiveViewContent->SetExtraInfo(requestExtraInfo);
-
-            auto requestContent = std::make_shared<NotificationContent>(requestLiveViewContent);
-            request->SetContent(requestContent);
-            result = ERR_OK;
-            break;
+        auto record = GetRecordFromNotificationList(notificationId, bundle->GetUid(), label, bundle->GetBundleName());
+        if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
+            return;
         }
+        result = ERR_OK;
+        if (extraInfoKeys.empty()) {
+            // return all liveViewExtraInfo because no extraInfoKeys
+            request = record->request;
+            return;
+        }
+        // obtain extraInfo by extraInfoKeys
+        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+            record->request->GetContent()->GetNotificationContent());
+        auto liveViewExtraInfo = liveViewContent->GetExtraInfo();
+
+        request = sptr<NotificationRequest>::MakeSptr(*(record->request));
+        auto requestLiveViewContent = std::make_shared<NotificationLiveViewContent>();
+
+        requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
+        requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
+
+        std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
+        for (const auto &extraInfoKey : extraInfoKeys) {
+            auto paramValue = liveViewExtraInfo->GetParam(extraInfoKey);
+            if (paramValue != nullptr) {
+                requestExtraInfo->SetParam(extraInfoKey, paramValue);
+            }
+        }
+        requestLiveViewContent->SetExtraInfo(requestExtraInfo);
+
+        auto requestContent = std::make_shared<NotificationContent>(requestLiveViewContent);
+        request->SetContent(requestContent);
     }));
     notificationSvrQueue_->wait(handler);
 
@@ -3219,9 +3221,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
                 record->deviceId.empty() &&
 #endif
                 !record->request->IsUnremovable()) {
-
                 ProcForDeleteLiveView(record);
-
                 removeList.push_back(record);
             }
         }

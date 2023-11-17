@@ -169,7 +169,6 @@ bool AdvancedNotificationService::IsLiveViewCanRecover(const sptr<NotificationRe
 
     auto epoch = std::chrono::system_clock::now().time_since_epoch();
     auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
-
     if (curTime > request->GetMaxUpdateTime() || curTime > request->GetMaxFinishTime()) {
         ANS_LOGE("The liveView has expired.");
         return false;

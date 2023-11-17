@@ -940,6 +940,8 @@ private:
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();
+    std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
+        int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
