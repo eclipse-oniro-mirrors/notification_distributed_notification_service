@@ -473,8 +473,7 @@ public:
         const std::vector<std::string> key, std::vector<sptr<Notification>> &notification);
 
     /**
-     * @brief Obtains the live view notification extra info by the extraInfoKeys. To call this method
-     * to obtain particular live view notification extra info by filter, you must
+     * @brief Obtains the active notifications by filter. 
      * @param filter
      * @param extraInfo
      * @return
