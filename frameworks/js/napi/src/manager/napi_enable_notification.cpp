@@ -166,7 +166,7 @@ napi_value NapiIsNotificationEnabled(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(
                         asynccallbackinfo->allowed);
                 }
                 ANS_LOGI("asynccallbackinfo->info.errorCode : %{public}d, allowed : %{public}d",
