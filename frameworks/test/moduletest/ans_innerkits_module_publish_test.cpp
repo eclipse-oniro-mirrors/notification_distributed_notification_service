@@ -64,6 +64,7 @@ const int32_t CASE_SIXTEEN = 16;
 const int32_t CASE_SEVENTEEN = 17;
 const int32_t CASE_EIGHTEEN = 18;
 const int32_t CASE_NINETEEN = 19;
+const int32_t CASE_TWENTY = 20;
 
 const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
@@ -1709,7 +1710,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10002, Function
     EXPECT_NE(content, nullptr);
 
     NotificationRequest req;
-    int32_t notificationId = CASE_NINETEEN;
+    int32_t notificationId = CASE_TWENTY;
     req.SetContent(content);
     req.SetSlotType(NotificationConstant::LIVE_VIEW);
     req.SetNotificationId(notificationId);
@@ -1726,7 +1727,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10002, Function
     buttonOption.SetButtonName(buttonName);
     g_system_live_view_subscribe_response_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::TriggerLocalLiveView(bundleOption, notificationId, buttonOption));
-    WaitOnResponse(CASE_NINETEEN, buttonName);
+    WaitOnResponse(notificationId, buttonName);
 
     g_unsubscribe_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
