@@ -2389,6 +2389,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     EXPECT_EQ(advancedNotificationService_->DeleteAll(), ERR_OK);
 
     bool enable = true;
+    bool isForceControl = false;
     EXPECT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, enable), ERR_OK);
 
     EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, enable), ERR_OK);
@@ -3284,14 +3285,14 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21600,
 {
     GTEST_LOG_(INFO) << "RegisterPushCallback_0100 test start";
 
-    advancedNotificationService_->pushCallBack_ = nullptr;
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
 
     EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
-    advancedNotificationService_->pushCallBack_ = nullptr;
+
+    advancedNotificationService_->UnregisterPushCallback();
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0100 test end";
 }
@@ -3314,6 +3315,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21700,
 
     EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest),
         (int)ERR_ANS_NON_SYSTEM_APP);
+    advancedNotificationService_->UnregisterPushCallback();
+
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";
 }
@@ -3331,11 +3334,14 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21800,
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
-    advancedNotificationService_->pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
 
-    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), (int)ERR_ALREADY_EXISTS);
-    advancedNotificationService_->pushCallBack_ = nullptr;
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(checkRequest->GetSlotType(), pushCallBack);
+
+    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), (int)ERR_OK);
+
+    advancedNotificationService_->UnregisterPushCallback();
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";
 }
@@ -3353,7 +3359,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21900,
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
-    advancedNotificationService_->pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
+
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(checkRequest->GetSlotType(), pushCallBack);
 
     EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), ERR_OK);
 
@@ -3386,7 +3395,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22100,
 {
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0300 test start";
 
-    advancedNotificationService_->pushCallBack_ = nullptr;
     EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_INVALID_OPERATION);
 
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0300 test end";
@@ -3402,8 +3410,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22200,
 {
     GTEST_LOG_(INFO) << "IsNeedPushCheck_0100 test start";
 
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
-    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(slotType), false);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
 
     GTEST_LOG_(INFO) << "IsNeedPushCheck_0100 test end";
 }
@@ -3419,27 +3427,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22300,
     GTEST_LOG_(INFO) << "IsNeedPushCheck_0200 test start";
 
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
+    sptr<NotificationRequest> request = new NotificationRequest();
 
-    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(slotType), false);
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
 
     GTEST_LOG_(INFO) << "IsNeedPushCheck_0200 test end";
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_22400
- * @tc.name      : IsNeedPushCheck_0300
- * @tc.desc      : Test IsNeedPushCheck function.
- * @tc.require   : #I6Z5OV
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22400, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_0300 test start";
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CONTENT_INFORMATION;
-    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(slotType), true);
-
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_0300 test end";
 }
 
 /**
@@ -3453,7 +3445,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500,
     GTEST_LOG_(INFO) << "PushCheck_0100 test start";
 
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
-    EXPECT_EQ(advancedNotificationService_->PushCheck(req), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->PushCheck(req), ERR_ANS_PUSH_CHECK_UNREGISTERED);
 
     GTEST_LOG_(INFO) << "PushCheck_0100 test end";
 }
@@ -3498,7 +3490,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_221000
     record->request = request;
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
-    advancedNotificationService_->StartAutoDelete(record);
+    advancedNotificationService_->StartAutoDelete(record->notification->GetKey(),
+        record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
 
     std::this_thread::sleep_for(std::chrono::seconds(2));   // 2ms
     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
@@ -3603,8 +3596,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00006,
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00006 test start";
     EXPECT_NE(advancedNotificationService_, nullptr);
-    advancedNotificationService_->pushCallBack_ = nullptr;
     advancedNotificationService_->ResetPushCallbackProxy();
+    ASSERT_EQ(advancedNotificationService_->pushCallBacks_.empty(), true);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00006 test end";
 }
 
@@ -3621,8 +3614,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00007,
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
-    advancedNotificationService_->pushCallBack_ = iface_cast<IPushCallBack>(pushCallback);
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
+
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(checkRequest->GetSlotType(), pushCallBack);
     advancedNotificationService_->ResetPushCallbackProxy();
+    ASSERT_TRUE(advancedNotificationService_->pushCallBacks_.empty());
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00007 test end";
 }
 
@@ -3887,5 +3884,5 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019,
     EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_ANS_INVALID_PARAM);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test end";
 }
-}  // namespace Notification
-}  // namespace OHOS
+}
+}

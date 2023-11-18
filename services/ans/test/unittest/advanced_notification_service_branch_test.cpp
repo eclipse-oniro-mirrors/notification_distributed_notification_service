@@ -33,7 +33,9 @@
 #include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
 #include "notification_constant.h"
+#include "notification_record.h"
 #include "notification_subscriber.h"
+#include "refbase.h"
 
 extern void MockVerifyNativeToken(bool mockRet);
 extern void MockVerifyCallerPermission(bool mockRet);
@@ -55,7 +57,8 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-
+    static void InitNotificationRecord(std::shared_ptr<NotificationRecord> &record,
+        const NotificationLiveViewContent::LiveViewStatus &status);
 private:
     void TestAddSlot(NotificationConstant::SlotType type);
 
@@ -997,9 +1000,11 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_270000, Function | SmallTest | Level1)
     MockVerifyCallerPermission(false);
 
     bool enabled = false;
+    bool isForceControl = false;
     auto result = advancedNotificationService_->SetEnabledForBundleSlot(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
             NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled, false);
+
     EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
     auto result1 = advancedNotificationService_->GetEnabledForBundleSlot(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
@@ -1068,7 +1073,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_273000, Function | SmallTest | Level1)
 /**
  * @tc.number    : AnsBranchTest_274000
  * @tc.name      : EnableDistributedByBundle_3000
- * @tc.desc      : Test EnableDistributedByBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc      : Test EnableDistributedByBundle function return ERR_ANS_NON_SYSTEM_APP.
  * @tc.require   : #I6P8UI
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_274000, Function | SmallTest | Level1)
@@ -1080,7 +1085,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_274000, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundleOption =
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(
-        bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
+        bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1142,5 +1147,5 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
     EXPECT_EQ(advancedNotificationService_->GetDistributedEnableInApplicationInfo(
         bundleOption, enabled), ERR_ANS_INVALID_PARAM);
 }
-}  // namespace Notification
-}  // namespace OHOS
+}
+}

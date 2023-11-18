@@ -26,17 +26,17 @@ public:
     static void InitDbColumns();
 
     // Reminder Table Basic Columns.
-    
+
     /*
      * reminder id
      */
     static const std::string REMINDER_ID;
-    
+
     /*
      * package name
      */
     static const std::string PKG_NAME;
-    
+
     /*
      * user id
      */

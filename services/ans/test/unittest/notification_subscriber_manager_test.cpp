@@ -19,10 +19,13 @@
 #define private public
 #include "notification_subscriber.h"
 #include "notification_subscriber_manager.h"
+#include "mock_ans_subscriber.h"
 
 #include "ans_inner_errors.h"
 
 using namespace testing::ext;
+using namespace testing;
+
 namespace OHOS {
 namespace Notification {
 class NotificationSubscriberManagerTest : public testing::Test {

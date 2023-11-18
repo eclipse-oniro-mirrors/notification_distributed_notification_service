@@ -39,6 +39,8 @@ namespace OHOS {
 namespace Notification {
 class NotificationSubscriberManager : public DelayedSingleton<NotificationSubscriberManager> {
 public:
+    struct SubscriberRecord;
+
     /**
      * @brief Add a subscriber.
      *
@@ -66,6 +68,9 @@ public:
      * @param notificationMap Indicates the NotificationSortingMap object.
      */
     void NotifyConsumed(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap);
+
+    void BatchNotifyConsumed(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record);
 
     /**
      * @brief Notify all subscribers on canceled.
@@ -116,9 +121,13 @@ public:
      */
     void ResetFfrtQueue();
 
-private:
-    struct SubscriberRecord;
+    void RegisterOnSubscriberAddCallback(std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback);
 
+    void UnRegisterOnSubscriberAddCallback();
+
+    std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
+
+private:
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
     std::shared_ptr<SubscriberRecord> CreateSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
@@ -133,6 +142,8 @@ private:
 
     void NotifyConsumedInner(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap);
+    void BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record);
     void NotifyCanceledInner(const sptr<Notification> &notification,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
@@ -149,6 +160,7 @@ private:
     sptr<AnsSubscriberInterface> ansSubscriberProxy_ {};
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
+    std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;
 
     DECLARE_DELAYED_SINGLETON(NotificationSubscriberManager);
     DISALLOW_COPY_AND_MOVE(NotificationSubscriberManager);

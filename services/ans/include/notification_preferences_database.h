@@ -156,7 +156,10 @@ public:
     bool RemoveNotificationEnable(const int32_t userId);
     bool RemoveDoNotDisturbDate(const int32_t userId);
     bool RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid);
-
+    int32_t SetKvToDb(const std::string &key, const std::string &value);
+    int32_t GetKvFromDb(const std::string &key, std::string &value);
+    int32_t GetBatchKvsFromDb(const std::string &key, std::unordered_map<std::string, std::string> &values);
+    int32_t DeleteKvFromDb(const std::string &key);
 private:
     bool CheckRdbStore();
 

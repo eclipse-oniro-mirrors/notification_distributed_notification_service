@@ -742,6 +742,7 @@ std::string NotificationRequest::Dump()
             ", additionalParams = " + (additionalParams_ ? "not null" : "null") +
             ", littleIcon = " + (littleIcon_ ? "not null" : "null") +
             ", bigIcon = " + (bigIcon_ ? "not null" : "null") +
+            ", overlayIcon = " + (overlayIcon_ ? "not null" : "null") +
             ", notificationContent = " + (notificationContent_ ? notificationContent_->Dump() : "null") +
             ", notificationTemplate = " + (notificationTemplate_ ? "not null" : "null") +
             ", actionButtons = " + (!actionButtons_.empty() ? actionButtons_.at(0)->Dump() : "empty") +
@@ -773,6 +774,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["slotType"]       = static_cast<int32_t>(slotType_);
     jsonObject["notificationSlotType"] = static_cast<int32_t>(slotType_);
     jsonObject["badgeIconStyle"] = static_cast<int32_t>(badgeStyle_);
+    jsonObject["notificationContentType"] = static_cast<int32_t>(notificationContentType_);
 
     jsonObject["showDeliveryTime"] = showDeliveryTime_;
     jsonObject["tapDismissed"]     = tapDismissed_;
@@ -789,6 +791,8 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["creatorPid"]        = creatorPid_;
     jsonObject["creatorUserId"]     = creatorUserId_;
     jsonObject["receiverUserId"]    = receiverUserId_;
+    jsonObject["maxUpdateTime"]     = maxUpdateTime_;
+    jsonObject["maxFinishTime"]     = maxFinishTime_;
 
     if (!ConvertObjectsToJson(jsonObject)) {
         ANS_LOGE("Cannot convert objects to JSON");
@@ -1169,6 +1173,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    valid = overlayIcon_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write the flag which indicate whether overlayIcon is null");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(overlayIcon_.get())) {
+            ANS_LOGE("Failed to write overlayIcon");
+            return false;
+        }
+    }
+
     valid = notificationContent_ ? true : false;
     if (!parcel.WriteBool(valid)) {
         ANS_LOGE("Failed to write the flag which indicate whether notificationContent is null");
@@ -1241,6 +1258,16 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
             ANS_LOGE("Failed to write notification flags");
             return false;
         }
+    }
+
+    if (!parcel.WriteInt64(maxUpdateTime_)) {
+        ANS_LOGE("Failed to write max update time");
+        return false;
+    }
+
+    if (!parcel.WriteInt64(maxFinishTime_)) {
+        ANS_LOGE("Failed to write max finish time");
+        return false;
     }
 
     return true;
@@ -1403,6 +1430,15 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
+        overlayIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+        if (!overlayIcon_) {
+            ANS_LOGE("Failed to read overlayIcon");
+            return false;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
         notificationContent_ = std::shared_ptr<NotificationContent>(parcel.ReadParcelable<NotificationContent>());
         if (!notificationContent_) {
             ANS_LOGE("Failed to read notificationContent");
@@ -1468,6 +1504,9 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         }
     }
 
+    maxUpdateTime_ = parcel.ReadInt64();
+    maxFinishTime_ = parcel.ReadInt64();
+
     return true;
 }
 
@@ -1530,6 +1569,8 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->createTime_ = other.createTime_;
     this->deliveryTime_ = other.deliveryTime_;
     this->autoDeletedTime_ = other.autoDeletedTime_;
+    this->maxUpdateTime_ = other.maxUpdateTime_;
+    this->maxFinishTime_ = other.maxFinishTime_;
 
     this->creatorPid_ = other.creatorPid_;
     this->creatorUid_ = other.creatorUid_;
@@ -1630,6 +1671,7 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
 
     jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_);
     jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
+    jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";
 
     nlohmann::json optObj;
     if (!NotificationJsonConverter::ConvertToJson(&distributedOptions_, optObj)) {
@@ -1764,6 +1806,11 @@ void NotificationRequest::ConvertJsonToEnum(NotificationRequest *target, const n
         auto badgeStyleValue  = jsonObject.at("badgeIconStyle").get<int32_t>();
         target->badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(badgeStyleValue);
     }
+
+    if (jsonObject.find("notificationContentType") != jsonEnd && jsonObject.at("notificationContentType").is_number_integer()) {
+        auto notificationContentType = jsonObject.at("notificationContentType").get<int32_t>();
+        target->notificationContentType_ = static_cast<NotificationContent::Type>(notificationContentType);
+    }
 }
 
 void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const nlohmann::json &jsonObject)
@@ -1829,6 +1876,11 @@ void NotificationRequest::ConvertJsonToPixelMap(NotificationRequest *target, con
     if (jsonObject.find("largeIcon") != jsonEnd && jsonObject.at("largeIcon").is_string()) {
         auto bigIconStr    = jsonObject.at("largeIcon").get<std::string>();
         target->bigIcon_ = AnsImageUtil::UnPackImage(bigIconStr);
+    }
+
+    if (jsonObject.find("overlayIcon") != jsonEnd && jsonObject.at("overlayIcon").is_string()) {
+        auto overlayIconStr    = jsonObject.at("overlayIcon").get<std::string>();
+        target->overlayIcon_ = AnsImageUtil::UnPackImage(overlayIconStr);
     }
 }
 
@@ -1897,7 +1949,7 @@ bool NotificationRequest::ConvertJsonToNotificationDistributedOptions(
     if (jsonObject.find("distributedOptions") != jsonEnd) {
         auto optObj = jsonObject.at("distributedOptions");
         if (!optObj.is_null()) {
-            auto pOpt = NotificationJsonConverter::ConvertFromJson<NotificationDistributedOptions>(optObj);
+            auto *pOpt = NotificationJsonConverter::ConvertFromJson<NotificationDistributedOptions>(optObj);
             if (pOpt == nullptr) {
                 ANS_LOGE("Failed to parse distributedOptions!");
                 return false;
@@ -1923,7 +1975,7 @@ bool NotificationRequest::ConvertJsonToNotificationFlags(
     if (jsonObject.find("notificationFlags") != jsonEnd) {
         auto flagsObj = jsonObject.at("notificationFlags");
         if (!flagsObj.is_null()) {
-            auto pFlags = NotificationJsonConverter::ConvertFromJson<NotificationFlags>(flagsObj);
+            auto *pFlags = NotificationJsonConverter::ConvertFromJson<NotificationFlags>(flagsObj);
             if (pFlags == nullptr) {
                 ANS_LOGE("Failed to parse notificationFlags!");
                 return false;

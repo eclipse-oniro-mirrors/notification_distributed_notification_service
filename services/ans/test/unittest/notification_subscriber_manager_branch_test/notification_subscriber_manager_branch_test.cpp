@@ -1243,13 +1243,14 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     sptr<NotificationBundleOption> bundleOption = nullptr;
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
+    bool isForceControl = false;
 
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
 
     MockVerifyNativeToken(false);
     MockVerifyCallerPermission(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false),
+    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl),
         ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -1263,6 +1264,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
+    bool isForceControl = false;
 
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
 
@@ -1270,7 +1272,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false),
+    EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl),
         ERR_ANS_INVALID_BUNDLE);
 }
 
