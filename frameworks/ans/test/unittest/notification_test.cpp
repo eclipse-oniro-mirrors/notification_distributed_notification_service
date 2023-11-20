@@ -260,7 +260,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     std::string ret = "Notification{ key = DeviceId_-1_0__0, ledLightColor = 0, "
     "lockscreenVisbleness = 0, remindType = -1, isRemoveAllowed = true, sourceType = 0, "
     "deviceId = DeviceId, request = NotificationRequest{ notificationId = 0, "
-    "slotType = 3, createTime = 0, deliveryTime = 0, autoDeletedTime = 0, settingsText = , "
+    "slotType = 3, createTime = 0, deliveryTime = 0, autoDeletedTime = -1, settingsText = , "
     "creatorBundleName = , creatorPid = 0, creatorUid = 0, ownerBundleName = , "
     "ownerUid = 0, groupName = , statusBarText = , label = , shortcutId = , "
     "sortingKey = , groupAlertType = 0, color = 0, badgeNumber = 0, visiblenessType = 0, "
@@ -275,7 +275,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "userInputHistory = empty, distributedOptions = NotificationDistributedOptions"
     "{ isDistributed = true, devicesSupportDisplay = [], devicesSupportOperate = [] }, "
     "notificationFlags = null, creatorUserId = -1, ownerUserId = -1, receiverUserId = -1, "
-    "maxUpdateTime = 0, maxFinishTime = 0 }, postTime = 0, sound = nullptr, vibrationStyle = [], "
+    "updateDeadLine = 0, finishDeadLine = 0 }, postTime = 0, sound = nullptr, vibrationStyle = [], "
     "updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
@@ -547,5 +547,5 @@ HWTEST_F(NotificationTest, GetFinishTimer_00001, Function | SmallTest | Level1)
     rrc->SetFinishTimer(1);
     EXPECT_EQ(rrc->GetFinishTimer(), 1);
 }
-}
-}
+} // namespace Notification
+} // namespace OHOS

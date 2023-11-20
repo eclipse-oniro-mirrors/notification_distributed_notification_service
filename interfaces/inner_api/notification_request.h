@@ -429,50 +429,50 @@ public:
     /**
      * @brief Sets the update deadline time before deleting a notification.
      *
-     * @param maxUpdateTime Indicates the time in milliseconds.
+     * @param updateDeadLine Indicates the time in milliseconds.
      * The default value is 0, indicating that the notification will not be automatically deleted.
      * To enable the notification to be automatically deleted, set this parameter to an integer greater than 0.
      */
-    void SetMaxUpdateTime(int64_t maxUpdateTime);
+    void SetUpdateDeadLine(int64_t updateDeadLine);
 
     /**
      * @brief Obtains the time point which a notification must be updated.
      *
      * @return Returns the time point in milliseconds.
      */
-    int64_t GetMaxUpdateTime() const;
+    int64_t GetUpdateDeadLine() const;
 
     /**
      * @brief Sets the finish deadline time before deleting a notification.
      *
-     * @param maxFinishTime Indicates the time in milliseconds.
+     * @param finishDeadLine Indicates the time in milliseconds.
      * The default value is 0, indicating that the notification will not be automatically deleted.
      * To enable the notification to be automatically deleted, set this parameter to an integer greater than 0.
      */
-    void SetMaxFinishTime(int64_t maxUpdateTime);
+    void SetFinishDeadLine(int64_t finishDeadLine);
 
     /**
      * @brief Obtains the time point which a notification must be finished.
      *
      * @return Returns the time point in milliseconds.
      */
-    int64_t GetMaxFinishTime() const;
+    int64_t GetFinishDeadLine() const;
 
     /**
      * @brief Sets the finish deadline time before deleting a notification.
      *
-     * @param maxFinishTime Indicates the time in milliseconds.
+     * @param finishDeadLine Indicates the time in milliseconds.
      * The default value is 0, indicating that the notification will not be automatically deleted.
      * To enable the notification to be automatically deleted, set this parameter to an integer greater than 0.
      */
-    void SetMaxArchiveTime(int64_t maxArchiveTime);
+    void SetArchiveDeadLine(int64_t archiveDeadLine);
 
     /**
      * @brief Obtains the time point which a notification must be finished.
      *
      * @return Returns the time point in milliseconds.
      */
-    int64_t GetMaxArchiveTime() const;
+    int64_t GetArchiveDeadLine() const;
 
     /**
      * @brief Sets the little icon of the notification.
@@ -1274,9 +1274,9 @@ private:
     int64_t deliveryTime_ {0};
 
     int64_t autoDeletedTime_ {NotificationConstant::INVALID_AUTO_DELETE_TIME};
-    int64_t maxUpdateTime_ {0};
-    int64_t maxFinishTime_ {0};
-    int64_t maxArchiveTime_ {0};
+    int64_t updateDeadLine_ {0};
+    int64_t finishDeadLine_ {0};
+    int64_t archiveDeadLine_ {0};
     pid_t creatorPid_ {0};
     int32_t creatorUid_ {0};
     int32_t ownerUid_ {0};

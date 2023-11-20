@@ -149,5 +149,5 @@ HWTEST_F(NotificationBundleOptionTest, JsonConvert_00001, Function | SmallTest |
     EXPECT_EQ(rrcNew->GetBundleName(), rrc->GetBundleName());
     EXPECT_EQ(rrcNew->GetUid(), rrc->GetUid());
 }
-}
-}
+} // namespace Notification
+} // namespace OHOS
