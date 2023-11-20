@@ -719,6 +719,9 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         ANSR_LOGE("ReminderRequest object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
+    if (!CheckLocalLiveViewSubscribed(request)) {
+        return ERR_ANS_INVALID_PARAM;
+    }
 
     if (!request->IsRemoveAllowed()) {
         if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
@@ -1736,7 +1739,9 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
             break;
         }
     } while (0);
-
+    if (errCode == ERR_OK) {
+        AddLiveViewSubscriber();
+    }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
 }
@@ -3034,6 +3039,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
 ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std::string& bundleName)
 {
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    EraseLiveViewSubsciber(bundleName);
     if (GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
         NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) {
         ANS_LOGE("Get Target record list fail.");
@@ -5650,6 +5656,47 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
     }
     if (!bundleMgr->GetBundleInfoByBundleName(bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
         ANS_LOGE("Get bundle info error!");
+        return false;
+    }
+    return true;
+}
+
+void AdvancedNotificationService::AddLiveViewSubscriber()
+{
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return;
+    }
+    std::string bundleName = bundleOption->GetBundleName();
+    std::lock_guard<std::mutex> lock(liveViewMutext_);
+    localLiveViewSubscribedList_.emplace(bundleName);
+}
+
+void AdvancedNotificationService::EraseLiveViewSubsciber(const std::string &bundleName)
+{
+    std::lock_guard<std::mutex> lock(liveViewMutext_);
+    localLiveViewSubscribedList_.erase(bundleName);
+}
+
+bool AdvancedNotificationService::GetLiveViewSubscribeState(const std::string &bundleName)
+{
+    std::lock_guard<std::mutex> lock(liveViewMutext_);
+    if (localLiveViewSubscribedList_.find(bundleName) == localLiveViewSubscribedList_.end()) {
+        return false;
+    }
+    return true;
+}
+
+bool AdvancedNotificationService::CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request)
+{
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return false;
+    }
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
+        request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW &&
+        !GetLiveViewSubscribeState(bundleOption->GetBundleName())) {
+        ANS_LOGE("Not subscribe local live view.");
         return false;
     }
     return true;
