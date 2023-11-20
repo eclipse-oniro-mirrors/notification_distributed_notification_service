@@ -275,7 +275,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "userInputHistory = empty, distributedOptions = NotificationDistributedOptions"
     "{ isDistributed = true, devicesSupportDisplay = [], devicesSupportOperate = [] }, "
     "notificationFlags = null, creatorUserId = -1, ownerUserId = -1, receiverUserId = -1, "
-    "maxUpdateTime = 0, maxFinishTime = 0 }, postTime = 0, sound = nullptr, vibrationStyle = [], "
+    "updateDeadLine = 0, finishDeadLine = 0 }, postTime = 0, sound = nullptr, vibrationStyle = [], "
     "updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
@@ -547,5 +547,5 @@ HWTEST_F(NotificationTest, GetFinishTimer_00001, Function | SmallTest | Level1)
     rrc->SetFinishTimer(1);
     EXPECT_EQ(rrc->GetFinishTimer(), 1);
 }
-}
-}
+} // namespace Notification
+} // namespace OHOS

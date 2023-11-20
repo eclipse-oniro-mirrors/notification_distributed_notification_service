@@ -561,13 +561,13 @@ ErrCode AdvancedNotificationService::SetFinishTimer(const std::shared_ptr<Notifi
     if (result != ERR_OK) {
         return result;
     }
-    record->request->SetMaxFinishTime(maxExpiredTime);
+    record->request->SetFinishDeadLine(maxExpiredTime);
     return ERR_OK;
 }
 
 void AdvancedNotificationService::CancelFinishTimer(const std::shared_ptr<NotificationRecord> &record)
 {
-    record->request->SetMaxFinishTime(0);
+    record->request->SetFinishDeadLine(0);
     CancelAutoDeleteTimer(record->notification->GetFinishTimer());
     record->notification->SetFinishTimer(NotificationConstant::INVALID_TIMER_ID);
 }
@@ -592,13 +592,13 @@ ErrCode AdvancedNotificationService::SetUpdateTimer(const std::shared_ptr<Notifi
     if (result != ERR_OK) {
         return result;
     }
-    record->request->SetMaxUpdateTime(maxExpiredTime);
+    record->request->SetUpdateDeadLine(maxExpiredTime);
     return ERR_OK;
 }
 
 void AdvancedNotificationService::CancelUpdateTimer(const std::shared_ptr<NotificationRecord> &record)
 {
-    record->request->SetMaxUpdateTime(0);
+    record->request->SetUpdateDeadLine(0);
     CancelAutoDeleteTimer(record->notification->GetUpdateTimer());
     record->notification->SetUpdateTimer(NotificationConstant::INVALID_TIMER_ID);
 }
@@ -621,7 +621,7 @@ void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<Notifi
 
 void AdvancedNotificationService::CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record)
 {
-    record->request->SetMaxArchiveTime(0);
+    record->request->SetArchiveDeadLine(0);
     CancelAutoDeleteTimer(record->notification->GetArchiveTimer());
     record->notification->SetArchiveTimer(NotificationConstant::INVALID_TIMER_ID);
 }
@@ -4681,17 +4681,12 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD(
-        "slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d", slotType, enabled, isForceControl);
+    ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
+        slotType, enabled, isForceControl);
 
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("CheckPermission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
+    ErrCode result = CheckCommonParams();
+    if (result != ERR_OK) {
+        return result;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
@@ -4699,11 +4694,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ErrCode result = ERR_OK;
+    result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);

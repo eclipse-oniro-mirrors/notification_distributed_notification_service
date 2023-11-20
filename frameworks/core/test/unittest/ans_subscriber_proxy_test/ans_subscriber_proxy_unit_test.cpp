@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "notification_request.h"
 #include <gtest/gtest.h>
 
 #define private public
@@ -157,7 +158,11 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumed_0400, Function | MediumTest | Le
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<OHOS::Notification::NotificationRequest> request =
+        new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification =
+        new (std::nothrow) OHOS::Notification::Notification(request);
     ASSERT_NE(nullptr, notification);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
     ASSERT_NE(nullptr, notificationMap);
@@ -179,7 +184,11 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumed_0500, Function | MediumTest | Le
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<OHOS::Notification::NotificationRequest> request =
+        new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification =
+        new (std::nothrow) OHOS::Notification::Notification(request);
     ASSERT_NE(nullptr, notification);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
     ASSERT_NE(nullptr, notificationMap);
@@ -221,9 +230,96 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumed_0700, Function | MediumTest | Le
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<OHOS::Notification::NotificationRequest> request =
+        new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification =
+        new (std::nothrow) OHOS::Notification::Notification(request);
     ASSERT_NE(nullptr, notification);
     proxy->OnConsumed(notification, nullptr);
+}
+
+/*
+ * @tc.name: OnConsumedList_0100
+ * @tc.desc: Test OnConsumedList function and notifications is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumedList_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyBranchTest, OnConsumedList_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    proxy->OnConsumedList(notifications, nullptr);
+}
+
+/*
+ * @tc.name: OnConsumedList_0200
+ * @tc.desc: Test OnConsumedList function and notifications is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumedList_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyBranchTest, OnConsumedList_0200, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<OHOS::Notification::NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+    proxy->OnConsumedList(notifications, nullptr);
+}
+
+/*
+ * @tc.name: OnConsumedList_0300
+ * @tc.desc: Test OnConsumedList function and notifications is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumedList_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyBranchTest, OnConsumedList_0300, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+    proxy->OnConsumedList(notifications, notificationMap);
+}
+
+/*
+ * @tc.name: OnConsumedList_0400
+ * @tc.desc: 1.Test OnConsumedList function and notifications is not empty
+ *           2.notificationMap is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumedList_0400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsSubscriberProxyBranchTest, OnConsumedList_0400, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1);
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<OHOS::Notification::NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+    proxy->OnConsumedList(notifications, notificationMap);
 }
 
 /*
@@ -241,7 +337,9 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnCanceled_0400, Function | MediumTest | Le
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<OHOS::Notification::NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
     ASSERT_NE(nullptr, notification);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
     ASSERT_NE(nullptr, notificationMap);
@@ -264,7 +362,9 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnCanceled_0500, Function | MediumTest | Le
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<OHOS::Notification::NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
     ASSERT_NE(nullptr, notification);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
     ASSERT_NE(nullptr, notificationMap);
@@ -308,7 +408,9 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnCanceled_0700, Function | MediumTest | Le
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<OHOS::Notification::NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    ASSERT_NE(nullptr, request);
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
     ASSERT_NE(nullptr, notification);
     int32_t deleteReason = 0;
     proxy->OnCanceled(notification, nullptr, deleteReason);

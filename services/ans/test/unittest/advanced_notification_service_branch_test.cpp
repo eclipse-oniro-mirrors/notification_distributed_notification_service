@@ -1147,5 +1147,80 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
     EXPECT_EQ(advancedNotificationService_->GetDistributedEnableInApplicationInfo(
         bundleOption, enabled), ERR_ANS_INVALID_PARAM);
 }
+
+void AnsBranchTest::InitNotificationRecord(std::shared_ptr<NotificationRecord> &record,
+    const NotificationLiveViewContent::LiveViewStatus &status)
+{
+    NotificationRequest notificationRequest;
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(status);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    record->request = sptr<NotificationRequest>::MakeSptr(notificationRequest);
+    record->notification = new (std::nothrow) Notification(record->request);
 }
+
+/**
+ * @tc.number    : AnsBranchTest_279000
+ * @tc.name      : UpdateNotificationTimerInfo_0001
+ * @tc.desc      : Check set update and finish timer when create notification request
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_279000, Function | SmallTest | Level1)
+{
+    using Status = NotificationLiveViewContent::LiveViewStatus;
+    auto record = std::make_shared<NotificationRecord>();
+    InitNotificationRecord(record, Status::LIVE_VIEW_CREATE);
+    EXPECT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
+    EXPECT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
+    auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
+    EXPECT_NE(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
 }
+
+/**
+ * @tc.number    : AnsBranchTest_279001
+ * @tc.name      : UpdateNotificationTimerInfo_0002
+ * @tc.desc      : Check set update and finish timer when update notification request
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_279001, Function | SmallTest | Level1)
+{
+    using Status = NotificationLiveViewContent::LiveViewStatus;
+    auto record = std::make_shared<NotificationRecord>();
+    InitNotificationRecord(record, Status::LIVE_VIEW_BATCH_UPDATE);
+    record->notification->SetUpdateTimer(2);
+    record->notification->SetFinishTimer(3);
+    auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
+    EXPECT_EQ(result, ERR_OK);
+    /* finish timer not change, but update timer changed */
+    EXPECT_NE(record->notification->GetUpdateTimer(), 2);
+    EXPECT_EQ(record->notification->GetFinishTimer(), 3);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_279002
+ * @tc.name      : UpdateNotificationTimerInfo_0003
+ * @tc.desc      : Check cancel update and finish timer when end notification request
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_279002, Function | SmallTest | Level1)
+{
+    using Status = NotificationLiveViewContent::LiveViewStatus;
+    auto record = std::make_shared<NotificationRecord>();
+    InitNotificationRecord(record, Status::LIVE_VIEW_END);
+    record->notification->SetUpdateTimer(2);
+    record->notification->SetFinishTimer(3);
+
+    auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
+    EXPECT_EQ(result, ERR_OK);
+    /* finish timer not change, but update timer changed */
+    EXPECT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
+    EXPECT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
+}
+
+}  // namespace Notification
+}  // namespace OHOS
