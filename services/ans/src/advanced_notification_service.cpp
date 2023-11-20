@@ -5365,6 +5365,7 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
 
     if (pushCallBacks_.find(slotType) == pushCallBacks_.end()) {
         ANS_LOGI("pushCallback Unregistered, no need to check.");
+        return false;
     }
 
     if (contentType == checkRequests_[slotType]->GetContentType()) {
