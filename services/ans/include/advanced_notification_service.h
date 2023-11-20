@@ -943,6 +943,7 @@ private:
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
         int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);
+    ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
