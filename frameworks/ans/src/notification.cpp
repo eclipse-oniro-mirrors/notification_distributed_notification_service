@@ -504,8 +504,13 @@ std::string Notification::GenerateNotificationKey(
 {
     const char *keySpliter = "_";
 
+    std::string ownerBundleName = request_->GetOwnerBundleName();
+    if (ownerBundleName.empty()) {
+        ANS_LOGI("ownerBundleName is empty");
+    }
     std::stringstream stream;
-    stream << deviceId << keySpliter << userId << keySpliter << uid << keySpliter << label << keySpliter << id;
+    stream << deviceId << keySpliter << userId << keySpliter << uid <<
+        keySpliter << label << keySpliter << id<< keySpliter << ownerBundleName;
 
     return stream.str();
 }
