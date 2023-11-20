@@ -99,7 +99,7 @@ HWTEST_F(NotificationLiveViewContentTest, Dump_00001, Function | SmallTest | Lev
 {
     auto rrc = std::make_shared<NotificationLiveViewContent>();
     std::string ret = "NotificationLiveViewContent{ title = , text = , "
-    "additionalText = , status = 0, version = 0, extraInfo = null, pictureMap = {}}";
+    "additionalText = , status = 0, version = -1, extraInfo = null, pictureMap = {}}";
 
     EXPECT_EQ(rrc->Dump(), ret);
 }
@@ -125,7 +125,7 @@ HWTEST_F(NotificationLiveViewContentTest, Dump_00002, Function | SmallTest | Lev
     rrc->SetAdditionalText("addText");
 
     std::string ret = "NotificationLiveViewContent{ title = title, text = text, "
-        "additionalText = addText, status = 0, version = 0, extraInfo = null, "
+        "additionalText = addText, status = 0, version = -1, extraInfo = null, "
         "pictureMap = { { key = test, value = not empty } }}";
 
     EXPECT_EQ(rrc->Dump(), ret);

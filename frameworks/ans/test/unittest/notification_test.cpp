@@ -260,7 +260,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     std::string ret = "Notification{ key = DeviceId_-1_0__0, ledLightColor = 0, "
     "lockscreenVisbleness = 0, remindType = -1, isRemoveAllowed = true, sourceType = 0, "
     "deviceId = DeviceId, request = NotificationRequest{ notificationId = 0, "
-    "slotType = 3, createTime = 0, deliveryTime = 0, autoDeletedTime = 0, settingsText = , "
+    "slotType = 3, createTime = 0, deliveryTime = 0, autoDeletedTime = -1, settingsText = , "
     "creatorBundleName = , creatorPid = 0, creatorUid = 0, ownerBundleName = , "
     "ownerUid = 0, groupName = , statusBarText = , label = , shortcutId = , "
     "sortingKey = , groupAlertType = 0, color = 0, badgeNumber = 0, visiblenessType = 0, "
