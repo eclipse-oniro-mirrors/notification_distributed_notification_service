@@ -652,42 +652,57 @@ ErrCode AdvancedNotificationService::FillNotificationRecord(
     return ERR_OK;
 }
 
+std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificationRecord(
+    const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = new (std::nothrow) Notification(request);
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create notification.");
+        return nullptr;
+    }
+    record->bundleOption = bundleOption;
+    SetNotificationRemindType(record->notification, true);
+    return record;
+}
+
 ErrCode AdvancedNotificationService::PublishPreparedNotification(
     const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
-    auto record = std::make_shared<NotificationRecord>();
-    record->request = request;
-    record->notification = new (std::nothrow) Notification(request);
 
-    if (record->notification == nullptr) {
-        ANS_LOGE("Failed to create notification.");
+    auto record = MakeNotificationRecord(request, bundleOption);
+    if (record == nullptr) {
         return ERR_ANS_NO_MEMORY;
     }
-    record->bundleOption = bundleOption;
-    SetNotificationRemindType(record->notification, true);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
+
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        if (AssignValidNotificationSlot(record) != ERR_OK) {
+        result = AssignValidNotificationSlot(record);
+        if (result != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
             return;
         }
 
-        if (Filter(record) != ERR_OK) {
-            ANS_LOGE("Reject by filters.");
+        result = Filter(record);
+        if (result != ERR_OK) {
+            ANS_LOGE("Reject by filters: %{public}d", result);
             return;
         }
 
-        if (AssignToNotificationList(record) != ERR_OK) {
+        result = AssignToNotificationList(record);
+        if (result != ERR_OK) {
             return;
         }
+
         UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());

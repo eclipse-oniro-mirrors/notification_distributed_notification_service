@@ -2023,6 +2023,11 @@ ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRe
 ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationRequest> &oldRequest) const
 {
     if (!IsCommonLiveView()) {
+        if ((oldRequest != nullptr) && oldRequest->IsCommonLiveView()) {
+            ANS_LOGE("Invalid new request param, slot type %{public}d, content type %{public}d.",
+                GetSlotType(), GetNotificationType());
+            return ERR_ANS_INVALID_PARAM;
+        }
         return ERR_OK;
     }
 
