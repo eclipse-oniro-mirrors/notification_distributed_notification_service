@@ -548,7 +548,7 @@ public:
      * @param pictureMap Indicates a picturemap object to be converted
      * @return Returns the null object if success, returns the null value otherwise
      */
-    static napi_value SetLiveViewPictureMap(
+    static napi_value SetLiveViewPictureInfo(
         const napi_env &env, const std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap);
 
     /**
@@ -1568,7 +1568,7 @@ public:
      * @param pictureMap Indicates picturemap from specified js object
      * @return Returns the null object if success, returns the null value otherwise
      */
-    static napi_value GetLiveViewPictureMap(const napi_env &env, const napi_value &pictureMapObj,
+    static napi_value GetLiveViewPictureInfo(const napi_env &env, const napi_value &pictureMapObj,
         std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap);
 
     /**

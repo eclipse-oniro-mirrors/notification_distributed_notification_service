@@ -558,15 +558,14 @@ ErrCode AnsManagerProxy::GetActiveNotificationByFilter(
         return result;
     }
 
-    request = reply.ReadParcelable<NotificationRequest>();
-    if (request == nullptr) {
-        ANS_LOGE("[GetActiveNotificationByFilter] fail: read request is nullptr.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("[GetActiveNotificationByFilter] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    request = reply.ReadParcelable<NotificationRequest>();
+    if (request == nullptr) {
+        ANS_LOGE("[GetActiveNotificationByFilter] fail: read request is nullptr.");
     }
 
     return result;
