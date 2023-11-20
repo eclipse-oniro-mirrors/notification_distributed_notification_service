@@ -2198,6 +2198,34 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     return result;
 }
 
+ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<NotificationBundleOption>
+    &bundleOption, bool &allowed)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!GetActiveUserId(userId)) {
+        ANS_LOGD("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    ErrCode result = ERR_OK;
+    allowed = false;
+    result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+    if (result == ERR_OK && allowed) {
+        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, allowed);
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            result = ERR_OK;
+            // FA model app can publish notification without user confirm
+            allowed = CheckApiCompatibility(bundleOption);
+        }
+    }
+    return result;
+}
+
 ErrCode AdvancedNotificationService::GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
     sptr<NotificationBundleOption> &targetBundle)
 {
@@ -3205,7 +3233,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
         ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
             bool isAllowedNotification = true;
-            if (IsAllowedNotifySelf(bundleOption, isAllowedNotification) != ERR_OK) {
+            if (IsAllowedNotifyForBundle(bundleOption, isAllowedNotification) != ERR_OK) {
                 ANSR_LOGW("The application does not request enable notification.");
             }
             if (!record->notification->IsRemoveAllowed() && isAllowedNotification) {
