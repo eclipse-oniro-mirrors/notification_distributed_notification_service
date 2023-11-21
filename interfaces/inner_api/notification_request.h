@@ -1177,18 +1177,6 @@ public:
     void FillMissingParameters(const sptr<NotificationRequest> &oldRequest);
 
     /**
-     * @brief Generate notification request key.
-     *
-     * @param creatorUserId Indicates the user id of creator.
-     * @param creatorUid Indicates the uid of creator.
-     * @param label Indicates the label of notification request.
-     * @param notificationId Indicates the ID of notification request, different apps may have same value.
-     * @return Return the unique key of notification request.
-     */
-    static std::string GenerateNotificationRequestKey(int32_t creatorUserId,
-        int32_t creatorUid, const std::string &label, int32_t notificationId);
-
-    /**
      * @brief Get notification request key.
      *
      * @return Return the unique key of notification request.
