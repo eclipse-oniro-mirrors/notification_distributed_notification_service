@@ -1200,23 +1200,23 @@ napi_value Common::SetNotificationLiveViewContent(
         napi_set_named_property(env, result, "extraInfo", extraInfo);
     }
 
-    // pictureMap?: {[key, string]: Array<image.pixelMap>}
+    // pictureInfo?: {[key, string]: Array<image.pixelMap>}
     if (liveViewContent->GetPicture().empty()) {
         ANS_LOGI("No pictures in live view.");
         return NapiGetBoolean(env, true);
     }
 
-    napi_value pictureMapObj = SetLiveViewPictureMap(env, liveViewContent->GetPicture());
+    napi_value pictureMapObj = SetLiveViewPictureInfo(env, liveViewContent->GetPicture());
     if (pictureMapObj == nullptr) {
         ANS_LOGE("Set live view picture map failed.");
         return NapiGetBoolean(env, false);
     }
-    napi_set_named_property(env, result, "pictureMap", pictureMapObj);
+    napi_set_named_property(env, result, "pictureInfo", pictureMapObj);
 
     return NapiGetBoolean(env, true);
 }
 
-napi_value Common::SetLiveViewPictureMap(
+napi_value Common::SetLiveViewPictureInfo(
     const napi_env &env, const std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
 {
     ANS_LOGI("enter");
@@ -3655,15 +3655,15 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
         liveViewContent->SetExtraInfo(extras);
     }
 
-    // pictureMap?: {[key, string]: Array<image.pixelMap>}
-    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "pictureMap", napi_object);
+    // pictureInfo?: {[key, string]: Array<image.pixelMap>}
+    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "pictureInfo", napi_object);
     if (jsValue == nullptr) {
         ANS_LOGI("No picture maps.");
         return NapiGetNull(env);
     }
 
     std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap;
-    if (GetLiveViewPictureMap(env, jsValue, pictureMap) == nullptr) {
+    if (GetLiveViewPictureInfo(env, jsValue, pictureMap) == nullptr) {
         ANS_LOGE("Failed to get picture map from liveView content.");
         return nullptr;
     }
@@ -3712,7 +3712,7 @@ napi_value Common::GetLiveViewPictures(
     return NapiGetNull(env);
 }
 
-napi_value Common::GetLiveViewPictureMap(
+napi_value Common::GetLiveViewPictureInfo(
     const napi_env &env, const napi_value &pictureMapObj,
     std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
 {

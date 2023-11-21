@@ -947,6 +947,9 @@ private:
     void EraseLiveViewSubsciber(const std::string &bundleName);
     bool GetLiveViewSubscribeState(const std::string &bundleName);
     bool CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request);
+    std::shared_ptr<NotificationRecord> MakeNotificationRecord(
+        const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

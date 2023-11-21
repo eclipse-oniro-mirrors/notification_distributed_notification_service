@@ -255,34 +255,34 @@ int64_t NotificationRequest::GetAutoDeletedTime() const
     return autoDeletedTime_;
 }
 
-void NotificationRequest::SetMaxUpdateTime(int64_t maxUpdateTime)
+void NotificationRequest::SetUpdateDeadLine(int64_t updateDeadLine)
 {
-        maxUpdateTime_ = maxUpdateTime;
+    updateDeadLine_ = updateDeadLine;
 }
 
-int64_t NotificationRequest::GetMaxUpdateTime() const
+int64_t NotificationRequest::GetUpdateDeadLine() const
 {
-    return maxUpdateTime_;
+    return updateDeadLine_;
 }
 
-void NotificationRequest::SetMaxFinishTime(int64_t maxFinishTime)
+void NotificationRequest::SetFinishDeadLine(int64_t finishDeadLine)
 {
-    maxFinishTime_ = maxFinishTime;
+    finishDeadLine_ = finishDeadLine;
 }
 
-int64_t NotificationRequest::GetMaxFinishTime() const
+int64_t NotificationRequest::GetFinishDeadLine() const
 {
-    return maxFinishTime_;
+    return finishDeadLine_;
 }
 
-void NotificationRequest::SetMaxArchiveTime(int64_t maxArchiveTime)
+void NotificationRequest::SetArchiveDeadLine(int64_t archiveDeadLine)
 {
-    maxArchiveTime_ = maxArchiveTime;
+    archiveDeadLine_ = archiveDeadLine;
 }
 
-int64_t NotificationRequest::GetMaxArchiveTime() const
+int64_t NotificationRequest::GetArchiveDeadLine() const
 {
-    return maxArchiveTime_;
+    return archiveDeadLine_;
 }
 
 void NotificationRequest::SetLittleIcon(const std::shared_ptr<Media::PixelMap> &littleIcon)
@@ -752,8 +752,8 @@ std::string NotificationRequest::Dump()
             ", notificationFlags = " + (notificationFlags_ ? "not null" : "null") +
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", ownerUserId = " + std::to_string(ownerUserId_) +
-            ", receiverUserId = " + std::to_string(receiverUserId_) + ", maxUpdateTime = " +
-            std::to_string(maxUpdateTime_) + ", maxFinishTime = " + std::to_string(maxFinishTime_) + " }";
+            ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
+            std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) + " }";
 }
 
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
@@ -791,8 +791,8 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["creatorPid"]        = creatorPid_;
     jsonObject["creatorUserId"]     = creatorUserId_;
     jsonObject["receiverUserId"]    = receiverUserId_;
-    jsonObject["maxUpdateTime"]     = maxUpdateTime_;
-    jsonObject["maxFinishTime"]     = maxFinishTime_;
+    jsonObject["updateDeadLine"]     = updateDeadLine_;
+    jsonObject["finishDeadLine"]     = finishDeadLine_;
 
     if (!ConvertObjectsToJson(jsonObject)) {
         ANS_LOGE("Cannot convert objects to JSON");
@@ -1260,12 +1260,12 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
-    if (!parcel.WriteInt64(maxUpdateTime_)) {
+    if (!parcel.WriteInt64(updateDeadLine_)) {
         ANS_LOGE("Failed to write max update time");
         return false;
     }
 
-    if (!parcel.WriteInt64(maxFinishTime_)) {
+    if (!parcel.WriteInt64(finishDeadLine_)) {
         ANS_LOGE("Failed to write max finish time");
         return false;
     }
@@ -1504,8 +1504,8 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         }
     }
 
-    maxUpdateTime_ = parcel.ReadInt64();
-    maxFinishTime_ = parcel.ReadInt64();
+    updateDeadLine_ = parcel.ReadInt64();
+    finishDeadLine_ = parcel.ReadInt64();
 
     return true;
 }
@@ -1569,8 +1569,8 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->createTime_ = other.createTime_;
     this->deliveryTime_ = other.deliveryTime_;
     this->autoDeletedTime_ = other.autoDeletedTime_;
-    this->maxUpdateTime_ = other.maxUpdateTime_;
-    this->maxFinishTime_ = other.maxFinishTime_;
+    this->updateDeadLine_ = other.updateDeadLine_;
+    this->finishDeadLine_ = other.finishDeadLine_;
 
     this->creatorPid_ = other.creatorPid_;
     this->creatorUid_ = other.creatorUid_;
@@ -1697,12 +1697,12 @@ void NotificationRequest::ConvertJsonToNumExt(
 {
     const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("maxUpdateTime") != jsonEnd && jsonObject.at("maxUpdateTime").is_number_integer()) {
-        target->maxUpdateTime_ = jsonObject.at("maxUpdateTime").get<int64_t>();
+    if (jsonObject.find("updateDeadLine") != jsonEnd && jsonObject.at("updateDeadLine").is_number_integer()) {
+        target->updateDeadLine_ = jsonObject.at("updateDeadLine").get<int64_t>();
     }
 
-    if (jsonObject.find("maxFinishTime") != jsonEnd && jsonObject.at("maxFinishTime").is_number_integer()) {
-        target->maxFinishTime_ = jsonObject.at("maxFinishTime").get<int64_t>();
+    if (jsonObject.find("finishDeadLine") != jsonEnd && jsonObject.at("finishDeadLine").is_number_integer()) {
+        target->finishDeadLine_ = jsonObject.at("finishDeadLine").get<int64_t>();
     }
 }
 
@@ -1807,7 +1807,8 @@ void NotificationRequest::ConvertJsonToEnum(NotificationRequest *target, const n
         target->badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(badgeStyleValue);
     }
 
-    if (jsonObject.find("notificationContentType") != jsonEnd && jsonObject.at("notificationContentType").is_number_integer()) {
+    if (jsonObject.find("notificationContentType") != jsonEnd &&
+        jsonObject.at("notificationContentType").is_number_integer()) {
         auto notificationContentType = jsonObject.at("notificationContentType").get<int32_t>();
         target->notificationContentType_ = static_cast<NotificationContent::Type>(notificationContentType);
     }
@@ -2022,6 +2023,11 @@ ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRe
 ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationRequest> &oldRequest) const
 {
     if (!IsCommonLiveView()) {
+        if ((oldRequest != nullptr) && oldRequest->IsCommonLiveView()) {
+            ANS_LOGE("Invalid new request param, slot type %{public}d, content type %{public}d.",
+                GetSlotType(), GetNotificationType());
+            return ERR_ANS_INVALID_PARAM;
+        }
         return ERR_OK;
     }
 
@@ -2068,8 +2074,8 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
         return;
     }
 
-    maxUpdateTime_ = oldRequest->maxUpdateTime_;
-    maxFinishTime_ = oldRequest->maxFinishTime_;
+    updateDeadLine_ = oldRequest->updateDeadLine_;
+    finishDeadLine_ = oldRequest->finishDeadLine_;
     if (autoDeletedTime_ == NotificationConstant::INVALID_AUTO_DELETE_TIME) {
         autoDeletedTime_ = oldRequest->autoDeletedTime_;
     }
@@ -2108,23 +2114,15 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     }
 }
 
-std::string NotificationRequest::GenerateNotificationRequestKey(
-    int32_t creatorUserId, int32_t creatorUid, const std::string &label, int32_t notificationId)
-{
-    const char *keySpliter = "_";
-
-    std::stringstream stream;
-    stream << KEY_PREFIX << keySpliter << creatorUserId << keySpliter <<
-        creatorUid << keySpliter<< label << keySpliter << notificationId;
-    return stream.str();
-}
-
 std::string NotificationRequest::GetKey()
 {
     const char *keySpliter = "_";
+    // reservce for distribute notification
+    const char *deviceId = "";
 
     std::stringstream stream;
-    stream << KEY_PREFIX << keySpliter << creatorUserId_ << keySpliter <<
+    stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
+        ownerBundleName_ << keySpliter << creatorUserId_ << keySpliter <<
         creatorUid_ << keySpliter << label_ << keySpliter << notificationId_;
     return stream.str();
 }

@@ -14,11 +14,17 @@
  */
 
 #include <gtest/gtest.h>
+#include <utility>
 
 #define private public
 #define protected public
+#include "ans_inner_errors.h"
+#include "notification_conversational_content.h"
+#include "notification_live_view_content.h"
+#include "notification_multiline_content.h"
 #include "notification_request.h"
-#undef private 
+#include "pixel_map.h"
+#undef private
 #undef protected
 #include "want_agent_helper.h"
 
@@ -324,7 +330,7 @@ HWTEST_F(NotificationRequestTest, SetSettingsText_0100, Level1)
     EXPECT_EQ(result, content1);
     std::string text = "text";
     notificationRequest.SetSettingsText(text);
-    
+
     std::shared_ptr<NotificationLongTextContent> longTextContent =
         std::make_shared<NotificationLongTextContent>("longtext");
     std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
@@ -468,7 +474,7 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToString_0100, Level1)
 
     nlohmann::json jsonObject;
     Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
-    
+
     notificationRequest.ConvertJsonToString(target, jsonObject);
     notificationRequest.ConvertJsonToEnum(target, jsonObject);
     notificationRequest.ConvertJsonToBool(target, jsonObject);
@@ -513,5 +519,579 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationDistributedOptions_02
     bool result1 = notificationRequest.ConvertJsonToNotificationDistributedOptions(target, jsonObject);
     EXPECT_EQ(result1, true);
 }
+
+/**
+ * @tc.name: CheckLiveViewRequest_0001
+ * @tc.desc: Check default notification request is not live view request
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequest_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    EXPECT_EQ(notificationRequest.IsCommonLiveView(), false);
 }
+
+/**
+ * @tc.name: CheckLiveViewRequest_0002
+ * @tc.desc: Check live view request pass
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequest_0002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    EXPECT_EQ(notificationRequest.IsCommonLiveView(), true);
 }
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0001
+ * @tc.desc: Default notification request no need to check live view paramter
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    EXPECT_EQ(notificationRequest.CheckNotificationRequest(nullptr), ERR_OK);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0002
+ * @tc.desc: Check pass when no old notification request
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    EXPECT_EQ(notificationRequest.CheckNotificationRequest(nullptr), ERR_OK);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0003
+ * @tc.desc: Check not pass when update without old notification request
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0003, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    ErrCode result = notificationRequest.CheckNotificationRequest(nullptr);
+    EXPECT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0004
+ * @tc.desc: Check not pass when old request not live view request
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0004, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::OTHER);
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0005
+ * @tc.desc: Check not pass when live view request end
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0005, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
+    EXPECT_EQ(result, ERR_ANS_END_NOTIFICATION);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0006
+ * @tc.desc: Check not pass when repeate create
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0006, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
+    EXPECT_EQ(result, ERR_ANS_REPEAT_CREATE);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0007
+ * @tc.desc: Check not pass when live view version invalid
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0007, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetVersion(NotificationLiveViewContent::MAX_VERSION);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    oldLiveContent->SetVersion(1);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
+    EXPECT_EQ(result, ERR_ANS_EXPIRED_NOTIFICATION);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0008
+ * @tc.desc: Check not pass when version is expired
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0008, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetVersion(1);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    oldLiveContent->SetVersion(1);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
+    EXPECT_EQ(result, ERR_ANS_EXPIRED_NOTIFICATION);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0009
+ * @tc.desc: Check pass when the version is new
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0009, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetVersion(1);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckLiveViewRequestParam_0010
+ * @tc.desc: Check pass when the old version is invalid
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0010, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetVersion(1);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    oldLiveContent->SetVersion(NotificationLiveViewContent::MAX_VERSION);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: FillMissingParameters_0001
+ * @tc.desc: Check no need to fill parameter when not live view request
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    notificationRequest.FillMissingParameters(nullptr);
+}
+
+/**
+ * @tc.name: FillMissingParameters_0002
+ * @tc.desc: Check no need to fill parameter when not exist old request
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_0002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    notificationRequest.FillMissingParameters(nullptr);
+}
+
+/**
+ * @tc.name: FillMissingParameters_0003
+ * @tc.desc: Check no need to fill param when full update
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_0003, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+
+    notificationRequest.FillMissingParameters(oldNotificationRequest);
+}
+
+/**
+ * @tc.name: FillMissingParameters_0004
+ * @tc.desc: Check update request correctly when batch update
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_0004, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldExtraInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtraInfo->SetParam(string("test"), nullptr);
+    oldLiveContent->SetExtraInfo(oldExtraInfo);
+    PictureMap pictureMap;
+    pictureMap.insert(std::make_pair(string("test"), std::vector<std::shared_ptr<Media::PixelMap>>()));
+    oldLiveContent->SetPicture(pictureMap);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+
+    notificationRequest.FillMissingParameters(oldNotificationRequest);
+    EXPECT_TRUE(liveContent->GetPicture().empty());
+    EXPECT_TRUE(liveContent->GetExtraInfo()->HasParam(string("test")));
+}
+
+/**
+ * @tc.name: GetNotificationRequestKey_0001
+ * @tc.desc: Check get key right
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetCreatorUid(0);
+    notificationRequest.SetCreatorUserId(1);
+    notificationRequest.SetLabel(string("test"));
+    notificationRequest.SetOwnerBundleName(string("push.com"));
+    auto key = notificationRequest.GetKey();
+    string expectKey {"ans_live_view__push.com_1_0_test_10"};
+    EXPECT_EQ(key, expectKey);
+}
+
+inline std::shared_ptr<Media::PixelMap> TestMakePixelMap(int32_t width, int32_t height)
+{
+    const int32_t PIXEL_BYTES = 4;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    if (pixelMap == nullptr) {
+        return nullptr;
+    }
+    Media::ImageInfo info;
+    info.size.width = width;
+    info.size.height = height;
+    info.pixelFormat = Media::PixelFormat::ARGB_8888;
+    info.colorSpace = Media::ColorSpace::SRGB;
+    pixelMap->SetImageInfo(info);
+    int32_t rowDataSize = width * PIXEL_BYTES;
+    uint32_t bufferSize = rowDataSize * height;
+    void *buffer = malloc(bufferSize);
+    if (buffer != nullptr) {
+        pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, Media::AllocatorType::HEAP_ALLOC, nullptr);
+    }
+    return pixelMap;
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0001
+ * @tc.desc: Check no need to check image size when request is default
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0002
+ * @tc.desc: Check pass when conversation request image size is small
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0002, Level1)
+{
+    const int32_t ICON_SIZE = 36;
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    MessageUser msgUser;
+    msgUser.SetPixelMap(TestMakePixelMap(ICON_SIZE, ICON_SIZE));
+    auto conversationContent = std::make_shared<NotificationConversationalContent>(msgUser);
+    conversationContent->GetMessageUser();
+    auto content = std::make_shared<NotificationContent>(conversationContent);
+    notificationRequest.SetContent(content);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0003
+ * @tc.desc: Check not pass when the pixel of picture request exceed limit
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0003, Level1)
+{
+    const int32_t ICON_SIZE = 2 * 1024;
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto pictureContent = std::make_shared<NotificationPictureContent>();
+    pictureContent->SetBigPicture(TestMakePixelMap(ICON_SIZE, ICON_SIZE));
+    auto content = std::make_shared<NotificationContent>(pictureContent);
+    notificationRequest.SetContent(content);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_ANS_PICTURE_OVER_SIZE);
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0004
+ * @tc.desc: Check not pass when live view request icon is empty
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0004, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    PictureMap pictureMap;
+    pictureMap.insert(std::make_pair(string("test"), PictureMap::mapped_type()));
+    liveViewContent->SetPicture(pictureMap);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    notificationRequest.SetContent(content);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0005
+ * @tc.desc: Check not pass when the number of live view request exceed limit
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0005, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    PictureMap pictureMap;
+    pictureMap.insert(std::make_pair(string("test"), PictureMap::mapped_type(MAX_LIVE_VIEW_ICON_NUM + 1)));
+    liveViewContent->SetPicture(pictureMap);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    notificationRequest.SetContent(content);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0006
+ * @tc.desc: Check not pass when the pixel of live view request exceed limit
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0006, Level1)
+{
+    const int32_t ICON_SIZE = 8 * 32;
+    auto pixelMap = TestMakePixelMap(ICON_SIZE, ICON_SIZE);
+    PictureMap pictureMap;
+    PictureMap::mapped_type vecPixelMap;
+    vecPixelMap.push_back(pixelMap);
+    pictureMap.insert(std::make_pair(string("test"), vecPixelMap));
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetPicture(pictureMap);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetContent(content);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_ANS_ICON_OVER_SIZE);
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0007
+ * @tc.desc: Check live view picture pass when pixel doesn't exceed limit
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0007, Level1)
+{
+    const int32_t ICON_SIZE = 3 * 32;
+    auto pixelMap = TestMakePixelMap(ICON_SIZE, ICON_SIZE);
+    PictureMap pictureMap;
+    PictureMap::mapped_type vecPixelMap;
+    vecPixelMap.push_back(pixelMap);
+    pictureMap.insert(std::make_pair(string("test"), vecPixelMap));
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetPicture(pictureMap);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetContent(content);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckImageSizeForContent_0008
+ * @tc.desc: Check pass when notification request is other types
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0008, Level1)
+{
+    auto multiLineContent = std::make_shared<NotificationMultiLineContent>();
+    auto content = std::make_shared<NotificationContent>(multiLineContent);
+
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetContent(content);
+
+    auto result = notificationRequest.CheckImageSizeForContent();
+    EXPECT_EQ(result, ERR_OK);
+}
+} // namespace Notification
+} // namespace OHOS
+

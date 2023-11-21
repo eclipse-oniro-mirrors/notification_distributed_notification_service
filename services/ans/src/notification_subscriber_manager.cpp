@@ -572,8 +572,8 @@ void NotificationSubscriberManager::UnRegisterOnSubscriberAddCallback()
     onSubscriberAddCallback_ = nullptr;
 }
 
-std::list<std::shared_ptr<NotificationSubscriberManager::SubscriberRecord>>
-    NotificationSubscriberManager::GetSubscriberRecords()
+using SubscriberRecordPtr = std::shared_ptr<NotificationSubscriberManager::SubscriberRecord>;
+std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecords()
 {
     return subscriberRecordList_;
 }

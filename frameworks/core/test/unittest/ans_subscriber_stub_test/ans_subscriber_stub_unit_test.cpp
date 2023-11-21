@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "ans_subscriber_stub.h"
+#include "ans_subscriber_proxy.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
 #undef private
@@ -26,6 +27,7 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
+#include "mock_i_remote_object.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -236,6 +238,103 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedMap04, Function | SmallTest 
     data.WriteParcelable(notificationSortingMap);
 
     ErrCode res = stub_->HandleOnConsumedMap(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+* @tc.name: HandleOnConsumedListMap01
+* @tc.desc: test notification failed
+* @tc.type: Fun
+*/
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedListMap01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    ErrCode res = stub_->HandleOnConsumedListMap(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+* @tc.name: HandleOnConsumedListMap02
+* @tc.desc: test read existMap failed
+* @tc.type: Fun
+*/
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedListMap02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<Notification> notification = new Notification();
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+
+    sptr<MockIRemoteObject> remoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, remoteObject);
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(remoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool isWriteNotificationsSucc = proxy->WriteParcelableVector(notifications, data);
+    EXPECT_EQ(isWriteNotificationsSucc, true);
+
+    ErrCode res = stub_->HandleOnConsumedListMap(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+* @tc.name: HandleOnConsumedListMap03
+* @tc.desc: test read NotificationSortingMap failed
+* @tc.type: Fun
+*/
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedListMap03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<Notification> notification = new Notification();
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+
+    sptr<MockIRemoteObject> remoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, remoteObject);
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(remoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool isWriteNotificationsSucc = proxy->WriteParcelableVector(notifications, data);
+    EXPECT_EQ(isWriteNotificationsSucc, true);
+
+    bool existMap = true;
+    data.WriteBool(existMap);
+
+    ErrCode res = stub_->HandleOnConsumedListMap(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+* @tc.name: HandleOnConsumedListMap04
+* @tc.desc: test HandleOnConsumedListMap success
+* @tc.type: Fun
+*/
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedListMap04, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<Notification> notification = new Notification();
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+
+    sptr<MockIRemoteObject> remoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, remoteObject);
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(remoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool isWriteNotificationsSucc = proxy->WriteParcelableVector(notifications, data);
+    EXPECT_EQ(isWriteNotificationsSucc, true);
+
+    bool existMap = true;
+    data.WriteBool(existMap);
+    sptr<NotificationSortingMap> notificationSortingMap = new NotificationSortingMap();
+    data.WriteParcelable(notificationSortingMap);
+
+    ErrCode res = stub_->HandleOnConsumedListMap(data, reply);
     EXPECT_EQ(res, ERR_OK);
 }
 
