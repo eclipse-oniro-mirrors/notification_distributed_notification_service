@@ -330,7 +330,7 @@ HWTEST_F(NotificationRequestTest, SetSettingsText_0100, Level1)
     EXPECT_EQ(result, content1);
     std::string text = "text";
     notificationRequest.SetSettingsText(text);
-    
+
     std::shared_ptr<NotificationLongTextContent> longTextContent =
         std::make_shared<NotificationLongTextContent>("longtext");
     std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
@@ -474,7 +474,7 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToString_0100, Level1)
 
     nlohmann::json jsonObject;
     Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
-    
+
     notificationRequest.ConvertJsonToString(target, jsonObject);
     notificationRequest.ConvertJsonToEnum(target, jsonObject);
     notificationRequest.ConvertJsonToBool(target, jsonObject);
@@ -883,19 +883,6 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0004, Level1)
 }
 
 /**
- * @tc.name: GenerateNotificationRequestKey_0001
- * @tc.desc: Check key generation
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRequestTest, GenerateNotificationRequestKey_0001, Level1)
-{
-    auto key = NotificationRequest::GenerateNotificationRequestKey(0, 1, string("test"), 1);
-    string expectKey {"ans_live_view_0_1_test_1"};
-    EXPECT_EQ(key, expectKey);
-}
-
-/**
  * @tc.name: GetNotificationRequestKey_0001
  * @tc.desc: Check get key right
  * @tc.type: FUNC
@@ -908,8 +895,9 @@ HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0001, Level1)
     notificationRequest.SetCreatorUid(0);
     notificationRequest.SetCreatorUserId(1);
     notificationRequest.SetLabel(string("test"));
+    notificationRequest.SetOwnerBundleName(string("push.com"));
     auto key = notificationRequest.GetKey();
-    string expectKey {"ans_live_view_1_0_test_10"};
+    string expectKey {"ans_live_view__push.com_1_0_test_10"};
     EXPECT_EQ(key, expectKey);
 }
 

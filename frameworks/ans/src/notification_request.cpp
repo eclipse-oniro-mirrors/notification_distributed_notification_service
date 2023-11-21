@@ -2114,23 +2114,15 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     }
 }
 
-std::string NotificationRequest::GenerateNotificationRequestKey(
-    int32_t creatorUserId, int32_t creatorUid, const std::string &label, int32_t notificationId)
-{
-    const char *keySpliter = "_";
-
-    std::stringstream stream;
-    stream << KEY_PREFIX << keySpliter << creatorUserId << keySpliter <<
-        creatorUid << keySpliter<< label << keySpliter << notificationId;
-    return stream.str();
-}
-
 std::string NotificationRequest::GetKey()
 {
     const char *keySpliter = "_";
+    // reservce for distribute notification
+    const char *deviceId = "";
 
     std::stringstream stream;
-    stream << KEY_PREFIX << keySpliter << creatorUserId_ << keySpliter <<
+    stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
+        ownerBundleName_ << keySpliter << creatorUserId_ << keySpliter <<
         creatorUid_ << keySpliter << label_ << keySpliter << notificationId_;
     return stream.str();
 }
