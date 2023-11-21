@@ -122,7 +122,7 @@ int32_t JSPushCallBack::OnCheckNotification(const std::string &notificationData)
     SetJsPropertyInt32("creatorUserId", checkInfo->GetCreatorUserId(), jsResult);
     SetJsPropertyInt32("slotType", static_cast<int32_t>(slotType), jsResult);
     SetJsPropertyString("label", checkInfo->GetLabel(), jsResult);
-    SetJsPropertyWantParams("extraInfo", checkInfo->GetExtraInfo(), jsResult);
+    SetJsPropertyWantParams("extraInfos", checkInfo->GetExtraInfo(), jsResult);
 
     napi_value funcResult;
     napi_value argv[] = { jsResult };

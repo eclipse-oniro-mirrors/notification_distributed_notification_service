@@ -570,7 +570,6 @@ void AdvancedNotificationService::CancelFinishTimer(const std::shared_ptr<Notifi
     record->request->SetFinishDeadLine(0);
     CancelAutoDeleteTimer(record->notification->GetFinishTimer());
     record->notification->SetFinishTimer(NotificationConstant::INVALID_TIMER_ID);
-    ProcForDeleteLiveView(record);
 }
 
 ErrCode AdvancedNotificationService::StartUpdateTimer(
@@ -602,7 +601,6 @@ void AdvancedNotificationService::CancelUpdateTimer(const std::shared_ptr<Notifi
     record->request->SetUpdateDeadLine(0);
     CancelAutoDeleteTimer(record->notification->GetUpdateTimer());
     record->notification->SetUpdateTimer(NotificationConstant::INVALID_TIMER_ID);
-    ProcForDeleteLiveView(record);
 }
 
 void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record)
@@ -626,7 +624,6 @@ void AdvancedNotificationService::CancelArchiveTimer(const std::shared_ptr<Notif
     record->request->SetArchiveDeadLine(0);
     CancelAutoDeleteTimer(record->notification->GetArchiveTimer());
     record->notification->SetArchiveTimer(NotificationConstant::INVALID_TIMER_ID);
-    ProcForDeleteLiveView(record);
 }
 
 ErrCode AdvancedNotificationService::FillNotificationRecord(
@@ -5558,6 +5555,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
         if (record->notification->GetKey() == hashCode) {
             UpdateRecentNotification(record->notification, true, reason);
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
+            ProcForDeleteLiveView(record);
             notificationList_.remove(record);
             break;
         }
