@@ -716,6 +716,9 @@ private:
     static inline BrokerDelegator<AnsManagerProxy> delegator_;
 
     ErrCode ReadReminders(uint8_t &count, MessageParcel &reply, std::vector<sptr<ReminderRequest>> &reminders);
+
+private:
+    std::atomic<bool> isSubscribedLocalLiveView = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

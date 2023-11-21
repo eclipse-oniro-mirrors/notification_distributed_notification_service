@@ -943,6 +943,10 @@ private:
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
         int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);
+    void AddLiveViewSubscriber();
+    void EraseLiveViewSubsciber(const std::string &bundleName);
+    bool GetLiveViewSubscribeState(const std::string &bundleName);
+    bool CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request);
     std::shared_ptr<NotificationRecord> MakeNotificationRecord(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
@@ -970,6 +974,8 @@ private:
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
+    std::set<std::string> localLiveViewSubscribedList_;
+    std::mutex liveViewMutext_;
 };
 
 /**
