@@ -4778,8 +4778,13 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
 
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
-    request->SetCreatorUserId(userId);
+    if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        request->SetCreatorUserId(userId);
+    } else {
+        userId = request->GetCreatorUserId();
+    }
+
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
