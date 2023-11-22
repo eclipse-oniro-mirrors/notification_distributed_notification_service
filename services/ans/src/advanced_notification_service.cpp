@@ -832,15 +832,16 @@ bool AdvancedNotificationService::IsNotificationExists(const std::string &key)
     return isExists;
 }
 
-ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRecord> &record)
+ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover)
 {
     ErrCode result = ERR_OK;
-
-    auto oldRecord = GetFromNotificationList(record->notification->GetKey());
-    result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
-    if (result != ERR_OK) {
-        ANS_LOGE("Notification isn't ready on publish failed with %{public}d.", result);
-        return result;
+    if (!isRecover) {
+        auto oldRecord = GetFromNotificationList(record->notification->GetKey());
+        result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
+        if (result != ERR_OK) {
+            ANS_LOGE("Notification isn't ready on publish failed with %{public}d.", result);
+            return result;
+        }
     }
 
     if (permissonFilter_ == nullptr || notificationSlotFilter_ == nullptr) {

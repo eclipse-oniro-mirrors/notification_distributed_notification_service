@@ -807,7 +807,7 @@ private:
 
     void StartFilters();
     void StopFilters();
-    ErrCode Filter(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
 
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
