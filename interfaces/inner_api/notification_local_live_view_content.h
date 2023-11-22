@@ -25,11 +25,19 @@
 #include "notification_json_convert.h"
 #include "notification_time.h"
 #include "parcel.h"
+#include <vector>
 
 namespace OHOS {
 namespace Notification {
 class NotificationLocalLiveViewContent : public NotificationBasicContent {
 public:
+    enum LiveViewContentInner {
+        CAPSULE = 1,
+        BUTTON,
+        PROGRESS,
+        TIME,
+    };
+    
     NotificationLocalLiveViewContent() = default;
     ~NotificationLocalLiveViewContent() = default;
 
@@ -100,6 +108,21 @@ public:
      */
     NotificationTime GetTime();
 
+    /*
+     * @add flag function.
+     *
+     * @param flag Indicates the flag to be added.
+     
+     */
+    void addFlag(int32_t flag);
+
+    /*
+     * @return is the given flag exist.
+     *
+     * @param flag Indicates the flag to be added.
+     */
+    bool isFlagExist(int32_t flag);
+
     /**
      * @brief Returns a string representation of the object.
      *
@@ -154,6 +177,7 @@ private:
     NotificationLocalLiveViewButton button_ {};
     NotificationProgress progress_ {};
     NotificationTime time_ {};
+    std::vector<int32_t> flags_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS
