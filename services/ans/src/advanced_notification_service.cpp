@@ -1729,6 +1729,45 @@ ErrCode AdvancedNotificationService::Subscribe(
     return errCode;
 }
 
+ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
+    ErrCode errCode = ERR_OK;
+    do {
+        if (subscriber == nullptr) {
+            errCode = ERR_ANS_INVALID_PARAM;
+            break;
+        }
+
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+            ANS_LOGE("Client is not a system app or subsystem");
+            errCode = ERR_ANS_NON_SYSTEM_APP;
+            break;
+        }
+
+        int32_t uid = IPCSkeleton().GetCallingUid();
+        // subscribeSelf doesn't need OHOS_PERMISSION_NOTIFICATION_CONTROLLER permission
+        std::string bundle;
+        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+        if (bundleManager != nullptr) {
+            bundle = bundleManager->GetBundleNameByUid(uid);
+        }
+        
+        sptrInfo->AddAppName(bundle);
+
+        errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, sptrInfo);
+        if (errCode != ERR_OK) {
+            break;
+        }
+    } while (0);
+
+    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
+    return errCode;
+}
+
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {

@@ -22,6 +22,7 @@ namespace NotificationNapi {
 using namespace OHOS::Notification;
 
 napi_value NapiSubscribe(napi_env env, napi_callback_info info);
+napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info);
 napi_value NapiUnsubscribe(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS

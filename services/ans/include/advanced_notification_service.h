@@ -430,6 +430,14 @@ public:
         const sptr<NotificationSubscribeInfo> &info) override;
 
     /**
+     * @brief Subscribes notifications self.
+     *
+     * @param subscriber Indicates the subscriber.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override;
+
+    /**
      * @brief Subscribes notifications.
      *
      * @param subscriber Indicates the subscriber.
