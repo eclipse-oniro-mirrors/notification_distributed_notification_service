@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <string>                            // for basic_string, operator+
 #include <algorithm>                         // for min
+#include <vector>
 
 #include "ans_log_wrapper.h"
 #include "nlohmann/json.hpp"                 // for json, basic_json<>::obje...
@@ -83,6 +84,21 @@ NotificationTime NotificationLocalLiveViewContent::GetTime()
     return time_;
 }
 
+void NotificationLocalLiveViewContent::addFlag(int32_t flag)
+{
+    flags_.emplace_back(flag);
+}
+
+bool NotificationLocalLiveViewContent::isFlagExist(int32_t flag)
+{
+    auto it = std::find(flags_.begin(), flags_.end(), flag);
+    if (it != flags_.end()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 std::string NotificationLocalLiveViewContent::Dump()
 {
     return "NotificationLocalLiveViewContent{ " + NotificationBasicContent::Dump() +
@@ -130,6 +146,7 @@ bool NotificationLocalLiveViewContent::ToJson(nlohmann::json &jsonObject) const
     jsonObject["button"] = buttonObj;
     jsonObject["progress"] = progressObj;
     jsonObject["time"] = timeObj;
+    jsonObject["flags"] = nlohmann::json(flags_);
 
     return true;
 }
@@ -194,6 +211,10 @@ NotificationLocalLiveViewContent *NotificationLocalLiveViewContent::FromJson(con
         }
     }
 
+    if (jsonObject.find("flags") != jsonEnd && jsonObject.at("flags").is_array()) {
+        pContent->flags_ = jsonObject.at("flags").get<std::vector<int32_t>>();
+    }
+
     return pContent;
 }
 
@@ -226,6 +247,11 @@ bool NotificationLocalLiveViewContent::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteParcelable(&time_)) {
         ANS_LOGE("Failed to write time");
+        return false;
+    }
+
+    if (!parcel.WriteInt32Vector(flags_)) {
+        ANS_LOGE("Failed to write flags");
         return false;
     }
 
@@ -290,6 +316,11 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
     time_ = *pTime;
     delete pTime;
     pTime = nullptr;
+
+    if (!parcel.ReadInt32Vector(&flags_)) {
+        ANS_LOGE("Failed to read flags");
+        return false;
+    }
 
     return true;
 }

@@ -23,6 +23,7 @@
 #include "notification_action_button.h"
 #include "notification_capsule.h"
 #include "notification_constant.h"
+#include "notification_local_live_view_content.h"
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "pixel_map_napi.h"
@@ -1019,40 +1020,48 @@ napi_value Common::SetNotificationLocalLiveViewContent(
     napi_set_named_property(env, result, "typeCode", value);
 
     // capsule: NotificationCapsule
-    napi_value capsule = nullptr;
-    napi_create_object(env, &capsule);
-    if (!SetCapsule(env, localLiveViewContent->GetCapsule(), capsule)) {
-        ANS_LOGE("SetCapsule call failed");
-        return NapiGetBoolean(env, false);
+    if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::CAPSULE)) {
+        napi_value capsule = nullptr;
+        napi_create_object(env, &capsule);
+        if (!SetCapsule(env, localLiveViewContent->GetCapsule(), capsule)) {
+            ANS_LOGE("SetCapsule call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "capsule", capsule);
     }
-    napi_set_named_property(env, result, "capsule", capsule);
 
     // button: NotificationLocalLiveViewButton
-    napi_value button = nullptr;
-    napi_create_object(env, &button);
-    if (!SetButton(env, localLiveViewContent->GetButton(), button)) {
-        ANS_LOGE("SetButton call failed");
-        return NapiGetBoolean(env, false);
+    if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::BUTTON)) {
+        napi_value button = nullptr;
+        napi_create_object(env, &button);
+        if (!SetButton(env, localLiveViewContent->GetButton(), button)) {
+            ANS_LOGE("SetButton call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "button", button);
     }
-    napi_set_named_property(env, result, "button", button);
 
     // progress: NotificationProgress
-    napi_value progress = nullptr;
-    napi_create_object(env, &progress);
-    if (!SetProgress(env, localLiveViewContent->GetProgress(), progress)) {
-        ANS_LOGE("SetProgress call failed");
-        return NapiGetBoolean(env, false);
+    if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::PROGRESS)) {
+        napi_value progress = nullptr;
+        napi_create_object(env, &progress);
+        if (!SetProgress(env, localLiveViewContent->GetProgress(), progress)) {
+            ANS_LOGE("SetProgress call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "progress", progress);
     }
-    napi_set_named_property(env, result, "progress", progress);
-
+    
     // time: NotificationTime
-    napi_value time = nullptr;
-    napi_create_object(env, &time);
-    if (!SetTime(env, localLiveViewContent->GetTime(), time)) {
-        ANS_LOGE("SetMessageUser call failed");
-        return NapiGetBoolean(env, false);
+    if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::TIME)) {
+        napi_value time = nullptr;
+        napi_create_object(env, &time);
+        if (!SetTime(env, localLiveViewContent->GetTime(), time)) {
+            ANS_LOGE("SetMessageUser call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "time", time);
     }
-    napi_set_named_property(env, result, "time", time);
 
     return NapiGetBoolean(env, true);
 }
@@ -4414,6 +4423,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
     }
 
     content->SetCapsule(capsule);
+    content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::CAPSULE);
 
     return NapiGetNull(env);
 }
@@ -4493,6 +4503,7 @@ napi_value Common::GetNotificationLocalLiveViewButton(
     }
     ANS_LOGD("button buttonIcon = %{public}s", str);
     content->SetButton(button);
+    content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::BUTTON);
 
     return NapiGetNull(env);
 }
@@ -4558,6 +4569,8 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
     }
 
     content->SetProgress(progress);
+    content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::PROGRESS);
+
     return NapiGetNull(env);
 }
 
@@ -4635,6 +4648,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
     }
 
     content->SetTime(time);
+    content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::TIME);
+
     return NapiGetNull(env);
 }
 
