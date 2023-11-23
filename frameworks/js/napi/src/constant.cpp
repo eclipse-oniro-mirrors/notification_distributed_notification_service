@@ -198,6 +198,10 @@ napi_value ContentTypeInit(napi_env env, napi_value exports)
         env, obj, (int32_t)ContentType::NOTIFICATION_CONTENT_CONVERSATION, "NOTIFICATION_CONTENT_CONVERSATION");
     SetNamedPropertyByInteger(
         env, obj, (int32_t)ContentType::NOTIFICATION_CONTENT_MULTILINE, "NOTIFICATION_CONTENT_MULTILINE");
+    SetNamedPropertyByInteger(
+        env, obj, (int32_t)ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW, "NOTIFICATION_CONTENT_SYSTEM_LIVE_VIEW");
+    SetNamedPropertyByInteger(
+        env, obj, (int32_t)ContentType::NOTIFICATION_CONTENT_LIVE_VIEW, "NOTIFICATION_CONTENT_LIVE_VIEW");
 
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("ContentType", obj),
