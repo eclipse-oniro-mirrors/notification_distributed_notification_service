@@ -835,11 +835,13 @@ bool AdvancedNotificationService::IsNotificationExists(const std::string &key)
 ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover)
 {
     ErrCode result = ERR_OK;
+
     if (!isRecover) {
         auto oldRecord = GetFromNotificationList(record->notification->GetKey());
         result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
         if (result != ERR_OK) {
-            ANS_LOGE("Notification isn't ready on publish failed with %{public}d.", result);
+            ANS_LOGE("Notification(key %{public}s) isn't ready on publish failed with %{public}d.",
+                record->notification->GetKey().c_str(), result);
             return result;
         }
     }
@@ -1755,7 +1757,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
         if (bundleManager != nullptr) {
             bundle = bundleManager->GetBundleNameByUid(uid);
         }
-        
+
         sptrInfo->AddAppName(bundle);
 
         errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, sptrInfo);

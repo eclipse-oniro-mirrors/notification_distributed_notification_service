@@ -27,6 +27,7 @@
 #include "ans_inner_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
+#include "notification_request.h"
 #include "singleton.h"
 #include "notification_subscriber.h"
 
@@ -601,6 +602,113 @@ HWTEST_F(AnsNotificationBranchTest, UnregisterPushCallback_0200, Function | Medi
     MockGetAnsManagerProxy(true);
     ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     ansNotification->UnregisterPushCallback();
+}
+
+/*
+ * @tc.name: CanPublishLiveViewContent_0100
+ * @tc.desc: CanPublishLiveViewContent
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0100, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    auto notification = std::make_shared<AnsNotification>();
+    EXPECT_TRUE(notification->CanPublishLiveViewContent(request));
+}
+
+/*
+ * @tc.name: CanPublishLiveViewContent_0110
+ * @tc.desc: CanPublishLiveViewContent
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0110, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request.SetContent(content);
+
+    auto notification = std::make_shared<AnsNotification>();
+    EXPECT_FALSE(notification->CanPublishLiveViewContent(request));
+}
+
+/*
+ * @tc.name: CanPublishLiveViewContent_0120
+ * @tc.desc: CanPublishLiveViewContent
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0120, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request.SetContent(content);
+
+    auto notification = std::make_shared<AnsNotification>();
+    EXPECT_FALSE(notification->CanPublishLiveViewContent(request));
+}
+
+/*
+ * @tc.name: CanPublishLiveViewContent_0130
+ * @tc.desc: CanPublishLiveViewContent
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0130, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request.SetContent(content);
+
+    auto notification = std::make_shared<AnsNotification>();
+    EXPECT_TRUE(notification->CanPublishLiveViewContent(request));
+}
+
+/*
+ * @tc.name: CanPublishLiveViewContent_0140
+ * @tc.desc: CanPublishLiveViewContent
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0140, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request.SetContent(content);
+    request.notificationContent_ = nullptr;
+
+    auto notification = std::make_shared<AnsNotification>();
+    EXPECT_FALSE(notification->CanPublishLiveViewContent(request));
+}
+
+/*
+ * @tc.name: CanPublishLiveViewContent_0150
+ * @tc.desc: CanPublishLiveViewContent
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0150, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    content->content_ = nullptr;
+    request.SetContent(content);
+
+    auto notification = std::make_shared<AnsNotification>();
+    EXPECT_FALSE(notification->CanPublishLiveViewContent(request));
 }
 }  // namespace Notification
 }  // namespace OHOS
