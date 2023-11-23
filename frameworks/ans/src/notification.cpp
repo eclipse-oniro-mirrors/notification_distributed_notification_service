@@ -509,7 +509,7 @@ std::string Notification::GenerateNotificationKey(
         ANS_LOGI("ownerBundleName is empty");
     }
     std::stringstream stream;
-    stream << deviceId << keySpliter << userId << keySpliter << uid << 
+    stream << deviceId << keySpliter << userId << keySpliter << uid <<
         keySpliter << label << keySpliter << id<< keySpliter << ownerBundleName;
 
     return stream.str();
