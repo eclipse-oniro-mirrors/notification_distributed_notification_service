@@ -49,7 +49,7 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
             continue;
         }
 
-        if (Filter(record) != ERR_OK) {
+        if (Filter(record, true) != ERR_OK) {
             ANS_LOGE("Filter record failed.");
             continue;
         }
