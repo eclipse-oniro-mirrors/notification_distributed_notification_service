@@ -1192,6 +1192,22 @@ ErrCode AnsManagerStub::HandleSubscribe(MessageParcel &data, MessageParcel &repl
     return ERR_OK;
 }
 
+ErrCode AnsManagerStub::HandleSubscribeSelf(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> subscriber = data.ReadRemoteObject();
+    if (subscriber == nullptr) {
+        ANS_LOGE("[HandleSubscribeSelf] fail: read subscriber failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SubscribeSelf(iface_cast<AnsSubscriberInterface>(subscriber));
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSubscribeSelf] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode AnsManagerStub::HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> subscriber = data.ReadRemoteObject();
@@ -2155,6 +2171,12 @@ ErrCode AnsManagerStub::Subscribe(const sptr<AnsSubscriberInterface> &subscriber
     const sptr<NotificationSubscribeInfo> &info)
 {
     ANS_LOGE("AnsManagerStub::Subscribe called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber)
+{
+    ANS_LOGE("AnsManagerStub::SubscribeSelf called!");
     return ERR_INVALID_OPERATION;
 }
 

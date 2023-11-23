@@ -408,6 +408,14 @@ public:
      */
     virtual ErrCode Subscribe(
         const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
+    
+    /**
+     * @brief Subscribes notifications self.
+     *
+     * @param subscriber Indicates the subscriber.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override;
 
     virtual ErrCode SubscribeLocalLiveView(
         const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
@@ -789,6 +797,7 @@ private:
     ErrCode HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleTriggerLocalLiveView(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSubscribeSelf(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)

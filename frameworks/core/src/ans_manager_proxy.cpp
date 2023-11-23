@@ -1473,7 +1473,6 @@ ErrCode AnsManagerProxy::Subscribe(const sptr<AnsSubscriberInterface> &subscribe
             return ERR_ANS_PARCELABLE_FAILED;
         }
     }
-
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION, option, data, reply);
@@ -1484,6 +1483,41 @@ ErrCode AnsManagerProxy::Subscribe(const sptr<AnsSubscriberInterface> &subscribe
 
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("[Subscribe] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber)
+{
+    if (subscriber == nullptr) {
+        ANS_LOGE("[SubscribeSelf] fail: subscriber is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[SubscribeSelf] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool ret = data.WriteRemoteObject(subscriber->AsObject());
+    if (!ret) {
+        ANS_LOGE("[SubscribeSelf] fail: write subscriber failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION_SELF, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[SubscribeSelf] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[SubscribeSelf] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

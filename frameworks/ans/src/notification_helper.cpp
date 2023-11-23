@@ -167,6 +167,11 @@ ErrCode NotificationHelper::SubscribeNotification(const NotificationSubscriber &
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber);
 }
 
+ErrCode NotificationHelper::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(subscriber);
+}
+
 ErrCode NotificationHelper::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(subscriber);

@@ -121,6 +121,97 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
     }
 }
 
+napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
+{
+    ANS_LOGI("enter");
+    napi_ref callback = nullptr;
+    SubscriberInstance *objectInfo = nullptr;
+    NotificationSubscribeInfo subscriberInfo;
+    if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
+        if (objectInfo) {
+            delete objectInfo;
+            objectInfo = nullptr;
+        }
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackInfoSubscribe *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoSubscribe {
+        .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
+    };
+    if (!asynccallbackinfo) {
+        if (objectInfo) {
+            delete objectInfo;
+            objectInfo = nullptr;
+        }
+        return Common::JSParaError(env, callback);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "subscribeNotificationSelf", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGI("NapiSubscribeSelf work excute.");
+            if (!data) {
+                ANS_LOGE("Invalid asynccallbackinfo!");
+                return;
+            }
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::SubscribeNotificationSelf(*(asynccallbackinfo->objectInfo));
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANS_LOGI("NapiSubscribeSelf work complete.");
+            if (!data) {
+                ANS_LOGE("Invalid asynccallbackinfo!");
+                return;
+            }
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
+            if (asynccallbackinfo) {
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete napiSubscribeSelf callback reference.");
+                    napi_delete_reference(env, asynccallbackinfo->info.callback);
+                }
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
+            }
+            ANS_LOGD("NapiSubscribeSelf work complete end.");
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue napiSubscribeSelf work failed return: %{public}d", status);
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiSubscribeSelf callback reference.");
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
+        ANS_LOGD("NapiSubscribeSelf callback is nullptr.");
+        return Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
+
 napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("Unsubscribe start");

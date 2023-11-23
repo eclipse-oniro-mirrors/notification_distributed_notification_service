@@ -306,6 +306,19 @@ public:
     static ErrCode SubscribeNotification(const NotificationSubscriber &subscriber);
 
     /**
+     * @brief Subscribes to notifications from the appliaction self.
+     * @note  To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     *        notification.
+     *
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns unsubscribe notification result.
+     */
+    static ErrCode SubscribeNotificationSelf(const NotificationSubscriber &subscriber);
+
+    /**
      * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only
      * by applications with required system permissions.
      * @note  After {subscribeInfo} is specified, a subscriber receives only the notifications that
