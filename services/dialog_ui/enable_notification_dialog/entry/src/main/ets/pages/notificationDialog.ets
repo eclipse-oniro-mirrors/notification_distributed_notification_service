@@ -226,6 +226,10 @@ struct PermissionDialog {
     }
   }
 
+  async aboutToDisappear(): Promise<void> {
+    await this.dialog.destroyWindow();
+  }
+
   async enableNotification(enabled: boolean): Promise<void> {
     console.info(TAG, `NotificationDialog enableNotification: ${enabled}`);
     try {
