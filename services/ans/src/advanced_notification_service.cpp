@@ -3379,42 +3379,34 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is null.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        sptr<Notification> notification = nullptr;
-        sptr<NotificationRequest> notificationRequest = nullptr;
+    sptr<Notification> notification = nullptr;
+    sptr<NotificationRequest> notificationRequest = nullptr;
 
-        for (auto record : notificationList_) {
-            if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundle->GetUid()) &&
-                (record->request->GetSlotType() == slot->GetType())) {
-                if (!record->notification->IsRemoveAllowed() || !record->request->IsCommonLiveView()) {
-                    continue;
-                }
-
-                notification = record->notification;
-                notificationRequest = record->request;
-
-                ProcForDeleteLiveView(record);
-                notificationList_.remove(record);
-
-                if (notification != nullptr) {
-                    UpdateRecentNotification(notification, true, NotificationConstant::CANCEL_REASON_DELETE);
-                    NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr,
-                        NotificationConstant::CANCEL_REASON_DELETE);
-                }
-
-                TriggerRemoveWantAgent(notificationRequest);
-                result = ERR_OK;
+    for (auto record : notificationList_) {
+        if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+            (record->bundleOption->GetUid() == bundle->GetUid()) &&
+            (record->request->GetSlotType() == slot->GetType())) {
+            if (!record->notification->IsRemoveAllowed() || !record->request->IsCommonLiveView()) {
+                continue;
             }
+
+            notification = record->notification;
+            notificationRequest = record->request;
+
+            ProcForDeleteLiveView(record);
+            notificationList_.remove(record);
+
+            if (notification != nullptr) {
+                UpdateRecentNotification(notification, true, NotificationConstant::CANCEL_REASON_DELETE);
+                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr,
+                    NotificationConstant::CANCEL_REASON_DELETE);
+            }
+
+            TriggerRemoveWantAgent(notificationRequest);
+            result = ERR_OK;
         }
-    }));
-    notificationSvrQueue_->wait(handler);
+    }
 
     return result;
 }

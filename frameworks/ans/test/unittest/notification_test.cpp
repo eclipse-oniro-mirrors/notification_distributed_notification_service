@@ -198,7 +198,7 @@ HWTEST_F(NotificationTest, GenerateNotificationKey_00001, Function | SmallTest |
     int32_t id = 30;
     sptr<NotificationRequest> request = nullptr;
     auto rrc = std::make_shared<Notification>(deviceId, request);
-    std::string result = "DeviceId_10_20_Lable_30";
+    std::string result = "DeviceId_10_20_Lable_30_";
     EXPECT_EQ(rrc->GenerateNotificationKey(deviceId, userId, uid, label, id), result);
 }
 
