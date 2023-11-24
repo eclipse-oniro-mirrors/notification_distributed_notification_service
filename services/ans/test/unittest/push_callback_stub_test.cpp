@@ -38,7 +38,8 @@ public:
     TestPushCallBackStub() = default;
     virtual ~TestPushCallBackStub()
     {};
-    int32_t OnCheckNotification(const std::string &notificationData) override
+    int32_t OnCheckNotification(
+        const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam) override
     {
         return 0;
     }
@@ -111,7 +112,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00400, Function | SmallTest 
     sptr<IRemoteObject> impl;
     PushCallBackProxy pushCallBackProxy(impl);
 
-    int ret = pushCallBackProxy.OnCheckNotification("");
+    int ret = pushCallBackProxy.OnCheckNotification("", nullptr);
     EXPECT_EQ(ret, false);
 }
 
@@ -126,7 +127,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00600, Function | SmallTest 
     PushCallBackProxy pushCallBackProxy(impl);
 
     std::string notificationData = "this is notificationData";
-    int ret = pushCallBackProxy.OnCheckNotification(notificationData);
+    int ret = pushCallBackProxy.OnCheckNotification(notificationData, nullptr);
     EXPECT_EQ(ret, false);
 }
 }  // namespace Notification

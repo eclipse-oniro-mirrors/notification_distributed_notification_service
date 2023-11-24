@@ -1955,8 +1955,8 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+    if (CheckCommonParams() != ERR_OK) {
+        ANS_LOGE("get live view by filter invalid param.");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -5349,12 +5349,21 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
     pushCallback->AddDeathRecipient(pushRecipient_);
 
     sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
-    pushCallBacks_.insert_or_assign(notificationCheckRequest->GetSlotType(), pushCallBack);
-    ANS_LOGE("insert pushCallBack, slot type %{public}d", notificationCheckRequest->GetSlotType());
-    notificationCheckRequest->SetUid(IPCSkeleton::GetCallingUid());
-    checkRequests_.insert_or_assign(notificationCheckRequest->GetSlotType(), notificationCheckRequest);
-    ANS_LOGE("insert notificationCheckRequest, slot type %{public}d, content type %{public}d",
-        notificationCheckRequest->GetSlotType(), notificationCheckRequest->GetContentType());
+    NotificationConstant::SlotType slotType = notificationCheckRequest->GetSlotType();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+
+    if (pushCallBacks_.find(slotType) != pushCallBacks_.end()) {
+        if (checkRequests_[slotType]->GetUid() != uid) {
+            return ERROR_INTERNAL_ERROR;
+        }
+    }
+
+    pushCallBacks_.insert_or_assign(slotType, pushCallBack);
+    ANS_LOGD("insert pushCallBack, slot type %{public}d", slotType);
+    notificationCheckRequest->SetUid(uid);
+    checkRequests_.insert_or_assign(slotType, notificationCheckRequest);
+    ANS_LOGD("insert notificationCheckRequest, slot type %{public}d, content type %{public}d",
+        slotType, notificationCheckRequest->GetContentType());
 
     ANS_LOGD("end");
     return ERR_OK;
@@ -5463,56 +5472,8 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     jsonObject["label"] = request->GetLabel();
     FillExtraInfoToJson(request, checkRequest, jsonObject);
 
-    ErrCode result;
-    int32_t pushCheckCode;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        pushCheckCode = pushCallBack->OnCheckNotification(jsonObject.dump());
-        result = ConvertPushCheckCodeToErrCode(pushCheckCode);
-    }));
-
-    notificationSvrQueue_->wait(handler);
+    ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), nullptr);
     return result;
-}
-
-enum PushCheckErrCode : int32_t {
-    SUCCESS = 0,
-    FIXED_PARAMETER_INVALID = 1,
-    NETWORK_UNREACHABLE = 2,
-    SPECIFIED_NOTIFICATIONS_FAILED = 3,
-    SYSTEM_ERROR = 4,
-    OPTIONAL_PARAMETER_INVALID = 5
-};
-
-ErrCode AdvancedNotificationService::ConvertPushCheckCodeToErrCode(int32_t pushCheckCode)
-{
-    ErrCode errCode;
-    PushCheckErrCode checkCode = static_cast<PushCheckErrCode>(pushCheckCode);
-
-    switch (checkCode) {
-        case PushCheckErrCode::SUCCESS:
-            errCode = ERR_OK;
-            break;
-        case PushCheckErrCode::FIXED_PARAMETER_INVALID:
-            errCode = ERR_ANS_TASK_ERR;
-            break;
-        case PushCheckErrCode::NETWORK_UNREACHABLE:
-            errCode = ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE;
-            break;
-        case PushCheckErrCode::SPECIFIED_NOTIFICATIONS_FAILED:
-            errCode = ERR_ANS_PUSH_CHECK_FAILED;
-            break;
-        case PushCheckErrCode::SYSTEM_ERROR:
-            errCode = ERR_ANS_TASK_ERR;
-            break;
-        case PushCheckErrCode::OPTIONAL_PARAMETER_INVALID:
-            errCode = ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID;
-            break;
-        default:
-            errCode = ERR_OK;
-            break;
-    }
-    return errCode;
 }
 
 uint64_t AdvancedNotificationService::StartAutoDelete(const std::string &key, int64_t deleteTimePoint, int32_t reason)

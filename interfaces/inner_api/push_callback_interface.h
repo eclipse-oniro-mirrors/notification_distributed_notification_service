@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_PUSH_CALLBACK_INTERFACE_H
 
 #include "iremote_broker.h"
+#include "push_promise_callback.h"
 
 namespace OHOS {
 namespace Notification {
@@ -33,7 +34,8 @@ public:
      * @param notificationData, notification param.
      * @return Returns push check result.
      */
-    virtual int32_t OnCheckNotification(const std::string &notificationData) = 0;
+    virtual int32_t OnCheckNotification(
+        const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

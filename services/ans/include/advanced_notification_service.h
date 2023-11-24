@@ -900,7 +900,6 @@ private:
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
         sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
-    ErrCode ConvertPushCheckCodeToErrCode(int32_t pushCheckCode);
     uint64_t StartAutoDelete(const std::string &key, int64_t deleteTimePoint, int32_t reason);
     void TriggerAutoDelete(const std::string &hashCode, int32_t reason);
     void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
