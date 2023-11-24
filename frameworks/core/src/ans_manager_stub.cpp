@@ -265,6 +265,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION,
             std::bind(&AnsManagerStub::HandleTriggerLocalLiveView, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION_SELF,
+            std::bind(&AnsManagerStub::HandleSubscribeSelf, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
