@@ -894,7 +894,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0005, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
 
