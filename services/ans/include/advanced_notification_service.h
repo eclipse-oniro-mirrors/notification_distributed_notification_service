@@ -903,6 +903,7 @@ private:
     void SendEnableNotificationSlotHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
     void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,

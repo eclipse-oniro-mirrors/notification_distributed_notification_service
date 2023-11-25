@@ -5226,22 +5226,15 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
 #endif
 }
 
-ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
+ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
+    int32_t uid, std::string &bundle)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    int32_t uid = request->GetCreatorUid();
-    if (uid <= 0) {
-        ANS_LOGE("CreatorUid[%{public}d] error", uid);
-        return ERR_ANS_INVALID_UID;
-    }
-
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         ANS_LOGE("failed to get bundleManager!");
         return ERR_ANS_INVALID_BUNDLE;
     }
-    std::string bundle = bundleManager->GetBundleNameByUid(uid);
+    bundle = bundleManager->GetBundleNameByUid(uid);
     if (!bundle.empty()) {
         if (request->GetCreatorBundleName().empty()) {
             request->SetCreatorBundleName(bundle);
@@ -5260,16 +5253,37 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
-    request->SetCreatorUserId(userId);
+    if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        request->SetCreatorUserId(userId);
+    } else {
+        userId = request->GetCreatorUserId();
+    }
+
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid, userId, bundle.c_str());
-
     ErrCode result = CheckPictureSize(request);
     if (result != ERR_OK) {
         ANS_LOGE("Failed to check picture size");
+        return result;
+    }
+    ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid, userId, bundle.c_str());
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    int32_t uid = request->GetCreatorUid();
+    if (uid <= 0) {
+        ANS_LOGE("CreatorUid[%{public}d] error", uid);
+        return ERR_ANS_INVALID_UID;
+    }
+    std::string bundle = "";
+    ErrCode result = PrePublishNotificationBySa(request, uid, bundle);
+    if (result != ERR_OK) {
         return result;
     }
 
