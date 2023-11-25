@@ -595,7 +595,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0003, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
     ErrCode result = notificationRequest.CheckNotificationRequest(nullptr);
@@ -614,7 +614,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0004, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
 
@@ -637,7 +637,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0005, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
 
@@ -691,7 +691,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0007, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     liveContent->SetVersion(NotificationLiveViewContent::MAX_VERSION);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
@@ -720,7 +720,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0008, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     liveContent->SetVersion(1);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
@@ -749,7 +749,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0009, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     liveContent->SetVersion(1);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
@@ -777,7 +777,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0010, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     liveContent->SetVersion(1);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
@@ -860,7 +860,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0004, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
 

@@ -1191,7 +1191,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279001, Function | SmallTest | Level1)
 {
     using Status = NotificationLiveViewContent::LiveViewStatus;
     auto record = std::make_shared<NotificationRecord>();
-    InitNotificationRecord(record, Status::LIVE_VIEW_BATCH_UPDATE);
+    InitNotificationRecord(record, Status::LIVE_VIEW_INCREMENTAL_UPDATE);
     record->notification->SetUpdateTimer(2);
     record->notification->SetFinishTimer(3);
     auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);

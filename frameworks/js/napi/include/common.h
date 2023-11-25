@@ -136,6 +136,14 @@ enum class NotificationFlagStatus {
     TYPE_CLOSE
 };
 
+enum class LiveViewStatus {
+    LIVE_VIEW_CREATE,
+    LIVE_VIEW_INCREMENTAL_UPDATE,
+    LIVE_VIEW_END,
+    LIVE_VIEW_FULL_UPDATE,
+    LIVE_VIEW_BUTT
+};
+
 struct NotificationSubscribeInfo {
     std::vector<std::string> bundleNames;
     int32_t userId = 0;
@@ -1649,6 +1657,15 @@ public:
     static bool SlotLevelJSToC(const SlotLevel &inLevel, NotificationSlot::NotificationLevel &outLevel);
 
     /**
+     * @brief Converts liveview status from js to native
+     *
+     * @param inType Indicates a js liveview status object
+     * @param outType Indicates a liveview status object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool LiveViewStatusJSToC(const LiveViewStatus &inType, NotificationLiveViewContent::LiveViewStatus &outType);
+
+    /**
      * @brief Converts slot level from native to js
      *
      * @param inType Indicates a js NotificationLevel object
@@ -1701,6 +1718,15 @@ public:
      * @return Returns true if success, returns false otherwise
      */
     static bool SourceTypeCToJS(const NotificationConstant::SourceType &inType, SourceType &outType);
+
+    /**
+     * @brief Converts liveview status type from native to js
+     *
+     * @param inType Indicates a native liveview status object
+     * @param outType Indicates a js liveview status object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool LiveViewStatusCToJS(const NotificationLiveViewContent::LiveViewStatus &inType, LiveViewStatus &outType);
 
     /**
      * @brief Creates a js object from specified WantAgent object

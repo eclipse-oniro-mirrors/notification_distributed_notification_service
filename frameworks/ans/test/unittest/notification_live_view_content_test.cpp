@@ -151,7 +151,7 @@ HWTEST_F(NotificationLiveViewContentTest, JsonConvert_00001, Function | SmallTes
     auto extraInfo = std::make_shared<AAFwk::WantParams>();
     rrc->SetExtraInfo(extraInfo);
 
-    rrc->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    rrc->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     rrc->SetVersion(NotificationLiveViewContent::MAX_VERSION);
     rrc->SetTitle("title");
     rrc->SetText("text");
@@ -169,7 +169,7 @@ HWTEST_F(NotificationLiveViewContentTest, JsonConvert_00001, Function | SmallTes
     EXPECT_EQ(ptr->GetTitle(), std::string("title"));
     EXPECT_EQ(ptr->GetText(), std::string("text"));
     EXPECT_EQ(ptr->GetAdditionalText(), std::string("addText"));
-    EXPECT_EQ(ptr->GetLiveViewStatus(), NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    EXPECT_EQ(ptr->GetLiveViewStatus(), NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     EXPECT_EQ(ptr->GetVersion(), NotificationLiveViewContent::MAX_VERSION);
     EXPECT_NE(ptr->GetExtraInfo(), nullptr);
     EXPECT_EQ(ptr->GetPicture().size(), 1);
