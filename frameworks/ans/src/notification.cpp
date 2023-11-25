@@ -38,7 +38,7 @@ Notification::Notification(const std::string &deviceId, const sptr<NotificationR
 {
     deviceId_ = deviceId;
     request_ = request;
-    if (request == nullptr) {
+    if (request != nullptr) {
         key_ = request->GetBaseKey(deviceId);
     }
 }

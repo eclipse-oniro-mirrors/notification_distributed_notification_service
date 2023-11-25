@@ -191,7 +191,6 @@ HWTEST_F(NotificationTest, GetRemindType_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(NotificationTest, GenerateNotificationKey_00001, Function | SmallTest | Level1)
 {
-    std::string deviceId = "DeviceId";
     int32_t userId = 10;
     int32_t uid = 20;
     std::string label = "Lable";
@@ -202,8 +201,8 @@ HWTEST_F(NotificationTest, GenerateNotificationKey_00001, Function | SmallTest |
     request->SetLabel(label);
     request->SetNotificationId(id);
     request->SetCreatorBundleName("come.test");
-    auto rrc = std::make_shared<Notification>(deviceId, request);
-    std::string result = "DeviceId_10_20_come.test_Lable_30";
+    auto rrc = std::make_shared<Notification>(request);
+    std::string result = "_10_20_come.test_Lable_30";
     EXPECT_EQ(rrc->GetKey(), result);
 }
 
