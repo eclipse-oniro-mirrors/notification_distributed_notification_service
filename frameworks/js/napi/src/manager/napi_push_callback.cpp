@@ -27,9 +27,8 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr size_t ARGC_ONE = 1;
+constexpr uint32_t ERR_INVOKE_PUSHCHECK_PROMISE = 1;
 } // namespace
-
-int32_t JSPushCallBack::checkResult_;
 
 JSPushCallBack::JSPushCallBack(napi_env env) : env_(env) {}
 
@@ -88,19 +87,57 @@ void JSPushCallBack::SetJsPropertyWantParams(
     }
 }
 
-int32_t JSPushCallBack::OnCheckNotification(const std::string &notificationData)
+void CallBackReturn(const int32_t ret, const std::weak_ptr<PushCallBackParam> pushCallBackParam)
+{
+    auto callBackParam = pushCallBackParam.lock();
+    if (callBackParam == nullptr) {
+        ANS_LOGI("Push callback param has been released");
+        return;
+    }
+
+    std::unique_lock<std::mutex> uniqueLock(callBackParam->callBackMutex);
+    callBackParam->result = ret;
+    callBackParam->ready = true;
+    callBackParam->callBackCondition.notify_all();
+}
+
+napi_value JSPushCallBack::CheckPromiseCallback(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    if (info == nullptr) {
+        ANS_LOGE("CheckPromiseCallback, invalid input info");
+        return nullptr;
+    }
+
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
+    void *data;
+
+    napi_get_cb_info(env, info, &argc, &argv[0], nullptr, &data);
+    int32_t ret = ConvertFunctionResult(env, argv[0]);
+
+    auto *callbackInfo = static_cast<PromiseCallbackInfo *>(data);
+    CallBackReturn(ret, callbackInfo->GetJsCallBackParam());
+
+    PromiseCallbackInfo::Destroy(callbackInfo);
+    callbackInfo = nullptr;
+    return nullptr;
+}
+
+int32_t JSPushCallBack::OnCheckNotification(
+    const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam)
 {
     AbilityRuntime::HandleEscape handleEscape(env_);
     if (pushCallBackObject_ == nullptr) {
-        ANS_LOGE("pushCallBackObject_ nullptr");
-        return checkResult_;
+        ANS_LOGE("pushCallBackObject is nullptr");
+        return ERR_INVALID_STATE;
     }
 
     napi_value value = nullptr;
     napi_get_reference_value(env_, pushCallBackObject_, &value);
     if (value == nullptr) {
         ANS_LOGE("Failed to get value");
-        return checkResult_;
+        return ERR_INVALID_STATE;
     }
 
     std::string pkgName;
@@ -135,48 +172,59 @@ int32_t JSPushCallBack::OnCheckNotification(const std::string &notificationData)
     napi_is_promise(env_, funcResult, &isPromise);
     if (!isPromise) {
         ANS_LOGE("Notificaiton check function is not promise.");
-        return checkResult_;
+        return ERR_INVALID_STATE;
     }
 
-    return HandleCheckPromise(funcResult);
+    HandleCheckPromise(funcResult, pushCallBackParam);
+    return ERR_OK;
 }
 
-int32_t JSPushCallBack::HandleCheckPromise(napi_value funcResult)
+void JSPushCallBack::HandleCheckPromise(
+    napi_value funcResult, const std::shared_ptr<PushCallBackParam> &pushCallBackParam)
 {
     napi_value promiseThen = nullptr;
+    napi_value promiseCatch = nullptr;
     napi_get_named_property(env_, funcResult, "then", &promiseThen);
+    napi_get_named_property(env_, funcResult, "catch", &promiseCatch);
 
     bool isCallable = false;
     napi_is_callable(env_, promiseThen, &isCallable);
     if (!isCallable) {
         ANS_LOGE("HandleCheckPromise property then is not callable.");
-        return checkResult_;
+        return;
+    }
+    napi_is_callable(env_, promiseCatch, &isCallable);
+    if (!isCallable) {
+        ANS_LOGE("HandleCheckPromise property catch is not callable.");
+        return;
     }
 
     napi_value checkPromiseCallback;
+    auto *callbackInfo = PromiseCallbackInfo::Create(pushCallBackParam);
     napi_create_function(env_, "checkPromiseCallback", strlen("checkPromiseCallback"), CheckPromiseCallback,
-        nullptr, &checkPromiseCallback);
+        callbackInfo, &checkPromiseCallback);
 
-    napi_call_function(env_, funcResult, promiseThen, ARGC_ONE, &checkPromiseCallback, nullptr);
-    return checkResult_;
-}
+    napi_status status;
+    napi_value argvPromise[ARGC_ONE] = { checkPromiseCallback };
 
-napi_value JSPushCallBack::CheckPromiseCallback(napi_env env, napi_callback_info info)
-{
-    if (info == nullptr) {
-        ANS_LOGE("CheckPromiseCallback, invalid input info.");
-        return nullptr;
+    status = napi_call_function(env_, funcResult, promiseThen, ARGC_ONE, argvPromise, nullptr);
+    if (status != napi_ok) {
+        ANS_LOGE("Invoke pushCheck promise then error.");
+        PromiseCallbackInfo::Destroy(callbackInfo);
+        return CallBackReturn(ERR_INVOKE_PUSHCHECK_PROMISE, pushCallBackParam);
     }
-    size_t argc = ARGC_ONE;
-    napi_value argv[ARGC_ONE] = {nullptr};
-    napi_get_cb_info(env, info, &argc, &argv[0], nullptr, nullptr);
-    if (!ConvertFunctionResult(env, argv[0])) {
-        ANS_LOGE("ConvertFunctionResult failed.");
-    };
-    return nullptr;
+
+    status = napi_call_function(env_, funcResult, promiseCatch, ARGC_ONE, argvPromise, nullptr);
+    if (status != napi_ok) {
+        ANS_LOGE("Invoke pushCheck promise catch error.");
+        PromiseCallbackInfo::Destroy(callbackInfo);
+        return CallBackReturn(ERR_INVOKE_PUSHCHECK_PROMISE, pushCallBackParam);
+    }
+
+    return;
 }
 
-bool JSPushCallBack::ConvertFunctionResult(napi_env env, napi_value funcResult)
+int32_t JSPushCallBack::ConvertFunctionResult(napi_env env, napi_value funcResult)
 {
     if (funcResult == nullptr) {
         ANS_LOGE("The funcResult is error.");
@@ -232,8 +280,7 @@ bool JSPushCallBack::ConvertFunctionResult(napi_env env, napi_value funcResult)
     }
 
     ANS_LOGI("code : %{public}d ,message : %{public}s", code, message.c_str());
-    checkResult_ = code;
-    return true;
+    return code;
 }
 } // namespace Notification
 } // namespace OHOS

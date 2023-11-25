@@ -36,21 +36,22 @@ class JSPushCallBack : public PushCallBackStub {
 public:
     JSPushCallBack(napi_env env);
     virtual ~JSPushCallBack();
-    int32_t OnCheckNotification(const std::string &notificationData);
+    int32_t OnCheckNotification(
+        const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam) override;
     void SetJsPushCallBackObject(napi_value pushCallBackObject);
     bool IsEqualPushCallBackObject(napi_value pushCallBackObject);
-    int32_t HandleCheckPromise(napi_value funcResult);
+    void HandleCheckPromise(
+        napi_value funcResult, const std::shared_ptr<PushCallBackParam> &pushCallBackParam);
     static napi_value CheckPromiseCallback(napi_env env, napi_callback_info info);
 
 private:
-    static bool ConvertFunctionResult(napi_env env, napi_value funcResult);
+    static int32_t ConvertFunctionResult(napi_env env, napi_value funcResult);
     void SetJsPropertyString(std::string key, std::string value, napi_value& jsResult);
     void SetJsPropertyInt32(std::string key, int32_t value, napi_value& jsResult);
     void SetJsPropertyWantParams(std::string key, std::shared_ptr<AAFwk::WantParams> wantParams, napi_value& jsResult);
     napi_env env_ = nullptr;
     napi_ref pushCallBackObject_ = nullptr;
     std::mutex mutexlock;
-    static int32_t checkResult_;
 };
 } // namespace Notification
 } // namespace OHOS
