@@ -510,6 +510,12 @@ std::string Notification::GenerateNotificationKey(
     std::string keySpliter = "_";
 
     if (request != nullptr) {
+        /**
+         * third party app: [deviceId] + userId + uid + bundleName + [label] + id
+         * push agent: [deviceId] + ownerUserId + ownerUid + ownerBundleName + [label] + id
+         * SA self: [deviceId] + userId + uid + [bundleName] + [label] + id
+         * SA send to other: [deviceId] + userId + uid + bundleName + [label] + id
+         */
         id = request->GetNotificationId();
         label = request->GetLabel();
         if (request->IsAgentNotification()) {
