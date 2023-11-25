@@ -154,7 +154,7 @@ int32_t JSPushCallBack::OnCheckNotification(
     NotificationNapi::Common::SlotTypeCToJS(
         static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType()), slotType);
     SetJsPropertyString("bundleName", checkInfo->GetPkgName(), jsResult);
-    SetJsPropertyInt32("notificationKey", checkInfo->GetNotifyId(), jsResult);
+    SetJsPropertyInt32("notificationId", checkInfo->GetNotifyId(), jsResult);
     SetJsPropertyInt32("contentType", static_cast<int32_t>(contentType), jsResult);
     SetJsPropertyInt32("creatorUserId", checkInfo->GetCreatorUserId(), jsResult);
     SetJsPropertyInt32("slotType", static_cast<int32_t>(slotType), jsResult);
