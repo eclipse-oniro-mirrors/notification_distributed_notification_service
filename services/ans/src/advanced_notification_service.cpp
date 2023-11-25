@@ -734,6 +734,11 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         ANSR_LOGE("ReminderRequest object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
+
+    if (!CheckLocalLiveViewAllowed(request)) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
     if (!CheckLocalLiveViewSubscribed(request)) {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -5768,6 +5773,21 @@ bool AdvancedNotificationService::CheckLocalLiveViewSubscribed(const sptr<Notifi
         !GetLiveViewSubscribeState(bundleOption->GetBundleName())) {
         ANS_LOGE("Not subscribe local live view.");
         return false;
+    }
+    return true;
+}
+
+bool AdvancedNotificationService::CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request)
+{
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
+        request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW) {
+            bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+            if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+                ANS_LOGE("Client is not a system app or subsystem");
+                return false;
+            } else {
+                return true;
+            }
     }
     return true;
 }
