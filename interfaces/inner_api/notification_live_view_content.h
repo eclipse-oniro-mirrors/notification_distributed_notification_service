@@ -29,7 +29,7 @@ public:
     static const uint32_t MAX_VERSION;
     enum class LiveViewStatus {
         LIVE_VIEW_CREATE,
-        LIVE_VIEW_BATCH_UPDATE,
+        LIVE_VIEW_INCREMENTAL_UPDATE,
         LIVE_VIEW_END,
         LIVE_VIEW_FULL_UPDATE,
         LIVE_VIEW_BUTT

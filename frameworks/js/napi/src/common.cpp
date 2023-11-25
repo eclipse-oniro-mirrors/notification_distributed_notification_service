@@ -1186,7 +1186,12 @@ napi_value Common::SetNotificationLiveViewContent(
     }
 
     // status: LiveViewStatus
-    napi_create_int32(env, (int32_t)(liveViewContent->GetLiveViewStatus()), &value);
+    LiveViewStatus outType = LiveViewStatus::LIVE_VIEW_BUTT;
+    if (!LiveViewStatusCToJS(liveViewContent->GetLiveViewStatus(), outType)) {
+        ANS_LOGE("Liveview status is invalid");
+        return NapiGetBoolean(env, false);
+    }
+    napi_create_int32(env, (int32_t)outType, &value);
     napi_set_named_property(env, result, "status", value);
 
     // version?: uint32_t
@@ -3634,7 +3639,12 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
         ANS_LOGE("Failed to get status from liveView content.");
         return nullptr;
     }
-    liveViewContent->SetLiveViewStatus(static_cast<NotificationLiveViewContent::LiveViewStatus>(status));
+    NotificationLiveViewContent::LiveViewStatus outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT;
+    if (!LiveViewStatusJSToC(LiveViewStatus(status), outType)) {
+        ANS_LOGE("The liveview status is not valid.");
+        return nullptr;
+    }
+    liveViewContent->SetLiveViewStatus(outType);
 
     // version?: uint32_t
     napi_value jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult,
@@ -5260,6 +5270,29 @@ bool Common::SlotLevelJSToC(const SlotLevel &inLevel, NotificationSlot::Notifica
     return true;
 }
 
+bool Common::LiveViewStatusJSToC(const LiveViewStatus &inType, NotificationLiveViewContent::LiveViewStatus &outType)
+{
+    switch (inType) {
+        case LiveViewStatus::LIVE_VIEW_CREATE:
+            outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE;
+            break;
+        case LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE:
+            outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE;
+            break;
+        case LiveViewStatus::LIVE_VIEW_END:
+            outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END;
+            break;
+        case LiveViewStatus::LIVE_VIEW_FULL_UPDATE:
+            outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
+            break;
+        default:
+            ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);
+            return false;
+    }
+
+    return true;
+}
+
 bool Common::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel)
 {
     switch (inLevel) {
@@ -5415,6 +5448,29 @@ bool Common::SourceTypeCToJS(const NotificationConstant::SourceType &inType, Sou
             ANS_LOGE("SourceType %{public}d is an invalid value", inType);
             return false;
     }
+    return true;
+}
+
+bool Common::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveViewStatus &inType, LiveViewStatus &outType)
+{
+    switch (inType) {
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE:
+            outType = LiveViewStatus::LIVE_VIEW_CREATE;
+            break;
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE:
+            outType = LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE;
+            break;
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END:
+            outType = LiveViewStatus::LIVE_VIEW_END;
+            break;
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE:
+            outType = LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
+            break;
+        default:
+            ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);
+            return false;
+    }
+
     return true;
 }
 

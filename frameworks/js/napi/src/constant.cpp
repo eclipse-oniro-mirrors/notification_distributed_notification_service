@@ -285,6 +285,27 @@ napi_value NotificationFlagTypeInit(napi_env env, napi_value exports)
     return exports;
 }
 
+napi_value LiveViewStatusInit(napi_env env, napi_value exports)
+{
+    ANS_LOGI("%{public}s, called", __func__);
+
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+
+    SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_CREATE, "LIVE_VIEW_CREATE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE,
+        "LIVE_VIEW_INCREMENTAL_UPDATE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_END, "LIVE_VIEW_END");
+    SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_FULL_UPDATE, "LIVE_VIEW_FULL_UPDATE");
+
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("LiveViewStatus", obj),
+    };
+
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
 napi_value ConstantInit(napi_env env, napi_value exports)
 {
     RemoveReasonInit(env, exports);
@@ -299,6 +320,7 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     DoNotDisturbTypeInit(env, exports);
     DeviceRemindTypeInit(env, exports);
     NotificationFlagTypeInit(env, exports);
+    LiveViewStatusInit(env, exports);
     return exports;
 }
 }  // namespace NotificationNapi
