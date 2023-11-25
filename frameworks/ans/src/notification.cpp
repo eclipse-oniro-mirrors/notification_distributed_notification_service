@@ -29,14 +29,18 @@ Notification::Notification(const sptr<NotificationRequest> &request)
         isRemoveAllowed_ = request->IsRemoveAllowed();
     }
     request_ = request;
-    key_ = GenerateNotificationKey("", request);
+    if (request != nullptr) {
+        key_ = request->GetBaseKey("");
+    }
 }
 
 Notification::Notification(const std::string &deviceId, const sptr<NotificationRequest> &request)
 {
     deviceId_ = deviceId;
     request_ = request;
-    key_ = GenerateNotificationKey(deviceId, request);
+    if (request == nullptr) {
+        key_ = request->GetBaseKey(deviceId);
+    }
 }
 
 Notification::Notification(const Notification &other)
@@ -497,43 +501,6 @@ void Notification::SetVibrationStyle(const std::vector<int64_t> &style)
 void Notification::SetRemindType(const NotificationConstant::RemindType &reminType)
 {
     remindType_ = reminType;
-}
-
-std::string Notification::GenerateNotificationKey(
-    const std::string &deviceId, const sptr<NotificationRequest> &request)
-{
-    int32_t id = 0;
-    int32_t userId = 0;
-    int32_t uid = 0;
-    std::string label;
-    std::string bundleName;
-    std::string keySpliter = "_";
-
-    if (request != nullptr) {
-        /**
-         * third party app: [deviceId] + userId + uid + bundleName + [label] + id
-         * push agent: [deviceId] + ownerUserId + ownerUid + ownerBundleName + [label] + id
-         * SA self: [deviceId] + userId + uid + [bundleName] + [label] + id
-         * SA send to other: [deviceId] + userId + uid + bundleName + [label] + id
-         */
-        id = request->GetNotificationId();
-        label = request->GetLabel();
-        if (request->IsAgentNotification()) {
-            userId = request->GetOwnerUserId();
-            uid = request->GetOwnerUid();
-            bundleName = request->GetOwnerBundleName();
-        } else {
-            userId = request->GetCreatorUserId();
-            uid = request->GetCreatorUid();
-            bundleName = request->GetCreatorBundleName();
-        }
-    }
-
-    std::stringstream stream;
-    stream << deviceId << keySpliter << userId << keySpliter << uid <<
-        keySpliter << bundleName << keySpliter << label << keySpliter << id;
-
-    return stream.str();
 }
 
 void Notification::SetRemoveAllowed(bool removeAllowed)

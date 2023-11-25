@@ -297,8 +297,6 @@ private:
     void SetSound(const Uri &sound);
     void SetVibrationStyle(const std::vector<int64_t> &style);
     void SetRemindType(const NotificationConstant::RemindType &reminType);
-    std::string GenerateNotificationKey(
-        const std::string &deviceId, const sptr<NotificationRequest> &request);
     void SetRemoveAllowed(bool removeAllowed);
     void SetSourceType(NotificationConstant::SourceType sourceType);
     bool ReadFromParcel(Parcel &parcel);

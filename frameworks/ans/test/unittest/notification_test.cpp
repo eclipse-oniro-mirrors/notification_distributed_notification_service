@@ -204,7 +204,7 @@ HWTEST_F(NotificationTest, GenerateNotificationKey_00001, Function | SmallTest |
     request->SetCreatorBundleName("come.test");
     auto rrc = std::make_shared<Notification>(deviceId, request);
     std::string result = "DeviceId_10_20_come.test_Lable_30";
-    EXPECT_EQ(rrc->GenerateNotificationKey(deviceId, request), result);
+    EXPECT_EQ(rrc->GetKey(), result);
 }
 
 /**
@@ -230,7 +230,7 @@ HWTEST_F(NotificationTest, GenerateNotificationKey_00002, Function | SmallTest |
     request->SetOwnerBundleName("come.test");
     auto rrc = std::make_shared<Notification>(deviceId, request);
     std::string result = "DeviceId_10_20_come.test_Lable_30";
-    EXPECT_EQ(rrc->GenerateNotificationKey(deviceId, request), result);
+    EXPECT_EQ(rrc->GetKey(), result);
 }
 
 /**

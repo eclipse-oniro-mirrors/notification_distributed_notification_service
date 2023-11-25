@@ -34,6 +34,9 @@
 
 namespace OHOS {
 namespace Notification {
+
+inline const std::string REQUEST_STORAGE_KEY_PREFIX {"ans_live_view"};
+
 struct NotificationKey {
     int32_t id {};
     std::string label {};
@@ -1184,15 +1187,18 @@ public:
     std::string GetKey();
 
     /**
+     * @brief Get notification request base key.
+     *
+     * @return Return the base key of notification request.
+     */
+    std::string GetBaseKey(const std::string &deviceId);
+
+    /**
      * @brief Check the image size in content.
      *
      * @return Return the check result, ERR_OK: check pass, others: not pass.
      */
     ErrCode CheckImageSizeForContent() const;
-    /**
-     * Key prefix of notification request
-     */
-    static const std::string KEY_PREFIX;
 
 private:
     /**

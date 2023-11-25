@@ -50,7 +50,6 @@ const uint32_t NotificationRequest::COLOR_MASK {0xFF000000};
 const std::size_t NotificationRequest::MAX_USER_INPUT_HISTORY {5};
 const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
-const std::string NotificationRequest::KEY_PREFIX {"ans_live_view"};
 
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
@@ -2115,22 +2114,28 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     }
 }
 
-std::string NotificationRequest::GetKey()
+std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
 {
     const char *keySpliter = "_";
-    // reservce for distribute notification
-    const char *deviceId = "";
 
     std::stringstream stream;
     if (IsAgentNotification()) {
-        stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
-            creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
-            creatorBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
+        stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
+            creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<
+            label_ << keySpliter << notificationId_;
     } else {
-        stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
-            ownerUserId_ << keySpliter << ownerUid_ << keySpliter <<
-            ownerBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
+        stream << deviceId << keySpliter << ownerUserId_ << keySpliter <<
+            ownerUid_ << keySpliter << ownerBundleName_ << keySpliter <<
+            label_ << keySpliter << notificationId_;
     }
+    return stream.str();
+}
+
+std::string NotificationRequest::GetKey()
+{
+    std::stringstream stream;
+    const char *keySpliter = "_";
+    stream << REQUEST_STORAGE_KEY_PREFIX << keySpliter << GetBaseKey("");
     return stream.str();
 }
 
