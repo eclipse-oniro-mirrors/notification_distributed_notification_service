@@ -92,7 +92,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
 
             result = SetUpdateTimer(record);
             return result;
-        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE:
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE:
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE:
             // delete old, then add new
             CancelUpdateTimer(record);
