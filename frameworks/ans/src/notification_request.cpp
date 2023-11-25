@@ -2041,6 +2041,7 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
                 GetCreatorBundleName().c_str(), GetNotificationId());
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
+
         return ERR_OK;
     }
 
@@ -2095,7 +2096,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
     if (newExtraInfo == nullptr) {
         newLiveViewContent->SetExtraInfo(oldExtraInfo);
-    } else {
+    } else if (oldExtraInfo != nullptr) {
         auto oldKeySet = oldExtraInfo->KeySet();
         for (const auto &key : oldKeySet) {
             if (!newExtraInfo->HasParam(key)) {
@@ -2121,9 +2122,15 @@ std::string NotificationRequest::GetKey()
     const char *deviceId = "";
 
     std::stringstream stream;
-    stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
-        ownerBundleName_ << keySpliter << creatorUserId_ << keySpliter <<
-        creatorUid_ << keySpliter << label_ << keySpliter << notificationId_;
+    if (IsAgentNotification()) {
+        stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
+            creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
+            creatorBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
+    } else {
+        stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
+            ownerUserId_ << keySpliter << ownerUid_ << keySpliter <<
+            ownerBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
+    }
     return stream.str();
 }
 
@@ -2221,6 +2228,5 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
             return ERR_OK;
     }
 }
-
 }  // namespace Notification
 }  // namespace OHOS

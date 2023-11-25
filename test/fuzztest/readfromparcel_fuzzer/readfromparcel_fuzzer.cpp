@@ -66,7 +66,7 @@ namespace OHOS {
         Notification::NotificationConstant::RemindType remind =
             Notification::NotificationConstant::RemindType(remindType);
         notification.SetRemindType(remind);
-        notification.GenerateNotificationKey(stringData, color, color, stringData, color);
+        notification.GenerateNotificationKey(stringData, nullptr);
         notification.SetRemoveAllowed(enabled);
         int32_t source = static_cast<int32_t>(*data % SOURCE_TYPE);
         Notification::NotificationConstant::SourceType sourceType =

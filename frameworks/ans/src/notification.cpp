@@ -29,14 +29,14 @@ Notification::Notification(const sptr<NotificationRequest> &request)
         isRemoveAllowed_ = request->IsRemoveAllowed();
     }
     request_ = request;
-    key_ = GenerateNotificationKey("", GetUserId(), GetUid(), GetLabel(), GetId());
+    key_ = GenerateNotificationKey("", request);
 }
 
 Notification::Notification(const std::string &deviceId, const sptr<NotificationRequest> &request)
 {
     deviceId_ = deviceId;
     request_ = request;
-    key_ = GenerateNotificationKey(deviceId, GetUserId(), GetUid(), GetLabel(), GetId());
+    key_ = GenerateNotificationKey(deviceId, request);
 }
 
 Notification::Notification(const Notification &other)
@@ -500,21 +500,32 @@ void Notification::SetRemindType(const NotificationConstant::RemindType &reminTy
 }
 
 std::string Notification::GenerateNotificationKey(
-    const std::string &deviceId, int32_t userId, int32_t uid, const std::string &label, int32_t id)
+    const std::string &deviceId, const sptr<NotificationRequest> &request)
 {
-    const char *keySpliter = "_";
+    int32_t id = 0;
+    int32_t userId = 0;
+    int32_t uid = 0;
+    std::string label;
+    std::string bundleName;
+    std::string keySpliter = "_";
 
-    std::string ownerBundleName = "";
-    if (request_ != nullptr) {
-        ownerBundleName = request_->GetOwnerBundleName();
-    }
-    if (ownerBundleName.empty()) {
-        ANS_LOGI("ownerBundleName is empty");
+    if (request != nullptr) {
+        id = request->GetNotificationId();
+        label = request->GetLabel();
+        if (request->IsAgentNotification()) {
+            userId = request->GetOwnerUserId();
+            uid = request->GetOwnerUid();
+            bundleName = request->GetOwnerBundleName();
+        } else {
+            userId = request->GetCreatorUserId();
+            uid = request->GetCreatorUid();
+            bundleName = request->GetCreatorBundleName();
+        }
     }
 
     std::stringstream stream;
     stream << deviceId << keySpliter << userId << keySpliter << uid <<
-        keySpliter << label << keySpliter << id<< keySpliter << ownerBundleName;
+        keySpliter << bundleName << keySpliter << label << keySpliter << id;
 
     return stream.str();
 }
@@ -583,6 +594,5 @@ uint64_t Notification::GetArchiveTimer() const
 {
     return archiveTimerId_;
 }
-
 }  // namespace Notification
 }  // namespace OHOS

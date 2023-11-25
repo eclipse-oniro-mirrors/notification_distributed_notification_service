@@ -883,6 +883,46 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0004, Level1)
 }
 
 /**
+ * @tc.name: FillMissingParameters_0005
+ * @tc.desc: Check update request correctly when old extrainfo is null
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_0005, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BATCH_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    PictureMap pictureMap;
+    pictureMap.insert(std::make_pair(string("test"), std::vector<std::shared_ptr<Media::PixelMap>>()));
+    oldLiveContent->SetPicture(pictureMap);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+
+    notificationRequest.FillMissingParameters(oldNotificationRequest);
+    EXPECT_TRUE(liveContent->GetPicture().empty());
+    EXPECT_EQ(oldLiveContent->GetExtraInfo(), nullptr);
+    EXPECT_EQ(liveContent->GetExtraInfo(), nullptr);
+
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam(string("test"), nullptr);
+    liveContent->SetExtraInfo(extraInfo);
+    notificationRequest.FillMissingParameters(oldNotificationRequest);
+    EXPECT_TRUE(liveContent->GetPicture().empty());
+    EXPECT_EQ(oldLiveContent->GetExtraInfo(), nullptr);
+    EXPECT_TRUE(liveContent->GetExtraInfo()->HasParam(string("test")));
+}
+
+/**
  * @tc.name: GetNotificationRequestKey_0001
  * @tc.desc: Check get key right
  * @tc.type: FUNC
@@ -895,9 +935,29 @@ HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0001, Level1)
     notificationRequest.SetCreatorUid(0);
     notificationRequest.SetCreatorUserId(1);
     notificationRequest.SetLabel(string("test"));
-    notificationRequest.SetOwnerBundleName(string("push.com"));
+    notificationRequest.SetCreatorBundleName(string("push.com"));
     auto key = notificationRequest.GetKey();
-    string expectKey {"ans_live_view__push.com_1_0_test_10"};
+    string expectKey {"ans_live_view__1_0_push.com_test_10"};
+    EXPECT_EQ(key, expectKey);
+}
+
+/**
+ * @tc.name: GetNotificationRequestKey_0002
+ * @tc.desc: Check get key right
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetOwnerUid(2);
+    notificationRequest.SetOwnerUserId(1);
+    notificationRequest.SetLabel(string("test"));
+    notificationRequest.SetOwnerBundleName(string("test.com"));
+    notificationRequest.SetIsAgentNotification(true);
+    auto key = notificationRequest.GetKey();
+    string expectKey {"ans_live_view__1_2_test.com_test_10"};
     EXPECT_EQ(key, expectKey);
 }
 

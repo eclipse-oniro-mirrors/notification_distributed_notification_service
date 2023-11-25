@@ -665,7 +665,7 @@ HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0130, Function | M
     NotificationRequest request;
     request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
     auto content = std::make_shared<NotificationContent>(liveViewContent);
     request.SetContent(content);
 
