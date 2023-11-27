@@ -878,7 +878,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0004, Level1)
     oldNotificationRequest->SetContent(oldContent);
 
     notificationRequest.FillMissingParameters(oldNotificationRequest);
-    EXPECT_TRUE(liveContent->GetPicture().empty());
+    EXPECT_FALSE(liveContent->GetPicture().empty());
     EXPECT_TRUE(liveContent->GetExtraInfo()->HasParam(string("test")));
 }
 
@@ -909,7 +909,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0005, Level1)
     oldNotificationRequest->SetContent(oldContent);
 
     notificationRequest.FillMissingParameters(oldNotificationRequest);
-    EXPECT_TRUE(liveContent->GetPicture().empty());
+    EXPECT_FALSE(liveContent->GetPicture().empty());
     EXPECT_EQ(oldLiveContent->GetExtraInfo(), nullptr);
     EXPECT_EQ(liveContent->GetExtraInfo(), nullptr);
 
@@ -917,7 +917,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0005, Level1)
     extraInfo->SetParam(string("test"), nullptr);
     liveContent->SetExtraInfo(extraInfo);
     notificationRequest.FillMissingParameters(oldNotificationRequest);
-    EXPECT_TRUE(liveContent->GetPicture().empty());
+    EXPECT_FALSE(liveContent->GetPicture().empty());
     EXPECT_EQ(oldLiveContent->GetExtraInfo(), nullptr);
     EXPECT_TRUE(liveContent->GetExtraInfo()->HasParam(string("test")));
 }

@@ -2106,11 +2106,16 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
 
     auto newPicture = newLiveViewContent->GetPicture();
     auto oldPicture = oldLiveViewContent->GetPicture();
+    bool isSet = false;
     for (const auto &pictureRecord : oldPicture) {
         if (newPicture.find(pictureRecord.first) != newPicture.end()) {
             continue;
         }
         newPicture[pictureRecord.first] = pictureRecord.second;
+        isSet = true;
+    }
+    if (isSet) {
+        newLiveViewContent->SetPicture(newPicture);
     }
 }
 
