@@ -5254,7 +5254,11 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        if (request->GetCreatorUid() != 0) {
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId);
+        } else {
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        }
         request->SetCreatorUserId(userId);
     } else {
         userId = request->GetCreatorUserId();
