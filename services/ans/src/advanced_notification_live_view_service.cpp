@@ -241,7 +241,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
 {
     std::unordered_map<std::string, std::string> dbRecords;
     int32_t result =
-        NotificationPreferences::GetInstance().GetBatchKvsFromDb(NotificationRequest::KEY_PREFIX, dbRecords);
+        NotificationPreferences::GetInstance().GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords);
     if (result != ERR_OK) {
         ANS_LOGE("Get batch notification request failed.");
         return result;

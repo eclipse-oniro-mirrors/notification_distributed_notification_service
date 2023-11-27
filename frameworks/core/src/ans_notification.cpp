@@ -274,6 +274,11 @@ ErrCode AnsNotification::PublishNotificationAsBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (!CanPublishLiveViewContent(request)) {
+        ANS_LOGE("Refuse to publish the notification without valid live view content.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode checkErr = CheckImageSize(request);
     if (checkErr != ERR_OK) {
         ANS_LOGE("The size of one picture overtake the limit");
@@ -864,6 +869,11 @@ ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationReq
         return checkErr;
     }
 
+    if (!CanPublishLiveViewContent(request)) {
+        ANS_LOGE("Refuse to publish the notification without valid live view content.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -1115,12 +1125,6 @@ bool AnsNotification::CanPublishLiveViewContent(const NotificationRequest &reque
     auto status = liveView->GetLiveViewStatus();
     if (status >= NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT) {
         ANS_LOGE("Invalid status %{public}u.", status);
-        return false;
-    }
-
-    auto extraInfo = liveView->GetExtraInfo();
-    if ((extraInfo == nullptr) && (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END)) {
-        ANS_LOGE("Extrainfo is empty.");
         return false;
     }
 

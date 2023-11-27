@@ -191,15 +191,45 @@ HWTEST_F(NotificationTest, GetRemindType_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(NotificationTest, GenerateNotificationKey_00001, Function | SmallTest | Level1)
 {
+    int32_t userId = 10;
+    int32_t uid = 20;
+    std::string label = "Lable";
+    int32_t id = 30;
+    sptr<NotificationRequest> request = sptr<NotificationRequest>::MakeSptr();
+    request->SetCreatorUid(uid);
+    request->SetCreatorUserId(userId);
+    request->SetLabel(label);
+    request->SetNotificationId(id);
+    request->SetCreatorBundleName("come.test");
+    auto rrc = std::make_shared<Notification>(request);
+    std::string result = "_10_20_come.test_Lable_30";
+    EXPECT_EQ(rrc->GetKey(), result);
+}
+
+/**
+ * @tc.name: GenerateNotificationKey_00002
+ * @tc.desc: Test GenerateNotificationKey parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GenerateNotificationKey_00002, Function | SmallTest | Level1)
+{
     std::string deviceId = "DeviceId";
     int32_t userId = 10;
     int32_t uid = 20;
     std::string label = "Lable";
     int32_t id = 30;
-    sptr<NotificationRequest> request = nullptr;
+    sptr<NotificationRequest> request = sptr<NotificationRequest>::MakeSptr();
+    request->SetIsAgentNotification(true);
+    request->SetOwnerUid(uid);
+    request->SetOwnerUserId(userId);
+    request->SetLabel(label);
+    request->SetNotificationId(id);
+    request->SetCreatorBundleName("come.push");
+    request->SetOwnerBundleName("come.test");
     auto rrc = std::make_shared<Notification>(deviceId, request);
-    std::string result = "DeviceId_10_20_Lable_30_";
-    EXPECT_EQ(rrc->GenerateNotificationKey(deviceId, userId, uid, label, id), result);
+    std::string result = "DeviceId_10_20_come.test_Lable_30";
+    EXPECT_EQ(rrc->GetKey(), result);
 }
 
 /**

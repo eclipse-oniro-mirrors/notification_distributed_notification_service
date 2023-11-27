@@ -29,14 +29,18 @@ Notification::Notification(const sptr<NotificationRequest> &request)
         isRemoveAllowed_ = request->IsRemoveAllowed();
     }
     request_ = request;
-    key_ = GenerateNotificationKey("", GetUserId(), GetUid(), GetLabel(), GetId());
+    if (request != nullptr) {
+        key_ = request->GetBaseKey("");
+    }
 }
 
 Notification::Notification(const std::string &deviceId, const sptr<NotificationRequest> &request)
 {
     deviceId_ = deviceId;
     request_ = request;
-    key_ = GenerateNotificationKey(deviceId, GetUserId(), GetUid(), GetLabel(), GetId());
+    if (request != nullptr) {
+        key_ = request->GetBaseKey(deviceId);
+    }
 }
 
 Notification::Notification(const Notification &other)
@@ -499,26 +503,6 @@ void Notification::SetRemindType(const NotificationConstant::RemindType &reminTy
     remindType_ = reminType;
 }
 
-std::string Notification::GenerateNotificationKey(
-    const std::string &deviceId, int32_t userId, int32_t uid, const std::string &label, int32_t id)
-{
-    const char *keySpliter = "_";
-
-    std::string ownerBundleName = "";
-    if (request_ != nullptr) {
-        ownerBundleName = request_->GetOwnerBundleName();
-    }
-    if (ownerBundleName.empty()) {
-        ANS_LOGI("ownerBundleName is empty");
-    }
-
-    std::stringstream stream;
-    stream << deviceId << keySpliter << userId << keySpliter << uid <<
-        keySpliter << label << keySpliter << id<< keySpliter << ownerBundleName;
-
-    return stream.str();
-}
-
 void Notification::SetRemoveAllowed(bool removeAllowed)
 {
     isRemoveAllowed_ = removeAllowed;
@@ -583,6 +567,5 @@ uint64_t Notification::GetArchiveTimer() const
 {
     return archiveTimerId_;
 }
-
 }  // namespace Notification
 }  // namespace OHOS

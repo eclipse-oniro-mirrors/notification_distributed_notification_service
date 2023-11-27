@@ -50,7 +50,6 @@ const uint32_t NotificationRequest::COLOR_MASK {0xFF000000};
 const std::size_t NotificationRequest::MAX_USER_INPUT_HISTORY {5};
 const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
-const std::string NotificationRequest::KEY_PREFIX {"ans_live_view"};
 
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
@@ -2041,6 +2040,7 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
                 GetCreatorBundleName().c_str(), GetNotificationId());
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
+
         return ERR_OK;
     }
 
@@ -2095,7 +2095,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
     if (newExtraInfo == nullptr) {
         newLiveViewContent->SetExtraInfo(oldExtraInfo);
-    } else {
+    } else if (oldExtraInfo != nullptr) {
         auto oldKeySet = oldExtraInfo->KeySet();
         for (const auto &key : oldKeySet) {
             if (!newExtraInfo->HasParam(key)) {
@@ -2106,24 +2106,41 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
 
     auto newPicture = newLiveViewContent->GetPicture();
     auto oldPicture = oldLiveViewContent->GetPicture();
+    bool isSet = false;
     for (const auto &pictureRecord : oldPicture) {
         if (newPicture.find(pictureRecord.first) != newPicture.end()) {
             continue;
         }
         newPicture[pictureRecord.first] = pictureRecord.second;
+        isSet = true;
     }
+    if (isSet) {
+        newLiveViewContent->SetPicture(newPicture);
+    }
+}
+
+std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
+{
+    const char *keySpliter = "_";
+
+    std::stringstream stream;
+    if (IsAgentNotification()) {
+        stream << deviceId << keySpliter << ownerUserId_ << keySpliter <<
+            ownerUid_ << keySpliter << ownerBundleName_ << keySpliter <<
+            label_ << keySpliter << notificationId_;
+    } else {
+        stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
+            creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<
+            label_ << keySpliter << notificationId_;
+    }
+    return stream.str();
 }
 
 std::string NotificationRequest::GetKey()
 {
-    const char *keySpliter = "_";
-    // reservce for distribute notification
-    const char *deviceId = "";
-
     std::stringstream stream;
-    stream << KEY_PREFIX << keySpliter << deviceId << keySpliter <<
-        ownerBundleName_ << keySpliter << creatorUserId_ << keySpliter <<
-        creatorUid_ << keySpliter << label_ << keySpliter << notificationId_;
+    const char *keySpliter = "_";
+    stream << REQUEST_STORAGE_KEY_PREFIX << keySpliter << GetBaseKey("");
     return stream.str();
 }
 
@@ -2221,6 +2238,5 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
             return ERR_OK;
     }
 }
-
 }  // namespace Notification
 }  // namespace OHOS
