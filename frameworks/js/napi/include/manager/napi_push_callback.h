@@ -24,6 +24,7 @@
 #include "parcel.h"
 #include "push_callback_stub.h"
 #include "want.h"
+#include "notification_constant.h"
 
 class NativeReference;
 
@@ -38,7 +39,7 @@ public:
     virtual ~JSPushCallBack();
     int32_t OnCheckNotification(
         const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam) override;
-    void SetJsPushCallBackObject(napi_value pushCallBackObject);
+    void SetJsPushCallBackObject(NotificationConstant::SlotType slotType, napi_value pushCallBackObject);
     bool IsEqualPushCallBackObject(napi_value pushCallBackObject);
     void HandleCheckPromise(
         napi_value funcResult, const std::shared_ptr<PushCallBackParam> &pushCallBackParam);
@@ -51,6 +52,7 @@ private:
     void SetJsPropertyWantParams(std::string key, std::shared_ptr<AAFwk::WantParams> wantParams, napi_value& jsResult);
     napi_env env_ = nullptr;
     napi_ref pushCallBackObject_ = nullptr;
+    std::map<NotificationConstant::SlotType, napi_ref> pushCallBackObjects_;
     std::mutex mutexlock;
 };
 } // namespace Notification
