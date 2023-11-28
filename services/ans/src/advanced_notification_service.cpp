@@ -3302,11 +3302,11 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
                 }
             }
             if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundle->GetUid()) &&
+                (record->bundleOption->GetUid() == bundle->GetUid())
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                record->deviceId.empty() &&
+                && record->deviceId.empty()
 #endif
-                !record->request->IsUnremovable()) {
+                ) {
                 ProcForDeleteLiveView(record);
                 removeList.push_back(record);
             }
