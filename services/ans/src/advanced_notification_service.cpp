@@ -2002,9 +2002,10 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    if (CheckCommonParams() != ERR_OK) {
+    ErrCode result = CheckCommonParams();
+    if (result != ERR_OK) {
         ANS_LOGE("get live view by filter invalid param.");
-        return ERR_ANS_INVALID_PARAM;
+        return result;
     }
 
     if (bundleOption == nullptr) {
@@ -2015,7 +2016,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 
