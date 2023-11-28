@@ -61,23 +61,17 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     size_t argc = ARGC_THREE;
     napi_value argv[ARGC_THREE] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, NULL));
+    if (argc == ARGC_TWO) {
+        ANS_LOGI("Old function param, don't need register.");
+        return undefined;
+    }
     if (argc < ARGC_THREE) {
         ANS_LOGE("The param is invalid.");
         ThrowTooFewParametersError(env);
         return undefined;
     }
 
-    napi_valuetype valueType = napi_undefined;
-    NAPI_CALL(env, napi_typeof(env, argv[INDEX_ZERO], &valueType));
-    if (valueType != napi_string) {
-        ANS_LOGE("Parse type failed");
-        ThrowError(env, ERROR_PARAM_INVALID);
-        return undefined;
-    }
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[INDEX_ZERO], str, STR_MAX_SIZE - 1, &strLen));
-    std::string type = str;
+    std::string type = AppExecFwk::UnwrapStringFromJS(env, argv[INDEX_ZERO]);
     if (type != "checkNotification") {
         ANS_LOGE("The type is not checkNotification");
         ThrowError(env, ERROR_PARAM_INVALID);
@@ -106,7 +100,11 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     }
 
     jsPushCallBack_->SetJsPushCallBackObject(argv[INDEX_TWO]);
-    NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject(), checkRequest);
+    auto result = NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject(), checkRequest);
+    if (result != ERR_OK) {
+        ANS_LOGE("Register failed, result is %{public}d", result);
+        ThrowError(env, Common::ErrorToExternal(result));
+    }
     return undefined;
 }
 
