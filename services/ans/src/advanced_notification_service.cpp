@@ -3260,8 +3260,10 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
             if (!record->notification->IsRemoveAllowed() && isAllowedNotification) {
                 continue;
             }
-            if (record->slot->GetForceControl() && record->slot->GetEnable()) {
-                continue;
+            if (record->slot != nullptr) {
+                if (record->slot->GetForceControl() && record->slot->GetEnable()) {
+                    continue;
+                }
             }
             if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundle->GetUid()) &&
@@ -5408,6 +5410,13 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     }
 
     if (request->IsCommonLiveView()) {
+        std::shared_ptr<NotificationContent> content = request->GetContent();
+        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
+        auto status = liveViewContent->GetLiveViewStatus();
+        if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
+            ANS_LOGI("Status of common live view is not create, no need to check.");
+            return false;
+        }
         ANS_LOGI("Common live view requires push check.");
         return true;
     }
