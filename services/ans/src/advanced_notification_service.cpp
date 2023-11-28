@@ -756,19 +756,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     do {
-        bool notificationEnable = false;
         if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
-            result = CheckNotificationEnableStatus(notificationEnable);
-            if (result != ERR_OK) {
-                result = ERR_ANS_INVALID_BUNDLE;
-                ANS_LOGE("Bundle notification enable not found!");
-                break;
-            }
-            if (notificationEnable) {
-                result = PublishPreparedNotificationInner(request);
-                break;
-            }
-
             if (!AccessTokenHelper::IsSystemApp()) {
                 result = ERR_ANS_NON_SYSTEM_APP;
                 break;
@@ -5643,45 +5631,6 @@ void AdvancedNotificationService::InitNotificationEnableList()
         }
     };
     notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(task) : task();
-}
-
-ErrCode AdvancedNotificationService::CheckNotificationEnableStatus(bool &notificationEnable)
-{
-    auto bundleManager = BundleManagerHelper::GetInstance();
-    if (bundleManager == nullptr) {
-        ANS_LOGE("BundleMgr is null!");
-        return ERR_INVALID_VALUE;
-    }
-
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    std::string bundleName = bundleManager->GetBundleNameByUid(uid);
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
-    if (bundleOption == nullptr) {
-        ANS_LOGE("New obj error!");
-        return ERR_INVALID_VALUE;
-    }
-    return NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, notificationEnable);
-}
-
-ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr<NotificationRequest> &request)
-{
-    if (request == nullptr) {
-        ANS_LOGE("Request obj is null!");
-        return ERR_INVALID_VALUE;
-    }
-    sptr<NotificationBundleOption> bundleOption;
-    auto result = PrepareNotificationInfo(request, bundleOption);
-    if (result != ERR_OK) {
-        return result;
-    }
-
-    if (IsNeedPushCheck(request)) {
-        result = PushCheck(request);
-        if (result != ERR_OK) {
-            return result;
-        }
-    }
-    return PublishPreparedNotification(request, bundleOption);
 }
 
 bool AdvancedNotificationService::CreateDialogManager()
