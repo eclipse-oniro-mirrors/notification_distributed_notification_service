@@ -5676,11 +5676,7 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
 
 void AdvancedNotificationService::AddLiveViewSubscriber()
 {
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return;
-    }
-    std::string bundleName = bundleOption->GetBundleName();
+    std::string bundleName = GetClientBundleName();
     std::lock_guard<std::mutex> lock(liveViewMutext_);
     localLiveViewSubscribedList_.emplace(bundleName);
 }
@@ -5702,13 +5698,9 @@ bool AdvancedNotificationService::GetLiveViewSubscribeState(const std::string &b
 
 bool AdvancedNotificationService::CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request)
 {
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return false;
-    }
     if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
         request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW &&
-        !GetLiveViewSubscribeState(bundleOption->GetBundleName())) {
+        !GetLiveViewSubscribeState(GetClientBundleName())) {
         ANS_LOGE("Not subscribe local live view.");
         return false;
     }
