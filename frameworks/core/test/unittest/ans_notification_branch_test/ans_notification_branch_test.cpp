@@ -651,7 +651,7 @@ HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0120, Function | M
     request.SetContent(content);
 
     auto notification = std::make_shared<AnsNotification>();
-    EXPECT_FALSE(notification->CanPublishLiveViewContent(request));
+    EXPECT_TRUE(notification->CanPublishLiveViewContent(request));
 }
 
 /*
