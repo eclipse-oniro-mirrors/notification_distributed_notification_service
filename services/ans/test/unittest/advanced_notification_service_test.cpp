@@ -3389,40 +3389,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22100,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_22200
- * @tc.name      : IsNeedPushCheck_0100
- * @tc.desc      : Test IsNeedPushCheck function.
- * @tc.require   : #I6Z5OV
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22200, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_0100 test start";
-
-    sptr<NotificationRequest> request = new NotificationRequest();
-    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
-
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_0100 test end";
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_22300
- * @tc.name      : IsNeedPushCheck_0200
- * @tc.desc      : Test IsNeedPushCheck function.
- * @tc.require   : #I6Z5OV
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22300, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_0200 test start";
-
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-    sptr<NotificationRequest> request = new NotificationRequest();
-
-    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
-
-    GTEST_LOG_(INFO) << "IsNeedPushCheck_0200 test end";
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_22500
  * @tc.name      : PushCheck_0100
  * @tc.desc      : Test PushCheck function.
@@ -4071,6 +4037,8 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0001, Function | S
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     sptr<NotificationRequest> request = new NotificationRequest();
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto status = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE;
+    liveViewContent->SetLiveViewStatus(status);
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -4102,6 +4070,8 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0002, Function | S
     normalContent->SetTitle("normalContent's title");
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
 
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
     sptr<NotificationCheckRequest> notificationCheckRequest = new (std::nothrow)NotificationCheckRequest();
     notificationCheckRequest->SetSlotType(NotificationConstant::SlotType::CUSTOM);
     notificationCheckRequest->SetContentType(NotificationContent::Type::BASIC_TEXT);
@@ -4131,10 +4101,6 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0003, Function | S
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0003 test start";
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
 
-    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
-    EXPECT_NE(pushCallbackProxy, nullptr);
-    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
-
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::CUSTOM);
     EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
@@ -4142,6 +4108,86 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0003, Function | S
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0003 test end";
 }
 
+/**
+ * @tc.number    : IsNeedPushCheckTest_0004
+ * @tc.name      : IsNeedPushCheckTest
+ * @tc.desc      : Test notification published by system app don't need push check.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0004, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0004 test start";
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::CUSTOM);
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
+
+    GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0004 test end";
+}
+
+/**
+ * @tc.number    : IsNeedPushCheckTest_0005
+ * @tc.name      : IsNeedPushCheckTest
+ * @tc.desc      : Test live view notification except create status don't need pushCheck.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0005, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0005 test start";
+
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto status = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE;
+    liveViewContent->SetLiveViewStatus(status);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
+
+    GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0005 test end";
+}
+
+/**
+ * @tc.number    : IsNeedPushCheckTest_0006
+ * @tc.name      : IsNeedPushCheckTest
+ * @tc.desc      : Test notification except live view registered but has inconsistent contentType dont't need push check.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0006, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0006 test start";
+
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+
+    sptr<NotificationCheckRequest> notificationCheckRequest = new (std::nothrow)NotificationCheckRequest();
+    notificationCheckRequest->SetSlotType(NotificationConstant::SlotType::CUSTOM);
+    notificationCheckRequest->SetContentType(NotificationContent::Type::PICTURE);
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(
+        notificationCheckRequest->GetSlotType(), pushCallBack);
+    advancedNotificationService_->checkRequests_.insert_or_assign(
+        notificationCheckRequest->GetSlotType(), notificationCheckRequest);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetContent(content);
+    request->SetSlotType(NotificationConstant::SlotType::CUSTOM);
+    EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+
+    GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0006 test end";
+}
 /**
  * @tc.number    : PushCheckTest_0001
  * @tc.name      : PushCheckTest

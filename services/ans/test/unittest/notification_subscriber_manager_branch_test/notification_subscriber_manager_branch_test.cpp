@@ -1397,5 +1397,36 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     EXPECT_EQ(advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled),
         ERR_ANS_NON_SYSTEM_APP);
 }
+
+/**
+ * @tc.number  : AdvancedNotificationService_06700
+ * @tc.name    : AdvancedNotificationService_06700
+ * @tc.desc    : Test GetEnabledForBundleSlotSelf function and slot == nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06700, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
+    bool enabled = true;
+
+    MockGetNotificationSlotRet(true);
+    AdvancedNotificationService advancedNotificationService;
+    EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_OK);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_06800
+ * @tc.name    : AdvancedNotificationService_06800
+ * @tc.desc    : Test GetEnabledForBundleSlotSelf function and GetNotificationSlot false 
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06800, Function | SmallTest | Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
+    bool enabled = true;
+
+    MockGetNotificationSlotRet(false);
+    AdvancedNotificationService advancedNotificationService;
+    EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS
