@@ -91,25 +91,9 @@ struct PermissionDialog {
                   Flex({ justifyContent: FlexAlign.Start }) {
                     Text() {
                       Span($r('app.string.whether_to_allow'))
-                      .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
-                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                      .fontWeight(FontWeight.Medium)
-                      .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
                       Span(this.appName)
-                      .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
-                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                      .fontWeight(FontWeight.Medium)
-                      .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
                       Span($r('app.string.quotes'))
-                      .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
-                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                      .fontWeight(FontWeight.Medium)
-                      .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
                       Span(permission.label)
-                      .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
-                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                      .fontWeight(FontWeight.Medium)
-                      .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
                     }
                     .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
@@ -126,9 +110,6 @@ struct PermissionDialog {
                   Flex({ justifyContent: FlexAlign.Start }) {
                     Text() {
                       Span(permission.reason)
-                      .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
-                      .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-                      .lineHeight(Constants.DIALOG_DESP_LINE_HEIGHT)
                     }
                     .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
                     .fontColor($r('sys.color.ohos_id_color_text_secondary'))
