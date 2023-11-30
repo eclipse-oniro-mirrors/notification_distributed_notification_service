@@ -1666,11 +1666,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12500,
     data.SetCode(DEFAULT_USER_ID);
     advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
 
-    std::stringstream key;
-    key << "_" << req->GetCreatorUserId() << "_" << req->GetCreatorUid() << "_"
-        << req->GetLabel() << "_" << req->GetNotificationId();
-
-    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
+    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(req->GetBaseKey("")), true);
 }
 
 /**
@@ -2042,11 +2038,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15500,
     data.SetCode(50);
     advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
 
-    std::stringstream key;
-    key << "_" << req->GetCreatorUserId() << "_" << req->GetCreatorUid() << "_"
-        << req->GetLabel() << "_" << req->GetNotificationId();
-
-    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
+    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(req->GetBaseKey("")), true);
 }
 
 /**
@@ -2080,11 +2072,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15600,
     data.SetCode(200);
     advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
 
-    std::stringstream key;
-    key << "_" << req->GetCreatorUserId() << "_" << req->GetCreatorUid() << "_"
-        << req->GetLabel() << "_" << req->GetNotificationId();
-
-    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(key.str()), true);
+    EXPECT_EQ(advancedNotificationService_->IsNotificationExists(req->GetBaseKey("")), true);
 }
 
 /**
