@@ -1057,5 +1057,20 @@ HWTEST_F(NotificationHelperTest, SetType_00001, Function | SmallTest | Level1)
     auto slot4 = std::make_shared<NotificationSlot>(slotType);
     EXPECT_NE(slot4, nullptr);
 }
+
+/**
+ * @tc.name: GetActiveNotificationByFilter_00001
+ * @tc.desc: Test GetActiveNotificationByFilter parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationHelperTest, GetActiveNotificationByFilter_00001, Function | SmallTest | Level1)
+{
+    LiveViewFilter filter;
+    sptr<NotificationRequest> request;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetActiveNotificationByFilter(filter, request);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
 }
 }
