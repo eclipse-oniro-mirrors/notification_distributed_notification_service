@@ -7286,5 +7286,63 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, Function | MediumTest
     int32_t result = proxy->SetBadgeNumber(badgeNumber);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
+
+/*
+ * @tc.name: GetActiveNotificationByFilterTest_0100
+ * @tc.desc: test GetActiveNotificationByFilter function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0100, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    int32_t notificationId = 0;
+    std::string label = "label";
+    std::vector<std::string> extraInfoKeys;
+
+    NotificationRequest request(1);
+    sptr<NotificationRequest> liveViewRequest = new (std::nothrow) NotificationRequest(request);
+
+    int32_t result = proxy->GetActiveNotificationByFilter(bundleOption, notificationId, label,
+        extraInfoKeys, liveViewRequest);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/*
+ * @tc.name: GetActiveNotificationByFilterTest_0200
+ * @tc.desc: test GetActiveNotificationByFilter function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0200, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    int32_t notificationId = 0;
+    std::string label = "label";
+    std::vector<std::string> extraInfoKeys;
+
+    NotificationRequest request(1);
+    sptr<NotificationRequest> liveViewRequest = new (std::nothrow) NotificationRequest(request);
+
+    int32_t result = proxy->GetActiveNotificationByFilter(bundleOption, notificationId, label,
+        extraInfoKeys, liveViewRequest);
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+}
 }  // namespace Notification
 }  // namespace OHOS

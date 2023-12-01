@@ -4220,6 +4220,31 @@ HWTEST_F(AdvancedNotificationServiceTest, PushCheckTest_0001, Function | SmallTe
     GTEST_LOG_(INFO) << "PushCheckTest_0001 test end";
 }
 
+/**
+ * @tc.number    : GetActiveNotificationByFilter_0001
+ * @tc.name      : GetActiveNotificationByFilter
+ * @tc.desc      : Test get non-existent live view notification request by filter.
+ * @tc.require   : #I6Z5OV
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetActiveNotificationByFilter_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetActiveNotificationByFilter_0001 test start";
+
+    TestAddSlot(NotificationConstant::SlotType::LIVE_VIEW);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    sptr<NotificationRequest> req;
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    int32_t notificationId = 1;
+    std::string label = "GetActiveNotificationByFilter's label";
+    std::vector<std::string> extraInfoKeys;
+
+    EXPECT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundleOption, notificationId, label,
+        extraInfoKeys, req), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+
+    GTEST_LOG_(INFO) << "GetActiveNotificationByFilter_0001 test end";
+}
+
 }  // namespace Notification
 }  // namespace OHOS
 
