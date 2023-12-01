@@ -50,6 +50,7 @@
 #include "notification_subscriber_manager.h"
 #include "notification_local_live_view_subscriber_manager.h"
 #include "os_account_manager.h"
+#include "parameters.h"
 #include "permission_filter.h"
 #include "push_callback_proxy.h"
 #include "reminder_data_manager.h"
@@ -100,6 +101,8 @@ constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
 constexpr int32_t MAIN_USER_ID = 100;
 
+const std::string NOTIFICATION_SUPPORT_CHECK_SA_PERMISSION = "notification.support.check.sa.permission";
+
 constexpr char HIDUMPER_HELP_MSG[] =
     "Usage:dump <command> [options]\n"
     "Description::\n"
@@ -136,7 +139,7 @@ std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
 std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> AdvancedNotificationService::checkRequests_;
-
+std::string AdvancedNotificationService::supportCheckSaPermission_ = "false";
 inline std::string GetClientBundleName()
 {
     std::string bundle;
@@ -358,6 +361,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 #endif
     permissonFilter_ = std::make_shared<PermissionFilter>();
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
+    supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_SUPPORT_CHECK_SA_PERMISSION, "false");
 }
 
 AdvancedNotificationService::~AdvancedNotificationService()
@@ -3739,12 +3743,12 @@ ErrCode AdvancedNotificationService::DoesSupportDoNotDisturbMode(bool &doesSuppo
 bool AdvancedNotificationService::CheckPermission(const std::string &permission)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (isSubsystem) {
-        return true;
+    if (supportCheckSaPermission_.compare("true") != 0) {
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (isSubsystem) {
+            return true;
+        }
     }
-
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool result = AccessTokenHelper::VerifyCallerPermission(tokenCaller, permission);
     if (!result) {

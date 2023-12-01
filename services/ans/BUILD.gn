@@ -104,6 +104,7 @@ ohos_shared_library("libans") {
     "ffrt:libffrt",
     "i18n:intl_util",
     "image_framework:image_native",
+    "init:libbegetutil",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",

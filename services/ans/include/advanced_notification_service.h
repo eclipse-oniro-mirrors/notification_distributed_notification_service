@@ -974,6 +974,7 @@ private:
     DistributedKv::DistributedKvDataManager dataManager_;
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
     std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
+    static std::string supportCheckSaPermission_;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;

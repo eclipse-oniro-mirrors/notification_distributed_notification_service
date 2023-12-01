@@ -73,6 +73,7 @@
         "ipc",
         "player_framework",
         "image_framework",
+        "init",
         "eventhandler",
         "c_utils",
         "i18n",
