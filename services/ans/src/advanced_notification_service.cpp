@@ -177,7 +177,11 @@ inline ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRec
     ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(record->bundleOption, slotType, slot);
     if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
         (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
-        slot = new NotificationSlot(slotType);
+        slot = new (std::nothrow) NotificationSlot(slotType);
+        if (slot == nullptr) {
+            ANS_LOGE("Failed to create NotificationSlot instance");
+            return ERR_NO_MEMORY;
+        }
         std::vector<sptr<NotificationSlot>> slots;
         slots.push_back(slot);
         result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
@@ -277,7 +281,11 @@ sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
     std::lock_guard<std::mutex> lock(instanceMutex_);
 
     if (instance_ == nullptr) {
-        instance_ = new AdvancedNotificationService();
+        instance_ = new (std::nothrow) AdvancedNotificationService();
+        if (instance_ == nullptr) {
+            ANS_LOGE("Failed to create AdvancedNotificationService instance");
+            return nullptr;
+        }
     }
     return instance_;
 }
@@ -347,7 +355,11 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
         return nullptr;
     }
     int32_t uid = IPCSkeleton::GetCallingUid();
-    bundleOption = new NotificationBundleOption(bundle, uid);
+    bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create NotificationBundleOption instance");
+        return nullptr;
+    }
     return bundleOption;
 }
 
@@ -365,7 +377,11 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
             }
             int32_t uid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
             if (uid > 0) {
-                validBundleOption = new NotificationBundleOption(bundleOption->GetBundleName(), uid);
+                validBundleOption = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), uid);
+                if (validBundleOption == nullptr) {
+                    ANS_LOGE("Failed to create NotificationBundleOption instance");
+                    return nullptr;
+                }
             }
         }
     } else {
@@ -616,7 +632,11 @@ sptr<NotificationSortingMap> AdvancedNotificationService::GenerateSortingMap()
         sortingList.push_back(sorting);
     }
 
-    sptr<NotificationSortingMap> sortingMap = new NotificationSortingMap(sortingList);
+    sptr<NotificationSortingMap> sortingMap = new (std::nothrow) NotificationSortingMap(sortingList);
+    if (sortingMap == nullptr) {
+        ANS_LOGE("Failed to create NotificationSortingMap instance");
+        return nullptr;
+    }
 
     return sortingMap;
 }
@@ -1527,8 +1547,12 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    sptr<EnabledNotificationCallbackData> bundleData =
-        new EnabledNotificationCallbackData(bundle->GetBundleName(), bundle->GetUid(), enabled);
+    sptr<EnabledNotificationCallbackData> bundleData = new (std::nothrow)
+        EnabledNotificationCallbackData(bundle->GetBundleName(), bundle->GetUid(), enabled);
+    if (bundleData == nullptr) {
+        ANS_LOGE("Failed to create EnabledNotificationCallbackData instance");
+        return ERR_NO_MEMORY;
+    }
 
     ErrCode result = ERR_OK;
     handler_->PostSyncTask(std::bind([&]() {
@@ -1711,9 +1735,10 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
     }
 
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    bundleOption = new NotificationBundleOption(std::string(), uid);
+    bundleOption = new (std::nothrow) NotificationBundleOption(std::string(), uid);
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        ANS_LOGE("Failed to create NotificationBundleOption instance");
+        return ERR_NO_MEMORY;
     }
 
     ErrCode result = PrepareContinuousTaskNotificationRequest(request, uid);
@@ -1724,10 +1749,12 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->bundleOption = bundleOption;
-    record->notification = new Notification(request);
-    if (record->notification != nullptr) {
-        record->notification->SetSourceType(NotificationConstant::SourceType::TYPE_CONTINUOUS);
+    record->notification = new (std::nothrow) Notification(request);
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create Notification instance");
+        return ERR_NO_MEMORY;
     }
+    record->notification->SetSourceType(NotificationConstant::SourceType::TYPE_CONTINUOUS);
 
     handler_->PostSyncTask(std::bind([&]() {
         if (!IsNotificationExists(record->notification->GetKey())) {
@@ -2218,7 +2245,12 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
         if ((result == ERR_OK) && (slot != nullptr)) {
             return;
         } else {
-            slot = new NotificationSlot(slotType);
+            slot = new (std::nothrow) NotificationSlot(slotType);
+            if (slot == nullptr) {
+                ANS_LOGE("Failed to create NotificationSlot instance");
+                return;
+            }
+
             std::vector<sptr<NotificationSlot>> slots;
             slots.push_back(slot);
             result = NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, slots);
@@ -2953,7 +2985,11 @@ void AdvancedNotificationService::OnDistributedPublish(
             return;
         }
         record->request = request;
-        record->notification = new Notification(deviceId, request);
+        record->notification = new (std::nothrow) Notification(deviceId, request);
+        if (record->notification == nullptr) {
+            ANS_LOGE("Failed to create Notification instance");
+            return;
+        }
         record->bundleOption = bundleOption;
         record->deviceId = deviceId;
         record->bundleName = bundleName;
@@ -3018,7 +3054,11 @@ void AdvancedNotificationService::OnDistributedUpdate(
             return;
         }
         record->request = request;
-        record->notification = new Notification(deviceId, request);
+        record->notification = new (std::nothrow) Notification(deviceId, request);
+        if (record->notification == nullptr) {
+            ANS_LOGE("Failed to create Notification instance");
+            return;
+        }
         record->bundleOption = bundleOption;
         record->deviceId = deviceId;
         record->bundleName = bundleName;
@@ -3343,11 +3383,15 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
     }
     ANS_LOGD("Before set SetDoNotDisturbDate beginDate = %{public}" PRId64 ", endDate = %{public}" PRId64,
              beginDate, endDate);
-    const sptr<NotificationDoNotDisturbDate> newConfig = new NotificationDoNotDisturbDate(
+    const sptr<NotificationDoNotDisturbDate> newConfig = new (std::nothrow) NotificationDoNotDisturbDate(
         date->GetDoNotDisturbType(),
         beginDate,
         endDate
     );
+    if (newConfig == nullptr) {
+        ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+        return ERR_NO_MEMORY;
+    }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -3379,7 +3423,12 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
                 case NotificationConstant::DoNotDisturbType::CLEARLY:
                 case NotificationConstant::DoNotDisturbType::ONCE:
                     if (now >= currentConfig->GetEndDate()) {
-                        date = new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+                        date = new (std::nothrow) NotificationDoNotDisturbDate(
+                            NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+                        if (date == nullptr) {
+                            ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                            return;
+                        }
                         NotificationPreferences::GetInstance().SetDoNotDisturbDate(userId, date);
                     } else {
                         date = currentConfig;
@@ -3917,7 +3966,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return result;
     }
 
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundle, uid);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;

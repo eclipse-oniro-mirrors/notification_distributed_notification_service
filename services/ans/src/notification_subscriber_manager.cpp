@@ -42,8 +42,11 @@ NotificationSubscriberManager::NotificationSubscriberManager()
     runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationSubscriberMgr");
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner_);
     AnsWatchdog::AddHandlerThread(handler_, runner_);
-    recipient_ =
-        new RemoteDeathRecipient(std::bind(&NotificationSubscriberManager::OnRemoteDied, this, std::placeholders::_1));
+    recipient_ = new (std::nothrow)
+        RemoteDeathRecipient(std::bind(&NotificationSubscriberManager::OnRemoteDied, this, std::placeholders::_1));
+    if (recipient_ == nullptr) {
+        ANS_LOGE("Failed to create RemoteDeathRecipient instance");
+    }
 }
 
 NotificationSubscriberManager::~NotificationSubscriberManager()

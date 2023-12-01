@@ -102,8 +102,12 @@ bool NotificationFlags::Marshalling(Parcel &parcel) const
 
 NotificationFlags *NotificationFlags::Unmarshalling(Parcel &parcel)
 {
-    auto templ = new NotificationFlags();
-    if ((templ != nullptr) && !templ->ReadFromParcel(parcel)) {
+    auto templ = new (std::nothrow) NotificationFlags();
+    if (templ == nullptr) {
+        ANS_LOGE("Failed to create NotificationFlags instance");
+        return nullptr;
+    }
+    if (!templ->ReadFromParcel(parcel)) {
         delete templ;
         templ = nullptr;
     }

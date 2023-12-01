@@ -72,8 +72,12 @@ bool NotificationTemplate::Marshalling(Parcel &parcel) const
 
 NotificationTemplate *NotificationTemplate::Unmarshalling(Parcel &parcel)
 {
-    auto templ = new NotificationTemplate();
-    if ((templ != nullptr) && !templ->ReadFromParcel(parcel)) {
+    auto templ = new (std::nothrow) NotificationTemplate();
+    if (templ == nullptr) {
+        ANS_LOGE("Failed to create NotificationTemplate instance");
+        return nullptr;
+    }
+    if (!templ->ReadFromParcel(parcel)) {
         delete templ;
         templ = nullptr;
     }
