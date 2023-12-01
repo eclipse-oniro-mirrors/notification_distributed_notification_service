@@ -122,6 +122,7 @@ ohos_unittest("ans_unit_test") {
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
     "notification_hisysevent_test.cpp",
+    "notification_local_live_view_subscriber_manager_test.cpp",
     "notification_preferences_database_test.cpp",
     "notification_slot_filter_test.cpp",
     "notification_subscriber_manager_test.cpp",
