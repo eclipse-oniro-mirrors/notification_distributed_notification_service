@@ -235,6 +235,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (request == nullptr) {
+        ANSR_LOGE("NotificationRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     if (request->IsAgentNotification()) {
         if (!IsSystemApp()) {
             return ERR_ANS_NON_SYSTEM_APP;
