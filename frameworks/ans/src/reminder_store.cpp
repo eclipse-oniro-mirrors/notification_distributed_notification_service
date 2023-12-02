@@ -69,7 +69,7 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
     return NativeRdb::E_OK;
 }
 
-int32_t ReminderStore::Init()
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
 {
     ANSR_LOGD("Reminder store init.");
     int32_t errCode(STATE_FAIL);
@@ -103,7 +103,7 @@ int32_t ReminderStore::Init()
     return ReminderStore::InitData();
 }
 
-int32_t ReminderStore::InitData()
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::InitData()
 {
     ANSR_LOGD("Reminder data init.");
     if (rdbStore_ == nullptr) {
@@ -151,7 +151,7 @@ int32_t ReminderStore::InitData()
     return ReminderStore::STATE_OK;
 }
 
-int32_t ReminderStore::Delete(int32_t reminderId)
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(int32_t reminderId)
 {
     std::string deleteCondition = ReminderTable ::REMINDER_ID
         + " = " + std::to_string(reminderId);
@@ -164,14 +164,14 @@ int32_t ReminderStore::DeleteUser(int32_t userId)
     return ReminderStore::Delete(deleteCondition);
 }
 
-int32_t ReminderStore::Delete(const std::string &pkg, int32_t userId)
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string &pkg, int32_t userId)
 {
     std::string deleteCondition = ReminderTable::PKG_NAME + " = \"" + pkg + "\" and "
         + ReminderTable::USER_ID + " = " + std::to_string(userId);
     return ReminderStore::Delete(deleteCondition);
 }
 
-int32_t ReminderStore::Delete(const std::string &deleteCondition)
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string &deleteCondition)
 {
     if (rdbStore_ == nullptr) {
         ANSR_LOGE("Rdb store is not initialized.");
@@ -315,7 +315,7 @@ int32_t ReminderStore::GetMaxId()
     return maxId;
 }
 
-std::vector<sptr<ReminderRequest>> ReminderStore::GetAllValidReminders()
+__attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderStore::GetAllValidReminders()
 {
     std::string sql = "select " + g_sqlColumns + " from " + REMINDER_DB_TABLE + " where "
         + ReminderTable::IS_EXPIRED + " = 'false' order by "
