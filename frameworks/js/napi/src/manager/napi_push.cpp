@@ -98,8 +98,8 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
             return undefined;
         }
     }
-
-    jsPushCallBack_->SetJsPushCallBackObject(argv[INDEX_TWO]);
+    NotificationConstant::SlotType outSlotType = checkRequest->GetSlotType();
+    jsPushCallBack_->SetJsPushCallBackObject(outSlotType, argv[INDEX_TWO]);
     auto result = NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject(), checkRequest);
     if (result != ERR_OK) {
         ANS_LOGE("Register failed, result is %{public}d", result);

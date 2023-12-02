@@ -5529,7 +5529,9 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     jsonObject["creatorUserId"] = request->GetCreatorUserId();
     jsonObject["slotType"] = static_cast<int32_t>(request->GetSlotType());
     jsonObject["label"] = request->GetLabel();
-    FillExtraInfoToJson(request, checkRequest, jsonObject);
+    if (request->IsCommonLiveView()) {
+        FillExtraInfoToJson(request, checkRequest, jsonObject);
+    }
 
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), nullptr);
     return result;

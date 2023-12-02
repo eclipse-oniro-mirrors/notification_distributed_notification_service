@@ -34,9 +34,11 @@ JSPushCallBack::JSPushCallBack(napi_env env) : env_(env) {}
 
 JSPushCallBack::~JSPushCallBack() {}
 
-void JSPushCallBack::SetJsPushCallBackObject(napi_value pushCallBackObject)
+void JSPushCallBack::SetJsPushCallBackObject(NotificationConstant::SlotType slotType, napi_value pushCallBackObject)
 {
-    napi_create_reference(env_, pushCallBackObject, 1, &pushCallBackObject_);
+    napi_ref pushCheckObject;
+    napi_create_reference(env_, pushCallBackObject, 1, &pushCheckObject);
+    pushCallBackObjects_.insert_or_assign(slotType, pushCheckObject);
 }
 
 bool JSPushCallBack::IsEqualPushCallBackObject(napi_value pushCallBackObject)
@@ -128,22 +130,23 @@ int32_t JSPushCallBack::OnCheckNotification(
     const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam)
 {
     AbilityRuntime::HandleEscape handleEscape(env_);
-    if (pushCallBackObject_ == nullptr) {
-        ANS_LOGE("pushCallBackObject is nullptr");
-        return ERR_INVALID_STATE;
-    }
-
-    napi_value value = nullptr;
-    napi_get_reference_value(env_, pushCallBackObject_, &value);
-    if (value == nullptr) {
-        ANS_LOGE("Failed to get value");
-        return ERR_INVALID_STATE;
-    }
 
     std::string pkgName;
     auto checkInfo = new (std::nothrow) NotificationCheckInfo {};
     checkInfo->ConvertJsonStringToValue(notificationData);
 
+    NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
+    if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
+        ANS_LOGE("pushCallBackObjects is nullptr");
+        return ERR_INVALID_STATE;
+    }
+
+    napi_value checkFunc = nullptr;
+    napi_get_reference_value(env_, pushCallBackObjects_[outSlotType], &checkFunc);
+    if (checkFunc == nullptr) {
+        ANS_LOGE("Failed to get checkFunc value");
+        return ERR_INVALID_STATE;
+    }
     napi_value jsResult = nullptr;
     napi_create_object(env_, &jsResult);
 
@@ -165,7 +168,7 @@ int32_t JSPushCallBack::OnCheckNotification(
     napi_value argv[] = { jsResult };
 
     napi_value resultOut = nullptr;
-    napi_call_function(env_, value, value, ARGC_ONE, &argv[0], &resultOut);
+    napi_call_function(env_, nullptr, checkFunc, ARGC_ONE, &argv[0], &resultOut);
     funcResult = handleEscape.Escape(resultOut);
 
     bool isPromise = false;
