@@ -91,7 +91,7 @@ napi_value Common::SetNotificationByDistributedOptions(
     if (!DeviceRemindTypeCToJS(notification->GetRemindType(), outType)) {
         return NapiGetBoolean(env, false);
     }
-    napi_create_int32(env, (int32_t)outType, &value);
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
     napi_set_named_property(env, result, "remindType", value);
 
     return NapiGetBoolean(env, true);
@@ -169,7 +169,7 @@ napi_value Common::SetNotification(
     if (!SourceTypeCToJS(notification->GetSourceType(), sourceType)) {
         return NapiGetBoolean(env, false);
     }
-    napi_create_int32(env, (int32_t)sourceType, &value);
+    napi_create_int32(env, static_cast<int32_t>(sourceType), &value);
     napi_set_named_property(env, result, "source", value);
 
     // readonly deviceId?: string
@@ -235,7 +235,7 @@ napi_value Common::SetNotificationRequestByNumber(
     if (!SlotTypeCToJS(request->GetSlotType(), outType)) {
         return NapiGetBoolean(env, false);
     }
-    napi_create_int32(env, (int32_t)outType, &value);
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
     napi_set_named_property(env, result, "slotType", value);
     napi_set_named_property(env, result, "notificationSlotType", value);
 
@@ -629,7 +629,7 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     if (!SlotTypeCToJS(slot.GetType(), outType)) {
         return NapiGetBoolean(env, false);
     }
-    napi_create_int32(env, (int32_t)outType, &value);
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
     napi_set_named_property(env, result, "type", value);
     napi_set_named_property(env, result, "notificationType", value);
 
@@ -638,7 +638,7 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     if (!SlotLevelCToJS(slot.GetLevel(), outLevel)) {
         return NapiGetBoolean(env, false);
     }
-    napi_create_int32(env, (int32_t)outLevel, &value);
+    napi_create_int32(env, static_cast<int32_t>(outLevel), &value);
     napi_set_named_property(env, result, "level", value);
 
     // desc?: string
@@ -654,7 +654,7 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     napi_set_named_property(env, result, "bypassDnd", value);
 
     // lockscreenVisibility?: number
-    int32_t lockScreenVisibleness = (int32_t)slot.GetLockScreenVisibleness();
+    int32_t lockScreenVisibleness = static_cast<int32_t>(slot.GetLockScreenVisibleness());
     napi_create_int32(env, lockScreenVisibleness, &value);
     napi_set_named_property(env, result, "lockscreenVisibility", value);
 
@@ -783,7 +783,7 @@ napi_value Common::SetNotificationContent(
     if (!ContentTypeCToJS(type, outType)) {
         return NapiGetBoolean(env, false);
     }
-    napi_create_int32(env, (int32_t)outType, &value);
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
     napi_set_named_property(env, result, "contentType", value);
     napi_set_named_property(env, result, "notificationContentType", value);
 
@@ -1051,7 +1051,7 @@ napi_value Common::SetNotificationLocalLiveViewContent(
         }
         napi_set_named_property(env, result, "progress", progress);
     }
-    
+
     // time: NotificationTime
     if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::TIME)) {
         napi_value time = nullptr;
@@ -1200,11 +1200,11 @@ napi_value Common::SetNotificationLiveViewContent(
         ANS_LOGE("Liveview status is invalid");
         return NapiGetBoolean(env, false);
     }
-    napi_create_int32(env, (int32_t)outType, &value);
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
     napi_set_named_property(env, result, "status", value);
 
     // version?: uint32_t
-    napi_create_uint32(env, liveViewContent->GetVersion(), &value);
+    napi_create_int32(env, static_cast<int32_t>(liveViewContent->GetVersion()), &value);
     napi_set_named_property(env, result, "version", value);
 
     // extraInfo?: {[key:string] : any}
@@ -1514,7 +1514,7 @@ napi_value Common::SetDoNotDisturbDate(
 
     // type:DoNotDisturbType
     napi_value typeNapi = nullptr;
-    napi_create_int32(env, (int32_t)outType, &typeNapi);
+    napi_create_int32(env, static_cast<int32_t>(outType), &typeNapi);
     napi_set_named_property(env, result, "type", typeNapi);
 
     // begin:Date
@@ -3659,8 +3659,8 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
     napi_value jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult,
         "version", napi_number);
     if (jsValue != nullptr) {
-        uint32_t version = NotificationLiveViewContent::MAX_VERSION;
-        NAPI_CALL(env, napi_get_value_uint32(env, jsValue, &version));
+        int32_t version = NotificationLiveViewContent::MAX_VERSION;
+        NAPI_CALL(env, napi_get_value_int32(env, jsValue, &version));
         liveViewContent->SetVersion(version);
     }
 
