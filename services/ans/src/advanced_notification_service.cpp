@@ -645,6 +645,10 @@ void AdvancedNotificationService::CancelUpdateTimer(const std::shared_ptr<Notifi
 void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record)
 {
     auto deleteTime = record->request->GetAutoDeletedTime();
+    if (deleteTime == NotificationConstant::NO_DELAY_DELETE_TIME) {
+        TriggerAutoDelete(record->notification->GetKey(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+        return;
+    }
     if (deleteTime <= NotificationConstant::INVALID_AUTO_DELETE_TIME) {
         deleteTime = NotificationConstant::DEFAULT_AUTO_DELETE_TIME;
     }
@@ -751,9 +755,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
             DoDistributedPublish(bundleOption, record);
         }
 #endif
-        UpdateNotificationTimerInfo(record);
         NotificationRequestDb requestDb = { .request = record->request, .bundleOption = bundleOption};
         result = SetNotificationRequestToDb(requestDb);
+        UpdateNotificationTimerInfo(record);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
@@ -2023,16 +2027,42 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNo
     return nullptr;
 }
 
+ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
+    const std::shared_ptr<NotificationRecord> &record)
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
+        if (CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            return ERR_OK;
+        }
+
+        ANS_LOGD("Get live view by filter failed because check permission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    std::string bundle = GetClientBundleName();
+    if (bundle.empty()) {
+        ANS_LOGD("Get live view by filter failed because bundle name is empty.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    if (uid == record->bundleOption->GetUid() && bundle == record->bundleOption->GetBundleName()) {
+        return ERR_OK;
+    }
+
+    ANS_LOGD("Get live view by filter failed because no permission.");
+    return ERR_ANS_PERMISSION_DENIED;
+}
+
 ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
     const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    ErrCode result = CheckCommonParams();
-    if (result != ERR_OK) {
-        ANS_LOGE("get live view by filter invalid param.");
-        return result;
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidity.");
+        return ERR_ANS_INVALID_PARAM;
     }
 
     if (bundleOption == nullptr) {
@@ -2043,7 +2073,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 
@@ -2051,7 +2081,11 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
             return;
         }
-        result = ERR_OK;
+        result = IsAllowedGetNotificationByFilter(record);
+        if (result != ERR_OK) {
+            return;
+        }
+
         if (extraInfoKeys.empty()) {
             // return all liveViewExtraInfo because no extraInfoKeys
             request = record->request;
