@@ -75,6 +75,8 @@ ohos_shared_library("libans") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
+    "../ans:ans.para",
+    "../ans:ans.para.dac",
     "//third_party/icu/icu4c:shared_icuuc",
   ]
 
@@ -138,6 +140,20 @@ ohos_shared_library("libans") {
     defines += [ "HITRACE_METER_ENABLE" ]
   }
 
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_prebuilt_etc("ans.para") {
+  source = "etc/ans.para"
+  relative_install_dir = "param"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_prebuilt_etc("ans.para.dac") {
+  source = "etc/ans.para.dac"
+  relative_install_dir = "param"
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

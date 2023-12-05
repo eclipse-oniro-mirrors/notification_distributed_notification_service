@@ -101,7 +101,7 @@ constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
 constexpr int32_t MAIN_USER_ID = 100;
 
-const std::string NOTIFICATION_SUPPORT_CHECK_SA_PERMISSION = "notification.support.check.sa.permission";
+const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
 
 constexpr char HIDUMPER_HELP_MSG[] =
     "Usage:dump <command> [options]\n"
@@ -396,7 +396,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 #endif
     permissonFilter_ = std::make_shared<PermissionFilter>();
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
-    supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_SUPPORT_CHECK_SA_PERMISSION, "false");
+    supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_ANS_CHECK_SA_PERMISSION, "false");
 }
 
 AdvancedNotificationService::~AdvancedNotificationService()
