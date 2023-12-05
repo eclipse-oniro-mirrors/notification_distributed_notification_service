@@ -149,8 +149,10 @@ napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &in
     // argv[0] : notificationSlot
     // slotType
     const char* propertyKey = "type";
+    const char* propertyNewKey = "notificationType";
     int32_t propertyVal = 0;
-    if (!ReminderCommon::GetInt32(env, argv[0], propertyKey, propertyVal, false)) {
+    if (!ReminderCommon::GetInt32(env, argv[0], propertyKey, propertyVal, false) &&
+        !ReminderCommon::GetInt32(env, argv[0], propertyNewKey, propertyVal, false)) {
         ANSR_LOGW("Failed to get valid slot type.");
         params.errCode = ERR_REMINDER_INVALID_PARAM;
         if (isThrow) {
