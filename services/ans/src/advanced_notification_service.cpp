@@ -227,6 +227,39 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
     return ERR_OK;
 }
 
+void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    NotificationConstant::SlotType type = request->GetSlotType();
+    auto flags = std::make_shared<NotificationFlags>();
+
+    switch (type) {
+        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            break;
+        case NotificationConstant::SlotType::SERVICE_REMINDER:
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            break;
+        case NotificationConstant::SlotType::CONTENT_INFORMATION:
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+            break;
+        case NotificationConstant::SlotType::LIVE_VIEW:
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            break;
+        case NotificationConstant::SlotType::OTHER:
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+            break;
+        default:
+            break;
+    }
+    request->SetFlags(flags);
+}
+
 ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -278,6 +311,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
+
+    SetRequestBySlotType(request);
 
     return result;
 }
