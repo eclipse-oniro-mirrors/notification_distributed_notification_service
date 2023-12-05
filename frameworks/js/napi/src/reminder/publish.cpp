@@ -659,8 +659,7 @@ void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_val
             napi_set_named_property(env, wantAgentInfo, BUTTON_WANT_AGENT_URI, info);
         }
         // Parse ButtonDataShareUpdate
-        if (it->second.type == ReminderRequest::ActionButtonType::CLOSE ||
-            it->second.type == ReminderRequest::ActionButtonType::SNOOZE) {
+        if (it->second.type != ReminderRequest::ActionButtonType::INVALID) {
             ParseButtonDataShareUpdate(env, it->second.dataShareUpdate, actionButton);
         }
         // add obj to array
