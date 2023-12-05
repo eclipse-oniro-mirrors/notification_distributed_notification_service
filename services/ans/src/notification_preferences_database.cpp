@@ -168,6 +168,15 @@ const static std::string KEY_SLOT_ENABLE_BYPASS_DND = "enableBypassDnd";
  */
 const static std::string KEY_SLOT_ENABLED = "enabled";
 
+/**
+ * Indicates whether the type of bundle is flags.
+ */
+const static std::string KEY_BUNDLE_SLOTFLGS_TYPE = "bundleReminderflagstype";
+
+/**
+ * Indicates whether the type of slot is flags.
+ */
+const static std::string KEY_SLOT_SLOTFLGS_TYPE = "reminderflagstype";
 
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
@@ -227,6 +236,11 @@ const std::map<std::string,
             std::bind(&NotificationPreferencesDatabase::ParseSlotEnabled, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3),
         },
+        {
+            KEY_SLOT_SLOTFLGS_TYPE,
+            std::bind(&NotificationPreferencesDatabase::ParseSlotFlags, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
+        },
 };
 
 const std::map<std::string,
@@ -266,6 +280,11 @@ const std::map<std::string,
             KEY_BUNDLE_UID,
             std::bind(&NotificationPreferencesDatabase::ParseBundleUid, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3),
+        },
+        {
+            KEY_BUNDLE_SLOTFLGS_TYPE,
+            std::bind(&NotificationPreferencesDatabase::ParseBundleSlotFlags, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
         },
 };
 
@@ -444,6 +463,19 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabled(const int32_t &use
         return false;
     }
     return true;
+}
+
+bool NotificationPreferencesDatabase::PutSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    const int32_t &slotFlags)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(bundleInfo);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::PutHasPoppedDialog(
@@ -745,7 +777,12 @@ int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
             keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_ENABLE_NOTIFICATION);
             break;
         case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
+            ANS_LOGD("Into BUNDLE_POPPED_DIALOG_TYPE:GenerateBundleKey.");
             keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_POPPED_DIALOG);
+            break;
+        case BundleType::BUNDLE_SLOTFLGS_TYPE:
+            ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:GenerateBundleKey.");
+            keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SLOTFLGS_TYPE);
             break;
         default:
             break;
@@ -1140,6 +1177,20 @@ void NotificationPreferencesDatabase::ParseSlotShowBadge(sptr<NotificationSlot> 
     ANS_LOGD("ParseSlotShowBadge slot show badge is %{public}s.", value.c_str());
     bool showBadge = static_cast<bool>(StringToInt(value));
     slot->EnableBadge(showBadge);
+}
+
+void NotificationPreferencesDatabase::ParseSlotFlags(sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotFlags slot show flags is %{public}s.", value.c_str());
+    uint32_t slotFlags = static_cast<uint32_t>(StringToInt(value));
+    slot->SetSlotFlags(slotFlags);
+}
+
+void NotificationPreferencesDatabase::ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    const std::string &value) const
+{
+    ANS_LOGD("ParseBundleSlotFlags slot show flags is %{public}s.", value.c_str());
+    bundleInfo.SetSlotFlags(StringToInt(value));
 }
 
 void NotificationPreferencesDatabase::ParseSlotEnableLight(sptr<NotificationSlot> &slot, const std::string &value) const

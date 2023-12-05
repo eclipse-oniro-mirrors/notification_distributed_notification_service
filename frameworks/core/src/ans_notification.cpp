@@ -122,6 +122,40 @@ ErrCode AnsNotification::GetNotificationSlotNumAsBundle(const NotificationBundle
     return ansManagerProxy_->GetSlotNumAsBundle(bo, num);
 }
 
+ErrCode AnsNotification::GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
+    uint32_t &slotFlags)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->GetSlotFlagsAsBundle(bo, slotFlags);
+}
+
+ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
+    uint32_t slotFlags)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->SetSlotFlagsAsBundle(bo, slotFlags);
+}
+
 ErrCode AnsNotification::PublishNotification(const NotificationRequest &request)
 {
     ANS_LOGI("enter");

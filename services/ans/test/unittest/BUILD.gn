@@ -641,9 +641,11 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [
+    "${services_path}/ans/src/notification_config_parse.cpp",
     "${services_path}/ans/src/notification_preferences_database.cpp",
     "${services_path}/ans/src/notification_preferences_info.cpp",
     "notification_preferences_database_branch_test/mock_notification_rdb_data_mgr.cpp",
@@ -653,6 +655,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "//third_party/googletest:gtest_main",
+    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [

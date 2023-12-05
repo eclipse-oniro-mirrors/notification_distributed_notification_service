@@ -106,6 +106,24 @@ public:
     static ErrCode GetNotificationSlotNumAsBundle(const NotificationBundleOption &bundleOption, uint64_t &num);
 
     /**
+     * @brief Obtains slotflags of bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotFlags Indicates slotFlags of bundle.
+     * @return Returns get slotFlags by bundle result.
+     */
+    static ErrCode GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t &slotFlags);
+
+    /**
+     * @brief set slotflags of bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotFlags Indicates slotFlags of bundle.
+     * @return Returns get slotFlags by bundle result.
+     */
+    static ErrCode SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t slotFlags);
+
+    /**
      * @brief Publishes a notification.
      * @note If a notification with the same ID has been published by the current application and has not been deleted,
      * this method will update the notification.

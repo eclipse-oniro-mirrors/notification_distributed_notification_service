@@ -698,6 +698,26 @@ public:
     ErrCode SetBadgeNumber(int32_t badgeNumber) override;
 
     /**
+     * @brief Get the slotFlags of slot.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slot      Indicates the specified slot object
+     * @param slotFlags Indicates the slogFlags of slot to get.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags) override;
+
+    /**
+     * @brief Set the slotFlags of slot.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slot      Indicates the specified slot object
+     * @param slotFlags Indicates the slogFlags of slot to set.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags) override;
+
+    /**
      * @brief Register Push Callback.
      *
      * @param pushCallback PushCallBack.

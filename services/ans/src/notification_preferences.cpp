@@ -76,7 +76,6 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
@@ -87,7 +86,7 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
     } else {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
-
+    ANS_LOGD("AddNotificationBundleProperty.result: %{public}d", result);
     return result;
 }
 
@@ -255,6 +254,33 @@ ErrCode NotificationPreferences::GetNotificationSlotsNumForBundle(
     return result;
 }
 
+ErrCode NotificationPreferences::GetNotificationSlotFlagsForBundle(
+    const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    return GetBundleProperty(bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
+}
+
+
+ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
+    const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
+    if (result == ERR_OK) {
+        preferencesInfo_ = preferencesInfo;
+    }
+    return result;
+}
+
 ErrCode NotificationPreferences::IsShowBadge(const sptr<NotificationBundleOption> &bundleOption, bool &enable)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
@@ -285,6 +311,7 @@ ErrCode NotificationPreferences::GetImportance(const sptr<NotificationBundleOpti
 
     return GetBundleProperty(bundleOption, BundleType::BUNDLE_IMPORTANCE_TYPE, importance);
 }
+
 
 ErrCode NotificationPreferences::SetImportance(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t &importance)
@@ -539,7 +566,6 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
         bundleInfo.SetBundleUid(bundleOption->GetUid());
         bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
     }
-
     result = SaveBundleProperty(bundleInfo, bundleOption, type, value);
     preferencesInfo.SetBundleInfo(bundleInfo);
 
@@ -569,8 +595,14 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, value);
             break;
         case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
+            ANS_LOGD("Into BUNDLE_POPPED_DIALOG_TYPE:SetHasPoppedDialog.");
             bundleInfo.SetHasPoppedDialog(value);
             storeDBResult = preferncesDB_->PutHasPoppedDialog(bundleInfo, value);
+            break;
+        case BundleType::BUNDLE_SLOTFLGS_TYPE:
+            ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:SetSlotFlags.");
+            bundleInfo.SetSlotFlags(value);
+            storeDBResult = preferncesDB_->PutSlotFlags(bundleInfo, value);
             break;
         default:
             break;
@@ -600,7 +632,12 @@ ErrCode NotificationPreferences::GetBundleProperty(
                 value = bundleInfo.GetEnableNotification();
                 break;
             case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
+                ANS_LOGD("Into BUNDLE_POPPED_DIALOG_TYPE:GetHasPoppedDialog.");
                 value = bundleInfo.GetHasPoppedDialog();
+                break;
+            case BundleType::BUNDLE_SLOTFLGS_TYPE:
+                value = bundleInfo.GetSlotFlags();
+                ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:GetSlotFlags.");
                 break;
             default:
                 result = ERR_ANS_INVALID_PARAM;

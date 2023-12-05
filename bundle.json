@@ -85,6 +85,7 @@
       ],
       "third_party": [
         "libuv",
+        "libxml2",
         "icu"
       ]
     },

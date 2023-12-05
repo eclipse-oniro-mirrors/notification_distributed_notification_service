@@ -147,6 +147,25 @@ public:
     void SetLevel(NotificationLevel level);
 
     /**
+     * @brief Sets the slotflags of a NotificationSlot object.
+     * @note SetSlotFlags must be set before the NotificationHelper::AddNotificationSlot(NotificationSlot)
+     * method is called.
+     *       Otherwise, the settings will not take effect.
+     *
+     * @param slotFlags Specifies the slotflags of the NotificationSlot object,
+     * @note which determines the notification display effect.
+     * The value can be LEVEL_NONE, LEVEL_MIN, LEVEL_LOW, LEVEL_DEFAULT, or LEVEL_HIGH.
+     */
+    void SetSlotFlags(uint32_t slotFlags);
+
+    /**
+     * @brief Obtains the slotflags of a NotificationSlot object, which is set by SetSlotFlags(uint32_t slotFlags).
+     *
+     * @return Returns the slotflags of the NotificationSlot object.
+     */
+    uint32_t GetSlotFlags() const;
+
+    /**
      * @brief Obtains the type of a NotificationSlot object, which is set by SetType(SlotType).
      *
      * @return Returns the Type of the NotificationSlot object.
@@ -367,6 +386,7 @@ private:
     Uri sound_;
     std::vector<int64_t> vibrationValues_ {};
     bool enabled_ {true};
+    uint32_t slotFlags_{0};
     bool isForceControl_ {false};
 
     // no object in parcel

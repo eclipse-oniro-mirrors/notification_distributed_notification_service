@@ -61,6 +61,10 @@ public:
      */
     static sptr<AdvancedNotificationService> GetInstance();
 
+    static std::map<std::string, uint32_t>& GetDefaultSlotConfig();
+
+    void SelfClean();
+
     // AnsManagerStub
 
     /**
@@ -711,6 +715,28 @@ public:
      */
     ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled) override;
 
+    /**
+     * @brief Obtains the number of slotFlags.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slot      Indicates the specified slot object
+     * @param slotFlags Indicates the slogFlags of slot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption,
+        uint32_t &slotFlags) override;
+
+    /**
+     * @brief Set the slotFlags of slot.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slot      Indicates the specified slot object
+     * @param slotFlags Indicates the slogFlags of slot to set.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption,
+        uint32_t slotFlags) override;
+
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     /**
      * @brief Obtains the event of turn on screen.
@@ -914,7 +940,6 @@ private:
     void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
-    void SelfClean();
     ErrCode SetDefaultNotificationEnabled(
         const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr

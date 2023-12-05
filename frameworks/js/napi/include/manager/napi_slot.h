@@ -155,6 +155,32 @@ struct AsyncCallbackInfoInfoIsEnableSlot {
     CallbackPromiseInfo info;
 };
 
+struct ParametersInfoSetSlotFlagsByBundle {
+    NotificationBundleOption option;
+    uint32_t slotFlags;
+    napi_ref callback = nullptr;
+};
+
+struct ParametersInfoGetSlotFlagsByBundle {
+    NotificationBundleOption option;
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackInfoSetSlotFlagsByBundle {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    ParametersInfoSetSlotFlagsByBundle params;
+    CallbackPromiseInfo info;
+};
+
+struct AsyncCallbackInfoGetSlotFlagsByBundle {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    ParametersInfoGetSlotFlagsByBundle params;
+    CallbackPromiseInfo info;
+    uint32_t slotFlags = 0;
+};
+
 napi_value NapiAddSlot(napi_env env, napi_callback_info info);
 napi_value NapiAddSlots(napi_env env, napi_callback_info info);
 napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info);
@@ -166,6 +192,8 @@ napi_value NapiRemoveSlot(napi_env env, napi_callback_info info);
 napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info);
 napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info);
 napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info);
+napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info);
+napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info);
 
 napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_info &info, ParametersInfoAddSlot &paras);
 napi_value ParseParametersByAddSlots(
@@ -183,6 +211,10 @@ napi_value ParseParametersEnableSlot(
     const napi_env &env, const napi_callback_info &info, ParametersInfoEnableSlot &params);
 napi_value ParseParametersIsEnableSlot(
     const napi_env &env, const napi_callback_info &info, ParametersInfoIsEnableSlot &params);
+napi_value ParseParametersSetSlotFlagsByBundle(
+    const napi_env &env, const napi_callback_info &info, ParametersInfoSetSlotFlagsByBundle &params);
+napi_value ParseParametersGetSlotFlagsByBundle(
+    const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotFlagsByBundle &params);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

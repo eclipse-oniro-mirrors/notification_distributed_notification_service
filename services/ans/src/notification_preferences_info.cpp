@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 #include "notification_preferences_info.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
 NotificationPreferencesInfo::BundleInfo::BundleInfo()
-{}
+{
+}
+
 NotificationPreferencesInfo::BundleInfo::~BundleInfo()
-{}
+{
+}
 
 void NotificationPreferencesInfo::BundleInfo::SetBundleName(const std::string &name)
 {
@@ -98,6 +102,61 @@ bool NotificationPreferencesInfo::BundleInfo::GetSlot(
     return false;
 }
 
+const char* NotificationPreferencesInfo::BundleInfo::GetSlotFlagsKeyFromType(
+    const NotificationConstant::SlotType &type) const
+{
+    switch (type) {
+        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
+            return NotificationConstant::SLOTTYPECCMNAMES[NotificationConstant::SlotType::SOCIAL_COMMUNICATION];
+        case NotificationConstant::SlotType::SERVICE_REMINDER:
+            return NotificationConstant::SLOTTYPECCMNAMES[NotificationConstant::SlotType::SERVICE_REMINDER];
+        case NotificationConstant::SlotType::CONTENT_INFORMATION:
+            return NotificationConstant::SLOTTYPECCMNAMES[NotificationConstant::SlotType::CONTENT_INFORMATION];
+        case NotificationConstant::SlotType::OTHER:
+            return NotificationConstant::SLOTTYPECCMNAMES[NotificationConstant::SlotType::OTHER];
+        case NotificationConstant::SlotType::CUSTOM:
+            return NotificationConstant::SLOTTYPECCMNAMES[NotificationConstant::SlotType::CUSTOM];
+        case NotificationConstant::SlotType::LIVE_VIEW:
+            return NotificationConstant::SLOTTYPECCMNAMES[NotificationConstant::SlotType::LIVE_VIEW];
+        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
+            return NotificationConstant::SLOTTYPECCMNAMES[NotificationConstant::SlotType::CUSTOMER_SERVICE];
+        default:
+            return nullptr;
+    }
+}
+
+void NotificationPreferencesInfo::BundleInfo::SetSlotFlagsForSlot(
+    const NotificationConstant::SlotType &type)
+{
+    uint32_t bundleSlotFlags = GetSlotFlags();
+    std::string key = GetSlotFlagsKeyFromType(type);
+    std::map<std::string, uint32_t>& slotFlagsDefaultMap = AdvancedNotificationService::GetDefaultSlotConfig();
+    if (slotFlagsDefaultMap.find(key) == slotFlagsDefaultMap.end()) {
+        return;
+    }
+    uint32_t finalSlotFlags = bundleSlotFlags&slotFlagsDefaultMap[key];
+    if (slotFlagsMap_.find(key) == slotFlagsMap_.end()) {
+        slotFlagsMap_.insert_or_assign(key, finalSlotFlags);
+    } else {
+        for (auto it = slotFlagsMap_.begin(); it != slotFlagsMap_.end(); ++it) {
+            if (it->first.compare(key) == 0 && it->second != finalSlotFlags) {
+                    it->second = finalSlotFlags;
+                }
+        }
+    }
+}
+
+uint32_t NotificationPreferencesInfo::BundleInfo::GetSlotFlagsForSlot(const NotificationConstant::SlotType &type) const
+{
+    std::string key = GetSlotFlagsKeyFromType(type);
+    auto it = slotFlagsMap_.find(key);
+    if (it != slotFlagsMap_.end()) {
+        return it->second;
+    } else {
+        return 0;
+    }
+}
+
 bool NotificationPreferencesInfo::BundleInfo::GetAllSlots(std::vector<sptr<NotificationSlot>> &slots)
 {
     slots.clear();
@@ -128,6 +187,16 @@ bool NotificationPreferencesInfo::BundleInfo::RemoveSlot(const NotificationConst
         return true;
     }
     return false;
+}
+
+uint32_t NotificationPreferencesInfo::BundleInfo::GetSlotFlags()
+{
+    return slotFlags_;
+}
+
+void NotificationPreferencesInfo::BundleInfo::SetSlotFlags(uint32_t slotFlags)
+{
+    slotFlags_ = slotFlags;
 }
 
 void NotificationPreferencesInfo::BundleInfo::RemoveAllSlots()
