@@ -50,7 +50,6 @@ bool ReminderCommon::GenActionButtons(
     const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
-    char res[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_valuetype valuetype = napi_undefined;
     napi_value actionButtons = nullptr;
     if (!GetObject(env, value, ReminderAgentNapi::ACTION_BUTTON, actionButtons)) {
@@ -85,34 +84,39 @@ bool ReminderCommon::GenActionButtons(
                 ANSR_LOGW("Wrong argument type:%{public}s. buttonType not support.", ACTION_BUTTON);
                 return false;
             }
-
-            std::string resource = "";
-            if (GetStringUtf8(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_RESOURCE, res,
-                NotificationNapi::STR_MAX_SIZE)) {
-                resource = std::string(res);
-            }
-
-            std::string title(str);
-            auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
-            if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
-                GetButtonWantAgent(env, actionButton, reminder, buttonWantAgent);
-            }
-            // gen buttonDataShareUpdate
-            auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
-            if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CLOSE ||
-                ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::SNOOZE) {
-                GetButtonDataShareUpdate(env, actionButton, reminder, buttonDataShareUpdate);
-            }
-            reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType),
-                resource, buttonWantAgent, buttonDataShareUpdate);
-            ANSR_LOGD("button title=%{public}s, type=%{public}d, resource=%{public}s",
-                title.c_str(), buttonType, resource.c_str());
+            HandleActionButtonTitle(env, actionButton, reminder, str, buttonType);
         } else {
             ANSR_LOGW("Parse action button error.");
             return false;
         }
     }
     return true;
+}
+
+void ReminderCommon::HandleActionButtonTitle(const napi_env &env, const napi_value &actionButton,
+    std::shared_ptr<ReminderRequest>& reminder, const char* str, int32_t buttonType)
+{
+    char res[NotificationNapi::STR_MAX_SIZE] = {0};
+    std::string resource = "";
+    if (GetStringUtf8(env, actionButton, ReminderAgentNapi::ACTION_BUTTON_RESOURCE, res,
+        NotificationNapi::STR_MAX_SIZE)) {
+        resource = std::string(res);
+    }
+
+    std::string title(str);
+    auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    if (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM) {
+        GetButtonWantAgent(env, actionButton, reminder, buttonWantAgent);
+    }
+    // gen buttonDataShareUpdate
+    auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    if (ReminderRequest::ActionButtonType(buttonType) != ReminderRequest::ActionButtonType::INVALID) {
+        GetButtonDataShareUpdate(env, actionButton, buttonDataShareUpdate);
+    }
+    reminder->SetActionButton(title, static_cast<ReminderRequest::ActionButtonType>(buttonType),
+        resource, buttonWantAgent, buttonDataShareUpdate);
+    ANSR_LOGD("button title=%{public}s, type=%{public}d, resource=%{public}s",
+        title.c_str(), buttonType, resource.c_str());
 }
 
 bool ReminderCommon::IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder)
@@ -149,7 +153,6 @@ void ReminderCommon::GetButtonWantAgent(const napi_env &env, const napi_value &v
 
 // uri:string  equalTo{key:value}  valuesBucket{key:value}
 void ReminderCommon::GetButtonDataShareUpdate(const napi_env &env, const napi_value &value,
-    std::shared_ptr<ReminderRequest>& reminder,
     std::shared_ptr<ReminderRequest::ButtonDataShareUpdate>& buttonDataShareUpdate)
 {
     napi_value dataShare = nullptr;
@@ -228,12 +231,12 @@ std::string ReminderCommon::GetStringFromJS(const napi_env &env, const napi_valu
     if (napi_get_value_string_utf8(env, param, nullptr, 0, &size) != napi_ok) {
         return defaultValue;
     }
-    std::string value("");
     if (size == 0) {
         return defaultValue;
     }
 
     char *buf = new (std::nothrow) char[size + 1];
+    std::string value("");
     if (buf == nullptr) {
         return value;
     }

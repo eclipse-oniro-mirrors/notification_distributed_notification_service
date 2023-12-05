@@ -158,6 +158,9 @@ private:
     static napi_value GenReminder(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
+    static void HandleActionButtonTitle(const napi_env &env, const napi_value &actionButton,
+        std::shared_ptr<ReminderRequest>& reminder, const char* str, int32_t buttonType);
+
     static napi_value ParseInt32Array(const napi_env &env, const napi_value &value,
         const char* propertyName, std::vector<uint8_t> &propertyVal, uint8_t maxLen);
 
@@ -168,7 +171,6 @@ private:
     static void GetButtonWantAgent(const napi_env &env, const napi_value &value,
         std::shared_ptr<ReminderRequest>& reminder, std::shared_ptr<ReminderRequest::ButtonWantAgent>& wantAgent);
     static void GetButtonDataShareUpdate(const napi_env &env, const napi_value &value,
-        std::shared_ptr<ReminderRequest>& reminder,
         std::shared_ptr<ReminderRequest::ButtonDataShareUpdate>& buttonDataShareUpdate);
     static bool GetValueBucketObject(std::string &ValueBucketString, const napi_env &env, const napi_value &arg);
     static std::string GetStringFromJS(const napi_env &env, const napi_value &param,

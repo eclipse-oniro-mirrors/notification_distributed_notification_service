@@ -976,10 +976,6 @@ void AnsNotification::ResetAnsManagerProxy()
 
 ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
 {
-    if (!GetAnsManagerProxy()) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
     sptr<ReminderRequest> tarReminder = nullptr;
     switch (reminder.GetReminderType()) {
         case (ReminderRequest::ReminderType::TIMER): {
@@ -1004,6 +1000,10 @@ ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
             ANSR_LOGW("PublishReminder fail.");
             return ERR_ANS_INVALID_PARAM;
         }
+    }
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     ErrCode code = ansManagerProxy_->PublishReminder(tarReminder);
     reminder.SetReminderId(tarReminder->GetReminderId());
