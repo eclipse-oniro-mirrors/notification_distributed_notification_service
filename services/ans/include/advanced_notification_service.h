@@ -809,6 +809,11 @@ public:
      */
     ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName);
 
+    /**
+     * @brief Set the notification SoundEnabled and VibrationEnabled by soltType
+     */
+    void SetRequestBySlotType(const sptr<NotificationRequest> &request);
+
 private:
     struct RecentInfo;
     AdvancedNotificationService();
@@ -957,7 +962,6 @@ private:
     std::shared_ptr<NotificationRecord> MakeNotificationRecord(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
-    void SetRequestBySlotType(const sptr<NotificationRequest> &request);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

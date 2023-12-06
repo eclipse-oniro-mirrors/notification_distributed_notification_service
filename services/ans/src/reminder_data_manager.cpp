@@ -798,6 +798,8 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
         ANSR_LOGE("Ans instance is null.");
         return;
     }
+    // Set the notification SoundEnabled and VibrationEnabled by soltType
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
     advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
 }
@@ -1000,6 +1002,8 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
+    // Set the notification SoundEnabled and VibrationEnabled by soltType
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
     ANSR_LOGD("publish notification.(reminderId=%{public}d)", reminder->GetReminderId());
     ErrCode errCode = advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     if (errCode != ERR_OK) {
@@ -1086,6 +1090,8 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
         ANSR_LOGE("Ans instance is null");
         return;
     }
+    // Set the notification SoundEnabled and VibrationEnabled by soltType
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
     advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     StartRecentReminder();
 }
