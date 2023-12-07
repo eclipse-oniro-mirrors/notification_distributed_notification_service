@@ -125,6 +125,13 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetLevel(LEVEL_DEFAULT);
             SetForceControl(true);
             break;
+        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
+            id_ = "CUSTOMER_SERVICE";
+            SetName("CUSTOMER_SERVICE");
+            SetLockscreenVisibleness(NotificationConstant::VisiblenessType::SECRET);
+            SetEnableVibration(false);
+            SetLevel(LEVEL_LOW);
+            break;
         case NotificationConstant::SlotType::OTHER:
             id_ = "OTHER";
             SetName("OTHER");

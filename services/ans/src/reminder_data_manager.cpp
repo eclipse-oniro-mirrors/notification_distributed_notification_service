@@ -515,6 +515,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         CloseRemindersByGroupId(reminderId, bundleName, groupId);
     }
     CloseReminder(reminder, cancelNotification);
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
 }
@@ -562,7 +563,6 @@ void ReminderDataManager::CloseReminder(const sptr<ReminderRequest> &reminder, b
     }
     reminder->OnClose(true);
     RemoveFromShowedReminders(reminder);
-    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
     if (cancelNotification) {
         CancelNotification(reminder);
@@ -585,27 +585,40 @@ std::shared_ptr<ReminderDataManager> ReminderDataManager::InitInstance(
     return REMINDER_DATA_MANAGER;
 }
 
-void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminder,
-    const ReminderRequest::ActionButtonType &actionButtonType)
+bool ReminderDataManager::CheckUpdateConditions(const sptr<ReminderRequest> &reminder,
+    const ReminderRequest::ActionButtonType &actionButtonType,
+    const std::map<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo> &actionButtonMap)
 {
     if (!reminder->IsSystemApp()) {
         ANSR_LOGI("UpdateAppDatabase faild, is not SystemApp");
-        return;
+        return false;
     }
-    if (actionButtonType == ReminderRequest::ActionButtonType::CUSTOM ||
-        actionButtonType == ReminderRequest::ActionButtonType::INVALID) {
-        ANSR_LOGI("actionButtonType is CUSTOM or INVALID");
-        return;
+    if (actionButtonType == ReminderRequest::ActionButtonType::INVALID) {
+        ANSR_LOGI("actionButtonType is NVALID");
+        return false;
     }
-    auto actionButtonMap = reminder->GetActionButtons();
-    if (actionButtonMap.count(actionButtonType) && actionButtonMap.at(actionButtonType).dataShareUpdate == nullptr) {
+    if (!actionButtonMap.count(actionButtonType)) {
+        ANSR_LOGI("actionButtonType does not exist");
+        return false;
+    }
+    if (actionButtonMap.at(actionButtonType).dataShareUpdate == nullptr) {
         ANSR_LOGI("dataShareUpdate is null");
-        return;
+        return false;
     }
     if (actionButtonMap.at(actionButtonType).dataShareUpdate->uri == "" ||
         actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo == "" ||
         actionButtonMap.at(actionButtonType).dataShareUpdate->valuesBucket == "") {
-        ANSR_LOGI("not have uri");
+        ANSR_LOGI("datashare parameter is invalid");
+        return false;
+    }
+    return true;
+}
+
+void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminder,
+    const ReminderRequest::ActionButtonType &actionButtonType)
+{
+    auto actionButtonMap = reminder->GetActionButtons();
+    if (!CheckUpdateConditions(reminder, actionButtonType, actionButtonMap)) {
         return;
     }
     // init default dstBundleName
@@ -785,6 +798,8 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
         ANSR_LOGE("Ans instance is null.");
         return;
     }
+    // Set the notification SoundEnabled and VibrationEnabled by soltType
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
     advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
 }
@@ -987,6 +1002,8 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
+    // Set the notification SoundEnabled and VibrationEnabled by soltType
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
     ANSR_LOGD("publish notification.(reminderId=%{public}d)", reminder->GetReminderId());
     ErrCode errCode = advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     if (errCode != ERR_OK) {
@@ -1038,6 +1055,7 @@ void ReminderDataManager::SnoozeReminder(const OHOS::EventFwk::Want &want)
         return;
     }
     SnoozeReminderImpl(reminder);
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::SNOOZE);
 }
 
@@ -1057,7 +1075,6 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
     reminder->OnSnooze();
-    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
 
     // 2) Show the notification dialog in the systemUI
@@ -1073,6 +1090,8 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
         ANSR_LOGE("Ans instance is null");
         return;
     }
+    // Set the notification SoundEnabled and VibrationEnabled by soltType
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
     advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     StartRecentReminder();
 }
@@ -1683,6 +1702,7 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
         return;
     }
     CloseReminder(reminder, false);
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CUSTOM);
     std::string buttonPkgName = want.GetStringParam("PkgName");
     std::string buttonAbilityName = want.GetStringParam("AbilityName");
 

@@ -1613,10 +1613,6 @@ void ReminderRequest::UpdateNotificationCommon(bool isSnooze)
         (reminderType_ == ReminderRequest::ReminderType::ALARM)) {
         notificationRequest_->SetUnremovable(true);
     }
-    auto flags = std::make_shared<NotificationFlags>();
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-    notificationRequest_->SetFlags(flags);
 }
 
 void ReminderRequest::UpdateNotificationBundleInfo()

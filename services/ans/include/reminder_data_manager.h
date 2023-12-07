@@ -241,6 +241,18 @@ private:
     void CancelAllReminders(const int32_t &userId);
 
     /**
+     * @brief Check the update conditions.
+     *
+     * @param reminder Indicates the showed reminder.
+     * @param actionButtonType Button type of the button.
+     * @param actionButtonMap Button map.
+     * @return True if check successful.
+     */
+    bool CheckUpdateConditions(const sptr<ReminderRequest> &reminder,
+        const ReminderRequest::ActionButtonType &actionButtonType,
+        const std::map<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo> &actionButtonMap);
+
+    /**
      * @brief update app database.
      *
      * @param reminder Indicates the showed reminder.

@@ -287,7 +287,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     std::string deviceId = "DeviceId";
     sptr<NotificationRequest> request = new NotificationRequest();
     auto rrc = std::make_shared<Notification>(deviceId, request);
-    std::string ret = "Notification{ key = DeviceId_-1_0__0, ledLightColor = 0, "
+    std::string ret = "Notification{ key = DeviceId_-1_0___0, ledLightColor = 0, "
     "lockscreenVisbleness = 0, remindType = -1, isRemoveAllowed = true, sourceType = 0, "
     "deviceId = DeviceId, request = NotificationRequest{ notificationId = 0, "
     "slotType = 3, createTime = 0, deliveryTime = 0, autoDeletedTime = -1, settingsText = , "

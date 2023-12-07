@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <map>
 #include <functional>
 #include <gtest/gtest.h>
 
@@ -26,6 +27,7 @@
 #include "reminder_event_manager.h"
 #include "reminder_request_timer.h"
 #include "reminder_request_alarm.h"
+#include "reminder_request.h"
 #undef private
 #undef protected
 
@@ -386,6 +388,10 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
     reminder->SetActionButton("无效的", ReminderRequest::ActionButtonType::INVALID, "",
         buttonWantAgent, buttonDataShareUpdate);
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::INVALID);
+
+    // actionButtonType does not exist
+    std::map<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo> actionButtonMap;
+    manager->CheckUpdateConditions(reminder, ReminderRequest::ActionButtonType::CLOSE, actionButtonMap);
 
     // null ButtonDataShareUpdate
     reminder->SetActionButton("稍后提醒", ReminderRequest::ActionButtonType::SNOOZE, "", buttonWantAgent);
