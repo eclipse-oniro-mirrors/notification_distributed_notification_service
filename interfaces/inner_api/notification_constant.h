@@ -196,6 +196,8 @@ public:
     /* one hour */
     static const int64_t DEFAULT_AUTO_DELETE_TIME = 3600;
 
+    static const int64_t NO_DELAY_DELETE_TIME = 0;
+
     static constexpr uint64_t INVALID_TIMER_ID = 0ULL;
 
     // live view max size is 512KB(extra size) + 8KB(base size) = 520KB

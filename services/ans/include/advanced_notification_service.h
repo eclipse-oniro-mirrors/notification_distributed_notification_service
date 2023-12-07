@@ -962,6 +962,7 @@ private:
     std::shared_ptr<NotificationRecord> MakeNotificationRecord(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
+    ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
