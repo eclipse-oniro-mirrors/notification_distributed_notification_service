@@ -467,7 +467,9 @@ napi_value Common::SetNotificationRequestByCustom(
             }
         }
     }
-    napi_set_named_property(env, result, "actionButtons", arr);
+    if (count != 0) {
+        napi_set_named_property(env, result, "actionButtons", arr);
+    }
 
     // template?: NotificationTemplate
     std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();
@@ -2510,6 +2512,7 @@ napi_value Common::GetNotificationActionButtons(
         return Common::NapiGetNull(env);
     }
 
+    request.SetIsCoverActionButtons(true);
     napi_get_named_property(env, value, "actionButtons", &actionButtons);
     napi_is_array(env, actionButtons, &isArray);
     if (!isArray) {
@@ -2518,8 +2521,8 @@ napi_value Common::GetNotificationActionButtons(
     }
     napi_get_array_length(env, actionButtons, &length);
     if (length == 0) {
-        ANS_LOGE("The array is empty.");
-        return nullptr;
+        ANS_LOGI("The array is empty.");
+        return Common::NapiGetNull(env);
     }
     for (size_t i = 0; i < length; i++) {
         napi_value actionButton = nullptr;

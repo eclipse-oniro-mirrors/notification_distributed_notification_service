@@ -2237,5 +2237,16 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
             return ERR_OK;
     }
 }
+
+void NotificationRequest::SetIsCoverActionButtons(bool isCoverActionButtons)
+{
+    isCoverActionButtons_ = isCoverActionButtons;
+}
+
+bool NotificationRequest::IsCoverActionButtons() const
+{
+    return isCoverActionButtons_;
+}
+
 }  // namespace Notification
 }  // namespace OHOS
