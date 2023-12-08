@@ -1210,6 +1210,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    if (!parcel.WriteBool(isCoverActionButtons_)) {
+        ANS_LOGE("Failed to write isCoverActionButtons_");
+        return false;
+    }
+
     if (!parcel.WriteUint64(messageUsers_.size())) {
         ANS_LOGE("Failed to write the size of messageUsers");
         return false;
@@ -1457,6 +1462,8 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         actionButtons_.emplace_back(member);
     }
 
+    isCoverActionButtons_ = parcel.ReadBool();
+
     vsize = parcel.ReadUint64();
     vsize = (vsize < NotificationRequest::MAX_MESSAGE_USERS) ? vsize : NotificationRequest::MAX_MESSAGE_USERS;
     for (uint64_t it = 0; it < vsize; ++it) {
@@ -1622,6 +1629,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationContent_ = other.notificationContent_;
 
     this->actionButtons_ = other.actionButtons_;
+    this->isCoverActionButtons_ = other.isCoverActionButtons_;
     this->messageUsers_ = other.messageUsers_;
     this->userInputHistory_ = other.userInputHistory_;
 
