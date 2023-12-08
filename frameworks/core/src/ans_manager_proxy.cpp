@@ -2848,6 +2848,91 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
     return result;
 }
 
+ErrCode AnsManagerProxy::GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,  uint32_t& slotFlags)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[GetSlotFlagsAsBundle] fail: bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[GetSlotFlagsAsBundle] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteStrongParcelable(bundleOption)) {
+        ANS_LOGE("[GetSlotFlagsAsBundle] fail:: write bundle failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(slotFlags)) {
+        ANS_LOGE("[GetSlotFlagsAsBundle] fail: write slots failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadUint32(slotFlags)) {
+        ANS_LOGE("[GetSlotFlagsAsBundle] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,  uint32_t slotFlags)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[SetSlotFlagsAsBundle] fail: bundleOption is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[SetSlotFlagsAsBundle] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteParcelable(bundleOption)) {
+        ANS_LOGE("[SetSlotFlagsAsBundle] fail:: write bundleoption failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    
+    // got the LSB 5 bits as slotflags;
+    uint32_t validSlotFlag = 0x001f&slotFlags;
+    if (!data.WriteInt32(validSlotFlag)) {
+        ANS_LOGE("[SetSlotFlagsAsBundle] fail: write slots failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_SLOTFLAGS_BY_BUNDLE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::RegisterPushCallback(
     const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {

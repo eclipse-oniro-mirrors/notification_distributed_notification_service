@@ -104,7 +104,10 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("subscribeSystemLiveView", NapiSubscriteLocalAcitvity),
-        DECLARE_NAPI_FUNCTION("triggerSystemLiveView", NapiTriggerLocalLiveView)};
+        DECLARE_NAPI_FUNCTION("triggerSystemLiveView", NapiTriggerLocalLiveView),
+        DECLARE_NAPI_FUNCTION("setSlotFlagsByBundle", NapiSetSlotFlagsByBundle),
+        DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", NapiGetSlotFlagsByBundle),
+};
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
 

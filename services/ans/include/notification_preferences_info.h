@@ -24,6 +24,7 @@
 #include "notification_do_not_disturb_date.h"
 #include "notification_slot.h"
 #include "preferences_constant.h"
+#include "advanced_notification_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -138,6 +139,40 @@ public:
         uint32_t GetAllSlotsSize();
 
         /**
+         * @brief Get slotflags from bundle.
+         *
+         * @return Return slotFlags of bundle.
+         */
+        uint32_t GetSlotFlags();
+
+        /**
+         * @brief Set slotflags to bundle.
+         *
+         * @param slotFlags Indicates slotFlags of bundle.
+         */
+        void SetSlotFlags(uint32_t slotFlags);
+
+        /**
+         * get slot type name string from slottype enum type.
+         * @param type  slot type enum value.
+         * @return slot type name string.
+         */
+        const char *GetSlotFlagsKeyFromType(const NotificationConstant::SlotType &type) const;
+
+        /**
+         * set for specified slottype slotfalgs.
+         * @param type Indicates slot type.
+         */
+        void SetSlotFlagsForSlot(const NotificationConstant::SlotType &type);
+
+        /**
+         * get for specified slottype slotfalgs.
+         * @param type  Indicates slot type.
+         * @return specified slottype's slotfalgs.
+         */
+        uint32_t GetSlotFlagsForSlot(const NotificationConstant::SlotType &type) const;
+
+        /**
          * @brief Get all slot from group in bundle.
          *
          * @param groupId Indicates a groupId from bundle.
@@ -186,12 +221,14 @@ public:
     private:
         std::string bundleName_;
         int32_t uid_ = 0;
+        uint32_t slotFlags_ = 27; // 0b11011
         int32_t importance_ = BUNDLE_IMPORTANCE;
         bool isShowBadge_ = BUNDLE_SHOW_BADGE;
         int32_t badgeTotalNum_ = BUNDLE_BADGE_TOTAL_NUM;
         bool isEnabledNotification_ = BUNDLE_ENABLE_NOTIFICATION;
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
+        std::map<std::string, uint32_t> slotFlagsMap_;
     };
 
     /*
@@ -273,7 +310,6 @@ public:
     void RemoveNotificationEnable(const int32_t userId);
     void RemoveDoNotDisturbDate(const int32_t userId);
     void SetBundleInfoFromDb(const BundleInfo &info, std::string bundleKey);
-
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
     std::map<int32_t, sptr<NotificationDoNotDisturbDate>> doNotDisturbDate_;

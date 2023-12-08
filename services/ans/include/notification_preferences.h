@@ -174,6 +174,24 @@ public:
     ErrCode SetTotalBadgeNums(const sptr<NotificationBundleOption> &bundleOption, const int32_t num);
 
     /**
+     * @brief Get slotFlags in the of bunlde from DB.
+     *
+     * @param bundleOption Indicates bunlde info label.
+     * @param slotFlags Indicates to set soltFlags.
+     * @return Return ERR_OK on success, others on failure.
+     */
+    ErrCode GetNotificationSlotFlagsForBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags);
+
+    /**
+     * @brief Get slotFlags in the of bunlde from DB.
+     *
+     * @param bundleOption Indicates bunlde info label.
+     * @param slotFlags Indicates to get slotFlags.
+     * @return Return ERR_OK on success, others on failure.
+     */
+    ErrCode SetNotificationSlotFlagsForBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags);
+
+    /**
      * @brief Get private notification enable in the of bunlde from DB.
      *
      * @param bundleOption Indicates bunlde info label.

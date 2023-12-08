@@ -436,6 +436,16 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t &slotFlags) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t slotFlags) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode RegisterPushCallback(const sptr<IRemoteObject> &pushCallback,
         const sptr<NotificationCheckRequest> &notificationCheckRequest) override
     {

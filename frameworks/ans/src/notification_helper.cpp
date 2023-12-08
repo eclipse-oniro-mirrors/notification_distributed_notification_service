@@ -60,6 +60,18 @@ ErrCode NotificationHelper::GetNotificationSlotNumAsBundle(const NotificationBun
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotNumAsBundle(bundleOption, num);
 }
 
+ErrCode NotificationHelper::GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
+    uint32_t &slotFlags)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+}
+
+ErrCode NotificationHelper::SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
+    uint32_t slotFlags)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+}
+
 ErrCode NotificationHelper::PublishNotification(const NotificationRequest &request)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(request);

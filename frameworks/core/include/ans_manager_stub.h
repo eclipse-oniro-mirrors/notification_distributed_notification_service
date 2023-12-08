@@ -699,6 +699,24 @@ public:
      */
     virtual ErrCode SetBadgeNumber(int32_t badgeNumber) override;
 
+   /**
+     * @brief Get slotFlags.
+     *
+     * @param badgeNumber The slotFlags.
+     * @return Returns get slotFlags result.
+     */
+    virtual ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+        uint32_t &slotFlags) override;
+
+   /**
+     * @brief Set slotFlags.
+     *
+     * @param badgeNumber The slotFlags.
+     * @return Returns set slotFlags result.
+     */
+    virtual ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+        uint32_t slotFlags) override;
+
     /**
      * @brief Register Push Callback.
      *
@@ -798,7 +816,8 @@ private:
     ErrCode HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleTriggerLocalLiveView(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSubscribeSelf(MessageParcel &data, MessageParcel &reply);
-
+    ErrCode HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

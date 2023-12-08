@@ -25,6 +25,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [

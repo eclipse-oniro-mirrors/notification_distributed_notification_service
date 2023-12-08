@@ -95,6 +95,7 @@ public:
      * @return Return true on success, false on failure.
      */
     bool PutNotificationsEnabled(const int32_t &userId, const bool &enabled);
+    bool PutSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &slotFlags);
     bool PutHasPoppedDialog(const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &hasPopped);
 
     /**
@@ -205,6 +206,7 @@ private:
     void ParseEnableAllNotification(NotificationPreferencesInfo &info);
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
+    void ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleShowBadge(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleBadgeNum(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleEnableNotification(
@@ -225,6 +227,7 @@ private:
     void ParseSlotVibrationSytle(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotEnableBypassDnd(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotEnabled(sptr<NotificationSlot> &slot, const std::string &value) const;
+    void ParseSlotFlags(sptr<NotificationSlot> &slot, const std::string &value) const;
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
     void GetDoNotDisturbType(NotificationPreferencesInfo &info, int32_t userId);

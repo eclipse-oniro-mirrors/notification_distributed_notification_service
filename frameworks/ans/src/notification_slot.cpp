@@ -216,6 +216,16 @@ bool NotificationSlot::GetEnable() const
     return enabled_;
 }
 
+void NotificationSlot::SetSlotFlags(uint32_t slotFlags)
+{
+    slotFlags_ = slotFlags;
+}
+
+uint32_t NotificationSlot::GetSlotFlags() const
+{
+    return slotFlags_;
+}
+
 void NotificationSlot::SetForceControl(bool isForceControl)
 {
     isForceControl_ = isForceControl;
@@ -243,6 +253,7 @@ std::string NotificationSlot::Dump() const
             ", vibration = " + MergeVectorToString(vibrationValues_) +
             ", isShowBadge = " + (isShowBadge_ ? "true" : "false") +
             ", enabled = " + (enabled_ ? "true" : "false") +
+            ", slotFlags = " + std::to_string(static_cast<int32_t>(slotFlags_)) +
             " }";
 }
 
@@ -329,6 +340,11 @@ bool NotificationSlot::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(slotFlags_)) {
+        ANS_LOGE("Failed to write slotFlags");
+        return false;
+    }
+
     return true;
 }
 
@@ -358,6 +374,7 @@ bool NotificationSlot::ReadFromParcel(Parcel &parcel)
 
     parcel.ReadInt64Vector(&vibrationValues_);
     enabled_ = parcel.ReadBool();
+    slotFlags_ = parcel.ReadInt32();
     return true;
 }
 

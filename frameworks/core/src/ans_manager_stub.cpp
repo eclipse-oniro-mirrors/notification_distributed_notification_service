@@ -268,6 +268,12 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION_SELF,
             std::bind(&AnsManagerStub::HandleSubscribeSelf, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_SLOTFLAGS_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleSetSlotFlagsAsBundle, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleGetSlotFlagsAsBundle, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -485,6 +491,52 @@ ErrCode AnsManagerStub::HandleGetSlotNumAsBundle(MessageParcel &data, MessagePar
         ANS_LOGE("[HandleGetSlotNumAsBundle] fail: write enabled failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleSetSlotFlagsAsBundle] fail: read bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t slotFlags = 0;
+    if (!data.ReadInt32(slotFlags)) {
+        ANS_LOGE("[HandleSetSlotFlagsAsBundle] fail: read notification failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetSlotFlagsAsBundle(bundleOption, slotFlags);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSetSlotFlagsAsBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleGetSlotFlagsAsBundle] fail: read bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    uint32_t slotFlags = 0;
+    ErrCode result = GetSlotFlagsAsBundle(bundleOption, slotFlags);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetSlotFlagsAsBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteUint32(slotFlags)) {
+        ANS_LOGE("[HandleGetSlotFlagsAsBundle] fail: write enabled failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
     return ERR_OK;
 }
 
@@ -2058,6 +2110,18 @@ ErrCode AnsManagerStub::SetNotificationBadgeNum(int num)
 ErrCode AnsManagerStub::GetBundleImportance(int &importance)
 {
     ANS_LOGE("AnsManagerStub::GetBundleImportance called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags)
+{
+    ANS_LOGE("AnsManagerStub::GetSlotFlagsAsBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags)
+{
+    ANS_LOGE("AnsManagerStub::SetSlotFlagsAsBundle called!");
     return ERR_INVALID_OPERATION;
 }
 

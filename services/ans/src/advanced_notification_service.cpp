@@ -58,6 +58,7 @@
 #include "want_agent_helper.h"
 #include "notification_timer_info.h"
 #include "time_service_client.h"
+#include "notification_config_parse.h"
 #include "want_params_wrapper.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -137,6 +138,8 @@ struct AdvancedNotificationService::RecentInfo {
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
 std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
+std::map<std::string, uint32_t> slotFlagsDefaultMap_;
+
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
 std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> AdvancedNotificationService::checkRequests_;
 std::string AdvancedNotificationService::supportCheckSaPermission_ = "false";
@@ -254,6 +257,10 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
             flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
             flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
             break;
+        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            break;
         default:
             break;
     }
@@ -327,8 +334,16 @@ sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
             ANS_LOGE("Failed to create AdvancedNotificationService instance");
             return nullptr;
         }
+        std::string configPath(NotificationConstant::NOTIFICATION_SLOTFLAG_CONFIG_PATH);
+        NotificationConfigFile::getNotificationSlotFlagConfig(configPath, slotFlagsDefaultMap_);
     }
+
     return instance_;
+}
+
+std::map<std::string, uint32_t>& AdvancedNotificationService::GetDefaultSlotConfig()
+{
+    return slotFlagsDefaultMap_;
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -410,6 +425,7 @@ AdvancedNotificationService::~AdvancedNotificationService()
     DistributedNotificationManager::GetInstance()->UngegisterCallback();
 #endif
     SelfClean();
+    slotFlagsDefaultMap_.clear();
 }
 
 void AdvancedNotificationService::SelfClean()
@@ -5392,6 +5408,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     return result;
 }
+
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -5432,6 +5449,82 @@ void AdvancedNotificationService::ResetPushCallbackProxy()
         }
     }
     pushCallBacks_.clear();
+}
+
+ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+    uint32_t &slotFlags)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        ANS_LOGD("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance().GetNotificationSlotFlagsForBundle(bundle, slotFlags);
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            result = ERR_OK;
+            slotFlags = 0;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+    uint32_t slotFlags)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr) {
+        ANS_LOGD("BundleOption is null.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is false.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        ANS_LOGD("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidity.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+        std::bind([&]() {
+            result = NotificationPreferences::GetInstance().SetNotificationSlotFlagsForBundle(bundle, slotFlags);
+        }));
+    notificationSvrQueue_->wait(handler);
+    return result;
 }
 
 ErrCode AdvancedNotificationService::RegisterPushCallback(
