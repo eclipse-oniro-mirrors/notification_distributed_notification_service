@@ -171,12 +171,12 @@ const static std::string KEY_SLOT_ENABLED = "enabled";
 /**
  * Indicates whether the type of bundle is flags.
  */
-const static std::string KEY_BUNDLE_SLOTFLGS_TYPE = "bundleReminderflagstype";
+const static std::string KEY_BUNDLE_SLOTFLGS_TYPE = "bundleReminderFlagsType";
 
 /**
  * Indicates whether the type of slot is flags.
  */
-const static std::string KEY_SLOT_SLOTFLGS_TYPE = "reminderflagstype";
+const static std::string KEY_SLOT_SLOTFLGS_TYPE = "reminderFlagsType";
 
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
