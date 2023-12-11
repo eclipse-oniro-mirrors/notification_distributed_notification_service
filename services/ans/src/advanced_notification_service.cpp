@@ -320,6 +320,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     }
 
     SetRequestBySlotType(request);
+    FillActionButtons(request);
 
     return result;
 }
@@ -381,7 +382,8 @@ AdvancedNotificationService::AdvancedNotificationService()
     recentInfo_ = std::make_shared<RecentInfo>();
     distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
         std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
-
+    permissonFilter_ = std::make_shared<PermissionFilter>();
+    notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
 
     std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
@@ -409,8 +411,6 @@ AdvancedNotificationService::AdvancedNotificationService()
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
 #endif
-    permissonFilter_ = std::make_shared<PermissionFilter>();
-    notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_ANS_CHECK_SA_PERMISSION, "false");
 }
 
@@ -772,8 +772,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         }
 #endif
         NotificationRequestDb requestDb = { .request = record->request, .bundleOption = bundleOption};
-        result = SetNotificationRequestToDb(requestDb);
         UpdateNotificationTimerInfo(record);
+        result = SetNotificationRequestToDb(requestDb);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
@@ -5888,6 +5888,31 @@ bool AdvancedNotificationService::CheckLocalLiveViewAllowed(const sptr<Notificat
             }
     }
     return true;
+}
+
+void AdvancedNotificationService::FillActionButtons(const sptr<NotificationRequest> &request)
+{
+    if (request->IsCoverActionButtons()) {
+        ANS_LOGD("Cover old action buttons.");
+        return;
+    }
+
+    auto iter = notificationList_.begin();
+    while (iter != notificationList_.end()) {
+        if ((*iter)->request->GetKey() == request->GetKey()) {
+            break;
+        }
+        iter++;
+    }
+
+    if (iter == notificationList_.end()) {
+        ANS_LOGD("No old action buttons.");
+        return;
+    }
+
+    for (auto actionButton : (*iter)->request->GetActionButtons()) {
+        request->AddActionButton(actionButton);
+    }
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

@@ -1200,6 +1200,20 @@ public:
      */
     ErrCode CheckImageSizeForContent() const;
 
+    /**
+     * @brief Set notification isCoverActionButtons value.
+     *
+     * @param isCoverActionButtons the value of isCoverActionButtons.
+     */
+    void SetIsCoverActionButtons(bool isCoverActionButtons);
+
+    /**
+     * @brief Get notification isCoverActionButtons value.
+     *
+     * @return Return the value of isCoverActionButtons.
+     */
+    bool IsCoverActionButtons() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1320,6 +1334,7 @@ private:
     std::shared_ptr<NotificationContent> notificationContent_ {};
 
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
+    bool isCoverActionButtons_ {false};
     std::vector<std::shared_ptr<MessageUser>> messageUsers_ {};
     std::vector<std::string> userInputHistory_ {};
 
