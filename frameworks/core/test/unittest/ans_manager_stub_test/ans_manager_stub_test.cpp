@@ -4278,5 +4278,91 @@ HWTEST_F(AnsManagerStubTest, HandleRegisterPushCallback01, Function | SmallTest 
     ErrCode ret = ansManagerStub_->HandleRegisterPushCallback(data, reply);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
+
+/**
+ * @tc.name: HandleGetSlotFlagsAsBundle01
+ * @tc.desc: Test HandleGetSlotFlagsAsBundle succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetSlotFlagsAsBundle01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    uint32_t res = 305;
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ((int)ret, (int)res);
+}
+
+/**
+ * @tc.name: HandleGetSlotFlagsAsBundle02
+ * @tc.desc: Test if the bundleOption in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetSlotFlagsAsBundle02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    uint32_t res = 305;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ((int)ret, (int)res);
+}
+
+/**
+ * @tc.name: HandleSetSlotFlagsAsBundle01
+ * @tc.desc: Test HandleSetSlotFlagsAsBundle succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SLOTFLAGS_BY_BUNDLE);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    uint32_t res = 305;
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ((int)ret, (int)res);
+}
+
+/**
+ * @tc.name: HandleSetSlotFlagsAsBundle02
+ * @tc.desc: Test if the bundleOption in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_SLOTFLAGS_BY_BUNDLE);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    uint32_t res = 305;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ((int)ret, (int)res);
+}
 }
 }
