@@ -181,12 +181,12 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
 bool ReminderDataManager::IsMatchedForGroupIdAndPkgName(const sptr<ReminderRequest> &reminder,
     const std::string &packageName, const std::string &groupId) const
 {
-    sptr<NotificationRequest> notification = reminder->GetNotificationRequest();
-    if (notification == nullptr) {
-        ANSR_LOGW("IsMatchedForGroupIdAndPkgName not find the notification");
+    std::string packageNameTemp = reminder->GetBundleName();
+    if (packageNameTemp.empty()) {
+        ANSR_LOGW("reminder package name is null");
         return false;
     }
-    if (notification->GetCreatorBundleName() == packageName && reminder->GetGroupId() == groupId) {
+    if (packageNameTemp == packageName && reminder->GetGroupId() == groupId) {
         return true;
     }
     return false;
@@ -500,20 +500,16 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
         return;
     }
-    sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
-    if (notificationRequest == nullptr) {
-        ANSR_LOGW("notificationRequest is not find, this reminder can`t close by groupId");
+    std::string packageName = reminder->GetBundleName();
+    std::string groupId = reminder->GetGroupId();
+    if (packageName.empty() || groupId.empty()) {
+        ANSR_LOGD("reminder packageName is null or default close reminder, \
+            the group id is not set, this reminder can not close by groupId");
         CloseReminder(reminder, cancelNotification);
         StartRecentReminder();
-        CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
         return;
     }
-    std::string bundleName = notificationRequest->GetCreatorBundleName();
-    std::string groupId = reminder->GetGroupId();
-    if (!groupId.empty()) {
-        ANSR_LOGD("close reminder, the group id is set.");
-        CloseRemindersByGroupId(reminderId, bundleName, groupId);
-    }
+    CloseRemindersByGroupId(reminder,);
     CloseReminder(reminder, cancelNotification);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
@@ -1599,11 +1595,7 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
                 ANSR_LOGE("Trigger timer has already started.");
                 break;
             }
-            SetActiveReminder(reminderRequest);
-            timerId_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type, reminderRequest));
-            triggerTime = reminderRequest->GetTriggerTimeInMilli();
-            timer->StartTimer(timerId_, triggerTime);
-            ANSR_LOGD("Start timing (next triggerTime), timerId=%{public}" PRIu64 "", timerId_);
+            triggerTime = HandleTriggerTimeInner(reminderRequest, type, timer);
             break;
         }
         case TimerType::ALERTING_TIMER: {
@@ -1611,12 +1603,7 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
                 ANSR_LOGE("Alerting time out timer has already started.");
                 break;
             }
-            triggerTime = ReminderRequest::GetDurationSinceEpochInMilli(now)
-                + static_cast<uint64_t>(reminderRequest->GetRingDuration() * ReminderRequest::MILLI_SECONDS);
-            timerIdAlerting_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type, reminderRequest));
-            timer->StartTimer(timerIdAlerting_, triggerTime);
-            ANSR_LOGD(
-                "Start timing (alerting time out), timerId=%{public}" PRIu64 "", timerIdAlerting_);
+            triggerTime = HandleAlertingTimeInner(reminderRequest, type, timer, now);
             break;
         }
         default: {
@@ -1630,6 +1617,30 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
         ANSR_LOGD("Timing info: now:(%{public}" PRIu64 "), tar:(%{public}" PRIu64 ")",
             ReminderRequest::GetDurationSinceEpochInMilli(now), triggerTime);
     }
+}
+
+uint64_t ReminderDataManager::HandleTriggerTimeInner(const sptr<ReminderRequest> &reminderRequest, TimerType type,
+    const sptr<MiscServices::TimeServiceClient> &timer)
+{
+    uint64_t triggerTime = 0;
+    SetActiveReminder(reminderRequest);
+    timerId_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type, reminderRequest));
+    triggerTime = reminderRequest->GetTriggerTimeInMilli();
+    timer->StartTimer(timerId_, triggerTime);
+    ANSR_LOGD("Start timing (next triggerTime), timerId=%{public}" PRIu64 "", timerId_);
+    return triggerTime;
+}
+
+uint64_t ReminderDataManager::HandleAlertingTimeInner(const sptr<ReminderRequest> &reminderRequest, TimerType type,
+    const sptr<MiscServices::TimeServiceClient> &timer, time_t now)
+{
+    uint64_t triggerTime = 0;
+    triggerTime = ReminderRequest::GetDurationSinceEpochInMilli(now)
+        + static_cast<uint64_t>(reminderRequest->GetRingDuration() * ReminderRequest::MILLI_SECONDS);
+    timerIdAlerting_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type, reminderRequest));
+    timer->StartTimer(timerIdAlerting_, triggerTime);
+    ANSR_LOGD("Start timing (alerting time out), timerId=%{public}" PRIu64 "", timerIdAlerting_);
+    return triggerTime;
 }
 
 void ReminderDataManager::StopTimerLocked(TimerType type)
