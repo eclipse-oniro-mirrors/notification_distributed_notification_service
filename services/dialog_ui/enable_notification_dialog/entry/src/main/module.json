@@ -21,7 +21,7 @@
         "description": "$string:NotificationServiceExtAbility_desc",
         "icon": "$media:icon",
         "label": "$string:NotificationServiceExtAbility_label",
-        "visible": false,
+        "visible": true,
         "type": "service"
       }
     ],
