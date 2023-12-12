@@ -506,6 +506,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         ANSR_LOGD("reminder packageName is null or default close reminder, \
             the group id is not set, this reminder can not close by groupId");
         CloseReminder(reminder, cancelNotification);
+        UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
         StartRecentReminder();
         return;
     }
