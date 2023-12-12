@@ -466,11 +466,6 @@ napi_value ReminderCommon::GenReminder(
         return nullptr;
     }
 
-    // custom ring uri
-    if (GetStringUtf8(env, value, ReminderAgentNapi::CUSTOM_RING_URI, str, NotificationNapi::STR_MAX_SIZE)) {
-        reminder->SetCustomRingUri(std::string(str));
-    }
-
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
@@ -502,6 +497,11 @@ void ReminderCommon::GenReminderStringInner(
     // group id
     if (GetStringUtf8(env, value, ReminderAgentNapi::GROUP_ID, str, NotificationNapi::STR_MAX_SIZE)) {
         reminder->SetGroupId(std::string(str));
+    }
+
+    // custom ring uri
+    if (GetStringUtf8(env, value, ReminderAgentNapi::CUSTOM_RING_URI, str, NotificationNapi::STR_MAX_SIZE)) {
+        reminder->SetCustomRingUri(std::string(str));
     }
 }
 
