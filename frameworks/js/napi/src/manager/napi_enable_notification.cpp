@@ -126,7 +126,7 @@ void AsyncCompleteCallbackNapiIsNotificationEnabled(napi_env env, napi_status st
     }
 }
 
-napi_value NapiIsNotificationEnabled(napi_env env, napi_callback_info info)
+__attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_env env, napi_callback_info info)
 {
     ANS_LOGI("enter");
     IsEnableParams params {};
