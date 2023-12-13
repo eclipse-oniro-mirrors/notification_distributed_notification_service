@@ -510,7 +510,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         StartRecentReminder();
         return;
     }
-    CloseRemindersByGroupId(reminder,);
+    CloseRemindersByGroupId(reminderId, packageName, groupId);
     CloseReminder(reminder, cancelNotification);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
