@@ -436,6 +436,42 @@ napi_value ReminderCommon::GenReminder(
         return nullptr;
     }
     bool isSysApp = IsSelfSystemApp(reminder);
+    GenReminderStringInner(env, value, reminder);
+    if (!GenReminderIntInner(env, value, reminder)) {
+        return nullptr;
+    }
+    GenReminderBoolInner(env, value, reminder);
+
+    // snoozeSlotType
+    int32_t snoozeSlotType = 0;
+    if (GetInt32(env, value, ReminderAgentNapi::SNOOZE_SLOT_TYPE, snoozeSlotType, false)) {
+        enum NotificationConstant::SlotType actureSnoozeType = NotificationConstant::SlotType::OTHER;
+        if (!NotificationNapi::Common::SlotTypeJSToC(NotificationNapi::SlotType(snoozeSlotType), actureSnoozeType)) {
+            ANSR_LOGW("snooze slot type not support.");
+            return nullptr;
+        }
+        reminder->SetSnoozeSlotType(actureSnoozeType);
+    }
+
+    // wantAgent
+    if (!GenWantAgent(env, value, reminder, isSysApp)) {
+        return nullptr;
+    }
+
+    // maxScreenWantAgent
+    GenMaxScreenWantAgent(env, value, reminder);
+
+    // actionButtons
+    if (!GenActionButtons(env, value, reminder, isSysApp)) {
+        return nullptr;
+    }
+
+    return NotificationNapi::Common::NapiGetNull(env);
+}
+
+void ReminderCommon::GenReminderStringInner(
+    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+{
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
 
     // title
@@ -458,6 +494,20 @@ napi_value ReminderCommon::GenReminder(
         reminder->SetSnoozeContent(std::string(str));
     }
 
+    // group id
+    if (GetStringUtf8(env, value, ReminderAgentNapi::GROUP_ID, str, NotificationNapi::STR_MAX_SIZE)) {
+        reminder->SetGroupId(std::string(str));
+    }
+
+    // custom ring uri
+    if (GetStringUtf8(env, value, ReminderAgentNapi::CUSTOM_RING_URI, str, NotificationNapi::STR_MAX_SIZE)) {
+        reminder->SetCustomRingUri(std::string(str));
+    }
+}
+
+bool ReminderCommon::GenReminderIntInner(
+    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+{
     // ringDuration
     int64_t propVal = 0;
     if (GetInt64(env, value, ReminderAgentNapi::RING_DURATION, propVal)) {
@@ -501,26 +551,9 @@ napi_value ReminderCommon::GenReminder(
         enum NotificationConstant::SlotType actureType = NotificationConstant::SlotType::OTHER;
         if (!NotificationNapi::Common::SlotTypeJSToC(NotificationNapi::SlotType(slotType), actureType)) {
             ANSR_LOGW("slot type not support.");
-            return nullptr;
+            return false;
         }
         reminder->SetSlotType(actureType);
-    }
-
-    // snoozeSlotType
-    int32_t snoozeSlotType = 0;
-    if (GetInt32(env, value, ReminderAgentNapi::SNOOZE_SLOT_TYPE, snoozeSlotType, false)) {
-        enum NotificationConstant::SlotType actureSnoozeType = NotificationConstant::SlotType::OTHER;
-        if (!NotificationNapi::Common::SlotTypeJSToC(NotificationNapi::SlotType(snoozeSlotType), actureSnoozeType)) {
-            ANSR_LOGW("snooze slot type not support.");
-            return nullptr;
-        }
-        reminder->SetSnoozeSlotType(actureSnoozeType);
-    }
-
-    // tapDismissed
-    bool tapDismissed = false;
-    if (GetBool(env, value, ReminderAgentNapi::TAPDISMISSED, tapDismissed)) {
-        reminder->SetTapDismissed(tapDismissed);
     }
 
     //autoDeletedTime
@@ -530,31 +563,17 @@ napi_value ReminderCommon::GenReminder(
             reminder->SetAutoDeletedTime(autoDeletedTime);
         }
     }
+    return true;
+}
 
-    // wantAgent
-    if (!GenWantAgent(env, value, reminder, isSysApp)) {
-        return nullptr;
+void ReminderCommon::GenReminderBoolInner(
+    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+{
+    // tapDismissed
+    bool tapDismissed = false;
+    if (GetBool(env, value, ReminderAgentNapi::TAPDISMISSED, tapDismissed)) {
+        reminder->SetTapDismissed(tapDismissed);
     }
-
-    // maxScreenWantAgent
-    GenMaxScreenWantAgent(env, value, reminder);
-
-    // actionButtons
-    if (!GenActionButtons(env, value, reminder, isSysApp)) {
-        return nullptr;
-    }
-
-    // group id
-    if (GetStringUtf8(env, value, ReminderAgentNapi::GROUP_ID, str, NotificationNapi::STR_MAX_SIZE)) {
-        reminder->SetGroupId(std::string(str));
-    }
-
-    // custom ring uri
-    if (GetStringUtf8(env, value, ReminderAgentNapi::CUSTOM_RING_URI, str, NotificationNapi::STR_MAX_SIZE)) {
-        reminder->SetCustomRingUri(std::string(str));
-    }
-
-    return NotificationNapi::Common::NapiGetNull(env);
 }
 
 bool ReminderCommon::GetStringUtf8(const napi_env &env, const napi_value &value,

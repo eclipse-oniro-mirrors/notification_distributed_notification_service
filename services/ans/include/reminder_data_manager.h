@@ -32,6 +32,7 @@
 #include "datashare_predicates.h"
 #include "datashare_values_bucket.h"
 #include "app_mgr_interface.h"
+#include "time_service_client.h"
 
 namespace OHOS {
 namespace Notification {
@@ -502,6 +503,12 @@ private:
      */
     void StartTimerLocked(const sptr<ReminderRequest> &reminderRequest, TimerType type);
     void StartTimer(const sptr<ReminderRequest> &reminderRequest, TimerType type);
+
+    uint64_t HandleTriggerTimeInner(const sptr<ReminderRequest> &reminderRequest, TimerType type,
+        const sptr<MiscServices::TimeServiceClient> &timer);
+
+    uint64_t HandleAlertingTimeInner(const sptr<ReminderRequest> &reminderRequest, TimerType type,
+        const sptr<MiscServices::TimeServiceClient> &timer, time_t now);
 
     /**
      * @brief Stop the alerting timer and update reminder information.

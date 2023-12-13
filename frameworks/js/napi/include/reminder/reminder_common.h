@@ -161,6 +161,15 @@ private:
     static void HandleActionButtonTitle(const napi_env &env, const napi_value &actionButton,
         std::shared_ptr<ReminderRequest>& reminder, const char* str, int32_t buttonType);
 
+    static void GenReminderStringInner(
+        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+
+    static bool GenReminderIntInner(
+        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+
+    static void GenReminderBoolInner(
+        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+
     static napi_value ParseInt32Array(const napi_env &env, const napi_value &value,
         const char* propertyName, std::vector<uint8_t> &propertyVal, uint8_t maxLen);
 
