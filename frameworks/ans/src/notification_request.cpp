@@ -1585,6 +1585,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->receiverUserId_ = other.receiverUserId_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
+    this->isCoverActionButtons_ = other.isCoverActionButtons_;
 
     this->slotType_ = other.slotType_;
     this->settingsText_ = other.settingsText_;
@@ -1629,7 +1630,6 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationContent_ = other.notificationContent_;
 
     this->actionButtons_ = other.actionButtons_;
-    this->isCoverActionButtons_ = other.isCoverActionButtons_;
     this->messageUsers_ = other.messageUsers_;
     this->userInputHistory_ = other.userInputHistory_;
 
