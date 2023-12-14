@@ -990,5 +990,16 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     MockDeleteData(true);
     EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test")), NativeRdb::E_OK);
 }
+
+/**
+ * @tc.name      : PutSlotFlags_00100
+ * @tc.number    :
+ * @tc.desc      : Put bundle total badge nums into disturbe DB, return is true.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, PutSlotFlags_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    EXPECT_EQ(preferncesDB_->PutSlotFlags(bundleInfo, 0), true);
+}
 }  // namespace Notification
 }  // namespace OHOS
