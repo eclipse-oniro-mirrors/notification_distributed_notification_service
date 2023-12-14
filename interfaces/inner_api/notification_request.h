@@ -1323,6 +1323,7 @@ private:
     bool permitted_ {true};
     bool isAgent_ {false};
     bool isRemoveAllowed_ {true};
+    bool isCoverActionButtons_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};
@@ -1334,7 +1335,6 @@ private:
     std::shared_ptr<NotificationContent> notificationContent_ {};
 
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
-    bool isCoverActionButtons_ {false};
     std::vector<std::shared_ptr<MessageUser>> messageUsers_ {};
     std::vector<std::string> userInputHistory_ {};
 
