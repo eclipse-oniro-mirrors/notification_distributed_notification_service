@@ -182,15 +182,17 @@ struct PermissionDialog {
   updateAvoidWindow(): void {
     let type = window.AvoidAreaType.TYPE_SYSTEM;
     try {
-      this.dialog.window.on('avoidAreaChange', (data): void => {
+      this.dialog?.window.on('avoidAreaChange', (data): void => {
         if (data.type == window.AvoidAreaType.TYPE_SYSTEM) {
           console.info(TAG, `avoidAreaChange: ${JSON.stringify(data)}`);
           this.naviHeight = data.area.bottomRect.height;
         }
       });
-      let avoidArea = this.dialog.window.getWindowAvoidArea(type);
-      console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
-      this.naviHeight = avoidArea.bottomRect.height;
+      let avoidArea = this.dialog?.window.getWindowAvoidArea(type);
+      if (avoidArea != undefined){
+        console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
+        this.naviHeight = avoidArea.bottomRect.height;
+      }
     } catch (err) {
       console.error(TAG, `Failed to obtain the area. Cause: ${JSON.stringify(err)}`);
     }
@@ -203,7 +205,7 @@ struct PermissionDialog {
   }
 
   async updateStatus(): Promise<void> {
-    let bundleNameObj = this.dialog.want.parameters.from;
+    let bundleNameObj = this.dialog?.want.parameters?.from;
     let bundleName = bundleNameObj ? bundleNameObj.toString() : '';
     await this.updateApplicationName(bundleName);
     this.updateIsBottomPopover();
@@ -222,22 +224,22 @@ struct PermissionDialog {
       await this.updateStatus();
     } catch (err) {
       console.error(TAG, `aboutToAppear error : + ${JSON.stringify(err)}`);
-      await this.dialog.destroyException();
+      await this.dialog?.destroyException();
     }
   }
 
   async aboutToDisappear(): Promise<void> {
-    await this.dialog.destroyWindow();
+    await this.dialog?.destroyWindow();
   }
 
   async enableNotification(enabled: boolean): Promise<void> {
     console.info(TAG, `NotificationDialog enableNotification: ${enabled}`);
     try {
-      await this.dialog.publishButtonClickedEvent(enabled);
+      await this.dialog?.publishButtonClickedEvent(enabled);
     } catch (err) {
       console.error(TAG, `NotificationDialog enable error, code is ${err.code}`);
     } finally {
-      await this.dialog.destroy();
+      await this.dialog?.destroy();
     }
   }
 }
