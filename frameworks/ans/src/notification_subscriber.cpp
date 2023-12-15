@@ -112,6 +112,7 @@ void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sp
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber_.HasOnBatchCancelCallback()) {
         OnBatchCanceled(notifications, notificationMap, deleteReason);
+        return;
     }
     for (auto notification : notifications) {
         OnCanceled(notification, notificationMap, deleteReason);
