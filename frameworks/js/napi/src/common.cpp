@@ -3224,9 +3224,8 @@ napi_value Common::GetNotificationContentType(const napi_env &env, const napi_va
         return NapiGetNull(env);
     } else {
         ANS_LOGE("Property contentType expected.");
+        return nullptr;
     }
-
-    return NapiGetNull(env);
 }
 
 napi_value Common::GetNotificationBasicContent(
@@ -4758,6 +4757,7 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
         }
     } else {
         ANS_LOGE("Property type expected.");
+        return nullptr;
     }
 
     if (nobj != nullptr) {
