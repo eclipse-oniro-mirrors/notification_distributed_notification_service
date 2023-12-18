@@ -29,13 +29,16 @@
 
 extern void MockGetUserId(bool mockRet);
 extern void MockGetBundleName(bool mockRet);
-extern void MockVerifyNativeToken(bool mockRet);
-extern void MockVerifyCallerPermission(bool mockRet);
 extern void MockGetNotificationSlotRet(bool mockRet);
 
+using namespace OHOS::Security::AccessToken;
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
+extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
+extern void MockIsSystemApp(bool isSystemApp);
+extern void MockIsVerfyPermisson(bool isVerify);
+
 class NotificationSubscriberManagerBranchTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -418,8 +421,9 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
 {
     std::string permission = "<permission>";
     AdvancedNotificationService advancedNotificationService;
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
     EXPECT_EQ(advancedNotificationService.CheckPermission(permission), false);
 }
 
@@ -430,16 +434,14 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01400, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
     sptr<NotificationRequest> req = new NotificationRequest();
     bool isAgentTrue = true;
     req->SetIsAgentNotification(isAgentTrue);
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(advancedNotificationService.PrepareNotificationRequest(req), ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -449,14 +451,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01500, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
     int32_t notificationId = 1;
     std::string representativeBundle = "<representativeBundle>";
     int32_t userId = 2;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.CancelAsBundle(notificationId, representativeBundle, userId),
         ERR_ANS_NON_SYSTEM_APP);
@@ -469,12 +469,10 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01600, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
     std::vector<sptr<NotificationSlot>> slots;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.AddSlots(slots), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -486,13 +484,11 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01700, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
     std::string key = "<key>";
     int32_t removeReason = 1;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.Delete(key, removeReason), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -504,12 +500,10 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01800, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> bundleOption =  new NotificationBundleOption();
 
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.DeleteByBundle(bundleOption), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -521,10 +515,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01900, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.DeleteAll(), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -541,8 +533,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::vector<sptr<NotificationSlot>> slots;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetSlotsByBundle(bundleOption, slots), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -559,8 +551,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::vector<sptr<NotificationSlot>> slots;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.UpdateSlots(bundleOption, slots), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -577,8 +569,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool enabled = true;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetShowBadgeEnabledForBundle(bundleOption, enabled),
         ERR_ANS_NON_SYSTEM_APP);
@@ -596,8 +588,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool enabled = true;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetShowBadgeEnabledForBundle(bundleOption, enabled),
         ERR_ANS_NON_SYSTEM_APP);
@@ -613,10 +605,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     sptr<AnsSubscriberInterface> subscriber = nullptr;
     sptr<NotificationSubscribeInfo> info = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.Unsubscribe(subscriber, info), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -630,10 +620,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
 {
     std::vector<sptr<Notification>> notifications;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetAllActiveNotifications(notifications), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -648,10 +636,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     std::vector<std::string> key;
     std::vector<sptr<Notification>> notifications;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(
         advancedNotificationService.GetSpecialActiveNotifications(key, notifications), ERR_ANS_NON_SYSTEM_APP);
@@ -667,10 +653,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     std::string deviceId = "<deviceId>";
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledForAllBundles(deviceId, enabled),
         ERR_ANS_NON_SYSTEM_APP);
@@ -685,10 +669,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
 {
     std::string deviceId = "<deviceId>";
     bool enabled = true;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledForAllBundles(deviceId, enabled),
         ERR_ANS_GET_ACTIVE_USER_FAILED);
@@ -705,10 +687,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledForSpecialBundle(deviceId, bundleOption, enabled),
         ERR_ANS_NON_SYSTEM_APP);
@@ -723,10 +703,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
 {
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -740,9 +718,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
 {
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
@@ -757,8 +733,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool allowed = true;
 
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(
         advancedNotificationService.IsSpecialBundleAllowedNotify(bundleOption, allowed), ERR_ANS_NON_SYSTEM_APP);
@@ -774,7 +750,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool allowed = true;
 
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(
         advancedNotificationService.IsSpecialBundleAllowedNotify(bundleOption, allowed), ERR_ANS_INVALID_BUNDLE);
@@ -793,7 +769,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     int32_t uid = 2;
     bundleOption->SetUid(uid);
 
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.IsSpecialBundleAllowedNotify(bundleOption, allowed),
         ERR_ANS_GET_ACTIVE_USER_FAILED);
@@ -811,10 +787,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     std::string label = "<label>";
     int32_t removeReason = 1;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.RemoveNotification(bundleOption, notificationId, label, removeReason),
         ERR_ANS_NON_SYSTEM_APP);
@@ -832,9 +806,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     std::string label = "<label>";
     int32_t removeReason = 1;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     bundleOption->SetUid(notificationId);
 
     AdvancedNotificationService advancedNotificationService;
@@ -851,10 +823,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.RemoveAllNotifications(bundleOption), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -868,9 +838,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
 
@@ -888,10 +856,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     sptr<NotificationBundleOption> bundleOption = nullptr;
     uint64_t num = 1;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetSlotNumAsBundle(bundleOption, num), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -906,9 +872,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     uint64_t num = 1;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
 
@@ -926,10 +890,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::string groupName = "<groupName>";
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -944,9 +906,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::string groupName = "";
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_INVALID_PARAM);
 }
@@ -961,9 +921,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     std::string groupName = "<groupName>";
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
@@ -979,10 +937,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 {
     sptr<NotificationDoNotDisturbDate> date = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -996,9 +952,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 {
     sptr<NotificationDoNotDisturbDate> date = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
@@ -1012,10 +966,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 {
     sptr<NotificationDoNotDisturbDate> date = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1029,9 +981,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 {
     sptr<NotificationDoNotDisturbDate> date = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
@@ -1045,10 +995,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 {
     bool doesSupport = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1062,10 +1010,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 {
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.EnableDistributed(enabled), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1080,10 +1026,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1098,9 +1042,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
@@ -1117,10 +1059,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1135,9 +1075,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
@@ -1153,10 +1091,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
 {
     NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetDeviceRemindType(remindType), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1171,10 +1107,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     int32_t userId = 1;
     bool allowed = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.IsSpecialUserAllowedNotify(userId, allowed), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1189,10 +1123,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     int32_t userId = 1;
     bool allowed = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledByUser(userId, allowed), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1207,10 +1139,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbDate> date = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1225,10 +1155,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbDate> date = nullptr;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
 }
@@ -1245,10 +1173,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     bool enabled = true;
     bool isForceControl = false;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl),
         ERR_ANS_NON_SYSTEM_APP);
@@ -1266,9 +1192,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     bool enabled = true;
     bool isForceControl = false;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
@@ -1287,10 +1211,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled),
         ERR_ANS_NON_SYSTEM_APP);
@@ -1307,9 +1229,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
@@ -1328,9 +1248,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 1;
     bundleOption->SetUid(notificationId);
     MockGetNotificationSlotRet(false);
@@ -1350,14 +1268,13 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 1;
     bundleOption->SetUid(notificationId);
     MockGetNotificationSlotRet(true);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled), ERR_OK);
+    EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled),
+        ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1370,10 +1287,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     int32_t userId = 1;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetSyncNotificationEnabledWithoutApp(userId, enabled),
         ERR_ANS_NON_SYSTEM_APP);
@@ -1389,10 +1304,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     int32_t userId = 1;
     bool enabled = true;
 
-    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-
-    MockVerifyNativeToken(false);
-    MockVerifyCallerPermission(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled),
         ERR_ANS_NON_SYSTEM_APP);
@@ -1426,7 +1339,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
 
     MockGetNotificationSlotRet(false);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_ANS_INVALID_BUNDLE);
 }
 }  // namespace Notification
 }  // namespace OHOS
