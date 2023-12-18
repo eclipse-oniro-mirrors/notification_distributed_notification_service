@@ -16,11 +16,22 @@
 #include "tokenid_kit.h"
 
 namespace OHOS {
+namespace Notification {
+bool g_isSystemApp = true;
+
+void MockIsSystemApp(bool isSystemApp)
+{
+    g_isSystemApp = isSystemApp;
+}
+
+}
+}
+namespace OHOS {
 namespace Security {
 namespace AccessToken {
 bool TokenIdKit::IsSystemAppByFullTokenID(uint64_t tokenId)
 {
-    return true;
+    return Notification::g_isSystemApp;
 }
 }  // namespace AccessToken
 }  // namespace Security
