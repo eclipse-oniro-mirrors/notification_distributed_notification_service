@@ -37,11 +37,11 @@ namespace OHOS {
 namespace Notification {
 class ReminderDataManagerTest : public testing::Test {
 public:
-    static void SetUpTestCase() 
+    static void SetUpTestCase()
     {
         manager = std::make_shared<ReminderDataManager>();
     }
-    static void TearDownTestCase() 
+    static void TearDownTestCase()
     {
         manager = nullptr;
     }
