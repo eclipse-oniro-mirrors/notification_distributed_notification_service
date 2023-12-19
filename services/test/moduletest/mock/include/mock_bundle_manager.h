@@ -16,45 +16,26 @@
 #ifndef FOUNDATION_EVENT_CESFWK_SERVICES_TEST_UNITTEST_MOCK_INCLUDE_MOCK_BUNDLE_MANAGER_H
 #define FOUNDATION_EVENT_CESFWK_SERVICES_TEST_UNITTEST_MOCK_INCLUDE_MOCK_BUNDLE_MANAGER_H
 
-#include <vector>
-
-#include "ability_info.h"
-#include "application_info.h"
-#include "bundle_mgr_host.h"
-#include "bundle_mgr_interface.h"
+#include "bundle_info.h"
 #include "iremote_proxy.h"
-#include "iremote_stub.h"
-#include "want.h"
+#include "bundle_mgr_interface.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-class MockBundleManager : public BundleMgrHost {
+class BundleMgrProxy : public IRemoteProxy<IBundleMgr> {
 public:
-    MockBundleManager()
-    {
-    }
+    explicit BundleMgrProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<IBundleMgr>(impl) {}
+    virtual ~BundleMgrProxy() {}
 
-    ~MockBundleManager()
-    {}
+    ErrCode GetNameForUid(const int uid, std::string &name) override;
+
+    bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag,
+        BundleInfo &bundleInfo, int32_t userId) override;
+
+    int GetUidByBundleName(const std::string &bundleName, const int userId) override;
     
-    /**
-     * @brief Check whether the app is system app by it's UID.
-     *
-     * @param uid Indicates the uid.
-     * @return Returns true if the bundle is a system application; returns false otherwise.
-     */
-    virtual bool CheckIsSystemAppByUid(const int uid) override;
-
-    /**
-     * @brief Set whether the bundle is systemapp.
-     *
-     * @param isSystemApp Indicates the system app flag.
-     */
-    void MockSetIsSystemApp(bool isSystemApp);
-
-private:
-    bool isSystemApp_ = false;
-    bool isSystemAppMock_ = false;
+    bool GetApplicationInfo(
+        const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo) override;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
