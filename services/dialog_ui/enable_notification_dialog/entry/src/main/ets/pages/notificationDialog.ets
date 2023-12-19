@@ -27,6 +27,7 @@ const permission: Record<string, Resource> = {
   'icon': $r('app.media.ic_public_ring'),
   'reason': $r('app.string.reason'),
 };
+const moduleName = 'entry';
 const bottomPopoverTypes = ['default', 'phone'];
 
 let storage = LocalStorage.getShared();
@@ -170,7 +171,7 @@ struct PermissionDialog {
       let applicationInfo = await bundleManager.getApplicationInfo(bundleName,
         bundleManager.ApplicationFlag.GET_APPLICATION_INFO_DEFAULT);
       let extensionContext = AppStorage.Get('context') as Context;
-      let context = extensionContext.createBundleContext(bundleName);
+      let context = extensionContext.createModuleContext(bundleName, moduleName);
       let appName = context.resourceManager.getStringSync(applicationInfo.labelId);
       this.appName = titleTrim(appName);
       console.info(TAG, `hap label: ${applicationInfo.label}, value ${this.appName}`);
