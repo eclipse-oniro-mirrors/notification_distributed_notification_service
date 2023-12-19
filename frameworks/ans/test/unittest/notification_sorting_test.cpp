@@ -129,7 +129,7 @@ HWTEST_F(NotificationSortingTest, Dump_00001, Function | SmallTest | Level1)
     "slot = NotificationSlot{ id = OTHER, name = OTHER, description = , "
     "type = 3, level = 1, isBypassDnd = false, visibleness = 3, sound = , "
     "isLightEnabled = false, lightColor = 0, isVibrate = false, "
-    "vibration = , isShowBadge = true, enabled = true } }";
+    "vibration = , isShowBadge = true, enabled = true, slotFlags = 0 } }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 }
