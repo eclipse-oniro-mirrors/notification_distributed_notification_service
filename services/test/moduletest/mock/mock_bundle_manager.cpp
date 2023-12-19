@@ -13,26 +13,55 @@
  * limitations under the License.
  */
 
-#include "ability_info.h"
-#include "application_info.h"
 #include "mock_bundle_manager.h"
+
+#include <functional>
+#include <gtest/gtest.h>
+#include "ans_ut_constant.h"
+
+namespace OHOS {
+namespace Notification {
+namespace {
+bool g_isNonBundleName = false;
+}
+
+void MockIsNonBundleName(bool isNonBundleName)
+{
+    g_isNonBundleName = isNonBundleName;
+}
+}
+}
 
 namespace OHOS {
 namespace AppExecFwk {
-constexpr int SYSTEMAPP_UUID = 1000;
-
-void MockBundleManager::MockSetIsSystemApp(bool isSystemApp)
+ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
 {
-    isSystemAppMock_ = true;
-    isSystemApp_ = isSystemApp;
+    GTEST_LOG_(INFO) << "mock GetNameForUid.";
+    name = Notification::g_isNonBundleName ? "": "bundleName";
+    return ERR_OK;
 }
 
-bool MockBundleManager::CheckIsSystemAppByUid(const int uid)
+bool BundleMgrProxy::GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo,
+    int32_t userId)
 {
-    if (isSystemAppMock_) {
-        return isSystemApp_;
+    return true;
+}
+
+int BundleMgrProxy::GetUidByBundleName(const std::string &bundleName, const int userId)
+{
+    if (userId == 0) {
+        return -1;
+    } else {
+        return Notification::NON_SYSTEM_APP_UID;
     }
-    return (uid < SYSTEMAPP_UUID) ? false : true;
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
+
+bool BundleMgrProxy::GetApplicationInfo(
+    const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
+{
+    appInfo.distributedNotificationEnabled = true;
+    return true;
+}
+
+} // namespace AppExecFwk
+} // namespace OHOS

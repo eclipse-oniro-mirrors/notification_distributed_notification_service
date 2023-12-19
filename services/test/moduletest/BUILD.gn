@@ -38,7 +38,6 @@ ohos_moduletest("ans_module_test") {
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
-    "mock/mock_bundle_mgr_proxy.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_single_kv_store.cpp",
   ]
