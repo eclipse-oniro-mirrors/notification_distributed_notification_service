@@ -295,7 +295,7 @@ std::string ReminderCommon::Convert2Value(const napi_env &env, const napi_value 
             valueBlob = Convert2U8Vector(env, value);
             for (auto it = valueBlob.begin(); it != valueBlob.end(); ++it) {
                 valueString += std::to_string(*it);
-                if (it != valueBlob.end()) {
+                if ((it + 1) != valueBlob.end()) {
                     valueString += ",";
                 }
             }
