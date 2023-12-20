@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_EVENT_CESFWK_SERVICES_TEST_UNITTEST_MOCK_INCLUDE_MOCK_BUNDLE_MANAGER_H
-#define FOUNDATION_EVENT_CESFWK_SERVICES_TEST_UNITTEST_MOCK_INCLUDE_MOCK_BUNDLE_MANAGER_H
+#ifndef BASE_NOTIFICATION_MOCK_BUNDLE_MANAGER_H
+#define BASE_NOTIFICATION_MOCK_BUNDLE_MANAGER_H
 
 #include "bundle_info.h"
 #include "iremote_proxy.h"
@@ -28,16 +28,13 @@ public:
     virtual ~BundleMgrProxy() {}
 
     ErrCode GetNameForUid(const int uid, std::string &name) override;
-
     bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag,
         BundleInfo &bundleInfo, int32_t userId) override;
-
     int GetUidByBundleName(const std::string &bundleName, const int userId) override;
-    
     bool GetApplicationInfo(
         const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo) override;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
-#endif  // FOUNDATION_EVENT_CESFWK_SERVICES_TEST_UNITTEST_MOCK_INCLUDE_MOCK_BUNDLE_MANAGER_H
+#endif  // MOCK_OHOS_EDM_MOCK_BUNDLE_MANAGER_H

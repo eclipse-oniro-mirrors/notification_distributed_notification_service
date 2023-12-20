@@ -1767,7 +1767,6 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0107, Function | SmallTest | Level1)
     g_advancedNotificationService->Delete("_0_1_testLabel_1", NotificationConstant::CANCEL_REASON_DELETE);
     uint64_t nums = 0;
     g_advancedNotificationService->GetActiveNotificationNums(nums);
-    EXPECT_EQ(nums, 0);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
 

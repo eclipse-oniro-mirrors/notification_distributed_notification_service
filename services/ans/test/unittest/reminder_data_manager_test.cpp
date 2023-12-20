@@ -35,14 +35,24 @@ using namespace testing::ext;
 using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
-static auto manager = std::make_shared<ReminderDataManager>();
 class ReminderDataManagerTest : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase()
+    {
+        manager = std::make_shared<ReminderDataManager>();
+    }
+    static void TearDownTestCase()
+    {
+        manager = nullptr;
+    }
     void SetUp() {};
     void TearDown() {};
+
+public:
+    static std::shared_ptr<ReminderDataManager> manager;
 };
+
+std::shared_ptr<ReminderDataManager> ReminderDataManagerTest::manager = nullptr;
 
 /**
  * @tc.name: ReminderDataManagerTest_001

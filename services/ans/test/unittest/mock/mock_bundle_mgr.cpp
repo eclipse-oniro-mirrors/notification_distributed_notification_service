@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "mock_bundle_manager.h"
+#include "mock_bundle_mgr.h"
 
 #include <functional>
 #include <gtest/gtest.h>
@@ -36,7 +36,6 @@ namespace OHOS {
 namespace AppExecFwk {
 ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
 {
-    GTEST_LOG_(INFO) << "mock GetNameForUid.";
     name = Notification::g_isNonBundleName ? "": "bundleName";
     return ERR_OK;
 }
