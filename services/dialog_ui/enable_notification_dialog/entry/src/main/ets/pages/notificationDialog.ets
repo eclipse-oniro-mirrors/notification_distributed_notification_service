@@ -27,7 +27,6 @@ const permission: Record<string, Resource> = {
   'icon': $r('app.media.ic_public_ring'),
   'reason': $r('app.string.reason'),
 };
-const moduleName = 'entry'
 const bottomPopoverTypes = ['default', 'phone'];
 
 let storage = LocalStorage.getShared();
