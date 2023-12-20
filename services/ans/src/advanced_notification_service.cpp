@@ -378,6 +378,7 @@ AdvancedNotificationService::AdvancedNotificationService()
     notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
     if (!notificationSvrQueue_) {
         ANS_LOGE("ffrt create failed!");
+        return;
     }
     recentInfo_ = std::make_shared<RecentInfo>();
     distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
@@ -488,6 +489,11 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleOption(
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is invalid!");
+        return nullptr;
+    }
+
     sptr<NotificationBundleOption> validBundleOption = nullptr;
     if (bundleOption->GetUid() <= 0) {
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
@@ -2081,9 +2087,6 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -2108,31 +2111,44 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
             return;
         }
         // obtain extraInfo by extraInfoKeys
-        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
-            record->request->GetContent()->GetNotificationContent());
-        auto liveViewExtraInfo = liveViewContent->GetExtraInfo();
-
-        request = sptr<NotificationRequest>::MakeSptr(*(record->request));
-        auto requestLiveViewContent = std::make_shared<NotificationLiveViewContent>();
-
-        requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
-        requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
-
-        std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
-        for (const auto &extraInfoKey : extraInfoKeys) {
-            auto paramValue = liveViewExtraInfo->GetParam(extraInfoKey);
-            if (paramValue != nullptr) {
-                requestExtraInfo->SetParam(extraInfoKey, paramValue);
-            }
+        if (FillRequestByKeys(record->request, extraInfoKeys, request) != ERR_OK) {
+            return;
         }
-        requestLiveViewContent->SetExtraInfo(requestExtraInfo);
-
-        auto requestContent = std::make_shared<NotificationContent>(requestLiveViewContent);
-        request->SetContent(requestContent);
     }));
     notificationSvrQueue_->wait(handler);
 
     return result;
+}
+
+ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRequest> &oldRequest,
+    const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest)
+{
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+        oldRequest->GetContent()->GetNotificationContent());
+    auto liveViewExtraInfo = liveViewContent->GetExtraInfo();
+
+    newRequest = sptr<NotificationRequest>::MakeSptr(*(oldRequest));
+    auto requestLiveViewContent = std::make_shared<NotificationLiveViewContent>();
+
+    requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
+    requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
+
+    std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
+    if (requestExtraInfo == nullptr) {
+        ANS_LOGE("Failed to make extraInfos.");
+        return ERR_ANS_TASK_ERR;
+    }
+    for (const auto &extraInfoKey : extraInfoKeys) {
+        auto paramValue = liveViewExtraInfo->GetParam(extraInfoKey);
+        if (paramValue != nullptr) {
+            requestExtraInfo->SetParam(extraInfoKey, paramValue);
+        }
+    }
+    requestLiveViewContent->SetExtraInfo(requestExtraInfo);
+
+    auto requestContent = std::make_shared<NotificationContent>(requestLiveViewContent);
+    newRequest->SetContent(requestContent);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId,
@@ -5656,6 +5672,10 @@ void AdvancedNotificationService::FillExtraInfoToJson(
     }
 
     std::shared_ptr<AAFwk::WantParams> checkExtraInfo = std::make_shared<AAFwk::WantParams>();
+    if (checkExtraInfo == nullptr) {
+        return;
+    }
+
     if (checkRequest->GetExtraKeys().size() == 0) {
         checkExtraInfo = extraInfo;
     } else {
