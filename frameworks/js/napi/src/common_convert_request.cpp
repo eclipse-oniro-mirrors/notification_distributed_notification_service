@@ -346,6 +346,18 @@ napi_value Common::SetNotificationRequestByCustom(
         napi_set_named_property(env, result, "notificationFlags", flagsResult);
     }
 
+    // readonly agentBundle?: agentBundle
+    std::shared_ptr<NotificationBundleOption> agentBundle = request->GetAgentBundle();
+    if (agentBundle) {
+        napi_value agentBundleResult = nullptr;
+        napi_create_object(env, &agentBundleResult);
+        if (!SetAgentBundle(env, agentBundle, agentBundleResult)) {
+            ANS_LOGE("SetAgentBundle call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "agentBundle", agentBundleResult);
+    }
+
     return NapiGetBoolean(env, true);
 }
 

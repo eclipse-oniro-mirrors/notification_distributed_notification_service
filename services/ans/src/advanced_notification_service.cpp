@@ -149,6 +149,24 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             request->SetOwnerUserId(userId);
         }
         request->SetOwnerUid(uid);
+        // set agentBundle
+        std::string bundle = "";
+        if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+            bundle = GetClientBundleName();
+            if (bundle.empty()) {
+                ANS_LOGE("Failed to GetClientBundleName");
+                return ERR_ANS_INVALID_BUNDLE;
+            }
+        }
+
+        int32_t agentUid = IPCSkeleton::GetCallingUid();
+        std::shared_ptr<NotificationBundleOption> agentBundle =
+            std::make_shared<NotificationBundleOption>(bundle, agentUid);
+        if (agentBundle == nullptr) {
+            ANS_LOGE("Failed to create agentBundle instance");
+            return ERR_ANS_INVALID_BUNDLE;
+        }
+        request->SetAgentBundle(agentBundle);
     } else {
         std::string sourceBundleName =
             request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();

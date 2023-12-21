@@ -1697,6 +1697,8 @@ public:
         const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent);
     static napi_value SetLockScreenPicture(
         const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
+    static napi_value SetAgentBundle(const napi_env &env,
+        const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;
