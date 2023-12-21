@@ -258,16 +258,13 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
         auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
         if (request == nullptr) {
             ANS_LOGE("Parse json string to request failed.");
-            auto emptyVec = std::vector<NotificationRequestDb>();
-            requests.swap(emptyVec);
-            return ERR_ANS_TASK_ERR;
+            continue;
         }
         auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
         if (bundleOption == nullptr) {
             ANS_LOGE("Parse json string to bundle option failed.");
-            auto emptyVec = std::vector<NotificationRequestDb>();
-            requests.swap(emptyVec);
-            return ERR_ANS_TASK_ERR;
+            (void)DeleteNotificationRequestFromDb(request->GetKey());
+            continue;
         }
         NotificationRequestDb requestDb = { .request = request, .bundleOption = bundleOption };
         requests.emplace_back(requestDb);
