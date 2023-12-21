@@ -545,7 +545,8 @@ napi_status ParseArray(const napi_env &env, std::vector<std::string>& temp, napi
     } else if (temp[INDEX_TYPE] == "null") {
         napi_get_null(env, &valueInfo);
     } else if (temp[INDEX_TYPE] == "vector") {
-        std::vector<std::string> arr = ReminderRequest::StringSplit(temp[INDEX_VALUE], ",");
+        std::vector<std::string> arr = ReminderRequest::StringSplit(temp[INDEX_VALUE],
+            ReminderRequest::SEP_BUTTON_VALUE_BLOB);
         std::vector<uint8_t> value;
         for (auto &num : arr) {
             value.push_back(static_cast<uint8_t>(std::stoi(num)));
@@ -587,7 +588,7 @@ void ParseValueBucket(const napi_env &env, std::vector<std::string> valueBucketV
     int32_t index = 0;
     // write equalTo or valuesBucket
     for (auto &str : valueBucketVector) {
-        std::vector<std::string> temp = ReminderRequest::StringSplit(str, ":");
+        std::vector<std::string> temp = ReminderRequest::StringSplit(str, ReminderRequest::SEP_BUTTON_VALUE);
         if (temp.size() <= INDEX_VALUE) {
             continue;
         }
@@ -616,10 +617,12 @@ void ParseButtonDataShareUpdate(const napi_env &env,
     napi_create_string_utf8(env, dataShareUpdate->uri.c_str(), NAPI_AUTO_LENGTH, &uriInfo);
     napi_set_named_property(env, buttonDataShareUpdate, BUTTON_DATA_SHARE_UPDATE_URI, uriInfo);
     // equalTo
-    std::vector<std::string> equalToVector = ReminderRequest::StringSplit(dataShareUpdate->equalTo, ";");
+    std::vector<std::string> equalToVector = ReminderRequest::StringSplit(dataShareUpdate->equalTo,
+        ReminderRequest::SEP_BUTTON_VALUE_TYPE);
     ParseValueBucket(env, equalToVector, buttonDataShareUpdate, BUTTON_DATA_SHARE_UPDATE_EQUALTO);
     // valuesBucket
-    std::vector<std::string> valuesBucketVector = ReminderRequest::StringSplit(dataShareUpdate->valuesBucket, ";");
+    std::vector<std::string> valuesBucketVector = ReminderRequest::StringSplit(dataShareUpdate->valuesBucket,
+        ReminderRequest::SEP_BUTTON_VALUE_TYPE);
     ParseValueBucket(env, valuesBucketVector, buttonDataShareUpdate, BUTTON_DATA_SHARE_UPDATE_VALUE);
 }
 

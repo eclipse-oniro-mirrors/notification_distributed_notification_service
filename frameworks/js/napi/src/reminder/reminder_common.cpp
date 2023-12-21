@@ -193,7 +193,7 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
     uint32_t arrlen = 0;
     napi_status status = napi_get_array_length(env, keys, &arrlen);
     if (status != napi_ok) {
-        ANSR_LOGW("valuesBucket err");
+        ANSR_LOGW("get the valuesBucket length err");
         return false;
     }
     for (size_t i = 0; i < arrlen; ++i) {
@@ -201,7 +201,7 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
         napi_value key = 0;
         status = napi_get_element(env, keys, i, &key);
         if (status != napi_ok) {
-            ANSR_LOGW("valuesBucket err");
+            ANSR_LOGW("get valuesBucket err");
             continue;
         }
         std::string keyStr = GetStringFromJS(env, key);
@@ -212,12 +212,13 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
         std::string type;
         std::string valueObject = Convert2Value(env, value, ret, type);
         if (!ret) {
-            ANSR_LOGW("valuesBucket err");
+            ANSR_LOGW("parse valuesBucket err");
             continue;
         }
-        valueBucketString += keyStr + ":" + type + ":" + valueObject;
+        valueBucketString += keyStr + ReminderRequest::SEP_BUTTON_VALUE + type
+            + ReminderRequest::SEP_BUTTON_VALUE + valueObject;
         if (i < arrlen - 1) {
-            valueBucketString += ";";
+            valueBucketString += ReminderRequest::SEP_BUTTON_VALUE_TYPE;
         }
     }
     return true;
@@ -296,7 +297,7 @@ std::string ReminderCommon::Convert2Value(const napi_env &env, const napi_value 
             for (auto it = valueBlob.begin(); it != valueBlob.end(); ++it) {
                 valueString += std::to_string(*it);
                 if ((it + 1) != valueBlob.end()) {
-                    valueString += ",";
+                    valueString += ReminderRequest::SEP_BUTTON_VALUE_BLOB;
                 }
             }
             break;
