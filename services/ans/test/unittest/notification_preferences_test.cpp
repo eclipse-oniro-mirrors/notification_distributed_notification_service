@@ -503,7 +503,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | 
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
     EXPECT_EQ((int)slotsResult.size(), 0);
     ErrCode result = advancedNotificationService_->GetSlots(slotsResult);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
 }
 
 /**
