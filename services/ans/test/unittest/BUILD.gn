@@ -514,6 +514,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
+    "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
     "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",

@@ -25,6 +25,7 @@ namespace {
 ATokenTypeEnum g_mockGetTokenTypeFlagRet = ATokenTypeEnum::TOKEN_INVALID;
 DlpType g_mockDlpType = DlpType::DLP_COMMON;
 ATokenAplEnum g_mockApl = ATokenAplEnum::APL_NORMAL;
+bool g_mockVerfyPermisson = true;
 }
 
 void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
@@ -39,6 +40,11 @@ void MockApl(ATokenAplEnum mockRet)
 {
     g_mockApl = mockRet;
 }
+
+void MockIsVerfyPermisson(bool isVerify)
+{
+    g_mockVerfyPermisson = isVerify;
+}
 }
 }
 namespace OHOS {
@@ -46,6 +52,10 @@ namespace Security {
 namespace AccessToken {
 int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& permissionName)
 {
+    if (!Notification::g_mockVerfyPermisson) {
+        return PERMISSION_DENIED;
+    }
+
     if (tokenID == Notification::NON_NATIVE_TOKEN) {
         return PERMISSION_DENIED;
     }
