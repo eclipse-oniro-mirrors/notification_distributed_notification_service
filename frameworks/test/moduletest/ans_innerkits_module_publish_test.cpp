@@ -1710,7 +1710,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10002, Function
     WaitOnSubscribeResult();
 
     auto systemLiveViewSubscriber = TestLocalLiveViewSubscriber();
-    EXPECT_EQ(0, NotificationHelper::SubscribeLocalLiveViewNotification(systemLiveViewSubscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeLocalLiveViewNotification(systemLiveViewSubscriber, true));
 
     MessageUser messageUser;
     std::shared_ptr<NotificationLocalLiveViewContent> liveContent =

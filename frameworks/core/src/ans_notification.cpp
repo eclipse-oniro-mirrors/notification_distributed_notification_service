@@ -469,7 +469,8 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber 
     return ansManagerProxy_->SubscribeSelf(subscriberSptr);
 }
 
-ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber)
+ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
+    const bool isNative)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
@@ -482,7 +483,7 @@ ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLo
         ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->SubscribeLocalLiveView(subscriberSptr, nullptr);
+    return ansManagerProxy_->SubscribeLocalLiveView(subscriberSptr, nullptr, isNative);
 }
 
 ErrCode AnsNotification::SubscribeNotification(

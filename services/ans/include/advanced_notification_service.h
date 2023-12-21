@@ -510,7 +510,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) override;
+        const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
     /**
      * @brief Unsubscribes notifications.

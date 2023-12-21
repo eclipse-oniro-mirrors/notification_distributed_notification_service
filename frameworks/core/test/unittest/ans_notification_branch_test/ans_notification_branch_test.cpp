@@ -280,7 +280,7 @@ public:
     }
 
     ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) override
+        const sptr<NotificationSubscribeInfo> &info, const bool isNatives) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

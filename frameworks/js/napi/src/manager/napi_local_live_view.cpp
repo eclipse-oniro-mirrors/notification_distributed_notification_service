@@ -65,7 +65,7 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribeLocalLiveView *>(data);
 
             asynccallbackinfo->info.errorCode =
-                NotificationHelper::SubscribeLocalLiveViewNotification(*(asynccallbackinfo->objectInfo));
+                NotificationHelper::SubscribeLocalLiveViewNotification(*(asynccallbackinfo->objectInfo), false);
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGD("NapiSubscribeLocalLiveView work complete.");

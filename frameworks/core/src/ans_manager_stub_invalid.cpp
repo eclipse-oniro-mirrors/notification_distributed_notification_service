@@ -318,7 +318,7 @@ ErrCode AnsManagerStub::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscr
 }
 
 ErrCode AnsManagerStub::SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-    const sptr<NotificationSubscribeInfo> &info)
+    const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
     ANS_LOGE("AnsManagerStub::SubscribeLocalLiveView called!");
     return ERR_INVALID_OPERATION;
