@@ -1633,13 +1633,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
             allowed = CheckApiCompatibility(bundle);
             SetDefaultNotificationEnabled(bundle, allowed);
         }
-        if (!slot->GetEnable()) {
-            RemoveNotificationBySlot(bundle, slot);
-        } else {
-            if (!slot->GetForceControl() && !allowed) {
-                RemoveNotificationBySlot(bundle, slot);
-            }
-        }
+        
         slot->SetEnable(enabled);
         slot->SetForceControl(isForceControl);
         // 重置authHintCnt_，设置authorizedStatus为已授权
@@ -1650,6 +1644,14 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         if (result != ERR_OK) {
             ANS_LOGE("Set enable slot: AddNotificationSlot failed");
             return;
+        }
+
+        if (!slot->GetEnable()) {
+            RemoveNotificationBySlot(bundle, slot);
+        } else {
+            if (!slot->GetForceControl() && !allowed) {
+                RemoveNotificationBySlot(bundle, slot);
+            }
         }
 
         PublishSlotChangeCommonEvent(bundle);
