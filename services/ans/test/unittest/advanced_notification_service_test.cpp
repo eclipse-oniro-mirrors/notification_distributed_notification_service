@@ -51,6 +51,8 @@ using namespace OHOS::Media;
 namespace OHOS {
 namespace Notification {
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
+extern void MockIsSystemApp(bool isSystemApp);
+extern void MockIsNonBundleName(bool isNonBundleName);
 
 class AdvancedNotificationServiceTest : public testing::Test {
 public:
@@ -143,11 +145,13 @@ void AdvancedNotificationServiceTest::TestAddSlot(NotificationConstant::SlotType
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00100, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -168,11 +172,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00100,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00200, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -194,11 +200,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00200,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00300, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CUSTOM);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -219,12 +227,14 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00300,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00400, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockIsNonBundleName(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -234,6 +244,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00400,
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_INVALID_BUNDLE);
+    MockIsNonBundleName(false);
     SleepForFC();
 }
 
@@ -246,11 +257,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00400,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00500, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -272,11 +285,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00500,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00600, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -297,11 +312,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00600,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00700, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -322,11 +339,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00700,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00800, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -347,11 +366,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00800,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00900, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::SERVICE_REMINDER);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -372,11 +393,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00900,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01000, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -397,11 +420,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01000,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01100, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -422,11 +447,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01100,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01200, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::CUSTOM);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::CUSTOM);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -435,6 +462,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01200,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NON_SYSTEM_APP);
     SleepForFC();
 }
@@ -453,6 +482,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01300,
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
@@ -465,6 +495,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01300,
                   std::string(), new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false),
         (int)ERR_OK);
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NOT_ALLOWED);
     SleepForFC();
 }
@@ -640,11 +672,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04000,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04100, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     req->SetLabel("req's label");
+    req->SetCreatorUid(1);
     req->SetAlertOneTime(true);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -656,7 +688,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04100,
     req->SetContent(content);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
 
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     std::vector<sptr<Notification>> allNotifications;
     EXPECT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), (int)ERR_OK);
     EXPECT_EQ(allNotifications.size(), (size_t)1);
@@ -679,12 +710,14 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04100,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04600, Function | SmallTest | Level1)
 {
     sptr<NotificationRequest> req = new NotificationRequest(1);
+    req->SetCreatorUid(1);
     req->SetSlotType(NotificationConstant::OTHER);
     TestAddSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
                   std::string(), new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false),
         (int)ERR_OK);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(advancedNotificationService_->Publish(std::string(), req), (int)ERR_ANS_NOT_ALLOWED);
 }
 
@@ -696,18 +729,21 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04600,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04700, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     std::string label = "testLabel";
     {
         sptr<NotificationRequest> req = new NotificationRequest(1);
         req->SetSlotType(NotificationConstant::OTHER);
         req->SetLabel(label);
+        req->SetCreatorUid(1);
         EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
     }
     {
         sptr<NotificationRequest> req = new NotificationRequest(2);
         req->SetSlotType(NotificationConstant::OTHER);
         req->SetLabel(label);
+        req->SetCreatorUid(1);
         EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
     }
     EXPECT_EQ(advancedNotificationService_->Cancel(1, label), (int)ERR_OK);
@@ -746,13 +782,15 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04900,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05000, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     int32_t notificationId = 2;
     std::string label = "testLabel";
     sptr<NotificationRequest> req = new NotificationRequest(notificationId);
     req->SetSlotType(NotificationConstant::OTHER);
     req->SetLabel(label);
     req->SetUnremovable(true);
+    req->SetCreatorUid(1);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
     EXPECT_EQ(advancedNotificationService_->Cancel(notificationId, label), (int)ERR_OK);
 }
@@ -981,7 +1019,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08600,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08700, Function | SmallTest | Level1)
 {
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    sptr<NotificationSlot> slot;
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ((int)advancedNotificationService_->GetSlotByType(NotificationConstant::OTHER, slot), (int)ERR_OK);
     EXPECT_EQ(slot->GetType(), NotificationConstant::SlotType::OTHER);
 }
@@ -1128,7 +1166,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10000,
     const int BIG_PICTURE_HEIGHT = 300;
     const int ICON_SIZE = 36;
 
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1161,7 +1200,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10100,
     const int BIG_PICTURE_HEIGHT = 1024;
     const int ICON_SIZE = 36;
 
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1194,7 +1234,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10200,
     const int BIG_PICTURE_HEIGHT = 300;
     const int ICON_SIZE = 256;
 
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1223,7 +1264,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10200,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10300, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     ASSERT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1249,7 +1291,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10300,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10400, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     ASSERT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1265,7 +1308,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10400,
     req->SetGroupName(groupName);
     EXPECT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_OK);
 
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     EXPECT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), (int)ERR_OK);
     SleepForFC();
@@ -1421,8 +1463,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10900,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11000, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1438,7 +1478,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11000,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11100, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1454,8 +1495,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11100,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11200, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-    IPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     std::string label = "testLabel";
     {
         sptr<NotificationRequest> req = new NotificationRequest(1);
@@ -1473,8 +1512,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11200,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11300, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-    IPCSkeleton::SetCallingUid(SYSTEM_SERVICE_UID);
     std::string label = "testLabel";
     {
         sptr<NotificationRequest> req = new NotificationRequest(1);
@@ -1482,7 +1519,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11300,
         req->SetLabel(label);
         EXPECT_EQ(advancedNotificationService_->PublishContinuousTaskNotification(req), (int)ERR_OK);
     }
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(
         advancedNotificationService_->CancelContinuousTaskNotification(label, 1), (int)ERR_ANS_NOT_SYSTEM_SERVICE);
 }
@@ -1517,7 +1555,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12000,
         std::string(), new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false),
         (int)ERR_OK);
 
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NOT_ALLOWED);
     SleepForFC();
 }
@@ -1549,7 +1588,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12100,
         false, false);
     EXPECT_EQ(result, (int)ERR_OK);
 
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED);
     SleepForFC();
 }
@@ -1568,10 +1608,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12200,
     sptr<NotificationRequest> req = new NotificationRequest(notificationId);
     req->SetSlotType(NotificationConstant::OTHER);
     req->SetLabel(label);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
 
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     auto result = advancedNotificationService_->RemoveNotification(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
         notificationId, label, NotificationConstant::CANCEL_REASON_DELETE);
@@ -1586,7 +1626,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12200,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     TestAddSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
@@ -1615,7 +1654,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(DLP_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1631,7 +1671,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400,
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_DLP_HAP);
     SleepForFC();
 
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
 }
 
@@ -1643,7 +1682,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12500, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -1985,13 +2025,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15200,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     std::string cmd = "CMD";
     std::string bundle = "Bundle";
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
     EXPECT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
 }
 
 /**
@@ -2015,7 +2053,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15400,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15500, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -2049,7 +2088,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15500,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15600, Function | SmallTest | Level1)
 {
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -2084,8 +2124,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15600,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15700, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "PrepareNotificationRequest_0100 test start";
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
-
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
 
@@ -2115,8 +2153,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15700,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15800, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "GenerateBundleOption_0100 test start";
-    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    MockIsNonBundleName(true);
     EXPECT_EQ(advancedNotificationService_->GenerateBundleOption(), nullptr);
+    MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "GenerateBundleOption_0100 test end";
 }
 
@@ -2181,7 +2220,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16200,
     GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0200 test start";
 
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
@@ -2220,8 +2258,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16300,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16400, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "ANS_AddSlots_0100 test start";
-
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
@@ -2239,13 +2275,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16400,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16600, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "ANS_AddSlots_0300 test start";
-    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    MockIsNonBundleName(true);
 
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
     EXPECT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_INVALID_BUNDLE);
-
+    MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "ANS_AddSlots_0300 test end";
 }
 
@@ -2274,13 +2310,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16700,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16800, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "ANS_GetSlots_0100 test start";
-    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    MockIsNonBundleName(true);
 
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
     EXPECT_EQ(advancedNotificationService_->GetSlots(slots), ERR_ANS_INVALID_BUNDLE);
-
+    MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "ANS_GetSlots_0100 test end";
 }
 
@@ -2294,7 +2330,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
 {
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
 
-    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    MockIsNonBundleName(true);
     std::vector<sptr<NotificationRequest>> notifications;
     EXPECT_EQ(advancedNotificationService_->GetActiveNotifications(notifications), ERR_ANS_INVALID_BUNDLE);
     uint64_t num = 1;
@@ -2335,7 +2371,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
 
     bool enabled = true;
     EXPECT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), ERR_ANS_INVALID_BUNDLE);
-
+    MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
 
@@ -2366,7 +2402,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 {
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
 
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
     std::string key = "key";
     int32_t removeReason = 0;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
@@ -2458,7 +2493,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17200,
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
 
     TestAddSlot(NotificationConstant::SlotType::OTHER);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
@@ -2476,7 +2512,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17200,
     req->SetCreatorUserId(SUBSCRIBE_USER_INIT);
     std::shared_ptr<Notification> notification = std::make_shared<Notification>(req);
 
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     EXPECT_EQ(advancedNotificationService_->DeleteAll(), ERR_OK);
 
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
@@ -2491,8 +2526,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17200,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17300, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "ANS_GetSlotsByBundle_0100 test start";
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
-
     std::vector<sptr<NotificationSlot>> slots;
     EXPECT_EQ(advancedNotificationService_->GetSlotsByBundle(
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), slots),
@@ -2514,8 +2547,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17300,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "Subscribe_1000 test start";
-
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
@@ -2577,8 +2608,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17600,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17700, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test start";
-
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     sptr<NotificationBundleOption> targetBundle = nullptr;
     bundleOption->SetBundleName("test");
@@ -2615,8 +2644,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17900,
 {
     GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test start";
 
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
     int32_t reminderId = 1;
     sptr<ReminderRequest> reminder = new ReminderRequest(reminderId);
     reminder->InitNotificationRequest();
@@ -2635,13 +2662,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18000,
 {
     GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test start";
 
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-    IPCSkeleton::SetCallingUid(NON_BUNDLE_NAME_UID);
+    MockIsNonBundleName(true);
     int32_t reminderId = 1;
     sptr<ReminderRequest> reminder = new ReminderRequest(reminderId);
     reminder->InitNotificationRequest();
     EXPECT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_ANS_INVALID_BUNDLE);
-
+    MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test end";
 }
 
@@ -3209,9 +3235,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21200,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21300, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "PrepareNotificationRequest_0200 test start";
-    IPCSkeleton::SetCallingUid(NON_SYSTEM_APP_UID);
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-
     sptr<NotificationRequest> req = new NotificationRequest();
     int32_t myNotificationId = 10;
     bool isAgentTrue = true;
@@ -3277,7 +3300,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21600,
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
-
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
 
     advancedNotificationService_->UnregisterPushCallback();
@@ -3295,7 +3319,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21700,
 {
     GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test start";
 
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
@@ -3319,6 +3342,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21800,
 {
     GTEST_LOG_(INFO) << "RegisterPushCallback_0300 test start";
 
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
@@ -3344,6 +3369,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21900,
 {
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0100 test start";
 
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
@@ -3366,8 +3393,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21900,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22000, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0200 test start";
-
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_ANS_NON_SYSTEM_APP);
 
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0200 test end";
@@ -3383,6 +3408,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22100,
 {
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0300 test start";
 
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     EXPECT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_INVALID_OPERATION);
 
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0300 test end";
@@ -3955,7 +3982,6 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0001, Function |
 {
     GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0001 test start";
     advancedNotificationService_->notificationList_.clear();
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     sptr<NotificationRequest> request = new NotificationRequest(1);
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
@@ -3997,7 +4023,6 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0002, Function |
 {
     GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0002 test start";
     advancedNotificationService_->notificationList_.clear();
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     sptr<NotificationRequest> request = new NotificationRequest(1);
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
@@ -4033,8 +4058,6 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0002, Function |
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0001, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0001 test start";
-
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     sptr<NotificationRequest> request = new NotificationRequest();
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
     auto status = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE;
@@ -4056,8 +4079,6 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0001, Function | S
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0002, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0002 test start";
-
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
 
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
@@ -4099,8 +4120,6 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0002, Function | S
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0003, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0003 test start";
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::CUSTOM);
     EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
@@ -4134,8 +4153,6 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0004, Function | S
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0005, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0005 test start";
-
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     sptr<NotificationRequest> request = new NotificationRequest();
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
     auto status = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE;
@@ -4157,8 +4174,6 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0005, Function | S
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0006, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0006 test start";
-
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
 
     auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
     EXPECT_NE(pushCallbackProxy, nullptr);
@@ -4231,7 +4246,6 @@ HWTEST_F(AdvancedNotificationServiceTest, GetActiveNotificationByFilter_0001, Fu
     GTEST_LOG_(INFO) << "GetActiveNotificationByFilter_0001 test start";
 
     TestAddSlot(NotificationConstant::SlotType::LIVE_VIEW);
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     sptr<NotificationRequest> req;
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
