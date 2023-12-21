@@ -87,7 +87,7 @@ HWTEST_F(NotificationPreferencesInfoTest, SetSlotFlagsForSlot_00001, Function | 
     bundleInfo.SetSlotFlags(1);
     bundleInfo.SetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     int res = bundleInfo.GetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    EXPECT_NE(res, 0);
+    EXPECT_EQ(res, 0);
 }
 
 /**
