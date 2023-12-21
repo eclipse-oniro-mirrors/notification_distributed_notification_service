@@ -702,6 +702,16 @@ int32_t NotificationRequest::GetCreatorUserId() const
     return creatorUserId_;
 }
 
+void NotificationRequest::SetCreatorInstanceKey(int32_t key)
+{
+    creatorInstanceKey_ = key;
+}
+
+int32_t NotificationRequest::GetCreatorInstanceKey() const
+{
+    return creatorInstanceKey_;
+}
+
 void NotificationRequest::SetOwnerUserId(int32_t userId)
 {
     ownerUserId_ = userId;
@@ -809,6 +819,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["ownerUserId"]       = ownerUserId_;
     jsonObject["ownerUid"]          = ownerUid_;
     jsonObject["receiverUserId"]    = receiverUserId_;
+    jsonObject["creatorInstanceKey"]    = creatorInstanceKey_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
@@ -965,6 +976,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(static_cast<int32_t>(receiverUserId_))) {
         ANS_LOGE("Failed to write receiver userId");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(creatorInstanceKey_))) {
+        ANS_LOGE("Failed to write creator instance key");
         return false;
     }
 
@@ -1418,6 +1434,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     creatorUserId_ = parcel.ReadInt32();
     ownerUserId_ = parcel.ReadInt32();
     receiverUserId_ = parcel.ReadInt32();
+    creatorInstanceKey_ = parcel.ReadInt32();
     notificationControlFlags_ = parcel.ReadUint32();
     publishDelayTime_ = parcel.ReadUint32();
 
@@ -1788,6 +1805,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->creatorUserId_ = other.creatorUserId_;
     this->ownerUserId_ = other.ownerUserId_;
     this->receiverUserId_ = other.receiverUserId_;
+    this->creatorInstanceKey_ = other.creatorInstanceKey_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
@@ -1996,6 +2014,10 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
 
     if (jsonObject.find("receiverUserId") != jsonEnd && jsonObject.at("receiverUserId").is_number_integer()) {
         target->receiverUserId_ = jsonObject.at("receiverUserId").get<int32_t>();
+    }
+
+    if (jsonObject.find("creatorInstanceKey") != jsonEnd && jsonObject.at("creatorInstanceKey").is_number_integer()) {
+        target->creatorInstanceKey_ = jsonObject.at("creatorInstanceKey").get<int32_t>();
     }
 
     if (jsonObject.find("badgeNumber") != jsonEnd && jsonObject.at("badgeNumber").is_number_integer()) {

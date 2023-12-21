@@ -563,6 +563,9 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
         ANS_LOGE("Failed to create notification.");
         return nullptr;
     }
+    if (bundleOption != nullptr) {
+        bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+    }
     record->bundleOption = bundleOption;
     SetNotificationRemindType(record->notification, true);
     return record;
@@ -938,7 +941,8 @@ void AdvancedNotificationService::StopFilters()
     }
 }
 
-ErrCode AdvancedNotificationService::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications)
+ErrCode AdvancedNotificationService::GetActiveNotifications(
+    std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -946,6 +950,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(std::vector<sptr<Not
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
+    bundleOption->SetInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidated.");
@@ -1061,7 +1066,8 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
     std::vector<std::string> keys;
 
     for (auto record : notificationList_) {
-        if ((bundleOption != nullptr) && (record->bundleOption->GetUid() != bundleOption->GetUid())) {
+        if ((bundleOption != nullptr) &&
+            (record->bundleOption->GetUid() != bundleOption->GetUid())) {
             continue;
         }
         keys.push_back(record->notification->GetKey());

@@ -37,6 +37,15 @@ public:
     BadgeNumberCallbackData(const std::string &bundle, int32_t uid, int32_t badgeNumber);
 
     /**
+     * A constructor used to create a BadgeNumberCallbackData instance with the input parameters passed.
+     * @param bundle Indicates the name of the application.
+     * @param uid Indicates the uid of the application.
+     * @param badgeNumber badge number.
+     * @param badgeNumber application instance key.
+     */
+    BadgeNumberCallbackData(const std::string &bundle, int32_t uid, int32_t badgeNumber, int32_t instanceKey);
+
+    /**
      * Default deconstructor used to deconstruct.
      */
     ~BadgeNumberCallbackData() = default;
@@ -52,6 +61,10 @@ public:
     void SetBadgeNumber(int32_t badgeNumber);
 
     int32_t GetBadgeNumber() const;
+
+    void SetInstanceKey(int32_t key);
+
+    int32_t GetInstanceKey() const;
 
     /**
      * Returns a string representation of the BadgeNumberCallbackData object.
@@ -76,6 +89,7 @@ private:
     std::string bundle_;
     int32_t uid_;
     int32_t badgeNumber_;
+    int32_t instanceKey_;
 };
 }  // namespace Notification
 }  // namespace OHOS

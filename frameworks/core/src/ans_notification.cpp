@@ -34,6 +34,7 @@ namespace {
 const int32_t MAX_RETRY_TIME = 30;
 const int32_t SLEEP_TIME = 1000;
 const uint32_t MAX_PUBLISH_DELAY_TIME = 5;
+const int32_t DEFAULT_INSTANCE_KEY = -1;
 const std::string DOWNLOAD_TITLE = "title";
 const std::string DOWNLOAD_FILENAME = "fileName";
 }
@@ -215,6 +216,8 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
+    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    reqPtr->SetCreatorInstanceKey(instanceKey);
 
     return ansManagerProxy_->Publish(label, reqPtr);
 }
@@ -231,7 +234,8 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->Cancel(notificationId, label);
+    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    return ansManagerProxy_->Cancel(notificationId, label, instanceKey);
 }
 
 ErrCode AnsNotification::CancelAllNotifications()
@@ -242,7 +246,8 @@ ErrCode AnsNotification::CancelAllNotifications()
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->CancelAll();
+    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    return ansManagerProxy_->CancelAll(instanceKey);
 }
 
 ErrCode AnsNotification::CancelAsBundle(
@@ -281,7 +286,8 @@ ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationReq
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetActiveNotifications(request);
+    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    return ansManagerProxy_->GetActiveNotifications(request, instanceKey);
 }
 
 ErrCode AnsNotification::SetNotificationAgent(const std::string &agent)
@@ -856,8 +862,8 @@ ErrCode AnsNotification::CancelGroup(const std::string &groupName)
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-
-    return ansManagerProxy_->CancelGroup(groupName);
+    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    return ansManagerProxy_->CancelGroup(groupName, instanceKey);
 }
 
 ErrCode AnsNotification::RemoveGroupByBundle(
@@ -1529,8 +1535,8 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
         ANS_LOGE("SetBadgeNumber fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-
-    return ansManagerProxy_->SetBadgeNumber(badgeNumber);
+    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    return ansManagerProxy_->SetBadgeNumber(badgeNumber, instanceKey);
 }
 
 ErrCode AnsNotification::SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber)

@@ -64,6 +64,20 @@ public:
     int32_t GetUid() const;
 
     /**
+     * @brief Sets the application instance key.
+     *
+     * @param uid Indicates the application instance key.
+     */
+    void SetInstanceKey(const int32_t key);
+
+    /**
+     * @brief Obtains the application instance key.
+     *
+     * @return Returns the application instance key.
+     */
+    int32_t GetInstanceKey() const;
+
+    /**
      * @brief Returns a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -114,6 +128,7 @@ private:
 private:
     std::string bundleName_ {};
     int32_t uid_ {};
+    int32_t instanceKey_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -407,7 +407,13 @@ ErrCode AnsManagerStub::HandleCancel(MessageParcel &data, MessageParcel &reply)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = Cancel(notificationId, label);
+    int32_t instanceKey = 0;
+    if (!data.ReadInt32(instanceKey)) {
+        ANS_LOGE("[HandleCancel] fail: read instanceKey failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = Cancel(notificationId, label, instanceKey);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancel] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -417,7 +423,13 @@ ErrCode AnsManagerStub::HandleCancel(MessageParcel &data, MessageParcel &reply)
 
 ErrCode AnsManagerStub::HandleCancelAll(MessageParcel &data, MessageParcel &reply)
 {
-    ErrCode result = CancelAll();
+    int32_t instanceKey = 0;
+    if (!data.ReadInt32(instanceKey)) {
+        ANS_LOGE("[HandleCancelAll] fail: read instanceKey failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    
+    ErrCode result = CancelAll(instanceKey);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAll] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -647,8 +659,13 @@ ErrCode AnsManagerStub::HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageP
 
 ErrCode AnsManagerStub::HandleGetActiveNotifications(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t instanceKey = 0;
+    if (!data.ReadInt32(instanceKey)) {
+        ANS_LOGE("[HandleGetActiveNotifications] fail: read instanceKey failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     std::vector<sptr<NotificationRequest>> notifications;
-    ErrCode result = GetActiveNotifications(notifications);
+    ErrCode result = GetActiveNotifications(notifications, instanceKey);
     if (!WriteParcelableVector(notifications, reply, result)) {
         ANS_LOGE("[HandleGetActiveNotifications] fail: write notifications failed");
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1523,7 +1540,13 @@ ErrCode AnsManagerStub::HandleCancelGroup(MessageParcel &data, MessageParcel &re
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = CancelGroup(groupName);
+    int32_t instanceKey = 0;
+    if (!data.ReadInt32(instanceKey)) {
+        ANS_LOGE("[HandleCancelGroup] fail: read instanceKey failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = CancelGroup(groupName, instanceKey);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelGroup] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2147,7 +2170,13 @@ ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel 
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = SetBadgeNumber(badgeNumber);
+    int32_t instanceKey = -1;
+    if (!data.ReadInt32(instanceKey)) {
+        ANSR_LOGE("Read instance key failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetBadgeNumber(badgeNumber, instanceKey);
     if (!reply.WriteInt32(result)) {
         ANSR_LOGE("Write badge number failed");
         return ERR_ANS_PARCELABLE_FAILED;

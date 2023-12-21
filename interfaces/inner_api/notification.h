@@ -236,6 +236,13 @@ public:
     int32_t GetRecvUserId() const;
 
     /**
+     * @brief Obtains the instance key of the notification creator.
+     *
+     * @return Returns the instance key of the notification creator.
+     */
+    int32_t GetInstanceKey() const;
+
+    /**
      * @brief Dumps a string representation of the object.
      *
      * @return Returns a string representation of the object.

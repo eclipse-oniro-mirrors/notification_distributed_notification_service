@@ -281,6 +281,11 @@ napi_value Common::SetBadgeCallbackData(const napi_env &env, const BadgeNumberCa
     napi_create_int32(env, data.GetBadgeNumber(), &badgeNapi);
     napi_set_named_property(env, result, "badgeNumber", badgeNapi);
 
+    // instanceKey: int32_t
+    napi_value keyNapi = nullptr;
+    napi_create_int32(env, data.GetInstanceKey(), &keyNapi);
+    napi_set_named_property(env, result, "instanceKey", keyNapi);
+
     return NapiGetBoolean(env, true);
 }
 
