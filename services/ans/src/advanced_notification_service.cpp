@@ -690,8 +690,7 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
 {
     ErrCode result = ERR_OK;
     // only update auth info for LIVE_VIEW notification
-    if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
-        record->request->GetNotificationType() == NotificationContent::Type::LIVE_VIEW) {
+    if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
         sptr<NotificationSlot> slot = record->slot;
         // update authHintCnt when authorizedStatus is NOT_AUTHORIZED
         if (slot->GetAuthorizedStatus() == NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED) {
