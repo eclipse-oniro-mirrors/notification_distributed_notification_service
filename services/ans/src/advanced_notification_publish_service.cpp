@@ -185,6 +185,9 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::s
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
     bundleOption->SetInstanceKey(instanceKey);
     return CancelPreparedNotification(notificationId, label, bundleOption);
 }
