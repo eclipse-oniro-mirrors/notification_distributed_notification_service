@@ -1951,6 +1951,13 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
 
     ErrCode errCode = ERR_OK;
     do {
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+            ANS_LOGE("Client is not a system app or subsystem.");
+            errCode = ERR_ANS_NON_SYSTEM_APP;
+            break;
+        }
+
         if (subscriber == nullptr) {
             errCode = ERR_ANS_INVALID_PARAM;
             break;
