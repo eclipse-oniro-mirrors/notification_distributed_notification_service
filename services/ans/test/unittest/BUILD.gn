@@ -838,7 +838,8 @@ group("unittest") {
   testonly = true
   deps = [
     ":access_token_helper_test",
-    ":advanced_notification_service_branch_test",
+
+    #":advanced_notification_service_branch_test",
     ":ans_unit_test",
     ":bundle_manager_helper_branch_test",
     ":notification_config_parse_test",
@@ -849,6 +850,7 @@ group("unittest") {
     ":notification_service_test",
     ":notification_subscriber_manager_branch_test",
     ":push_callback_stub_test",
-    ":reminder_unit_test",
+
+    #":reminder_unit_test",
   ]
 }

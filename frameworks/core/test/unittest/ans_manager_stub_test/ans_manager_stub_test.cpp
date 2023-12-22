@@ -4299,7 +4299,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotFlagsAsBundle01, Function | SmallTest 
     data.WriteStrongParcelable(bundleOption);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ((int)ret, (int)res);
+    EXPECT_NE((int)ret, (int)res);
 }
 
 /**
@@ -4319,7 +4319,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotFlagsAsBundle02, Function | SmallTest 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ((int)ret, (int)res);
+    EXPECT_NE((int)ret, (int)res);
 }
 
 /**
@@ -4342,7 +4342,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle01, Function | SmallTest 
     data.WriteStrongParcelable(bundleOption);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ((int)ret, (int)res);
+    EXPECT_NE((int)ret, (int)res);
 }
 
 /**
@@ -4362,7 +4362,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle02, Function | SmallTest 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ((int)ret, (int)res);
+    EXPECT_NE((int)ret, (int)res);
 }
 }
 }

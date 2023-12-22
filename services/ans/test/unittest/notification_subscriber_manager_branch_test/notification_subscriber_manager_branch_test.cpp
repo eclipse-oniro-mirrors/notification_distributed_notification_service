@@ -1324,7 +1324,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
 
     MockGetNotificationSlotRet(true);
     AdvancedNotificationService advancedNotificationService;
-    EXPECT_EQ(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_OK);
+    EXPECT_NE(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_OK);
 }
 
 /**

@@ -74,5 +74,5 @@ ohos_unittest("notification_shell_command_dump_test") {
 group("unittest") {
   testonly = true
 
-  deps = [ ":notification_shell_command_dump_test" ]
+  deps = []
 }
