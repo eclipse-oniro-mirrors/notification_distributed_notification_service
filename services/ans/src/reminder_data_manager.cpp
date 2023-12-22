@@ -643,13 +643,13 @@ void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminde
     Uri uri(uriStr);
 
     DataShare::DataSharePredicates predicates;
-    std::vector<std::string> equalToVector =
-        ReminderRequest::StringSplit(actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo, ";");
+    std::vector<std::string> equalToVector = ReminderRequest::StringSplit(
+        actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo, ReminderRequest::SEP_BUTTON_VALUE_TYPE);
     GenPredicates(predicates, equalToVector);
 
     DataShare::DataShareValuesBucket valuesBucket;
-    std::vector<std::string> valuesBucketVector =
-        ReminderRequest::StringSplit(actionButtonMap.at(actionButtonType).dataShareUpdate->valuesBucket, ";");
+    std::vector<std::string> valuesBucketVector = ReminderRequest::StringSplit(
+        actionButtonMap.at(actionButtonType).dataShareUpdate->valuesBucket, ReminderRequest::SEP_BUTTON_VALUE_TYPE);
     GenValuesBucket(valuesBucket, valuesBucketVector);
 
     // update app store
@@ -660,12 +660,12 @@ void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminde
     }
 }
 
-void ReminderDataManager::GenPredicates(DataShare::DataSharePredicates & predicates,
+void ReminderDataManager::GenPredicates(DataShare::DataSharePredicates &predicates,
     const std::vector<std::string> &equalToVector)
 {
     // predicates
     for (auto &it : equalToVector) {
-        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ":");
+        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ReminderRequest::SEP_BUTTON_VALUE);
         if (temp.size() <= INDEX_VALUE) {
             continue;
         }
@@ -688,7 +688,7 @@ void ReminderDataManager::GenValuesBucket(DataShare::DataShareValuesBucket & val
 {
     // valuesBucket
     for (auto &it : valuesBucketVector) {
-        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ":");
+        std::vector<std::string> temp = ReminderRequest::StringSplit(it, ReminderRequest::SEP_BUTTON_VALUE);
         if (temp.size() <= INDEX_VALUE) {
             continue;
         }
@@ -705,10 +705,11 @@ void ReminderDataManager::GenValuesBucket(DataShare::DataShareValuesBucket & val
         } else if (temp[INDEX_TYPE] == "null") {
             valuesBucket.Put(temp[INDEX_KEY]);
         } else if (temp[INDEX_TYPE] == "vector") {
-            std::vector<std::string> arr = ReminderRequest::StringSplit(temp[INDEX_VALUE], ",");
+            std::vector<std::string> arr = ReminderRequest::StringSplit(temp[INDEX_VALUE],
+                ReminderRequest::SEP_BUTTON_VALUE_BLOB);
             std::vector<uint8_t> value;
             for (auto &num : arr) {
-                value.push_back(static_cast<uint8_t>(std::stoi(num)));
+                value.emplace_back(static_cast<uint8_t>(std::atoi(num.c_str())));
             }
             valuesBucket.Put(temp[INDEX_KEY], value);
         }

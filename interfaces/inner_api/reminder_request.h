@@ -910,6 +910,11 @@ public:
     static std::string sqlOfAddColumns;
     static std::vector<std::string> columns;
 
+    // For ActionButtonDataShare.
+    static const std::string SEP_BUTTON_VALUE_TYPE;
+    static const std::string SEP_BUTTON_VALUE;
+    static const std::string SEP_BUTTON_VALUE_BLOB;
+
 protected:
     enum class DbRecoveryType : uint8_t {
         INT,

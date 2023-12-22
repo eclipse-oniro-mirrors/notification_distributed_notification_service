@@ -44,6 +44,7 @@ const int32_t BUTTON_TITLE_INDEX = 1;
 const int32_t BUTTON_PKG_INDEX = 2;
 const int32_t BUTTON_ABILITY_INDEX = 3;
 const int32_t WANT_AGENT_URI_INDEX = 2;
+const int32_t INDENT = -1;
 }
 
 int32_t ReminderRequest::GLOBAL_ID = 0;
@@ -71,6 +72,9 @@ const std::string ReminderRequest::PARAM_REMINDER_ID = "REMINDER_ID";
 const std::string ReminderRequest::SEP_BUTTON_SINGLE = "<SEP,/>";
 const std::string ReminderRequest::SEP_BUTTON_MULTI = "<SEP#/>";
 const std::string ReminderRequest::SEP_WANT_AGENT = "<SEP#/>";
+const std::string ReminderRequest::SEP_BUTTON_VALUE_TYPE = "<SEP;/>";
+const std::string ReminderRequest::SEP_BUTTON_VALUE = "<SEP:/>";
+const std::string ReminderRequest::SEP_BUTTON_VALUE_BLOB = "<SEP-/>";
 const uint8_t ReminderRequest::DAYS_PER_WEEK = 7;
 const uint8_t ReminderRequest::MONDAY = 1;
 const uint8_t ReminderRequest::SUNDAY = 7;
@@ -658,7 +662,7 @@ void ReminderRequest::RecoverActionButton(const std::shared_ptr<NativeRdb::Resul
         std::string resource = "";
         auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
         SetActionButton(singleButton.at(BUTTON_TITLE_INDEX),
-            ActionButtonType(std::stoi(singleButton.at(BUTTON_TYPE_INDEX), nullptr)),
+            ActionButtonType(std::atoi(singleButton.at(BUTTON_TYPE_INDEX).c_str())),
             resource, buttonWantAgent, buttonDataShareUpdate);
         ANSR_LOGI("RecoverButton title:%{public}s, pkgName:%{public}s, abilityName:%{public}s",
             singleButton.at(BUTTON_TITLE_INDEX).c_str(), buttonWantAgent->pkgName.c_str(),
@@ -1182,9 +1186,15 @@ bool ReminderRequest::ReadActionButtonFromParcel(Parcel& parcel)
         info.title = title;
         info.resource = resource;
         info.wantAgent = std::make_shared<ButtonWantAgent>();
+        if (info.wantAgent == nullptr) {
+            return false;
+        }
         info.wantAgent->pkgName = pkgName;
         info.wantAgent->abilityName = abilityName;
         info.dataShareUpdate = std::make_shared<ButtonDataShareUpdate>();
+        if (info.dataShareUpdate == nullptr) {
+            return false;
+        }
         info.dataShareUpdate->uri = uri;
         info.dataShareUpdate->equalTo = equalTo;
         info.dataShareUpdate->valuesBucket = valuesBucket;
@@ -1321,7 +1331,7 @@ std::string ReminderRequest::GetButtonInfo() const
             dataShareUpdatefriends["valuesBucket"] = buttonInfo.dataShareUpdate->valuesBucket;
             root["dataShareUpdate"]  = dataShareUpdatefriends;
         }
-        std::string str = root.dump();
+        std::string str = root.dump(INDENT, ' ', false, nlohmann::json::error_handler_t::replace);
         info += str;
         isFirst = false;
     }
