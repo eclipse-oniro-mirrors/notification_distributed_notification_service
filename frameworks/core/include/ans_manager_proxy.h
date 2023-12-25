@@ -738,10 +738,49 @@ private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
-    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data);
+    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
+    {
+        if (!data.WriteInt32(parcelableVector.size())) {
+            ANS_LOGE("Failed to write ParcelableVector size.");
+            return false;
+        }
+
+        for (auto &parcelable : parcelableVector) {
+            if (!data.WriteStrongParcelable(parcelable)) {
+                ANS_LOGE("Failed to write ParcelableVector");
+                return false;
+            }
+        }
+        return true;
+    }
 
     template<typename T>
-    bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &reply, ErrCode &result);
+    bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &reply, ErrCode &result)
+    {
+        if (!reply.ReadInt32(result)) {
+            ANS_LOGE("read result failed.");
+            return false;
+        }
+
+        int32_t infoSize = 0;
+        if (!reply.ReadInt32(infoSize)) {
+            ANS_LOGE("read Parcelable size failed.");
+            return false;
+        }
+
+        parcelableInfos.clear();
+        infoSize = (infoSize < MAX_PARCELABLE_VECTOR_NUM) ? infoSize : MAX_PARCELABLE_VECTOR_NUM;
+        for (int32_t index = 0; index < infoSize; index++) {
+            sptr<T> info = reply.ReadStrongParcelable<T>();
+            if (info == nullptr) {
+                ANS_LOGE("read Parcelable infos failed.");
+                return false;
+            }
+            parcelableInfos.emplace_back(info);
+        }
+
+        return true;
+    }
     static inline BrokerDelegator<AnsManagerProxy> delegator_;
 
     ErrCode ReadReminders(uint8_t &count, MessageParcel &reply, std::vector<sptr<ReminderRequest>> &reminders);
