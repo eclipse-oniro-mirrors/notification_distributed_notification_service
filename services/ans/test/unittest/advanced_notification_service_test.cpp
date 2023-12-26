@@ -63,6 +63,7 @@ public:
 
 private:
     void TestAddSlot(NotificationConstant::SlotType type);
+    void TestAddLiveViewSlot(bool isForceControl);
 
 private:
     static sptr<AdvancedNotificationService> advancedNotificationService_;
@@ -133,6 +134,15 @@ void AdvancedNotificationServiceTest::TestAddSlot(NotificationConstant::SlotType
 {
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(type);
+    slots.push_back(slot);
+    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
+}
+
+void AdvancedNotificationServiceTest::TestAddLiveViewSlot(bool isForceControl)
+{
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
+    slot->SetForceControl(isForceControl);
     slots.push_back(slot);
     EXPECT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
 }
@@ -4257,6 +4267,81 @@ HWTEST_F(AdvancedNotificationServiceTest, GetActiveNotificationByFilter_0001, Fu
         extraInfoKeys, req), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 
     GTEST_LOG_(INFO) << "GetActiveNotificationByFilter_0001 test end";
+}
+
+/**
+ * @tc.number    : IsAllowedRemoveSlot_0001
+ * @tc.name      : IsAllowedRemoveSlot
+ * @tc.desc      : Test IsAllowedRemoveSlot and slotType is not liveView.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0001 test start";
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    EXPECT_EQ(advancedNotificationService_->IsAllowedRemoveSlot(bundleOption, NotificationConstant::SlotType::OTHER),
+        (int)ERR_OK);
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0001 test end";
+}
+
+/**
+ * @tc.number    : IsAllowedRemoveSlot_0002
+ * @tc.name      : IsAllowedRemoveSlot
+ * @tc.desc      : Test IsAllowedRemoveSlot and slot is not exist.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0002, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0002 test start";
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    EXPECT_EQ(advancedNotificationService_->IsAllowedRemoveSlot(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW), (int)ERR_OK);
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0002 test end";
+}
+
+/**
+ * @tc.number    : IsAllowedRemoveSlot_0003
+ * @tc.name      : IsAllowedRemoveSlot
+ * @tc.desc      : Test IsAllowedRemoveSlot and slot is forcecontrol is false
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0003, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0003 test start";
+    TestAddLiveViewSlot(false);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->IsAllowedRemoveSlot(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW), (int)ERR_OK);
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0003 test end";
+}
+
+/**
+ * @tc.number    : IsAllowedRemoveSlot_0004
+ * @tc.name      : IsAllowedRemoveSlot
+ * @tc.desc      : Test IsAllowedRemoveSlot and caller not sa or systemapp
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0004, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0004 test start";
+    TestAddLiveViewSlot(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->IsAllowedRemoveSlot(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW), (int)ERR_ANS_NON_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0004 test end";
+}
+
+/**
+ * @tc.number    : IsAllowedRemoveSlot_0005
+ * @tc.name      : IsAllowedRemoveSlot
+ * @tc.desc      : Test IsAllowedRemoveSlot and caller is systemapp
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0005, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0005 test start";
+    TestAddLiveViewSlot(true);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    EXPECT_EQ(advancedNotificationService_->IsAllowedRemoveSlot(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW), (int)ERR_OK);
+    GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0005 test end";
 }
 
 }  // namespace Notification

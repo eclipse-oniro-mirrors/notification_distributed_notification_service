@@ -21,6 +21,9 @@
 #include "notification_request.h"
 #include "want_params_wrapper.h"
 #include "notification_preferences.h"
+#include "access_token_helper.h"
+#include "accesstoken_kit.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace Notification {
@@ -279,6 +282,33 @@ int32_t AdvancedNotificationService::DeleteNotificationRequestFromDb(const std::
         ANS_LOGE("Delete notification request failed, key %{public}s.", key.c_str());
         return result;
     }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType)
+{
+    if (slotType != NotificationConstant::SlotType::LIVE_VIEW) {
+        return ERR_OK;
+    }
+
+    sptr<NotificationSlot> slot;
+    if (NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot) != ERR_OK) {
+        ANS_LOGE("Failed to get slot.");
+        return ERR_OK;
+    }
+
+    if (!slot->GetForceControl()) {
+        ANS_LOGI("Liveview slot is not force control.");
+        return ERR_OK;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("Only sa or systemapp can remove liveview slot.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
     return ERR_OK;
 }
 }
