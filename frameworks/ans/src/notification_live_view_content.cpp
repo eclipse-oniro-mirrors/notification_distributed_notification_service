@@ -167,7 +167,7 @@ NotificationLiveViewContent *NotificationLiveViewContent::FromJson(const nlohman
     if (jsonObject.find("extraInfo") != jsonEnd && jsonObject.at("extraInfo").is_string()) {
         std::string extraInfoStr = jsonObject.at("extraInfo").get<std::string>();
         if (!extraInfoStr.empty()) {
-            AAFwk::WantParams params = AAFwk::WantParamWrapper::ParseWantParamsNew(extraInfoStr);
+            AAFwk::WantParams params = AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(extraInfoStr);
             pContent->extraInfo_ = std::make_shared<AAFwk::WantParams>(params);
         }
     }
