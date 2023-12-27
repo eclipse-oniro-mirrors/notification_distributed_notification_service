@@ -1928,8 +1928,16 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(const NotificationConstant
         ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        result = IsAllowedRemoveSlot(bundleOption, slotType);
+        if (result != ERR_OK) {
+            ANS_LOGE("Liveview slot cann't remove.");
+            return;
+        }
+
         NotificationPreferences::GetInstance().RemoveNotificationSlot(bundleOption, slotType);
     }));
     notificationSvrQueue_->wait(handler);
@@ -3118,9 +3126,28 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        sptr<NotificationSlot> liveViewSlot;
+        bool isLiveViewSlotExist = true;
+        // retain liveview slot before removeNotificationAllSlots
+        if (NotificationPreferences::GetInstance().GetNotificationSlot(
+            bundleOption, NotificationConstant::SlotType::LIVE_VIEW, liveViewSlot) != ERR_OK) {
+            isLiveViewSlotExist = false;
+        }
+
         result = NotificationPreferences::GetInstance().RemoveNotificationAllSlots(bundleOption);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
+        }
+
+        if (!isLiveViewSlotExist) {
+            return;
+        }
+        // retain liveview slot when caller is not sa or systemapp
+        if ((result == ERR_OK) &&
+            (IsAllowedRemoveSlot(bundleOption, NotificationConstant::SlotType::LIVE_VIEW) != ERR_OK)) {
+            std::vector<sptr<NotificationSlot>> slots;
+            slots.push_back(liveViewSlot);
+            (void)NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, slots);
         }
     }));
     notificationSvrQueue_->wait(handler);
