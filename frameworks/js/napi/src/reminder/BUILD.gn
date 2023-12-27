@@ -47,6 +47,11 @@ ohos_shared_library("reminderagent") {
 
   sources = [
     "../common.cpp",
+    "../common_convert_content.cpp",
+    "../common_convert_enum.cpp",
+    "../common_convert_liveview.cpp",
+    "../common_convert_notification.cpp",
+    "../common_convert_request.cpp",
     "../common_utils.cpp",
     "../slot.cpp",
     "native_module.cpp",
@@ -100,6 +105,7 @@ ohos_shared_library("reminderagentmanager") {
 
   sources = [
     "../common.cpp",
+    "../common_convert_enum.cpp",
     "../common_utils.cpp",
     "../manager/napi_slot.cpp",
     "../slot.cpp",
