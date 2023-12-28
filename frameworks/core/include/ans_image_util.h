@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Notification {
 class AnsImageUtil {
 public:
-    static const std::string IMAGE_FORMAT_JPEG;
+    static const std::string IMAGE_FORMAT_PNG;
     static const uint8_t IMAGE_QUALITY;
     static const uint8_t SHIFT_FOUR;
     static const uint8_t NUM_TEN;
@@ -37,7 +37,7 @@ public:
      * @return Returns a string.
      */
     static std::string PackImage(
-        const std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &format = IMAGE_FORMAT_JPEG);
+        const std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &format = IMAGE_FORMAT_PNG);
 
     /**
      * @brief Unpacks the string to an image.
@@ -58,7 +58,7 @@ public:
     static bool PackImage2File(
         const std::shared_ptr<Media::PixelMap> &pixelMap,
         const std::string &outFilePath,
-        const std::string &format = IMAGE_FORMAT_JPEG);
+        const std::string &format = IMAGE_FORMAT_PNG);
 
     /**
      * @brief Creates an image from a file.
@@ -68,7 +68,7 @@ public:
      * @return Returns an image object.
      */
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(
-        const std::string &inFilePath, const std::string &format = IMAGE_FORMAT_JPEG);
+        const std::string &inFilePath, const std::string &format = IMAGE_FORMAT_PNG);
 
     /**
      * @brief Converts a binary string to a hexadecimal string.

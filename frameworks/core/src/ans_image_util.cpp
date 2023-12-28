@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace Notification {
-const std::string AnsImageUtil::IMAGE_FORMAT_JPEG {"image/jpeg"};
+const std::string AnsImageUtil::IMAGE_FORMAT_PNG {"image/png"};
 const uint8_t AnsImageUtil::IMAGE_QUALITY {100};
 const uint8_t AnsImageUtil::SHIFT_FOUR {4};
 const uint8_t AnsImageUtil::NUM_TEN {10};
