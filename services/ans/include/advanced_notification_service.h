@@ -991,6 +991,8 @@ private:
     ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record);
     ErrCode FillRequestByKeys(const sptr<NotificationRequest> &oldRequest,
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest);
+    ErrCode IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

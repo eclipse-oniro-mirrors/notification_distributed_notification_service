@@ -417,7 +417,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
     }
     ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu",
         request->GetKey().c_str(), sortingMap->GetKey().size());
-
+    ANS_LOGD("OnConsumed Notification info is %{public}s", request->GetNotificationRequest().Dump().c_str());
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(consumeCallbackInfo_.env, &loop);
     if (loop == nullptr) {
