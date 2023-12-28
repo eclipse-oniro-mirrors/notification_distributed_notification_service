@@ -50,6 +50,11 @@ ohos_shared_library("notificationsubscribe") {
 
   sources = [
     "../common.cpp",
+    "../common_convert_content.cpp",
+    "../common_convert_enum.cpp",
+    "../common_convert_liveview.cpp",
+    "../common_convert_notification.cpp",
+    "../common_convert_request.cpp",
     "../common_utils.cpp",
     "../constant.cpp",
     "../remove.cpp",
