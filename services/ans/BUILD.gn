@@ -45,9 +45,16 @@ ohos_shared_library("libans") {
 
   sources = [
     "src/access_token_helper.cpp",
+    "src/advanced_notification_event_service.cpp",
+    "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
+    "src/advanced_notification_publish_service.cpp",
+    "src/advanced_notification_reminder_service.cpp",
     "src/advanced_notification_service.cpp",
     "src/advanced_notification_service_ability.cpp",
+    "src/advanced_notification_slot_service.cpp",
+    "src/advanced_notification_subscriber_service.cpp",
+    "src/advanced_notification_utils.cpp",
     "src/bundle_manager_helper.cpp",
     "src/event_report.cpp",
     "src/notification_config_parse.cpp",

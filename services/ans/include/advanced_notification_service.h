@@ -50,6 +50,13 @@ public:
         sptr<NotificationBundleOption> bundleOption {nullptr};
     };
 
+    struct RecentNotification {
+        sptr<Notification> notification = nullptr;
+        bool isActive = false;
+        int32_t deleteReason = 0;
+        int64_t deleteTime = 0;
+    };
+
     ~AdvancedNotificationService() override;
 
     DISALLOW_COPY_AND_MOVE(AdvancedNotificationService);
@@ -841,7 +848,11 @@ public:
     void SetRequestBySlotType(const sptr<NotificationRequest> &request);
 
 private:
-    struct RecentInfo;
+    struct RecentInfo {
+        std::list<std::shared_ptr<RecentNotification>> list;
+        size_t recentCount = 16;
+    };
+
     AdvancedNotificationService();
 
     void StartFilters();
