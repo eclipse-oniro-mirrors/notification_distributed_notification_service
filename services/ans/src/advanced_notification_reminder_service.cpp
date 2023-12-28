@@ -58,6 +58,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
 
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     std::string bundle = GetClientBundleName();
+    reminder->InitCreatorBundleName(bundle);
     if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
         ANSR_LOGE("wantagent info is nullptr");
         return ERR_ANS_INVALID_PARAM;

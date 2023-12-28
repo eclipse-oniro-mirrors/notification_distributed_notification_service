@@ -32,7 +32,8 @@ namespace Notification {
 namespace {
 const int32_t REMINDER_RDB_VERSION_V1 = 1;
 const int32_t REMINDER_RDB_VERSION_V2 = 2;
-const uint32_t REMINDER_RDB_VERSION = 3;
+const int32_t REMINDER_RDB_VERSION_V3 = 3;
+const uint32_t REMINDER_RDB_VERSION = 4;
 const int32_t STATE_FAIL = -1;
 std::string g_sqlColumns;
 }
@@ -60,9 +61,13 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
             AddRdbColum(store, "groupId", "TEXT");
             AddRdbColum(store, "custom_ring_uri", "TEXT");
             AddRdbColum(store, "snooze_slot_id", "INT");
+            AddRdbColum(store, "creator_bundle_name", "TEXT");
         } else if (oldVersion == REMINDER_RDB_VERSION_V2) {
             AddRdbColum(store, "custom_ring_uri", "TEXT");
             AddRdbColum(store, "snooze_slot_id", "INT");
+            AddRdbColum(store, "creator_bundle_name", "TEXT");
+        } else if (oldVersion == REMINDER_RDB_VERSION_V3) {
+            AddRdbColum(store, "creator_bundle_name", "TEXT");
         }
     }
     store.SetVersion(newVersion);
