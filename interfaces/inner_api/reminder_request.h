@@ -312,6 +312,13 @@ public:
     std::map<ActionButtonType, ActionButtonInfo> GetActionButtons() const;
 
     /**
+     * @brief Obtains creator bundle name
+     *
+     * @return creator bundle name
+     */
+    std::string GetCreatorBundleName() const;
+
+    /**
      * @brief Obtains the configured content.
      *
      * @return content text.
@@ -440,6 +447,13 @@ public:
      * @return want agent information.
      */
     std::shared_ptr<WantAgentInfo> GetWantAgentInfo() const;
+
+    /**
+     * @brief Inites reminder creator bundle name when publish reminder success.
+     *
+     * @param creatorBundleName Indicates the creator bundle name which the reminder belong to
+     */
+    void InitCreatorBundleName(const std::string &creatorBundleName);
 
     /**
      * @brief Inits reminder id when publish reminder success.
@@ -1043,6 +1057,7 @@ private:
     int64_t autoDeletedTime_ {0};
     std::string customButtonUri_ {};
     std::string customRingUri_ {};
+    std::string creatorBundleName_ {};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.

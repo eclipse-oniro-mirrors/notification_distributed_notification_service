@@ -1905,5 +1905,33 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00300, Function | SmallTe
     // then
     EXPECT_EQ(ret->GetSlotType(), NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 }
+
+/**
+ * @tc.name: InitCreatorBundleName_00001
+ * @tc.desc: Test InitCreatorBundleName with normal parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I8R55M
+ */
+HWTEST_F(ReminderRequestTest, InitCreatorBundleName_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string bundleName = "com.example.myapplication";
+    rrc->InitCreatorBundleName(bundleName);
+    EXPECT_EQ(rrc->GetCreatorBundleName(), bundleName);
+}
+
+/**
+ * @tc.name: InitCreatorBundleName_00002
+ * @tc.desc: Test InitCreatorBundleName with special parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I8R55M
+ */
+HWTEST_F(ReminderRequestTest, InitCreatorBundleName_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string bundleName = "com.example.myapplication.~!@#$%^&*()";
+    rrc->InitCreatorBundleName(bundleName);
+    EXPECT_EQ(rrc->GetCreatorBundleName(), bundleName);
+}
 }
 }

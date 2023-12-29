@@ -53,6 +53,7 @@ const std::string ReminderTable::AUTO_DELETED_TIME = "autoDeletedTime";
 const std::string ReminderTable::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
 const std::string ReminderTable::GROUP_ID = "groupId";
 const std::string ReminderTable::CUSTOM_RING_URI = "custom_ring_uri";
+const std::string ReminderTable::CREATOR_BUNDLE_NAME = "creator_bundle_name";
 
 // Reminder Table Calendar Columns.
 const std::string ReminderTable::REPEAT_DAYS = "repeat_days";
@@ -116,7 +117,8 @@ void ReminderTable::InitBasicColumns()
     AddColumn(AUTO_DELETED_TIME, "BIGINT");
     AddColumn(REPEAT_DAYS_OF_WEEK, "INT");
     AddColumn(GROUP_ID, "TEXT");
-    AddColumn(CUSTOM_RING_URI, "TEXT", false);
+    AddColumn(CUSTOM_RING_URI, "TEXT");
+    AddColumn(CREATOR_BUNDLE_NAME, "TEXT", false);
 }
 
 void ReminderTable::InitCalendarColumns()

@@ -202,6 +202,11 @@ public:
      */
     static const std::string CUSTOM_RING_URI;
 
+    /*
+     * reminder creator bundle name
+     */
+    static const std::string CREATOR_BUNDLE_NAME;
+
     // Reminder Table Calendar Columns.
     static const std::string REPEAT_DAYS;
     static const std::string REPEAT_MONTHS;
