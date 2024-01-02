@@ -782,12 +782,15 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["isStopwatch"]      = showStopwatch_;
     jsonObject["isCountdown"]      = isCountdown_;
     jsonObject["isUnremovable"]    = unremovable_;
+    jsonObject["isAgent"]          = isAgent_;
     jsonObject["isFloatingIcon"]   = floatingIcon_;
 
     jsonObject["creatorBundleName"] = creatorBundleName_;
     jsonObject["creatorUid"]        = creatorUid_;
     jsonObject["creatorPid"]        = creatorPid_;
     jsonObject["creatorUserId"]     = creatorUserId_;
+    jsonObject["ownerUserId"]       = ownerUserId_;
+    jsonObject["ownerUid"]          = ownerUid_;
     jsonObject["receiverUserId"]    = receiverUserId_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
@@ -1710,6 +1713,14 @@ void NotificationRequest::ConvertJsonToNumExt(
     if (jsonObject.find("finishDeadLine") != jsonEnd && jsonObject.at("finishDeadLine").is_number_integer()) {
         target->finishDeadLine_ = jsonObject.at("finishDeadLine").get<int64_t>();
     }
+
+    if (jsonObject.find("ownerUserId") != jsonEnd && jsonObject.at("ownerUserId").is_number_integer()) {
+        target->ownerUserId_ = jsonObject.at("ownerUserId").get<int32_t>();
+    }
+
+    if (jsonObject.find("ownerUid") != jsonEnd && jsonObject.at("ownerUid").is_number_integer()) {
+        target->ownerUid_ = jsonObject.at("ownerUid").get<int32_t>();
+    }
 }
 
 void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nlohmann::json &jsonObject)
@@ -1863,6 +1874,17 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
 
     if (jsonObject.find("isFloatingIcon") != jsonEnd && jsonObject.at("isFloatingIcon").is_boolean()) {
         target->floatingIcon_ = jsonObject.at("isFloatingIcon").get<bool>();
+    }
+
+    ConvertJsonToBoolExt(target, jsonObject);
+}
+
+void NotificationRequest::ConvertJsonToBoolExt(NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("isAgent") != jsonEnd && jsonObject.at("isAgent").is_boolean()) {
+        target->isAgent_ = jsonObject.at("isAgent").get<bool>();
     }
 }
 
