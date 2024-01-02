@@ -1262,6 +1262,7 @@ private:
     static void ConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToEnum(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToBool(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static void ConvertJsonToBoolExt(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToPixelMap(NotificationRequest *target, const nlohmann::json &jsonObject);
     static bool ConvertJsonToNotificationContent(NotificationRequest *target, const nlohmann::json &jsonObject);
     static bool ConvertJsonToNotificationActionButton(NotificationRequest *target, const nlohmann::json &jsonObject);
