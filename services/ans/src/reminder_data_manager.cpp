@@ -70,6 +70,8 @@ std::mutex ReminderDataManager::SHOW_MUTEX;
 std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
 
+ReminderDataManager::~ReminderDataManager() = default;
+
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption)
 {
@@ -464,12 +466,7 @@ sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(
     if (reminder == nullptr) {
         return nullptr;
     }
-    sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
-    if (notificationRequest == nullptr) {
-        ANSR_LOGW("Not find the reminder due to notification request is null");
-        return nullptr;
-    }
-    if (notificationRequest->GetCreatorBundleName() != pkgName) {
+    if (reminder->GetCreatorBundleName() != pkgName) {
         ANSR_LOGW("Not find the reminder due to package name not match");
         return nullptr;
     }
@@ -987,7 +984,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
         return;
     }
     if (!IsAllowedNotify(reminder)) {
-        ANSR_LOGD("Not allow to notify.");
+        ANSR_LOGE("Not allow to notify.");
         reminder->OnShow(false, isSysTimeChanged, false);
         store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
         return;

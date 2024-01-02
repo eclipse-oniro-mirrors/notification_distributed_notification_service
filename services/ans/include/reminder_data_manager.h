@@ -42,7 +42,7 @@ public:
     {
         Init(false);
     };
-    ~ReminderDataManager() {};
+    ~ReminderDataManager();
 
     ReminderDataManager(ReminderDataManager &other) = delete;
     ReminderDataManager& operator = (const ReminderDataManager &other) = delete;
