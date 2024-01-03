@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import bundleManager from '@ohos.bundle.bundleManager';
+import bundleResourceManager from '@ohos.bundle.bundleResourceManager';
 import deviceInfo from '@ohos.deviceInfo';
 import display from '@ohos.display';
 import window from '@ohos.window';
@@ -167,13 +167,12 @@ struct PermissionDialog {
   async updateApplicationName(bundleName: string): Promise<void> {
     console.info(TAG, `updateApplicationName bundleName: ${bundleName}`);
     try {
-      let applicationInfo = await bundleManager.getApplicationInfo(bundleName,
-        bundleManager.ApplicationFlag.GET_APPLICATION_INFO_DEFAULT);
-      let extensionContext = AppStorage.Get('context') as Context;
-      let context = extensionContext.createBundleContext(bundleName);
-      let appName = context.resourceManager.getStringSync(applicationInfo.labelId);
+      let bundleFlags = bundleResourceManager.ResourceFlag.GET_RESOURCE_INFO_ALL;
+      let resourceInfo = bundleResourceManager.getBundleResourceInfo(bundleName, bundleFlags);
+      console.info(TAG, `applicationName name : ${JSON.stringify(resourceInfo.label)}`);
+      let appName = resourceInfo.label;
       this.appName = titleTrim(appName);
-      console.info(TAG, `hap label: ${applicationInfo.label}, value ${this.appName}`);
+      console.info(TAG, `hap label: ${this.appName}`);
     } catch (err) {
       console.error(TAG, `applicationName error : ${JSON.stringify(err)}`);
     }
