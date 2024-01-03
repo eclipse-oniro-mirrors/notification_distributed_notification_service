@@ -587,6 +587,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_advanced_notification_service.cpp",
     "mock/mock_bundle_manager_helper.cpp",
+    "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
