@@ -61,6 +61,7 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/ans_manager_proxy_slot.cpp",
     "${core_path}/src/ans_manager_proxy_utils.cpp",
     "${core_path}/src/ans_manager_stub.cpp",
+    "${core_path}/src/ans_manager_stub_invalid.cpp",
     "${core_path}/src/ans_notification.cpp",
     "${core_path}/src/ans_subscriber_local_live_view_proxy.cpp",
     "${core_path}/src/ans_subscriber_local_live_view_stub.cpp",
