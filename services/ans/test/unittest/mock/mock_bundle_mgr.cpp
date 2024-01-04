@@ -23,11 +23,17 @@ namespace OHOS {
 namespace Notification {
 namespace {
 bool g_isNonBundleName = false;
+bool g_isEnable = true;
 }
 
 void MockIsNonBundleName(bool isNonBundleName)
 {
     g_isNonBundleName = isNonBundleName;
+}
+
+void MockDistributedNotificationEnabled(bool isEnable)
+{
+    g_isEnable = isEnable;
 }
 }
 }
@@ -58,7 +64,7 @@ int BundleMgrProxy::GetUidByBundleName(const std::string &bundleName, const int 
 bool BundleMgrProxy::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
 {
-    appInfo.distributedNotificationEnabled = true;
+    appInfo.distributedNotificationEnabled = Notification::g_isEnable;
     return true;
 }
 
