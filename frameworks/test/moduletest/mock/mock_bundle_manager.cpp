@@ -14,8 +14,24 @@
  */
 
 #include "mock_bundle_manager.h"
+
+#include <gtest/gtest.h>
 #include "ability_info.h"
 #include "application_info.h"
+
+namespace OHOS {
+namespace Notification {
+namespace {
+bool g_isNonBundleName = false;
+int32_t NON_SYSTEM_APP_UID = 1000;
+}
+
+void MockIsNonBundleName(bool isNonBundleName)
+{
+    g_isNonBundleName = isNonBundleName;
+}
+}
+}
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -33,6 +49,35 @@ bool MockBundleManager::CheckIsSystemAppByUid(const int uid)
         return isSystemApp_;
     }
     return (uid < SYSTEM_APP_UUID) ? false : true;
+}
+
+ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
+{
+    GTEST_LOG_(INFO) << "mock GetNameForUid.";
+    name = Notification::g_isNonBundleName ? "": "bundleName";
+    return ERR_OK;
+}
+
+bool BundleMgrProxy::GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo,
+    int32_t userId)
+{
+    return true;
+}
+
+int BundleMgrProxy::GetUidByBundleName(const std::string &bundleName, const int userId)
+{
+    if (userId == 0) {
+        return -1;
+    } else {
+        return Notification::NON_SYSTEM_APP_UID;
+    }
+}
+
+bool BundleMgrProxy::GetApplicationInfo(
+    const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
+{
+    appInfo.distributedNotificationEnabled = true;
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
