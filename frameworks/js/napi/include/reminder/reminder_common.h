@@ -179,13 +179,21 @@ private:
 
     static void GetButtonWantAgent(const napi_env &env, const napi_value &value,
         std::shared_ptr<ReminderRequest>& reminder, std::shared_ptr<ReminderRequest::ButtonWantAgent>& wantAgent);
+
     static void GetButtonDataShareUpdate(const napi_env &env, const napi_value &value,
         std::shared_ptr<ReminderRequest::ButtonDataShareUpdate>& buttonDataShareUpdate);
+
     static bool GetValueBucketObject(std::string &ValueBucketString, const napi_env &env, const napi_value &arg);
+
     static std::string GetStringFromJS(const napi_env &env, const napi_value &param,
         const std::string &defaultValue = "");
+
     static std::string Convert2Value(const napi_env &env, const napi_value &value, bool &status, std::string &type);
+
     static std::vector<uint8_t> Convert2U8Vector(const napi_env &env, const napi_value &input_array);
+
+    static bool ValidateString(const std::string &str);
+
     static bool IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder);
 };
 }  // namespace OHOS
