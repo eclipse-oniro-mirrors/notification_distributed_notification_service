@@ -454,6 +454,14 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     ANS_LOGE("ffrt enter!");
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
+    bool isCommonLiveView = notification->GetNotificationRequest().IsCommonLiveView();
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
+    if (isCommonLiveView) {
+        liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+            notification->GetNotificationRequest().GetContent()->GetNotificationContent());
+        liveViewContent->FillPictureMarshallingMap();
+    }
+
     int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
     for (auto record : subscriberRecordList_) {
@@ -468,6 +476,10 @@ void NotificationSubscriberManager::NotifyCanceledInner(
             IsSystemUser(sendUserId))) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
         }
+    }
+
+    if (isCommonLiveView && liveViewContent != nullptr) {
+        liveViewContent->ClearPictureMarshallingMap();
     }
 }
 

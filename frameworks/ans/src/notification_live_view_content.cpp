@@ -212,23 +212,7 @@ bool NotificationLiveViewContent::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    for (const auto &picture : pictureMap_) {
-        if (!parcel.WriteString(picture.first)) {
-            ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
-            return false;
-        }
-        std::vector<std::string> pixelVec;
-        pixelVec.reserve(picture.second.size());
-        for (const auto &pixel : picture.second) {
-            pixelVec.emplace_back(AnsImageUtil::PackImage(pixel));
-        }
-        if (!parcel.WriteStringVector(pixelVec)) {
-            ANS_LOGE("Failed to write picture vector.");
-            return false;
-        }
-    }
-
-    return true;
+    return MarshallingPictureMap(parcel);
 }
 
 NotificationLiveViewContent *NotificationLiveViewContent::Unmarshalling(Parcel &parcel)
@@ -279,5 +263,66 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
 
     return true;
 }
+
+bool NotificationLiveViewContent::MarshallingPictureMap(Parcel &parcel) const
+{
+    if (!pictureMarshallingMap_.empty()) {
+        ANS_LOGD("Write pictureMap by pictureMarshallingMap.");
+        for (const auto &picture : pictureMarshallingMap_) {
+            if (!parcel.WriteString(picture.first)) {
+                ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
+                return false;
+            }
+
+            if (!parcel.WriteStringVector(picture.second)) {
+                ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    for (const auto &picture : pictureMap_) {
+        if (!parcel.WriteString(picture.first)) {
+            ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
+            return false;
+        }
+        std::vector<std::string> pixelVec;
+        pixelVec.reserve(picture.second.size());
+        for (const auto &pixel : picture.second) {
+            pixelVec.emplace_back(AnsImageUtil::PackImage(pixel));
+        }
+        if (!parcel.WriteStringVector(pixelVec)) {
+            ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void NotificationLiveViewContent::FillPictureMarshallingMap()
+{
+    pictureMarshallingMap_.clear();
+    for (const auto &picture : pictureMap_) {
+        std::vector<std::string> pixelVec;
+        pixelVec.reserve(picture.second.size());
+        for (const auto &pixel : picture.second) {
+            pixelVec.emplace_back(AnsImageUtil::PackImage(pixel));
+        }
+        pictureMarshallingMap_[picture.first] = pixelVec;
+    }
+}
+
+void NotificationLiveViewContent::ClearPictureMarshallingMap()
+{
+    pictureMarshallingMap_.clear();
+}
+
+PictureMarshallingMap NotificationLiveViewContent::GetPictureMarshallingMap() const
+{
+    return pictureMarshallingMap_;
+}
+
 }  // namespace Notification
 }  // namespace OHOS

@@ -247,5 +247,68 @@ HWTEST_F(NotificationLiveViewContentTest, Unmarshalling_00001, Function | SmallT
     auto ptr = NotificationLiveViewContent::Unmarshalling(parcel);
     EXPECT_EQ(ptr, nullptr);
 }
+
+/**
+ * @tc.name: MarshallingPictureMap_00001
+ * @tc.desc: Test MarshallingPictureMap.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);
+    EXPECT_EQ(isSuccess, true);
+}
+
+/**
+ * @tc.name: MarshallingPictureMap_00002
+ * @tc.desc: Test MarshallingPictureMap.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00002, Function | SmallTest | Level1)
+{
+    PictureMap pictureMap;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelVec;
+    pixelVec.push_back(std::make_shared<Media::PixelMap>());
+    auto picture = std::make_pair(std::string{"test"}, pixelVec);
+    pictureMap.insert(picture);
+
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetPicture(pictureMap);
+    bool isEmptyMarshallingMap = liveViewContent->GetPictureMarshallingMap().empty();
+    EXPECT_EQ(isEmptyMarshallingMap, true);
+
+    Parcel parcel;
+    bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);
+    EXPECT_EQ(isSuccess, true);
+}
+
+/**
+ * @tc.name: MarshallingPictureMap_00003
+ * @tc.desc: Test MarshallingPictureMap.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00003, Function | SmallTest | Level1)
+{
+    PictureMap pictureMap;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelVec;
+    pixelVec.push_back(std::make_shared<Media::PixelMap>());
+    auto picture = std::make_pair(std::string{"test"}, pixelVec);
+    pictureMap.insert(picture);
+
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetPicture(pictureMap);
+    liveViewContent->FillPictureMarshallingMap();
+    bool isEmptyMarshallingMap = liveViewContent->GetPictureMarshallingMap().empty();
+    EXPECT_EQ(isEmptyMarshallingMap, false);
+
+    Parcel parcel;
+    bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);
+    EXPECT_EQ(isSuccess, true);
+}
 }
 }
