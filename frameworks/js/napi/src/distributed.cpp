@@ -213,18 +213,8 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue isDistributedEnabled work failed return: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, callback);
-    }
-
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("isDistributedEnabled callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -285,18 +275,8 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue enableDistributed work failed return: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
-    }
-
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("enableDistributed callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -357,18 +337,8 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue enableDistributedByBundle work failed return: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
-    }
-
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("enableDistributedByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -429,18 +399,8 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue enableDistributedSelf work failed return: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
-    }
-
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("enableDistributedSelf callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -514,18 +474,8 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue isDistributedEnableByBundle work failed return: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
-    }
-
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("isDistributedEnableByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -604,18 +554,8 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue getDeviceRemindType work failed return: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, callback);
-    }
-
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("getDeviceRemindType callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -724,17 +664,8 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    if (napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated) != napi_ok) {
-        if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete setSyncNotificationEnabledWithoutApp callback reference.");
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
-    }
-
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("setSyncNotificationEnabledWithoutApp callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -841,15 +772,7 @@ napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    if (napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated) != napi_ok) {
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-        return Common::JSParaError(env, params.callback);
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("GetSyncNotificationEnabledWithoutApp callback is nullptr.");
