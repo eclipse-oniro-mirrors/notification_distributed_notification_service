@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace Notification {
 using PictureMap = std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>>;
+using PictureMarshallingMap = std::map<std::string, std::vector<std::string>>;
 class NotificationLiveViewContent : public NotificationBasicContent {
 public:
     static const uint32_t MAX_VERSION;
@@ -138,6 +139,14 @@ public:
      */
     static NotificationLiveViewContent *Unmarshalling(Parcel &parcel);
 
+    bool MarshallingPictureMap(Parcel &parcel) const;
+
+    void FillPictureMarshallingMap();
+
+    void ClearPictureMarshallingMap();
+
+    PictureMarshallingMap GetPictureMarshallingMap() const;
+
 protected:
     /**
      * @brief Read a NotificationLiveViewContent object from a Parcel.
@@ -153,6 +162,7 @@ private:
     uint32_t version_ {MAX_VERSION};
     std::shared_ptr<AAFwk::WantParams> extraInfo_ {};
     PictureMap pictureMap_ {};
+    PictureMarshallingMap pictureMarshallingMap_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS
