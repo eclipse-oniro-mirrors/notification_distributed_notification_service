@@ -78,19 +78,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue napiPublish work failed return: %{public}d", status);
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete napiPublish callback reference.");
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
         ANS_LOGD("napiPublish callback is nullptr.");
@@ -152,16 +140,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue napiShowNotification work failed return: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     return nullptr;
 }
@@ -222,19 +201,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue napiPublishAsBundle work failed return: %{public}d", status);
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete napiPublishAsBundle callback reference.");
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
         ANS_LOGD("napiPublishAsBundle callback is nullptr.");

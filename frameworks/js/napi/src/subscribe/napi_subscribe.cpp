@@ -99,19 +99,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue napiSubscribe work failed return: %{public}d", status);
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete napiSubscribe callback reference.");
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
         ANS_LOGD("napiSubscribe callback is nullptr.");
@@ -190,19 +178,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue napiSubscribeSelf work failed return: %{public}d", status);
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete napiSubscribeSelf callback reference.");
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
         ANS_LOGD("NapiSubscribeSelf callback is nullptr.");
@@ -277,19 +253,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue napiUnsubscribe work failed return: %{public}d", status);
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete napiUnsubscribe callback reference.");
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
         ANS_LOGD("napiUnsubscribe callback is nullptr.");

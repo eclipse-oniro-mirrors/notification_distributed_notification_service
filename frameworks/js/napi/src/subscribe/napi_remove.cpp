@@ -83,7 +83,7 @@ napi_value NapiRemove(napi_env env, napi_callback_info info)
     // Asynchronous function call
     napi_create_async_work(env, nullptr, resourceName, NapiRemoveExecuteCallback, NapiRemoveCompleteCallback,
         (void *)removeInfo, &removeInfo->asyncWork);
-    NAPI_CALL(env, napi_queue_async_work_with_qos(env, removeInfo->asyncWork, napi_qos_user_initiated));
+    napi_queue_async_work_with_qos(env, removeInfo->asyncWork, napi_qos_user_initiated);
     if (removeInfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {
@@ -148,19 +148,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    if (status != napi_ok) {
-        ANS_LOGE("Queue napiRemoveAll work failed return: %{public}d", status);
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete napiRemoveAll callback reference.");
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-        delete asynccallbackinfo;
-        asynccallbackinfo = nullptr;
-    }
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
         ANS_LOGD("napiRemoveAll callback is nullptr.");
