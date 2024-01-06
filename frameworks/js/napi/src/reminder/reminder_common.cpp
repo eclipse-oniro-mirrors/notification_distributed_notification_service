@@ -205,6 +205,10 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
             continue;
         }
         std::string keyStr = GetStringFromJS(env, key);
+        if (!ValidateString(keyStr)) {
+            ANSR_LOGW("The key contains separator");
+            return false;
+        }
         // value
         napi_value value = 0;
         napi_get_property(env, arg, key, &value);
@@ -214,6 +218,10 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
         if (!ret) {
             ANSR_LOGW("parse valuesBucket err");
             continue;
+        }
+        if (!ValidateString(valueObject)) {
+            ANSR_LOGW("The value contains separator");
+            return false;
         }
         valueBucketString += keyStr + ReminderRequest::SEP_BUTTON_VALUE + type
             + ReminderRequest::SEP_BUTTON_VALUE + valueObject;
@@ -346,6 +354,23 @@ std::vector<uint8_t> ReminderCommon::Convert2U8Vector(const napi_env &env, const
         }
     }
     return std::vector<uint8_t>((uint8_t *)data, ((uint8_t *)data) + length);
+}
+
+bool ReminderCommon::ValidateString(const std::string &str)
+{
+    if (str.find(ReminderRequest::SEP_BUTTON_VALUE_TYPE) != std::string::npos) {
+        ANSR_LOGW("The string contains SEP_BUTTON_VALUE_TYPE");
+        return false;
+    }
+    if (str.find(ReminderRequest::SEP_BUTTON_VALUE) != std::string::npos) {
+        ANSR_LOGW("The string contains SEP_BUTTON_VALUE");
+        return false;
+    }
+    if (str.find(ReminderRequest::SEP_BUTTON_VALUE_BLOB) != std::string::npos) {
+        ANSR_LOGW("The string contains SEP_BUTTON_VALUE_BLOB");
+        return false;
+    }
+    return true;
 }
 
 bool ReminderCommon::GenWantAgent(
