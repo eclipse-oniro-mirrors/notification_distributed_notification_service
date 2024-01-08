@@ -1590,22 +1590,31 @@ void AdvancedNotificationService::FillActionButtons(const sptr<NotificationReque
         return;
     }
 
-    auto iter = notificationList_.begin();
-    while (iter != notificationList_.end()) {
-        if ((*iter)->request->GetKey() == request->GetKey()) {
-            break;
-        }
-        iter++;
-    }
-
-    if (iter == notificationList_.end()) {
-        ANS_LOGD("No old action buttons.");
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
         return;
     }
 
-    for (auto actionButton : (*iter)->request->GetActionButtons()) {
-        request->AddActionButton(actionButton);
-    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        auto iter = notificationList_.begin();
+        while (iter != notificationList_.end()) {
+            if ((*iter)->request->GetKey() == request->GetKey()) {
+                break;
+            }
+            iter++;
+        }
+
+        if (iter == notificationList_.end()) {
+            ANS_LOGD("No old action buttons.");
+            return;
+        }
+
+        for (auto actionButton : (*iter)->request->GetActionButtons()) {
+            request->AddActionButton(actionButton);
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
