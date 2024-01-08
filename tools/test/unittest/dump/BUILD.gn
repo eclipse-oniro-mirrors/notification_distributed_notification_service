@@ -28,6 +28,14 @@ tools_dump_mock_sources =
     [ "${tools_path}/test/mock/mock_ans_manager_stub.cpp" ]
 
 ohos_unittest("notification_shell_command_dump_test") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   include_dirs = []
