@@ -24,6 +24,7 @@
 #ifdef PLAYER_FRAMEWORK_ENABLE
 #include "player.h"
 #endif
+#include "ffrt.h"
 #include "app_mgr_client.h"
 #include "reminder_request.h"
 #include "reminder_store.h"
@@ -658,6 +659,11 @@ private:
      */
     std::mutex appMgrMutex_;
     sptr<AppExecFwk::IAppMgr> appMgrProxy_ = nullptr;
+
+    /**
+     * async queue
+     */
+    std::shared_ptr<ffrt::queue> queue_ = nullptr;
 };
 }  // namespace OHOS
 }  // namespace Notification
