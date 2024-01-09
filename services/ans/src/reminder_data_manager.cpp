@@ -79,7 +79,7 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
         return ERR_REMINDER_NUMBER_OVERLOAD;
     }
     UpdateAndSaveReminderLocked(reminder, bundleOption);
-    queue_->submit([this, reminder](){
+    queue_->submit([this, reminder]() {
         UpdateReminderLanguageLocked(reminder);
         StartRecentReminder();
     });
