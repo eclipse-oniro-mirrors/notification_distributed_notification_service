@@ -122,7 +122,8 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
     sptr<NotificationButtonOption> buttonOption = new NotificationButtonOption();
-    sptr<Notification> notification = new Notification();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    sptr<Notification> notification = new Notification(request);
     notificationLocalLiveViewSubscriberManager_->NotifyTriggerResponse(notification, buttonOption);
 }
 }  // namespace Notification

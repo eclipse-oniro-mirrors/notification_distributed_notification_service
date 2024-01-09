@@ -257,14 +257,20 @@ void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner(
 {
     ANS_LOGI("ffrt enter!");
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("%{public}s notification->GetUserId <%{public}d>, bundlename <%{public}s>",
-        __FUNCTION__, notification->GetUid(),
-        notification->GetBundleName().c_str());
+
     int32_t sendUserId = notification->GetUid();
+    std::string bundleName = "";
+    if (notification->GetNotificationRequest().IsAgentNotification()) {
+        bundleName = notification->GetCreateBundle();
+    } else {
+        bundleName = notification->GetBundleName();
+    }
+    ANS_LOGD("%{public}s notification->GetUserId <%{public}d>, bundlename <%{public}s>",
+        __FUNCTION__, notification->GetUid(), bundleName.c_str());
+
     for (auto record : buttonRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>, bundlename <%{public}s>",
             __FUNCTION__, record->userId, record->bundleName.c_str());
-        auto bundleName = notification->GetBundleName();
         if (record->bundleName == bundleName && record->userId == sendUserId) {
             record->subscriber->OnResponse(notification->GetId(), buttonOption);
         }
