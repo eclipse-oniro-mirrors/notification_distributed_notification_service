@@ -1261,20 +1261,5 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00400, Function | S
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
 }
-
-/**
- * @tc.number    : GetTemplateSupported_00100
- * @tc.name      : GetTemplateSupported
- * @tc.desc      : Test GetTemplateSupported function
- * @tc.require   : issueI5SR8J
- */
-HWTEST_F(NotificationPreferencesTest, GetTemplateSupported_00100, Function | SmallTest | Level1)
-{
-    NotificationPreferences::GetInstance().OnDistributedKvStoreDeathRecipient();
-    std::string templateName = "";
-    bool support = true;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetTemplateSupported(templateName, support),
-        (int)ERR_ANS_INVALID_PARAM);
-}
 }  // namespace Notification
 }  // namespace OHOS

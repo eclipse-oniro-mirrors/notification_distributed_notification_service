@@ -146,14 +146,6 @@ public:
      * @return Return true on success, false on failure.
      */
     bool RemoveAllSlotsFromDisturbeDB(const std::string &bundleKey);
-
-    /**
-     * @brief Deal death recipient.
-     *
-     * @return Return true on success, false on failure.
-     */
-    bool StoreDeathRecipient();
-
     bool RemoveNotificationEnable(const int32_t userId);
     bool RemoveDoNotDisturbDate(const int32_t userId);
     bool RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid);
