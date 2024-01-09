@@ -85,7 +85,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         SetAgentNotification(notificationRequest, msWantAgentName);
     }
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    result = PrepareNotificationInfo(notificationRequest, bundleOption);
+    ErrCode result = PrepareNotificationInfo(notificationRequest, bundleOption);
     if (result != ERR_OK) {
         ANSR_LOGW("PrepareNotificationInfo fail");
         return result;
