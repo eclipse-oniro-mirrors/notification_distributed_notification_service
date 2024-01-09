@@ -39,7 +39,8 @@ class ReminderDataManagerTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        manager = std::make_shared<ReminderDataManager>();
+        ReminderDataManager::InitInstance(nullptr);
+        manager = ReminderDataManager::GetInstance();
     }
     static void TearDownTestCase()
     {
