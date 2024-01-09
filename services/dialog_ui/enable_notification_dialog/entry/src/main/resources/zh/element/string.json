@@ -43,6 +43,10 @@
     {
       "name": "group_label_notification",
       "value": "发送通知？"
+    },
+    {
+      "name": "permission_reason",
+      "value": "需要该权限去获取应用名"
     }
   ]
 }

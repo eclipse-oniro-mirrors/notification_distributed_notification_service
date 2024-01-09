@@ -30,7 +30,11 @@
         "name": "ohos.permission.START_ABILITIES_FROM_BACKGROUND"
       },
       {
-        "name": "ohos.permission.GET_BUNDLE_RESOURCES"
+        "name": "ohos.permission.GET_BUNDLE_RESOURCES",
+        "reason": "$string:permission_reason",
+        "usedScene": {
+          "abilities": ["MainAbility"]
+        }
       }
     ]
   }
