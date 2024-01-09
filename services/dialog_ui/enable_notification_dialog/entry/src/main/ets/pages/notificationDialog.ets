@@ -236,7 +236,7 @@ struct PermissionDialog {
     try {
       await this.dialog?.publishButtonClickedEvent(enabled);
     } catch (err) {
-      console.error(TAG, `NotificationDialog enable error, code is ${err?.code}`);
+      console.error(TAG, `NotificationDialog enable error, code is ${err.code}`);
     } finally {
       await this.dialog?.destroy();
     }
