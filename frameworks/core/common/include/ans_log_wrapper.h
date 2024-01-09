@@ -31,10 +31,14 @@ namespace Notification {
 #define ANS_LOG_TAG "Ans"
 #endif
 
+#ifndef ANS_REMINDER_LOG_TAG
+#define ANS_REMINDER_LOG_TAG "ANS_REMINDER"
+#endif
+
 enum class AnsLogLevel : uint8_t { DEBUG = 0, INFO, WARN, ERROR, FATAL };
 
 static constexpr OHOS::HiviewDFX::HiLogLabel ANS_LABEL = {LOG_CORE, ANS_LOG_DOMAIN, ANS_LOG_TAG};
-static constexpr OHOS::HiviewDFX::HiLogLabel ANS_REMINDER_LABEL = {LOG_CORE, ANS_LOG_DOMAIN, "ANS_REMINDER"};
+static constexpr OHOS::HiviewDFX::HiLogLabel ANS_REMINDER_LABEL = {LOG_CORE, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG};
 
 class AnsLogWrapper {
 public:
@@ -81,35 +85,35 @@ private:
     static AnsLogLevel level_;
 };
 
-#define PRINT_LOG(LEVEL, Level, fmt, ...)                  \
-    if (AnsLogWrapper::JudgeLevel(AnsLogLevel::LEVEL))     \
-    OHOS::HiviewDFX::HiLog::Level(ANS_LABEL,               \
-        "[%{public}s(%{public}s):%{public}d] " fmt,        \
+#define PRINT_LOG(LEVEL, level, fmt, ...)                    \
+    if (AnsLogWrapper::JudgeLevel(AnsLogLevel::LEVEL))   \
+    HILOG_IMPL(LOG_CORE, level, ANS_LOG_DOMAIN, ANS_LOG_TAG  \
+        "[%{public}s:(%{public}s):%{public}d] " fmt,         \
         AnsLogWrapper::GetBriefFileName(__FILE__).c_str(), \
-        __FUNCTION__,                                      \
-        __LINE__,                                          \
+        __FUNCTION__,                                        \
+        __LINE__,                                            \
         ##__VA_ARGS__)
 
-#define ANS_LOGD(fmt, ...) PRINT_LOG(DEBUG, Debug, fmt, ##__VA_ARGS__)
-#define ANS_LOGI(fmt, ...) PRINT_LOG(INFO, Info, fmt, ##__VA_ARGS__)
-#define ANS_LOGW(fmt, ...) PRINT_LOG(WARN, Warn, fmt, ##__VA_ARGS__)
-#define ANS_LOGE(fmt, ...) PRINT_LOG(ERROR, Error, fmt, ##__VA_ARGS__)
-#define ANS_LOGF(fmt, ...) PRINT_LOG(FATAL, Fatal, fmt, ##__VA_ARGS__)
+#define ANS_LOGD(fmt, ...) PRINT_LOG(DEBUG, LOG_DEBUG, fmt, ##__VA_ARGS__)
+#define ANS_LOGI(fmt, ...) PRINT_LOG(INFO, LOG_INFO, fmt, ##__VA_ARGS__)
+#define ANS_LOGW(fmt, ...) PRINT_LOG(WARN, LOG_WARN, fmt, ##__VA_ARGS__)
+#define ANS_LOGE(fmt, ...) PRINT_LOG(ERROR, LOG_ERROR, fmt, ##__VA_ARGS__)
+#define ANS_LOGF(fmt, ...) PRINT_LOG(FATAL, LOG_FATAL, fmt, ##__VA_ARGS__)
 
-#define PRINT_REMINDER_LOG(LEVEL, Level, fmt, ...)                  \
-    if (AnsLogWrapper::JudgeLevel(AnsLogLevel::LEVEL))     \
-    OHOS::HiviewDFX::HiLog::Level(ANS_REMINDER_LABEL,      \
-        "[%{public}s(%{public}s):%{public}d] " fmt,        \
+#define PRINT_REMINDER_LOG(LEVEL, level, fmt, ...)                  \
+    if (AnsLogWrapper::JudgeLevel(AnsLogLevel::LEVEL))   \
+    HILOG_IMPL(LOG_CORE, level, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG  \
+        "[%{public}s:(%{public}s):%{public}d] " fmt,         \
         AnsLogWrapper::GetBriefFileName(__FILE__).c_str(), \
-        __FUNCTION__,                                      \
-        __LINE__,                                          \
+        __FUNCTION__,                                        \
+        __LINE__,                                            \
         ##__VA_ARGS__)
 
-#define ANSR_LOGD(fmt, ...) PRINT_REMINDER_LOG(DEBUG, Debug, fmt, ##__VA_ARGS__)
-#define ANSR_LOGI(fmt, ...) PRINT_REMINDER_LOG(INFO, Info, fmt, ##__VA_ARGS__)
-#define ANSR_LOGW(fmt, ...) PRINT_REMINDER_LOG(WARN, Warn, fmt, ##__VA_ARGS__)
-#define ANSR_LOGE(fmt, ...) PRINT_REMINDER_LOG(ERROR, Error, fmt, ##__VA_ARGS__)
-#define ANSR_LOGF(fmt, ...) PRINT_REMINDER_LOG(FATAL, Fatal, fmt, ##__VA_ARGS__)
+#define ANSR_LOGD(fmt, ...) PRINT_REMINDER_LOG(DEBUG, LOG_DEBUG, fmt, ##__VA_ARGS__)
+#define ANSR_LOGI(fmt, ...) PRINT_REMINDER_LOG(INFO, LOG_INFO, fmt, ##__VA_ARGS__)
+#define ANSR_LOGW(fmt, ...) PRINT_REMINDER_LOG(WARN, LOG_WARN, fmt, ##__VA_ARGS__)
+#define ANSR_LOGE(fmt, ...) PRINT_REMINDER_LOG(ERROR, LOG_ERROR, fmt, ##__VA_ARGS__)
+#define ANSR_LOGF(fmt, ...) PRINT_REMINDER_LOG(FATAL, LOG_FATAL, fmt, ##__VA_ARGS__)
 }  // namespace Notification
 }  // namespace OHOS
 
