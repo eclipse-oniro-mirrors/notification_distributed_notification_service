@@ -206,7 +206,8 @@ public:
      * Update action button title.
      */
     void UpdateReminderLanguage(const sptr<ReminderRequest> &reminder);
-
+    void UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder);
+    
     /**
      * @brief System language change
      */

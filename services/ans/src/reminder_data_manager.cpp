@@ -80,12 +80,9 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
     }
     UpdateAndSaveReminderLocked(reminder, bundleOption);
     queue_->submit([this, reminder](){
-        {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            UpdateReminderLanguage(reminder);
-        }
+        UpdateReminderLanguageLocked(reminder);
         StartRecentReminder();
-    })
+    });
     return ERR_OK;
 }
 
@@ -1790,6 +1787,12 @@ void ReminderDataManager::UpdateReminderLanguage(const sptr<ReminderRequest> &re
     }
     // update action button title
     reminder->OnLanguageChange(resourceMgr);
+}
+
+void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder)
+{
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    UpdateReminderLanguage(reminder);
 }
 
 void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)

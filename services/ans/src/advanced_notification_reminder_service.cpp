@@ -101,6 +101,14 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
 ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
 {
     ANSR_LOGI("Cancel Reminder");
+    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+    ErrCode result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        callerToken, "ohos.permission.PUBLISH_AGENT_REMINDER");
+    if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -115,6 +123,14 @@ ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
 ErrCode AdvancedNotificationService::CancelAllReminders()
 {
     ANSR_LOGI("Cancel all reminders");
+    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+    ErrCode result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        callerToken, "ohos.permission.PUBLISH_AGENT_REMINDER");
+    if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -132,6 +148,14 @@ ErrCode AdvancedNotificationService::CancelAllReminders()
 ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders)
 {
     ANSR_LOGI("GetValidReminders");
+    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+    ErrCode result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        callerToken, "ohos.permission.PUBLISH_AGENT_REMINDER");
+    if (result != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+    
     reminders.clear();
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
