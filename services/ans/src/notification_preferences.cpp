@@ -271,7 +271,7 @@ ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    
+
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
@@ -653,14 +653,6 @@ ErrCode NotificationPreferences::GetBundleProperty(
 std::string NotificationPreferences::GenerateBundleKey(const sptr<NotificationBundleOption> &bundleOption) const
 {
     return bundleOption->GetBundleName().append(std::to_string(bundleOption->GetUid()));
-}
-
-void NotificationPreferences::OnDistributedKvStoreDeathRecipient()
-{
-    if (preferncesDB_ != nullptr) {
-        if (preferncesDB_->StoreDeathRecipient()) {
-        }
-    }
 }
 
 ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templateName, bool &support)

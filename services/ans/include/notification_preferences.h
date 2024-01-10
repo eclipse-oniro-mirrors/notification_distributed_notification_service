@@ -254,11 +254,6 @@ public:
      * @return Return ERR_OK on success, others on failure.
      */
     ErrCode ClearNotificationInRestoreFactorySettings();
-
-    /**
-     * @brief Death recipient.
-     */
-    void OnDistributedKvStoreDeathRecipient();
     void InitSettingFromDisturbDB();
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);

@@ -618,7 +618,6 @@ void AdvancedNotificationService::OnDistributedKvStoreDeathRecipient()
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        NotificationPreferences::GetInstance().OnDistributedKvStoreDeathRecipient();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         DistributedNotificationManager::GetInstance()->OnDistributedKvStoreDeathRecipient();
 #endif

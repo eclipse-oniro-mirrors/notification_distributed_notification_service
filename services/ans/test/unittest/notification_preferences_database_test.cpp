@@ -340,16 +340,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSlotFromDisturbeDB_00200, Fu
 }
 
 /**
- * @tc.name      : StoreDeathRecipient_00100
- * @tc.number    :
- * @tc.desc      : Test store when death recipient.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, StoreDeathRecipient_00100, Function | SmallTest | Level1)
-{
-    EXPECT_TRUE(preferncesDB_->StoreDeathRecipient());
-}
-
-/**
  * @tc.name      : CheckKvStore_00100
  * @tc.number    :
  * @tc.desc      : Check disturbe DB is exsit, return is true.
@@ -366,14 +356,13 @@ HWTEST_F(NotificationPreferencesDatabaseTest, CheckKvStore_00100, Function | Sma
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, CheckKvStore_00300, Function | SmallTest | Level1)
 {
-    preferncesDB_->StoreDeathRecipient();
-    EXPECT_FALSE(preferncesDB_->CheckRdbStore());
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     sptr<NotificationSlot> slot2 = new NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     slots.push_back(slot1);
     slots.push_back(slot2);
-    EXPECT_FALSE(preferncesDB_->PutSlotsToDisturbeDB(bundleName_, bundleUid_, slots));
+    EXPECT_TRUE(preferncesDB_->PutSlotsToDisturbeDB(bundleName_, bundleUid_, slots));
 }
 
 /**

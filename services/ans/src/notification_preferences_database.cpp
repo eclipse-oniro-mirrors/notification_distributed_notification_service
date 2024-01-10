@@ -751,13 +751,6 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(const std::st
     return (result == NativeRdb::E_OK);
 }
 
-bool NotificationPreferencesDatabase::StoreDeathRecipient()
-{
-    ANS_LOGW("distribute remote died");
-    rdbDataManager_ = nullptr;
-    return true;
-}
-
 template <typename T>
 int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     const std::string &bundleKey, const BundleType &type, const T &t)
