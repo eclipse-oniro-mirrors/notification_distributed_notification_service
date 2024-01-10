@@ -170,7 +170,7 @@ class NotificationDialogServiceExtensionAbility extends extension {
       await this.removeExceededDialog();
       let dialog = new EnableNotificationDialog(startId, want);
       let winType = want.parameters.callerToken !== undefined ?
-        window.WindowType.TYPE_DIALOG : window.WindowType.TYPE_SYSTEM_ALERT;
+        window.WindowType.TYPE_DIALOG : window.WindowType.TYPE_FLOAT;
       let dis = display.getDefaultDisplaySync();
       let navigationBarRect = {
         left: 0,
