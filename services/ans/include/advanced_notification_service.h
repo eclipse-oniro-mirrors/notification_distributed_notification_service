@@ -603,6 +603,11 @@ public:
     ErrCode CancelContinuousTaskNotification(const std::string &label, int32_t notificationId) override;
 
     /**
+     * @brief Check reminder permission
+     */
+    bool CheckReminderPermission();
+
+    /**
      * @brief Publishes a reminder notification.
      *
      * @param reminder Identifies the reminder notification request that needs to be published.

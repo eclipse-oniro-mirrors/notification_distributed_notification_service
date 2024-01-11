@@ -79,7 +79,10 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
         return ERR_REMINDER_NUMBER_OVERLOAD;
     }
     UpdateAndSaveReminderLocked(reminder, bundleOption);
-    StartRecentReminder();
+    queue_->submit([this, reminder]() {
+        UpdateReminderLanguageLocked(reminder);
+        StartRecentReminder();
+    });
     return ERR_OK;
 }
 
@@ -822,7 +825,6 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
         return;
     }
     ANSR_LOGD("Containers(vector) add. reminderId=%{public}d", reminderId);
-    UpdateReminderLanguage(reminder);
     reminderVector_.push_back(reminder);
     totalCount_++;
     store_->UpdateOrInsert(reminder, bundleOption);
@@ -1299,6 +1301,13 @@ void ReminderDataManager::Init(bool isFromBootComplete)
     if (!RegisterConfigurationObserver()) {
         ANSR_LOGW("Register configuration observer failed.");
         return;
+    }
+    if (queue_ == nullptr) {
+        queue_ = std::make_shared<ffrt::queue>("ReminderDataManager");
+        if (queue_ == nullptr) {
+            ANSR_LOGE("create ffrt queue failed!");
+            return;
+        }
     }
     if (store_ == nullptr) {
         store_ = std::make_shared<ReminderStore>();
@@ -1778,6 +1787,12 @@ void ReminderDataManager::UpdateReminderLanguage(const sptr<ReminderRequest> &re
     }
     // update action button title
     reminder->OnLanguageChange(resourceMgr);
+}
+
+void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder)
+{
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    UpdateReminderLanguage(reminder);
 }
 
 void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)
