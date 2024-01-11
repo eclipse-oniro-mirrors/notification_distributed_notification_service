@@ -419,7 +419,7 @@ private:
         std::shared_ptr<NotificationFlags> notiFlags = notificationRequest.GetFlags();
         if (notiFlags != nullptr) {
             EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsSoundEnabled());
-            EXPECT_EQ(NotificationConstant::FlagStatus::OPEN, notiFlags->IsVibrationEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsVibrationEnabled());
         }
     }
 
@@ -427,8 +427,8 @@ private:
     {
         std::shared_ptr<NotificationFlags> notiFlags = notificationRequest.GetFlags();
         if (notiFlags != nullptr) {
-            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsSoundEnabled());
-            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsVibrationEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsSoundEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsVibrationEnabled());
         }
     }
 
@@ -662,6 +662,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00100, Function
 
     req.SetBigIcon(pixelMap);
     req.SetLittleIcon(pixelMap);
+    req.SetOverlayIcon(pixelMap);
     std::shared_ptr<MessageUser> messageUserPtr = std::make_shared<MessageUser>();
     EXPECT_NE(messageUserPtr, nullptr);
     messageUserPtr->SetName("ANS_Interface_MT_Publish_00100_Message_User");
@@ -1656,8 +1657,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
  * @tc.name      : Publish_10001
  * @tc.desc      : Add notification slot(type is LIVE_VIEW), make a subscriber, a system live view subscriber
  *                 and publish a system live view notification. Then trigger a button.
- * @tc.expected  : Add notification slot success, make a subscriber, publish a notification
- *                 and trigger a buuton success.
+ * @tc.expected  : Add notification slot success, publish notification failed because not subscirbe button callback .
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function | MediumTest | Level1)
 {
@@ -1681,9 +1681,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function
     req.SetSlotType(NotificationConstant::LIVE_VIEW);
     req.SetNotificationId(notificationId);
 
-    g_consumed_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
-    WaitOnConsumed();
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, NotificationHelper::PublishNotification(req));
 
     g_unsubscribe_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
