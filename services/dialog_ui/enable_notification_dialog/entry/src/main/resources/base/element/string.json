@@ -43,10 +43,6 @@
     {
       "name": "group_label_notification",
       "value": " to send notifications?"
-    },
-    {
-      "name": "permission_reason",
-      "value": "Need this permission to obtain the application name"
     }
   ]
 }
