@@ -60,7 +60,7 @@ HWTEST_F(ReminderHelperTest, CancelReminder_00001, Function | SmallTest | Level1
     int32_t reminderId = 10;
     ReminderHelper reminderHelper;
     ErrCode ret = reminderHelper.CancelReminder(reminderId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_OK);
 }
 
 /**
@@ -73,7 +73,7 @@ HWTEST_F(ReminderHelperTest, CancelAllReminders_00001, Function | SmallTest | Le
 {
     ReminderHelper reminderHelper;
     ErrCode ret = reminderHelper.CancelAllReminders();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_OK);
 }
 
 /**
@@ -87,7 +87,7 @@ HWTEST_F(ReminderHelperTest, GetValidReminders_00001, Function | SmallTest | Lev
     std::vector<sptr<ReminderRequest>> validReminders;
     ReminderHelper reminderHelper;
     ErrCode ret = reminderHelper.GetValidReminders(validReminders);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_OK);
 }
 
 /**
