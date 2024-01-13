@@ -17,6 +17,7 @@
 
 #include "ans_log_wrapper.h"
 #include "device_manager.h"
+#include "distributed_preferences.h"
 
 namespace OHOS {
 namespace Notification {
@@ -76,6 +77,14 @@ void DistributedDatabase::GetKvStore()
     if (!CheckKvDataManager()) {
         return;
     }
+
+    bool enable = false;
+    DistributedPreferences::GetInstance()->GetDistributedEnable(enable);
+    if (!enable) {
+        ANS_LOGW("DistributedEnable is false, no need to create db.");
+        return;
+    }
+
     DistributedKv::Options options {
         .createIfMissing = true,
         .encrypt = false,
