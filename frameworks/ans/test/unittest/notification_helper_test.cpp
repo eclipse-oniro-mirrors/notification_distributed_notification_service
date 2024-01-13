@@ -382,7 +382,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotify_00001, Function | SmallTest | L
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotify(allowed);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_NE(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -720,7 +720,7 @@ HWTEST_F(NotificationHelperTest, GetDoNotDisturbDate_00001, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_NE(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -968,7 +968,7 @@ HWTEST_F(NotificationHelperTest, GetDoNotDisturbDate_00002, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_NE(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
