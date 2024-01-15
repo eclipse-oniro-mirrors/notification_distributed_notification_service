@@ -78,6 +78,27 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, AddSingleButtonName_00003, Functio
 }
 
 /**
+ * @tc.name: addSingleButtonIcon_00001
+ * @tc.desc: Test buttonNames_ parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, addSingleButtonIcon_00001, Function | SmallTest | Level1)
+{
+    auto pixelMapOne = std::make_shared<Media::PixelMap>();
+    auto pixelMapTwo = std::make_shared<Media::PixelMap>();
+    auto pixelMapThree = std::make_shared<Media::PixelMap>();
+    auto pixelMapFour = std::make_shared<Media::PixelMap>();
+    auto rrc = std::make_shared<NotificationLocalLiveViewButton>();
+    rrc->addSingleButtonIcon(pixelMapOne);
+    rrc->addSingleButtonIcon(pixelMapTwo);
+    rrc->addSingleButtonIcon(pixelMapThree);
+    rrc->addSingleButtonIcon(pixelMapFour);
+
+    EXPECT_EQ(rrc->GetAllButtonIcons().size(), 3);
+}
+
+/**
  * @tc.name: ToJson_00001
  * @tc.desc: Test ToJson parameters.
  * @tc.type: FUNC
@@ -92,6 +113,22 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, ToJson_00001, Function | SmallTest
 }
 
 /**
+ * @tc.name: ToJson_00002
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, ToJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    button->addSingleButtonIcon(pixelMap);
+
+    EXPECT_EQ(button->ToJson(jsonObject), true);
+}
+
+/**
  * @tc.name: FromJson_00001
  * @tc.desc: Test FromJson parameters.
  * @tc.type: FUNC
@@ -103,6 +140,37 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00001, Function | SmallTe
     nlohmann::json jsonObject = nlohmann::json{"test"};
     EXPECT_EQ(jsonObject.is_object(), false);
     EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLocalLiveViewButton>();
+    nlohmann::json jsonObject = nlohmann::json{{"names", {"test"}}, {"icons", {}}};
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
+ * @tc.name: Marshalling_00002
+ * @tc.desc: Test Marshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Marshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    button->addSingleButtonName("test");
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    button->addSingleButtonIcon(pixelMap);
+
+    EXPECT_EQ(button->Marshalling(parcel), false);
 }
 
 /**
@@ -137,6 +205,36 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00001, Function | Sm
         }
     }
     EXPECT_EQ(unmarshalling, true);
+}
+
+/**
+ * @tc.name: Unmarshalling_00002
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    button->addSingleButtonName("test");
+    button->Marshalling(parcel);
+
+    auto newButton = button->Unmarshalling(parcel);
+    EXPECT_NE(newButton, nullptr);
+}
+
+/**
+ * @tc.name: Dump_00001
+ * @tc.desc: Test Dump.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Dump_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLocalLiveViewButton>();
+
+    EXPECT_EQ(rrc->Dump(), "");
 }
 }
 }

@@ -85,6 +85,24 @@ HWTEST_F(NotificationConversationalContentTest, FromJson_00002, Function | Small
 }
 
 /**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConversationalContentTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    auto content = std::make_shared<NotificationConversationalContent>(messageUser);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"messageUser", {{"key", "testKey"}, {"name", "test"}}},
+        {"message", {{"arrivedTime", 1}}}};
+    auto newContent = content->FromJson(jsonObject);
+
+    EXPECT_NE(newContent, nullptr);
+}
+
+/**
  * @tc.name: Marshalling_00001
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC
@@ -118,6 +136,24 @@ HWTEST_F(NotificationConversationalContentTest, Unmarshalling_001, Function | Sm
         }
     }
     EXPECT_EQ(unmarshalling, false);
+}
+
+/**
+ * @tc.name: Unmarshalling_00001
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConversationalContentTest, Unmarshalling_002, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+    auto content = std::make_shared<NotificationConversationalContent>(messageUser);
+    content->SetConversationTitle("testTitle");
+    content->AddConversationalMessage("text", 1, messageUser);
+    content->Marshalling(parcel);
+
+    EXPECT_NE(content->Unmarshalling(parcel), nullptr);
 }
 
 /**
