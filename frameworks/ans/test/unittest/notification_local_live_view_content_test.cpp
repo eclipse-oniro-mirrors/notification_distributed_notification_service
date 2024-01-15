@@ -57,6 +57,37 @@ HWTEST_F(NotificationLocalLiveViewContentTest, ToJson_00001, Function | SmallTes
 }
 
 /**
+ * @tc.name: ToJson_00002
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, ToJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    NotificationCapsule capsule;
+    capsule.SetTitle("testTitle");
+    liveViewContent->SetCapsule(capsule);
+
+    NotificationLocalLiveViewButton button;
+    button.addSingleButtonName("test");
+    liveViewContent->SetButton(button);
+
+    NotificationProgress progress;
+    progress.SetMaxValue(1);
+    liveViewContent->SetProgress(progress);
+
+    NotificationTime time;
+    time.SetInitialTime(1);
+    liveViewContent->SetTime(time);
+
+    liveViewContent->addFlag(0);
+    liveViewContent->ToJson(jsonObject);
+    EXPECT_NE(jsonObject.dump(), "");
+}
+
+/**
  * @tc.name: FromJson_00001
  * @tc.desc: Test FromJson parameters.
  * @tc.type: FUNC
@@ -69,6 +100,23 @@ HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00001, Function | SmallT
     rrc->FromJson(jsonObject);
     EXPECT_EQ(jsonObject.is_object(), false);
     EXPECT_EQ(rrc->FromJson(jsonObject), NULL);
+}
+
+/**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    nlohmann::json jsonObject = nlohmann::json{
+        {"additionalText", ""}, {"button", ""}, {"capsule", ""}, {"flags", ""},
+        {"progress", ""}, {"text", ""}, {"time", ""}, {"title", ""}, {"typeCode", 1}};
+    EXPECT_EQ(jsonObject.is_object(), true);
+    auto *liveView = liveViewContent->FromJson(jsonObject);
+    EXPECT_EQ(liveView->GetType(), 1);
 }
 
 /**
@@ -118,6 +166,105 @@ HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00002, Function | SmallT
         {"expandedTitle", "test"},
         {"briefText", "test"}};
     EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling_00002
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, Unmarshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+
+    NotificationCapsule capsule;
+    capsule.SetTitle("testTitle");
+    liveViewContent->SetCapsule(capsule);
+
+    NotificationLocalLiveViewButton button;
+    button.addSingleButtonName("test");
+    liveViewContent->SetButton(button);
+
+    NotificationProgress progress;
+    progress.SetMaxValue(1);
+    liveViewContent->SetProgress(progress);
+
+    NotificationTime time;
+    time.SetInitialTime(1);
+    liveViewContent->SetTime(time);
+    liveViewContent->addFlag(0);
+
+    liveViewContent->Marshalling(parcel);
+    EXPECT_NE(liveViewContent->Unmarshalling(parcel), nullptr);
+}
+
+/**
+ * @tc.name: SetLocalLiveViewContent_00001
+ * @tc.desc: Test Set liveViewContent attribute.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, SetLocalLiveViewContent_00001, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    capsule.SetTitle("testTitle");
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    liveViewContent->SetCapsule(capsule);
+    EXPECT_EQ(liveViewContent->GetCapsule().GetTitle(), "testTitle");
+
+    NotificationLocalLiveViewButton button;
+    button.addSingleButtonName("test");
+    liveViewContent->SetButton(button);
+    EXPECT_EQ(liveViewContent->GetButton().GetAllButtonNames()[0], "test");
+
+    NotificationProgress progress;
+    progress.SetMaxValue(1);
+    liveViewContent->SetProgress(progress);
+    EXPECT_EQ(liveViewContent->GetProgress().GetMaxValue(), 1);
+
+    NotificationTime time;
+    time.SetInitialTime(1);
+    liveViewContent->SetTime(time);
+    EXPECT_EQ(liveViewContent->GetTime().GetInitialTime(), 1);
+
+    liveViewContent->addFlag(0);
+    EXPECT_EQ(liveViewContent->isFlagExist(1), false);
+    EXPECT_EQ(liveViewContent->isFlagExist(0), true);
+}
+
+/**
+ * @tc.name: Dump_00001
+ * @tc.desc: Test Dump.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, Dump_00001, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    capsule.SetTitle("testTitle");
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    liveViewContent->SetCapsule(capsule);
+
+    NotificationLocalLiveViewButton button;
+    button.addSingleButtonName("test");
+    liveViewContent->SetButton(button);
+
+    NotificationProgress progress;
+    progress.SetMaxValue(1);
+    liveViewContent->SetProgress(progress);
+
+    NotificationTime time;
+    time.SetInitialTime(1);
+    liveViewContent->SetTime(time);
+    liveViewContent->addFlag(0);
+
+    std::string dumpStr = "NotificationLocalLiveViewContent{ title = , text = , additionalText = , type = 0, "
+        "capsule = Capsule{ title = testTitle, backgroundColor = , icon = null }, button = , "
+        "progress = Progress{ maxValue = 1, currentValue = 0, isPercentage = 1 }, "
+        "time = Time{ initialTime = 1, isCountDown = 0, isPaused = 0, isInTitle = 0 } }";
+    EXPECT_EQ(liveViewContent->Dump(), dumpStr);
 }
 }
 }

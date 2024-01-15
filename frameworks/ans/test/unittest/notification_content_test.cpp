@@ -19,7 +19,7 @@
 #define protected public
 #include "notification_basic_content.h"
 #include "notification_content.h"
-#undef private 
+#undef private
 #undef protected
 
 using namespace testing::ext;
@@ -149,7 +149,13 @@ HWTEST_F(NotificationContentTest, NotificationContentReadFromParcel_0200, Level1
 
     std::shared_ptr<NotificationMediaContent> mediaContent = nullptr;
     NotificationContent notificationContent5(mediaContent);
-    
+
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
+    NotificationContent notificationContent6(liveViewContent);
+
+    std::shared_ptr<NotificationLocalLiveViewContent> localLiveViewContent = nullptr;
+    NotificationContent notificationContent7(localLiveViewContent);
+
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     NotificationContent notificationContent(normalContent);
     auto result = notificationContent.GetContentType();
@@ -286,6 +292,38 @@ HWTEST_F(NotificationContentTest, FromJson_00003, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationContentTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    NotificationContent content;
+    nlohmann::json jsonObject = nlohmann::json{{"contentType", 1}, {"content", {}}};
+    EXPECT_EQ(content.FromJson(jsonObject), nullptr);
+
+    jsonObject["content"] = {{"text", "test"}, {"title", "testTitle"}};
+    jsonObject["contentType"] = NotificationContent::Type::BASIC_TEXT;
+    EXPECT_NE(content.FromJson(jsonObject), nullptr);
+
+    jsonObject["contentType"] = NotificationContent::Type::CONVERSATION;
+    EXPECT_NE(content.FromJson(jsonObject), nullptr);
+
+    jsonObject["contentType"] = NotificationContent::Type::LONG_TEXT;
+    EXPECT_NE(content.FromJson(jsonObject), nullptr);
+
+    jsonObject["contentType"] = NotificationContent::Type::MULTILINE;
+    EXPECT_NE(content.FromJson(jsonObject), nullptr);
+
+    jsonObject["contentType"] = NotificationContent::Type::PICTURE;
+    EXPECT_NE(content.FromJson(jsonObject), nullptr);
+
+    jsonObject["contentType"] = NotificationContent::Type::LOCAL_LIVE_VIEW;
+    EXPECT_NE(content.FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: ToJson_00001
  * @tc.desc: Test ToJson parameters.
  * @tc.type: FUNC
@@ -370,6 +408,68 @@ HWTEST_F(NotificationContentTest, NotificationBasicContentReadFromJson_00001, Le
         {"additionalText", "test"}};
     notificationBasicContent->ReadFromJson(jsonObject);
     EXPECT_NE(notificationBasicContent, nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling_00001
+ * @tc.desc: Test Unmarshalling
+ * @tc.type: FUNC
+ * @tc.require: issueI5S0ZS
+ */
+HWTEST_F(NotificationContentTest, Unmarshalling_00001, Level1)
+{
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    NotificationContent content(normalContent);
+
+    Parcel parcel;
+    EXPECT_EQ(content.Marshalling(parcel), true);
+    EXPECT_NE(content.Unmarshalling(parcel), nullptr);
+
+    auto conversationalContent = std::make_shared<NotificationConversationalContent>();
+    NotificationContent content1(conversationalContent);
+    EXPECT_EQ(content1.Marshalling(parcel), true);
+    EXPECT_NE(content1.Unmarshalling(parcel), nullptr);
+
+    auto longContent = std::make_shared<NotificationLongTextContent>();
+    NotificationContent content2(longContent);
+    EXPECT_EQ(content2.Marshalling(parcel), true);
+    EXPECT_NE(content2.Unmarshalling(parcel), nullptr);
+
+    auto pictureContent = std::make_shared<NotificationPictureContent>();
+    NotificationContent content3(pictureContent);
+    EXPECT_EQ(content3.Marshalling(parcel), true);
+    EXPECT_NE(content3.Unmarshalling(parcel), nullptr);
+
+    auto mediaContent = std::make_shared<NotificationMediaContent>();
+    NotificationContent content4(mediaContent);
+    EXPECT_EQ(content4.Marshalling(parcel), true);
+    EXPECT_NE(content4.Unmarshalling(parcel), nullptr);
+
+    auto multiLineContent = std::make_shared<NotificationMultiLineContent>();
+    NotificationContent content5(multiLineContent);
+    EXPECT_EQ(content5.Marshalling(parcel), true);
+    EXPECT_NE(content5.Unmarshalling(parcel), nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling_00002
+ * @tc.desc: Test Unmarshalling
+ * @tc.type: FUNC
+ * @tc.require: issueI5S0ZS
+ */
+HWTEST_F(NotificationContentTest, Unmarshalling_00002, Level1)
+{
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    NotificationContent content(localLiveViewContent);
+
+    Parcel parcel;
+    EXPECT_EQ(content.Marshalling(parcel), true);
+    EXPECT_NE(content.Unmarshalling(parcel), nullptr);
+
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    NotificationContent content1(liveViewContent);
+    EXPECT_EQ(content1.Marshalling(parcel), true);
+    EXPECT_NE(content1.Unmarshalling(parcel), nullptr);
 }
 }
 }
