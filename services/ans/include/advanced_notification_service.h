@@ -72,6 +72,13 @@ public:
 
     void SelfClean();
 
+    /**
+     * @brief Get notification_svr_queue of service.
+     *
+     * @return Returns the queue.
+     */
+    std::shared_ptr<ffrt::queue> GetNotificationSvrQueue();
+
     // AnsManagerStub
 
     /**

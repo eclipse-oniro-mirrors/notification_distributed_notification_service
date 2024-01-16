@@ -95,6 +95,11 @@ static bool SortNotificationsByLevelAndTime(
     return (first->request->GetCreateTime() < second->request->GetCreateTime());
 }
 
+std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueue()
+{
+    return notificationSvrQueue_;
+}
+
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
