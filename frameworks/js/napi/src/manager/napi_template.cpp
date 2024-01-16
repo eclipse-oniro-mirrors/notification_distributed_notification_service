@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     TemplateName params;
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

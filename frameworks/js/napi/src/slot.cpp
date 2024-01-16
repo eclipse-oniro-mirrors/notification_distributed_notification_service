@@ -355,7 +355,7 @@ napi_value ParseParametersSetSlotByBundle(
 
 napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlot &paras)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     size_t argc = GET_SLOT_MAX_PARA;
     napi_value argv[GET_SLOT_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
@@ -393,7 +393,7 @@ napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_inf
 napi_value ParseParametersGetSlotNumByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotNumByBundle &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = GET_SLOT_NUM_AS_BUNDLE_MAX_PARA;
     napi_value argv[GET_SLOT_NUM_AS_BUNDLE_MAX_PARA] = {nullptr};
@@ -483,7 +483,7 @@ napi_value ParseParametersSetSlotFlagsByBundle(
 napi_value ParseParametersGetSlotFlagsByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotFlagsByBundle &params)
     {
-        ANS_LOGI("enter");
+        ANS_LOGD("enter");
 
         size_t argc = GET_SLOTS_AS_BUNDLE_MAX_PARA;
         napi_value argv[GET_SLOTS_AS_BUNDLE_MAX_PARA] = {nullptr};
@@ -523,7 +523,7 @@ napi_value ParseParametersGetSlotFlagsByBundle(
 napi_value ParseParametersGetSlotsByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotsByBundle &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = GET_SLOTS_AS_BUNDLE_MAX_PARA;
     napi_value argv[GET_SLOTS_AS_BUNDLE_MAX_PARA] = {nullptr};
@@ -563,7 +563,7 @@ napi_value ParseParametersGetSlotsByBundle(
 napi_value ParseParametersByRemoveSlot(
     const napi_env &env, const napi_callback_info &info, ParametersInfoRemoveSlot &paras)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     size_t argc = REMOVE_SLOT_MAX_PARA;
     napi_value argv[REMOVE_SLOT_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
@@ -600,7 +600,7 @@ napi_value ParseParametersByRemoveSlot(
 
 napi_value AddSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoAddSlot paras;
     if (ParseParametersByAddSlot(env, info, paras) == nullptr) {
@@ -670,7 +670,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
 
 napi_value AddSlots(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoAddSlots paras;
     if (ParseParametersByAddSlots(env, info, paras) == nullptr) {
@@ -729,7 +729,7 @@ napi_value AddSlots(napi_env env, napi_callback_info info)
 
 napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoSetSlotByBundle params {};
     if (ParseParametersSetSlotByBundle(env, info, params) == nullptr) {
@@ -825,7 +825,7 @@ void AsyncCompleteCallbackGetSlot(napi_env env, napi_status status, void *data)
 
 napi_value GetSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoGetSlot paras;
     if (ParseParametersByGetSlot(env, info, paras) == nullptr) {
@@ -872,7 +872,7 @@ napi_value GetSlot(napi_env env, napi_callback_info info)
 
 napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoGetSlotNumByBundle params {};
     if (ParseParametersGetSlotNumByBundle(env, info, params) == nullptr) {
@@ -935,7 +935,7 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetSlots(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -984,7 +984,7 @@ void AsyncCompleteCallbackGetSlots(napi_env env, napi_status status, void *data)
 
 napi_value GetSlots(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -1029,7 +1029,7 @@ napi_value GetSlots(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetSlotsByBundle(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalidated async callback data.");
         return;
@@ -1078,7 +1078,7 @@ void AsyncCompleteCallbackGetSlotsByBundle(napi_env env, napi_status status, voi
 
 napi_value GetSlotsByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoGetSlotsByBundle params {};
     if (ParseParametersGetSlotsByBundle(env, info, params) == nullptr) {
@@ -1125,7 +1125,7 @@ napi_value GetSlotsByBundle(napi_env env, napi_callback_info info)
 
 napi_value RemoveSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoRemoveSlot paras;
     if (ParseParametersByRemoveSlot(env, info, paras) == nullptr) {
@@ -1185,7 +1185,7 @@ napi_value RemoveSlot(napi_env env, napi_callback_info info)
 
 napi_value RemoveAllSlots(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -1262,7 +1262,7 @@ static napi_value ParseEnableSlotCallBackParam(
 napi_value ParseParametersEnableSlot(
     const napi_env &env, const napi_callback_info &info, ParametersInfoEnableSlot &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = SET_ENABLE_SLOT_MAX_PARA;
     napi_value argv[SET_ENABLE_SLOT_MAX_PARA] = {nullptr};
@@ -1324,7 +1324,7 @@ napi_value ParseParametersEnableSlot(
 
 napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoEnableSlot params {};
     if (ParseParametersEnableSlot(env, info, params) == nullptr) {
@@ -1388,7 +1388,7 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
 napi_value ParseParametersIsEnableSlot(
     const napi_env &env, const napi_callback_info &info, ParametersInfoIsEnableSlot &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = GET_ENABLE_SLOT_MAX_PARA;
     napi_value argv[GET_ENABLE_SLOT_MAX_PARA] = {nullptr};
@@ -1439,7 +1439,7 @@ napi_value ParseParametersIsEnableSlot(
 
 napi_value IsEnableNotificationSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoIsEnableSlot params {};
     if (ParseParametersIsEnableSlot(env, info, params) == nullptr) {
@@ -1499,7 +1499,7 @@ napi_value IsEnableNotificationSlot(napi_env env, napi_callback_info info)
 
 napi_value GetSlotFlagsByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoGetSlotFlagsByBundle params {};
     if (ParseParametersGetSlotFlagsByBundle(env, info, params) == nullptr) {

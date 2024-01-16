@@ -24,7 +24,7 @@ constexpr int8_t CANCEL_AS_BUNDLE_MAX_PARA = 4;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancel &paras)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = CANCEL_MAX_PARA;
     napi_value argv[CANCEL_MAX_PARA] = {nullptr};
@@ -88,7 +88,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelGroup &paras)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = CANCEL_GROUP_MAX_PARA;
     napi_value argv[CANCEL_GROUP_MAX_PARA] = {nullptr};
@@ -136,7 +136,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value Cancel(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoCancel paras;
     if (ParseParameters(env, info, paras) == nullptr) {
@@ -198,7 +198,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
 
 napi_value CancelAll(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -257,7 +257,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
 
 napi_value CancelGroup(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoCancelGroup params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -320,7 +320,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelAsBundle &paras)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = CANCEL_AS_BUNDLE_MAX_PARA;
     napi_value argv[CANCEL_AS_BUNDLE_MAX_PARA] = {nullptr};
@@ -385,7 +385,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value CancelAsBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoCancelAsBundle paras;
     if (ParseParameters(env, info, paras) == nullptr) {

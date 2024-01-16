@@ -29,7 +29,7 @@ constexpr int8_t PUBLISH_AS_BUNDLE_MAX = 4;
 
 napi_value GetCallback(const napi_env &env, const napi_value &value, ParametersInfoPublish &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
@@ -38,13 +38,13 @@ napi_value GetCallback(const napi_env &env, const napi_value &value, ParametersI
         return Common::NapiGetNull(env);
     }
     napi_create_reference(env, value, 1, &params.callback);
-    ANS_LOGI("end");
+    ANS_LOGD("end");
     return Common::NapiGetNull(env);
 }
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoPublish &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = PUBLISH_NOTIFICATION_MAX;
     napi_value argv[PUBLISH_NOTIFICATION_MAX] = {nullptr};
@@ -90,13 +90,13 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         }
     }
 
-    ANS_LOGI("end");
+    ANS_LOGD("end");
     return Common::NapiGetNull(env);
 }
 
 napi_value Publish(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoPublish params;
     if (ParseParameters(env, info, params) == nullptr) {
@@ -163,7 +163,7 @@ napi_value Publish(napi_env env, napi_callback_info info)
 
 bool CheckProperty(const napi_env &env, const napi_value &content, const std::string &property)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     bool hasProperty = false;
 
@@ -177,7 +177,7 @@ bool CheckProperty(const napi_env &env, const napi_value &content, const std::st
 napi_value GetStringProperty(
     const napi_env &env, const napi_value &content, const std::string &property, std::string &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (!CheckProperty(env, content, property)) {
         return nullptr;
@@ -203,7 +203,7 @@ napi_value GetStringProperty(
 napi_value GetObjectProperty(
     const napi_env &env, const napi_value &content, const std::string &property, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (!CheckProperty(env, content, property)) {
         return nullptr;
@@ -221,7 +221,7 @@ napi_value GetObjectProperty(
 
 napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info, ParametersInfoPublish &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = SHOW_NOTIFICATION_MAX;
     napi_value argv[SHOW_NOTIFICATION_MAX] = {nullptr};
@@ -291,13 +291,13 @@ napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info,
         params.request.SetWantAgent(wantAgent);
     }
 
-    ANS_LOGI("end");
+    ANS_LOGD("end");
     return Common::NapiGetNull(env);
 }
 
 napi_value ShowNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoPublish params;
     if (ParseShowOptions(env, info, params) == nullptr) {
@@ -357,7 +357,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
 napi_value ParsePublishAsBundleParameters(
     const napi_env &env, const napi_callback_info &info, ParametersInfoPublish &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = PUBLISH_AS_BUNDLE_MAX;
     napi_value argv[PUBLISH_AS_BUNDLE_MAX] = {nullptr};
@@ -419,13 +419,13 @@ napi_value ParsePublishAsBundleParameters(
         }
     }
 
-    ANS_LOGI("end");
+    ANS_LOGD("end");
     return Common::NapiGetNull(env);
 }
 
 napi_value PublishAsBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     ParametersInfoPublish params;
     if (ParsePublishAsBundleParameters(env, info, params) == nullptr) {

@@ -33,7 +33,7 @@ namespace NotificationNapi {
 napi_value Common::SetNotificationByDistributedOptions(
     const napi_env &env, const OHOS::Notification::Notification *notification, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (notification == nullptr) {
         ANS_LOGE("notification is nullptr");
         return NapiGetBoolean(env, false);
@@ -91,7 +91,7 @@ napi_value Common::SetNotificationByDistributedOptions(
 napi_value Common::SetNotification(
     const napi_env &env, const OHOS::Notification::Notification *notification, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (notification == nullptr) {
         ANS_LOGE("notification is nullptr");
@@ -174,7 +174,7 @@ napi_value Common::SetNotification(
 napi_value Common::GetNotificationRequestDistributedOptions(const napi_env &env,
     const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
@@ -211,7 +211,7 @@ napi_value Common::GetNotificationRequestDistributedOptions(const napi_env &env,
 napi_value Common::GetNotificationIsDistributed(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;

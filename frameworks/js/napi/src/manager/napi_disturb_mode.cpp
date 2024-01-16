@@ -21,7 +21,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     SetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -87,7 +87,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiGetDoNotDisturbDate(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -113,7 +113,7 @@ void AsyncCompleteCallbackNapiGetDoNotDisturbDate(napi_env env, napi_status stat
 
 napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     GetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -170,7 +170,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
 napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {

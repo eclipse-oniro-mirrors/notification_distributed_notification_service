@@ -23,7 +23,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     SubscriberInstance *objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
@@ -111,7 +111,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 
 napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     SubscriberInstance *objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;

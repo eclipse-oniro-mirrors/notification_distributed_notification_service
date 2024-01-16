@@ -42,7 +42,7 @@ Common::~Common()
 napi_value Common::SetNotificationSortingMap(
     const napi_env &env, const std::shared_ptr<NotificationSortingMap> &sortingMap, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (sortingMap == nullptr) {
         ANS_LOGE("sortingMap is null");
         return NapiGetBoolean(env, false);
@@ -87,7 +87,7 @@ napi_value Common::SetNotificationSortingMap(
 
 napi_value Common::SetNotificationSorting(const napi_env &env, const NotificationSorting &sorting, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     // slot: NotificationSlot
     napi_value slotResult = nullptr;
@@ -132,7 +132,7 @@ napi_value Common::SetNotificationSorting(const napi_env &env, const Notificatio
 
 napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSlot &slot, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_value value = nullptr;
     // type: SlotType
@@ -206,7 +206,7 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
 napi_value Common::SetDoNotDisturbDate(
     const napi_env &env, const NotificationDoNotDisturbDate &date, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     DoNotDisturbType outType = DoNotDisturbType::TYPE_NONE;
     if (!DoNotDisturbTypeCToJS(date.GetDoNotDisturbType(), outType)) {
         return NapiGetBoolean(env, false);
@@ -235,7 +235,7 @@ napi_value Common::SetDoNotDisturbDate(
 napi_value Common::SetEnabledNotificationCallbackData(const napi_env &env, const EnabledNotificationCallbackData &data,
     napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     // bundle: string
     napi_value bundleNapi = nullptr;
     napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
@@ -257,7 +257,7 @@ napi_value Common::SetEnabledNotificationCallbackData(const napi_env &env, const
 napi_value Common::SetBadgeCallbackData(const napi_env &env, const BadgeNumberCallbackData &data,
     napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     // bundle: string
     napi_value bundleNapi = nullptr;
     napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
@@ -279,7 +279,7 @@ napi_value Common::SetBadgeCallbackData(const napi_env &env, const BadgeNumberCa
 napi_value Common::GetNotificationSubscriberInfo(
     const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     uint32_t length = 0;
     size_t strLen = 0;
     bool hasProperty = false;
@@ -336,7 +336,7 @@ napi_value Common::GetNotificationSubscriberInfo(
 napi_value Common::GetNotificationUserInput(
     const napi_env &env, const napi_value &actionButton, std::shared_ptr<NotificationActionButton> &pActionButton)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_valuetype valuetype = napi_undefined;
     napi_value userInputResult = nullptr;
     bool hasProperty = false;
@@ -364,7 +364,7 @@ napi_value Common::GetNotificationUserInput(
 napi_value Common::GetNotificationUserInputByInputKey(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_valuetype valuetype = napi_undefined;
     napi_value value = nullptr;
     bool hasProperty = false;
@@ -397,7 +397,7 @@ napi_value Common::GetNotificationUserInputByInputKey(
 napi_value Common::GetNotificationUserInputByTag(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value value = nullptr;
@@ -431,7 +431,7 @@ napi_value Common::GetNotificationUserInputByTag(
 napi_value Common::GetNotificationUserInputByOptions(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value value = nullptr;
@@ -484,7 +484,7 @@ napi_value Common::GetNotificationUserInputByOptions(
 napi_value Common::GetNotificationUserInputByPermitMimeTypes(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value value = nullptr;
@@ -532,7 +532,7 @@ napi_value Common::GetNotificationUserInputByPermitMimeTypes(
 napi_value Common::GetNotificationUserInputByPermitFreeFormInput(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -563,7 +563,7 @@ napi_value Common::GetNotificationUserInputByPermitFreeFormInput(
 napi_value Common::GetNotificationUserInputByEditType(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -592,7 +592,7 @@ napi_value Common::GetNotificationUserInputByEditType(
 napi_value Common::GetNotificationUserInputByAdditionalData(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -624,7 +624,7 @@ napi_value Common::GetNotificationUserInputByAdditionalData(
 
 napi_value Common::GetNotificationContentType(const napi_env &env, const napi_value &result, int32_t &type)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_value contentResult = nullptr;
     napi_valuetype valuetype = napi_undefined;
@@ -665,7 +665,7 @@ napi_value Common::GetNotificationContentType(const napi_env &env, const napi_va
 
 napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &value, NotificationSlot &slot)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
@@ -725,7 +725,7 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
 
 napi_value Common::GetNotificationSlotByString(const napi_env &env, const napi_value &value, NotificationSlot &slot)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
@@ -771,7 +771,7 @@ napi_value Common::GetNotificationSlotByString(const napi_env &env, const napi_v
 
 napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_value &value, NotificationSlot &slot)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -826,7 +826,7 @@ napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_val
 
 napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_value &value, NotificationSlot &slot)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
@@ -886,7 +886,7 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
 
 napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const napi_value &value, NotificationSlot &slot)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -944,7 +944,7 @@ napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const nap
 
 napi_value Common::GetBundleOption(const napi_env &env, const napi_value &value, NotificationBundleOption &option)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     bool hasProperty {false};
     napi_valuetype valuetype = napi_undefined;
@@ -986,7 +986,7 @@ napi_value Common::GetBundleOption(const napi_env &env, const napi_value &value,
 
 napi_value Common::GetButtonOption(const napi_env &env, const napi_value &value, NotificationButtonOption &option)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     bool hasProperty {false};
     napi_valuetype valuetype = napi_undefined;
@@ -1041,7 +1041,7 @@ napi_value Common::GetHashCodes(const napi_env &env, const napi_value &value, st
 
 napi_value Common::GetNotificationKey(const napi_env &env, const napi_value &value, NotificationKey &key)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     bool hasProperty {false};
     napi_valuetype valuetype = napi_undefined;
@@ -1140,7 +1140,7 @@ napi_value Common::CreateWantAgentByJS(const napi_env &env,
 
 napi_value Common::GetNotificationTemplate(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1173,7 +1173,7 @@ napi_value Common::GetNotificationTemplate(const napi_env &env, const napi_value
 napi_value Common::GetNotificationTemplateInfo(const napi_env &env, const napi_value &value,
     std::shared_ptr<NotificationTemplate> &templ)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1221,7 +1221,7 @@ napi_value Common::GetNotificationTemplateInfo(const napi_env &env, const napi_v
 napi_value Common::SetNotificationTemplateInfo(
     const napi_env &env, const std::shared_ptr<NotificationTemplate> &templ, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (templ == nullptr) {
         ANS_LOGE("templ is null");
@@ -1246,7 +1246,7 @@ napi_value Common::SetNotificationTemplateInfo(
 napi_value Common::SetNotificationFlags(
     const napi_env &env, const std::shared_ptr<NotificationFlags> &flags, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (flags == nullptr) {
         ANS_LOGE("flags is null");

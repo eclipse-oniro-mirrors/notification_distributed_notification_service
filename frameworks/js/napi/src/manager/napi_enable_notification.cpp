@@ -27,7 +27,7 @@ namespace NotificationNapi {
 const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
 void AsyncCompleteCallbackNapiEnableNotification(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -47,7 +47,7 @@ void AsyncCompleteCallbackNapiEnableNotification(napi_env env, napi_status statu
 
 napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     EnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -95,7 +95,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiIsNotificationEnabled(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -116,7 +116,7 @@ void AsyncCompleteCallbackNapiIsNotificationEnabled(napi_env env, napi_status st
 
 __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         ANS_LOGD("ParseParameters is nullptr.");
@@ -140,7 +140,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiIsNotificationEnabled work excute.");
+            ANS_LOGD("NapiIsNotificationEnabled work excute.");
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
@@ -178,7 +178,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
 
 napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -210,7 +210,7 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
+                ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },

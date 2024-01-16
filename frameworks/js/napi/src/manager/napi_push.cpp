@@ -179,7 +179,7 @@ bool NapiPush::CheckCallerIsSystemApp()
 napi_value NapiPush::ParseCheckRequest(const napi_env &env,
     const napi_value &obj, sptr<NotificationCheckRequest> &checkRequest)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (!AppExecFwk::IsTypeForNapiValue(env, obj, napi_object)) {
         ANS_LOGE("Wrong argument type. Object expected.");
@@ -219,7 +219,7 @@ napi_value NapiPush::ParseCheckRequest(const napi_env &env,
     }
     checkRequest->SetExtraKeys(extraInfoKeys);
 
-    ANS_LOGI("end");
+    ANS_LOGD("end");
     return Common::NapiGetNull(env);
 }
 

@@ -23,7 +23,7 @@ namespace NotificationNapi {
 
 napi_value NapiPublish(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoPublish params;
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -90,7 +90,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
 
 napi_value NapiShowNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoPublish params;
     if (ParseShowOptions(env, info, params) == nullptr) {
         ANS_LOGW("parse showOptions failed");
@@ -147,7 +147,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
 
 napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoPublish params;
     if (ParsePublishAsBundleParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

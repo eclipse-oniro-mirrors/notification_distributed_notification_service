@@ -31,7 +31,7 @@ const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = ENABLE_NOTIFICATION_MAX_PARA;
     napi_value argv[ENABLE_NOTIFICATION_MAX_PARA] = {nullptr};
@@ -78,7 +78,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnableParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = IS_NOTIFICATION_ENABLE_MAX_PARA;
     napi_value argv[IS_NOTIFICATION_ENABLE_MAX_PARA] = {nullptr};
@@ -125,7 +125,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 void AsyncCompleteCallbackEnableNotification(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -145,7 +145,7 @@ void AsyncCompleteCallbackEnableNotification(napi_env env, napi_status status, v
 
 napi_value EnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     EnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -194,7 +194,7 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackIsNotificationEnabled(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -219,7 +219,7 @@ void AsyncCompleteCallbackIsNotificationEnabled(napi_env env, napi_status status
 
 napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -280,7 +280,7 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
 
 napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {

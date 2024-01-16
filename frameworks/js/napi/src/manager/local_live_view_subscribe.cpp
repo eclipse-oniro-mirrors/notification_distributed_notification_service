@@ -44,17 +44,17 @@ LocalLiveViewSubscriberInstance::~LocalLiveViewSubscriberInstance()
 
 void LocalLiveViewSubscriberInstance::OnDied()
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 }
 
 void LocalLiveViewSubscriberInstance::OnConnected()
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 }
 
 void LocalLiveViewSubscriberInstance::OnDisconnected()
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 }
 
 void UvQueueWorkOnResponse(uv_work_t *work, int status)
@@ -97,7 +97,7 @@ void UvQueueWorkOnResponse(uv_work_t *work, int status)
 
 void LocalLiveViewSubscriberInstance::OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     
     if (responseCallbackInfo_.ref == nullptr) {
         ANS_LOGI("response callback unset");
@@ -185,7 +185,7 @@ bool HasNotificationSubscriber(const napi_env &env, const napi_value &value,
 napi_value GetNotificationSubscriber(
     const napi_env &env, const napi_value &value, LocalLiveViewSubscriberInstancesInfo &subscriberInfo)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     bool hasProperty = false;
     napi_valuetype valuetype = napi_undefined;
     napi_ref result = nullptr;
@@ -217,7 +217,7 @@ napi_value GetNotificationSubscriber(
 
 bool AddSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscriberInstancesInfo &subscriberInfo)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (subscriberInfo.ref == nullptr) {
         ANS_LOGE("subscriberInfo.ref is null");
         return false;
@@ -234,7 +234,7 @@ bool AddSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscrib
 
 bool DelSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscriberInstance *subscriber)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null");
         return false;
@@ -258,7 +258,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscrib
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     LocalLiveViewSubscriberInstance *&subscriber, napi_ref &callback)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = SUBSRIBE_MAX_PARA;
     napi_value argv[SUBSRIBE_MAX_PARA] = {nullptr};

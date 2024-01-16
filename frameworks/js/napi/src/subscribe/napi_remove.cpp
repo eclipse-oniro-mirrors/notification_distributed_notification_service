@@ -64,7 +64,7 @@ void NapiRemoveCompleteCallback(napi_env env, napi_status status, void *data)
 
 napi_value NapiRemove(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     RemoveParams params {};
     if (!ParseParameters(env, info, params)) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -93,7 +93,7 @@ napi_value NapiRemove(napi_env env, napi_callback_info info)
 
 napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     RemoveParams params {};
     if (ParseParametersByRemoveAll(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

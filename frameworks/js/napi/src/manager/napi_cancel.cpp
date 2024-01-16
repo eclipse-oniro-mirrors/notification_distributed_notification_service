@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiCancel(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoCancel paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -83,7 +83,7 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
 
 napi_value NapiCancelAll(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -141,7 +141,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
 
 napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoCancelGroup params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -203,7 +203,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
 
 napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoCancelAsBundle paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

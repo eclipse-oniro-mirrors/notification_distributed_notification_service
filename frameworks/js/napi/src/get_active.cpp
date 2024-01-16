@@ -70,7 +70,7 @@ void AsyncCompleteCallbackGetAllActiveNotifications(napi_env env, napi_status st
 
 napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -117,7 +117,7 @@ napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetActiveNotifications(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (!data) {
         ANS_LOGE("Async callback invalidity data.");
@@ -168,7 +168,7 @@ void AsyncCompleteCallbackGetActiveNotifications(napi_env env, napi_status statu
 
 napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -215,7 +215,7 @@ napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetActiveNotificationCount(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (!data) {
         ANS_LOGE("Invalidated async callback data.");
@@ -244,7 +244,7 @@ void AsyncCompleteCallbackGetActiveNotificationCount(napi_env env, napi_status s
 
 napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {

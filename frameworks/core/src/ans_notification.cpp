@@ -158,14 +158,14 @@ ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBund
 
 ErrCode AnsNotification::PublishNotification(const NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     return PublishNotification(std::string(), request);
 }
 
 ErrCode AnsNotification::PublishNotification(const std::string &label, const NotificationRequest &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
@@ -1000,7 +1000,7 @@ ErrCode AnsNotification::GetDeviceRemindType(NotificationConstant::RemindType &r
 
 void AnsNotification::ResetAnsManagerProxy()
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(mutex_);
     if ((ansManagerProxy_ != nullptr) && (ansManagerProxy_->AsObject() != nullptr)) {
         ansManagerProxy_->AsObject()->RemoveDeathRecipient(recipient_);

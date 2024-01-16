@@ -282,7 +282,7 @@ bool DistributedNotificationManager::PublishCallback(
     if (callback_.OnPublish) {
         callback_.OnPublish(deviceId, bundleName, request);
     }
-    ANS_LOGI("end");
+    ANS_LOGD("end");
 
     return true;
 }
@@ -294,7 +294,7 @@ bool DistributedNotificationManager::UpdateCallback(
     if (callback_.OnUpdate) {
         callback_.OnUpdate(deviceId, bundleName, request);
     }
-    ANS_LOGI("end");
+    ANS_LOGD("end");
 
     return true;
 }
@@ -306,7 +306,7 @@ bool DistributedNotificationManager::DeleteCallback(
     if (callback_.OnDelete) {
         callback_.OnDelete(deviceId, bundleName, label, id);
     }
-    ANS_LOGI("end");
+    ANS_LOGD("end");
 
     return true;
 }

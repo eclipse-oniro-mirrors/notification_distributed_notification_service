@@ -23,7 +23,7 @@ const int UNSUBSCRIBE_MAX_PARA = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoUnsubscribe &paras)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = UNSUBSCRIBE_MAX_PARA;
     napi_value argv[UNSUBSCRIBE_MAX_PARA] = {nullptr};
