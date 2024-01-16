@@ -28,7 +28,7 @@ const int ENABLED_SYNC_MIN_PARA = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = ENABLED_MAX_PARA;
     napi_value argv[ENABLED_MAX_PARA] = {nullptr};
@@ -63,7 +63,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledByBundleParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = ENABLED_BUNDLE_MAX_PARA;
     napi_value argv[ENABLED_BUNDLE_MAX_PARA] = {nullptr};
@@ -110,7 +110,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnabledByBundleParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = IS_ENABLED_BUNDLE_MAX_PARA;
     napi_value argv[IS_ENABLED_BUNDLE_MAX_PARA] = {nullptr};
@@ -149,7 +149,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 void AsyncCompleteCallbackIsDistributedEnabled(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -176,7 +176,7 @@ void AsyncCompleteCallbackIsDistributedEnabled(napi_env env, napi_status status,
 
 napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -225,7 +225,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
 
 napi_value EnableDistributed(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -287,7 +287,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
 
 napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     EnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -349,7 +349,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
 
 napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -411,7 +411,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -438,7 +438,7 @@ void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status 
 
 napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     IsEnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -486,7 +486,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalidity async callback data");
         return;
@@ -519,7 +519,7 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
 
 napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -566,7 +566,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledWithoutAppParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = ENABLED_SYNC_MAX_PARA;
     napi_value argv[ENABLED_SYNC_MAX_PARA] = {nullptr};
@@ -613,7 +613,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     EnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -675,7 +675,7 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetEnabledWithoutAppParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = ENABLED_SYNC_MIN_PARA;
     napi_value argv[ENABLED_SYNC_MIN_PARA] = {nullptr};
@@ -714,7 +714,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     GetEnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {

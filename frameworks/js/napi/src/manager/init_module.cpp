@@ -58,7 +58,7 @@ static napi_value NapiPushInit(napi_env env, napi_value exports)
 
 napi_value NotificationManagerInit(napi_env env, napi_value exports)
 {
-    ANS_LOGI("NotificationManagerInit start");
+    ANS_LOGD("NotificationManagerInit start");
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("publish", NapiPublish),

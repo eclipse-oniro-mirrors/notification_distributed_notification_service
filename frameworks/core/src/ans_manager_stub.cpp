@@ -1050,7 +1050,7 @@ ErrCode AnsManagerStub::HandleUpdateSlots(MessageParcel &data, MessageParcel &re
 
 ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, MessageParcel &reply)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     std::string deviceId;
     if (!data.ReadString(deviceId)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: read deviceId failed.");

@@ -316,7 +316,7 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
 {
     std::string bundleName = bundleOption->GetBundleName();
     int32_t uid = bundleOption->GetUid();
-    ANSR_LOGI("OnProcessDiedLocked, bundleName=%{public}s, uid=%{public}d", bundleName.c_str(), uid);
+    ANSR_LOGD("OnProcessDiedLocked, bundleName=%{public}s, uid=%{public}d", bundleName.c_str(), uid);
     std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
         int32_t reminderId = (*it)->GetReminderId();

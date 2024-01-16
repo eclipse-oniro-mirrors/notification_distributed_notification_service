@@ -25,7 +25,7 @@ namespace OHOS {
 namespace NotificationNapi {
 void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -75,7 +75,7 @@ void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_statu
 
 napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         ANS_LOGD("ParseParaOnlyCallback is nullptr.");
@@ -172,7 +172,7 @@ void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status s
 
 napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         ANS_LOGD("Callback is nullptr.");
@@ -247,7 +247,7 @@ void AsyncCompleteCallbackNapiGetActiveNotificationCount(napi_env env, napi_stat
 
 napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -335,7 +335,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
 napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info &info,
     LiveViewFilter &filter, napi_ref &callback)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = ARGS_TWO;
     napi_value argv[ARGS_TWO] = {nullptr};
@@ -364,7 +364,7 @@ napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info 
         napi_create_reference(env, argv[1], 1, &callback);
     }
 
-    ANS_LOGI("end");
+    ANS_LOGD("end");
     return Common::NapiGetNull(env);
 }
 
@@ -381,7 +381,7 @@ void AsyncGetLiveViewExecute(napi_env env, void *data)
 
 void AsyncGetLiveViewComplete(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     auto asyncCallbackinfo = static_cast<AsyncLiveViewCallBackInfo *>(data);
     if (asyncCallbackinfo == nullptr) {
@@ -416,7 +416,7 @@ void AsyncGetLiveViewComplete(napi_env env, napi_status status, void *data)
 
 napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     auto asyncLiveViewCallBackInfo = new (std::nothrow) AsyncLiveViewCallBackInfo {.env = env, .asyncWork = nullptr};
     napi_ref callback = nullptr;

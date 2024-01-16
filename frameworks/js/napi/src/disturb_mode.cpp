@@ -23,7 +23,7 @@ const int GET_DISTURB_MAX_PARA = 2;
 
 napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetDoNotDisturbDateParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     bool hasProperty = false;
     napi_valuetype valuetype = napi_undefined;
@@ -87,7 +87,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetDoNotDisturbDateParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = SET_DISTURB_MAX_PARA;
     napi_value argv[SET_DISTURB_MAX_PARA] = {nullptr};
@@ -140,7 +140,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     SetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -205,7 +205,7 @@ napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetDoNotDisturbDate(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -233,7 +233,7 @@ void AsyncCompleteCallbackGetDoNotDisturbDate(napi_env env, napi_status status, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetDoNotDisturbDateParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = GET_DISTURB_MAX_PARA;
     napi_value argv[GET_DISTURB_MAX_PARA] = {nullptr};
@@ -271,7 +271,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     GetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -328,7 +328,7 @@ napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
 napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {

@@ -130,7 +130,7 @@ bool ParseBundleOptionTypeParams(const napi_env &env, napi_value* argv, size_t a
 
 bool ParseParameters(const napi_env &env, const napi_callback_info &info, RemoveParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     size_t argc = REMOVE_BY_BUNDLE_AND_KEY_MAX_PARA;
     napi_value argv[REMOVE_BY_BUNDLE_AND_KEY_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
@@ -156,7 +156,7 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
 
 napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_info &info, RemoveParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = REMOVE_ALL_MAX_PARA;
     napi_value argv[REMOVE_ALL_MAX_PARA] = {nullptr};
@@ -205,7 +205,7 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
 napi_value ParseParameters(
     const napi_env &env, const napi_callback_info &info, RemoveParamsGroupByBundle &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = REMOVE_GROUP_BY_BUNDLE_MAX_PARA;
     napi_value argv[REMOVE_GROUP_BY_BUNDLE_MAX_PARA] = {nullptr};
@@ -304,7 +304,7 @@ void RemoveCompleteCallback(napi_env env, napi_status status, void *data)
 
 napi_value Remove(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     RemoveParams params {};
     if (!ParseParameters(env, info, params)) {
         return Common::NapiGetUndefined(env);
@@ -332,7 +332,7 @@ napi_value Remove(napi_env env, napi_callback_info info)
 
 napi_value RemoveAll(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     RemoveParams params {};
     if (ParseParametersByRemoveAll(env, info, params) == nullptr) {
@@ -401,7 +401,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackRemoveGroupByBundle(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -420,7 +420,7 @@ void AsyncCompleteCallbackRemoveGroupByBundle(napi_env env, napi_status status, 
 
 napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     RemoveParamsGroupByBundle params {};
     if (ParseParameters(env, info, params) == nullptr) {

@@ -24,7 +24,7 @@ const int IS_DISPLAY_BADGE_MIN_PARA = 1;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableBadgeParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = ENABLE_BADGE_DISPLAYED_MAX_PARA;
     napi_value argv[ENABLE_BADGE_DISPLAYED_MAX_PARA] = {nullptr};
@@ -72,7 +72,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsDisplayBadgeParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = IS_DISPLAY_BADGE_MAX_PARA;
     napi_value argv[IS_DISPLAY_BADGE_MAX_PARA] = {nullptr};
@@ -119,7 +119,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value DisplayBadge(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     EnableBadgeParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -185,7 +185,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackIsBadgeDisplayed(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalidity async callback data");
         return;
@@ -206,7 +206,7 @@ void AsyncCompleteCallbackIsBadgeDisplayed(napi_env env, napi_status status, voi
 
 napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     IsDisplayBadgeParams params {};
     if (ParseParameters(env, info, params) == nullptr) {

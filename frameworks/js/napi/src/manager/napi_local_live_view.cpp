@@ -24,7 +24,7 @@ const int32_t TRIGGER_PARA = 3;
 
 napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     LocalLiveViewSubscriberInstance *objectInfo = nullptr;
     if (ParseParameters(env, info, objectInfo, callback) == nullptr) {
@@ -108,7 +108,7 @@ napi_value NapiUnsubscriteLocalLiveView(napi_env env, napi_callback_info info)
 napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info &info,
     AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo, napi_ref &callback)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = TRIGGER_PARA;
     napi_value argv[TRIGGER_PARA] = {nullptr, nullptr};
@@ -152,7 +152,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
 
 napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
 
     AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo =

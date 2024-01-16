@@ -56,7 +56,7 @@ const char *Common::GetPropertyNameByContentType(ContentType type)
 napi_value Common::SetNotificationContentDetailed(const napi_env &env, const ContentType &type,
     const std::shared_ptr<NotificationContent> &content, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value ret = NapiGetBoolean(env, false);
     if (!content) {
         ANS_LOGE("content is null");
@@ -108,7 +108,7 @@ napi_value Common::SetNotificationContentDetailed(const napi_env &env, const Con
 napi_value Common::SetNotificationContent(
     const napi_env &env, const std::shared_ptr<NotificationContent> &content, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     if (content == nullptr) {
         ANS_LOGE("content is null");
@@ -135,7 +135,7 @@ napi_value Common::SetNotificationContent(
 napi_value Common::SetNotificationBasicContent(
     const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
         ANS_LOGE("basicContent is null");
@@ -160,7 +160,7 @@ napi_value Common::SetNotificationBasicContent(
 napi_value Common::SetNotificationLongTextContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
         ANS_LOGE("basicContent is null");
@@ -197,7 +197,7 @@ napi_value Common::SetNotificationLongTextContent(
 napi_value Common::SetNotificationPictureContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
         ANS_LOGE("basicContent is null");
@@ -243,7 +243,7 @@ napi_value Common::SetNotificationPictureContent(
 napi_value Common::SetNotificationConversationalContent(const napi_env &env,
     NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
         ANS_LOGE("basicContent is null");
@@ -292,7 +292,7 @@ napi_value Common::SetNotificationConversationalContent(const napi_env &env,
 napi_value Common::SetNotificationMultiLineContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
         ANS_LOGE("basicContent is null");
@@ -334,7 +334,7 @@ napi_value Common::SetNotificationMultiLineContent(
 
 napi_value Common::SetMessageUser(const napi_env &env, const MessageUser &messageUser, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_value value = nullptr;
     // name: string
@@ -377,7 +377,7 @@ napi_value Common::SetMessageUser(const napi_env &env, const MessageUser &messag
 napi_value Common::SetConversationalMessages(const napi_env &env,
     const OHOS::Notification::NotificationConversationalContent *conversationalContent, napi_value &arr)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!conversationalContent) {
         ANS_LOGE("conversationalContent is null");
         return NapiGetBoolean(env, false);
@@ -406,7 +406,7 @@ napi_value Common::SetConversationalMessages(const napi_env &env,
 napi_value Common::SetConversationalMessage(const napi_env &env,
     const std::shared_ptr<NotificationConversationalMessage> &conversationalMessage, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_value value = nullptr;
     if (conversationalMessage == nullptr) {
         ANS_LOGE("conversationalMessage is null");
@@ -443,7 +443,7 @@ napi_value Common::SetConversationalMessage(const napi_env &env,
 
 napi_value Common::GetNotificationContent(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_value result = AppExecFwk::GetPropertyValueByPropertyName(env, value, "content", napi_object);
     if (result == nullptr) {
@@ -505,7 +505,7 @@ napi_value Common::GetNotificationContent(const napi_env &env, const napi_value 
 napi_value Common::GetNotificationBasicContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -540,7 +540,7 @@ napi_value Common::GetNotificationBasicContent(
 napi_value Common::GetNotificationBasicContentDetailed(
     const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value value = nullptr;
@@ -608,7 +608,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
 napi_value Common::GetNotificationLongTextContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -647,7 +647,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLongTextContent> &longContent)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value longContentResult = nullptr;
@@ -726,7 +726,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
 napi_value Common::GetNotificationPictureContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -762,7 +762,7 @@ napi_value Common::GetNotificationPictureContent(
 napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
     const napi_value &contentResult, std::shared_ptr<OHOS::Notification::NotificationPictureContent> &pictureContent)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value pictureContentResult = nullptr;
@@ -838,7 +838,7 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
 napi_value Common::GetNotificationConversationalContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -889,7 +889,7 @@ napi_value Common::GetNotificationConversationalContent(
 napi_value Common::GetNotificationConversationalContentByUser(
     const napi_env &env, const napi_value &contentResult, MessageUser &user)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -916,7 +916,7 @@ napi_value Common::GetNotificationConversationalContentByUser(
 
 napi_value Common::GetMessageUser(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (GetMessageUserByString(env, result, messageUser) == nullptr) {
         return nullptr;
@@ -935,7 +935,7 @@ napi_value Common::GetMessageUser(const napi_env &env, const napi_value &result,
 
 napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -998,7 +998,7 @@ napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value 
 
 napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1044,7 +1044,7 @@ napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &r
 
 napi_value Common::GetMessageUserByCustom(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1075,7 +1075,7 @@ napi_value Common::GetNotificationConversationalContentTitle(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationConversationalContent> &conversationalContent)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_valuetype valuetype = napi_undefined;
     napi_value conversationalContentResult = nullptr;
     bool hasProperty = false;
@@ -1105,7 +1105,7 @@ napi_value Common::GetNotificationConversationalContentGroup(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationConversationalContent> &conversationalContent)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_valuetype valuetype = napi_undefined;
     napi_value conversationalContentResult = nullptr;
     bool hasProperty = false;
@@ -1134,7 +1134,7 @@ napi_value Common::GetNotificationConversationalContentMessages(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationConversationalContent> &conversationalContent)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_valuetype valuetype = napi_undefined;
     napi_value conversationalContentResult = nullptr;
     bool hasProperty = false;
@@ -1179,7 +1179,7 @@ napi_value Common::GetNotificationConversationalContentMessages(
 napi_value Common::GetConversationalMessage(const napi_env &env, const napi_value &conversationalMessage,
     std::shared_ptr<NotificationConversationalMessage> &message)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (GetConversationalMessageBasicInfo(env, conversationalMessage, message) == nullptr) {
         return nullptr;
@@ -1193,7 +1193,7 @@ napi_value Common::GetConversationalMessage(const napi_env &env, const napi_valu
 napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const napi_value &conversationalMessage,
     std::shared_ptr<NotificationConversationalMessage> &message)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1265,7 +1265,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
 napi_value Common::GetConversationalMessageOtherInfo(const napi_env &env, const napi_value &conversationalMessage,
     std::shared_ptr<NotificationConversationalMessage> &message)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1314,7 +1314,7 @@ napi_value Common::GetConversationalMessageOtherInfo(const napi_env &env, const 
 napi_value Common::GetNotificationMultiLineContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -1398,14 +1398,14 @@ napi_value Common::GetNotificationMultiLineContent(
 
     request.SetContent(std::make_shared<NotificationContent>(multiLineContent));
 
-    ANS_LOGI("end");
+    ANS_LOGD("end");
     return NapiGetNull(env);
 }
 
 napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, const napi_value &result,
     std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     bool isArray = false;
     napi_valuetype valuetype = napi_undefined;

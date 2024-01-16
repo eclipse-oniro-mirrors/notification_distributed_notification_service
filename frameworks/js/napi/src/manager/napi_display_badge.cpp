@@ -24,7 +24,7 @@ const int SET_BADGE_NUMBER_MAX_PARA = 2;
 
 napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     EnableBadgeParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -89,7 +89,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiIsBadgeDisplayed(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -110,7 +110,7 @@ void AsyncCompleteCallbackNapiIsBadgeDisplayed(napi_env env, napi_status status,
 
 napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     IsDisplayBadgeParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         ANS_LOGE("Failed to parse params!");
@@ -167,7 +167,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetBadgeNumberParams &params)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = SET_BADGE_NUMBER_MAX_PARA;
     napi_value argv[SET_BADGE_NUMBER_MAX_PARA] = {nullptr};
@@ -202,7 +202,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 void AsyncCompleteCallbackNapiSetBadgeNumber(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -219,7 +219,7 @@ void AsyncCompleteCallbackNapiSetBadgeNumber(napi_env env, napi_status status, v
 
 napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     SetBadgeNumberParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

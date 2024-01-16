@@ -147,7 +147,7 @@ void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFw
 {
     Want want = data.GetWant();
     std::string action = want.GetAction();
-    ANSR_LOGI("Recieved common event:%{public}s", action.c_str());
+    ANSR_LOGD("Recieved common event:%{public}s", action.c_str());
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
         reminderDataManager_->Init(true);
         return;

@@ -54,7 +54,7 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason, napi_value &result)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (request == nullptr) {
         ANS_LOGE("request is null");
         return Common::NapiGetBoolean(env, false);
@@ -194,7 +194,7 @@ void UvQueueWorkOnCanceled(uv_work_t *work, int status)
 void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (canceCallbackInfo_.ref == nullptr) {
         ANS_LOGI("cancel callback unset");
@@ -399,7 +399,7 @@ void UvQueueWorkOnConsumed(uv_work_t *work, int status)
 void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (consumeCallbackInfo_.ref == nullptr) {
         ANS_LOGI("consume callback unset");
@@ -489,7 +489,7 @@ void UvQueueWorkOnUpdate(uv_work_t *work, int status)
 
 void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (updateCallbackInfo_.ref == nullptr) {
         ANS_LOGI("update callback unset");
@@ -565,7 +565,7 @@ void UvQueueWorkOnConnected(uv_work_t *work, int status)
 
 void SubscriberInstance::OnConnected()
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (subscribeCallbackInfo_.ref == nullptr) {
         ANS_LOGI("subscribe callback unset");
@@ -636,7 +636,7 @@ void UvQueueWorkOnDisconnected(uv_work_t *work, int status)
 
 void SubscriberInstance::OnDisconnected()
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (unsubscribeCallbackInfo_.ref == nullptr) {
         ANS_LOGI("unsubscribe callback unset");
@@ -706,7 +706,7 @@ void UvQueueWorkOnDied(uv_work_t *work, int status)
 
 void SubscriberInstance::OnDied()
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (dieCallbackInfo_.ref == nullptr) {
         ANS_LOGE("die callback unset");
@@ -785,7 +785,7 @@ void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
 
 void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     onDoNotDisturbChanged(date);
 
@@ -889,7 +889,7 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
 
 void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
 {
-    ANS_LOGI("OnEnabledNotificationChanged uv_work_t start");
+    ANS_LOGD("OnEnabledNotificationChanged uv_work_t start");
 
     if (work == nullptr) {
         ANS_LOGE("work is null.");
@@ -924,7 +924,7 @@ void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
 void SubscriberInstance::OnEnabledNotificationChanged(
     const std::shared_ptr<EnabledNotificationCallbackData> &callbackData)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (enabledNotificationCallbackInfo_.ref == nullptr) {
         ANS_LOGI("enabledNotificationCallbackInfo_ callback unset");
@@ -975,7 +975,7 @@ void SubscriberInstance::OnEnabledNotificationChanged(
 
 void UvQueueWorkOnBadgeChanged(uv_work_t *work, int status)
 {
-    ANS_LOGI("UvQueueWorkOnBadgeChanged uv_work_t start");
+    ANS_LOGD("UvQueueWorkOnBadgeChanged uv_work_t start");
 
     if (work == nullptr) {
         ANS_LOGE("work is null");
@@ -1008,10 +1008,9 @@ void UvQueueWorkOnBadgeChanged(uv_work_t *work, int status)
 void SubscriberInstance::OnBadgeChanged(
     const std::shared_ptr<BadgeNumberCallbackData> &badgeData)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     if (setBadgeCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("setBadgeCallbackInfo_ callback unset");
         return;
     }
 
@@ -1180,7 +1179,7 @@ bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, Sub
 napi_value GetNotificationSubscriber(
     const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     bool hasProperty = false;
     napi_valuetype valuetype = napi_undefined;
     napi_ref result = nullptr;
@@ -1359,7 +1358,7 @@ napi_value GetNotificationSubscriber(
 
 bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesInfo &subscriberInfo)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (subscriberInfo.ref == nullptr) {
         ANS_LOGE("subscriberInfo.ref is null");
         return false;
@@ -1376,7 +1375,7 @@ bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesIn
 
 bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *subscriber)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null");
         return false;
@@ -1400,7 +1399,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *s
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NotificationSubscribeInfo &subscriberInfo, SubscriberInstance *&subscriber, napi_ref &callback)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     size_t argc = SUBSRIBE_MAX_PARA;
     napi_value argv[SUBSRIBE_MAX_PARA] = {nullptr};
@@ -1474,7 +1473,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
 
 napi_value Subscribe(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
     SubscriberInstance *objectInfo = nullptr;

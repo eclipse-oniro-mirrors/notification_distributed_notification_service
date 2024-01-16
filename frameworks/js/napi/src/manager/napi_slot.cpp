@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiAddSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoAddSlot paras;
     if (ParseParametersByAddSlot(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -92,7 +92,7 @@ napi_value NapiAddSlot(napi_env env, napi_callback_info info)
 
 napi_value NapiAddSlots(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoAddSlots paras;
     if (ParseParametersByAddSlots(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -152,7 +152,7 @@ napi_value NapiAddSlots(napi_env env, napi_callback_info info)
 
 napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoSetSlotByBundle params {};
     if (ParseParametersSetSlotByBundle(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -244,7 +244,7 @@ void AsyncCompleteCallbackNapiGetSlot(napi_env env, napi_status status, void *da
 
 napi_value NapiGetSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoGetSlot paras;
     if (ParseParametersByGetSlot(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -290,7 +290,7 @@ napi_value NapiGetSlot(napi_env env, napi_callback_info info)
 
 napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoGetSlotNumByBundle params {};
     if (ParseParametersGetSlotNumByBundle(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -352,7 +352,7 @@ napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiGetSlots(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -401,7 +401,7 @@ void AsyncCompleteCallbackNapiGetSlots(napi_env env, napi_status status, void *d
 
 napi_value NapiGetSlots(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -445,7 +445,7 @@ napi_value NapiGetSlots(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiGetSlotsByBundle(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -492,7 +492,7 @@ void AsyncCompleteCallbackNapiGetSlotsByBundle(napi_env env, napi_status status,
 
 napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoGetSlotsByBundle params {};
     if (ParseParametersGetSlotsByBundle(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -538,7 +538,7 @@ napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
 
 napi_value NapiRemoveSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoRemoveSlot paras;
     if (ParseParametersByRemoveSlot(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -599,7 +599,7 @@ napi_value NapiRemoveSlot(napi_env env, napi_callback_info info)
 
 napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -657,7 +657,7 @@ napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info)
 
 napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoEnableSlot params {};
     if (ParseParametersEnableSlot(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -720,7 +720,7 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
 
 napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoIsEnableSlot params {};
     if (ParseParametersIsEnableSlot(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -782,7 +782,7 @@ napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info)
 
 napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoSetSlotFlagsByBundle params {};
     if (ParseParametersSetSlotFlagsByBundle(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -842,7 +842,7 @@ napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info)
 
 napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("enter");
     ParametersInfoGetSlotFlagsByBundle params {};
     if (ParseParametersGetSlotFlagsByBundle(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
