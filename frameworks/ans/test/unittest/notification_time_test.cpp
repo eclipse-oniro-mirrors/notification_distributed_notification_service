@@ -125,6 +125,21 @@ HWTEST_F(NotificationTimeTest, FromJson_00001, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTimeTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationTime>();
+    nlohmann::json jsonObject = nlohmann::json{{"initialTime", 60}, {"isCountDown", false},
+        {"isPaused", false}, {"isInTitle", false}};
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Marshalling_00001
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC

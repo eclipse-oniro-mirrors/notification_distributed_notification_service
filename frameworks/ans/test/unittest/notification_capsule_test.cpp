@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 #include <string>
 #include <unistd.h>
 #include "notification_capsule.h"
@@ -89,6 +90,21 @@ HWTEST_F(NotificationCapsuleTest, FromJson_00001, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCapsuleTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationCapsule>();
+    nlohmann::json jsonObject = nlohmann::json{{"title", "testTitle"}, {"backgroundColor", "testBkColor"},
+        {"icon", ""}};
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Marshalling_00001
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC
@@ -120,6 +136,20 @@ HWTEST_F(NotificationCapsuleTest, Unmarshalling_00001, Function | SmallTest | Le
         }
     }
     EXPECT_EQ(unmarshalling, true);
+}
+
+/**
+ * @tc.name: SetIcon_00001
+ * @tc.desc: Test SetIcon.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, SetIcon_00001, Function | SmallTest | Level1)
+{
+    auto pixmap = std::make_shared<Media::PixelMap>();
+    auto capsule = std::make_shared<NotificationCapsule>();
+    capsule->SetIcon(pixmap);
+    EXPECT_NE(capsule->GetIcon(), nullptr);
 }
 }
 }

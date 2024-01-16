@@ -85,6 +85,43 @@ HWTEST_F(NotificationSortingMapTest, Unmarshalling_001, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: Unmarshalling_00002
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationSortingMapTest, Unmarshalling_00002, Function | SmallTest | Level1)
+{
+    std::string groupKeyOverride = "GroupKeyOverride";
+    int32_t importance = 10;
+    uint64_t ranking = 20;
+    int32_t visibleness =30;
+    bool isDisplayBadge = false;
+    bool isHiddenNotification = true;
+    NotificationSorting sorting;
+    sorting.SetGroupKeyOverride(groupKeyOverride);
+    sorting.SetImportance(importance);
+    sorting.SetRanking(ranking);
+    sorting.SetVisiblenessOverride(visibleness);
+    sorting.SetDisplayBadge(isDisplayBadge);
+    sorting.SetHiddenNotification(isHiddenNotification);
+
+    std::vector<NotificationSorting> sortingList;
+    for (size_t i = 0; i <= MAX_ACTIVE_NUM + 1; i++) {
+        sorting.SetKey(std::to_string(i));
+        sortingList.emplace_back(sorting);
+    }
+
+    auto sortingMap = std::make_shared<NotificationSortingMap>(sortingList);
+    NotificationSorting sortingTmp;
+    Parcel parcel;
+    EXPECT_EQ(sortingMap->Marshalling(parcel), true);
+    auto newSortingMap = sortingMap->Unmarshalling(parcel);
+    EXPECT_NE(newSortingMap, nullptr);
+    EXPECT_EQ(newSortingMap->GetNotificationSorting(std::to_string(MAX_ACTIVE_NUM), sortingTmp), true);
+}
+
+/**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump parameters.
  * @tc.type: FUNC
