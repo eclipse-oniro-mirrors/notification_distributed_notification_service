@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 
 #define private public
 #define protected public
@@ -100,6 +101,35 @@ HWTEST_F(NotificationActionButtontTest, Unmarshalling_0100, Level1)
 }
 
 /**
+ * @tc.name: Unmarshalling_0200
+ * @tc.desc: Unmarshalling
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationActionButtontTest, Unmarshalling_0200, Level1)
+{
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    std::string title = "thios is title";
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = nullptr;
+    std::shared_ptr<AAFwk::WantParams> extras;
+    NotificationConstant::SemanticActionButton semanticActionButton =
+        NotificationConstant::SemanticActionButton(2);
+    bool autoCreatedReplies = true;
+    auto userInput = std::make_shared<NotificationUserInput>();
+    std::vector<std::string> options = {"test1", "test2"};
+    userInput->SetOptions(options);
+    userInput->SetPermitMimeTypes("test", true);
+    std::vector<std::shared_ptr<NotificationUserInput>> mimeTypeOnlyInputs = {userInput};
+    bool isContextual = false;
+
+    auto button = std::make_shared<NotificationActionButton>(icon, title, wantAgent, extras,
+        semanticActionButton, autoCreatedReplies, mimeTypeOnlyInputs, userInput, isContextual);
+    Parcel parcel;
+    EXPECT_EQ(button->Marshalling(parcel), true);
+    EXPECT_NE(button->Unmarshalling(parcel), nullptr);
+}
+
+/**
  * @tc.name: Create_00001
  * @tc.desc: Test Create parameters.
  * @tc.type: FUNC
@@ -183,5 +213,28 @@ HWTEST_F(NotificationActionButtontTest, FromJson_00003, Function | SmallTest | L
     rrc->FromJson(jsonObject);
     EXPECT_EQ(jsonObject.is_object(), true);
 }
+
+/**
+ * @tc.name: Dump_00001
+ * @tc.desc: Test Dump parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationActionButtontTest, Dump_00001, Function | SmallTest | Level1)
+{
+    auto button = std::make_shared<NotificationActionButton>();
+    auto userInput = std::make_shared<NotificationUserInput>();
+    userInput->SetPermitFreeFormInput(false);
+    userInput->SetPermitMimeTypes("test", true);
+    button->AddMimeTypeOnlyUserInput(userInput);
+    button->AddNotificationUserInput(userInput);
+
+    EXPECT_EQ(button->GetMimeTypeOnlyUserInputs().size(), 1);
+    EXPECT_NE(button->GetUserInput(), nullptr);
+
+    std::string dumpStr = "";
+    EXPECT_NE(button->Dump(), dumpStr);
+}
+
 }
 }

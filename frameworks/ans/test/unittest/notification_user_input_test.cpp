@@ -142,6 +142,25 @@ HWTEST_F(NotificationUserInputTest, FromJson_00003, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationUserInputTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    auto userInput = std::make_shared<NotificationUserInput>();
+    nlohmann::json jsonObject = nlohmann::json{
+        {"inputKey", "testKey"}, {"tag", "testTag"},
+        {"options", {"testOption"}}, {"permitFreeFormInput", 1},
+        {"permitMimeTypes", {"testType"}}, {"additionalData", "testData"},
+        {"editType", 1}};
+    EXPECT_EQ(jsonObject.is_object(), true);
+    auto res = userInput->FromJson(jsonObject);
+    EXPECT_EQ(res->GetPermitMimeTypes().size(), 1);
+}
+
+/**
  * @tc.name: Marshalling_00001
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC
@@ -173,6 +192,23 @@ HWTEST_F(NotificationUserInputTest, Unmarshalling_001, Function | SmallTest | Le
         }
     }
     EXPECT_EQ(unmarshalling, false);
+}
+
+/**
+ * @tc.name: Unmarshalling_00002
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationUserInputTest, Unmarshalling_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto userInput = std::make_shared<NotificationUserInput>("testKey");
+    std::vector<std::string> options = {"test1", "test2"};
+    userInput->SetOptions(options);
+    userInput->SetPermitMimeTypes("test", true);
+    EXPECT_EQ(userInput->Marshalling(parcel), true);
+    EXPECT_NE(userInput->Unmarshalling(parcel), nullptr);
 }
 
 /**
