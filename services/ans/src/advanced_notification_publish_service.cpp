@@ -934,17 +934,18 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std
 {
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
     EraseLiveViewSubsciber(bundleName);
-    if (GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
-        NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) {
-        ANS_LOGE("Get Target record list fail.");
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    }
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        if (GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) {
+            ANS_LOGE("Get Target record list fail.");
+            result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+            return;
+        }
         result = RemoveNotificationFromRecordList(recordList);
     }));
     notificationSvrQueue_->wait(handler);
