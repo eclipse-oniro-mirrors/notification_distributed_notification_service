@@ -859,6 +859,9 @@ public:
      */
     void SetRequestBySlotType(const sptr<NotificationRequest> &request);
 
+    // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
+    bool CreateDialogManager();
+
 private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
@@ -970,9 +973,6 @@ private:
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
     ErrCode SetDefaultNotificationEnabled(
         const sptr<NotificationBundleOption> &bundleOption, bool enabled);
-    // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
-    bool CreateDialogManager();
-
     static bool GetBundleInfoByNotificationBundleOption(
         const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
 
