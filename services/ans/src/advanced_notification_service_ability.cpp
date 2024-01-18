@@ -38,6 +38,7 @@ void AdvancedNotificationServiceAbility::OnStart()
     if (!Publish(service_)) {
         return;
     }
+    service_->CreateDialogManager();
     reminderAgent_ = ReminderDataManager::InitInstance(service_);
 }
 
