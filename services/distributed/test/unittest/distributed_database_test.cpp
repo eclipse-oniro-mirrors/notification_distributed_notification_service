@@ -19,6 +19,7 @@
 
 #define private public
 #include "distributed_database.h"
+#include "distributed_preferences.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -43,6 +44,7 @@ protected:
 
 void DistributedDatabaseTest::SetUp()
 {
+    DistributedPreferences::GetInstance()->SetDistributedEnable(true);
     DistributedDatabaseCallback::IDatabaseChange databaseCallback = {
         .OnInsert = std::bind(&DistributedDatabaseTest::OnInsert,
             this,
