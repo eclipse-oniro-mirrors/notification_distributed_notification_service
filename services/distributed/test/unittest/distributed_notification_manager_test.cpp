@@ -19,7 +19,7 @@
 #define private public
 #include "ans_inner_errors.h"
 #include "distributed_notification_manager.h"
-
+#include "distributed_preferences.h"
 using namespace testing::ext;
 
 namespace OHOS {
@@ -379,6 +379,7 @@ HWTEST_F(DistributedNotificationManagerTest, Distributed_DeleteCallback_00100, F
 HWTEST_F(DistributedNotificationManagerTest, Distributed_OnDistributedKvStoreDeathRecipient_00100,
          Function | SmallTest | Level1)
 {
+    DistributedPreferences::GetInstance()->SetDistributedEnable(true);
     EXPECT_EQ(distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_OK);
 }
 }  // namespace Notification

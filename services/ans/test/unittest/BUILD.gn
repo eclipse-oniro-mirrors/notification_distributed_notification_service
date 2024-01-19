@@ -200,6 +200,7 @@ ohos_unittest("notification_service_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test.cpp",
+    "advanced_notification_utils_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_access_token_helper.cpp",
@@ -226,6 +227,7 @@ ohos_unittest("notification_service_test") {
   }
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
@@ -461,6 +463,7 @@ ohos_unittest("notification_dialog_test") {
 
   sources = [
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
+    "notification_dialog_test/notification_dialog_manager_test.cpp",
     "notification_dialog_test/notification_dialog_test.cpp",
   ]
 
@@ -482,6 +485,7 @@ ohos_unittest("notification_dialog_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
