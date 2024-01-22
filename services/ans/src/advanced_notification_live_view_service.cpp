@@ -139,9 +139,10 @@ void AdvancedNotificationService::OnSubscriberAdd(
 
     sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
     std::vector<sptr<Notification>> notifications;
-    for (auto record : notificationList_) {
-        if (record->notification != nullptr && record->notification->GetNotificationRequest().IsCommonLiveView()) {
-            notifications.emplace_back(record->notification);
+    for (auto notificationRecord : notificationList_) {
+        if (notificationRecord->notification != nullptr &&
+            notificationRecord->notification->GetNotificationRequest().IsCommonLiveView()) {
+            notifications.emplace_back(notificationRecord->notification);
         }
     }
 

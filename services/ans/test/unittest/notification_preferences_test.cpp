@@ -164,8 +164,6 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00600, Function | Sma
         (int)ERR_ANS_INVALID_PARAM);
 }
 
-
-
 /**
  * @tc.number    : RemoveNotificationSlot_00100
  * @tc.name      :
