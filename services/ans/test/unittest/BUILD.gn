@@ -200,6 +200,7 @@ ohos_unittest("notification_service_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_live_view_service_test.cpp",
+    "advanced_notification_publish_service_test.cpp",
     "advanced_notification_service_test.cpp",
     "advanced_notification_slot_service_test.cpp",
     "advanced_notification_utils_test.cpp",

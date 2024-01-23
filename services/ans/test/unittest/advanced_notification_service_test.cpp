@@ -53,6 +53,7 @@ namespace Notification {
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsNonBundleName(bool isNonBundleName);
+extern void MockIsVerfyPermisson(bool isVerify);
 
 class AdvancedNotificationServiceTest : public testing::Test {
 public:
@@ -4344,6 +4345,239 @@ HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0005, Function | S
     GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0005 test end";
 }
 
+/**
+ * @tc.name: NotificationSvrQueue_00001
+ * @tc.desc: Test notificationSvrQueue is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+
+    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    ret = advancedNotificationService_->PublishPreparedNotification(request, bundle);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    std::vector<sptr<NotificationRequest>> requests;
+    ret = advancedNotificationService_->GetActiveNotifications(requests);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    uint64_t num = 0;
+    ret = advancedNotificationService_->GetActiveNotificationNums(num);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    int importance = 0;
+    ret = advancedNotificationService_->GetBundleImportance(importance);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    std::vector<sptr<Notification>> notifications;
+    ret = advancedNotificationService_->GetAllActiveNotifications(notifications);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    std::vector<std::string> keys;
+    ret = advancedNotificationService_->GetSpecialActiveNotifications(keys, notifications);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    bool enabled = false;
+    ret = advancedNotificationService_->IsDistributedEnabled(enabled);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    ret = advancedNotificationService_->EnableDistributed(enabled);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    ret = advancedNotificationService_->EnableDistributedByBundle(bundle, enabled);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotificationSvrQueue_00002
+ * @tc.desc: Test notificationSvrQueue is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+
+    auto ret = advancedNotificationService_->EnableDistributedSelf(true);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    bool enable = false;
+    ret = advancedNotificationService_->IsDistributedEnableByBundle(bundle, enable);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    ret = advancedNotificationService_->GetHasPoppedDialog(bundle, enable);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    ret = advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(1, enable);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    ret = advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(1, enable);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    advancedNotificationService_->FillActionButtons(request);
+    request->SetIsCoverActionButtons(true);
+    advancedNotificationService_->FillActionButtons(request);
+}
+
+/**
+ * @tc.name: AssignToNotificationList_00001
+ * @tc.desc: Test AssignToNotificationList
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+
+    ret = advancedNotificationService_->AssignToNotificationList(record);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: StartArchiveTimer_00001
+ * @tc.desc: Test StartArchiveTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, StartArchiveTimer_00001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetAutoDeletedTime(NotificationConstant::NO_DELAY_DELETE_TIME);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->StartArchiveTimer(record);
+    EXPECT_EQ(request->GetAutoDeletedTime(), NotificationConstant::NO_DELAY_DELETE_TIME);
+}
+
+/**
+ * @tc.name: Filter_00001
+ * @tc.desc: Test Filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Filter_00001, Function | SmallTest | Level1)
+{
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    advancedNotificationService_->notificationSlotFilter_ = nullptr;
+    auto ret = advancedNotificationService_->Filter(record, true);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetRecordFromNotificationList_00001
+ * @tc.desc: Test GetRecordFromNotificationList
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRecordFromNotificationList_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetLabel("label");
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+
+    auto res = advancedNotificationService_->GetRecordFromNotificationList(
+        1, SYSTEM_APP_UID, "label", TEST_DEFUALT_BUNDLE);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: RegisterPushCallback_00001
+ * @tc.desc: Test RegisterPushCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterPushCallback_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    sptr<IRemoteObject> pushCallback = nullptr;
+    sptr<NotificationCheckRequest> request = nullptr;
+
+    auto ret = advancedNotificationService_->RegisterPushCallback(pushCallback, request);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->RegisterPushCallback(pushCallback, request);
+    EXPECT_EQ(ret, (int)ERR_INVALID_VALUE);
+
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    pushCallback = pushCallbackProxy->AsObject();
+    ret = advancedNotificationService_->RegisterPushCallback(pushCallback, request);
+    EXPECT_EQ(ret, (int)ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnregisterPushCallback_00001
+ * @tc.desc: Test UnregisterPushCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, UnregisterPushCallback_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    auto ret = advancedNotificationService_->UnregisterPushCallback();
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: FillExtraInfoToJson_00001
+ * @tc.desc: Test FillExtraInfoToJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, FillExtraInfoToJson_00001, Function | SmallTest | Level1)
+{
+    auto request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    sptr<NotificationCheckRequest> checkRequest = new NotificationCheckRequest();
+    std::vector<std::string> extraKeys = {"key1"};
+    checkRequest->SetExtraKeys(extraKeys);
+    nlohmann::json obj;
+    advancedNotificationService_->FillExtraInfoToJson(request, checkRequest, obj);
+    EXPECT_EQ(liveViewContent->GetExtraInfo(), nullptr);
+
+    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+    liveViewContent->SetExtraInfo(extraInfo);
+    advancedNotificationService_->FillExtraInfoToJson(request, checkRequest, obj);
+}
+
+/**
+ * @tc.name: CreateDialogManager_00001
+ * @tc.desc: Test CreateDialogManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CreateDialogManager_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->dialogManager_ = nullptr;
+    bool ret = advancedNotificationService_->CreateDialogManager();
+    EXPECT_EQ(ret, true);
+
+    ret = advancedNotificationService_->CreateDialogManager();
+    EXPECT_EQ(ret, true);
+}
 }  // namespace Notification
 }  // namespace OHOS
 

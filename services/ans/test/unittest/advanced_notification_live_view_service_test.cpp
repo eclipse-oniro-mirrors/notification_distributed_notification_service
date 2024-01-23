@@ -152,7 +152,7 @@ HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00001, Function | 
  */
 HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00002, Function | SmallTest | Level1)
 {
-   auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(slotType);
     request->SetNotificationId(1);
