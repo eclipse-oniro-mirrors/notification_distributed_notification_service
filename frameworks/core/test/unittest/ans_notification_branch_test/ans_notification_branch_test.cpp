@@ -720,5 +720,63 @@ HWTEST_F(AnsNotificationBranchTest, CanPublishLiveViewContent_0150, Function | M
     auto notification = std::make_shared<AnsNotification>();
     EXPECT_FALSE(notification->CanPublishLiveViewContent(request));
 }
+
+/*
+ * @tc.name: SetNotificationSlotFlagsAsBundle_0001
+ * @tc.desc: SetNotificationSlotFlagsAsBundle
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    uint32_t slotFlags = 1;
+    auto notification = std::make_shared<AnsNotification>();
+    ErrCode ret = notification->SetNotificationSlotFlagsAsBundle(bundle, slotFlags);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    notification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
+    bundle.SetBundleName("test");
+    bundle.SetUid(1);
+    ret = notification->SetNotificationSlotFlagsAsBundle(bundle, slotFlags);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: PublishNotification_0001
+ * @tc.desc: PublishNotification
+ * @tc.type: FUNC
+ * @tc.require: issule
+ */
+HWTEST_F(AnsNotificationBranchTest, PublishNotification_0001, Function | MediumTest | Level1)
+{
+    auto notification = std::make_shared<AnsNotification>();
+    notification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
+    NotificationRequest req;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    auto content = std::make_shared<NotificationContent>(mediaContent);
+    content->content_ = nullptr;
+    req.SetContent(content);
+
+    auto ret = notification->PublishNotification("label", req);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ret = notification->PublishNotificationAsBundle("label", req);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content1 = std::make_shared<NotificationContent>(liveViewContent);
+    content1->content_ = nullptr;
+    req.SetContent(content1);
+    req.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    ret = notification->PublishNotification("label", req);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ret = notification->PublishNotificationAsBundle("label", req);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
 }  // namespace Notification
 }  // namespace OHOS
