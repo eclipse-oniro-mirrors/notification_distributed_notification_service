@@ -1089,7 +1089,7 @@ bool Common::IsValidRemoveReason(int32_t reasonType)
     return false;
 }
 
-napi_value Common::CreateWantAgentByJS(const napi_env &env,
+__attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const napi_env &env,
     const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &agent)
 {
     if (agent == nullptr) {
