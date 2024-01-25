@@ -18,6 +18,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "device_manager.h"
+#include "distributed_preferences.h"
 
 namespace OHOS {
 namespace Notification {
@@ -120,6 +121,13 @@ bool DistributedScreenStatusManager::CheckKvDataManager()
 
 void DistributedScreenStatusManager::GetKvStore()
 {
+    bool enable = false;
+    DistributedPreferences::GetInstance()->GetDistributedEnable(enable);
+    if (!enable) {
+        ANS_LOGI("DistributedEnable is false, no need to create db.");
+        return;
+    }
+
     if (!CheckKvDataManager()) {
         return;
     }
