@@ -227,5 +227,19 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01400, Function | Sm
     int32_t userId = 1;
     EXPECT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
 }
+
+/**
+ * @tc.number    : GetBundleInfos_00001
+ * @tc.name      : GetBundleInfos_00001
+ * @tc.desc      : test GetBundleInfos
+ */
+HWTEST_F(BundleManagerHelperBranchTest, GetBundleInfos_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    AppExecFwk::BundleFlag flag = AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+
+    EXPECT_EQ(false, bundleManagerHelper.GetBundleInfos(flag, bundleInfos, 1));
+}
 }  // namespace Notification
 }  // namespace OHOS

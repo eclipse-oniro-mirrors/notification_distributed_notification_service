@@ -290,5 +290,36 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_003, Functi
     notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record);
 }
 
+/**
+ * @tc.number    : BatchNotifyConsumed_001
+ * @tc.name      : BatchNotifyConsumed and params is nullptr
+ * @tc.desc      : Test BatchNotifyConsumed .
+ */
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | SmallTest | Level1)
+{
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    sptr<NotificationSortingMap> notificationMap = new NotificationSortingMap();
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
+    auto record = notificationSubscriberManager_->CreateSubscriberRecord(mockSubscriber);
+    notificationSubscriberManager_->BatchNotifyConsumed(notifications, notificationMap, record);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    sptr<Notification> notification = new Notification(request);
+    notifications.emplace_back(notification);
+    notificationSubscriberManager_->notificationSubQueue_ = nullptr;
+    notificationSubscriberManager_->BatchNotifyConsumed(notifications, notificationMap, record);
+}
+
+/**
+ * @tc.number    : OnRemoteDied_001
+ * @tc.name      : OnRemoteDied and params is nullptr
+ * @tc.desc      : Test OnRemoteDied .
+ */
+HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_001, Function | SmallTest | Level1)
+{
+    notificationSubscriberManager_->notificationSubQueue_ = nullptr;
+    wptr<IRemoteObject> obj = nullptr;
+    notificationSubscriberManager_->OnRemoteDied(obj);
+}
 }  // namespace Notification
 }  // namespace OHOS

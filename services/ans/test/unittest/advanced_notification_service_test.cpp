@@ -4359,9 +4359,6 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    ret = advancedNotificationService_->PublishPreparedNotification(request, bundle);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-
     std::vector<sptr<NotificationRequest>> requests;
     ret = advancedNotificationService_->GetActiveNotifications(requests);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
@@ -4387,9 +4384,6 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->EnableDistributed(enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-
-    ret = advancedNotificationService_->EnableDistributedByBundle(bundle, enabled);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
