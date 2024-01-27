@@ -196,8 +196,8 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
 {
     ANS_LOGD("enter");
 
-    if (canceCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("cancel callback unset");
+    if (canceCallbackInfo_.ref == nullptr || canceCallbackInfo_.env == nullptr) {
+        ANS_LOGI("cancel callback or env unset");
         return;
     }
 
@@ -302,8 +302,8 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
     &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
     ANS_LOGI("OnBatchCancel");
-    if (batchCancelCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("batchCancelCallbackInfo_ callback unset");
+    if (batchCancelCallbackInfo_.ref == nullptr || batchCancelCallbackInfo_.env == nullptr) {
+        ANS_LOGI("batchCancelCallbackInfo_ callback or env unset");
         return;
     }
     if (requestList.empty()) {
@@ -401,8 +401,8 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
 {
     ANS_LOGD("enter");
 
-    if (consumeCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("consume callback unset");
+    if (consumeCallbackInfo_.ref == nullptr || consumeCallbackInfo_.env == nullptr) {
+        ANS_LOGI("consume callback or env unset");
         return;
     }
 
@@ -491,8 +491,8 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
 {
     ANS_LOGD("enter");
 
-    if (updateCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("update callback unset");
+    if (updateCallbackInfo_.ref == nullptr || updateCallbackInfo_.env == nullptr) {
+        ANS_LOGI("update callback or env unset");
         return;
     }
 
@@ -567,8 +567,8 @@ void SubscriberInstance::OnConnected()
 {
     ANS_LOGD("enter");
 
-    if (subscribeCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("subscribe callback unset");
+    if (subscribeCallbackInfo_.ref == nullptr || subscribeCallbackInfo_.env == nullptr) {
+        ANS_LOGI("subscribe callback or env unset");
         return;
     }
 
@@ -789,8 +789,8 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
 
     onDoNotDisturbChanged(date);
 
-    if (disturbDateCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("disturbDateCallbackInfo_ callback unset");
+    if (disturbDateCallbackInfo_.ref == nullptr || disturbDateCallbackInfo_.env == nullptr) {
+        ANS_LOGI("disturbDateCallbackInfo_ callback or env unset");
         return;
     }
 
@@ -840,8 +840,8 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
 {
     ANS_LOGD("enter");
 
-    if (disturbChangedCallbackInfo_.ref == nullptr) {
-        ANS_LOGE("disturbChangedCallbackInfo_ callback unset");
+    if (disturbChangedCallbackInfo_.ref == nullptr || disturbChangedCallbackInfo_.env == nullptr) {
+        ANS_LOGE("disturbChangedCallbackInfo_ callback or env unset");
         return;
     }
 
@@ -926,8 +926,8 @@ void SubscriberInstance::OnEnabledNotificationChanged(
 {
     ANS_LOGD("enter");
 
-    if (enabledNotificationCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("enabledNotificationCallbackInfo_ callback unset");
+    if (enabledNotificationCallbackInfo_.ref == nullptr || enabledNotificationCallbackInfo_.env == nullptr) {
+        ANS_LOGI("enabledNotificationCallbackInfo_ callback or env unset");
         return;
     }
 
@@ -1010,7 +1010,7 @@ void SubscriberInstance::OnBadgeChanged(
 {
     ANS_LOGD("enter");
 
-    if (setBadgeCallbackInfo_.ref == nullptr) {
+    if (setBadgeCallbackInfo_.ref == nullptr || setBadgeCallbackInfo_.env == nullptr) {
         return;
     }
 
