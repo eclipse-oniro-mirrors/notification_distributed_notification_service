@@ -176,6 +176,41 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00100,
 }
 
 /**
+ * @tc.number    : ANS_Publish_Update_Flow_00100
+ * @tc.name      : ANSPublish00100
+ * @tc.desc      : Publish a normal text type notification 30 times,trigger flow.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceUpdateFlowTest_00100, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    sptr<NotificationRequest> req = new NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("req's label update flow");
+    req->SetCreatorUid(1);
+    std::string label = "publish's label";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    EXPECT_NE(normalContent, nullptr);
+    normalContent->SetText("normalContent's text");
+    normalContent->SetTitle("normalContent's title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    int count = 30;
+    for (uint64_t i = 1; i <= 30; ++i) {
+        if (i <= 21) {
+            EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
+        } else {
+            EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+        }
+    }
+    SleepForFC();
+}
+
+
+/**
  * @tc.number    : ANS_Publish_00200
  * @tc.name      : ANSPublish00200
  * @tc.desc      : Publish a normal text type notification twice.
@@ -4574,4 +4609,3 @@ HWTEST_F(AdvancedNotificationServiceTest, CreateDialogManager_00001, Function | 
 }
 }  // namespace Notification
 }  // namespace OHOS
-

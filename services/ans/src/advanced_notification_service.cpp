@@ -276,7 +276,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
             record->notification->SetEnableSound(false);
             record->notification->SetEnableVibration(false);
         }
-        UpdateInNotificationList(record);
+        result = UpdateInNotificationList(record);
     }
     return result;
 }
@@ -599,8 +599,15 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
     SortNotificationList();
 }
 
-void AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
+ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    RemoveExpired(flowControlUpdateTimestampList_, now);
+    if (flowControlUpdateTimestampList_.size() >= MAX_UPDATE_NUM_PERSECOND) {
+        return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
+    }
+
+    flowControlUpdateTimestampList_.push_back(now);
     auto iter = notificationList_.begin();
     while (iter != notificationList_.end()) {
         if ((*iter)->notification->GetKey() == record->notification->GetKey()) {
@@ -614,6 +621,7 @@ void AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr
     }
 
     SortNotificationList();
+    return ERR_OK;
 }
 
 void AdvancedNotificationService::SortNotificationList()

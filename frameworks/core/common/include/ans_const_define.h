@@ -28,6 +28,7 @@ namespace Notification {
 constexpr size_t MAX_ACTIVE_NUM = 1000;
 constexpr uint32_t MAX_ACTIVE_NUM_PERAPP = 100;
 constexpr uint32_t MAX_ACTIVE_NUM_PERSECOND = 10;
+constexpr uint32_t MAX_UPDATE_NUM_PERSECOND = 20;
 constexpr size_t MAX_SLOT_NUM = 5;
 constexpr uint32_t MAX_ICON_SIZE = 100 * 1024;
 constexpr uint32_t MAX_PICTURE_SIZE = 2 * 1024 * 1024;
