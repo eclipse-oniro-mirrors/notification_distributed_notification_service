@@ -89,7 +89,11 @@ export class EnableNotificationDialog {
       await win.moveWindowTo(displayRect.left, displayRect.top);
       await win.resize(displayRect.width, displayRect.height);
       await win.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
-      await win.hideNonSystemFloatingWindows(shouldHide);
+      try {
+        await win.hideNonSystemFloatingWindows(shouldHide);
+      } catch (err) {
+        console.error(TAG, 'window hideNonSystemFloatingWindows failed!');
+      }
       await win.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
       await win.showWindow();
       await win.setWindowLayoutFullScreen(true);
