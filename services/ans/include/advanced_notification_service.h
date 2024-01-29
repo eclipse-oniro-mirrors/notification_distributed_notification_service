@@ -875,7 +875,7 @@ private:
     ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
 
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
-    void UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption, const std::string &label,
         int32_t notificationId, sptr<Notification> &notification, bool isCancel = false);
@@ -1027,6 +1027,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
     std::list<std::chrono::system_clock::time_point> flowControlTimestampList_;
+    std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
