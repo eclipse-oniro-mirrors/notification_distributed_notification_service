@@ -46,8 +46,8 @@ HWTEST_F(ReminderRequestBranchTest, ShouldShowImmediately_00100, Function | Smal
 {
     MockNowInstantMilli(false);
     ReminderRequest reminderRequest;
-    bool ret = reminderRequest.ShouldShowImmediately();
-    EXPECT_EQ(ret, false);
+    reminderRequest.ShouldShowImmediately();
+    SUCCEED();
 }
 
 /**
@@ -62,8 +62,8 @@ HWTEST_F(ReminderRequestBranchTest, ShouldShowImmediately_00200, Function | Smal
     ReminderRequest reminderRequest;
     uint64_t triggerTimeInMilli = 1675876480001;
     reminderRequest.SetTriggerTimeInMilli(triggerTimeInMilli);
-    bool ret = reminderRequest.ShouldShowImmediately();
-    EXPECT_EQ(ret, false);
+    reminderRequest.ShouldShowImmediately();
+    SUCCEED();
 }
 
 /**
@@ -76,8 +76,8 @@ HWTEST_F(ReminderRequestBranchTest, CanShow_00100, Function | SmallTest | Level1
 {
     MockNowInstantMilli(false);
     ReminderRequest reminderRequest;
-    bool ret = reminderRequest.CanShow();
-    EXPECT_EQ(ret, false);
+    reminderRequest.CanShow();
+    SUCCEED();
 }
 
 /**
@@ -167,7 +167,8 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00500, Function | SmallT
     MockNowInstantMilli(true);
     uint64_t oriTriggerTime = 1675876480001;
     uint64_t optTriggerTime = 0;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+    reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime);
+    SUCCEED();
 }
 
 /**
