@@ -878,7 +878,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         ANS_LOGD("ffrt enter!");
         notifications.clear();
         for (auto record : notificationList_) {
-            if (record->notification != nullptr) {
+            if (record->notification != nullptr && record->notification->request_ != nullptr) {
                 notifications.push_back(record->notification);
             }
         }
