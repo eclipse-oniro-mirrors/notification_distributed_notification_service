@@ -85,35 +85,39 @@ private:
     static AnsLogLevel level_;
 };
 
-#define PRINT_LOG(LEVEL, level, fmt, ...)                    \
-    if (AnsLogWrapper::JudgeLevel(AnsLogLevel::LEVEL))   \
-    HILOG_IMPL(LOG_CORE, level, ANS_LOG_DOMAIN, ANS_LOG_TAG  \
-        "[%{public}s:(%{public}s):%{public}d] " fmt,         \
-        AnsLogWrapper::GetBriefFileName(__FILE__).c_str(), \
-        __FUNCTION__,                                        \
-        __LINE__,                                            \
-        ##__VA_ARGS__)
+#define CUR_FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define ANS_LOGD(fmt, ...) PRINT_LOG(DEBUG, LOG_DEBUG, fmt, ##__VA_ARGS__)
-#define ANS_LOGI(fmt, ...) PRINT_LOG(INFO, LOG_INFO, fmt, ##__VA_ARGS__)
-#define ANS_LOGW(fmt, ...) PRINT_LOG(WARN, LOG_WARN, fmt, ##__VA_ARGS__)
-#define ANS_LOGE(fmt, ...) PRINT_LOG(ERROR, LOG_ERROR, fmt, ##__VA_ARGS__)
-#define ANS_LOGF(fmt, ...) PRINT_LOG(FATAL, LOG_FATAL, fmt, ##__VA_ARGS__)
+#define ANS_LOGF(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANS_LOGE(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANS_LOGW(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANS_LOGI(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANS_LOGD(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 
-#define PRINT_REMINDER_LOG(LEVEL, level, fmt, ...)                  \
-    if (AnsLogWrapper::JudgeLevel(AnsLogLevel::LEVEL))   \
-    HILOG_IMPL(LOG_CORE, level, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG  \
-        "[%{public}s:(%{public}s):%{public}d] " fmt,         \
-        AnsLogWrapper::GetBriefFileName(__FILE__).c_str(), \
-        __FUNCTION__,                                        \
-        __LINE__,                                            \
-        ##__VA_ARGS__)
-
-#define ANSR_LOGD(fmt, ...) PRINT_REMINDER_LOG(DEBUG, LOG_DEBUG, fmt, ##__VA_ARGS__)
-#define ANSR_LOGI(fmt, ...) PRINT_REMINDER_LOG(INFO, LOG_INFO, fmt, ##__VA_ARGS__)
-#define ANSR_LOGW(fmt, ...) PRINT_REMINDER_LOG(WARN, LOG_WARN, fmt, ##__VA_ARGS__)
-#define ANSR_LOGE(fmt, ...) PRINT_REMINDER_LOG(ERROR, LOG_ERROR, fmt, ##__VA_ARGS__)
-#define ANSR_LOGF(fmt, ...) PRINT_REMINDER_LOG(FATAL, LOG_FATAL, fmt, ##__VA_ARGS__)
+#define ANSR_LOGF(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANSR_LOGE(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANSR_LOGW(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANSR_LOGI(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+#define ANSR_LOGD(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
+    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 }  // namespace Notification
 }  // namespace OHOS
 
