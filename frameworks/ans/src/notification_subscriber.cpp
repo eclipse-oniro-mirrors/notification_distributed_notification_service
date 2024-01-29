@@ -178,6 +178,7 @@ void NotificationSubscriber::SubscriberImpl::DeathRecipient::OnRemoteDied(const 
 {
     subscriberImpl_.proxy_ = nullptr;
     subscriberImpl_.subscriber_.OnDied();
+    subscriberImpl_.subscriber_.OnDisconnected();
 }
 }  // namespace Notification
 }  // namespace OHOS
