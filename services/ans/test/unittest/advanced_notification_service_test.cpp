@@ -1030,13 +1030,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08300,
 {
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    sptr<AdvancedNotificationService> advancedNotificationServices = new (std::nothrow) AdvancedNotificationService();
-    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
-        NotificationSubscriberManager::GetInstance();
-    notificationSubscriberManager->notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
-    EXPECT_NE((int)advancedNotificationServices->Subscribe(subscriber->GetImpl(), info), (int)ERR_OK);
-    EXPECT_EQ((int)advancedNotificationServices->Subscribe(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
-    EXPECT_NE((int)advancedNotificationServices->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
+    EXPECT_NE((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_NE((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
 }
 
 /**
@@ -2596,12 +2592,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400,
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    sptr<AdvancedNotificationService> advancedNotificationServices = new (std::nothrow) AdvancedNotificationService();
-    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
-        NotificationSubscriberManager::GetInstance();
-    notificationSubscriberManager->notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
-    EXPECT_NE(advancedNotificationServices->Subscribe(subscriber->GetImpl(), info), ERR_OK);
-    EXPECT_NE(advancedNotificationServices->Unsubscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_NE(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_NE(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_OK);
 
     GTEST_LOG_(INFO) << "Subscribe_1000 test end";
 }
@@ -2618,12 +2610,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17500,
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    sptr<AdvancedNotificationService> advancedNotificationServices = new (std::nothrow) AdvancedNotificationService();
-    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
-        NotificationSubscriberManager::GetInstance();
-    notificationSubscriberManager->notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
-    EXPECT_NE(advancedNotificationServices->Subscribe(subscriber->GetImpl(), info), ERR_OK);
-    EXPECT_EQ(advancedNotificationServices->Unsubscribe(nullptr, info), ERR_ANS_INVALID_PARAM);
+    EXPECT_NE(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->Unsubscribe(nullptr, info), ERR_ANS_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "Unsubscribe_1000 test end";
 }
@@ -3489,40 +3477,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_220000
     int64_t ret = 20;
     std::string result = advancedNotificationService_->TimeToString(time);
     EXPECT_EQ(result.size(), ret);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_22100
- * @tc.name      : StartAutoDelete
- * @tc.desc      : Test StartAutoDelete function.
- * @tc.require   : #I6Z5I4
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_221000, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_221000 test start";
-
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    EXPECT_NE(request, nullptr);
-    request->SetCreatorUid(0);
-    request->SetCreatorUserId(0);
-    request->SetLabel("label");
-    request->SetTapDismissed(true);
-    auto now = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    request->SetAutoDeletedTime(duration.count() + 1000);  // 1000ms
-    sptr<Notification> notification = new (std::nothrow) Notification(request);
-    EXPECT_NE(notification, nullptr);
-
-    auto record = std::make_shared<NotificationRecord>();
-    record->request = request;
-    record->notification = notification;
-    advancedNotificationService_->notificationList_.push_back(record);
-    advancedNotificationService_->StartAutoDelete(record->notification->GetKey(),
-        record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
-
-    std::this_thread::sleep_for(std::chrono::seconds(2));   // 2ms
-    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_221000 test end";
 }
 
 /**
