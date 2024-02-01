@@ -77,10 +77,9 @@ ohos_moduletest("ans_module_test") {
     "time_service:time_client",
   ]
 
-  defines = []
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
-    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+    defines = [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
   }
 
   if (distributed_notification_supported) {
