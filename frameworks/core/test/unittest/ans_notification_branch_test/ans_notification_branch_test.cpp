@@ -255,6 +255,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override
     {

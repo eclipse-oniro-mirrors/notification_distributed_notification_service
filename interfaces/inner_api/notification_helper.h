@@ -826,6 +826,14 @@ public:
     static ErrCode SetBadgeNumber(int32_t badgeNumber);
 
     /**
+     * @brief Obtains allow notification application list.
+     *
+     * @param status Indicates the bundle status.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status);
+
+    /**
      * @brief Register Push Callback.
      *
      * @param pushCallback push appliction's Callback.

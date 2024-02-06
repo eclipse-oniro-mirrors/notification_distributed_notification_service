@@ -512,6 +512,12 @@ ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+{
+    ANS_LOGE("AnsManagerStub::SetBadgeNumber called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::RegisterPushCallback(
     const sptr<IRemoteObject>& pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {

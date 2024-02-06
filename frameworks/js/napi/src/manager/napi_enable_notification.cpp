@@ -379,5 +379,97 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
 
     return Common::NapiGetNull(env);
 }
+
+void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("Called.");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    napi_value result = nullptr;
+    AsyncCallbackInfoEnableStatus *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableStatus *>(data);
+    if (asynccallbackinfo == nullptr) {
+        ANS_LOGE("asynccallbackinfo is nullptr");
+        return;
+    }
+    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+        result = Common::NapiGetNull(env);
+    }
+    napi_value arr = nullptr;
+    napi_create_array(env, &arr);
+    size_t count = 0;
+    for (auto vec : asynccallbackinfo->bundleNotificationStatus) {
+        napi_value nSlot = nullptr;
+        napi_create_object(env, &nSlot);
+        if (!Common::SetNotificationEnableStatus(env, vec, nSlot)) {
+            continue;
+        }
+        ANS_LOGD("Start napi_set_element");
+        napi_set_element(env, arr, count, nSlot);
+        count++;
+    }
+    result = arr;
+    if ((count == 0) && (asynccallbackinfo->bundleNotificationStatus.size() > 0)) {
+        asynccallbackinfo->info.errorCode = ERROR;
+        result = Common::NapiGetNull(env);
+    }
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    if (asynccallbackinfo->info.callback != nullptr) {
+        ANS_LOGD("Delete napiGetSlots callback reference.");
+        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    }
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
+}
+
+napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("Called");
+    napi_ref callback = nullptr;
+    AsyncCallbackInfoEnableStatus *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoEnableStatus{ .env = env, .asyncWork = nullptr };
+    if (asynccallbackinfo == nullptr) {
+        ANS_LOGE("asynccallbackinfo is nullptr");
+        return Common::NapiGetUndefined(env);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getAllNotificationEnabledBundles", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_async_work(
+        env, nullptr, resourceName,
+        [](napi_env env, void *data) {
+            AsyncCallbackInfoEnableStatus *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableStatus *>(data);
+            if (asynccallbackinfo != nullptr) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::GetAllNotificationEnabledBundles(asynccallbackinfo->bundleNotificationStatus);
+                ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            }
+        },
+        AsyncCompleteCallbackNapiGetAllNotificationEnableStatus, (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete callback reference.");
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+
+    if (isCallback) {
+        ANS_LOGD("Callback is nullptr.");
+        return Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

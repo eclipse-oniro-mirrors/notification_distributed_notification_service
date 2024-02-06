@@ -57,6 +57,13 @@ struct AsyncCallbackInfoEnable {
     CallbackPromiseInfo info;
 };
 
+struct AsyncCallbackInfoEnableStatus {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    CallbackPromiseInfo info;
+    std::vector<BundleNotificationStatus> bundleNotificationStatus {};
+};
+
 napi_value EnableNotification(napi_env env, napi_callback_info info);
 napi_value IsNotificationEnabled(napi_env env, napi_callback_info info);
 napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info);

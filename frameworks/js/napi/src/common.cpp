@@ -1243,6 +1243,33 @@ napi_value Common::SetNotificationTemplateInfo(
     return NapiGetBoolean(env, true);
 }
 
+napi_value Common::SetNotificationEnableStatus(
+    const napi_env &env, const BundleNotificationStatus &bundleNotificationStatus, napi_value &result)
+{
+    ANS_LOGD("Called.");
+    if (bundleNotificationStatus.bundleOption_ == nullptr) {
+        ANS_LOGE("BundleOption is nullptr.");
+        return NapiGetBoolean(env, false);
+    }
+
+    // bundle: string
+    napi_value bundleNapi = nullptr;
+    napi_create_string_utf8(
+        env, bundleNotificationStatus.bundleOption_->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
+
+    // uid: uid_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, bundleNotificationStatus.bundleOption_->GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
+
+    // enable: bool
+    napi_value enableNapi = nullptr;
+    napi_get_boolean(env, bundleNotificationStatus.status_, &enableNapi);
+    napi_set_named_property(env, result, "status", enableNapi);
+    return NapiGetBoolean(env, true);
+}
+
 napi_value Common::SetNotificationFlags(
     const napi_env &env, const std::shared_ptr<NotificationFlags> &flags, napi_value &result)
 {

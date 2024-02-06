@@ -1425,6 +1425,15 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
     return ansManagerProxy_->SetBadgeNumber(badgeNumber);
 }
 
+ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->GetAllNotificationEnabledBundles(status);
+}
+
 ErrCode AnsNotification::RegisterPushCallback(
     const sptr<IRemoteObject>& pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {

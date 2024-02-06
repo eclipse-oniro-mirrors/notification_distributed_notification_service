@@ -48,6 +48,36 @@ struct LiveViewFilter {
     std::vector<std::string> extraInfoKeys;
 };
 
+class BundleNotificationStatus : public Parcelable {
+public:
+    /**
+     * @brief Marshal a BundleNotificationStatus object into a Parcel.
+     *
+     * @param parcel Indicates the object into the parcel.
+     * @return Returns true if succeed; returns false otherwise.
+     */
+    virtual bool Marshalling(Parcel &parcel) const override;
+
+    /**
+     * @brief Unmarshal object from a Parcel.
+     *
+     * @param parcel Indicates the parcel object.
+     * @return Returns the NotificationRequest.
+     */
+    static BundleNotificationStatus *Unmarshalling(Parcel &parcel);
+
+    /**
+     * @brief Read a BundleNotificationStatus object from a Parcel.
+     *
+     * @param parcel Indicates the parcel object.
+     * @return Returns true if succeed; returns false otherwise.
+     */
+    bool ReadFromParcel(Parcel &parcel);
+
+    sptr<NotificationBundleOption> bundleOption_ = nullptr;
+    bool status_ = false;
+};
+
 class NotificationRequest : public Parcelable, public NotificationJsonConvertionBase {
 public:
     enum class BadgeStyle {
