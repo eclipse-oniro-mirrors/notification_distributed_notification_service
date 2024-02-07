@@ -718,6 +718,14 @@ public:
         uint32_t slotFlags) override;
 
     /**
+     * @brief Obtains allow notification application list.
+     *
+     * @param status Indicates the bundle status vector.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) override;
+
+    /**
      * @brief Register Push Callback.
      *
      * @param pushCallback PushCallBack.
@@ -816,6 +824,7 @@ private:
     ErrCode HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleTriggerLocalLiveView(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSubscribeSelf(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetAllNotificationEnableStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
     template<typename T>

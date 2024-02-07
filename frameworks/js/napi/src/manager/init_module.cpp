@@ -80,6 +80,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("removeAllSlots", NapiRemoveAllSlots),
         DECLARE_NAPI_FUNCTION("setNotificationEnableSlot", NapiEnableNotificationSlot),
         DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", NapiIsEnableNotificationSlot),
+        DECLARE_NAPI_FUNCTION("getAllNotificationEnabledBundles", NapiGetAllNotificationEnabledBundles),
         DECLARE_NAPI_FUNCTION("setNotificationEnable", NapiEnableNotification),
         DECLARE_NAPI_FUNCTION("isNotificationEnabled", NapiIsNotificationEnabled),
         DECLARE_NAPI_FUNCTION("requestEnableNotification", NapiRequestEnableNotification),

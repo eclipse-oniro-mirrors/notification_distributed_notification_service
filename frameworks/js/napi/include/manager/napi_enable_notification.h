@@ -26,6 +26,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info);
 napi_value NapiIsNotificationEnabled(napi_env env, napi_callback_info info);
 napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info);
 napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info);
+napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info info);
 napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback_info &info, IsEnableParams &params);
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -1789,6 +1789,47 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
     return result;
 }
 
+ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+{
+    ANS_LOGD("Called.");
+    MessageParcel data;
+    int32_t vectorSize = 0;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadInt32(vectorSize)) {
+        ANS_LOGE("Fail: read vectorSize failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle status vector is over size");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (auto i = 0; i < vectorSize; i++) {
+        sptr<BundleNotificationStatus> statusObj = reply.ReadParcelable<BundleNotificationStatus>();
+        status.emplace_back(*statusObj);
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::RegisterPushCallback(
     const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {

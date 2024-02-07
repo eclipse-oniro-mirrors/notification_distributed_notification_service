@@ -15,6 +15,8 @@
 
 #include "notification_preferences_database.h"
 
+#include <regex>
+
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "hitrace_meter_adapter.h"
@@ -720,6 +722,73 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
         return false;
     }
 
+    return true;
+}
+
+bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+{
+    ANS_LOGD("Called.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::unordered_map<std::string, std::string> datas;
+    const std::string ANS_BUNDLE_BEGIN = "ans_bundle_";
+    int32_t errCode = rdbDataManager_->QueryDataBeginWithKey(ANS_BUNDLE_BEGIN, datas);
+    if (errCode != NativeRdb::E_OK) {
+        ANS_LOGE("Query data begin with ans_bundle_ from db error");
+        return false;
+    }
+    return HandleDataBaseMap(datas, status);
+}
+
+bool NotificationPreferencesDatabase::HandleDataBaseMap(
+    const std::unordered_map<std::string, std::string> &datas, std::vector<BundleNotificationStatus> &status)
+{
+    std::regex matchBundlenamePattern("^ans_bundle_(.*)_name$");
+    std::smatch match;
+    std::vector<int32_t> ids;
+    ErrCode result = ERR_OK;
+    result = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (result != ERR_OK) {
+        ANS_LOGE("Get account id fail");
+        return false;
+    }
+    constexpr int MIDDLE_KEY = 1;
+    for (const auto &dataMapItem : datas) {
+        const std::string &key = dataMapItem.first;
+        const std::string &value = dataMapItem.second;
+        if (!std::regex_match(key, match, matchBundlenamePattern)) {
+            continue;
+        }
+        std::string matchKey = match[MIDDLE_KEY].str();
+        std::string matchUid = "ans_bundle_" + matchKey + "_uid";
+        std::string matchEnableNotification = "ans_bundle_" + matchKey + "_enabledNotification";
+        BundleNotificationStatus statusObj;
+        auto enableNotificationItem = datas.find(matchEnableNotification);
+        if (enableNotificationItem == datas.end()) {
+            continue;
+        }
+        if (static_cast<bool>(StringToInt(enableNotificationItem->second))) {
+            statusObj.status_ = static_cast<bool>(StringToInt(enableNotificationItem->second));
+            auto uidItem = datas.find(matchUid);
+            if (uidItem == datas.end()) {
+                continue;
+            }
+            int userid = -1;
+            constexpr int FIRST_USERID = 0;
+            result =
+                OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
+            if (result != ERR_OK) {
+                return false;
+            }
+            if (userid != ids[FIRST_USERID]) {
+                continue;
+            }
+            statusObj.bundleOption_ = new (std::nothrow) NotificationBundleOption(value, StringToInt(uidItem->second));
+            status.emplace_back(statusObj);
+        }
+    }
     return true;
 }
 

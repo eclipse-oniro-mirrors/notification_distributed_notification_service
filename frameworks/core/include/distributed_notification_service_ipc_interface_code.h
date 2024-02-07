@@ -126,6 +126,7 @@ namespace Notification {
         SUBSCRIBE_NOTIFICATION_SELF,
         SET_SLOTFLAGS_BY_BUNDLE,
         GET_SLOTFLAGS_BY_BUNDLE,
+        GET_ALL_NOTIFICATION_ENABLE_STATUS,
     };
 }
 }

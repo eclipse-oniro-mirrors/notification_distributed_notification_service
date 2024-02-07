@@ -728,6 +728,14 @@ public:
     virtual ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t slotFlags) = 0;
 
     /**
+     * @brief Obtains allow notification application list.
+     *
+     * @param status Indicates the bundle status.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) = 0;
+
+    /**
      * @brief Register Push Callback.
      *
      * @param pushCallback PushCallBack.

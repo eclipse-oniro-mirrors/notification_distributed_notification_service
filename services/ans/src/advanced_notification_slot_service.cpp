@@ -514,6 +514,35 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
     return result;
 }
 
+ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+{
+    ANS_LOGD("Called.");
+    if (!AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("Is not system app.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance().GetAllNotificationEnabledBundles(status);
+        if (result != ERR_OK) {
+            ANS_LOGE("Get all notification enable status failed");
+            return;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
 bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption)
 {
     if (bundleOption == nullptr) {

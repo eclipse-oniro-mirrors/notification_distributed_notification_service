@@ -249,6 +249,14 @@ public:
     ErrCode GetTemplateSupported(const std::string &templateName, bool &support);
 
     /**
+     * @brief Obtains allow notification application list.
+     *
+     * @param status Indicates the bundle status vector.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status);
+
+    /**
      * @brief Remove all proferences info from DB.
      *
      * @return Return ERR_OK on success, others on failure.

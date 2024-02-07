@@ -253,6 +253,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::SET_BADGE_NUMBER,
             std::bind(&AnsManagerStub::HandleSetBadgeNumber, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS,
+            std::bind(&AnsManagerStub::HandleGetAllNotificationEnableStatus, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::REGISTER_PUSH_CALLBACK,
             std::bind(&AnsManagerStub::HandleRegisterPushCallback, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
@@ -1942,6 +1945,36 @@ ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel 
         ANSR_LOGE("Write badge number failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleGetAllNotificationEnableStatus(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<BundleNotificationStatus> status;
+    ErrCode result = GetAllNotificationEnabledBundles(status);
+    int32_t vectorSize = status.size();
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle status vector is over size.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(vectorSize)) {
+        ANS_LOGE("Write status size failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (const auto &item : status) {
+        if (!reply.WriteParcelable(&item)) {
+            ANS_LOGE("Write bundleOption failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
     return result;
 }
 

@@ -1772,6 +1772,17 @@ public:
         const napi_env &env, const std::shared_ptr<NotificationTemplate> &templ, napi_value &result);
 
     /**
+     * @brief Sets a js object by specified BundleNotificationStatus object.
+     *
+     * @param env Indicates the environment that the API is invoked under.
+     * @param bundleNotificationStatus Indicates a BundleNotificationStatus object to be converted.
+     * @param result Indicates a js object to be set.
+     * @return Returns the null object if success, returns the null value otherwise.
+     */
+    static napi_value SetNotificationEnableStatus(
+        const napi_env &env, const BundleNotificationStatus &bundleNotificationStatus, napi_value &result);
+
+    /**
      * @brief Sets a js object by specified NotificationFlags object
      *
      * @param env Indicates the environment that the API is invoked under
