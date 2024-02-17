@@ -20,6 +20,7 @@ import window from '@ohos.window';
 import { titleTrim } from '../common/utils';
 import Constants from '../common/constant';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
+import { Callback} from '@ohos.base';
 
 const TAG = 'NotificationDialog_Service ';
 const permission: Record<string, Resource> = {
@@ -200,6 +201,18 @@ struct PermissionDialog {
   updateIsBottomPopover(): void {
     let dis = display.getDefaultDisplaySync();
     let isVertical = dis.width <= dis.height;
+    try {
+      if (display.isFoldable()) {
+        let foldStatus = display.getFoldStatus();
+        if (foldStatus == display.FoldStatus.FOLD_STATUS_EXPANDED ||
+          foldStatus == display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
+            this.isBottomPopover = false;
+            return;
+        }
+      }
+    } catch (err) {
+      console.error(TAG, 'Failed to get the device foldable status. Code: ' + JSON.stringify(err));
+    }
     this.isBottomPopover = bottomPopoverTypes.includes(deviceInfo.deviceType) && isVertical;
   }
 
@@ -224,6 +237,28 @@ struct PermissionDialog {
     } catch (err) {
       console.error(TAG, `aboutToAppear error : + ${JSON.stringify(err)}`);
       await this.dialog?.destroyException();
+    }
+    if (display.isFoldable()) {
+      await this.registerFoldableCallback();
+    }
+  }
+
+  async registerFoldableCallback(): Promise<void> {
+    let callback: Callback<display.FoldDisplayMode> = async (data: display.FoldDisplayMode) => {
+      try {
+        let win = this.dialog.window;
+        let dis = display.getDefaultDisplaySync();
+        await win.moveWindowTo(0, 0);
+        await win.resize(dis.width, dis.height);
+        await this.updateStatus();
+      } catch (err) {
+        console.error(TAG, 'Failed to touch callback. Code: ' + JSON.stringify(err));
+      }
+    };
+    try {
+      display.on('foldDisplayModeChange', callback);
+    } catch (err) {
+      console.error(TAG, 'Failed to register callback. Code: ' + JSON.stringify(err));
     }
   }
 
