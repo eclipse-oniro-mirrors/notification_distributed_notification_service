@@ -14,11 +14,12 @@
  */
 
 import bundleResourceManager from '@ohos.bundle.bundleResourceManager';
-import deviceInfo from '@ohos.deviceInfo';
 import display from '@ohos.display';
 import window from '@ohos.window';
 import { titleTrim } from '../common/utils';
 import Constants from '../common/constant';
+import fs from '@ohos.file.fs';
+import configPolicy from '@ohos.configPolicy';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
 import { Callback} from '@ohos.base';
 
@@ -213,7 +214,30 @@ struct PermissionDialog {
     } catch (err) {
       console.error(TAG, 'Failed to get the device foldable status. Code: ' + JSON.stringify(err));
     }
-    this.isBottomPopover = bottomPopoverTypes.includes(deviceInfo.deviceType) && isVertical;
+
+    // read ccm configs
+    let isBottomPopoverTemp = false;
+    try {
+      configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH).then((filePaths: Array<string>) => {
+        for (let i = 0; i < filePaths.length; i++) {
+          fs.access(filePaths[i]).then((res: boolean) => {
+            if (res) {
+              let fileContent = fs.readTextSync(filePaths[i]);
+              let config: NotificationConfig = JSON.parse(fileContent);
+              if (config.notificationAuthorizationWindow != undefined) {
+                let windowConfig: NotificationAuthorizationWindow = config.notificationAuthorizationWindow;
+                if (windowConfig.isBottomPopover != undefined) {
+                  isBottomPopoverTemp = windowConfig.isBottomPopover;
+                }
+              }
+            }
+          })
+        }
+      })
+    } catch (error) {
+      console.log(TAG, 'Failed get ccm files, Cause: ${JSON.stringify(err)}');
+    }
+    this.isBottomPopover = isBottomPopoverTemp && isVertical;
   }
 
   async updateStatus(): Promise<void> {
@@ -276,4 +300,12 @@ struct PermissionDialog {
       await this.dialog?.destroy();
     }
   }
+}
+
+interface NotificationConfig {
+  notificationAuthorizationWindow: NotificationAuthorizationWindow;
+}
+
+interface NotificationAuthorizationWindow {
+  isBottomPopover: boolean;
 }
