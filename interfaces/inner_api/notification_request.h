@@ -1287,8 +1287,8 @@ private:
     int64_t finishDeadLine_ {0};
     int64_t archiveDeadLine_ {0};
     pid_t creatorPid_ {0};
-    int32_t creatorUid_ {0};
-    int32_t ownerUid_ {0};
+    int32_t creatorUid_ {DEFAULT_UID};
+    int32_t ownerUid_ {DEFAULT_UID};
     int32_t creatorUserId_ {SUBSCRIBE_USER_INIT};
     int32_t ownerUserId_ {SUBSCRIBE_USER_INIT};
     int32_t receiverUserId_ {SUBSCRIBE_USER_INIT};

@@ -15,6 +15,7 @@
 
 #include "publish.h"
 
+#include "js_native_api_types.h"
 #include "want_agent_helper.h"
 
 namespace OHOS {
@@ -25,6 +26,7 @@ namespace {
 constexpr int8_t PUBLISH_NOTIFICATION_MAX = 3;
 constexpr int8_t SHOW_NOTIFICATION_MAX = 1;
 constexpr int8_t PUBLISH_AS_BUNDLE_MAX = 4;
+constexpr int8_t PUBLISH_AS_BUNDLEOPTION_MAX = 2;
 }
 
 napi_value GetCallback(const napi_env &env, const napi_value &value, ParametersInfoPublish &params)
@@ -366,7 +368,7 @@ napi_value ParsePublishAsBundleParameters(
         ANS_LOGW("Wrong number of arguments");
         return nullptr;
     }
-
+    // argv[0] : NotificationRequest / bundleOption
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
@@ -374,44 +376,62 @@ napi_value ParsePublishAsBundleParameters(
         return nullptr;
     }
 
-    // argv[0] : NotificationRequest
-    if (Common::GetNotificationRequest(env, argv[PARAM0], params.request) == nullptr) {
-        return nullptr;
-    }
-
-    // argv[1] : bundleName
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-    if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
-        ANS_LOGW("Error argument type. String number boolean expected.");
-        return nullptr;
-    }
-
-    if (valuetype == napi_string) {
-        char str[STR_MAX_SIZE] = {0};
-        size_t strLen = 0;
-        napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
-        params.request.SetOwnerBundleName(str);
-    } else if (valuetype == napi_number) {
-        int64_t number = 0;
-        NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
-        params.request.SetOwnerBundleName(std::to_string(number));
+    if (argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
+        if (Common::GetNotificationRequest(env, argv[PARAM0], params.request) == nullptr) {
+            return nullptr;
+        }
     } else {
-        bool result = false;
-        NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
-        params.request.SetOwnerBundleName(std::to_string(result));
+        NotificationBundleOption option;
+        auto retValue = Common::GetBundleOption(env, argv[PARAM0], option);
+        if (retValue == nullptr) {
+            ANS_LOGE("GetBundleOption failed.");
+            return nullptr;
+        }
+        params.request.SetCreatorBundleName(option.GetBundleName());
+        params.request.SetCreatorUid(option.GetUid());
+        params.request.SetIsAgentNotification(true);
+        ANS_LOGI("zbx set Bundleoption!!!!!");
+    }
+
+    // argv[1] : bundleName / NotificationRequest
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+    if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean && valuetype != napi_object) {
+        ANS_LOGW("Error argument type. String number boolean object expected.");
+        return nullptr;
+    }
+    if(argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
+        if (valuetype == napi_string) {
+            char str[STR_MAX_SIZE] = {0};
+            size_t strLen = 0;
+            napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
+            params.request.SetOwnerBundleName(str);
+        } else if (valuetype == napi_number) {
+            int64_t number = 0;
+            NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
+            params.request.SetOwnerBundleName(std::to_string(number));
+        } else {
+            bool result = false;
+            NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
+            params.request.SetOwnerBundleName(std::to_string(result));
+        }
+    } else {
+        if (Common::GetNotificationRequest(env, argv[PARAM1], params.request) == nullptr) {
+            return nullptr;
+        }
     }
 
     // argv[2] : userId
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
-        return nullptr;
+    if(argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGW("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        int32_t userId = 0;
+        napi_get_value_int32(env, argv[PARAM2], &userId);
+        params.request.SetOwnerUserId(userId);
+        params.request.SetIsAgentNotification(true);
     }
-    int32_t userId = 0;
-    napi_get_value_int32(env, argv[PARAM2], &userId);
-    params.request.SetOwnerUserId(userId);
-    params.request.SetIsAgentNotification(true);
-
     // argv[3] : callback
     if (argc >= PUBLISH_AS_BUNDLE_MAX) {
         if (GetCallback(env, argv[PARAM3], params) == nullptr) {

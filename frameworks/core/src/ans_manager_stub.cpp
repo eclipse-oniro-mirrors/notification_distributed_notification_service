@@ -20,6 +20,7 @@
 #include "ans_subscriber_local_live_view_interface.h"
 #include "message_option.h"
 #include "message_parcel.h"
+#include "notification_bundle_option.h"
 #include "notification_button_option.h"
 #include "parcel.h"
 #include "reminder_request_alarm.h"
@@ -39,6 +40,10 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS,
             std::bind(
                 &AnsManagerStub::HandleCancelAll, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION,
+            std::bind(
+                &AnsManagerStub::HandleCancelAsBundleOption, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3)},
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE,
             std::bind(&AnsManagerStub::HandleCancelAsBundle, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
@@ -361,6 +366,25 @@ ErrCode AnsManagerStub::HandleCancelAll(MessageParcel &data, MessageParcel &repl
     ErrCode result = CancelAll();
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAll] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+ErrCode AnsManagerStub::HandleCancelAsBundleOption(MessageParcel &data, MessageParcel &reply) 
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleCancelAsBundle] fail: read BundleOption failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    int32_t notificationId = 0;
+    if (!data.ReadInt32(notificationId)) {
+        ANS_LOGE("[HandleCancelAsBundle] fail: read notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    ErrCode result = CancelAsBundle(bundleOption, notificationId);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

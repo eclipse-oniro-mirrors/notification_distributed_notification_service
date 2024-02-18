@@ -41,7 +41,7 @@ constexpr uint32_t MAX_ACTION_BUTTON_NUM = 3;
 constexpr int32_t MAX_PARCELABLE_VECTOR_NUM = 10000;
 constexpr uint32_t MAX_CANCELED_PARCELABLE_VECTOR_NUM = 200;
 
-
+constexpr int32_t DEFAULT_UID = 0;
 constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 constexpr int32_t SUBSCRIBE_USER_ALL = -2;
 constexpr int32_t DEFAULT_USER_ID = 100;

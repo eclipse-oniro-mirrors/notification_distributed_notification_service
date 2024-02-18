@@ -239,6 +239,17 @@ ErrCode AnsNotification::CancelAsBundle(
     return ansManagerProxy_->CancelAsBundle(notificationId, representativeBundle, userId);
 }
 
+ErrCode AnsNotification::CancelAsBundle(
+    const NotificationBundleOption &bundleOption, int32_t notificationId)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->CancelAsBundle(bo, notificationId);
+}
+
 ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
 {
     if (!GetAnsManagerProxy()) {

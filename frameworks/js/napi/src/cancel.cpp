@@ -14,6 +14,7 @@
  */
 
 #include "cancel.h"
+#include "js_native_api_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -21,6 +22,7 @@ constexpr int8_t CANCEL_MAX_PARA = 3;
 constexpr int8_t CANCEL_GROUP_MAX_PARA = 2;
 constexpr int8_t CANCEL_GROUP_MIN_PARA = 1;
 constexpr int8_t CANCEL_AS_BUNDLE_MAX_PARA = 4;
+constexpr int8_t CANCEL_AS_BUNDLEOPTION_MAX_PARA = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancel &paras)
 {
@@ -332,44 +334,56 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     }
 
     napi_valuetype valuetype = napi_undefined;
-    // argv[0]: id: number
+    // argv[0]: id: number / bundleOption
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
+    if (valuetype != napi_number && valuetype != napi_object) {
+        ANS_LOGW("Wrong argument type. Number object expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &paras.id));
-
-    // argv[1]: representativeBundle: string
+    if (argc > CANCEL_AS_BUNDLEOPTION_MAX_PARA) {
+        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &paras.id));
+    } else {
+        auto retValue = Common::GetBundleOption(env, argv[PARAM0], paras.option);
+        if (retValue == nullptr) {
+            ANS_LOGE("GetBundleOption failed.");
+            return nullptr;
+        }
+        paras.hasOption = true;
+    }
+    // argv[1]: representativeBundle: string / id
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
         ANS_LOGW("Wrong argument type. String number boolean expected.");
         return nullptr;
     }
-
-    if (valuetype == napi_string) {
-        char str[STR_MAX_SIZE] = {0};
-        size_t strLen = 0;
-        napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
-        paras.representativeBundle = str;
-    } else if (valuetype == napi_number) {
-        int64_t number = 0;
-        NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
-        paras.representativeBundle = std::to_string(number);
+    if (argc > CANCEL_AS_BUNDLEOPTION_MAX_PARA) {
+        if (valuetype == napi_string) {
+            char str[STR_MAX_SIZE] = {0};
+            size_t strLen = 0;
+            napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
+            paras.representativeBundle = str;
+        } else if (valuetype == napi_number) {
+            int64_t number = 0;
+            NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM1], &number));
+            paras.representativeBundle = std::to_string(number);
+        } else {
+            bool result = false;
+            NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
+            paras.representativeBundle = std::to_string(result);
+        }
     } else {
-        bool result = false;
-        NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &result));
-        paras.representativeBundle = std::to_string(result);
+        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &paras.id));
     }
 
     // argv[2] : userId
-    NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
-        return nullptr;
+    if (argc > CANCEL_AS_BUNDLEOPTION_MAX_PARA) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGW("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, argv[PARAM2], &paras.userId);
     }
-    napi_get_value_int32(env, argv[PARAM2], &paras.userId);
-
     // argv[3]: callback
     if (argc >= CANCEL_AS_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM3], &valuetype));

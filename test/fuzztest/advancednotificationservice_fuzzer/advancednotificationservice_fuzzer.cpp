@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "notification_bundle_option.h"
 #define private public
 #define protected public
 #include "advanced_notification_service.h"
@@ -38,6 +39,8 @@ namespace OHOS {
         advancedNotificationService.CancelAll();
         int32_t userId = static_cast<int32_t>(GetU32Data(data));
         advancedNotificationService.CancelAsBundle(notificationId, stringData, userId);
+        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
+        //advancedNotificationService.CancelAsBundle(bundleOption, notificationId);
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         advancedNotificationService.AddSlotByType(slotType);
@@ -48,7 +51,7 @@ namespace OHOS {
         sptr<Notification::NotificationSlot> slot = new Notification::NotificationSlot();
         advancedNotificationService.GetSlotByType(slotType, slot);
         advancedNotificationService.GetSlots(slots);
-        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
+
         uint64_t num = static_cast<uint64_t>(GetU32Data(data));
         advancedNotificationService.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;

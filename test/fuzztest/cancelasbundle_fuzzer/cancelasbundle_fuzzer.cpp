@@ -20,6 +20,12 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
+        // std::string stringData(data);
+        // int32_t usingData = static_cast<int32_t>(GetU32Data(data));
+        // Notification::NotificationBundleOption bundleOption;
+        // bundleOption.SetBundleName(stringData);
+        // bundleOption.SetUid(usingData);
+
         std::string representativeBundle(data);
         int32_t notificationId = static_cast<int32_t>(GetU32Data(data));
         int32_t userId = static_cast<int32_t>(GetU32Data(data));

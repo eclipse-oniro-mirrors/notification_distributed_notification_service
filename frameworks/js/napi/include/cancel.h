@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_CANCEL_H
 
 #include "common.h"
+#include "commonlibrary/utils_lite/include/ohos_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -52,6 +53,8 @@ struct  ParametersInfoCancelAsBundle {
     int32_t id = 0;
     std::string representativeBundle = "";
     int32_t userId = 0;
+    NotificationBundleOption option;
+    boolean hasOption = false;
     napi_ref callback = nullptr;
 };
 
@@ -61,6 +64,8 @@ struct AsyncCallbackInfoCancelAsBundle {
     int32_t id = 0;
     std::string representativeBundle = "";
     int32_t userId = 0;
+    NotificationBundleOption option;
+    boolean hasOption = false;
     CallbackPromiseInfo info;
 };
 

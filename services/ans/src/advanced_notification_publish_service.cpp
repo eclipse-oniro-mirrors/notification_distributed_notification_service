@@ -25,6 +25,7 @@
 #include "errors.h"
 
 #include "ipc_skeleton.h"
+#include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
@@ -71,7 +72,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("%{public}s, uid = %{public}d", __FUNCTION__, request->GetCreatorUid());
 
     if (!request) {
         ANSR_LOGE("ReminderRequest object is nullptr");
@@ -210,6 +211,13 @@ ErrCode AdvancedNotificationService::CancelAll()
     }));
     notificationSvrQueue_->wait(handler);
     return result;
+}
+
+ErrCode AdvancedNotificationService::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+{
+    ANS_LOGD("%{public}s, bundleOption uid = %{public}d", __FUNCTION__, bundleOption->GetUid());
+    return ERR_INVALID_OPERATION;
 }
 
 ErrCode AdvancedNotificationService::CancelAsBundle(
