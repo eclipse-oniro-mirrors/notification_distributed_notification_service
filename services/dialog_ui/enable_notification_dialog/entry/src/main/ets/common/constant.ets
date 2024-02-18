@@ -137,4 +137,7 @@ export default class Constants {
 
     static DIALOG_PRIVACY_BORDER_RADIUS = 32;
     static DIALOG_PADDING_BOTTOM = 16;
+
+    // ccm config path
+    static CCM_CONFIG_PATH = "etc/notification/notification_config.json";
 }
