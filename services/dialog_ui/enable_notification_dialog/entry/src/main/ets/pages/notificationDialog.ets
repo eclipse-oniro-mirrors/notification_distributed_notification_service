@@ -199,7 +199,7 @@ struct PermissionDialog {
     }
   }
 
-  updateIsBottomPopover(): void {
+  async updateIsBottomPopover(): Promise<void> {
     let dis = display.getDefaultDisplaySync();
     let isVertical = dis.width <= dis.height;
     try {
@@ -218,22 +218,20 @@ struct PermissionDialog {
     // read ccm configs
     let isBottomPopoverTemp = false;
     try {
-      configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH).then((filePaths: Array<string>) => {
-        for (let i = 0; i < filePaths.length; i++) {
-          fs.access(filePaths[i]).then((res: boolean) => {
-            if (res) {
-              let fileContent = fs.readTextSync(filePaths[i]);
-              let config: NotificationConfig = JSON.parse(fileContent);
-              if (config.notificationAuthorizationWindow != undefined) {
-                let windowConfig: NotificationAuthorizationWindow = config.notificationAuthorizationWindow;
-                if (windowConfig.isBottomPopover != undefined) {
-                  isBottomPopoverTemp = windowConfig.isBottomPopover;
-                }
-              }
+      let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
+      for (let i = 0; i < filePaths.length; i++) {
+        let res = fs.accessSync(filePaths[i]);
+        if (res) {
+          let fileContent = fs.readTextSync(filePaths[i]);
+          let config: NotificationConfig = JSON.parse(fileContent);
+          if (config.notificationAuthorizationWindow != undefined) {
+            let windowConfig: NotificationAuthorizationWindow = config.notificationAuthorizationWindow;
+            if (windowConfig.isBottomPopover != undefined) {
+              isBottomPopoverTemp = windowConfig.isBottomPopover;
             }
-          })
+          }
         }
-      })
+      }
     } catch (error) {
       console.log(TAG, 'Failed get ccm files, Cause: ${JSON.stringify(err)}');
     }
@@ -244,7 +242,7 @@ struct PermissionDialog {
     let bundleNameObj = this.dialog?.want.parameters?.from;
     let bundleName = bundleNameObj ? bundleNameObj.toString() : '';
     await this.updateApplicationName(bundleName);
-    this.updateIsBottomPopover();
+    await this.updateIsBottomPopover();
   }
 
   async updateOnPageShow(): Promise<void> {
