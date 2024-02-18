@@ -6,7 +6,6 @@
             "libpath": "libans.z.so",
             "run-on-create": true,
             "depend": [
-                1301,
                 3299
             ],
             "depend_time_out": 60000,
