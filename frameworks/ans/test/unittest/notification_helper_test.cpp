@@ -259,6 +259,23 @@ HWTEST_F(NotificationHelperTest, CancelAsBundle_00001, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: CancelAsBundle_00002
+ * @tc.desc: Test CancelAsBundle parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationHelperTest, CancelAsBundle_00002, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    int32_t notificationId = 10;
+    bundleOption.SetBundleName("bundlename");
+    bundleOption.SetUid(20);
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.CancelAsBundle(bundleOption, notificationId);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: GetActiveNotificationNums_00001
  * @tc.desc: Test GetActiveNotificationNums parameters.
  * @tc.type: FUNC

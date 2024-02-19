@@ -2292,6 +2292,25 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16300,
 }
 
 /**
+ * @tc.number    : AdvancedNotificationServiceTest_16500
+ * @tc.name      : ANS_CancelAsBundle_0400
+ * @tc.desc      : Test CancelAsBundle function
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0400 test start";
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    int32_t notificationId = 1;
+
+    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(bundleOption, notificationId), result);
+
+    GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0400 test end";
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_16400
  * @tc.name      : ANS_AddSlots_0100
  * @tc.desc      : Test AddSlots function whith not system app

@@ -71,6 +71,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode AddSlotByType(NotificationConstant::SlotType slotType) override
     {
         return ERR_ANS_INVALID_PARAM;

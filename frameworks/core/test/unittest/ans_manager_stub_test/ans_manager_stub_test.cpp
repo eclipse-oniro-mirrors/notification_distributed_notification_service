@@ -328,6 +328,75 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle04, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: HandleCancelAsBundle05
+ * @tc.desc: Test HandlePublish succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle05, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t notificationId = 3;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(notificationId);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleCancelAsBundle06
+ * @tc.desc: Test if the bundleOption in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle06, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t notificationId = 3;
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(notificationId);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleCancelAsBundle07
+ * @tc.desc: Test if the notificationId in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle07, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
  * @tc.name: HandleAddSlotByType01
  * @tc.desc: Test HandleAddSlotByType succeeds.
  * @tc.type: FUNC

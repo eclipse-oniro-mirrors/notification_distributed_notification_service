@@ -42,8 +42,6 @@ namespace OHOS {
         int32_t notificationIds = static_cast<int32_t>(GetU32Data(data));
         int32_t userId = static_cast<int32_t>(GetU32Data(data));
         ansManagerStub.CancelAsBundle(notificationIds, stringData, userId);
-        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
-        //ansManagerStub.CancelAsBundle(bundleOption, notificationIds);
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         ansManagerStub.AddSlotByType(slotType);
@@ -55,6 +53,7 @@ namespace OHOS {
         ansManagerStub.RemoveAllSlots();
         ansManagerStub.GetSlotByType(slotType, slot);
         ansManagerStub.GetSlots(slots);
+        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
         uint64_t num = 1;
         ansManagerStub.GetSlotNumAsBundle(bundleOption, num);
         sptr<Notification::NotificationRequest> notificationer = new Notification::NotificationRequest();

@@ -216,7 +216,7 @@ ErrCode AdvancedNotificationService::CancelAll()
 ErrCode AdvancedNotificationService::CancelAsBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
 {
-    ANS_LOGD("%{public}s, bundleOption uid = %{public}d", __FUNCTION__, bundleOption->GetUid());
+    ANS_LOGD("%{public}s, uid = %{public}d", __FUNCTION__, bundleOption->GetUid());
     return ERR_INVALID_OPERATION;
 }
 

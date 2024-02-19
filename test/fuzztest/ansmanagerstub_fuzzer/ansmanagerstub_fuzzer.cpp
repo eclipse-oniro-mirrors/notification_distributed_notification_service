@@ -38,7 +38,6 @@ namespace OHOS {
         ansManagerStub.HandleCancel(datas, reply);
         ansManagerStub.HandleCancelAll(datas, reply);
         ansManagerStub.HandleCancelAsBundle(datas, reply);
-        //ansManagerStub.HandleCancelAsBundleOption(datas, reply);
         ansManagerStub.HandleAddSlotByType(datas, reply);
         ansManagerStub.HandleAddSlots(datas, reply);
         ansManagerStub.HandleRemoveSlotByType(datas, reply);
@@ -111,8 +110,6 @@ namespace OHOS {
         ansManagerStub.CancelAll();
         int32_t userId = static_cast<int32_t>(GetU32Data(data));
         ansManagerStub.CancelAsBundle(notificationId, stringData, userId);
-        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
-        //ansManagerStub.CancelAsBundle(bundleOption, notificationId);
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         ansManagerStub.AddSlotByType(slotType);
@@ -123,6 +120,7 @@ namespace OHOS {
         sptr<Notification::NotificationSlot> slot = new Notification::NotificationSlot();
         ansManagerStub.GetSlotByType(slotType, slot);
         ansManagerStub.GetSlots(slots);
+        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
         uint64_t num = static_cast<uint64_t>(GetU32Data(data));
         ansManagerStub.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
