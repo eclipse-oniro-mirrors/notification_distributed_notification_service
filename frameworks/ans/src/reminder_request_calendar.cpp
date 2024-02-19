@@ -67,7 +67,7 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     repeatDay_ = other.repeatDay_;
 }
 
-void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wamtAgentInfo)
+void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo)
 {
     rruleWantAgentInfo_ = wantAgentInfo;
 }
