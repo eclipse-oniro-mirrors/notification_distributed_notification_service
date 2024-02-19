@@ -1252,16 +1252,21 @@ napi_value Common::SetNotificationEnableStatus(
         return NapiGetBoolean(env, false);
     }
 
+    // bundleOption: object
+    napi_value bundleOptionNapi = nullptr;
+    napi_create_object(env, &bundleOptionNapi);
+    napi_set_named_property(env, result, "bundleOption", bundleOptionNapi);
+
     // bundle: string
     napi_value bundleNapi = nullptr;
     napi_create_string_utf8(
         env, bundleNotificationStatus.bundleOption_->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
-    napi_set_named_property(env, result, "bundle", bundleNapi);
+    napi_set_named_property(env, bundleOptionNapi, "bundle", bundleNapi);
 
     // uid: uid_t
     napi_value uidNapi = nullptr;
     napi_create_int32(env, bundleNotificationStatus.bundleOption_->GetUid(), &uidNapi);
-    napi_set_named_property(env, result, "uid", uidNapi);
+    napi_set_named_property(env, bundleOptionNapi, "uid", uidNapi);
 
     // enable: bool
     napi_value enableNapi = nullptr;
