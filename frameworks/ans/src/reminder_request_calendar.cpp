@@ -67,6 +67,11 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     repeatDay_ = other.repeatDay_;
 }
 
+void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wamtAgentInfo)
+{
+    rruleWantAgentInfo_ = wantAgentInfo;
+}
+
 bool ReminderRequestCalendar::SetNextTriggerTime()
 {
     hour_ = static_cast<uint8_t>(dateTime_.tm_hour);

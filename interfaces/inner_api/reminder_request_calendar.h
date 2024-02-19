@@ -64,6 +64,8 @@ public:
     ReminderRequestCalendar& operator = (const ReminderRequestCalendar &other);
     ~ReminderRequestCalendar() override {}
 
+    void SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo);
+
     inline uint16_t GetYear() const
     {
         return year_;
@@ -215,6 +217,7 @@ private:
     static const uint16_t SOLAR_YEAR;
     static const uint8_t LEAP_PARAM_MIN;
     static const uint8_t LEAP_PARAM_MAX;
+    std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
 };
 }
 }

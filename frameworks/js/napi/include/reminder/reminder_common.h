@@ -58,6 +58,7 @@ const char* TIME_INTERVAL = "timeInterval";
 const char* TITLE = "title";
 const char* TIMER_COUNT_DOWN_TIME = "triggerTimeInSeconds";
 const char* WANT_AGENT = "wantAgent";
+const char* RRULL_WANT_AGENT = "rruleWantAgent";
 const char* WANT_AGENT_PKG = "pkgName";
 const char* WANT_AGENT_ABILITY = "abilityName";
 const char* WANT_AGENT_URI = "uri";
@@ -148,6 +149,9 @@ private:
 
     static bool GenWantAgent(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp);
+
+    static std::shared_ptr<ReminderRequest::WantAgentInfo> GenRruleWantAgent(
+            const napi_env &env, const napi_value &value, const char*name);
 
     static void GenMaxScreenWantAgent(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
