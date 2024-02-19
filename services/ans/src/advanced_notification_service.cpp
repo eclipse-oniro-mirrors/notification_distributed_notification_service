@@ -518,7 +518,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());
-        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+        if (IsNeedNotifyConsumed(record->request)) {
+            NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+        }
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         if (!request->IsAgentNotification()) {
             DoDistributedPublish(bundleOption, record);
@@ -1615,6 +1617,23 @@ void AdvancedNotificationService::FillActionButtons(const sptr<NotificationReque
         }
     }));
     notificationSvrQueue_->wait(handler);
+}
+
+bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRequest> &request)
+{
+    if (!request->IsCommonLiveView()) {
+        return true;
+    }
+
+    auto content = request->GetContent()->GetNotificationContent();
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto status = liveViewContent->GetLiveViewStatus();
+    if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
+        return true;
+    }
+
+    auto deleteTime = request->GetAutoDeletedTime();
+    return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

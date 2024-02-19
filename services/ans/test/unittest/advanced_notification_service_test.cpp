@@ -4526,6 +4526,57 @@ HWTEST_F(AdvancedNotificationServiceTest, CreateDialogManager_00001, Function | 
     ret = advancedNotificationService_->CreateDialogManager();
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.number    : IsNeedNotifyConsumed_00001
+ * @tc.name      : IsNeedNotifyConsumed
+ * @tc.desc      : Test IsNeedNotifyConsumed function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_00001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00001 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    EXPECT_EQ(advancedNotificationService_->IsNeedNotifyConsumed(request), true);
+    GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00001 test end";
+}
+
+/**
+ * @tc.number    : IsNeedNotifyConsumed_00002
+ * @tc.name      : IsNeedNotifyConsumed
+ * @tc.desc      : Test IsNeedNotifyConsumed function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_00002, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00002 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    EXPECT_EQ(advancedNotificationService_->IsNeedNotifyConsumed(request), true);
+    GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00002 test end";
+}
+
+/**
+ * @tc.number    : IsNeedNotifyConsumed_00003
+ * @tc.name      : IsNeedNotifyConsumed
+ * @tc.desc      : Test IsNeedNotifyConsumed function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_00003, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00003 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetAutoDeletedTime(0);
+    EXPECT_EQ(advancedNotificationService_->IsNeedNotifyConsumed(request), false);
+    GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00003 test end";
+}
 }  // namespace Notification
 }  // namespace OHOS
 
