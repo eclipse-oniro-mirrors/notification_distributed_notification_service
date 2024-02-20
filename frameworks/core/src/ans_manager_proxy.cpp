@@ -204,7 +204,7 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CancelAsBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -243,7 +243,7 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CancelAsBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;

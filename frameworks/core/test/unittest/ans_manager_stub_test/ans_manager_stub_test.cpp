@@ -335,7 +335,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle04, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle05, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -359,7 +359,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle05, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle06, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -382,7 +382,29 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle06, Function | SmallTest | Leve
  */
 HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle07, Function | SmallTest | Level1)
 {
-    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION);
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleCancelAsBundle08
+ * @tc.desc: Test if the notificationId in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle08, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};

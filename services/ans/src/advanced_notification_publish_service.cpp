@@ -25,7 +25,6 @@
 #include "ans_log_wrapper.h"
 #include "errors.h"
 
-#include "foundation/ability/form_fwk/interfaces/inner_api/include/form_constants.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"

@@ -40,11 +40,11 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS,
             std::bind(
                 &AnsManagerStub::HandleCancelAll, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION,
+        {NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION,
             std::bind(
                 &AnsManagerStub::HandleCancelAsBundleOption, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION,
+        {NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER,
             std::bind(
                 &AnsManagerStub::HandleCancelAsBundleAndUser, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3)},
