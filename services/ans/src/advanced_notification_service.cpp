@@ -127,6 +127,9 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             }
         } else {
             int32_t userId = SUBSCRIBE_USER_INIT;
+            if (request->GetOwnerUid() < DEFAULT_UID) {
+                return ERR_ANS_GET_ACTIVE_USER_FAILED;
+            }
             if (request->GetOwnerUid() == DEFAULT_UID) {
                 uid = IPCSkeleton::GetCallingUid();
             } else {
