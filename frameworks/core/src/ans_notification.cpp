@@ -1425,13 +1425,13 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
     return ansManagerProxy_->SetBadgeNumber(badgeNumber);
 }
 
-ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetAllNotificationEnabledBundles(status);
+    return ansManagerProxy_->GetAllNotificationEnabledBundles(bundleOption);
 }
 
 ErrCode AnsNotification::RegisterPushCallback(

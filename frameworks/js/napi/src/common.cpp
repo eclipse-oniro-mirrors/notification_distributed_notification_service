@@ -1244,35 +1244,21 @@ napi_value Common::SetNotificationTemplateInfo(
 }
 
 napi_value Common::SetNotificationEnableStatus(
-    const napi_env &env, const BundleNotificationStatus &bundleNotificationStatus, napi_value &result)
+    const napi_env &env, const NotificationBundleOption &bundleOption, napi_value &result)
 {
-    ANS_LOGD("Called.");
-    if (bundleNotificationStatus.bundleOption_ == nullptr) {
-        ANS_LOGE("BundleOption is nullptr.");
-        return NapiGetBoolean(env, false);
-    }
-
-    // bundleOption: object
-    napi_value bundleOptionNapi = nullptr;
-    napi_create_object(env, &bundleOptionNapi);
-    napi_set_named_property(env, result, "bundleOption", bundleOptionNapi);
+    ANS_LOGI("Called.");
 
     // bundle: string
     napi_value bundleNapi = nullptr;
-    napi_create_string_utf8(
-        env, bundleNotificationStatus.bundleOption_->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
-    napi_set_named_property(env, bundleOptionNapi, "bundle", bundleNapi);
+    napi_create_string_utf8(env, bundleOption.GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
 
     // uid: uid_t
     napi_value uidNapi = nullptr;
-    napi_create_int32(env, bundleNotificationStatus.bundleOption_->GetUid(), &uidNapi);
-    napi_set_named_property(env, bundleOptionNapi, "uid", uidNapi);
+    napi_create_int32(env, bundleOption.GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
 
-    // enable: bool
-    napi_value enableNapi = nullptr;
-    napi_get_boolean(env, bundleNotificationStatus.status_, &enableNapi);
-    napi_set_named_property(env, result, "status", enableNapi);
-    return NapiGetBoolean(env, true);
+    return result;
 }
 
 napi_value Common::SetNotificationFlags(

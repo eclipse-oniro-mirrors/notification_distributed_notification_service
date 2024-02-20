@@ -725,7 +725,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     return true;
 }
 
-bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     if (!CheckRdbStore()) {
@@ -739,11 +739,11 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(std::vect
         ANS_LOGE("Query data begin with ans_bundle_ from db error");
         return false;
     }
-    return HandleDataBaseMap(datas, status);
+    return HandleDataBaseMap(datas, bundleOption);
 }
 
 bool NotificationPreferencesDatabase::HandleDataBaseMap(
-    const std::unordered_map<std::string, std::string> &datas, std::vector<BundleNotificationStatus> &status)
+    const std::unordered_map<std::string, std::string> &datas, std::vector<NotificationBundleOption> &bundleOption)
 {
     std::regex matchBundlenamePattern("^ans_bundle_(.*)_name$");
     std::smatch match;
@@ -764,13 +764,11 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
         std::string matchKey = match[MIDDLE_KEY].str();
         std::string matchUid = "ans_bundle_" + matchKey + "_uid";
         std::string matchEnableNotification = "ans_bundle_" + matchKey + "_enabledNotification";
-        BundleNotificationStatus statusObj;
         auto enableNotificationItem = datas.find(matchEnableNotification);
         if (enableNotificationItem == datas.end()) {
             continue;
         }
         if (static_cast<bool>(StringToInt(enableNotificationItem->second))) {
-            statusObj.status_ = static_cast<bool>(StringToInt(enableNotificationItem->second));
             auto uidItem = datas.find(matchUid);
             if (uidItem == datas.end()) {
                 continue;
@@ -785,8 +783,8 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
             if (userid != ids[FIRST_USERID]) {
                 continue;
             }
-            statusObj.bundleOption_ = new (std::nothrow) NotificationBundleOption(value, StringToInt(uidItem->second));
-            status.emplace_back(statusObj);
+            NotificationBundleOption obj(value, StringToInt(uidItem->second));
+            bundleOption.emplace_back(obj);
         }
     }
     return true;

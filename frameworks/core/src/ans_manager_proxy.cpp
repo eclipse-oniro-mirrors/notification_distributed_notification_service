@@ -1789,7 +1789,7 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
     return result;
 }
 
-ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     MessageParcel data;
@@ -1823,8 +1823,8 @@ ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<BundleNoti
     }
 
     for (auto i = 0; i < vectorSize; i++) {
-        sptr<BundleNotificationStatus> statusObj = reply.ReadParcelable<BundleNotificationStatus>();
-        status.emplace_back(*statusObj);
+        sptr<NotificationBundleOption> obj = reply.ReadParcelable<NotificationBundleOption>();
+        bundleOption.emplace_back(*obj);
     }
 
     return result;

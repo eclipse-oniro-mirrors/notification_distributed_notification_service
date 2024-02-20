@@ -826,10 +826,10 @@ public:
     /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status vector.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) override;
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override;
 
     /**
      * @brief Register Push Callback.

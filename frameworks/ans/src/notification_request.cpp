@@ -57,8 +57,13 @@ bool BundleNotificationStatus::Marshalling(Parcel &parcel) const
         ANS_LOGE("Failed to write status");
         return false;
     }
-
-    if (!parcel.WriteParcelable(bundleOption_.GetRefPtr())) {
+    bool flag = true;
+    flag = bundleOption_ == nullptr ? false : true;
+    if (!parcel.WriteBool(flag)) {
+        ANS_LOGE("Failed to write flag");
+        return false;
+    }
+    if (flag && !parcel.WriteParcelable(bundleOption_.GetRefPtr())) {
         ANS_LOGE("Failed to write bundleOption");
         return false;
     }
@@ -80,10 +85,10 @@ BundleNotificationStatus *BundleNotificationStatus::Unmarshalling(Parcel &parcel
 bool BundleNotificationStatus::ReadFromParcel(Parcel &parcel)
 {
     status_ = parcel.ReadBool();
-    bundleOption_ = sptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
-    if (!bundleOption_) {
-        ANS_LOGE("Failed to read bundleOption.");
-        return false;
+    bool flag = parcel.ReadBool();
+
+    if (flag) {
+        bundleOption_ = sptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
     }
 
     return true;

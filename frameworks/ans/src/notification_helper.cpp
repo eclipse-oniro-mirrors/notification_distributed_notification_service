@@ -444,9 +444,9 @@ ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber)
     return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber);
 }
 
-ErrCode NotificationHelper::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode NotificationHelper::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(status);
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
 }
 
 ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback,

@@ -142,11 +142,10 @@ public:
     /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status vector.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    bool GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status);
-
+    bool GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
     /**
      * @brief Delete all slots in the of bundle from disturbe DB.
      *
@@ -172,7 +171,7 @@ private:
     bool PutBundleToDisturbeDB(
         const std::string &bundleKey, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     bool HandleDataBaseMap(
-        const std::unordered_map<std::string, std::string> &datas, std::vector<BundleNotificationStatus> &status);
+        const std::unordered_map<std::string, std::string> &datas, std::vector<NotificationBundleOption> &bundleOption);
 
     void GetValueFromDisturbeDB(const std::string &key, std::function<void(std::string &)> function);
     void GetValueFromDisturbeDB(const std::string &key,

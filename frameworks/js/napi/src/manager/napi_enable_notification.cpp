@@ -382,7 +382,7 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
 
 void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGI("Called.");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -399,21 +399,14 @@ void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_
     napi_value arr = nullptr;
     napi_create_array(env, &arr);
     size_t count = 0;
-    for (auto vec : asynccallbackinfo->bundleNotificationStatus) {
+    for (auto vec : asynccallbackinfo->bundleOptionVector) {
         napi_value nSlot = nullptr;
         napi_create_object(env, &nSlot);
-        if (!Common::SetNotificationEnableStatus(env, vec, nSlot)) {
-            continue;
-        }
-        ANS_LOGD("Start napi_set_element");
+        Common::SetNotificationEnableStatus(env, vec, nSlot);
         napi_set_element(env, arr, count, nSlot);
         count++;
     }
     result = arr;
-    if ((count == 0) && (asynccallbackinfo->bundleNotificationStatus.size() > 0)) {
-        asynccallbackinfo->info.errorCode = ERROR;
-        result = Common::NapiGetNull(env);
-    }
     Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         ANS_LOGD("Delete napiGetSlots callback reference.");
@@ -444,19 +437,20 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
             AsyncCallbackInfoEnableStatus *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableStatus *>(data);
             if (asynccallbackinfo != nullptr) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetAllNotificationEnabledBundles(asynccallbackinfo->bundleNotificationStatus);
+                    NotificationHelper::GetAllNotificationEnabledBundles(asynccallbackinfo->bundleOptionVector);
                 ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiGetAllNotificationEnableStatus, (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete callback reference.");
+            ANS_LOGD("Delete NapiGetAllNotificationEnabledBundles callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
