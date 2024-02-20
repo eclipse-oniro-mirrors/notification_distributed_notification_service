@@ -945,16 +945,6 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     bool isAlerting = false;
     sptr<ReminderRequest> playSoundReminder = nullptr;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        const int32_t trytimes = 3;
-        int32_t result = ReminderDataManager::ReminderDataManagerStartExtensionAbility(reminder);
-        if (result != ERR_OK) {
-            for (int32_t i = 0; i < trytimes; i++){
-                int32_t tryresult = ReminderDataManager::ReminderDataManagerStartExtensionAbility(reminder);
-                if (tryresult == ERROK) {
-                    break;
-                }
-            }
-        }
         if ((*it)->IsExpired()) {
             continue;
         }
@@ -966,6 +956,16 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         }
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
             continue;
+        }
+        const int32_t trytimes = 3;
+        int32_t result = ReminderDataManager::StartExtensionAbility(reminder);
+        if (result != ERR_OK) {
+            for (int32_t i = 0; i < trytimes; i++){
+                int32_t tryresult = ReminderDataManager::StartExtensionAbility(reminder);
+                if (tryresult == ERR_OK) {
+                    break;
+                }
+            }
         }
         if (!isAlerting) {
             playSoundReminder = (*it);
@@ -979,7 +979,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     }
 }
 
-ErrCode ReminderDataManager::ReminderDataManagerStartExtensionAbility(const sptr <ReminderRequest> &reminder) {
+int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder) {
     int32_t result = AAFwk::DEFAULT_INVAL_VALUE;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
@@ -1455,7 +1455,7 @@ void ReminderDataManager::LoadReminderFromDb()
             ANSR_LOGE("Containers add to map error");
             continue;
         }
-        ReminderDataManager::ReminderDataManagerStartExtensionAbility(*it)
+        ReminderDataManager::StartExtensionAbility(*it)
     }
     totalCount_ = static_cast<int16_t>(reminderVector_.size());
     ReminderRequest::GLOBAL_ID = store_->GetMaxId() + 1;
