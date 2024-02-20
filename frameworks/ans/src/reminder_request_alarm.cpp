@@ -15,8 +15,9 @@
 
 #include "reminder_request_alarm.h"
 
-#include "reminder_table.h"
 #include "ans_log_wrapper.h"
+#include "reminder_table.h"
+#include "reminder_table_old.h"
 #include "reminder_store.h"
 
 namespace OHOS {
@@ -37,8 +38,9 @@ ReminderRequestAlarm::ReminderRequestAlarm(uint8_t hour, uint8_t minute, const s
 
 ReminderRequestAlarm::ReminderRequestAlarm(const ReminderRequestAlarm &other) : ReminderRequest(other)
 {
-    this->hour_ = other.hour_;
-    this->minute_ = other.minute_;
+    hour_ = other.hour_;
+    minute_ = other.minute_;
+    repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
     ANSR_LOGD("hour_=%{public}d, minute_=%{public}d, repeatDaysOfWeek_=%{public}d",
         hour_, minute_, other.repeatDaysOfWeek_);
 }
@@ -162,6 +164,7 @@ bool ReminderRequestAlarm::Marshalling(Parcel &parcel) const
     if (ReminderRequest::Marshalling(parcel)) {
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, repeatDaysOfWeek_, "repeatDaysOfWeek");
         return true;
     }
     return false;
@@ -187,6 +190,7 @@ bool ReminderRequestAlarm::ReadFromParcel(Parcel &parcel)
     if (ReminderRequest::ReadFromParcel(parcel)) {
         READ_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
         READ_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, repeatDaysOfWeek_, "repeatDaysOfWeek");
 
         ANSR_LOGD("hour_=%{public}d, minute_=%{public}d", hour_, minute_);
         return true;
@@ -194,9 +198,9 @@ bool ReminderRequestAlarm::ReadFromParcel(Parcel &parcel)
     return false;
 }
 
-void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
+void ReminderRequestAlarm::RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
-    ReminderRequest::RecoverFromDb(resultSet);
+    ReminderRequest::RecoverFromOldVersion(resultSet);
 
     // hour
     hour_ =
@@ -209,19 +213,33 @@ void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::Result
             DbRecoveryType::INT));
 }
 
+void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
+{
+    if (resultSet == nullptr) {
+        ANSR_LOGE("ResultSet is null");
+        return;
+    }
+    ReminderStore::GetUInt8Val(resultSet, ReminderAlarmTable::ALARM_HOUR, hour_);
+    ReminderStore::GetUInt8Val(resultSet, ReminderAlarmTable::ALARM_MINUTE, minute_);
+    ReminderStore::GetUInt8Val(resultSet, ReminderAlarmTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek_);
+}
+
 void ReminderRequestAlarm::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values)
 {
     uint8_t hour = 0;
     uint8_t minute = 0;
+    uint8_t repeatDaysOfWeek = 0;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::ALARM) {
         ReminderRequestAlarm* alarm = static_cast<ReminderRequestAlarm*>(reminder.GetRefPtr());
         hour = alarm->GetHour();
         minute = alarm->GetMinute();
+        repeatDaysOfWeek = alarm->GetRepeatDaysOfWeek();
     }
-    values.PutInt(ReminderTable::ALARM_HOUR, hour);
-    values.PutInt(ReminderTable::ALARM_MINUTE, minute);
+    values.PutInt(ReminderAlarmTable::REMINDER_ID, reminder->GetReminderId());
+    values.PutInt(ReminderAlarmTable::ALARM_HOUR, hour);
+    values.PutInt(ReminderAlarmTable::ALARM_MINUTE, minute);
+    values.PutInt(ReminderAlarmTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
 }
-
 }
 }

@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_TABLE_H
-#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_TABLE_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_TABLE_OLD_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_TABLE_OLD_H
 
 #include <vector>
 #include <string>
 
 namespace OHOS {
 namespace Notification {
-class ReminderBaseTable {
+class ReminderTable {
 public:
-    /*
-     * reminder base table name
-     */
+    static void InitDbColumns();
+
     static const std::string TABLE_NAME;
+
+    // Reminder Table Basic Columns.
 
     /*
      * reminder id
@@ -36,7 +37,7 @@ public:
     /*
      * package name
      */
-    static const std::string PACKAGE_NAME;
+    static const std::string PKG_NAME;
 
     /*
      * user id
@@ -51,7 +52,12 @@ public:
     /*
      * systerm app flag
      */
-    static const std::string SYSTEM_APP;
+    static const std::string SYS_APP;
+
+    /*
+     * app label
+     */
+    static const std::string APP_LABEL;
 
     /*
      * reminder type: Timer/Calendar/Alarm
@@ -67,6 +73,11 @@ public:
      * trigger time
      */
     static const std::string TRIGGER_TIME;
+
+    /*
+     * RTC trigger time
+     */
+    static const std::string RTC_TRIGGER_TIME;
 
     /*
      * time interval
@@ -94,9 +105,24 @@ public:
     static const std::string IS_EXPIRED;
 
     /*
+     * active flag
+     */
+    static const std::string IS_ACTIVE;
+
+    /*
      * reminder state
      */
     static const std::string STATE;
+
+    /*
+     * zone id
+     */
+    static const std::string ZONE_ID;
+
+    /*
+     * scheduled timeout flag
+     */
+    static const std::string HAS_SCHEDULED_TIMEOUT;
 
     /*
      * action button information
@@ -144,14 +170,14 @@ public:
     static const std::string EXPIRED_CONTENT;
 
     /*
-     * want agent information
+     * agent information
      */
-    static const std::string WANT_AGENT;
+    static const std::string AGENT;
 
     /*
-     * max screen want agent information
+     * max screen agent information
      */
-    static const std::string MAX_SCREEN_WANT_AGENT;
+    static const std::string MAX_SCREEN_AGENT;
 
     /*
      * tap dismissed flag
@@ -164,80 +190,50 @@ public:
     static const std::string AUTO_DELETED_TIME;
 
     /*
-     * group id
+     * repeat days of week
+     */
+    static const std::string REPEAT_DAYS_OF_WEEK;
+
+    /*
+     * reminder group id
      */
     static const std::string GROUP_ID;
 
     /*
-     * custom ring uri
+     * reminder ring uri
      */
     static const std::string CUSTOM_RING_URI;
 
     /*
-     * creator bundle name
+     * reminder creator bundle name
      */
     static const std::string CREATOR_BUNDLE_NAME;
 
-public:
-    static void InitDbColumns();
-
-public:
-    static std::string ADD_COLUMNS;
-    static std::string SELECT_COLUMNS;
-};
-
-class ReminderAlarmTable {
-public:
-    /*
-     * reminder alarm table name
-     */
-    static const std::string TABLE_NAME;
-
-    /*
-     * reminder timer table field
-     */
-    static const std::string REMINDER_ID;
-    static const std::string ALARM_HOUR;
-    static const std::string ALARM_MINUTE;
-    static const std::string REPEAT_DAYS_OF_WEEK;
-
-public:
-    static void InitDbColumns();
-
-public:
-    static std::string ADD_COLUMNS;
-    static std::string SELECT_COLUMNS;
-};
-
-class ReminderCalendarTable {
-public:
-    /*
-     * reminder calendar table name
-     */
-    static const std::string TABLE_NAME;
-
-    /*
-     * reminder calendar table field
-     */
-    static const std::string REMINDER_ID;
+    // Reminder Table Calendar Columns.
+    static const std::string REPEAT_DAYS;
+    static const std::string REPEAT_MONTHS;
     static const std::string FIRST_DESIGNATE_YEAR;
     static const std::string FIRST_DESIGNATE_MONTH;
     static const std::string FIRST_DESIGNATE_DAY;
-    static const std::string CALENDAR_DATE_TIME;
-    static const std::string CALENDAR_END_DATE_TIME;
-    static const std::string REPEAT_DAYS;
-    static const std::string REPEAT_MONTHS;
-    static const std::string REPEAT_DAYS_OF_WEEK;
-    static const std::string RRULE_WANT_AGENT;
-    static const std::string EXCLUDE_DATES;
+    static const std::string CALENDAR_YEAR;
+    static const std::string CALENDAR_MONTH;
+    static const std::string CALENDAR_DAY;
+    static const std::string CALENDAR_HOUR;
+    static const std::string CALENDAR_MINUTE;
 
-public:
-    static void InitDbColumns();
+    // Reminder Table Alarm Columns.
+    static const std::string ALARM_HOUR;
+    static const std::string ALARM_MINUTE;
 
-public:
     static std::string ADD_COLUMNS;
     static std::string SELECT_COLUMNS;
+
+private:
+    static void InitBasicColumns();
+    static void InitCalendarColumns();
+    static void InitAlarmColumns();
+    static void AddColumn(const std::string& name, const std::string& type, bool isEnd = false);
 };
 }  // namespace Notification
 }  // namespace OHOS
-#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_TABLE_H
+#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_TABLE_OLD_H

@@ -17,140 +17,138 @@
 
 namespace OHOS {
 namespace Notification {
-// Reminder Table Basic Columns.
-const std::string ReminderTable::REMINDER_ID = "reminder_id";
-const std::string ReminderTable::PKG_NAME = "package_name";
-const std::string ReminderTable::USER_ID = "user_id";
-const std::string ReminderTable::UID = "uid";
-const std::string ReminderTable::SYS_APP = "system_app";
-const std::string ReminderTable::APP_LABEL = "app_label";
-const std::string ReminderTable::REMINDER_TYPE = "reminder_type";
-const std::string ReminderTable::REMINDER_TIME = "reminder_time";
-const std::string ReminderTable::TRIGGER_TIME = "trigger_time";
-const std::string ReminderTable::RTC_TRIGGER_TIME = "rtc_trigger_time";
-const std::string ReminderTable::TIME_INTERVAL = "time_interval";
-const std::string ReminderTable::SNOOZE_TIMES = "snooze_times";
-const std::string ReminderTable::DYNAMIC_SNOOZE_TIMES = "dynamic_snooze_times";
-const std::string ReminderTable::RING_DURATION = "ring_duration";
-const std::string ReminderTable::IS_EXPIRED = "is_expired";
-const std::string ReminderTable::IS_ACTIVE = "is_active";
-const std::string ReminderTable::STATE = "state";
-const std::string ReminderTable::ZONE_ID = "zone_id";
-const std::string ReminderTable::HAS_SCHEDULED_TIMEOUT = "has_ScheduledTimeout";
-const std::string ReminderTable::ACTION_BUTTON_INFO = "button_info";
-const std::string ReminderTable::CUSTOM_BUTTON_URI = "custom_button_uri";
-const std::string ReminderTable::SLOT_ID = "slot_id";
-const std::string ReminderTable::SNOOZE_SLOT_ID = "snooze_slot_id";
-const std::string ReminderTable::NOTIFICATION_ID = "notification_id";
-const std::string ReminderTable::TITLE = "title";
-const std::string ReminderTable::CONTENT = "content";
-const std::string ReminderTable::SNOOZE_CONTENT = "snooze_content";
-const std::string ReminderTable::EXPIRED_CONTENT = "expired_content";
-const std::string ReminderTable::AGENT = "agent";
-const std::string ReminderTable::MAX_SCREEN_AGENT = "maxScreen_agent";
-const std::string ReminderTable::TAP_DISMISSED = "tapDismissed";
-const std::string ReminderTable::AUTO_DELETED_TIME = "autoDeletedTime";
-const std::string ReminderTable::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
-const std::string ReminderTable::GROUP_ID = "groupId";
-const std::string ReminderTable::CUSTOM_RING_URI = "custom_ring_uri";
-const std::string ReminderTable::CREATOR_BUNDLE_NAME = "creator_bundle_name";
+// reminder base table
+const std::string ReminderBaseTable::TABLE_NAME = "reminder_base";
+const std::string ReminderBaseTable::REMINDER_ID = "reminder_id";
+const std::string ReminderBaseTable::PACKAGE_NAME = "package_name";
+const std::string ReminderBaseTable::USER_ID = "user_id";
+const std::string ReminderBaseTable::UID = "uid";
+const std::string ReminderBaseTable::SYSTEM_APP = "system_app";
+const std::string ReminderBaseTable::REMINDER_TYPE = "reminder_type";
+const std::string ReminderBaseTable::REMINDER_TIME = "reminder_time";
+const std::string ReminderBaseTable::TRIGGER_TIME = "trigger_time";
+const std::string ReminderBaseTable::TIME_INTERVAL = "time_interval";
+const std::string ReminderBaseTable::SNOOZE_TIMES = "snooze_times";
+const std::string ReminderBaseTable::DYNAMIC_SNOOZE_TIMES = "dynamic_snooze_times";
+const std::string ReminderBaseTable::RING_DURATION = "ring_duration";
+const std::string ReminderBaseTable::IS_EXPIRED = "is_expired";
+const std::string ReminderBaseTable::STATE = "state";
+const std::string ReminderBaseTable::ACTION_BUTTON_INFO = "button_info";
+const std::string ReminderBaseTable::CUSTOM_BUTTON_URI = "custom_button_uri";
+const std::string ReminderBaseTable::SLOT_ID = "slot_id";
+const std::string ReminderBaseTable::SNOOZE_SLOT_ID = "snooze_slot_id";
+const std::string ReminderBaseTable::NOTIFICATION_ID = "notification_id";
+const std::string ReminderBaseTable::TITLE = "title";
+const std::string ReminderBaseTable::CONTENT = "content";
+const std::string ReminderBaseTable::SNOOZE_CONTENT = "snooze_content";
+const std::string ReminderBaseTable::EXPIRED_CONTENT = "expired_content";
+const std::string ReminderBaseTable::WANT_AGENT = "want_agent";
+const std::string ReminderBaseTable::MAX_SCREEN_WANT_AGENT = "max_screen_want_agent";
+const std::string ReminderBaseTable::TAP_DISMISSED = "tap_dismissed";
+const std::string ReminderBaseTable::AUTO_DELETED_TIME = "auto_deleted_time";
+const std::string ReminderBaseTable::GROUP_ID = "group_id";
+const std::string ReminderBaseTable::CUSTOM_RING_URI = "custom_ring_uri";
+const std::string ReminderBaseTable::CREATOR_BUNDLE_NAME = "creator_bundle_name";
 
-// Reminder Table Calendar Columns.
-const std::string ReminderTable::REPEAT_DAYS = "repeat_days";
-const std::string ReminderTable::REPEAT_MONTHS = "repeat_months";
-const std::string ReminderTable::FIRST_DESIGNATE_YEAR = "first_designate_year";
-const std::string ReminderTable::FIRST_DESIGNATE_MONTH = "first_designate_month";
-const std::string ReminderTable::FIRST_DESIGNATE_DAY = "first_designate_day";
-const std::string ReminderTable::CALENDAR_YEAR = "calendar_year";
-const std::string ReminderTable::CALENDAR_MONTH = "calendar_month";
-const std::string ReminderTable::CALENDAR_DAY = "calendar_day";
-const std::string ReminderTable::CALENDAR_HOUR = "calendar_hour";
-const std::string ReminderTable::CALENDAR_MINUTE = "calendar_minute";
+// reminder alarm table
+const std::string ReminderAlarmTable::TABLE_NAME = "reminder_alarm";
+const std::string ReminderAlarmTable::REMINDER_ID = "reminder_id";
+const std::string ReminderAlarmTable::ALARM_HOUR = "alarm_hour";
+const std::string ReminderAlarmTable::ALARM_MINUTE = "alarm_minute";
+const std::string ReminderAlarmTable::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
 
-// Reminder Table Alarm Columns.
-const std::string ReminderTable::ALARM_HOUR = "alarm_hour";
-const std::string ReminderTable::ALARM_MINUTE = "alarm_minute";
+// reminder calendar table
+const std::string ReminderCalendarTable::TABLE_NAME = "reminder_calendar";
+const std::string ReminderCalendarTable::REMINDER_ID = "reminder_id";
+const std::string ReminderCalendarTable::FIRST_DESIGNATE_YEAR = "first_designate_year";
+const std::string ReminderCalendarTable::FIRST_DESIGNATE_MONTH = "first_designate_month";
+const std::string ReminderCalendarTable::FIRST_DESIGNATE_DAY = "first_designate_day";
+const std::string ReminderCalendarTable::CALENDAR_DATE_TIME = "calendar_date_time";
+const std::string ReminderCalendarTable::CALENDAR_END_DATE_TIME = "calendar_end_date_time";
+const std::string ReminderCalendarTable::REPEAT_DAYS = "repeat_days";
+const std::string ReminderCalendarTable::REPEAT_MONTHS = "repeat_months";
+const std::string ReminderCalendarTable::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
+const std::string ReminderCalendarTable::RRULE_WANT_AGENT = "rrule_want_agent";
+const std::string ReminderCalendarTable::EXCLUDE_DATES = "exclude_dates";
 
-std::string ReminderTable::sqlOfAddColumns = "";
-std::vector<std::string> ReminderTable::columns;
+std::string ReminderBaseTable::ADD_COLUMNS = "";
+std::string ReminderBaseTable::SELECT_COLUMNS = "";
 
-void ReminderTable::InitDbColumns()
+std::string ReminderAlarmTable::ADD_COLUMNS = "";
+std::string ReminderAlarmTable::SELECT_COLUMNS = "";
+
+std::string ReminderCalendarTable::ADD_COLUMNS = "";
+std::string ReminderCalendarTable::SELECT_COLUMNS = "";
+
+static inline void AddColumn(const std::string& name, const std::string& type, std::string& sqlOfColumns, std::string& columns)
 {
-    InitBasicColumns();
-    InitCalendarColumns();
-    InitAlarmColumns();
+    columns.append(name).append(",");
+    sqlOfColumns.append(name).append(" ");
+    sqlOfColumns.append(type).append(", ");
 }
 
-void ReminderTable::InitBasicColumns()
+static inline void AddColumnEnd(const std::string& name, const std::string& type, std::string& sqlOfColumns, std::string& columns)
 {
-    AddColumn(REMINDER_ID, "INTEGER PRIMARY KEY");
-    AddColumn(PKG_NAME, "TEXT NOT NULL");
-    AddColumn(USER_ID, "INT NOT NULL");
-    AddColumn(UID, "INT NOT NULL");
-    AddColumn(SYS_APP, "TEXT NOT NULL");
-    AddColumn(APP_LABEL, "TEXT");
-    AddColumn(REMINDER_TYPE, "INT NOT NULL");
-    AddColumn(REMINDER_TIME, "BIGINT NOT NULL");
-    AddColumn(TRIGGER_TIME, "BIGINT NOT NULL");
-    AddColumn(RTC_TRIGGER_TIME, "BIGINT NOT NULL");
-    AddColumn(TIME_INTERVAL, "BIGINT NOT NULL");
-    AddColumn(SNOOZE_TIMES, "INT NOT NULL");
-    AddColumn(DYNAMIC_SNOOZE_TIMES, "INT NOT NULL");
-    AddColumn(RING_DURATION, "BIGINT NOT NULL");
-    AddColumn(IS_EXPIRED, "TEXT NOT NULL");
-    AddColumn(IS_ACTIVE, "TEXT NOT NULL");
-    AddColumn(STATE, "INT NOT NULL");
-    AddColumn(ZONE_ID, "TEXT");
-    AddColumn(HAS_SCHEDULED_TIMEOUT, "TEXT");
-    AddColumn(ACTION_BUTTON_INFO, "TEXT");
-    AddColumn(CUSTOM_BUTTON_URI, "TEXT");
-    AddColumn(SLOT_ID, "INT");
-    AddColumn(SNOOZE_SLOT_ID, "INT");
-    AddColumn(NOTIFICATION_ID, "INT NOT NULL");
-    AddColumn(TITLE, "TEXT");
-    AddColumn(CONTENT, "TEXT");
-    AddColumn(SNOOZE_CONTENT, "TEXT");
-    AddColumn(EXPIRED_CONTENT, "TEXT");
-    AddColumn(AGENT, "TEXT");
-    AddColumn(MAX_SCREEN_AGENT, "TEXT");
-    AddColumn(TAP_DISMISSED, "TEXT");
-    AddColumn(AUTO_DELETED_TIME, "BIGINT");
-    AddColumn(REPEAT_DAYS_OF_WEEK, "INT");
-    AddColumn(GROUP_ID, "TEXT");
-    AddColumn(CUSTOM_RING_URI, "TEXT");
-    AddColumn(CREATOR_BUNDLE_NAME, "TEXT", false);
+    columns.append(name);
+    sqlOfColumns.append(name).append(" ");
+    sqlOfColumns.append(type);
 }
 
-void ReminderTable::InitCalendarColumns()
+void ReminderBaseTable::InitDbColumns()
 {
-    AddColumn(REPEAT_DAYS, "INT");
-    AddColumn(REPEAT_MONTHS, "INT");
-    AddColumn(FIRST_DESIGNATE_YEAR, "INT");
-    AddColumn(FIRST_DESIGNATE_MONTH, "INT");
-    AddColumn(FIRST_DESIGNATE_DAY, "INT");
-    AddColumn(CALENDAR_YEAR, "INT");
-    AddColumn(CALENDAR_MONTH, "INT");
-    AddColumn(CALENDAR_DAY, "INT");
-    AddColumn(CALENDAR_HOUR, "INT");
-    AddColumn(CALENDAR_MINUTE, "INT");
+    AddColumn(REMINDER_ID, "INTEGER PRIMARY KEY", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(PACKAGE_NAME, "TEXT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(USER_ID, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(UID, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(SYSTEM_APP, "TEXT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(REMINDER_TYPE, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(REMINDER_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(TRIGGER_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(TIME_INTERVAL, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(SNOOZE_TIMES, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(DYNAMIC_SNOOZE_TIMES, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(RING_DURATION, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(IS_EXPIRED, "TEXT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(STATE, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(ACTION_BUTTON_INFO, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(CUSTOM_BUTTON_URI, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(SLOT_ID, "INT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(SNOOZE_SLOT_ID, "INT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(NOTIFICATION_ID, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(TITLE, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(CONTENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(SNOOZE_CONTENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(EXPIRED_CONTENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(WANT_AGENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(MAX_SCREEN_WANT_AGENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(TAP_DISMISSED, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(AUTO_DELETED_TIME, "BIGINT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(GROUP_ID, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(CUSTOM_RING_URI, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumnEnd(CREATOR_BUNDLE_NAME, "TEXT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
 }
 
-void ReminderTable::InitAlarmColumns()
+void ReminderAlarmTable::InitDbColumns()
 {
-    AddColumn(ALARM_HOUR, "INT");
-    AddColumn(ALARM_MINUTE, "INT", true);
+    AddColumn(REMINDER_ID, "INTEGER PRIMARY KEY", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(ALARM_HOUR, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(ALARM_MINUTE, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumnEnd(REPEAT_DAYS_OF_WEEK, "INT", ADD_COLUMNS, SELECT_COLUMNS);
 }
 
-void ReminderTable ::AddColumn(
-    const std::string& name, const std::string& type, bool isEnd)
+void ReminderCalendarTable::InitDbColumns()
 {
-    columns.push_back(name);
-    if (!isEnd) {
-        sqlOfAddColumns += name + " " + type + ", ";
-    } else {
-        sqlOfAddColumns += name + " " + type;
-    }
+    AddColumn(REMINDER_ID, "INTEGER PRIMARY KEY", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(FIRST_DESIGNATE_YEAR, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(FIRST_DESIGNATE_MONTH, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(FIRST_DESIGNATE_DAY, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(CALENDAR_DATE_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(CALENDAR_END_DATE_TIME, "BIGINT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(REPEAT_DAYS, "INT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(REPEAT_MONTHS, "INT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(REPEAT_DAYS_OF_WEEK, "INT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(RRULE_WANT_AGENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumnEnd(EXCLUDE_DATES, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
 }
-
 }
 }
