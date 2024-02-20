@@ -1455,6 +1455,7 @@ void ReminderDataManager::LoadReminderFromDb()
             ANSR_LOGE("Containers add to map error");
             continue;
         }
+        ReminderDataManager::ReminderDataManagerStartExtensionAbility(*it)
     }
     totalCount_ = static_cast<int16_t>(reminderVector_.size());
     ReminderRequest::GLOBAL_ID = store_->GetMaxId() + 1;
