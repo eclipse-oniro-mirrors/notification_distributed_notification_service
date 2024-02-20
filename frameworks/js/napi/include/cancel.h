@@ -54,7 +54,7 @@ struct  ParametersInfoCancelAsBundle {
     std::string representativeBundle = "";
     int32_t userId = 0;
     NotificationBundleOption option;
-    boolean hasOption = false;
+    bool hasOption = false;
     napi_ref callback = nullptr;
 };
 
@@ -65,7 +65,7 @@ struct AsyncCallbackInfoCancelAsBundle {
     std::string representativeBundle = "";
     int32_t userId = 0;
     NotificationBundleOption option;
-    boolean hasOption = false;
+    bool hasOption = false;
     CallbackPromiseInfo info;
 };
 
