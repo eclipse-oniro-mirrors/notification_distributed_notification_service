@@ -482,7 +482,8 @@ private:
     void SetActiveReminder(const sptr<ReminderRequest> &reminder);
     void SetAlertingReminder(const sptr<ReminderRequest> &reminder);
     void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder);
-
+    int32_t ReminderDataMangerStartExtensionAbility(const sptr <ReminderRequest> &reminder);
+    
     /**
      * @brief Show the reminder on SystemUI.
      *

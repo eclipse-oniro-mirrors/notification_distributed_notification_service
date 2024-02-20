@@ -21,6 +21,8 @@
 #include "ans_const_define.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
+#include "reminder_request_calendar.h"
+#include "in_process_call_wrapper.h"
 #ifdef DEVICE_STANDBY_ENABLE
 #include "standby_service_client.h"
 #include "allow_type.h"
@@ -943,6 +945,16 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     bool isAlerting = false;
     sptr<ReminderRequest> playSoundReminder = nullptr;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        const int32_t trytimes = 3;
+        int32_t result = ReminderDataManager::ReminderDataManagerStartExtensionAbility(reminder);
+        if (result != ERR_OK) {
+            for (int32_t i = 0, i < trytimes; i++){
+                int32_t tryresult = ReminderDataManager::ReminderDataManagerStartExtensionAbility(reminder);
+                if (tryresult == ERROK) {
+                    break;
+                }
+            }
+        }
         if ((*it)->IsExpired()) {
             continue;
         }
@@ -965,6 +977,18 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     if (playSoundReminder != nullptr) {
         ShowReminder(playSoundReminder, true, false, false, true);
     }
+}
+
+ErrorCode ReminderDataManager::ReminderDataManagerStartExtensionAbility(const sptr <ReminderRequest> &reminder) {
+    int32_t result = AAFwk::DEFAULT_INVAL_VALUE;
+    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+        ReminderRequestCalendar *calendar = static_cast<ReminderRequestCalendar *>(reminder.GetRefPtr());
+        std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
+        AAFwk::Want want;
+        want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
+        result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
+    }
+    return result;
 }
 
 void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
