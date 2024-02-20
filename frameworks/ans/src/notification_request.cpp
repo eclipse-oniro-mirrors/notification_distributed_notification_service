@@ -51,49 +51,6 @@ const std::size_t NotificationRequest::MAX_USER_INPUT_HISTORY {5};
 const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
 
-bool BundleNotificationStatus::Marshalling(Parcel &parcel) const
-{
-    if (!parcel.WriteBool(status_)) {
-        ANS_LOGE("Failed to write status");
-        return false;
-    }
-    bool flag = true;
-    flag = bundleOption_ == nullptr ? false : true;
-    if (!parcel.WriteBool(flag)) {
-        ANS_LOGE("Failed to write flag");
-        return false;
-    }
-    if (flag && !parcel.WriteParcelable(bundleOption_.GetRefPtr())) {
-        ANS_LOGE("Failed to write bundleOption");
-        return false;
-    }
-
-    return true;
-}
-
-BundleNotificationStatus *BundleNotificationStatus::Unmarshalling(Parcel &parcel)
-{
-    auto objptr = new (std::nothrow) BundleNotificationStatus();
-    if ((objptr != nullptr) && !objptr->ReadFromParcel(parcel)) {
-        delete objptr;
-        objptr = nullptr;
-    }
-
-    return objptr;
-}
-
-bool BundleNotificationStatus::ReadFromParcel(Parcel &parcel)
-{
-    status_ = parcel.ReadBool();
-    bool flag = parcel.ReadBool();
-
-    if (flag) {
-        bundleOption_ = sptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
-    }
-
-    return true;
-}
-
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
     createTime_ = GetNowSysTime();

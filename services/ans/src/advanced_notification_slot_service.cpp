@@ -514,7 +514,8 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
     return result;
 }
 
-ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     if (!AccessTokenHelper::IsSystemApp()) {

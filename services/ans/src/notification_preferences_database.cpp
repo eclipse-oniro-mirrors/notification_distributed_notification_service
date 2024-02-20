@@ -725,7 +725,8 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     return true;
 }
 
-bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     if (!CheckRdbStore()) {
