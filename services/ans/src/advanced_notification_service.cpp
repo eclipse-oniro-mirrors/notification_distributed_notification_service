@@ -118,11 +118,15 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
 
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
         int32_t uid = -1;
-        if (bundleManager != nullptr) {
-            uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), request->GetOwnerUserId());
-        }
-        if (uid < 0) {
-            return ERR_ANS_INVALID_UID;
+        if (request->GetOwnerUid() == DEFAULT_UID || request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
+            if (bundleManager != nullptr) {
+                uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), request->GetOwnerUserId());
+            }
+            if (uid < 0) {
+                return ERR_ANS_INVALID_UID;
+            }
+        } else {
+            uid = request->GetOwnerUid();
         }
         request->SetOwnerUid(uid);
     } else {

@@ -20,10 +20,12 @@
 #include <sstream>
 
 #include "accesstoken_kit.h"
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "errors.h"
 
+#include "foundation/ability/form_fwk/interfaces/inner_api/include/form_constants.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
@@ -214,18 +216,10 @@ ErrCode AdvancedNotificationService::CancelAll()
 }
 
 ErrCode AdvancedNotificationService::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
-{
-    ANS_LOGD("%{public}s, uid = %{public}d", __FUNCTION__, bundleOption->GetUid());
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AdvancedNotificationService::CancelAsBundle(
-    int32_t notificationId, const std::string &representativeBundle, int32_t userId)
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+       bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
@@ -236,16 +230,42 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     }
 
     int32_t uid = -1;
-    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-    if (bundleManager != nullptr) {
-        uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(representativeBundle, userId);
+    if(bundleOption->GetUid() == DEFAULT_UID) {
+        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+        if (bundleManager != nullptr) {
+            uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleOption->GetBundleName(), userId);
+        }
+    } else {
+        uid = bundleOption->GetUid();
     }
     if (uid < 0) {
         return ERR_ANS_INVALID_UID;
     }
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
+        bundleOption->GetBundleName(), uid);
+    return CancelPreparedNotification(notificationId, "", bundle);
+}
+
+ErrCode AdvancedNotificationService::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+{
+    ANS_LOGD("%{public}s, uid = %{public}d", __FUNCTION__, bundleOption->GetUid());
+    int32_t userId = -1;
+    if (bundleOption->GetUid() != 0) {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    } else {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+    }
+    return CancelAsBundle(bundleOption, notificationId, userId);
+}
+
+ErrCode AdvancedNotificationService::CancelAsBundle(
+    int32_t notificationId, const std::string &representativeBundle, int32_t userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
-        representativeBundle, uid);
-    return CancelPreparedNotification(notificationId, "", bundleOption);
+         representativeBundle, DEFAULT_UID);
+    return CancelAsBundle(bundleOption, notificationId, userId);
 }
 
 ErrCode AdvancedNotificationService::PublishAsBundle(

@@ -44,6 +44,10 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
             std::bind(
                 &AnsManagerStub::HandleCancelAsBundleOption, std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3)},
+        {NotificationInterfaceCode::CANCEL_AS_BUNDLEOPTION,
+            std::bind(
+                &AnsManagerStub::HandleCancelAsBundleAndUser, std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3)},
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE,
             std::bind(&AnsManagerStub::HandleCancelAsBundle, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
@@ -411,6 +415,33 @@ ErrCode AnsManagerStub::HandleCancelAsBundle(MessageParcel &data, MessageParcel 
     }
 
     ErrCode result = CancelAsBundle(notificationId, representativeBundle, userId);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleCancelAsBundleAndUser(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleCancelAsBundle] fail: read BundleOption failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    int32_t notificationId = 0;
+    if (!data.ReadInt32(notificationId)) {
+        ANS_LOGE("[HandleCancelAsBundle] fail: read notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t userId = 0;
+    if (!data.ReadInt32(userId)) {
+        ANS_LOGE("[HandleCancelAsBundle] fail: read userId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = CancelAsBundle(bundleOption, notificationId, userId);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;

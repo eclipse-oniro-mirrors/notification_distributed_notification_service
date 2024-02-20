@@ -15,6 +15,7 @@
 
 #include "publish.h"
 
+#include "ans_const_define.h"
 #include "js_native_api_types.h"
 #include "want_agent_helper.h"
 
@@ -387,10 +388,12 @@ napi_value ParsePublishAsBundleParameters(
             ANS_LOGE("GetBundleOption failed.");
             return nullptr;
         }
-        params.request.SetCreatorBundleName(option.GetBundleName());
-        params.request.SetCreatorUid(option.GetUid());
-        params.request.SetIsAgentNotification(true);
-        ANS_LOGI("zbx set Bundleoption!!!!!");
+        params.request.SetOwnerBundleName(option.GetBundleName());
+        params.request.SetOwnerUid(option.GetUid());
+        if (option.GetUid() != DEFAULT_UID) {
+            params.request.SetIsAgentNotification(true);
+        }
+        
     }
 
     // argv[1] : bundleName / NotificationRequest

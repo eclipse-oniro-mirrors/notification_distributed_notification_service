@@ -28,6 +28,7 @@ namespace Notification {
         CANCEL_NOTIFICATION,
         CANCEL_ALL_NOTIFICATIONS,
         CANCEL_AS_BUNDLEOPTION,
+        CANCEL_AS_BUNDLEANDUSER,
         CANCEL_AS_BUNDLE,
         ADD_SLOT_BY_TYPE,
         ADD_SLOTS,

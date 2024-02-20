@@ -94,6 +94,18 @@ public:
     virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) = 0;
 
     /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application bundle your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @param userId Indicates the specific user.
+     * @return Returns cancel notification result.
+     */
+    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) = 0;
+
+    /**
      * @brief Adds a notification slot by type.
      *
      * @param slotType Indicates the notification slot type to be added.
