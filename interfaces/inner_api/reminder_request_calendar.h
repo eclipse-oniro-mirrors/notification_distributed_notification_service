@@ -66,7 +66,7 @@ public:
 
     void SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo);
 
-    std::shared_ptr<ReminderRequest::WantAgentInfo> GetRRuleWantAgentInfo()
+    std::shared_ptr<ReminderRequest::WantAgentInfo> GetRRuleWantAgentInfo();
 
     inline uint16_t GetYear() const
     {
