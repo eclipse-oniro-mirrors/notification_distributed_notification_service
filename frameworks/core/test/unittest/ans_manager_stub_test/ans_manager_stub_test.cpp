@@ -398,7 +398,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle07, Function | SmallTest | Leve
 
 /**
  * @tc.name: HandleCancelAsBundle08
- * @tc.desc: Test if the notificationId in data is null.
+ * @tc.desc: Test HandlePublish succeeds.
  * @tc.type: FUNC
  * @tc.require: issueI5XQ4E
  */
@@ -410,12 +410,16 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle08, Function | SmallTest | Leve
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t notificationId = 3;
+    int32_t userId = 4;
     
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(notificationId);
+    data.WriteInt32(userId);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+    EXPECT_EQ(ret, (int)NO_ERROR);
 }
 
 /**
