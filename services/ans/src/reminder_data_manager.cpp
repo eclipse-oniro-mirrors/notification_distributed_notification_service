@@ -948,7 +948,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         const int32_t trytimes = 3;
         int32_t result = ReminderDataManager::ReminderDataManagerStartExtensionAbility(reminder);
         if (result != ERR_OK) {
-            for (int32_t i = 0, i < trytimes; i++){
+            for (int32_t i = 0; i < trytimes; i++){
                 int32_t tryresult = ReminderDataManager::ReminderDataManagerStartExtensionAbility(reminder);
                 if (tryresult == ERROK) {
                     break;
@@ -979,14 +979,19 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     }
 }
 
-ErrorCode ReminderDataManager::ReminderDataManagerStartExtensionAbility(const sptr <ReminderRequest> &reminder) {
+ErrCode ReminderDataManager::ReminderDataManagerStartExtensionAbility(const sptr <ReminderRequest> &reminder) {
     int32_t result = AAFwk::DEFAULT_INVAL_VALUE;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
-        ReminderRequestCalendar *calendar = static_cast<ReminderRequestCalendar *>(reminder.GetRefPtr());
+        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
-        AAFwk::Want want;
-        want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
-        result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
+        if (wantInfo != nullptr) {
+            AAFwk::Want want;
+            want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
+            result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
+            ANS_LOGED("END, result = %{public}d", result);
+        } else {
+            return 0;
+        }
     }
     return result;
 }
