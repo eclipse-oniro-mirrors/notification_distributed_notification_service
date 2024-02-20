@@ -390,9 +390,7 @@ napi_value ParsePublishAsBundleParameters(
         }
         params.request.SetOwnerBundleName(option.GetBundleName());
         params.request.SetOwnerUid(option.GetUid());
-        if (option.GetUid() != DEFAULT_UID) {
-            params.request.SetIsAgentNotification(true);
-        }
+        params.request.SetIsAgentNotification(true);
         
     }
 

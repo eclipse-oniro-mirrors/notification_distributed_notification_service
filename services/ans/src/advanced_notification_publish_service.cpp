@@ -74,7 +74,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("%{public}s, uid = %{public}d", __FUNCTION__, request->GetCreatorUid());
+    ANS_LOGD("%{public}s", __FUNCTION__);
 
     if (!request) {
         ANSR_LOGE("ReminderRequest object is nullptr");

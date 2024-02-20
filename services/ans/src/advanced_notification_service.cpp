@@ -126,9 +126,17 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_UID;
             }
         } else {
-            uid = request->GetOwnerUid();
+            int32_t userId = SUBSCRIBE_USER_INIT;
+            if (request->GetOwnerUid() == DEFAULT_UID) {
+                uid = IPCSkeleton::GetCallingUid();
+            } else {
+                uid = request->GetOwnerUid();
+            }
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+            request->SetOwnerUserId(userId);
         }
         request->SetOwnerUid(uid);
+
     } else {
         request->SetOwnerBundleName(bundle);
     }
