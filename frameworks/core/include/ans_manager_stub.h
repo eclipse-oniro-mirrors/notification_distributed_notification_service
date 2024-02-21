@@ -105,7 +105,8 @@ public:
      * @param userId Indicates the specific user.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
+    virtual ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
 
     /**
      * @brief Adds a notification slot by type.

@@ -218,7 +218,7 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-       bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
@@ -229,7 +229,7 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     }
 
     int32_t uid = -1;
-    if(bundleOption->GetUid() == DEFAULT_UID) {
+    if (bundleOption->GetUid() == DEFAULT_UID) {
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
         if (bundleManager != nullptr) {
             uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleOption->GetBundleName(), userId);

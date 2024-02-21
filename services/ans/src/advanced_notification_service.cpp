@@ -120,7 +120,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         int32_t uid = -1;
         if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
             if (bundleManager != nullptr) {
-                uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), request->GetOwnerUserId());
+                uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(),
+                request->GetOwnerUserId());
             }
             if (uid < 0) {
                 return ERR_ANS_INVALID_UID;
@@ -139,7 +140,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             request->SetOwnerUserId(userId);
         }
         request->SetOwnerUid(uid);
-
     } else {
         request->SetOwnerBundleName(bundle);
     }

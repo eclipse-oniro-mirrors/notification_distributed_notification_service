@@ -391,7 +391,6 @@ napi_value ParsePublishAsBundleParameters(
         params.request.SetOwnerBundleName(option.GetBundleName());
         params.request.SetOwnerUid(option.GetUid());
         params.request.SetIsAgentNotification(true);
-        
     }
 
     // argv[1] : bundleName / NotificationRequest
@@ -422,7 +421,7 @@ napi_value ParsePublishAsBundleParameters(
     }
 
     // argv[2] : userId
-    if(argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
+    if (argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGW("Wrong argument type. Number expected.");
