@@ -400,8 +400,7 @@ bool ReminderCommon::GenWantAgent(
     return true;
 }
 
-std::shared_ptr<ReminderRequest::WantAgentInfo>
-ReminderCommon::GenRruleWantAgent(const napi_env &env, const napi_value &value, const char* name)
+std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderCommon::GenRruleWantAgent(const napi_env &env, const napi_value &value, const char* name)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
@@ -431,11 +430,13 @@ void ReminderCommon::GenMaxScreenWantAgent(
     if (GetObject(env, value, ReminderAgentNapi::MAX_SCREEN_WANT_AGENT, maxScreenWantAgent)) {
         auto maxScreenWantAgentInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
         if (GetStringUtf8(env, maxScreenWantAgent,
-            ReminderAgentNapi::MAX_SCREEN_WANT_AGENT_PKG, str, NotificationNapi::STR_MAX_SIZE)) {
+            ReminderAgentNapi::MAX_SCREEN_WANT_AGENT_PKG, str, NotificationNapi::STR_MAX_SIZE))
+        {
             maxScreenWantAgentInfo->pkgName = str;
         }
         if (GetStringUtf8(env, maxScreenWantAgent,
-            ReminderAgentNapi::MAX_SCREEN_WANT_AGENT_ABILITY, str, NotificationNapi::STR_MAX_SIZE)) {
+            ReminderAgentNapi::MAX_SCREEN_WANT_AGENT_ABILITY, str, NotificationNapi::STR_MAX_SIZE))
+        {
             maxScreenWantAgentInfo->abilityName = str;
         }
         reminder->SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
