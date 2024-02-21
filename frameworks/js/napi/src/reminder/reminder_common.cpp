@@ -400,15 +400,21 @@ bool ReminderCommon::GenWantAgent(
     return true;
 }
 
-std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderCommon::GenRruleWantAgent(const napi_env &env, const napi_value &value, const char* name){
+std::shared_ptr<ReminderRequest::WantAgentInfo>
+ReminderCommon::GenRruleWantAgent(const napi_env &env, const napi_value &value, const char* name) {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
-    if (GetObject(env, value, name, wantAgent)){
+    if (GetObject(env, value, name, wantAgent))
+    {
         auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
-        if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str, NotificationNapi::STR_MAX_SIZE)){
+        if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str,
+                          NotificationNapi::STR_MAX_SIZE))
+        {
             wantAgentInfo->pkgName = str;
         }
-        if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_ABILITY, str, NotificationNapi::STR_MAX_SIZE)){
+        if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_ABILITY, str,
+                          NotificationNapi::STR_MAX_SIZE))
+        {
             wantAgentInfo->abilityName = str;
         }
         return wantAgentInfo;

@@ -959,10 +959,13 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         }
         const int32_t trytimes = 3;
         int32_t result = StartExtensionAbility(reminder);
-        if (result != ERR_OK) {
-            for (int32_t i = 0; i < trytimes; i++){
+        if (result != ERR_OK)
+        {
+            for (int32_t i = 0; i < trytimes; i++)
+            {
                 int32_t tryresult = StartExtensionAbility(reminder);
-                if (tryresult == ERR_OK) {
+                if (tryresult == ERR_OK)
+                {
                     break;
                 }
             }
@@ -979,7 +982,8 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     }
 }
 
-int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder) {
+int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
+{
     int32_t result = AAFwk::DEFAULT_INVAL_VALUE;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());

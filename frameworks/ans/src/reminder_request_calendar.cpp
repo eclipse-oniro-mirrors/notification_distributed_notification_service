@@ -72,7 +72,8 @@ void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAg
     rruleWantAgentInfo_ = wantAgentInfo;
 }
 
-std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequestCalendar::GetRRuleWantAgentInfo(){
+std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequestCalendar::GetRRuleWantAgentInfo()
+{
     return rruleWantAgentInfo_;
 }
 
