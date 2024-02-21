@@ -958,10 +958,10 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
             continue;
         }
         const int32_t trytimes = 3;
-        int32_t result = ReminderDataManager::StartExtensionAbility(reminder);
+        int32_t result = StartExtensionAbility(reminder);
         if (result != ERR_OK) {
             for (int32_t i = 0; i < trytimes; i++){
-                int32_t tryresult = ReminderDataManager::StartExtensionAbility(reminder);
+                int32_t tryresult = StartExtensionAbility(reminder);
                 if (tryresult == ERR_OK) {
                     break;
                 }
@@ -988,7 +988,7 @@ int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &
             AAFwk::Want want;
             want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
             result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
-            ANS_LOGED("END, result = %{public}d", result);
+            ANSR_LOGE("END, result = %{public}d", result);
         } else {
             return 0;
         }
@@ -1455,7 +1455,7 @@ void ReminderDataManager::LoadReminderFromDb()
             ANSR_LOGE("Containers add to map error");
             continue;
         }
-        ReminderDataManager::StartExtensionAbility(*it)
+        StartExtensionAbility(*it);
     }
     totalCount_ = static_cast<int16_t>(reminderVector_.size());
     ReminderRequest::GLOBAL_ID = store_->GetMaxId() + 1;
