@@ -981,10 +981,12 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
 int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
 {
     int32_t result = AAFwk::DEFAULT_INVAL_VALUE;
-    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR)
+    {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
-        if (wantInfo != nullptr) {
+        if (wantInfo != nullptr)
+        {
             AAFwk::Want want;
             want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
             result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
