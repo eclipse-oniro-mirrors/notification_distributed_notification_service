@@ -849,7 +849,8 @@ napi_value ReminderCommon::CreateReminderCalendar(
 }
 
 tm ReminderCommon::ConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
-                                   const int32_t propertyDayVal, const int32_t propertyHourVal, const int32_t propertyMinteVal)
+                                   const int32_t propertyDayVal, const int32_t propertyHourVal,
+                                   const int32_t propertyMinteVal)
 {
     tm dateTime;
     dateTime.tm_year = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::YEAR, propertyYearVal);
