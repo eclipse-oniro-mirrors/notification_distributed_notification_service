@@ -837,7 +837,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (ParseInt32Array(env, value, ReminderAgentNapi::REPEAT_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
         return nullptr;
     }
-    tm dateTime = ConvertDateTime(propertyYearVal, propertyMonthVal, propertyDayVal, propertyHourVal, propertyMinteVal);
+    tm dateTime = ReminderCalendarConvertDateTime(propertyYearVal, propertyMonthVal, propertyDayVal, propertyHourVal, propertyMinteVal);
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
@@ -848,7 +848,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-tm ReminderCommon::ConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
+tm ReminderCommon::ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
                                    const int32_t propertyDayVal, const int32_t propertyHourVal,
                                    const int32_t propertyMinteVal)
 {
@@ -860,6 +860,7 @@ tm ReminderCommon::ConvertDateTime(const int32_t propertyYearVal, const int32_t 
     dateTime.tm_min = propertyMinteVal;
     dateTime.tm_sec = 0;
     dateTime.tm_isdst = -1;
+    return dateTime;
 }
 
 bool ReminderCommon::CheckCalendarParams(const int32_t &year, const int32_t &month, const int32_t &day,
