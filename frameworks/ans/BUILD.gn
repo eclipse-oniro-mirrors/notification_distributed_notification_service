@@ -150,6 +150,7 @@ ohos_shared_library("ans_innerkits") {
     defines += [ "HITRACE_METER_ENABLE" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
