@@ -607,13 +607,13 @@ void ReminderRequestCalendar::SetDateTime(const uint64_t time)
 uint64_t ReminderRequestCalendar::GetDateTime()
 {
     struct tm dateTime;
-    dateTime_.tm_year = GetCTime(TimeTransferType::YEAR, year_);
-    dateTime_.tm_mon = GetCTime(TimeTransferType::MONTH, month_);
-    dateTime_.tm_mday = static_cast<int>(day_);
-    dateTime_.tm_hour = static_cast<int>(hour_);
-    dateTime_.tm_min = static_cast<int>(minute_);
-    dateTime_.tm_sec = static_cast<int>(second_);
-    dateTime_.tm_isdst = -1;
+    dateTime.tm_year = GetCTime(TimeTransferType::YEAR, year_);
+    dateTime.tm_mon = GetCTime(TimeTransferType::MONTH, month_);
+    dateTime.tm_mday = static_cast<int>(day_);
+    dateTime.tm_hour = static_cast<int>(hour_);
+    dateTime.tm_min = static_cast<int>(minute_);
+    dateTime.tm_sec = static_cast<int>(second_);
+    dateTime.tm_isdst = -1;
 
     time_t time = mktime(&dateTime);
     return GetDurationSinceEpochInMilli(time);
@@ -621,6 +621,7 @@ uint64_t ReminderRequestCalendar::GetDateTime()
 
 std::string ReminderRequestCalendar::SerializationRRule()
 {
+    constexpr int32_t INDENT = -1;
     if (rruleWantAgentInfo_ == nullptr) {
         return "";
     }

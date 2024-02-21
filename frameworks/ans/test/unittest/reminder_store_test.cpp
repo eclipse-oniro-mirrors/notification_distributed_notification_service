@@ -115,7 +115,7 @@ HWTEST_F(ReminderStoreTest, Delete_00003, Function | SmallTest | Level1)
 {
     std::string deleteCondition = "deleteCondition";
     ReminderStore reminderStore;
-    int32_t ret = reminderStore.Delete(deleteCondition);
+    int32_t ret = reminderStore.DeleteBase(deleteCondition);
     EXPECT_EQ(ret, -1);
 }
 

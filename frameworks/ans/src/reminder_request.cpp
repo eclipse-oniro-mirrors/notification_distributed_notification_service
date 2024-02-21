@@ -1937,13 +1937,11 @@ void ReminderRequest::RecoverBasicFromOldVersion(const std::shared_ptr<NativeRdb
 
     // isExpired
     std::string isExpired;
-    ReminderStore::GetStringVal(resultSet, ReminderTable::IS_EXPIRED,
-        isExpired);
+    ReminderStore::GetStringVal(resultSet, ReminderTable::IS_EXPIRED, isExpired);
     isExpired_ = isExpired == "true" ? true : false;
 
     // state
-    state_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::STATE,
-        DbRecoveryType::INT));
+    state_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::STATE, DbRecoveryType::INT));
 
     // repeatDaysOfWeek_
     repeatDaysOfWeek_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::REPEAT_DAYS_OF_WEEK,

@@ -80,14 +80,16 @@ std::string ReminderAlarmTable::SELECT_COLUMNS = "";
 std::string ReminderCalendarTable::ADD_COLUMNS = "";
 std::string ReminderCalendarTable::SELECT_COLUMNS = "";
 
-static inline void AddColumn(const std::string& name, const std::string& type, std::string& sqlOfColumns, std::string& columns)
+static inline void AddColumn(const std::string& name, const std::string& type, std::string& sqlOfColumns,
+    std::string& columns)
 {
     columns.append(name).append(",");
     sqlOfColumns.append(name).append(" ");
     sqlOfColumns.append(type).append(", ");
 }
 
-static inline void AddColumnEnd(const std::string& name, const std::string& type, std::string& sqlOfColumns, std::string& columns)
+static inline void AddColumnEnd(const std::string& name, const std::string& type, std::string& sqlOfColumns,
+    std::string& columns)
 {
     columns.append(name);
     sqlOfColumns.append(name).append(" ");

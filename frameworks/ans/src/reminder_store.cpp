@@ -55,22 +55,22 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
     ANSR_LOGI("OnUpgrade oldVersion is %{public}d, newVersion is %{public}d", oldVersion, newVersion);
     if (oldVersion < newVersion && newVersion == REMINDER_RDB_VERSION) {
         switch (oldVersion) {
-        case REMINDER_RDB_VERSION_V1:
-            AddRdbColum(store, ReminderTable::TABLE_NAME, "groupId", "TEXT");
-            [[fallthrough]];
-        case REMINDER_RDB_VERSION_V2:
-            AddRdbColum(store, ReminderTable::TABLE_NAME, "custom_ring_uri", "TEXT");
-            AddRdbColum(store, ReminderTable::TABLE_NAME, "snooze_slot_id", "INT");
-            [[fallthrough]];
-        case REMINDER_RDB_VERSION_V3:
-            AddRdbColum(store, ReminderTable::TABLE_NAME, "creator_bundle_name", "TEXT");
-            [[fallthrough]];
-        case REMINDER_RDB_VERSION_V4:
-            CreateTable(store);
-            CopyData(store);
-            [[fallthrough]];
-        default:
-            break;
+            case REMINDER_RDB_VERSION_V1:
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "groupId", "TEXT");
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V2:
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "custom_ring_uri", "TEXT");
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "snooze_slot_id", "INT");
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V3:
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "creator_bundle_name", "TEXT");
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V4:
+                CreateTable(store);
+                CopyData(store);
+                [[fallthrough]];
+            default:
+                break;
         }
     }
     store.SetVersion(newVersion);
@@ -105,9 +105,9 @@ int32_t ReminderStore::ReminderStoreDataCallBack::CreateTable(NativeRdb::RdbStor
 
 int32_t ReminderStore::ReminderStoreDataCallBack::CopyData(NativeRdb::RdbStore& store)
 {
-    // select old data;
+    // select old data
     auto reminders = GetOldReminders(store);
-    // insert new data;
+    // insert new data
     if (!reminders.empty()) {
         InsertNewReminders(store, reminders);
     }
@@ -129,7 +129,8 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
     queryResultSet->IsAtLastRow(isAtLastRow);
     while (!isAtLastRow) {
         queryResultSet->GoToNextRow();
-        int32_t reminderId, reminderType;
+        int32_t reminderId
+        int32_t reminderType;
         GetInt32Val(queryResultSet, ReminderTable::REMINDER_ID, reminderId);
         GetInt32Val(queryResultSet, ReminderTable::REMINDER_TYPE, reminderType);
 
@@ -160,7 +161,8 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
     return reminders;
 }
 
-void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::RdbStore& store, const std::vector<sptr<ReminderRequest>>& reminders)
+void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::RdbStore& store,
+    const std::vector<sptr<ReminderRequest>>& reminders)
 {
     for (auto reminder : reminders) {
         int64_t rowId = STATE_FAIL;
@@ -188,8 +190,7 @@ void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::Rdb
         if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
             ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
             ret = store.Insert(rowId, ReminderCalendarTable::TABLE_NAME, values);
-        }
-        else if (reminder->GetReminderType() == ReminderRequest::ReminderType::ALARM) {
+        } else if (reminder->GetReminderType() == ReminderRequest::ReminderType::ALARM) {
             ReminderRequestAlarm::AppendValuesBucket(reminder, bundleOption, values);
             ret = store.Insert(rowId, ReminderAlarmTable::TABLE_NAME, values);
         }
@@ -232,7 +233,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
         }
     }
 	
-	ReminderTable::InitDbColumns();
+    ReminderTable::InitDbColumns();
     ReminderBaseTable::InitDbColumns();
     ReminderAlarmTable::InitDbColumns();
     ReminderCalendarTable::InitDbColumns();
@@ -263,7 +264,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
     std::vector<std::string> whereArgs;
     int32_t ret = rdbStore_->Delete(delRows, ReminderBaseTable::TABLE_NAME, condition, whereArgs);
     if (ret != NativeRdb::E_OK) {
-        ANSR_LOGE("Delete from %{public}s failed, reminderId=%{public}d", 
+        ANSR_LOGE("Delete from %{public}s failed, reminderId = %{public}d", 
             ReminderBaseTable::TABLE_NAME.c_str(), reminderId);
         rdbStore_->RollBack();
         return STATE_FAIL;
@@ -271,7 +272,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
     delRows = STATE_FAIL;
     ret = rdbStore_->Delete(delRows, ReminderAlarmTable::TABLE_NAME, condition, whereArgs);
     if (ret != NativeRdb::E_OK) {
-        ANSR_LOGE("Delete from %{public}s failed, reminderId=%{public}d", 
+        ANSR_LOGE("Delete from %{public}s failed, reminderId = %{public}d", 
             ReminderAlarmTable::TABLE_NAME.c_str(), reminderId);
         rdbStore_->RollBack();
         return STATE_FAIL;
@@ -279,7 +280,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
     delRows = STATE_FAIL;
     ret = rdbStore_->Delete(delRows, ReminderCalendarTable::TABLE_NAME, condition, whereArgs);
     if (ret != NativeRdb::E_OK) {
-        ANSR_LOGE("Delete from %{public}s failed, reminderId=%{public}d",
+        ANSR_LOGE("Delete from %{public}s failed, reminderId = %{public}d",
             ReminderCalendarTable::TABLE_NAME.c_str(), reminderId);
         rdbStore_->RollBack();
         return STATE_FAIL;
@@ -291,11 +292,11 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
 __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& pkg, const int32_t userId)
 {
     std::string assoConditon = "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderBaseTable::TABLE_NAME
-        + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::PACKAGE_NAME + " = \"" + pkg
-        + "\" AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " + std::to_string(userId)
+        + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::PACKAGE_NAME + " = '" + pkg
+        + "' AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " + std::to_string(userId)
         + ")";
 
-    std::string baseCondtion = ReminderBaseTable::PACKAGE_NAME + " = \"" + pkg + "\" AND "
+    std::string baseCondtion = ReminderBaseTable::PACKAGE_NAME + " = '" + pkg + "' AND "
         + ReminderBaseTable::USER_ID + " = " + std::to_string(userId);
     return Delete(baseCondtion, assoConditon);
 }
@@ -303,7 +304,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::str
 __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::DeleteUser(const int32_t userId)
 {
     std::string assoConditon = "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderBaseTable::TABLE_NAME
-        + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " 
+        + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = "
         + std::to_string(userId) + ")";
 
     std::string baseCondtion = ReminderBaseTable::USER_ID + " = " + std::to_string(userId);
@@ -327,8 +328,7 @@ int32_t ReminderStore::UpdateOrInsert(
     }
     if (IsReminderExist(reminder)) {
         return Update(reminder, bundleOption);
-    }
-    else {
+    } else {
         return Insert(reminder, bundleOption);
     }
 }
@@ -365,7 +365,7 @@ int32_t ReminderStore::GetMaxId()
 
 __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderStore::GetAllValidReminders()
 {
-    std::string sql = "SELECT " + ReminderBaseTable::SELECT_COLUMNS + " FROM " 
+    std::string sql = "SELECT " + ReminderBaseTable::SELECT_COLUMNS + " FROM "
         + ReminderBaseTable::TABLE_NAME + " WHERE "
         + ReminderBaseTable::IS_EXPIRED + " = 'false' ORDER BY "
         + ReminderBaseTable::TRIGGER_TIME + " ASC";
@@ -473,7 +473,8 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::DeleteBase(const std:
     return deletedRows;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& baseCondition, const std::string& assoConditon)
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& baseCondition, 
+    const std::string& assoConditon)
 {
     if (rdbStore_ == nullptr) {
         ANSR_LOGE("Rdb store is not initialized.");
@@ -643,31 +644,30 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
     sptr<ReminderRequest> reminder = nullptr;
     std::shared_ptr<NativeRdb::ResultSet> resultSet;
     switch (reminderType) {
-    case (static_cast<int32_t>(ReminderRequest::ReminderType::TIMER)): {
-        reminder = new (std::nothrow) ReminderRequestTimer(reminderId);
-        break;
-    }
-    case (static_cast<int32_t>(ReminderRequest::ReminderType::CALENDAR)): {
-        reminder = new (std::nothrow) ReminderRequestCalendar(reminderId);
-        resultSet = Query(ReminderCalendarTable::TABLE_NAME, ReminderCalendarTable::SELECT_COLUMNS, reminderId);
-        break;
-    }
-    case (static_cast<int32_t>(ReminderRequest::ReminderType::ALARM)): {
-        reminder = new (std::nothrow) ReminderRequestAlarm(reminderId);
-        resultSet = Query(ReminderAlarmTable::TABLE_NAME, ReminderAlarmTable::SELECT_COLUMNS, reminderId);
-        break;
-    }
-    default: {
-        ANSR_LOGE("ReminderType from database is error, reminderType %{public}d.", reminderType);
-        break;
-    }
+        case (static_cast<int32_t>(ReminderRequest::ReminderType::TIMER)): {
+            reminder = new (std::nothrow) ReminderRequestTimer(reminderId);
+            break;
+        }
+        case (static_cast<int32_t>(ReminderRequest::ReminderType::CALENDAR)): {
+            reminder = new (std::nothrow) ReminderRequestCalendar(reminderId);
+            resultSet = Query(ReminderCalendarTable::TABLE_NAME, ReminderCalendarTable::SELECT_COLUMNS, reminderId);
+            break;
+        }
+        case (static_cast<int32_t>(ReminderRequest::ReminderType::ALARM)): {
+            reminder = new (std::nothrow) ReminderRequestAlarm(reminderId);
+            resultSet = Query(ReminderAlarmTable::TABLE_NAME, ReminderAlarmTable::SELECT_COLUMNS, reminderId);
+            break;
+        }
+        default: {
+            ANSR_LOGE("ReminderType from database is error, reminderType %{public}d.", reminderType);
+            break;
+        }
     }
     if (reminder != nullptr) {
         reminder->RecoverFromDbBase(resultBase);
         reminder->RecoverFromDb(resultSet);
         ANSR_LOGI("BuildReminder success.");
-    }
-    else {
+    } else {
         ANSR_LOGW("BuildReminder fail.");
     }
     return reminder;

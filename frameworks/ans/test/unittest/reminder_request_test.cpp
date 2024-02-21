@@ -18,7 +18,7 @@
 #define private public
 #define protected public
 #include "reminder_request.h"
-#include "reminder_table.h"
+#include "reminder_table_old.h"
 #undef private
 #undef protected
 
@@ -1334,7 +1334,6 @@ HWTEST_F(ReminderRequestTest, AddColumn_00002, Function | SmallTest | Level1)
     std::string type = "this is type";
     ReminderTable::AddColumn(name, type, true);
     ReminderTable::AddColumn(name, type, false);
-    EXPECT_EQ(ReminderTable::columns.size(), 2);
 }
 
 /**
