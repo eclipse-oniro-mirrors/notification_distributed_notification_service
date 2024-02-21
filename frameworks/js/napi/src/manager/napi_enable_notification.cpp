@@ -382,7 +382,7 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
 
 void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("Called.");
+    ANS_LOGD("Called.");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -443,7 +443,6 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
         },
         AsyncCompleteCallbackNapiGetAllNotificationEnableStatus, (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
-
     bool isCallback = asynccallbackinfo->info.isCallback;
     napi_status status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {

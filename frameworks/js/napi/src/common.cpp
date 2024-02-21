@@ -1246,7 +1246,7 @@ napi_value Common::SetNotificationTemplateInfo(
 napi_value Common::SetNotificationEnableStatus(
     const napi_env &env, const NotificationBundleOption &bundleOption, napi_value &result)
 {
-    ANS_LOGI("Called.");
+    ANS_LOGD("Called.");
 
     // bundle: string
     napi_value bundleNapi = nullptr;

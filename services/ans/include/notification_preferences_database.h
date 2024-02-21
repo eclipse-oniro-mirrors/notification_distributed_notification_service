@@ -146,6 +146,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     bool GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+
     /**
      * @brief Delete all slots in the of bundle from disturbe DB.
      *
