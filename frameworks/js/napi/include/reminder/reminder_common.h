@@ -151,7 +151,7 @@ private:
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp);
 
     static std::shared_ptr<ReminderRequest::WantAgentInfo> GenRruleWantAgent(
-            const napi_env &env, const napi_value &value, const char*name);
+            const napi_env &env, const napi_value &value, const char* name);
 
     static void GenMaxScreenWantAgent(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);

@@ -958,16 +958,12 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
             continue;
         }
         const int32_t trytimes = 3;
-        int32_t result = StartExtensionAbility(reminder);
-        if (result != ERR_OK)
+        for (int32_t i = 0; i < trytimes; i++)
         {
-            for (int32_t i = 0; i < trytimes; i++)
+            int32_t tryresult = StartExtensionAbility(reminder);
+            if (tryresult == ERR_OK)
             {
-                int32_t tryresult = StartExtensionAbility(reminder);
-                if (tryresult == ERR_OK)
-                {
-                    break;
-                }
+                break;
             }
         }
         if (!isAlerting) {
