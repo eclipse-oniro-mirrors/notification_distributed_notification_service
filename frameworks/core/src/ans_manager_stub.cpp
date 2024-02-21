@@ -46,8 +46,7 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
             std::placeholders::_3)},
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER,
             std::bind(
-                &AnsManagerStub::HandleCancelAsBundleAndUser, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3)},
+                &AnsManagerStub::HandleCancelAsBundleAndUser, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE,
             std::bind(&AnsManagerStub::HandleCancelAsBundle, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},

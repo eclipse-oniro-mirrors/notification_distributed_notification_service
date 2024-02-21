@@ -399,7 +399,7 @@ napi_value ParsePublishAsBundleParameters(
         ANS_LOGW("Error argument type. String number boolean object expected.");
         return nullptr;
     }
-    if(argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
+    if (argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
         if (valuetype == napi_string) {
             char str[STR_MAX_SIZE] = {0};
             size_t strLen = 0;
