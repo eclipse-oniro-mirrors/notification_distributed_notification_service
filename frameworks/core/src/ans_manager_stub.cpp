@@ -43,10 +43,11 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION,
             std::bind(
                 &AnsManagerStub::HandleCancelAsBundleOption, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3)},
+                std::placeholders::_3)},
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER,
             std::bind(
-                &AnsManagerStub::HandleCancelAsBundleAndUser, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
+                &AnsManagerStub::HandleCancelAsBundleAndUser, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3)},
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE,
             std::bind(&AnsManagerStub::HandleCancelAsBundle, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
@@ -373,7 +374,8 @@ ErrCode AnsManagerStub::HandleCancelAll(MessageParcel &data, MessageParcel &repl
     }
     return ERR_OK;
 }
-ErrCode AnsManagerStub::HandleCancelAsBundleOption(MessageParcel &data, MessageParcel &reply) 
+
+ErrCode AnsManagerStub::HandleCancelAsBundleOption(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NotificationBundleOption> bundleOption = data.ReadStrongParcelable<NotificationBundleOption>();
     if (bundleOption == nullptr) {

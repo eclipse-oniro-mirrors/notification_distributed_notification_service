@@ -257,7 +257,6 @@ ErrCode AnsManagerProxy::CancelAsBundle(
     return result;
 }
 
-
 ErrCode AnsManagerProxy::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications)
 {
     MessageParcel data;
