@@ -961,7 +961,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         for (int32_t i = 0; i < trytimes; i++)
         {
             int32_t tryresult = StartExtensionAbility(reminder);
-            if (tryresult == ERR_OK)
+            if (tryresult == ERR_OK) 
             {
                 break;
             }

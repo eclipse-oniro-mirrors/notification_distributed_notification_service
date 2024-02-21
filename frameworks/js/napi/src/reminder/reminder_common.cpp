@@ -407,18 +407,18 @@ ReminderCommon::GenRruleWantAgent(const napi_env &env, const napi_value &value, 
     napi_value wantAgent = nullptr;
     if (GetObject(env, value, name, wantAgent))
     {
-        auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+        auto wantAgentInfos = std::make_shared<ReminderRequest::WantAgentInfo>();
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str,
                           NotificationNapi::STR_MAX_SIZE))
         {
-            wantAgentInfo->pkgName = str;
+            wantAgentInfos->pkgName = str;
         }
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_ABILITY, str,
                           NotificationNapi::STR_MAX_SIZE))
         {
-            wantAgentInfo->abilityName = str;
+            wantAgentInfos->abilityName = str;
         }
-        return wantAgentInfo;
+        return wantAgentInfos;
     }
     return nullptr;
 }
