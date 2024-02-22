@@ -142,8 +142,8 @@ private:
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static tm ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
-                                       const int32_t propertyDayVal, const int32_t propertyHourVal,
-                                       const int32_t propertyMinteVal);
+        const int32_t propertyDayVal, const int32_t propertyHourVal,
+        const int32_t propertyMinteVal);
 
     static bool CreateReminder(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);

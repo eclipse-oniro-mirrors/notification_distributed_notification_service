@@ -974,7 +974,7 @@ HWTEST_F(ReminderRequestCalendarTest, GetRRuleWantAgentInfo_00001, Level1)
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     wantInfo->pkgName = "calendardata service";
     wantInfo->abilityName = "ReminderCallbackExtAbility";
-    tm dateTIme {};
+    tm dateTime {};
     std::vector<uint8_t> repeatMonths;
     std::vector<uint8_t> repeatDays;
     std::vector<uint8_t> daysOfWeek;
