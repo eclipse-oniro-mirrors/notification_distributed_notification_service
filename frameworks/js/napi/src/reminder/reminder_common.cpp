@@ -401,8 +401,8 @@ bool ReminderCommon::GenWantAgent(
 }
 
 std::shared_ptr<ReminderRequest::WantAgentInfo>ReminderCommon::GenRruleWantAgent(const napi_env &env,
-                                                                                 const napi_value &value,
-                                                                                 const char* name)
+    const napi_value &value,
+    const char* name)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
