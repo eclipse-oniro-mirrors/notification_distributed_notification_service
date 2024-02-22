@@ -50,6 +50,19 @@ ErrCode AnsManagerStub::CancelAsBundle(int32_t notificationId, const std::string
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+{
+    ANS_LOGE("AnsManagerStub::CancelAsBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
+{
+    ANS_LOGE("AnsManagerStub::CancelAsBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::AddSlotByType(NotificationConstant::SlotType slotType)
 {
     ANS_LOGE("AnsManagerStub::AddSlotByType called!");
