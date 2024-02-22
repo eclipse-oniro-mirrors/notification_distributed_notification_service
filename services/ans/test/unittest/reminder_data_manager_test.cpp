@@ -615,7 +615,7 @@ HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
     std::vector<uint8_t> daysOfWeek;
     ReminderRequestCalendar reminder = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays, daysOfWeek);
     AAFwk::Want want;
-    want.SetElementName("com.huawei.hmos.clendardata", "ReminderCallbackExtAbility");
+    want.SetElementName("calendardata service", "ReminderCallbackExtAbility");
     AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr);
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
