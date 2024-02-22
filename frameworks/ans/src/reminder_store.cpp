@@ -129,7 +129,7 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
     queryResultSet->IsAtLastRow(isAtLastRow);
     while (!isAtLastRow) {
         queryResultSet->GoToNextRow();
-        int32_t reminderId
+        int32_t reminderId;
         int32_t reminderType;
         GetInt32Val(queryResultSet, ReminderTable::REMINDER_ID, reminderId);
         GetInt32Val(queryResultSet, ReminderTable::REMINDER_TYPE, reminderType);
@@ -264,7 +264,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
     std::vector<std::string> whereArgs;
     int32_t ret = rdbStore_->Delete(delRows, ReminderBaseTable::TABLE_NAME, condition, whereArgs);
     if (ret != NativeRdb::E_OK) {
-        ANSR_LOGE("Delete from %{public}s failed, reminderId = %{public}d", 
+        ANSR_LOGE("Delete from %{public}s failed, reminderId = %{public}d",
             ReminderBaseTable::TABLE_NAME.c_str(), reminderId);
         rdbStore_->RollBack();
         return STATE_FAIL;
@@ -272,7 +272,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
     delRows = STATE_FAIL;
     ret = rdbStore_->Delete(delRows, ReminderAlarmTable::TABLE_NAME, condition, whereArgs);
     if (ret != NativeRdb::E_OK) {
-        ANSR_LOGE("Delete from %{public}s failed, reminderId = %{public}d", 
+        ANSR_LOGE("Delete from %{public}s failed, reminderId = %{public}d",
             ReminderAlarmTable::TABLE_NAME.c_str(), reminderId);
         rdbStore_->RollBack();
         return STATE_FAIL;
@@ -473,7 +473,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::DeleteBase(const std:
     return deletedRows;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& baseCondition, 
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& baseCondition,
     const std::string& assoConditon)
 {
     if (rdbStore_ == nullptr) {
