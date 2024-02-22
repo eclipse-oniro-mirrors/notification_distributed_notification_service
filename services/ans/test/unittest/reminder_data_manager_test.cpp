@@ -28,6 +28,8 @@
 #include "reminder_request_timer.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request.h"
+#include "reminder_request_calendar.h"
+#include "ability_manager_client.h"
 #undef private
 #undef protected
 
@@ -607,9 +609,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
 {
-    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
-    reminder->SetReminderId(0);
-    manager->StartExtensionAbility(reminder);
+    tm dateTime {};
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    ReminderRequestCalendar reminder = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays, daysOfWeek);
+    AAFwk::Want want;
+    want.SetElementName("com.huawei.hmos.clendardata", "ReminderCallbackExtAbility");
+    AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr);
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }

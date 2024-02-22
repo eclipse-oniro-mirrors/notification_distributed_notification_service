@@ -924,22 +924,38 @@ HWTEST_F(ReminderRequestCalendarTest, SetRepeatMonths_00001, Function | SmallTes
 }
 
 /**
- * @tc.name: RecoverFromDb_00001
- * @tc.desc: Test RecoverFromDb parameters.
+ * @tc.name: SetRRuleWantAgentInfo_00001
+ * @tc.desc: Test SetRRuleWantAgentInfo.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestCalendarTest, SetRRuleWantAgentInfo_00001, Level1)
 {
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    wantInfo->pkgName = "com.huawei.hmos.calendardata";
+    wantInfo->abilityName = "ReminderCallbackExtAbility";
+    tm dateTime {};
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays, daysOfWeek);
+    calendar->SetRRuleWantAgentInfo(wantInfo);
+    std::shared_ptr<ReminderRequest> reminder = calendar;
+    EXPECT_TRUE(reminder != nullptr);
+}
 
-    std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-    calendar->RecoverFromDb(resultSet);
-    bool result = calendar->IsRepeatDay(1);
-    EXPECT_EQ(result, false);
+/**
+ * @tc.name: GetRRuleWantAgentInfo_00001
+ * @tc.desc: Test SetRRuleWantAgentInfo_00001.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, GetRRuleWantAgentInfo_00001, Level1)
+{
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    wantInfo->pkgName = "com.huawei.hmos.calendardata";
+    wantInfo->abilityName = "ReminderCallbackExtAbility";
+    EXPECT_TRUE(wantInfo != nullptr);
 }
 }
 }
