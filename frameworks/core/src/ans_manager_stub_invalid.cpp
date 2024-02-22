@@ -525,9 +525,9 @@ ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode AnsManagerStub::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGE("AnsManagerStub::SetBadgeNumber called!");
+    ANS_LOGE("AnsManagerStub::GetAllNotificationEnabledBundles called!");
     return ERR_INVALID_OPERATION;
 }
 

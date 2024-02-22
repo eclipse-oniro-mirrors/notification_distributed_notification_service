@@ -251,10 +251,10 @@ public:
     /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status vector.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status);
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Remove all proferences info from DB.

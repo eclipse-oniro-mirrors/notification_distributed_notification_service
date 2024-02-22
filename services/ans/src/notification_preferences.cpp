@@ -473,7 +473,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
     return result;
 }
 
-ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     std::lock_guard<std::mutex> lock(preferenceMutex_);
@@ -482,7 +482,7 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<Bu
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    if (preferncesDB_->GetAllNotificationEnabledBundles(status)) {
+    if (preferncesDB_->GetAllNotificationEnabledBundles(bundleOption)) {
         preferencesInfo_ = preferencesInfo;
     } else {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;

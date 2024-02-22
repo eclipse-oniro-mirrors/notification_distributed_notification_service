@@ -2006,11 +2006,11 @@ ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel 
 
 ErrCode AnsManagerStub::HandleGetAllNotificationEnableStatus(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<BundleNotificationStatus> status;
-    ErrCode result = GetAllNotificationEnabledBundles(status);
-    int32_t vectorSize = status.size();
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode result = GetAllNotificationEnabledBundles(bundleOption);
+    int32_t vectorSize = bundleOption.size();
     if (vectorSize > MAX_STATUS_VECTOR_NUM) {
-        ANS_LOGE("Bundle status vector is over size.");
+        ANS_LOGE("Bundle bundleOption vector is over size.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2020,18 +2020,18 @@ ErrCode AnsManagerStub::HandleGetAllNotificationEnableStatus(MessageParcel &data
     }
 
     if (!reply.WriteInt32(vectorSize)) {
-        ANS_LOGE("Write status size failed.");
+        ANS_LOGE("Write bundleOption size failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    for (const auto &item : status) {
+    for (const auto &item : bundleOption) {
         if (!reply.WriteParcelable(&item)) {
             ANS_LOGE("Write bundleOption failed");
             return ERR_ANS_PARCELABLE_FAILED;
         }
     }
 
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AnsManagerStub::HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply)

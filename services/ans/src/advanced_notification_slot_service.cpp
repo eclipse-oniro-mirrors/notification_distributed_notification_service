@@ -514,7 +514,8 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
     return result;
 }
 
-ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     if (!AccessTokenHelper::IsSystemApp()) {
@@ -532,7 +533,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(std::vecto
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().GetAllNotificationEnabledBundles(status);
+        result = NotificationPreferences::GetInstance().GetAllNotificationEnabledBundles(bundleOption);
         if (result != ERR_OK) {
             ANS_LOGE("Get all notification enable status failed");
             return;

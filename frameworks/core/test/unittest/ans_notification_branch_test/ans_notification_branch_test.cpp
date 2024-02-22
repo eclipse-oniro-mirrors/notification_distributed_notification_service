@@ -267,7 +267,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) override
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)override
     {
         return ERR_ANS_INVALID_PARAM;
     }
