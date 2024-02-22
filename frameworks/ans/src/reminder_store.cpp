@@ -438,6 +438,10 @@ void ReminderStore::GetStringVal(const std::shared_ptr<NativeRdb::ResultSet>& re
 __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::InitData()
 {
     ANSR_LOGD("Reminder data init.");
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
     // delete all the reminders which IS_EXPIRED is true.
     std::string deleteCondition = ReminderBaseTable::IS_EXPIRED + " is true";
     DeleteBase(deleteCondition);
@@ -518,6 +522,10 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::str
 int32_t ReminderStore::Insert(
     const sptr<ReminderRequest>& reminder, const sptr<NotificationBundleOption>& bundleOption)
 {
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
     int64_t rowId = STATE_FAIL;
     NativeRdb::ValuesBucket baseValues;
     ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues);
@@ -556,6 +564,10 @@ int32_t ReminderStore::Insert(
 int32_t ReminderStore::Update(
     const sptr<ReminderRequest>& reminder, const sptr<NotificationBundleOption>& bundleOption)
 {
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
     int32_t rowId = STATE_FAIL;
     NativeRdb::ValuesBucket baseValues;
     ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues);
