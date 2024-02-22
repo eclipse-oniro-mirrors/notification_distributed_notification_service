@@ -965,7 +965,7 @@ HWTEST_F(ReminderRequestCalendarTest, SetRRuleWantAgentInfo_00001, Level1)
 
 /**
  * @tc.name: GetRRuleWantAgentInfo_00001
- * @tc.desc: Test SetRRuleWantAgentInfo_00001.
+ * @tc.desc: Test GetRRuleWantAgentInfo_00001.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -974,6 +974,13 @@ HWTEST_F(ReminderRequestCalendarTest, GetRRuleWantAgentInfo_00001, Level1)
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     wantInfo->pkgName = "calendardata service";
     wantInfo->abilityName = "ReminderCallbackExtAbility";
+    tm dateTIme {};
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
+    calendar->SetRRuleWantAgentInfo(wantInfo);
+    auto result = calendar->GetRRuleWantAgentInfo();
     EXPECT_TRUE(wantInfo != nullptr);
 }
 }

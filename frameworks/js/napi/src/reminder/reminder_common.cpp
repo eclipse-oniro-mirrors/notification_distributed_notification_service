@@ -815,22 +815,26 @@ napi_value ReminderCommon::CreateReminderCalendar(
         !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_MINUTE, propertyMinteVal, true)) {
         return nullptr;
     }
+
     if (!CheckCalendarParams(propertyYearVal, propertyMonthVal, propertyDayVal,
         propertyHourVal, propertyMinteVal)) {
         return nullptr;
     }
+
     // repeatMonth
     std::vector<uint8_t> repeatMonths;
     if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_MONTHS, repeatMonths,
         ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) == nullptr) {
         return nullptr;
     }
+
     // repeatDay
     std::vector<uint8_t> repeatDays;
     if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_DAYS, repeatDays,
         ReminderRequestCalendar::MAX_DAYS_OF_MONTH) == nullptr) {
         return nullptr;
     }
+
     // daysOfWeek
     std::vector<uint8_t> daysOfWeek;
     uint8_t maxDaysOfWeek = 7;
@@ -843,6 +847,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
     }
+
     // wantAgent
     reminderCalendar->SetRRuleWantAgentInfo(GenRruleWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT));
     reminder = reminderCalendar;
