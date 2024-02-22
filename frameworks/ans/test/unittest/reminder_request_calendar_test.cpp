@@ -936,7 +936,7 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
     EXPECT_NE(nullptr, calendar);
 
     std::shared_ptr<NativeRdb::ResultSet> resultSet =
-            std::make_shared<NativeRdb::AbsSharedResultSet>();
+        std::make_shared<NativeRdb::AbsSharedResultSet>();
     calendar->RecoverFromDb(resultSet);
     bool result = calendar->IsRepeatDay(1);
     EXPECT_EQ(result, false);
