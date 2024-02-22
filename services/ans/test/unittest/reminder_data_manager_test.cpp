@@ -598,5 +598,20 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
+
+/**
+ * @tc.name: StartExtensionAbilityTest_001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI92G9T
+ */
+HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    reminder->SetReminderId(0);
+    manager->StartExtensionAbility(reminder);
+    system("rm -rf /data/service/el1/public/notification/");
+    EXPECT_TRUE(manager != nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

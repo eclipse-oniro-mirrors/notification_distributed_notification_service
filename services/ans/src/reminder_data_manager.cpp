@@ -978,6 +978,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
 
 int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
 {
+    ANSR_LOGD('StartExtensionAbility');
     int32_t result = AAFwk::DEFAULT_INVAL_VALUE;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
@@ -988,6 +989,7 @@ int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &
             result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
             ANSR_LOGE("END, result = %{public}d", result);
         } else {
+            ANSR_LOGD('not StartExtensionAbility');
             return 0;
         }
     }
