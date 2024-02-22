@@ -981,7 +981,7 @@ HWTEST_F(ReminderRequestCalendarTest, GetRRuleWantAgentInfo_00001, Level1)
     auto calendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetRRuleWantAgentInfo(wantInfo);
     auto result = calendar->GetRRuleWantAgentInfo();
-    EXPECT_TRUE(wantInfo != nullptr);
+    EXPECT_TRUE(result != nullptr);
 }
 }
 }

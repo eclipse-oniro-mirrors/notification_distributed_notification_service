@@ -777,6 +777,7 @@ napi_value ReminderCommon::CreateReminderAlarm(
             ReminderAgentNapi::ALARM_HOUR);
         return nullptr;
     }
+
     if ((propertyMinuteVal < 0) || (propertyMinuteVal > maxMinute)) {
         ANSR_LOGW("Create alarm reminder fail: designated %{public}s must between [0, 59].",
             ReminderAgentNapi::ALARM_MINUTE);
