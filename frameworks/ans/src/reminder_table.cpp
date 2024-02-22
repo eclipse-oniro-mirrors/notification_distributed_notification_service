@@ -71,6 +71,13 @@ const std::string ReminderCalendarTable::REPEAT_DAYS_OF_WEEK = "repeat_days_of_w
 const std::string ReminderCalendarTable::RRULE_WANT_AGENT = "rrule_want_agent";
 const std::string ReminderCalendarTable::EXCLUDE_DATES = "exclude_dates";
 
+// reminder timer table
+const std::string ReminderTimerTable::TABLE_NAME = "reminder_timer";
+const std::string ReminderTimerTable::REMINDER_ID = "reminder_id";
+const std::string ReminderTimerTable::TRIGGER_SECOND = "trigger_second";
+const std::string ReminderTimerTable::START_DATE_TIME = "start_date_time";
+const std::string ReminderTimerTable::END_DATE_TIME = "end_date_time";
+
 std::string ReminderBaseTable::ADD_COLUMNS = "";
 std::string ReminderBaseTable::SELECT_COLUMNS = "";
 
@@ -79,6 +86,9 @@ std::string ReminderAlarmTable::SELECT_COLUMNS = "";
 
 std::string ReminderCalendarTable::ADD_COLUMNS = "";
 std::string ReminderCalendarTable::SELECT_COLUMNS = "";
+
+std::string ReminderTimerTable::ADD_COLUMNS = "";
+std::string ReminderTimerTable::SELECT_COLUMNS = "";
 
 static inline void AddColumn(const std::string& name, const std::string& type, std::string& sqlOfColumns,
     std::string& columns)
@@ -151,6 +161,14 @@ void ReminderCalendarTable::InitDbColumns()
     AddColumn(REPEAT_DAYS_OF_WEEK, "INT", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumn(RRULE_WANT_AGENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumnEnd(EXCLUDE_DATES, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+}
+
+void ReminderTimerTable::InitDbColumns()
+{
+    AddColumn(REMINDER_ID, "INTEGER PRIMARY KEY", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(TRIGGER_SECOND, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(START_DATE_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumnEnd(END_DATE_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
 }
 }
 }

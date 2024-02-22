@@ -238,6 +238,29 @@ public:
     static std::string ADD_COLUMNS;
     static std::string SELECT_COLUMNS;
 };
+
+class ReminderTimerTable {
+public:
+    /*
+     * reminder timer table name
+     */
+    static const std::string TABLE_NAME;
+
+    /*
+     * reminder timer table field
+     */
+    static const std::string REMINDER_ID;
+    static const std::string TRIGGER_SECOND;
+    static const std::string START_DATE_TIME;
+    static const std::string END_DATE_TIME;
+
+public:
+    static void InitDbColumns();
+
+public:
+    static std::string ADD_COLUMNS;
+    static std::string SELECT_COLUMNS;
+};
 }  // namespace Notification
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_TABLE_H
