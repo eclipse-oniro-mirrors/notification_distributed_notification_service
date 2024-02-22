@@ -449,7 +449,7 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
         asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete NapiGetAllNotificationEnabledBundles callback reference.");
+            ANS_LOGD("Delete callback reference.");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
