@@ -931,16 +931,16 @@ HWTEST_F(ReminderRequestCalendarTest, SetRepeatMonths_00001, Function | SmallTes
  */
 HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest | Level1)
 {
-struct tm nowTime;
-auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-EXPECT_NE(nullptr, calendar);
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
 
-std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-calendar->RecoverFromDb(resultSet);
-bool result = calendar->IsRepeatDay(1);
-EXPECT_EQ(result, false);
-}
+    std::shared_ptr<NativeRdb::ResultSet> resultSet =
+            std::make_shared<NativeRdb::AbsSharedResultSet>();
+    calendar->RecoverFromDb(resultSet);
+    bool result = calendar->IsRepeatDay(1);
+    EXPECT_EQ(result, false);
+    }
 
 /**
  * @tc.name: SetRRuleWantAgentInfo_00001
