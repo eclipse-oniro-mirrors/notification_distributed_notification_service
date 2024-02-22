@@ -1076,6 +1076,20 @@ HWTEST_F(NotificationHelperTest, SetType_00001, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetAllNotificationEnabledBundles_00001
+ * @tc.desc: Test GetAllNotificationEnabledBundles parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationHelperTest, GetAllNotificationEnabledBundles_00001, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetAllNotificationEnabledBundles(bundleOption);
+    EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.name: GetActiveNotificationByFilter_00001
  * @tc.desc: Test GetActiveNotificationByFilter parameters.
  * @tc.type: FUNC

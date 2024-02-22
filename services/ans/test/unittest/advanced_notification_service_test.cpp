@@ -4614,6 +4614,22 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_00002, Function |
 }
 
 /**
+ * @tc.number    : GetAllNotificationEnabledBundles_0001
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Test GetAllNotificationEnabledBundles function if not systemapp.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0001 test start";
+
+    std::vector<NotificationBundleOption> vec;
+    EXPECT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec), ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0001 test end";
+}
+
+/**
  * @tc.number    : IsNeedNotifyConsumed_00003
  * @tc.name      : IsNeedNotifyConsumed
  * @tc.desc      : Test IsNeedNotifyConsumed function.

@@ -102,6 +102,27 @@ int SendRequestReplaceString(uint32_t code, MessageParcel &data, MessageParcel &
     return 0;
 }
 
+int SendRequestGetAllEnableNotifications(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option,
+    int32_t error, int32_t retnum,  bool setError, int32_t notificationNum)
+{
+    if (setError) {
+        reply.WriteInt32(error);
+    }
+
+    if (retnum) {
+        reply.WriteInt32(retnum);
+    }
+
+    if (notificationNum > 0) {
+        for (int32_t i = 0; i < notificationNum; i++) {
+            sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+            reply.WriteParcelable(bundleOption);
+        }
+    }
+
+    return 0;
+}
+
 class TestSubscriber : public NotificationSubscriber {
 public:
     void OnDisconnected() override
@@ -7639,6 +7660,92 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     int32_t badgeNumber = 0;
     int32_t result = proxy->SetBadgeNumber(badgeNumber);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/*
+ * @tc.name: GetAllNotificationEnabledBundles_0100
+ * @tc.desc: test GetAllNotificationEnabledBundles function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0100, TestSize.Level1";
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t result = proxy->GetAllNotificationEnabledBundles(bundleOption);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/*
+ * @tc.name: GetAllNotificationEnabledBundles_0200
+ * @tc.desc: test GetAllNotificationEnabledBundles function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0200, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestGetAllEnableNotifications, _1, _2, _3, _4,
+        ERR_OK, true, 1, 1)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t result = proxy->GetAllNotificationEnabledBundles(bundleOption);
+    EXPECT_EQ(ERR_OK, result);
+}
+
+/*
+ * @tc.name: GetAllNotificationEnabledBundles_0300
+ * @tc.desc: test SetBadgeNumber function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0300, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t result = proxy->GetAllNotificationEnabledBundles(bundleOption);
+    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+}
+
+/*
+ * @tc.name: GetAllNotificationEnabledBundles_0400
+ * @tc.desc: test GetAllNotificationEnabledBundles function
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0400, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, false, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t result = proxy->GetAllNotificationEnabledBundles(bundleOption);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 

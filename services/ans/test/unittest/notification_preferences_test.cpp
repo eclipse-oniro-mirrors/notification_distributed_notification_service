@@ -1246,6 +1246,20 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | S
 }
 
 /**
+ * @tc.number    : GetAllNotificationEnabledBundles_00100
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Get all notification enable bundle in DB when db is null,
+ *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+ * @tc.require   : issueI5SR8J
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetAllNotificationEnabledBundles(bundleOption),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
  * @tc.number    : CheckSlotForUpdateSlot_00400
  * @tc.name      : CheckSlotForUpdateSlot
  * @tc.desc      : Test CheckSlotForUpdateSlot function after add notification slot, return is ERR_OK.

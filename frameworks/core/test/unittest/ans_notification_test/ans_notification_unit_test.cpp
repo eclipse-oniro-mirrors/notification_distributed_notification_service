@@ -896,6 +896,25 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationsEnabledForSpecifiedBundle_0100
 }
 
 /*
+ * @tc.name: GetAllNotificationEnabledBundles_0100
+ * @tc.desc: test GetAllNotificationEnabledBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetAllNotificationEnabledBundles_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode ret = ans_->GetAllNotificationEnabledBundles(bundleOption);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: CancelGroup_0200
  * @tc.desc: test CancelGroup ErrCode ERR_ANS_INVALID_PARAM.
  * @tc.type: FUNC
