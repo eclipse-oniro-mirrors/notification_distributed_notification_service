@@ -31,10 +31,6 @@ namespace OHOS {
         reminderStore.GetAllValidReminders();
         // test Query function
         reminderStore.Query(queryCondition);
-        // test GetBundleOption function
-        sptr<Notification::NotificationBundleOption> bundleOption;
-        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
-        reminderStore.GetBundleOption(reminderId, bundleOption);
         // test GetInt32Val function
         std::shared_ptr<NativeRdb::ResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
         std::string name(data);
