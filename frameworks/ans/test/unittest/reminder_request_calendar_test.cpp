@@ -940,7 +940,7 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
     calendar->RecoverFromDb(resultSet);
     bool result = calendar->IsRepeatDay(1);
     EXPECT_EQ(result, false);
-    }
+}
 
 /**
  * @tc.name: SetRRuleWantAgentInfo_00001
