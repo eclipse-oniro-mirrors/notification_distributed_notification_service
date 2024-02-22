@@ -200,27 +200,23 @@ void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::Rdb
         // insert reminder_alarm or reminder_calendar
         NativeRdb::ValuesBucket values;
         rowId = STATE_FAIL;
-        switch(reminder->GetReminderType()) {
-            case ReminderRequest::ReminderType::CALENDAR: {
+        switch (reminder->GetReminderType()) {
+            case ReminderRequest::ReminderType::CALENDAR:
                 ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
                 ret = store.Insert(rowId, ReminderCalendarTable::TABLE_NAME, values);
                 break;
-            }
-            case ReminderRequest::ReminderType::ALARM: {
+            case ReminderRequest::ReminderType::ALARM:
                 ReminderRequestAlarm::AppendValuesBucket(reminder, bundleOption, values);
                 ret = store.Insert(rowId, ReminderAlarmTable::TABLE_NAME, values);
                 break;
-            }
-            case ReminderRequest::ReminderType::TIMER: {
+            case ReminderRequest::ReminderType::TIMER:
                 ReminderRequestTimer::AppendValuesBucket(reminder, bundleOption, values);
                 ret = store.Insert(rowId, ReminderTimerTable::TABLE_NAME, values);
                 break;
-            }
-            default: {
+            default:
                 ANSR_LOGE("Insert reminder_base operation failed, unkown type.");
                 ret = STATE_FAIL;
                 break;
-            }
         }
         if (ret != NativeRdb::E_OK) {
             ANSR_LOGE("Insert operation failed, result: %{public}d, reminderId=%{public}d.",
@@ -587,7 +583,7 @@ int32_t ReminderStore::Insert(
     // insert reminder_alarm or reminder_calendar
     NativeRdb::ValuesBucket values;
     rowId = STATE_FAIL;
-    switch(reminder->GetReminderType()) {
+    switch (reminder->GetReminderType()) {
         case ReminderRequest::ReminderType::CALENDAR: {
             ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
             ret = rdbStore_->Insert(rowId, ReminderCalendarTable::TABLE_NAME, values);
@@ -648,27 +644,23 @@ int32_t ReminderStore::Update(
     // update reminder_alarm or reminder_calendar
     NativeRdb::ValuesBucket values;
     rowId = STATE_FAIL;
-    switch(reminder->GetReminderType()) {
-        case ReminderRequest::ReminderType::CALENDAR: {
+    switch (reminder->GetReminderType()) {
+        case ReminderRequest::ReminderType::CALENDAR:
             ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
             ret = rdbStore_->Update(rowId, ReminderCalendarTable::TABLE_NAME, values, updateCondition, whereArgs);
             break;
-        }
-        case ReminderRequest::ReminderType::ALARM: {
+        case ReminderRequest::ReminderType::ALARM:
             ReminderRequestAlarm::AppendValuesBucket(reminder, bundleOption, values);
             ret = rdbStore_->Update(rowId, ReminderAlarmTable::TABLE_NAME, values, updateCondition, whereArgs);
             break;
-        }
-        case ReminderRequest::ReminderType::TIMER: {
+        case ReminderRequest::ReminderType::TIMER:
             ReminderRequestTimer::AppendValuesBucket(reminder, bundleOption, values);
             ret = rdbStore_->Update(rowId, ReminderTimerTable::TABLE_NAME, values, updateCondition, whereArgs);
             break;
-        }
-        default: {
+        default:
             ANSR_LOGE("Insert reminder_base operation failed, unkown type.");
             ret = STATE_FAIL;
             break;
-        }
     }
     if (ret != NativeRdb::E_OK) {
         ANSR_LOGE("Update operation failed, result: %{public}d, reminderId=%{public}d.",
