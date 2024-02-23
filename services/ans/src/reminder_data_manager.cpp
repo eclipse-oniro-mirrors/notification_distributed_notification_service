@@ -1324,6 +1324,7 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
+    InitStartExtensionAbility(isFromBootComplete);
     if (IsReminderAgentReady()) {
         return;
     }
@@ -1347,7 +1348,6 @@ void ReminderDataManager::Init(bool isFromBootComplete)
         return;
     }
     LoadReminderFromDb();
-    InitStartExtensionAbility(isFromBootComplete);
     InitUserId();
     isReminderAgentReady_ = true;
     ANSR_LOGD("ReminderAgent is ready.");
