@@ -212,10 +212,10 @@ HWTEST_F(ReminderStoreTest, Query_00002, Function | SmallTest | Level1)
 {
     std::string tableName = "reminder_base";
     std::string colums = "reminder_type";
-    std::string queryCondition = "queryCondition";
+    int32_t reminderId = 0;
     ReminderStore reminderStore;
     std::shared_ptr<NativeRdb::ResultSet> ret = reminderStore.Query(tableName,
-        colums, queryCondition);
+        colums, reminderId);
     EXPECT_EQ(ret, nullptr);
 }
 

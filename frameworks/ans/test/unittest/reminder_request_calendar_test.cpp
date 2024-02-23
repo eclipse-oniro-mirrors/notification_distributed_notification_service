@@ -977,8 +977,8 @@ HWTEST_F(ReminderRequestCalendarTest, SetDateTime_00001, Function | SmallTest | 
 }
 
 /**
- * @tc.name: SetDateTime_00001
- * @tc.desc: Test SetDateTime parameters.
+ * @tc.name: SerializationRRule_00001
+ * @tc.desc: Test SerializationRRule parameters.
  * @tc.type: FUNC
  * @tc.require: issueI92BU9
  */
@@ -987,7 +987,7 @@ HWTEST_F(ReminderRequestCalendarTest, SerializationRRule_00001, Function | Small
     struct tm nowTime;
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
-    std::string result = calendar->SerializationRRule(0);
+    std::string result = calendar->SerializationRRule();
     EXPECT_EQ(result.size(), 0);
 }
 
