@@ -202,7 +202,7 @@ private:
 
     static bool ValidateString(const std::string &str);
 
-    static bool IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder);
+    static bool IsSelfSystemApp();
 };
 }  // namespace OHOS
 }  // namespace ReminderAgentNapi

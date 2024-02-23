@@ -119,14 +119,13 @@ void ReminderCommon::HandleActionButtonTitle(const napi_env &env, const napi_val
         title.c_str(), buttonType, resource.c_str());
 }
 
-bool ReminderCommon::IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder)
+bool ReminderCommon::IsSelfSystemApp()
 {
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         ANSR_LOGW("This application is not system-app, can not use system-api");
         return false;
     }
-    reminder->SetSystemApp(true);
     return true;
 }
 
