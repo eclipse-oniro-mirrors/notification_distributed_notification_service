@@ -27,6 +27,8 @@ namespace Notification {
         PUBLISH_NOTIFICATION_TO_DEVICE, // Obsolete
         CANCEL_NOTIFICATION,
         CANCEL_ALL_NOTIFICATIONS,
+        CANCEL_AS_BUNDLE_OPTION,
+        CANCEL_AS_BUNDLE_AND_USER,
         CANCEL_AS_BUNDLE,
         ADD_SLOT_BY_TYPE,
         ADD_SLOTS,

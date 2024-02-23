@@ -1456,11 +1456,9 @@ void ReminderDataManager::LoadReminderFromDb()
             ANS_LOGE("Failed to create bundle option due to low memory.");
             return;
         }
+        bundleOption->SetBundleName((*it)->GetBundleName());
+        bundleOption->SetUid((*it)->GetUid());
         int32_t reminderId = (*it)->GetReminderId();
-        if (!(store_->GetBundleOption(reminderId, bundleOption))) {
-            ANSR_LOGE("Get bundle option fail, reminderId=%{public}d", reminderId);
-            continue;
-        }
         auto ret = notificationBundleOptionMap_.insert(
             std::pair<int32_t, sptr<NotificationBundleOption>>(reminderId, bundleOption));
         if (!ret.second) {

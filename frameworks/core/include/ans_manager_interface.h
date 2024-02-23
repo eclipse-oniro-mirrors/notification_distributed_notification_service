@@ -83,6 +83,30 @@ public:
         int32_t notificationId, const std::string &representativeBundle, int32_t userId) = 0;
 
     /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @return Returns cancel notification result.
+     */
+    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) = 0;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application bundle your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @param userId Indicates the specific user.
+     * @return Returns cancel notification result.
+     */
+    virtual ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) = 0;
+
+    /**
      * @brief Adds a notification slot by type.
      *
      * @param slotType Indicates the notification slot type to be added.
@@ -730,10 +754,10 @@ public:
     /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) = 0;
+    virtual ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) = 0;
 
     /**
      * @brief Register Push Callback.

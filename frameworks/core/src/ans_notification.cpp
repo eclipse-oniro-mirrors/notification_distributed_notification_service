@@ -239,6 +239,17 @@ ErrCode AnsNotification::CancelAsBundle(
     return ansManagerProxy_->CancelAsBundle(notificationId, representativeBundle, userId);
 }
 
+ErrCode AnsNotification::CancelAsBundle(
+    const NotificationBundleOption &bundleOption, int32_t notificationId)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->CancelAsBundle(bo, notificationId);
+}
+
 ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
 {
     if (!GetAnsManagerProxy()) {
@@ -1425,13 +1436,13 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
     return ansManagerProxy_->SetBadgeNumber(badgeNumber);
 }
 
-ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetAllNotificationEnabledBundles(status);
+    return ansManagerProxy_->GetAllNotificationEnabledBundles(bundleOption);
 }
 
 ErrCode AnsNotification::RegisterPushCallback(

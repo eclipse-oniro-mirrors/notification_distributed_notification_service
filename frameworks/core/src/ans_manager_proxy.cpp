@@ -22,6 +22,7 @@
 #include "distributed_notification_service_ipc_interface_code.h"
 #include "message_option.h"
 #include "message_parcel.h"
+#include "notification_bundle_option.h"
 #include "parcel.h"
 #include "ans_manager_proxy.h"
 
@@ -169,6 +170,80 @@ ErrCode AnsManagerProxy::CancelAsBundle(
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[CancelAsBundle] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[CancelAsBundle] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[CancelAsBundle] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteParcelable(bundleOption)) {
+        ANS_LOGE("[CancelAsBundle] fail: write BundleOption failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(notificationId)) {
+        ANS_LOGE("[CancelAsBundle] fail: write notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[CancelAsBundle] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[CancelAsBundle] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[CancelAsBundle] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteParcelable(bundleOption)) {
+        ANS_LOGE("[CancelAsBundle] fail: write BundleOption failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(notificationId)) {
+        ANS_LOGE("[CancelAsBundle] fail: write notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        ANS_LOGE("[CancelAsBundle] fail: write notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CancelAsBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1789,7 +1864,7 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
     return result;
 }
 
-ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     MessageParcel data;
@@ -1823,8 +1898,8 @@ ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<BundleNoti
     }
 
     for (auto i = 0; i < vectorSize; i++) {
-        sptr<BundleNotificationStatus> statusObj = reply.ReadParcelable<BundleNotificationStatus>();
-        status.emplace_back(*statusObj);
+        sptr<NotificationBundleOption> obj = reply.ReadParcelable<NotificationBundleOption>();
+        bundleOption.emplace_back(*obj);
     }
 
     return result;

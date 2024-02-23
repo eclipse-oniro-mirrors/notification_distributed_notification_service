@@ -118,11 +118,26 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
 
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
         int32_t uid = -1;
-        if (bundleManager != nullptr) {
-            uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), request->GetOwnerUserId());
-        }
-        if (uid < 0) {
-            return ERR_ANS_INVALID_UID;
+        if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
+            if (bundleManager != nullptr) {
+                uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(),
+                request->GetOwnerUserId());
+            }
+            if (uid < 0) {
+                return ERR_ANS_INVALID_UID;
+            }
+        } else {
+            int32_t userId = SUBSCRIBE_USER_INIT;
+            if (request->GetOwnerUid() < DEFAULT_UID) {
+                return ERR_ANS_GET_ACTIVE_USER_FAILED;
+            }
+            if (request->GetOwnerUid() == DEFAULT_UID) {
+                uid = IPCSkeleton::GetCallingUid();
+            } else {
+                uid = request->GetOwnerUid();
+            }
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+            request->SetOwnerUserId(userId);
         }
         request->SetOwnerUid(uid);
     } else {
@@ -518,7 +533,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());
-        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+        if (IsNeedNotifyConsumed(record->request)) {
+            NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+        }
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         if (!request->IsAgentNotification()) {
             DoDistributedPublish(bundleOption, record);
@@ -1623,6 +1640,23 @@ void AdvancedNotificationService::FillActionButtons(const sptr<NotificationReque
         }
     }));
     notificationSvrQueue_->wait(handler);
+}
+
+bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRequest> &request)
+{
+    if (!request->IsCommonLiveView()) {
+        return true;
+    }
+
+    auto content = request->GetContent()->GetNotificationContent();
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto status = liveViewContent->GetLiveViewStatus();
+    if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
+        return true;
+    }
+
+    auto deleteTime = request->GetAutoDeletedTime();
+    return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

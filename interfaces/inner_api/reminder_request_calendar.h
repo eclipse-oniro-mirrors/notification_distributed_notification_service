@@ -142,15 +142,14 @@ public:
     bool ReadFromParcel(Parcel &parcel) override;
     bool SetNextTriggerTime() override;
 
+    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
+    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
+
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
-
-    // For database recovery.
-    static void InitDbColumns();
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const override;
@@ -185,6 +184,12 @@ private:
     void SetRepeatMonths(const std::vector<uint8_t> &repeatMonths);
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
 
+    void SetDateTime(const uint64_t time);
+    uint64_t GetDateTime();
+
+    std::string SerializationRRule();
+    void DeserializationRRule(const std::string& str);
+
     static const uint8_t JANUARY;
     static const uint8_t DECEMBER;
     static const uint8_t DEFAULT_SNOOZE_TIMES;
@@ -211,6 +216,9 @@ private:
     uint8_t second_ {0};
     uint16_t repeatMonth_ {0};
     uint32_t repeatDay_ {0};
+
+    // repeat calendar
+    std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
 
     static const uint8_t DAY_ARRAY[12];
     static const uint8_t FEBRUARY;

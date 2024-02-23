@@ -15,8 +15,11 @@
 
 #include "reminder_request_calendar.h"
 
-#include "reminder_table.h"
 #include "ans_log_wrapper.h"
+#include "reminder_table.h"
+#include "reminder_table_old.h"
+#include "reminder_store.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace Notification {
@@ -65,6 +68,8 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     second_ = other.second_;
     repeatMonth_ = other.repeatMonth_;
     repeatDay_ = other.repeatDay_;
+    repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
+    rruleWantAgentInfo_ = other.rruleWantAgentInfo_;
 }
 
 void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo)
@@ -270,7 +275,6 @@ bool ReminderRequestCalendar::IsRepeatReminder() const
         || (GetTimeInterval() > 0 && GetSnoozeTimes() > 0);
 }
 
-
 bool ReminderRequestCalendar::IsRepeatMonth(uint8_t month) const
 {
     if (month > MAX_MONTHS_OF_YEAR) {
@@ -416,6 +420,15 @@ bool ReminderRequestCalendar::Marshalling(Parcel &parcel) const
         WRITE_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateDay_, "firstDesignateDay");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, repeatDaysOfWeek_, "repeatDaysOfWeek");
+
+        bool rruleFlag = rruleWantAgentInfo_ == nullptr ? 0 : 1;
+        WRITE_BOOL_RETURN_FALSE_LOG(parcel, rruleFlag, "rruleFlag");
+        if (rruleWantAgentInfo_ != nullptr) {
+            WRITE_STRING_RETURN_FALSE_LOG(parcel, rruleWantAgentInfo_->pkgName, "rruleWantAgentInfo's pkgName");
+            WRITE_STRING_RETURN_FALSE_LOG(parcel, rruleWantAgentInfo_->abilityName, "rruleWantAgentInfo's abilityName");
+            WRITE_STRING_RETURN_FALSE_LOG(parcel, rruleWantAgentInfo_->uri, "rruleWantAgentInfo's uri");
+        }
         return true;
     }
     return false;
@@ -454,15 +467,24 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         READ_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateDay_, "firstDesignateDay");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, repeatDaysOfWeek_, "repeatDaysOfWeek");
 
+        bool rruleFlag = false;
+        READ_BOOL_RETURN_FALSE_LOG(parcel, rruleFlag, "rruleFlag");
+        if (rruleFlag) {
+            rruleWantAgentInfo_ = std::make_shared<WantAgentInfo>();
+            READ_STRING_RETURN_FALSE_LOG(parcel, rruleWantAgentInfo_->pkgName, "rruleWantAgentInfo's pkgName");
+            READ_STRING_RETURN_FALSE_LOG(parcel, rruleWantAgentInfo_->abilityName, "rruleWantAgentInfo's abilityName");
+            READ_STRING_RETURN_FALSE_LOG(parcel, rruleWantAgentInfo_->uri, "rruleWantAgentInfo's uri");
+        }
         return true;
     }
     return false;
 }
 
-void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
+void ReminderRequestCalendar::RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
 {
-    ReminderRequest::RecoverFromDb(resultSet);
+    ReminderRequest::RecoverFromOldVersion(resultSet);
 
     // repeatDay
     repeatDay_ = static_cast<uint32_t>(RecoverInt64FromDb(resultSet, ReminderTable::REPEAT_DAYS,
@@ -509,19 +531,49 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
         DbRecoveryType::INT));
 }
 
+void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
+{
+    if (resultSet == nullptr) {
+        ANSR_LOGE("ResultSet is null");
+        return;
+    }
+    ReminderStore::GetUInt16Val(resultSet, ReminderCalendarTable::FIRST_DESIGNATE_YEAR, firstDesignateYear_);
+    ReminderStore::GetUInt8Val(resultSet, ReminderCalendarTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth_);
+    ReminderStore::GetUInt8Val(resultSet, ReminderCalendarTable::FIRST_DESIGNATE_DAY, firstDesignateDay_);
+
+    uint64_t dateTime;
+    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
+    SetDateTime(dateTime);
+
+    uint64_t endDateTime;
+    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
+
+    int32_t repeatDay;
+    ReminderStore::GetInt32Val(resultSet, ReminderCalendarTable::REPEAT_DAYS, repeatDay);
+    repeatDay_ = static_cast<uint32_t>(repeatDay);
+
+    ReminderStore::GetUInt16Val(resultSet, ReminderCalendarTable::REPEAT_MONTHS, repeatMonth_);
+    ReminderStore::GetUInt8Val(resultSet, ReminderCalendarTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek_);
+
+    std::string rruleWantAgent;
+    ReminderStore::GetStringVal(resultSet, ReminderCalendarTable::RRULE_WANT_AGENT, rruleWantAgent);
+    DeserializationRRule(rruleWantAgent);
+
+    std::string excludeDates;
+    ReminderStore::GetStringVal(resultSet, ReminderCalendarTable::EXCLUDE_DATES, excludeDates);
+}
+
 void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values)
 {
-    uint32_t repeatDay = 0;
-    uint16_t repeatMonth = 0;
     uint16_t firstDesignateYear = 0;
     uint8_t firstDesignateMonth = 0;
     uint8_t firstDesignateDay = 0;
-    uint16_t year = 0;
-    uint8_t month = 0;
-    uint8_t day = 0;
-    uint8_t hour = 0;
-    uint8_t minute = 0;
+    uint64_t dateTime = 0;
+    uint32_t repeatDay = 0;
+    uint16_t repeatMonth = 0;
+    uint8_t repeatDaysOfWeek = 0;
+    std::string rruleWantAgent;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         if (calendar != nullptr) {
@@ -530,24 +582,83 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
             firstDesignateYear = calendar->GetFirstDesignateYear();
             firstDesignateMonth = calendar->GetFirstDesignageMonth();
             firstDesignateDay = calendar->GetFirstDesignateDay();
-            year = calendar->GetYear();
-            month = calendar->GetMonth();
-            day = calendar->GetDay();
-            hour = calendar->GetHour();
-            minute = calendar->GetMinute();
+            dateTime = calendar->GetDateTime();
+            repeatDaysOfWeek = calendar->GetRepeatDaysOfWeek();
+            rruleWantAgent = calendar->SerializationRRule();
         }
     }
-    values.PutInt(ReminderTable::REPEAT_DAYS, repeatDay);
-    values.PutInt(ReminderTable::REPEAT_MONTHS, repeatMonth);
-    values.PutInt(ReminderTable::FIRST_DESIGNATE_YEAR, firstDesignateYear);
-    values.PutInt(ReminderTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth);
-    values.PutInt(ReminderTable::FIRST_DESIGNATE_DAY, firstDesignateDay);
-    values.PutInt(ReminderTable::CALENDAR_YEAR, year);
-    values.PutInt(ReminderTable::CALENDAR_MONTH, month);
-    values.PutInt(ReminderTable::CALENDAR_DAY, day);
-    values.PutInt(ReminderTable::CALENDAR_HOUR, hour);
-    values.PutInt(ReminderTable::CALENDAR_MINUTE, minute);
+    values.PutInt(ReminderCalendarTable::REMINDER_ID, reminder->GetReminderId());
+    values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_YEAR, firstDesignateYear);
+    values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth);
+    values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_DAY, firstDesignateDay);
+    values.PutLong(ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
+    values.PutLong(ReminderCalendarTable::CALENDAR_END_DATE_TIME, 0);  // next
+    values.PutInt(ReminderCalendarTable::REPEAT_DAYS, repeatDay);
+    values.PutInt(ReminderCalendarTable::REPEAT_MONTHS, repeatMonth);
+    values.PutInt(ReminderCalendarTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
+    values.PutString(ReminderCalendarTable::RRULE_WANT_AGENT, rruleWantAgent);
+    values.PutString(ReminderCalendarTable::EXCLUDE_DATES, "");  // next
 }
 
+void ReminderRequestCalendar::SetDateTime(const uint64_t time)
+{
+    time_t t = static_cast<time_t>(time / MILLI_SECONDS);
+    struct tm dateTime;
+    (void)localtime_r(&t, &dateTime);
+
+    year_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, dateTime.tm_year));
+    month_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, dateTime.tm_mon));
+    day_ = static_cast<uint8_t>(dateTime.tm_mday);
+    hour_ = static_cast<uint8_t>(dateTime.tm_hour);
+    minute_ = static_cast<uint8_t>(dateTime.tm_min);
+    second_ = static_cast<uint8_t>(dateTime.tm_sec);
+}
+
+uint64_t ReminderRequestCalendar::GetDateTime()
+{
+    struct tm dateTime;
+    dateTime.tm_year = GetCTime(TimeTransferType::YEAR, year_);
+    dateTime.tm_mon = GetCTime(TimeTransferType::MONTH, month_);
+    dateTime.tm_mday = static_cast<int>(day_);
+    dateTime.tm_hour = static_cast<int>(hour_);
+    dateTime.tm_min = static_cast<int>(minute_);
+    dateTime.tm_sec = static_cast<int>(second_);
+    dateTime.tm_isdst = -1;
+
+    time_t time = mktime(&dateTime);
+    return GetDurationSinceEpochInMilli(time);
+}
+
+std::string ReminderRequestCalendar::SerializationRRule()
+{
+    constexpr int32_t INDENT = -1;
+    if (rruleWantAgentInfo_ == nullptr) {
+        return "";
+    }
+    nlohmann::json root;
+    root["pkgName"] = rruleWantAgentInfo_->pkgName;
+    root["abilityName"] = rruleWantAgentInfo_->abilityName;
+    root["uri"] = rruleWantAgentInfo_->uri;
+    std::string str = root.dump(INDENT, ' ', false, nlohmann::json::error_handler_t::replace);
+    return str;
+}
+
+void ReminderRequestCalendar::DeserializationRRule(const std::string& str)
+{
+    if (str.empty()) {
+        return;
+    }
+    nlohmann::json root = nlohmann::json::parse(str);
+    if (!root.contains("pkgName") || !root["pkgName"].is_string() ||
+        !root.contains("abilityName") || !root["abilityName"].is_string() ||
+        !root.contains("uri") || !root["uri"].is_string()) {
+        return;
+    }
+
+    rruleWantAgentInfo_ = std::make_shared<WantAgentInfo>();
+    rruleWantAgentInfo_->pkgName = root["pkgName"].get<std::string>();
+    rruleWantAgentInfo_->abilityName = root["abilityName"].get<std::string>();
+    rruleWantAgentInfo_->uri = root["uri"].get<std::string>();
+}
 }
 }

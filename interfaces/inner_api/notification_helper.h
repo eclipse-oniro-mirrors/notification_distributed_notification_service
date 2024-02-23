@@ -186,6 +186,17 @@ public:
     static ErrCode CancelAsBundle(int32_t notificationId, const std::string &representativeBundle, int32_t userId);
 
     /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application bundle your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @return Returns cancel notification result.
+     */
+    static ErrCode CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId);
+
+    /**
      * @brief Obtains the number of active notifications of the current application in the system.
      *
      * @param nums Indicates the number of active notifications of the current application.
@@ -828,10 +839,10 @@ public:
     /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    static ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status);
+    static ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Register Push Callback.

@@ -123,6 +123,30 @@ public:
         int32_t notificationId, const std::string &representativeBundle, int32_t userId) override;
 
     /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application bundle your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application bundle your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @param userId Indicates the specific user.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
+
+    /**
      * @brief Adds a notification slot by type.
      *
      * @param slotType Indicates the notification slot type to be added.
@@ -826,10 +850,10 @@ public:
     /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status vector.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) override;
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override;
 
     /**
      * @brief Register Push Callback.
@@ -1024,6 +1048,7 @@ private:
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest);
     ErrCode IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType);
+    bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

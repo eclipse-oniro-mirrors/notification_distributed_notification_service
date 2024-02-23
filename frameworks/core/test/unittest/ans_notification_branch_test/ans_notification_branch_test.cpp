@@ -71,6 +71,18 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode AddSlotByType(NotificationConstant::SlotType slotType) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -255,7 +267,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) override
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)override
     {
         return ERR_ANS_INVALID_PARAM;
     }

@@ -31,7 +31,7 @@ namespace OHOS {
         reminderStore.Delete(oldVersion);
         reminderStore.DeleteUser(oldVersion);
         reminderStore.Delete(stringData, oldVersion);
-        return reminderStore.Delete(stringData);
+        return reminderStore.DeleteBase(stringData);
     }
 }
 
