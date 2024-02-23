@@ -979,7 +979,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
 int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
 {
     ANSR_LOGD("StartExtensionAbility");
-    int32_t result = AAFwk::DEFAULT_INVAL_VALUE;
+    int32_t result = ERROR_PARAM_INVALID;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
@@ -991,7 +991,7 @@ int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &
             ANSR_LOGE("END, result = %{public}d", result);
         } else {
             ANSR_LOGD("not StartExtensionAbility");
-            return 0;
+            return ERROR_PARAM_INVALID;
         }
     }
     return result;

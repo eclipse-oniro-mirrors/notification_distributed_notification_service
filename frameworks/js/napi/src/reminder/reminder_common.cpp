@@ -440,7 +440,7 @@ void ReminderCommon::GenMaxScreenWantAgent(
     }
 }
 bool ReminderCommon::CreateReminder(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+    const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)
 {
     napi_value result = nullptr;
     napi_get_named_property(env, value, ReminderAgentNapi::REMINDER_TYPE, &result);
@@ -454,7 +454,7 @@ bool ReminderCommon::CreateReminder(
             CreateReminderAlarm(env, value, reminder);
             break;
         case ReminderRequest::ReminderType::CALENDAR:
-            CreateReminderCalendar(env, value, reminder);
+            CreateReminderCalendar(env, value, isSysApp, reminder);
             break;
         default:
             ANSR_LOGW("Reminder type is not support. (type:%{public}d)", reminderType);
@@ -796,7 +796,7 @@ napi_value ReminderCommon::CreateReminderAlarm(
 }
 
 napi_value ReminderCommon::CreateReminderCalendar(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+    const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)
 {
     napi_value dateTimeObj = nullptr;
     if (!GetObject(env, value, ReminderAgentNapi::CALENDAR_DATE_TIME, dateTimeObj)) {
@@ -850,7 +850,9 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
 
     // wantAgent
-    reminderCalendar->SetRRuleWantAgentInfo(GenRruleWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT));
+    if (isSysApp) {
+        reminderCalendar->SetRRuleWantAgentInfo(GenRruleWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT));
+    }
     reminder = reminderCalendar;
     return NotificationNapi::Common::NapiGetNull(env);
 }
