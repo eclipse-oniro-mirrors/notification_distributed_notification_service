@@ -1353,7 +1353,8 @@ void ReminderDataManager::Init(bool isFromBootComplete)
     ANSR_LOGD("ReminderAgent is ready.");
 }
 
-void ReminderDataManager::InitStartExtensionAbility(bool isFromBootComplete){
+void ReminderDataManager::InitStartExtensionAbility(bool isFromBootComplete)
+{
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     if (isFromBootComplete) {
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
@@ -1466,7 +1467,6 @@ void ReminderDataManager::LoadReminderFromDb()
             ANSR_LOGE("Containers add to map error");
             continue;
         }
-        StartExtensionAbility(*it);
     }
     totalCount_ = static_cast<int16_t>(reminderVector_.size());
     ReminderRequest::GLOBAL_ID = store_->GetMaxId() + 1;
