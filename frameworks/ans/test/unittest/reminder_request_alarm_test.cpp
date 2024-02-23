@@ -527,5 +527,22 @@ HWTEST_F(ReminderRequestAlarmTest, UpdateNextReminder_00200, Function | SmallTes
     EXPECT_EQ(reminderRequestAlarm->IsRepeatReminder(), true);
     EXPECT_EQ(reminderRequestAlarm->UpdateNextReminder(), true);
 }
+
+/**
+ * @tc.name: RecoverFromOldVersion_00001
+ * @tc.desc: Test RecoverFromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderRequestAlarmTest, RecoverFromOldVersion_00001, Function | SmallTest | Level1)
+{
+    uint8_t arr[] = {};
+    std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
+    auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
+    std::shared_ptr<NativeRdb::ResultSet> resultSet = nullptr;
+    rrc->RecoverFromOldVersion(resultSet);
+    uint8_t ret = rrc->GetRepeatDaysOfWeek();
+    EXPECT_EQ(ret, 0);
+}
 }
 }

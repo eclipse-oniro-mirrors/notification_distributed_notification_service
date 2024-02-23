@@ -116,6 +116,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/reminder_request_timer.cpp",
     "${frameworks_module_ans_path}/src/reminder_store.cpp",
     "${frameworks_module_ans_path}/src/reminder_table.cpp",
+    "${frameworks_module_ans_path}/src/reminder_table_old.cpp",
   ]
 
   public_configs = [ ":ans_innerkits_public_config" ]
