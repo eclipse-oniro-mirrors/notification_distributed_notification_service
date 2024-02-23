@@ -201,5 +201,65 @@ HWTEST_F(ReminderStoreTest, GetReminders_00001, Function | SmallTest | Level1)
     std::vector<sptr<ReminderRequest>> ret = reminderStore.GetReminders(queryCondition);
     EXPECT_EQ(ret.size(), 0);
 }
+
+/**
+ * @tc.name: Query_00002
+ * @tc.desc: Test Query parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, Query_00002, Function | SmallTest | Level1)
+{
+    std::string tableName = "reminder_base";
+    std::string colums = "reminder_type";
+    std::string queryCondition = "queryCondition";
+    ReminderStore reminderStore;
+    std::shared_ptr<NativeRdb::ResultSet> ret = reminderStore.Query(tableName,
+        colums, queryCondition);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: Delete_00004
+ * @tc.desc: Test Delete parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, Delete_00004, Function | SmallTest | Level1)
+{
+    std::string conditiont1 = "deleteCondition1";
+    std::string conditiont2 = "deleteCondition2";
+    ReminderStore reminderStore;
+    int32_t ret = reminderStore.Delete(conditiont1, conditiont2);
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: DeleteUser_00004
+ * @tc.desc: Test DeleteUser parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, DeleteUser_00004, Function | SmallTest | Level1)
+{
+    int32_t userId = 0;
+    ReminderStore reminderStore;
+    int32_t ret = reminderStore.DeleteUser(userId);
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: UpdateOrInsert_00001
+ * @tc.desc: Test UpdateOrInsert parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, UpdateOrInsert_00001, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder = nullptr;
+    ReminderStore reminderStore;
+    int64_t ret = reminderStore.UpdateOrInsert(reminder, bundleOption_);
+    EXPECT_EQ(ret, -1);
+}
 }
 }

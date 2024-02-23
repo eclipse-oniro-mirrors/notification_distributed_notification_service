@@ -941,5 +941,70 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
     bool result = calendar->IsRepeatDay(1);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: RecoverFromOldVersion_00001
+ * @tc.desc: Test RecoverFromOldVersion parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderRequestCalendarTest, RecoverFromOldVersion_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+
+    std::shared_ptr<NativeRdb::ResultSet> resultSet =
+        std::make_shared<NativeRdb::AbsSharedResultSet>();
+    calendar->RecoverFromOldVersion(resultSet);
+    bool result = calendar->IsRepeatDay(1);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SetDateTime_00001
+ * @tc.desc: Test SetDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetDateTime_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    calendar->SetDateTime(0);
+    EXPECT_EQ(calendar->GetDateTime(), 0);
+}
+
+/**
+ * @tc.name: SetDateTime_00001
+ * @tc.desc: Test SetDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderRequestCalendarTest, SerializationRRule_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    std::string result = calendar->SerializationRRule(0);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: SetDateTime_00001
+ * @tc.desc: Test SetDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderRequestCalendarTest, DeserializationRRule_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    std::string str;
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+}
 }
 }
