@@ -89,9 +89,10 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00100, Function | SmallT
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
     reminderRequest->isExpired_ = false;
+    MockNowInstantMilli(true);
     uint64_t oriTriggerTime = 0;
     uint64_t optTriggerTime = 1675876470000;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
 }
 
 /**
@@ -160,10 +161,9 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00500, Function | SmallT
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
     reminderRequest->isExpired_ = false;
-    MockNowInstantMilli(true);
     uint64_t oriTriggerTime = 1675876480001;
     uint64_t optTriggerTime = 0;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
 }
 
 /**
