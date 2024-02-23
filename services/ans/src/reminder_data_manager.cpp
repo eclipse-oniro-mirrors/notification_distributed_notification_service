@@ -1347,6 +1347,7 @@ void ReminderDataManager::Init(bool isFromBootComplete)
         return;
     }
     LoadReminderFromDb();
+    InitStartExtensionAbility(isFromBootComplete);
     InitUserId();
     isReminderAgentReady_ = true;
     ANSR_LOGD("ReminderAgent is ready.");
