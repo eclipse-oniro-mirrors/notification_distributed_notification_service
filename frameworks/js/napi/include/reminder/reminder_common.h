@@ -139,14 +139,14 @@ private:
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static napi_value CreateReminderCalendar(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+        const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder);
 
     static tm ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
         const int32_t propertyDayVal, const int32_t propertyHourVal,
         const int32_t propertyMinteVal);
 
     static bool CreateReminder(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+        const napi_env &env, const napi_value &value,  const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder);
 
     static bool GetPropertyValIfExist(const napi_env &env, const napi_value &value,
         const char* propertyName, napi_value& propertyVal);
