@@ -479,10 +479,11 @@ napi_value ReminderCommon::GenReminder(
     }
 
     // createReminder
-    if (!CreateReminder(env, value, reminder)) {
+    bool isSysApp = IsSelfSystemApp(reminder);
+    if (!CreateReminder(env, value, isSysApp, reminder)) {
         return nullptr;
     }
-    bool isSysApp = IsSelfSystemApp(reminder);
+    reminder->SetSystemApp(isSysApp);
     GenReminderStringInner(env, value, reminder);
     if (!GenReminderIntInner(env, value, reminder)) {
         return nullptr;
