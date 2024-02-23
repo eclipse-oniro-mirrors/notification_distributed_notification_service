@@ -609,16 +609,20 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
 {
-    tm dateTime {};
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    ReminderRequestCalendar reminder = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    AAFwk::Want want;
-    want.SetElementName("calendardata service", "ReminderCallbackExtAbility");
-    AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr);
+    auto reminder1 = new ReminderRequestCalendar(10);
+    int32_t ret = manager->StartExtensionAbility(reminder1);
+    EXPECT_TRUE(ret == 0);
+
+    auto reminder2 = new ReminderRequestCalendar(10);
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    reminder1->SetRRuleWantAgentInfo(wantInfo);
+    int32_t ret1 = manager->StartExtensionAbility(reminder2);
+    EXPECT_TRUE(ret != 0);
+
+    auto reminder3 = new ReminderRequestTimer(10);
+    int32_t ret2 = manager->StartExtensionAbility(reminder3);
     system("rm -rf /data/service/el1/public/notification/");
-    EXPECT_TRUE(manager != nullptr);
+    EXPECT_TRUE(ret2 == 0);
 }
 }  // namespace Notification
 }  // namespace OHOS

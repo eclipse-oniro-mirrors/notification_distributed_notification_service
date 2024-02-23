@@ -943,45 +943,22 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
 }
 
 /**
- * @tc.name: SetRRuleWantAgentInfo_00001
- * @tc.desc: Test SetRRuleWantAgentInfo.
+ * @tc.name: RecoverFromDb_00001
+ * @tc.desc: Test RecoverFromDb parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(ReminderRequestCalendarTest, SetRRuleWantAgentInfo_00001, Level1)
+HWTEST_F(ReminderRequestCalendarTest, RRuleWantAgentInfo_00001, Function | SmallTest | Level1)
 {
-    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
-    wantInfo->pkgName = "calendardata service";
-    wantInfo->abilityName = "ReminderCallbackExtAbility";
-    tm dateTime {};
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    auto calendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetRRuleWantAgentInfo(wantInfo);
-    std::shared_ptr<ReminderRequest> reminder = calendar;
-    EXPECT_TRUE(reminder != nullptr);
-}
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
 
-/**
- * @tc.name: GetRRuleWantAgentInfo_00001
- * @tc.desc: Test GetRRuleWantAgentInfo_00001.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestCalendarTest, GetRRuleWantAgentInfo_00001, Level1)
-{
+    calendar->SetRRuleWantAgentInfo(nullptr);
+    EXPECT_EQ(calendar->GetRRuleWantAgentInfo(), nullptr);
+
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
-    wantInfo->pkgName = "calendardata service";
-    wantInfo->abilityName = "ReminderCallbackExtAbility";
-    tm dateTime {};
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    auto calendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     calendar->SetRRuleWantAgentInfo(wantInfo);
-    auto result = calendar->GetRRuleWantAgentInfo();
-    EXPECT_TRUE(result != nullptr);
+    EXPECT_NE(calendar->GetRRuleWantAgentInfo(), nullptr);
 }
 }
 }
