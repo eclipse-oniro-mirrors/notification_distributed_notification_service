@@ -219,7 +219,6 @@ private:
 
     // repeat calendar
     std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
-
     static const uint8_t DAY_ARRAY[12];
     static const uint8_t FEBRUARY;
     static const uint8_t LEAP_MONTH;
@@ -227,7 +226,6 @@ private:
     static const uint16_t SOLAR_YEAR;
     static const uint8_t LEAP_PARAM_MIN;
     static const uint8_t LEAP_PARAM_MAX;
-    std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
 };
 }
 }
