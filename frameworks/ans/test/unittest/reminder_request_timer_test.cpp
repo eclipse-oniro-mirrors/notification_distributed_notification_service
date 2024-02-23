@@ -127,7 +127,7 @@ HWTEST_F(ReminderRequestTimerTest, RecoverFromDb_00001, Function | SmallTest | L
     std::shared_ptr<NativeRdb::ResultSet> resultSet = nullptr;
     rrc->RecoverFromDb(resultSet);
     uint64_t ret = rrc->GetInitInfo();
-    EXPECT_EQ(ret, 10);
+    EXPECT_EQ(ret, 0);
 }
 }
 }

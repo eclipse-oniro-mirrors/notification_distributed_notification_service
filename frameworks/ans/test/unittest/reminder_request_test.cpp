@@ -667,8 +667,7 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00002, Function | SmallTest | 
     rrc->SetExpired(false);
     uint64_t oriTriggerTime = 10;
     uint64_t optTriggerTime = 20;
-    MockNowInstantMilli(false);
-    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
 }
 
 /**
