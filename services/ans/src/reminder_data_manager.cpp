@@ -986,6 +986,7 @@ int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &
         if (wantInfo != nullptr) {
             AAFwk::Want want;
             want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
+            want.SetParm(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId())
             result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
             ANSR_LOGE("END, result = %{public}d", result);
         } else {
@@ -1349,6 +1350,15 @@ void ReminderDataManager::Init(bool isFromBootComplete)
     InitUserId();
     isReminderAgentReady_ = true;
     ANSR_LOGD("ReminderAgent is ready.");
+}
+
+void ReminderDataManager::InitStartExtensionAbility(bool isFromBootComplete){
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    if (isFromBootComplete) {
+        for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            StartExtensionAbility(*it);
+        }
+    }
 }
 
 void ReminderDataManager::InitUserId()
