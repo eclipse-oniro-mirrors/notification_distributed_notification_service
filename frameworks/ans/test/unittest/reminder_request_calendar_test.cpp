@@ -959,6 +959,9 @@ HWTEST_F(ReminderRequestCalendarTest, RRuleWantAgentInfo_00001, Function | Small
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     calendar->SetRRuleWantAgentInfo(wantInfo);
     EXPECT_NE(calendar->GetRRuleWantAgentInfo(), nullptr);
+}
+
+/**
  * @tc.name: RecoverFromOldVersion_00001
  * @tc.desc: Test RecoverFromOldVersion parameters.
  * @tc.type: FUNC
