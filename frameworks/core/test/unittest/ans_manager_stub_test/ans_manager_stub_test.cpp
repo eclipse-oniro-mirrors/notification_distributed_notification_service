@@ -4444,7 +4444,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle01, Function | SmallTest 
  * @tc.name: HandleGetAllNotificationEnableStatus
  * @tc.desc: Test HandleGetAllNotificationEnableStatus.
  * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
+ * @tc.require: issueI92VGR
  */
 HWTEST_F(AnsManagerStubTest, HandleGetAllNotificationEnableStatus01, Function | SmallTest | Level1)
 {

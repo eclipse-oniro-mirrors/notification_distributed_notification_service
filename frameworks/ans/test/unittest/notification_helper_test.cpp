@@ -1079,7 +1079,7 @@ HWTEST_F(NotificationHelperTest, SetType_00001, Function | SmallTest | Level1)
  * @tc.name: GetAllNotificationEnabledBundles_00001
  * @tc.desc: Test GetAllNotificationEnabledBundles parameters.
  * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
+ * @tc.require: issueI92VGR
  */
 HWTEST_F(NotificationHelperTest, GetAllNotificationEnabledBundles_00001, Function | SmallTest | Level1)
 {

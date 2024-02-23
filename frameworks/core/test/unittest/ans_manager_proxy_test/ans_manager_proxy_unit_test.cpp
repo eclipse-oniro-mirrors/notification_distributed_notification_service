@@ -102,8 +102,8 @@ int SendRequestReplaceString(uint32_t code, MessageParcel &data, MessageParcel &
     return 0;
 }
 
-int SendRequestGetAllEnableNotifications(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option,
-    int32_t error, int32_t retnum,  bool setError, int32_t notificationNum)
+int SendRequestGetAllEnableNotifications(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option, int32_t error, int32_t retnum,  bool setError, int32_t notificationNum)
 {
     if (setError) {
         reply.WriteInt32(error);
@@ -114,8 +114,8 @@ int SendRequestGetAllEnableNotifications(uint32_t code, MessageParcel &data, Mes
     }
 
     if (notificationNum > 0) {
+        sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
         for (int32_t i = 0; i < notificationNum; i++) {
-            sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
             reply.WriteParcelable(bundleOption);
         }
     }
@@ -7667,7 +7667,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, Function | MediumTest
  * @tc.name: GetAllNotificationEnabledBundles_0100
  * @tc.desc: test GetAllNotificationEnabledBundles function
  * @tc.type: FUNC
- * @tc.require: #I5XO2O
+ * @tc.require: #I92VGR
  */
 HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0100, Function | MediumTest | Level1)
 {
@@ -7686,7 +7686,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0100, Functio
  * @tc.name: GetAllNotificationEnabledBundles_0200
  * @tc.desc: test GetAllNotificationEnabledBundles function
  * @tc.type: FUNC
- * @tc.require: #I5XO2O
+ * @tc.require: #I92VGR
  */
 HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0200, Function | MediumTest | Level1)
 {
@@ -7708,7 +7708,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0200, Functio
  * @tc.name: GetAllNotificationEnabledBundles_0300
  * @tc.desc: test SetBadgeNumber function
  * @tc.type: FUNC
- * @tc.require: #I6C2X9
+ * @tc.require: #I92VGR
  */
 HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0300, Function | MediumTest | Level1)
 {
@@ -7730,7 +7730,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0300, Functio
  * @tc.name: GetAllNotificationEnabledBundles_0400
  * @tc.desc: test GetAllNotificationEnabledBundles function
  * @tc.type: FUNC
- * @tc.require: #I6C2X9
+ * @tc.require: #I92VGR
  */
 HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0400, Function | MediumTest | Level1)
 {

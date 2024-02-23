@@ -1250,7 +1250,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | S
  * @tc.name      : GetAllNotificationEnabledBundles
  * @tc.desc      : Get all notification enable bundle in DB when db is null,
  *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
- * @tc.require   : issueI5SR8J
+ * @tc.require   : issueI92VGR
  */
 HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {

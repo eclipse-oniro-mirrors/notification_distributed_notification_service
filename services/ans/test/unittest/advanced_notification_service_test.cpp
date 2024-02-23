@@ -4617,7 +4617,7 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_00002, Function |
  * @tc.number    : GetAllNotificationEnabledBundles_0001
  * @tc.name      : GetAllNotificationEnabledBundles
  * @tc.desc      : Test GetAllNotificationEnabledBundles function if not systemapp.
- * @tc.require   : #I61RF2
+ * @tc.require   : #I92VGR
  */
 HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0001, Function | SmallTest | Level1)
 {

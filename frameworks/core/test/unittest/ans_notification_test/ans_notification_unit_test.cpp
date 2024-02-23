@@ -899,7 +899,7 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationsEnabledForSpecifiedBundle_0100
  * @tc.name: GetAllNotificationEnabledBundles_0100
  * @tc.desc: test GetAllNotificationEnabledBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
- * @tc.require: #I62SME
+ * @tc.require: #I92VGR
  */
 HWTEST_F(AnsNotificationUnitTest, GetAllNotificationEnabledBundles_0100, Function | MediumTest | Level1)
 {
