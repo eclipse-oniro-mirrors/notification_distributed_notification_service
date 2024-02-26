@@ -408,14 +408,14 @@ std::shared_ptr<ReminderRequest::WantAgentInfo>ReminderCommon::GenRruleWantAgent
     if (GetObject(env, value, name, wantAgent)) {
         auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str,
-                          NotificationNapi::STR_MAX_SIZE)) {
+            NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->pkgName = str;
             if (wantAgentInfo->pkgName.size() == 0) {
                 return nullptr;
             }
         }
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_ABILITY, str,
-                          NotificationNapi::STR_MAX_SIZE)) {
+            NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->abilityName = str;
             if (wantAgentInfo->abilityName.size() == 0) {
                 return nullptr;
@@ -857,8 +857,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
     }
-
-    reminder = JudgeIsSysApp(reminderCalendar);
+    reminder = JudgeIsSysApp(env, value, isSysApp, reminderCalendar);
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
