@@ -377,8 +377,8 @@ bool ReminderCommon::GenWantAgent(
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
-    if (GetObject(env, value, ReminderAgentNapi::WANT_AGENT, wantAgent)) {
-        auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    if (GetObject(env, value, name, wantAgent)) {
+        wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str, NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->pkgName = str;
         }
@@ -409,10 +409,16 @@ std::shared_ptr<ReminderRequest::WantAgentInfo>ReminderCommon::GenRruleWantAgent
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str,
                           NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->pkgName = str;
+            if (wantAgentInfo->pkgName.size() == 0){
+                return nullptr;
+            }
         }
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_ABILITY, str,
                           NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->abilityName = str;
+            if (wantAgentInfo->abilityName.size() == 0) {
+                return nullptr;
+            }
         }
         return wantAgentInfo;
     }
@@ -845,7 +851,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
         return nullptr;
     }
     tm dateTime = ReminderCalendarConvertDateTime(propertyYearVal, propertyMonthVal, propertyDayVal, propertyHourVal,
-                                                  propertyMinteVal);
+        propertyMinteVal);
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
@@ -856,10 +862,12 @@ napi_value ReminderCommon::CreateReminderCalendar(
         return nullptr;
     }
 
-    // wantAgent
-    if (isSysApp) {
-        reminderCalendar->SetRRuleWantAgentInfo(GenRruleWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT));
+    if (!isSysApp && wantAgentInfo != nullptr) {
+        ANSR("not system app, rrule want agent is not supported");
+        return nullptr;
     }
+    ANSR("system app: %{public}d", isSysApp);
+    reminderCalendar->SetRRuleWantAgentInfo(wantAgentInfo);
     reminder = reminderCalendar;
     return NotificationNapi::Common::NapiGetNull(env);
 }
