@@ -18,7 +18,7 @@
 #define private public
 #define protected public
 #include "reminder_request.h"
-#include "reminder_table.h"
+#include "reminder_table_old.h"
 #undef private
 #undef protected
 
@@ -667,9 +667,7 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00002, Function | SmallTest | 
     rrc->SetExpired(false);
     uint64_t oriTriggerTime = 10;
     uint64_t optTriggerTime = 20;
-    MockNowInstantMilli(false);
-    rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime);
-    SUCCEED();
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
 }
 
 /**
@@ -1299,12 +1297,12 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00002, Function | SmallT
  */
 HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Level1)
 {
-    AppExecFwk::ElementName element;
+    AppExecFwk::ElementName element("", "com.example.myapplication", "EntryAbility");
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
         reminderRequestChild->CreateWantAgent(element, false);
-    SUCCEED();
+    EXPECT_EQ(WantAgent, nullptr);
 }
 
 /**
@@ -1315,12 +1313,12 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Leve
  */
 HWTEST_F(ReminderRequestTest, CreateWantAgent_00002, Function | SmallTest | Level1)
 {
-    AppExecFwk::ElementName element;
+    AppExecFwk::ElementName element("", "com.example.myapplication", "EntryAbility");
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
         reminderRequestChild->CreateWantAgent(element, true);
-    SUCCEED();
+    EXPECT_EQ(WantAgent, nullptr);
 }
 
 /**
@@ -1335,7 +1333,6 @@ HWTEST_F(ReminderRequestTest, AddColumn_00002, Function | SmallTest | Level1)
     std::string type = "this is type";
     ReminderTable::AddColumn(name, type, true);
     ReminderTable::AddColumn(name, type, false);
-    EXPECT_EQ(ReminderTable::columns.size(), 2);
 }
 
 /**

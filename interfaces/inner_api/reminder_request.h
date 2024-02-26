@@ -592,12 +592,16 @@ public:
      */
     virtual bool OnTimeZoneChange();
 
+    void RecoverBasicFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+
     /**
      * @brief Recovery reminder instance from database record.
      *
      * @param resultSet Indicates the resultSet with pointer to the row of record data.
      */
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet);
+    void RecoverFromDbBase(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) {};
 
     /**
      * @brief Sets action button.
@@ -884,46 +888,6 @@ public:
     static const uint8_t REMINDER_STATUS_SNOOZE;
     static const uint8_t TIME_HOUR_OFFSET;
 
-    // For database recovery.
-    static void InitDbColumns();
-    static const std::string REMINDER_ID;
-    static const std::string PKG_NAME;
-    static const std::string USER_ID;
-    static const std::string UID;
-    static const std::string SYS_APP;
-    static const std::string APP_LABEL;
-    static const std::string REMINDER_TYPE;
-    static const std::string REMINDER_TIME;
-    static const std::string TRIGGER_TIME;
-    static const std::string RTC_TRIGGER_TIME;
-    static const std::string TIME_INTERVAL;
-    static const std::string SNOOZE_TIMES;
-    static const std::string DYNAMIC_SNOOZE_TIMES;
-    static const std::string RING_DURATION;
-    static const std::string IS_EXPIRED;
-    static const std::string IS_ACTIVE;
-    static const std::string STATE;
-    static const std::string ZONE_ID;
-    static const std::string HAS_SCHEDULED_TIMEOUT;
-    static const std::string ACTION_BUTTON_INFO;
-    static const std::string CUSTOM_BUTTON_URI;
-    static const std::string SLOT_ID;
-    static const std::string SNOOZE_SLOT_ID;
-    static const std::string NOTIFICATION_ID;
-    static const std::string TITLE;
-    static const std::string CONTENT;
-    static const std::string SNOOZE_CONTENT;
-    static const std::string EXPIRED_CONTENT;
-    static const std::string AGENT;
-    static const std::string MAX_SCREEN_AGENT;
-    static const std::string TAP_DISMISSED;
-    static const std::string AUTO_DELETED_TIME;
-    static const std::string REPEAT_DAYS_OF_WEEK;
-    static const std::string GROUP_ID;
-    static const std::string CUSTOM_RING_URI;
-    static std::string sqlOfAddColumns;
-    static std::vector<std::string> columns;
-
     // For ActionButtonDataShare.
     static const std::string SEP_BUTTON_VALUE_TYPE;
     static const std::string SEP_BUTTON_VALUE;
@@ -944,17 +908,6 @@ protected:
 
     int64_t RecoverInt64FromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
         const std::string &columnName, const DbRecoveryType &columnType);
-
-    /**
-     * @brief For database recovery.
-     *
-     * Add column to create table of database.
-     *
-     * @param name Indicates the column name.
-     * @param type Indicates the type of the column.
-     * @param isEnd Indicates whether it is the last column.
-     */
-    static void AddColumn(const std::string &name, const std::string &type, const bool &isEnd);
 
     uint8_t repeatDaysOfWeek_{0};
 
