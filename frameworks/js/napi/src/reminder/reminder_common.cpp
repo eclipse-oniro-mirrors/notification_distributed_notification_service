@@ -373,7 +373,8 @@ bool ReminderCommon::ValidateString(const std::string &str)
 }
 
 bool ReminderCommon::GenWantAgent(
-    const napi_env &env, const napi_value &value, const char* name, std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp)
+    const napi_env &env, const napi_value &value, const char* name,
+    std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
@@ -409,7 +410,7 @@ std::shared_ptr<ReminderRequest::WantAgentInfo>ReminderCommon::GenRruleWantAgent
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str,
                           NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->pkgName = str;
-            if (wantAgentInfo->pkgName.size() == 0){
+            if (wantAgentInfo->pkgName.size() == 0) {
                 return nullptr;
             }
         }
@@ -856,20 +857,24 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
     }
+    
+    reminder = JudgeIsSysApp(reminderCalendar);
+    return NotificationNapi::Common::NapiGetNull(env);
+}
 
+std::shared_ptr<ReminderRequestCalendar> ReminderCommon::JudgeIsSysApp(const napi_env &env,
+    const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar)
+{
     std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
     if (!GenWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT, wantAgentInfo, isSysApp)) {
         return nullptr;
     }
 
     if (!isSysApp && wantAgentInfo != nullptr) {
-        ANSR("not system app, rrule want agent is not supported");
         return nullptr;
     }
-    ANSR("system app: %{public}d", isSysApp);
     reminderCalendar->SetRRuleWantAgentInfo(wantAgentInfo);
-    reminder = reminderCalendar;
-    return NotificationNapi::Common::NapiGetNull(env);
+    return reminderCalendar;
 }
 
 tm ReminderCommon::ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
