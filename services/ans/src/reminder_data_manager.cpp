@@ -1327,7 +1327,9 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
-    InitStartExtensionAbility(isFromBootComplete);
+    if (isFromBootComplete) {
+        InitStartExtensionAbility();
+    }
     if (IsReminderAgentReady()) {
         return;
     }
@@ -1356,13 +1358,11 @@ void ReminderDataManager::Init(bool isFromBootComplete)
     ANSR_LOGD("ReminderAgent is ready.");
 }
 
-void ReminderDataManager::InitStartExtensionAbility(bool isFromBootComplete)
+void ReminderDataManager::InitStartExtensionAbility()
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    if (isFromBootComplete) {
-        for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-            StartExtensionAbility(*it);
-        }
+    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        StartExtensionAbility(*it);
     }
 }
 

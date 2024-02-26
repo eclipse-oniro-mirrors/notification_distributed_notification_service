@@ -109,7 +109,7 @@ public:
 
     void InitUserId();
 
-    bool InitStartExtensionAbility(bool isFromBootComplete);
+    void InitStartExtensionAbility();
     /**
      * @brief Register configuration observer, the listening system language is changed.
      */
