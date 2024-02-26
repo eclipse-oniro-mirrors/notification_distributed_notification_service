@@ -478,7 +478,7 @@ napi_value ReminderCommon::GenReminder(
     }
 
     // createReminder
-    bool isSysApp = IsSelfSystemApp(reminder);
+    bool isSysApp = IsSelfSystemApp();
     if (!CreateReminder(env, value, isSysApp, reminder)) {
         return nullptr;
     }
