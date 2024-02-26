@@ -373,7 +373,7 @@ bool ReminderCommon::ValidateString(const std::string &str)
 }
 
 bool ReminderCommon::GenWantAgent(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp)
+    const napi_env &env, const napi_value &value, const char* name, std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
@@ -394,7 +394,6 @@ bool ReminderCommon::GenWantAgent(
             }
             wantAgentInfo->uri = str;
         }
-        reminder->SetWantAgentInfo(wantAgentInfo);
     }
     return true;
 }
@@ -501,10 +500,13 @@ napi_value ReminderCommon::GenReminder(
     }
 
     // wantAgent
-    if (!GenWantAgent(env, value, reminder, isSysApp)) {
+    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
+    if (!GenWantAgent(env, value, ReminderAgentNapi::WANT_AGENT, wantAgentInfo, isSysApp)) {
         return nullptr;
     }
-
+    if(wantAgentInfo != nullptr) {
+        reminder->SetWantAgentInfo(wantAgentInfo);
+    }
     // maxScreenWantAgent
     GenMaxScreenWantAgent(env, value, reminder);
 
@@ -846,6 +848,11 @@ napi_value ReminderCommon::CreateReminderCalendar(
                                                   propertyMinteVal);
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     if (!(reminderCalendar->SetNextTriggerTime())) {
+        return nullptr;
+    }
+
+    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
+    if (!GenWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT, wantAgentInfo, isSysApp)) {
         return nullptr;
     }
 

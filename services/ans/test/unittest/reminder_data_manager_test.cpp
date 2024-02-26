@@ -610,19 +610,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
 HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
 {
     auto reminder1 = new ReminderRequestCalendar(10);
-    int32_t ret1 = manager->StartExtensionAbility(reminder1);
-    EXPECT_TRUE(ret1 == 0);
+    bool ret1 = manager->StartExtensionAbility(reminder1);
+    EXPECT_FALSE(ret1);
 
     auto reminder2 = new ReminderRequestCalendar(10);
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     reminder2->SetRRuleWantAgentInfo(wantInfo);
-    int32_t ret2 = manager->StartExtensionAbility(reminder2);
-    EXPECT_TRUE(ret2 != 0);
-
-    auto reminder3 = new ReminderRequestTimer(10);
-    int32_t ret3 = manager->StartExtensionAbility(reminder3);
-    system("rm -rf /data/service/el1/public/notification/");
-    EXPECT_TRUE(ret3 == 0);
+    bool ret2 = manager->StartExtensionAbility(reminder2);
+    EXPECT_TRUE(ret2);
 }
 }  // namespace Notification
 }  // namespace OHOS

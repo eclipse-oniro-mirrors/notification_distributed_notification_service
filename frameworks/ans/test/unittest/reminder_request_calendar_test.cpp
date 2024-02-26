@@ -946,7 +946,7 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
  * @tc.name: RecoverFromDb_00001
  * @tc.desc: Test RecoverFromDb parameters.
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: I92G9T
  */
 HWTEST_F(ReminderRequestCalendarTest, RRuleWantAgentInfo_00001, Function | SmallTest | Level1)
 {

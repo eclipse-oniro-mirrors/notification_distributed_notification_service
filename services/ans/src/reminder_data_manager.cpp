@@ -959,8 +959,8 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         }
         const int32_t trytimes = 3;
         for (int32_t i = 0; i < trytimes; i++) {
-            int32_t tryresult = StartExtensionAbility(reminder);
-            if (tryresult == ERR_OK) {
+            bool tryresult = StartExtensionAbility(reminder);
+            if (tryresult) {
                 break;
             }
         }
@@ -976,25 +976,27 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     }
 }
 
-int32_t ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
+bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
 {
     ANSR_LOGD("StartExtensionAbility");
-    int32_t result = ERROR_PARAM_INVALID;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
-        if (wantInfo != nullptr) {
+        if (wantInfo != nullptr && wantInfo->pkgName.size() != 0 && wantInfo->abilityName.size() != 0) {
             AAFwk::Want want;
             want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
             want.SetParam(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId());
-            result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
-            ANSR_LOGE("END, result = %{public}d", result);
+            int32_t result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
+            if (result == ERR_OK) {
+                ANSR_LOGE("StartExtensionAbility success");
+                return true;
+            }
         } else {
-            ANSR_LOGD("not StartExtensionAbility");
-            return ERROR_PARAM_INVALID;
+            ANSR_LOGD("StartExtensionAbility failed");
+            return false;
         }
     }
-    return result;
+    return false;
 }
 
 void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
