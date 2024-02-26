@@ -21,6 +21,7 @@
 #include "napi/native_node_api.h"
 #include "reminder_helper.h"
 #include "reminder_request.h"
+#include "reminder_request_calendar.h"
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -154,7 +155,7 @@ private:
     static bool ReminderCommon::GenWantAgent(
         const napi_env &env, const napi_value &value, const char* name, std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp);
 
-    static std::shared_ptr<ReminderRequestCalendar> ReminderCommon::JudgeIsSysApp(const napi_env &env,
+    static std::shared_ptr<ReminderRequestCalendar> JudgeIsSysApp(const napi_env &env,
         const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar);
 
     static std::shared_ptr<ReminderRequest::WantAgentInfo> GenRruleWantAgent(

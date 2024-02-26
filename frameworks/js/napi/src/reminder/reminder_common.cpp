@@ -857,7 +857,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
     }
-    
+
     reminder = JudgeIsSysApp(reminderCalendar);
     return NotificationNapi::Common::NapiGetNull(env);
 }

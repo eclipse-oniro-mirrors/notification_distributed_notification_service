@@ -986,7 +986,8 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
             AAFwk::Want want;
             want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
             want.SetParam(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId());
-            int32_t result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
+            int32_t result = IN_PROCESS_CALL(
+                AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
             if (result == ERR_OK) {
                 ANSR_LOGE("StartExtensionAbility success");
                 return true;
