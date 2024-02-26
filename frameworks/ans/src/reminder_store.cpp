@@ -82,7 +82,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
     if (access(REMINDER_DB_DIR.c_str(), F_OK) != 0) {
         int createDir = mkdir(REMINDER_DB_DIR.c_str(), S_IRWXU);
         if (createDir != 0) {
-            ANSR_LOGE("Failed to create directory %{public}s", REMINDER_DB_DIR.c_str());
+            ANSR_LOGE("Failed to create directory %{private}s", REMINDER_DB_DIR.c_str());
             return errCode;
         }
     }
