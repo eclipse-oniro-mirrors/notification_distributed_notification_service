@@ -71,6 +71,8 @@ std::mutex ReminderDataManager::MUTEX;
 std::mutex ReminderDataManager::SHOW_MUTEX;
 std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
+constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
+constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
 
 ReminderDataManager::~ReminderDataManager() = default;
 
@@ -957,13 +959,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
             continue;
         }
-        const int32_t trytimes = 3;
-        for (int32_t i = 0; i < trytimes; i++) {
-            bool tryresult = StartExtensionAbility(reminder);
-            if (tryresult) {
-                break;
-            }
-        }
+        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES);
         if (!isAlerting) {
             playSoundReminder = (*it);
             isAlerting = true;
@@ -989,15 +985,30 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
             int32_t result = IN_PROCESS_CALL(
                 AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
             if (result == ERR_OK) {
-                ANSR_LOGE("StartExtensionAbility success");
+                ANSR_LOGD("StartExtensionAbility success");
                 return true;
             }
+            else{
+                ANSR_LOGE("StartExtensionAbility failed");
+                return false;
+            }
         } else {
-            ANSR_LOGD("StartExtensionAbility failed");
-            return false;
+            ANSR_LOGE("StartExtensionAbility failed");
+            return true;
         }
     }
-    return false;
+    return true;
+}
+
+void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times)
+{
+    times--;
+    bool ret = ReminderDataManager::StartExtensionAbility(reminder);
+    if (!ret && times > 0 && serviceHandler_ != nullptr) {
+        ANSR_LOGD("StartExtensionAbilty failed, reminder times: %{public}d", times);
+        auto callback = [reminder, times]() { ReminderDataManager::AsyncStartExtensionAbility(reminder, times); };
+        serviceHandler_->PostTask(callback, CONNECT_EXTENSION_INTERVAL);
+    }
 }
 
 void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
@@ -1362,7 +1373,7 @@ void ReminderDataManager::InitStartExtensionAbility()
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        StartExtensionAbility(*it);
+        ReminderDataManager::AsyncStartExtensionAbility(*it, CONNECT_EXTENSION_MAX_RETRY_TIMES);
     }
 }
 

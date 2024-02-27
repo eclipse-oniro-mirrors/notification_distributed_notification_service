@@ -228,6 +228,7 @@ private:
         ALERTING_TIMER
     };
 
+    static std::shared_ptr<AppExecFwk::EventHandler> serviceHandler_;
     /**
      * Add default slot to the reminder if no slot set by user.
      *
@@ -483,8 +484,8 @@ private:
     void SetActiveReminder(const sptr<ReminderRequest> &reminder);
     void SetAlertingReminder(const sptr<ReminderRequest> &reminder);
     void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder);
-    bool StartExtensionAbility(const sptr <ReminderRequest> &reminder);
-
+    static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder);
+    static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times);
     /**
      * @brief Show the reminder on SystemUI.
      *
