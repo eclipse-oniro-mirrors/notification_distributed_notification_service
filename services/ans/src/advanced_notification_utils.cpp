@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1676,6 +1676,42 @@ bool AdvancedNotificationService::CheckLocalLiveViewAllowed(const sptr<Notificat
             }
     }
     return true;
+}
+
+ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Bundle option is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    int32_t activeUserId = 0;
+    if (!GetActiveUserId(activeUserId)) {
+        ANS_LOGE("Failed to get active user id.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("Failed to get bundle manager.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    int32_t uid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
+    if (uid == -1) {
+        ANS_LOGE("The specified bundle name was not found.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (bundleOption->GetUid() > 0) {
+        // uid of bundleOption was set by user, need to check validity.
+        if (uid != bundleOption->GetUid()) {
+            ANS_LOGE("Bundle name and uid not consistent, invalid parameter.");
+            return ERR_ANS_INVALID_BUNDLE;
+        }
+        return ERR_OK;
+    }
+
+    bundleOption->SetUid(uid);
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

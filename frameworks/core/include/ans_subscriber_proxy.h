@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,13 @@ public:
      * @param badgeData Indicates the BadgeNumberCallbackData object.
      */
     void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
+
+    /**
+     * @brief The callback function on the badge enabled state changed.
+     *
+     * @param callbackData Indicates the EnabledNotificationCallbackData object.
+     */
+    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);

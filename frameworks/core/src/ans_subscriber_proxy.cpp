@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -359,6 +359,32 @@ void AnsSubscriberProxy::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &bad
     ErrCode result = InnerTransact(NotificationInterfaceCode::ON_BADGE_CHANGED, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[OnBadgeChanged] fail: transact ErrCode=ERR_ANS_TRANSACT_FAILED");
+        return;
+    }
+}
+
+void AnsSubscriberProxy::OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    if (callbackData == nullptr) {
+        ANS_LOGE("Callback data is nullptr.");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return;
+    }
+
+    if (!data.WriteParcelable(callbackData)) {
+        ANS_LOGE("Write callback data failed.");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_BADGE_ENABLED_CHANGED, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact error code is: %{public}d.", result);
         return;
     }
 }

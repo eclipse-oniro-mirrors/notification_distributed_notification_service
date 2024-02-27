@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1434,6 +1434,26 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
     }
 
     return ansManagerProxy_->SetBadgeNumber(badgeNumber);
+}
+
+ErrCode AnsNotification::SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Unable to connect to ANS service.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bundleInfo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bundleInfo == nullptr) {
+        ANS_LOGE("Unable to create new bundle info.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return ansManagerProxy_->SetBadgeNumberByBundle(bundleInfo, badgeNumber);
 }
 
 ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)

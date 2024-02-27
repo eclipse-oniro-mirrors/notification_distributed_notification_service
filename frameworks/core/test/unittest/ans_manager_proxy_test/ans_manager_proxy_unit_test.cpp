@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,6 +121,8 @@ public:
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
+    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override
     {}
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
@@ -7640,6 +7642,67 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, Function | MediumTest
     int32_t badgeNumber = 0;
     int32_t result = proxy->SetBadgeNumber(badgeNumber);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/**
+ * @tc.name: SetBadgeNumberByBundleTest_0100
+ * @tc.desc: test SetBadgeNumberByBundle with null bundleOption, expect ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberByBundleTest_0100, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    int32_t badgeNumber = 0;
+    int32_t result = proxy->SetBadgeNumberByBundle(nullptr, badgeNumber);
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+}
+
+/**
+ * @tc.name: SetBadgeNumberByBundleTest_0200
+ * @tc.desc: test SetBadgeNumberByBundle with invalid proxy object, expect ErrCode ERR_ANS_PARCELABLE_FAILED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberByBundleTest_0200, TestSize.Level1)
+{
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    ASSERT_NE(nullptr, bundleOption);
+    std::string bundleName = "bundleName";
+    bundleOption->SetBundleName(bundleName);
+    int32_t badgeNumber = 0;
+    int32_t result = proxy->SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/**
+ * @tc.name: SetBadgeNumberByBundleTest_0300
+ * @tc.desc: test SetBadgeNumberByBundle with empty bundleOption, expect ErrCode ERR_ANS_PARCELABLE_FAILED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberByBundleTest_0300, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, true, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    ASSERT_NE(nullptr, bundleOption);
+    std::string bundleName = "bundleName";
+    bundleOption->SetBundleName(bundleName);
+    int32_t badgeNumber = 0;
+    int32_t result = proxy->SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(ERR_OK, result);
 }
 
 /*

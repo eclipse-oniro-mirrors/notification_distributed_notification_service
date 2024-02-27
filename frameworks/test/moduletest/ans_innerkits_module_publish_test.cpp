@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -189,6 +189,10 @@ public:
         g_onBadgeNumberReceived = true;
         EXPECT_EQ(badgeData->GetBadgeNumber(), BADGE_NUMBER);
     }
+
+    void OnBadgeEnabledChanged(
+        const sptr<EnabledNotificationCallbackData> &callbackData) override
+    {}
 
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
         &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override

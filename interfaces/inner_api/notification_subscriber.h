@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,13 @@ public:
     virtual void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) = 0;
 
     /**
+     * @brief The callback function on the badge enabled state changed.
+     *
+     * @param callbackData Indicates the properties of the application that badge enabled state has changed.
+     */
+    virtual void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) = 0;
+
+    /**
      * @brief The callback function on the badge number changed.
      *
      * @param badgeData Indicates the BadgeNumberCallbackData object.
@@ -152,6 +159,8 @@ private:
         void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
         void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
+
+        void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
         bool GetAnsManagerProxy();
 

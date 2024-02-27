@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -723,6 +723,16 @@ public:
      */
     virtual ErrCode SetBadgeNumber(int32_t badgeNumber) override;
 
+    /**
+     * @brief Set badge number by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    virtual ErrCode SetBadgeNumberByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) override;
+
    /**
      * @brief Get slotFlags.
      *
@@ -845,6 +855,7 @@ private:
     ErrCode HandleDistributedSetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDistributedGetEnabledWithoutApp(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetBadgeNumberByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply);
