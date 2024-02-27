@@ -1402,8 +1402,9 @@ void AdvancedNotificationService::ResetPushCallbackProxy()
 ErrCode AdvancedNotificationService::RegisterPushCallback(
     const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {
-    if (!AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGW("Not system app!");
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -1488,10 +1489,6 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     NotificationConstant::SlotType slotType = request->GetSlotType();
     NotificationContent::Type contentType = request->GetNotificationType();
     ANS_LOGD("NotificationRequest slotType:%{public}d, contentType:%{public}d", slotType, contentType);
-    if (AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGI("System applications do not require push check.");
-        return false;
-    }
 
     if (request->IsCommonLiveView()) {
         std::shared_ptr<NotificationContent> content = request->GetContent();
