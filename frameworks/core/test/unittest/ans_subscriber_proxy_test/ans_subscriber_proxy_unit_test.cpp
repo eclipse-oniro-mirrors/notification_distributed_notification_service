@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -669,4 +669,37 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnBadgeChanged_0200, Function | MediumTest 
     sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData();
     ASSERT_NE(nullptr, badgeData);
     proxy->OnBadgeChanged(badgeData);
+}
+
+/**
+ * @tc.name: OnBadgeEnabledChanged_0100
+ * @tc.desc: test OnBadgeEnabledChanged function with callback data, expect to invoke SendRequest function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnBadgeEnabledChanged_0100, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<EnabledNotificationCallbackData> callbackData = new (std::nothrow) EnabledNotificationCallbackData();
+    ASSERT_NE(nullptr, callbackData);
+    proxy->OnBadgeEnabledChanged(callbackData);
+}
+
+/**
+ * @tc.name: OnBadgeEnabledChanged_0200
+ * @tc.desc: test OnBadgeEnabledChanged function with null callback data, expect not to invoke SendRequest function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSubscriberProxyUnitTest, OnBadgeEnabledChanged_0200, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0).WillRepeatedly(DoAll(Return(NO_ERROR)));
+    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    sptr<EnabledNotificationCallbackData> callbackData = nullptr;
+    proxy->OnBadgeEnabledChanged(callbackData);
 }

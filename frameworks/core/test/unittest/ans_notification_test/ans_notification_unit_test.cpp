@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,6 +93,8 @@ public:
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
+    {}
+    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override
     {}
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
         &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
@@ -906,6 +908,42 @@ HWTEST_F(AnsNotificationUnitTest, CancelGroup_0200, Function | MediumTest | Leve
     std::string groupName = "";
     ErrCode ret1 = ans_->CancelGroup(groupName);
     EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetBadgeNumberByBundle_0100
+ * @tc.desc: test SetBadgeNumberByBundle with empty bundleOption, expect ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetBadgeNumberByBundle_0100, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    int32_t badgeNumber = 0;
+    ErrCode res = ans_->SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetBadgeNumberByBundle_0200
+ * @tc.desc: test SetBadgeNumberByBundle with invalid AnsManagerProxy, expect ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetBadgeNumberByBundle_0200, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(ret, false);
+
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    int32_t badgeNumber = 0;
+    ErrCode res = ans_->SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,8 @@ AnsSubscriberStub::AnsSubscriberStub()
             std::placeholders::_2));
     interfaces_.emplace(NotificationInterfaceCode::ON_BADGE_CHANGED,
         std::bind(&AnsSubscriberStub::HandleOnBadgeChanged, this, std::placeholders::_1, std::placeholders::_2));
+    interfaces_.emplace(NotificationInterfaceCode::ON_BADGE_ENABLED_CHANGED,
+        std::bind(&AnsSubscriberStub::HandleOnBadgeEnabledChanged, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 AnsSubscriberStub::~AnsSubscriberStub()
@@ -283,6 +285,17 @@ ErrCode AnsSubscriberStub::HandleOnBadgeChanged(MessageParcel &data, MessageParc
     return ERR_OK;
 }
 
+ErrCode AnsSubscriberStub::HandleOnBadgeEnabledChanged(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<EnabledNotificationCallbackData> callbackData = data.ReadParcelable<EnabledNotificationCallbackData>();
+    if (callbackData == nullptr) {
+        ANS_LOGE("Read callback data failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    OnBadgeEnabledChanged(callbackData);
+    return ERR_OK;
+}
+
 void AnsSubscriberStub::OnConnected()
 {}
 
@@ -315,6 +328,9 @@ void AnsSubscriberStub::OnEnabledNotificationChanged(const sptr<EnabledNotificat
 {}
 
 void AnsSubscriberStub::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
+{}
+
+void AnsSubscriberStub::OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
 {}
 }  // namespace Notification
 }  // namespace OHOS

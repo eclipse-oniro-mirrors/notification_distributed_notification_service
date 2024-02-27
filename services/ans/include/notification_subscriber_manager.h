@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,6 +101,13 @@ public:
     void NotifyEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
 
     /**
+     * @brief Notify all subscribers on badge enabled state changed.
+     *
+     * @param callbackData Indicates the EnabledNotificationCallbackData object.
+     */
+    void NotifyBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
+
+    /**
      * @brief Obtains the death event.
      *
      * @param object Indicates the death object.
@@ -151,6 +158,7 @@ private:
     void NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap);
     void NotifyDoNotDisturbDateChangedInner(const sptr<NotificationDoNotDisturbDate> &date);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
+    void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
 
 private:

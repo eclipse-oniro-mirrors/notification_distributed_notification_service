@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -225,6 +225,19 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
     }
     AppExecFwk::EventHandler::Callback func =
         std::bind(&NotificationSubscriberManager::NotifyEnabledNotificationChangedInner, this, callbackData);
+
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("Queue is nullptr.");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyBadgeEnabledChangedInner, this, callbackData);
 
     notificationSubQueue_->submit(func);
 }
@@ -513,6 +526,16 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const spt
 {
     for (auto record : subscriberRecordList_) {
         record->subscriber->OnDoNotDisturbDateChange(date);
+    }
+}
+
+void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
+    const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    for (auto record : subscriberRecordList_) {
+        if (record != nullptr && record->subscriber != nullptr) {
+            record->subscriber->OnBadgeEnabledChanged(callbackData);
+        }
     }
 }
 

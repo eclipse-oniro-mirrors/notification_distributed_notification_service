@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1088,6 +1088,36 @@ HWTEST_F(NotificationHelperTest, GetActiveNotificationByFilter_00001, Function |
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetActiveNotificationByFilter(filter, request);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetBadgeNumberByBundle_0100
+ * @tc.desc: test SetBadgeNumberByBundle with invalid bundleOption, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetBadgeNumberByBundle_0100, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    int32_t badgeNumber = 0;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetBadgeNumberByBundle_0200
+ * @tc.desc: test SetBadgeNumberByBundle with invalid bundle name, expect errorCode ERR_ANS_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetBadgeNumberByBundle_0200, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    int32_t badgeNumber = 0;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
 }
 }
 }

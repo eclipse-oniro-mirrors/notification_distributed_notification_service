@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1861,6 +1861,40 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetBadgeNumberByBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteParcelable(bundleOption)) {
+        ANS_LOGE("Write bundle option failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(badgeNumber)) {
+        ANS_LOGE("Write badge number failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_BADGE_NUMBER_BY_BUNDLE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact error code is: %{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 
