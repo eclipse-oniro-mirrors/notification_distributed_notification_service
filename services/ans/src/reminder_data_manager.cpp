@@ -73,7 +73,7 @@ std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
-
+std::shared_ptr<AppExecFwk::EventHandler> ReminderDataManager::serviceHandler_;
 ReminderDataManager::~ReminderDataManager() = default;
 
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
