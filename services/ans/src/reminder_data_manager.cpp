@@ -987,8 +987,7 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
             if (result == ERR_OK) {
                 ANSR_LOGD("StartExtensionAbility success");
                 return true;
-            }
-            else{
+            } else {
                 ANSR_LOGE("StartExtensionAbility failed");
                 return false;
             }
