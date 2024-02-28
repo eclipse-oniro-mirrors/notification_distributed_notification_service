@@ -952,13 +952,11 @@ HWTEST_F(ReminderRequestCalendarTest, RRuleWantAgentInfo_00001, Function | Small
 {
     struct tm nowTime;
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-
-    calendar->SetRRuleWantAgentInfo(nullptr);
-    EXPECT_EQ(calendar->GetRRuleWantAgentInfo(), nullptr);
-
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    wantInfo->pkgName = "testing service";
+    wantInfo->abilityName = "testing ability";
     calendar->SetRRuleWantAgentInfo(wantInfo);
-    EXPECT_NE(calendar->GetRRuleWantAgentInfo(), nullptr);
+    EXPECT_EQ(calendar->GetRRuleWantAgentInfo(), wantInfo);
 }
 
 /**

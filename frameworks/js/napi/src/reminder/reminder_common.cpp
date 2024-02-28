@@ -830,11 +830,11 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
     }
-    reminder = JudgeIsSysApp(env, value, isSysApp, reminderCalendar);
+    reminder = ParseWantAgent(env, value, isSysApp, reminderCalendar);
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
-std::shared_ptr<ReminderRequestCalendar> ReminderCommon::JudgeIsSysApp(const napi_env &env,
+std::shared_ptr<ReminderRequestCalendar> ReminderCommon::ParseWantAgent(const napi_env &env,
     const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar)
 {
     std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;

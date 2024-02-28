@@ -155,7 +155,7 @@ private:
     static bool GenWantAgent(const napi_env &env, const napi_value &value, const char* name,
         std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp);
 
-    static std::shared_ptr<ReminderRequestCalendar> JudgeIsSysApp(const napi_env &env,
+    static std::shared_ptr<ReminderRequestCalendar> ParseWantAgent(const napi_env &env,
         const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar);
 
     static void GenMaxScreenWantAgent(
