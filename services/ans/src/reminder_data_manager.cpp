@@ -1362,10 +1362,24 @@ void ReminderDataManager::Init(bool isFromBootComplete)
         ANSR_LOGW("Db init fail.");
         return;
     }
+    InitServiceHandler();
     LoadReminderFromDb();
     InitUserId();
     isReminderAgentReady_ = true;
     ANSR_LOGD("ReminderAgent is ready.");
+}
+
+void ReminderDataManager::InitServiceHandler()
+{
+    ANSR_LOGD("InitServiceHandler started");
+    if (serviceHandler_ != nullptr) {
+        ANSR_LOGD("InitServiceHandler already init.");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("ReminderDataManager");
+    serviceHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+
+    ANSR_LOGD("InitServiceHandler suceeded.");
 }
 
 void ReminderDataManager::InitStartExtensionAbility()

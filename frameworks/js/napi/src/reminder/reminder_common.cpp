@@ -785,6 +785,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
         ANSR_LOGW("Create calendar reminder fail: dateTime must be setted.");
         return nullptr;
     }
+
     // year month day hour minute second
     int32_t propertyYearVal = 0;
     int32_t propertyMonthVal = 0;

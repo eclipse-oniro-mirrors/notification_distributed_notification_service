@@ -486,6 +486,7 @@ private:
     void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder);
     static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder);
     static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times);
+    void InitServiceHandler();
     /**
      * @brief Show the reminder on SystemUI.
      *
