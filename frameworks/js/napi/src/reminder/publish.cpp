@@ -829,7 +829,7 @@ void GetAllValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequ
             continue;
         }
         napi_value reminderReq = nullptr;
-        npai_create_object(env, &reminderReq);
+        napi_create_object(env, &reminderReq);
         napi_set_named_property(env, result, REMINDER_INFO_REMINDER_REQ, reminderReq);
         if (!SetValidReminder(env, *reminder, reminderReq)) {
             ANSR_LOGW("Set reminder object failed");
