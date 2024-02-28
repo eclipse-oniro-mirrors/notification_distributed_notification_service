@@ -957,7 +957,6 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
                 } else {
                     GetAllValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
                 }
-
                 ReminderCommon::ReturnCallbackPromise(
                     env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
             }
