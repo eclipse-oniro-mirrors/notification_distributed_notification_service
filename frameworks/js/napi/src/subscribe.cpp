@@ -88,7 +88,7 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     if (deleteReason != NO_DELETE_REASON) {
         napi_value value = nullptr;
         int32_t outReason = 0;
-        if (!Common::ReasonCToJS(deleteReason, outReason)) {
+        if (!AnsEnumUtil::ReasonCToJS(deleteReason, outReason)) {
             return Common::NapiGetBoolean(env, false);
         }
         napi_create_int32(env, outReason, &value);

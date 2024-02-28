@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#include "common.h"
-#include "ans_inner_errors.h"
+#include "ans_convert_enum.h"
 #include "ans_log_wrapper.h"
-#include "notification_constant.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-bool Common::ContentTypeJSToC(const ContentType &inType, NotificationContent::Type &outType)
+bool AnsEnumUtil::ContentTypeJSToC(const ContentType &inType, NotificationContent::Type &outType)
 {
     switch (inType) {
         case ContentType::NOTIFICATION_CONTENT_BASIC_TEXT:
@@ -51,7 +49,7 @@ bool Common::ContentTypeJSToC(const ContentType &inType, NotificationContent::Ty
     return true;
 }
 
-bool Common::ContentTypeCToJS(const NotificationContent::Type &inType, ContentType &outType)
+bool AnsEnumUtil::ContentTypeCToJS(const NotificationContent::Type &inType, ContentType &outType)
 {
     switch (inType) {
         case NotificationContent::Type::BASIC_TEXT:
@@ -82,7 +80,7 @@ bool Common::ContentTypeCToJS(const NotificationContent::Type &inType, ContentTy
     return true;
 }
 
-bool Common::SlotTypeJSToC(const SlotType &inType, NotificationConstant::SlotType &outType)
+bool AnsEnumUtil::SlotTypeJSToC(const SlotType &inType, NotificationConstant::SlotType &outType)
 {
     switch (inType) {
         case SlotType::SOCIAL_COMMUNICATION:
@@ -111,7 +109,7 @@ bool Common::SlotTypeJSToC(const SlotType &inType, NotificationConstant::SlotTyp
     return true;
 }
 
-bool Common::SlotTypeCToJS(const NotificationConstant::SlotType &inType, SlotType &outType)
+bool AnsEnumUtil::SlotTypeCToJS(const NotificationConstant::SlotType &inType, SlotType &outType)
 {
     switch (inType) {
         case NotificationConstant::SlotType::CUSTOM:
@@ -142,7 +140,8 @@ bool Common::SlotTypeCToJS(const NotificationConstant::SlotType &inType, SlotTyp
     return true;
 }
 
-bool Common::SlotLevelJSToC(const SlotLevel &inLevel, NotificationSlot::NotificationLevel &outLevel)
+
+bool AnsEnumUtil::SlotLevelJSToC(const SlotLevel &inLevel, NotificationSlot::NotificationLevel &outLevel)
 {
     switch (inLevel) {
         case SlotLevel::LEVEL_NONE:
@@ -167,7 +166,8 @@ bool Common::SlotLevelJSToC(const SlotLevel &inLevel, NotificationSlot::Notifica
     return true;
 }
 
-bool Common::LiveViewStatusJSToC(const LiveViewStatus &inType, NotificationLiveViewContent::LiveViewStatus &outType)
+bool AnsEnumUtil::LiveViewStatusJSToC(
+    const LiveViewStatus &inType, NotificationLiveViewContent::LiveViewStatus &outType)
 {
     switch (inType) {
         case LiveViewStatus::LIVE_VIEW_CREATE:
@@ -190,7 +190,7 @@ bool Common::LiveViewStatusJSToC(const LiveViewStatus &inType, NotificationLiveV
     return true;
 }
 
-bool Common::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel)
+bool AnsEnumUtil::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel)
 {
     switch (inLevel) {
         case NotificationSlot::NotificationLevel::LEVEL_NONE:
@@ -216,7 +216,7 @@ bool Common::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLevel, 
     return true;
 }
 
-bool Common::ReasonCToJS(const int &inType, int &outType)
+bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
 {
     switch (inType) {
         case NotificationConstant::CLICK_REASON_DELETE:
@@ -253,7 +253,7 @@ bool Common::ReasonCToJS(const int &inType, int &outType)
     return true;
 }
 
-bool Common::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, NotificationConstant::DoNotDisturbType &outType)
+bool AnsEnumUtil::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, NotificationConstant::DoNotDisturbType &outType)
 {
     switch (inType) {
         case DoNotDisturbType::TYPE_NONE:
@@ -275,7 +275,7 @@ bool Common::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, NotificationC
     return true;
 }
 
-bool Common::DoNotDisturbTypeCToJS(const NotificationConstant::DoNotDisturbType &inType, DoNotDisturbType &outType)
+bool AnsEnumUtil::DoNotDisturbTypeCToJS(const NotificationConstant::DoNotDisturbType &inType, DoNotDisturbType &outType)
 {
     switch (inType) {
         case NotificationConstant::DoNotDisturbType::NONE:
@@ -297,7 +297,7 @@ bool Common::DoNotDisturbTypeCToJS(const NotificationConstant::DoNotDisturbType 
     return true;
 }
 
-bool Common::DeviceRemindTypeCToJS(const NotificationConstant::RemindType &inType, DeviceRemindType &outType)
+bool AnsEnumUtil::DeviceRemindTypeCToJS(const NotificationConstant::RemindType &inType, DeviceRemindType &outType)
 {
     switch (inType) {
         case NotificationConstant::RemindType::DEVICE_IDLE_DONOT_REMIND:
@@ -319,7 +319,7 @@ bool Common::DeviceRemindTypeCToJS(const NotificationConstant::RemindType &inTyp
     return true;
 }
 
-bool Common::SourceTypeCToJS(const NotificationConstant::SourceType &inType, SourceType &outType)
+bool AnsEnumUtil::SourceTypeCToJS(const NotificationConstant::SourceType &inType, SourceType &outType)
 {
     switch (inType) {
         case NotificationConstant::SourceType::TYPE_NORMAL:
@@ -338,7 +338,8 @@ bool Common::SourceTypeCToJS(const NotificationConstant::SourceType &inType, Sou
     return true;
 }
 
-bool Common::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveViewStatus &inType, LiveViewStatus &outType)
+bool AnsEnumUtil::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveViewStatus &inType,
+    LiveViewStatus &outType)
 {
     switch (inType) {
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE:
