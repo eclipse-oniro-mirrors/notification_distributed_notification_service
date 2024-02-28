@@ -920,21 +920,18 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
     }
     std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
-    // param
     Parameters params;
     if (ParseGetValidParameter(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), isThrow);
     }
 
-    // promise
     napi_value promise = nullptr;
     SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
     asynccallbackinfo->isThrow = isThrow;
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getAllValidReminders", NAPI_AUTO_LENGTH, &resourceName);
-
-    // create and start async work
+    
     napi_create_async_work(env,
         nullptr,
         resourceName,
