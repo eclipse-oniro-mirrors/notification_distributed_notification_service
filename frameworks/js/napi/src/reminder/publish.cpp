@@ -931,7 +931,6 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
     SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
     asynccallbackinfo->isThrow = isThrow;
 
-    // resource name
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getAllValidReminders", NAPI_AUTO_LENGTH, &resourceName);
 
