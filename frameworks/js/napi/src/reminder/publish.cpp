@@ -905,11 +905,6 @@ napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool is
     }
 }
 
-void GetAllValidRemindersInfo(napi_env env, AsyncCallbackInfo *asynccallbackinfo) 
-{
-    
-}
-
 napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("Get all valid reminders");
