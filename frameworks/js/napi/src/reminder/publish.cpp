@@ -824,10 +824,6 @@ void GetAllValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequ
         }
         napi_value result = nullptr;
         napi_create_object(env, &result);
-        if (!SetValidReminder(env, *reminder, result)) {
-            ANSR_LOGW("Set reminder object failed");
-            continue;
-        }
         napi_value reminderReq = nullptr;
         napi_create_object(env, &reminderReq);
         napi_set_named_property(env, result, REMINDER_INFO_REMINDER_REQ, reminderReq);
@@ -909,6 +905,19 @@ napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool is
     }
 }
 
+void GetAllValidRemindersInfo(napi_env env, AsyncCallbackInfo *asynccallbackinfo) 
+{
+    if (asynccallbackinfo) {
+        if (asynccallbackinfo->info.errorCode != ERR_OK) {
+            asynccallbackinfo->result = NotificationNapi::Common::NapiGetNull(env);
+        } else {
+            GetAllValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
+        }
+        ReminderCommon::ReturnCallbackPromise(
+            env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
+    }
+}
+
 napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("Get all valid reminders");
@@ -947,15 +956,7 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
             AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
-            if (asynccallbackinfo) {
-                if (asynccallbackinfo->info.errorCode != ERR_OK) {
-                    asynccallbackinfo->result = NotificationNapi::Common::NapiGetNull(env);
-                } else {
-                    GetAllValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
-                }
-                ReminderCommon::ReturnCallbackPromise(
-                    env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
-            }
+            GetAllValidRemindersInfo(env, asyncCallbackinfo);
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
