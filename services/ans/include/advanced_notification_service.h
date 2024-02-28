@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -887,7 +887,42 @@ public:
     ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName);
 
     /**
-     * @brief Set the notification SoundEnabled and VibrationEnabled by soltType
+     * @brief Set the notification flags for social communication.
+     */
+    void SetNotificationFlagsForSocialCommunication(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for service reminder.
+     */
+    void SetNotificationFlagsForServiceReminder(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for content information.
+     */
+    void SetNotificationFlagsForContentInformation(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for live view.
+     */
+    void SetNotificationFlagsForLiveView(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for other.
+     */
+    void SetNotificationFlagsForOther(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for custom service.
+     */
+    void SetNotificationFlagsForCustomService(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for emergency information.
+     */
+    void SetNotificationFlagsForEmergencyInformation(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags by soltType.
      */
     void SetRequestBySlotType(const sptr<NotificationRequest> &request);
 
@@ -905,7 +940,8 @@ private:
     void StartFilters();
     void StopFilters();
     ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
-
+    void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);

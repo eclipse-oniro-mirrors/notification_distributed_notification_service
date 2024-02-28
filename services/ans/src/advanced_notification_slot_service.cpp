@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -241,6 +241,11 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    if (!AccessTokenHelper::IsSystemApp() && slotType == NotificationConstant::SlotType::EMERGENCY_INFORMATION) {
+        ANS_LOGE("Non system app used illegal slot type.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -385,36 +390,131 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     return result;
 }
 
+void AdvancedNotificationService::SetNotificationFlagsForSocialCommunication(std::shared_ptr<NotificationFlags> &flags)
+{
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenVisblenessEnabled(true);
+    flags->SetBannerEnabled(true);
+    flags->SetLightScreenEnabled(true);
+    flags->SetStatusIconEnabled(true);
+}
+
+void AdvancedNotificationService::SetNotificationFlagsForServiceReminder(std::shared_ptr<NotificationFlags> &flags)
+{
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenVisblenessEnabled(true);
+    flags->SetBannerEnabled(false);
+    flags->SetLightScreenEnabled(true);
+    flags->SetStatusIconEnabled(true);
+}
+
+void AdvancedNotificationService::SetNotificationFlagsForContentInformation(std::shared_ptr<NotificationFlags> &flags)
+{
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+    flags->SetLockScreenVisblenessEnabled(false);
+    flags->SetBannerEnabled(false);
+    flags->SetLightScreenEnabled(false);
+    flags->SetStatusIconEnabled(true);
+}
+
+void AdvancedNotificationService::SetNotificationFlagsForLiveView(std::shared_ptr<NotificationFlags> &flags)
+{
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenVisblenessEnabled(true);
+    flags->SetBannerEnabled(false);
+    flags->SetLightScreenEnabled(true);
+    flags->SetStatusIconEnabled(true);
+}
+
+void AdvancedNotificationService::SetNotificationFlagsForOther(std::shared_ptr<NotificationFlags> &flags)
+{
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+    flags->SetLockScreenVisblenessEnabled(false);
+    flags->SetBannerEnabled(false);
+    flags->SetLightScreenEnabled(false);
+    flags->SetStatusIconEnabled(false);
+}
+
+void AdvancedNotificationService::SetNotificationFlagsForCustomService(std::shared_ptr<NotificationFlags> &flags)
+{
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenVisblenessEnabled(false);
+    flags->SetBannerEnabled(false);
+    flags->SetLightScreenEnabled(false);
+    flags->SetStatusIconEnabled(true);
+}
+
+void AdvancedNotificationService::SetNotificationFlagsForEmergencyInformation(std::shared_ptr<NotificationFlags> &flags)
+{
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenVisblenessEnabled(true);
+    flags->SetBannerEnabled(true);
+    flags->SetLightScreenEnabled(true);
+    flags->SetStatusIconEnabled(true);
+}
+
 void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("Called.");
     NotificationConstant::SlotType type = request->GetSlotType();
     auto flags = std::make_shared<NotificationFlags>();
 
     switch (type) {
         case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            SetNotificationFlagsForSocialCommunication(flags);
             break;
         case NotificationConstant::SlotType::SERVICE_REMINDER:
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            SetNotificationFlagsForServiceReminder(flags);
             break;
         case NotificationConstant::SlotType::CONTENT_INFORMATION:
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+            SetNotificationFlagsForContentInformation(flags);
             break;
         case NotificationConstant::SlotType::LIVE_VIEW:
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            SetNotificationFlagsForLiveView(flags);
             break;
         case NotificationConstant::SlotType::OTHER:
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+            SetNotificationFlagsForOther(flags);
             break;
         case NotificationConstant::SlotType::CUSTOMER_SERVICE:
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+            SetNotificationFlagsForCustomService(flags);
+            break;
+        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
+            SetNotificationFlagsForEmergencyInformation(flags);
             break;
         default:
             break;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,7 @@ enum class SlotType {
     CONTENT_INFORMATION = 3,
     LIVE_VIEW = 4,
     CUSTOMER_SERVICE = 5,
+    EMERGENCY_INFORMATION = 10,
     OTHER_TYPES = 0xFFFF,
 };
 
@@ -121,6 +122,15 @@ enum class SourceType {
     TYPE_NORMAL = 0x00000000,
     TYPE_CONTINUOUS = 0x00000001,
     TYPE_TIMER = 0x00000002
+};
+
+enum class NotificationControlFlagStatus {
+    NOTIFICATION_STATUS_CLOSE_SOUND = 1 << 0,
+    NOTIFICATION_STATUS_CLOSE_LOCKSCREEN = 1 << 1,
+    NOTIFICATION_STATUS_CLOSE_BANNER = 1 << 2,
+    NOTIFICATION_STATUS_CLOSE_LIGHTSCREEN = 1 << 3,
+    NOTIFICATION_STATUS_CLOSE_VIBRATION = 1 << 4,
+    NOTIFICATION_STATUS_CLOSE_STATUSBAR_ICON = 1 << 5
 };
 
 enum class DeviceRemindType {
@@ -1802,6 +1812,17 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationBadgeNumber(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the notification control flags of NotificationRequest object from specified js object.
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationControlFlags(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**

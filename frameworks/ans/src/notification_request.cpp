@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,6 +140,16 @@ void NotificationRequest::SetBadgeNumber(uint32_t number)
 uint32_t NotificationRequest::GetBadgeNumber() const
 {
     return badgeNumber_;
+}
+
+void NotificationRequest::SetNotificationControlFlags(uint32_t notificationControlFlags)
+{
+    notificationControlFlags_ = notificationControlFlags;
+}
+
+uint32_t NotificationRequest::GetNotificationControlFlags() const
+{
+    return notificationControlFlags_;
 }
 
 void NotificationRequest::SetNotificationId(int32_t notificationId)
@@ -760,6 +770,7 @@ std::string NotificationRequest::Dump()
             ", badgeStyle = " + std::to_string(static_cast<int32_t>(badgeStyle_)) +
             ", classification = " + classification_ +
             ", notificationContentType = " + std::to_string(static_cast<int32_t>(notificationContentType_)) +
+            ", notificationControlFlags = " + std::to_string(notificationControlFlags_) +
             ", showDeliveryTime = " + (showDeliveryTime_ ? "true" : "false") +
             ", tapDismissed = " + (tapDismissed_ ? "true" : "false") +
             ", colorEnabled = " + (colorEnabled_ ? "true" : "false") +
@@ -830,6 +841,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["ownerUserId"]       = ownerUserId_;
     jsonObject["ownerUid"]          = ownerUid_;
     jsonObject["receiverUserId"]    = receiverUserId_;
+    jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
 
@@ -979,6 +991,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(static_cast<int32_t>(receiverUserId_))) {
         ANS_LOGE("Failed to write receiver userId");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(notificationControlFlags_)) {
+        ANS_LOGE("Failed to write notification control flags.");
         return false;
     }
 
@@ -1345,6 +1362,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     creatorUserId_ = parcel.ReadInt32();
     ownerUserId_ = parcel.ReadInt32();
     receiverUserId_ = parcel.ReadInt32();
+    notificationControlFlags_ = parcel.ReadUint32();
 
     if (!parcel.ReadString(settingsText_)) {
         ANS_LOGE("Failed to read settings text");
@@ -1678,6 +1696,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
+    this->notificationControlFlags_ = other.notificationControlFlags_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -1758,6 +1777,11 @@ void NotificationRequest::ConvertJsonToNumExt(
 
     if (jsonObject.find("ownerUid") != jsonEnd && jsonObject.at("ownerUid").is_number_integer()) {
         target->ownerUid_ = jsonObject.at("ownerUid").get<int32_t>();
+    }
+
+    if (jsonObject.find("notificationControlFlags") != jsonEnd &&
+        jsonObject.at("notificationControlFlags").is_number_integer()) {
+        target->notificationControlFlags_ = jsonObject.at("notificationControlFlags").get<uint32_t>();
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,6 +100,9 @@ bool Common::SlotTypeJSToC(const SlotType &inType, NotificationConstant::SlotTyp
         case SlotType::CUSTOMER_SERVICE:
             outType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
             break;
+        case SlotType::EMERGENCY_INFORMATION:
+            outType = NotificationConstant::SlotType::EMERGENCY_INFORMATION;
+            break;
         case SlotType::UNKNOWN_TYPE:
         case SlotType::OTHER_TYPES:
             outType = NotificationConstant::SlotType::OTHER;
@@ -131,6 +134,9 @@ bool Common::SlotTypeCToJS(const NotificationConstant::SlotType &inType, SlotTyp
             break;
         case NotificationConstant::SlotType::CUSTOMER_SERVICE:
             outType = SlotType::CUSTOMER_SERVICE;
+            break;
+        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
+            outType = SlotType::EMERGENCY_INFORMATION;
             break;
         case NotificationConstant::SlotType::OTHER:
             outType = SlotType::OTHER_TYPES;

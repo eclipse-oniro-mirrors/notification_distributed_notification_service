@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4478,6 +4478,55 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_00001, Function | SmallTest | L
     advancedNotificationService_->notificationSlotFilter_ = nullptr;
     auto ret = advancedNotificationService_->Filter(record, true);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ChangeNotificationByControlFlags_00001
+ * @tc.desc: Test ChangeNotificationByControlFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ChangeNotificationByControlFlags_00001, Function | SmallTest | Level1)
+{
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+    uint32_t notificationControlFlags = 0;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::SOUND_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG;
+    request->SetNotificationControlFlags(notificationControlFlags);
+
+    std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenVisblenessEnabled(true);
+    flags->SetBannerEnabled(true);
+    flags->SetLightScreenEnabled(true);
+    flags->SetStatusIconEnabled(true);
+    request->SetFlags(flags);
+
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->ChangeNotificationByControlFlags(record);
+
+    u_int32_t reminderFlags = flags->GetReminderFlags();
+    EXPECT_EQ(reminderFlags, 0);
+}
+
+/**
+ * @tc.name: CheckPublishPreparedNotification_00001
+ * @tc.desc: Test CheckPublishPreparedNotification
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckPublishPreparedNotification_00001, Function | SmallTest | Level1)
+{
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->CheckPublishPreparedNotification(record, true);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
