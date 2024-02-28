@@ -907,15 +907,7 @@ napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool is
 
 void GetAllValidRemindersInfo(napi_env env, AsyncCallbackInfo *asynccallbackinfo) 
 {
-    if (asynccallbackinfo) {
-        if (asynccallbackinfo->info.errorCode != ERR_OK) {
-            asynccallbackinfo->result = NotificationNapi::Common::NapiGetNull(env);
-        } else {
-            GetAllValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
-        }
-        ReminderCommon::ReturnCallbackPromise(
-            env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
-    }
+    
 }
 
 napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool isThrow)
@@ -941,9 +933,7 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getAllValidReminders", NAPI_AUTO_LENGTH, &resourceName);
     
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             ANSR_LOGI("GetAllValid reminders napi_create_async_work start");
             AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
@@ -956,7 +946,16 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
             AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
             std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
 
-            GetAllValidRemindersInfo(env, asyncCallbackinfo);
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->info.errorCode != ERR_OK) {
+                    asynccallbackinfo->result = NotificationNapi::Common::NapiGetNull(env);
+                } else {
+                    GetAllValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
+                }
+                
+                ReminderCommon::ReturnCallbackPromise(
+                    env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
+            }
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
