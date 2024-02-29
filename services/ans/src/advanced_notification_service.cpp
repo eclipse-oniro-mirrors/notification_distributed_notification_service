@@ -513,6 +513,10 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
+            (void)PublishRemoveDuplicateEvent(record);
+            return;
+        }
         result = AssignValidNotificationSlot(record);
         if (result != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");

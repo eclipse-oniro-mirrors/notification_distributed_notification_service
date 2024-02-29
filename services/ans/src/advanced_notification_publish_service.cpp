@@ -32,6 +32,11 @@
 #include "os_account_manager.h"
 #include "distributed_screen_status_manager.h"
 #include "notification_local_live_view_subscriber_manager.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
+#include "common_event_publish_info.h"
+#include "want_params_wrapper.h"
+#include "ans_convert_enum.h"
 
 #include "advanced_notification_inline.cpp"
 
@@ -39,6 +44,8 @@ namespace OHOS {
 namespace Notification {
 
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
+constexpr int32_t HOURS_IN_ONE_DAY = 24;
+const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1833,6 +1840,96 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
+}
+
+ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<NotificationRequest> &request)
+{
+    if (request->IsCommonLiveView() || request->GetAppMessageId().empty()) {
+        return ERR_OK;
+    }
+
+    RemoveExpiredUniqueKey();
+    std::string uniqueKey = request->GenerateUniqueKey();
+    if (IsDuplicateMsg(uniqueKey)) {
+        ANS_LOGI("Duplicate msg, no need to notify, key is %{public}s, appmessageId is %{public}s",
+            request->GetKey().c_str(), request->GetAppMessageId().c_str());
+        return ERR_ANS_DUPLICATE_MSG;
+    }
+
+    uniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+    return ERR_OK;
+}
+
+void AdvancedNotificationService::RemoveExpiredUniqueKey()
+{
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    auto iter = uniqueKeyList_.begin();
+    while (iter != uniqueKeyList_.end()) {
+        if (abs(now - (*iter).first) > std::chrono::hours(HOURS_IN_ONE_DAY)) {
+            iter = uniqueKeyList_.erase(iter);
+        } else {
+            break;
+        }
+    }
+}
+
+bool AdvancedNotificationService::IsDuplicateMsg(const std::string &uniqueKey)
+{
+    for (auto record : uniqueKeyList_) {
+        if (strcmp(record.second.c_str(), uniqueKey.c_str()) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+ErrCode AdvancedNotificationService::PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record)
+{
+    if (record == nullptr) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!record->request->IsAgentNotification()) {
+        ANS_LOGD("Only push agent need remove duplicate event");
+        return ERR_OK;
+    }
+
+    std::string extraStr;
+    if (record->request->GetUnifiedGroupInfo() != nullptr) {
+        auto extraInfo = record->request->GetUnifiedGroupInfo()->GetExtraInfo();
+        if (extraInfo != nullptr) {
+            AAFwk::WantParamWrapper wWrapper(*extraInfo);
+            extraStr = wWrapper.ToString();
+        }
+    }
+
+    NotificationNapi::SlotType slotType;
+    NotificationNapi::ContentType contentType;
+    NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
+        static_cast<NotificationContent::Type>(record->request->GetNotificationType()), contentType);
+    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(
+        static_cast<NotificationConstant::SlotType>(record->request->GetSlotType()), slotType);
+
+    EventFwk::Want want;
+    want.SetParam("bundleName", record->bundleOption->GetBundleName());
+    want.SetParam("uid", record->request->GetOwnerUid());
+    want.SetParam("id", record->request->GetNotificationId());
+    want.SetParam("slotType", static_cast<int32_t>(slotType));
+    want.SetParam("contentType", static_cast<int32_t>(contentType));
+    want.SetParam("appMessageId", record->request->GetAppMessageId());
+    want.SetParam("extraInfo", extraStr);
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    EventFwk::CommonEventData commonData {want, 1, ""};
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
+    if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
+        ANS_LOGE("PublishCommonEvent failed");
+        return ERR_ANS_TASK_ERR;
+    }
+
+    ANS_LOGE("xjh PublishCommonEvent success");
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

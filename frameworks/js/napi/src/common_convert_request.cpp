@@ -572,6 +572,10 @@ napi_value Common::GetNotificationRequestByString(
     if (GetNotificationGroupName(env, value, request) == nullptr) {
         return nullptr;
     }
+    // appMessageId?: string
+    if (GetNotificationAppMessageId(env, value, request) == nullptr) {
+        return nullptr;
+    }
     return NapiGetNull(env);
 }
 
@@ -667,6 +671,10 @@ napi_value Common::GetNotificationRequestByCustom(
     }
     // template?: NotificationTemplate
     if (GetNotificationTemplate(env, value, request) == nullptr) {
+        return nullptr;
+    }
+    // unifiedGroupInfo?: NotificationUnifiedGroupInfo
+    if (GetNotificationUnifiedGroupInfo(env, value, request) == nullptr) {
         return nullptr;
     }
     return NapiGetNull(env);
@@ -1242,6 +1250,27 @@ napi_value Common::GetNotificationClassification(
     return NapiGetNull(env);
 }
 
+napi_value Common::GetNotificationAppMessageId(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, value, "appMessageId", &hasProperty));
+    if (!hasProperty) {
+        return NapiGetNull(env);
+    }
+
+    auto appMessageIdValue = AppExecFwk::GetPropertyValueByPropertyName(env, value, "appMessageId", napi_string);
+    if (appMessageIdValue == nullptr) {
+        ANS_LOGE("Wrong argument type. String expected.");
+        return nullptr;
+    }
+
+    std::string appMessageId = AppExecFwk::UnwrapStringFromJS(env, appMessageIdValue);
+    ANS_LOGI("xjh appMessageId is %{public}s.", appMessageId.c_str());
+    request.SetAppMessageId(appMessageId);
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetNotificationColor(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
     ANS_LOGD("enter");
@@ -1688,6 +1717,64 @@ napi_value Common::GetNotificationBadgeNumber(
         request.SetBadgeNumber(badgeNumber);
     }
 
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationUnifiedGroupInfo(
+        const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, value, "unifiedGroupInfo", &hasProperty));
+    if (!hasProperty) {
+        return NapiGetNull(env);
+    }
+
+    auto info = AppExecFwk::GetPropertyValueByPropertyName(env, value, "unifiedGroupInfo", napi_object);
+    if (info == nullptr) {
+        ANS_LOGE("Wrong argument type. object expected.");
+        return nullptr;
+    }
+    std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo = std::make_shared<NotificationUnifiedGroupInfo>();
+    // key?: string
+    auto jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "key", napi_string);
+    if (jsValue != nullptr) {
+        std::string key = AppExecFwk::UnwrapStringFromJS(env, jsValue);
+        unifiedGroupInfo->SetKey(key);
+    }
+
+    // title?: string
+    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "title", napi_string);
+    if (jsValue != nullptr) {
+        std::string title = AppExecFwk::UnwrapStringFromJS(env, jsValue);
+        unifiedGroupInfo->SetTitle(title);
+    }
+
+    // content?: string
+    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "content", napi_string);
+    if (jsValue != nullptr) {
+        std::string content = AppExecFwk::UnwrapStringFromJS(env, jsValue);
+        unifiedGroupInfo->SetContent(content);
+    }
+
+    // sceneName?: string
+    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "sceneName", napi_string);
+    if (jsValue != nullptr) {
+        std::string sceneName = AppExecFwk::UnwrapStringFromJS(env, jsValue);
+        unifiedGroupInfo->SetSceneName(sceneName);
+    }
+
+    // extraInfo?: {[key:string] : any}
+    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "extraInfo", napi_object);
+    if (jsValue != nullptr) {
+        std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>();
+        if (!OHOS::AppExecFwk::UnwrapWantParams(env, jsValue, *extras)) {
+            return nullptr;
+        }
+        unifiedGroupInfo->SetExtraInfo(extras);
+    }
+
+    request.SetUnifiedGroupInfo(unifiedGroupInfo);
+    ANS_LOGE("xjh unifiedGroupInfo is %{public}s.", request.GetUnifiedGroupInfo()->Dump().c_str());
     return NapiGetNull(env);
 }
 }
