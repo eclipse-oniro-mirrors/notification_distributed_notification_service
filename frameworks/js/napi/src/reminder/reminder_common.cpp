@@ -484,9 +484,8 @@ napi_value ReminderCommon::GenReminder(
     if (!GenWantAgent(env, value, ReminderAgentNapi::WANT_AGENT, wantAgentInfo, isSysApp)) {
         return nullptr;
     }
-    if (wantAgentInfo != nullptr) {
-        reminder->SetWantAgentInfo(wantAgentInfo);
-    }
+    reminder->SetWantAgentInfo(wantAgentInfo);
+
     // maxScreenWantAgent
     GenMaxScreenWantAgent(env, value, reminder);
 
@@ -844,6 +843,7 @@ std::shared_ptr<ReminderRequestCalendar> ReminderCommon::ParseWantAgent(const na
     }
 
     if (!isSysApp && wantAgentInfo != nullptr) {
+        LOGE("Not system app rrule want info not supported")
         return nullptr;
     }
     reminderCalendar->SetRRuleWantAgentInfo(wantAgentInfo);
