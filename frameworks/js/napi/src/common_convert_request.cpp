@@ -1778,7 +1778,9 @@ napi_value Common::GetNotificationUnifiedGroupInfo(
     }
 
     request.SetUnifiedGroupInfo(unifiedGroupInfo);
-    ANS_LOGE("xjh unifiedGroupInfo is %{public}s.", request.GetUnifiedGroupInfo()->Dump().c_str());
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetNotificationControlFlags(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
