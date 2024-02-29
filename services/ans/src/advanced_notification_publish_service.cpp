@@ -1931,7 +1931,6 @@ ErrCode AdvancedNotificationService::PublishRemoveDuplicateEvent(const std::shar
         return ERR_ANS_TASK_ERR;
     }
 
-    ANS_LOGE("xjh PublishCommonEvent success");
     return ERR_OK;
 }
 }  // namespace Notification

@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Notification {
-class NotificationUnifiedGroupInfo : public Parcelable{
+class NotificationUnifiedGroupInfo : public Parcelable {
 public:
     NotificationUnifiedGroupInfo() = default;
 

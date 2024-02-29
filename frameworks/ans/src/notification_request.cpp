@@ -1393,7 +1393,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Failed to read appMessageId");
         return false;
     }
-    ANS_LOGI("xjh appMessageId is %{public}s.", appMessageId_.c_str());
+
     slotType_ = static_cast<NotificationConstant::SlotType>(parcel.ReadInt32());
     groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(parcel.ReadInt32());
     visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(parcel.ReadInt32());

@@ -17,12 +17,7 @@
 #include <memory>
 #include <string>
 #include "int_wrapper.h"
-
-#define private public
-#define protected public
 #include "notification_unified_group_Info.h"
-#undef private
-#undef protected
 
 using namespace testing::ext;
 namespace OHOS {

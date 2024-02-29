@@ -501,8 +501,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     ANS_LOGI("PublishPreparedNotification");
 
     auto record = MakeNotificationRecord(request, bundleOption);
-    bool isSystemApp = AccessTokenHelper::IsSystemApp();
-    ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
+    ErrCode result = CheckPublishPreparedNotification(record, AccessTokenHelper::IsSystemApp());
     if (result != ERR_OK) {
         return result;
     }
@@ -513,23 +512,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
             (void)PublishRemoveDuplicateEvent(record);
             return;
         }
-        result = AssignValidNotificationSlot(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Can not assign valid slot!");
-            return;
-        }
 
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
-            return;
-        }
-
-        if (isSystemApp) {
-            ChangeNotificationByControlFlags(record);
-        }
-
-        result = AssignToNotificationList(record);
+        result = AddRecordToMemory(record);
         if (result != ERR_OK) {
             return;
         }
@@ -1731,6 +1715,32 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
 
     auto deleteTime = request->GetAutoDeletedTime();
     return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
+}
+
+ErrCode AdvancedNotificationService::AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record)
+{
+    auto result = AssignValidNotificationSlot(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Can not assign valid slot!");
+        return result;
+    }
+
+    result = Filter(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Reject by filters: %{public}d", result);
+        return result;
+    }
+
+    if (AccessTokenHelper::IsSystemApp()) {
+        ChangeNotificationByControlFlags(record);
+    }
+
+    result = AssignToNotificationList(record);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    return ERR_OK;
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

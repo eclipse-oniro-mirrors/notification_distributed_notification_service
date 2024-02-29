@@ -1096,6 +1096,7 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
+    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);

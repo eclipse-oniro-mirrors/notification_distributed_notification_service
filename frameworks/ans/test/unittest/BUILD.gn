@@ -29,7 +29,6 @@ ohos_unittest("ans_reminder_unit_test") {
   ]
 
   sources = [
-    "${frameworks_module_ans_path}/test/unittest/notification_unified_group_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/ans_log_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/enabled_notification_callback_data_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/message_user_test.cpp",
@@ -59,6 +58,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_template_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_time_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_unified_group_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_user_input_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_helper_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_request_alarm_test.cpp",

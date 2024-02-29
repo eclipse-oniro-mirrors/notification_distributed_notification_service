@@ -1270,7 +1270,6 @@ napi_value Common::GetNotificationAppMessageId(
     }
 
     std::string appMessageId = AppExecFwk::UnwrapStringFromJS(env, appMessageIdValue);
-    ANS_LOGI("xjh appMessageId is %{public}s.", appMessageId.c_str());
     request.SetAppMessageId(appMessageId);
     return NapiGetNull(env);
 }
@@ -1725,7 +1724,7 @@ napi_value Common::GetNotificationBadgeNumber(
 }
 
 napi_value Common::GetNotificationUnifiedGroupInfo(
-        const napi_env &env, const napi_value &value, NotificationRequest &request)
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
     bool hasProperty = false;
     NAPI_CALL(env, napi_has_named_property(env, value, "unifiedGroupInfo", &hasProperty));
