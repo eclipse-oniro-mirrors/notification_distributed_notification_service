@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -837,12 +837,21 @@ public:
     static ErrCode SetBadgeNumber(int32_t badgeNumber);
 
     /**
+     * @brief Set badge number by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    static ErrCode SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
+
+    /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    static ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status);
+    static ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Register Push Callback.

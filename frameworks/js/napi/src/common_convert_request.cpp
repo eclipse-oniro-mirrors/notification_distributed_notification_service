@@ -83,7 +83,7 @@ napi_value Common::SetNotificationRequestByNumber(
 
     // slotType?: SlotType
     SlotType outType = SlotType::UNKNOWN_TYPE;
-    if (!SlotTypeCToJS(request->GetSlotType(), outType)) {
+    if (!AnsEnumUtil::SlotTypeCToJS(request->GetSlotType(), outType)) {
         return NapiGetBoolean(env, false);
     }
     napi_create_int32(env, static_cast<int32_t>(outType), &value);
@@ -919,7 +919,7 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
         napi_get_value_int32(env, result, &slotType);
 
         NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
-        if (!SlotTypeJSToC(SlotType(slotType), outType)) {
+        if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
             return nullptr;
         }
         request.SetSlotType(outType);
@@ -938,7 +938,7 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
         napi_get_value_int32(env, result, &slotType);
 
         NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
-        if (!SlotTypeJSToC(SlotType(slotType), outType)) {
+        if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
             return nullptr;
         }
         request.SetSlotType(outType);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -267,7 +267,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) override
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -449,6 +449,11 @@ public:
     }
 
     ErrCode SetBadgeNumber(int32_t badgeNumber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetBadgeNumberByBundle(const sptr<NotificationBundleOption>& bundleOption, int32_t badgeNumber) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

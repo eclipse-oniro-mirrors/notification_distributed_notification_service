@@ -232,7 +232,7 @@ napi_value Common::SetNotificationLiveViewContent(
 
     // status: LiveViewStatus
     LiveViewStatus outType = LiveViewStatus::LIVE_VIEW_BUTT;
-    if (!LiveViewStatusCToJS(liveViewContent->GetLiveViewStatus(), outType)) {
+    if (!AnsEnumUtil::LiveViewStatusCToJS(liveViewContent->GetLiveViewStatus(), outType)) {
         ANS_LOGE("Liveview status is invalid");
         return NapiGetBoolean(env, false);
     }
@@ -729,7 +729,7 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
         return nullptr;
     }
     NotificationLiveViewContent::LiveViewStatus outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT;
-    if (!LiveViewStatusJSToC(LiveViewStatus(status), outType)) {
+    if (!AnsEnumUtil::LiveViewStatusJSToC(LiveViewStatus(status), outType)) {
         ANS_LOGE("The liveview status is not valid.");
         return nullptr;
     }

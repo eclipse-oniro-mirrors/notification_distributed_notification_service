@@ -116,6 +116,8 @@ public:
     {}
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
+    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override
+    {}
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
         &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
     {}

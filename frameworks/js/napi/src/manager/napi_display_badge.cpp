@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,9 @@
 
 namespace OHOS {
 namespace NotificationNapi {
-const int SET_BADGE_NUMBER_MAX_PARA = 2;
+const int32_t SET_BADGE_NUMBER_MAX_PARA = 2;
+const int32_t SET_BADGE_NUMBER_MIN_PARA = 1;
+const int32_t SET_BADGE_NUMBER_BY_BUNDLE_PARA = 2;
 
 napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
 {
@@ -173,14 +175,31 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value argv[SET_BADGE_NUMBER_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < SET_BADGE_NUMBER_MAX_PARA - 1) {
+    if (argc < SET_BADGE_NUMBER_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
         return nullptr;
     }
 
-    // argv[0]: badgeNumber
+    // argv[0]: badgeNumber or bundleOption
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    // case1: setBadgeNumberByBundle(bundleOption, badgeNumber)
+    if (valuetype == napi_object) {
+        if (argc != SET_BADGE_NUMBER_BY_BUNDLE_PARA) {
+            ANS_LOGE("Wrong number of arguments. Expect exactly two.");
+            return nullptr;
+        }
+        Common::GetBundleOption(env, argv[PARAM0], params.option);
+        // argv[1]: badgeNumber
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, argv[PARAM1], &params.badgeNumber);
+        return Common::NapiGetNull(env);
+    }
+    // case2: setBadgeNumber(badgeNumber)
     if (valuetype != napi_number) {
         ANS_LOGW("Wrong argument type. Number expected.");
         return nullptr;
@@ -259,6 +278,57 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
 
     if (isCallback) {
         ANS_LOGD("napiSetBadgeNumber callback is nullptr.");
+        return Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
+
+napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("Enter.");
+    SetBadgeNumberParams params {};
+    if (ParseParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackSetBadgeNumber *asyncCallbackInfo =
+        new (std::nothrow) AsyncCallbackSetBadgeNumber {.env = env, .asyncWork = nullptr, .params = params};
+    if (asyncCallbackInfo == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, params.callback, asyncCallbackInfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "setBadgeNumberByBundle", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("Napi set badge number by bundle work execute.");
+            AsyncCallbackSetBadgeNumber *asyncCallbackInfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
+            if (asyncCallbackInfo) {
+                ANS_LOGD("Option.bundle = %{public}s, option.uid = %{public}d, badge number = %{public}d.",
+                    asyncCallbackInfo->params.option.GetBundleName().c_str(),
+                    asyncCallbackInfo->params.option.GetUid(),
+                    asyncCallbackInfo->params.badgeNumber);
+                asyncCallbackInfo->info.errorCode = NotificationHelper::SetBadgeNumberByBundle(
+                    asyncCallbackInfo->params.option, asyncCallbackInfo->params.badgeNumber);
+            }
+        },
+        AsyncCompleteCallbackNapiSetBadgeNumber,
+        (void *)asyncCallbackInfo,
+        &asyncCallbackInfo->asyncWork);
+
+    bool isCallback = asyncCallbackInfo->info.isCallback;
+    napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_user_initiated);
+
+    if (isCallback) {
+        ANS_LOGD("Callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

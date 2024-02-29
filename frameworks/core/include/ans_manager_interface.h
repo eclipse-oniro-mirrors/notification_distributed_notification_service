@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -732,6 +732,15 @@ public:
     virtual ErrCode SetBadgeNumber(int32_t badgeNumber) = 0;
 
     /**
+     * @brief Set badge number by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    virtual ErrCode SetBadgeNumberByBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) = 0;
+
+    /**
      * @brief Obtains the number of slotFlags.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -754,10 +763,10 @@ public:
     /**
      * @brief Obtains allow notification application list.
      *
-     * @param status Indicates the bundle status.
+     * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status) = 0;
+    virtual ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) = 0;
 
     /**
      * @brief Register Push Callback.

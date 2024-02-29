@@ -48,6 +48,7 @@ ohos_shared_library("ans_innerkits") {
   include_dirs = [ "${inner_api_path}" ]
 
   sources = [
+    "${core_path}/common/src/ans_convert_enum.cpp",
     "${core_path}/common/src/ans_log_wrapper.cpp",
     "${core_path}/common/src/ans_watchdog.cpp",
     "${core_path}/src/ans_dialog_callback_interface.cpp",
@@ -116,6 +117,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/reminder_request_timer.cpp",
     "${frameworks_module_ans_path}/src/reminder_store.cpp",
     "${frameworks_module_ans_path}/src/reminder_table.cpp",
+    "${frameworks_module_ans_path}/src/reminder_table_old.cpp",
   ]
 
   public_configs = [ ":ans_innerkits_public_config" ]
@@ -150,6 +152,7 @@ ohos_shared_library("ans_innerkits") {
     defines += [ "HITRACE_METER_ENABLE" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

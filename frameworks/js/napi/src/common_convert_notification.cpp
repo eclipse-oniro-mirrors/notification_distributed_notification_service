@@ -79,7 +79,7 @@ napi_value Common::SetNotificationByDistributedOptions(
 
     // readonly remindType?: number
     enum DeviceRemindType outType = DeviceRemindType::IDLE_DONOT_REMIND;
-    if (!DeviceRemindTypeCToJS(notification->GetRemindType(), outType)) {
+    if (!AnsEnumUtil::DeviceRemindTypeCToJS(notification->GetRemindType(), outType)) {
         return NapiGetBoolean(env, false);
     }
     napi_create_int32(env, static_cast<int32_t>(outType), &value);
@@ -157,7 +157,7 @@ napi_value Common::SetNotification(
 
     // readonly source?: number
     SourceType sourceType = SourceType::TYPE_NORMAL;
-    if (!SourceTypeCToJS(notification->GetSourceType(), sourceType)) {
+    if (!AnsEnumUtil::SourceTypeCToJS(notification->GetSourceType(), sourceType)) {
         return NapiGetBoolean(env, false);
     }
     napi_create_int32(env, static_cast<int32_t>(sourceType), &value);

@@ -399,21 +399,14 @@ void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_
     napi_value arr = nullptr;
     napi_create_array(env, &arr);
     size_t count = 0;
-    for (auto vec : asynccallbackinfo->bundleNotificationStatus) {
+    for (auto vec : asynccallbackinfo->bundleOptionVector) {
         napi_value nSlot = nullptr;
         napi_create_object(env, &nSlot);
-        if (!Common::SetNotificationEnableStatus(env, vec, nSlot)) {
-            continue;
-        }
-        ANS_LOGD("Start napi_set_element");
+        Common::SetNotificationEnableStatus(env, vec, nSlot);
         napi_set_element(env, arr, count, nSlot);
         count++;
     }
     result = arr;
-    if ((count == 0) && (asynccallbackinfo->bundleNotificationStatus.size() > 0)) {
-        asynccallbackinfo->info.errorCode = ERROR;
-        result = Common::NapiGetNull(env);
-    }
     Common::CreateReturnValue(env, asynccallbackinfo->info, result);
     if (asynccallbackinfo->info.callback != nullptr) {
         ANS_LOGD("Delete napiGetSlots callback reference.");
@@ -444,7 +437,7 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
             AsyncCallbackInfoEnableStatus *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableStatus *>(data);
             if (asynccallbackinfo != nullptr) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetAllNotificationEnabledBundles(asynccallbackinfo->bundleNotificationStatus);
+                    NotificationHelper::GetAllNotificationEnabledBundles(asynccallbackinfo->bundleOptionVector);
                 ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },

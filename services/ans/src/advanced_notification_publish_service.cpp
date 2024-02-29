@@ -468,8 +468,6 @@ ErrCode AdvancedNotificationService::DeleteAll()
 ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -492,11 +490,33 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
-            result = NotificationPreferences::GetInstance().SetShowBadge(bundle, enabled);
             ANS_LOGD("ffrt enter!");
+            bool enable = false;
+            result = NotificationPreferences::GetInstance().IsShowBadge(bundle, enable);
+            if (result == ERR_OK && enable == enabled) {
+                ANS_LOGD("Badge enabled state is not going to change, skipping!");
+                return;
+            }
+            result = NotificationPreferences::GetInstance().SetShowBadge(bundle, enabled);
+            if (result == ERR_OK) {
+                HandleBadgeEnabledChanged(bundle, enabled);
+            }
         }));
     notificationSvrQueue_->wait(handler);
     return result;
+}
+
+void AdvancedNotificationService::HandleBadgeEnabledChanged(
+    const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
+{
+    sptr<EnabledNotificationCallbackData> enabledData = new (std::nothrow)
+        EnabledNotificationCallbackData(bundleOption->GetBundleName(), bundleOption->GetUid(), enabled);
+    if (enabledData == nullptr) {
+        ANS_LOGE("Failed to create badge enabled data object.");
+        return;
+    }
+
+    NotificationSubscriberManager::GetInstance()->NotifyBadgeEnabledChanged(enabledData);
 }
 
 ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
@@ -1713,6 +1733,54 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
     });
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
+{
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("Client is not a system app or subsystem.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    sptr<NotificationBundleOption> bundle = bundleOption;
+    ErrCode result = CheckBundleOptionValid(bundle);
+    if (result != ERR_OK) {
+        ANS_LOGE("Input parameter bundle option is not correct.");
+        return result;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        std::string bundleName = GetClientBundleName();
+        if (bundleName.empty()) {
+            ANS_LOGE("Failed to get client bundle name.");
+            return result;
+        }
+        bool isAgent = true;
+        if (!isAgent) {
+            ANS_LOGE("The caller has no agent relationship with the specified bundle.");
+            return ERR_ANS_PERMISSION_DENIED;
+        }
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        ANS_LOGD("ffrt enter!");
+        sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
+            bundle->GetBundleName(), bundle->GetUid(), badgeNumber);
+        if (badgeData == nullptr) {
+            ANS_LOGE("Failed to create badge number callback data.");
+            result = ERR_ANS_NO_MEMORY;
+        }
+        NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
+    });
+    notificationSvrQueue_->wait(handler);
+    return result;
 }
 
 void AdvancedNotificationService::AddLiveViewSubscriber()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -525,9 +525,15 @@ ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::GetAllNotificationEnabledBundles(std::vector<BundleNotificationStatus> &status)
+ErrCode AnsManagerStub::SetBadgeNumberByBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
 {
-    ANS_LOGE("AnsManagerStub::SetBadgeNumber called!");
+    ANS_LOGD("Called.");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("AnsManagerStub::GetAllNotificationEnabledBundles called!");
     return ERR_INVALID_OPERATION;
 }
 

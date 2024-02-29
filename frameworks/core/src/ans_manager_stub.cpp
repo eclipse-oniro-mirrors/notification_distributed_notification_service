@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -261,6 +261,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
                 std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::SET_BADGE_NUMBER,
             std::bind(&AnsManagerStub::HandleSetBadgeNumber, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_BADGE_NUMBER_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleSetBadgeNumberByBundle, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS,
             std::bind(&AnsManagerStub::HandleGetAllNotificationEnableStatus, std::placeholders::_1,
@@ -2004,13 +2007,35 @@ ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel 
     return result;
 }
 
+ErrCode AnsManagerStub::HandleSetBadgeNumberByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("Called.");
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Read bundle option failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    int32_t badgeNumber = 0;
+    if (!data.ReadInt32(badgeNumber)) {
+        ANS_LOGE("Read badge number failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
 ErrCode AnsManagerStub::HandleGetAllNotificationEnableStatus(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<BundleNotificationStatus> status;
-    ErrCode result = GetAllNotificationEnabledBundles(status);
-    int32_t vectorSize = status.size();
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode result = GetAllNotificationEnabledBundles(bundleOption);
+    int32_t vectorSize = bundleOption.size();
     if (vectorSize > MAX_STATUS_VECTOR_NUM) {
-        ANS_LOGE("Bundle status vector is over size.");
+        ANS_LOGE("Bundle bundleOption vector is over size.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2020,18 +2045,18 @@ ErrCode AnsManagerStub::HandleGetAllNotificationEnableStatus(MessageParcel &data
     }
 
     if (!reply.WriteInt32(vectorSize)) {
-        ANS_LOGE("Write status size failed.");
+        ANS_LOGE("Write bundleOption size failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    for (const auto &item : status) {
+    for (const auto &item : bundleOption) {
         if (!reply.WriteParcelable(&item)) {
             ANS_LOGE("Write bundleOption failed");
             return ERR_ANS_PARCELABLE_FAILED;
         }
     }
 
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AnsManagerStub::HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply)

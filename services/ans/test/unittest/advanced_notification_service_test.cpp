@@ -117,6 +117,9 @@ public:
     {}
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override
     {}
+    void OnBadgeEnabledChanged(
+        const sptr<EnabledNotificationCallbackData> &callbackData) override
+    {}
     void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}

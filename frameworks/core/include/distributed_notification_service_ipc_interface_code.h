@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,6 +106,7 @@ namespace Notification {
         SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
         GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
         SET_BADGE_NUMBER,
+        SET_BADGE_NUMBER_BY_BUNDLE,
         REGISTER_PUSH_CALLBACK,
         UNREGISTER_PUSH_CALLBACK,
         // ans_subscriber_interface
@@ -120,6 +121,7 @@ namespace Notification {
         ON_DND_DATE_CHANGED,
         ON_ENABLED_NOTIFICATION_CHANGED,
         ON_BADGE_CHANGED,
+        ON_BADGE_ENABLED_CHANGED,
         // push_callback_interface
         ON_CHECK_NOTIFICATION,
         ON_RESPONSE,

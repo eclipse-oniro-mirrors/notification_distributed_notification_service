@@ -472,7 +472,8 @@ napi_value ReminderCommon::GenReminder(
     int32_t snoozeSlotType = 0;
     if (GetInt32(env, value, ReminderAgentNapi::SNOOZE_SLOT_TYPE, snoozeSlotType, false)) {
         enum NotificationConstant::SlotType actureSnoozeType = NotificationConstant::SlotType::OTHER;
-        if (!NotificationNapi::Common::SlotTypeJSToC(NotificationNapi::SlotType(snoozeSlotType), actureSnoozeType)) {
+        if (!NotificationNapi::AnsEnumUtil::SlotTypeJSToC(
+            NotificationNapi::SlotType(snoozeSlotType), actureSnoozeType)) {
             ANSR_LOGW("snooze slot type not support.");
             return nullptr;
         }
@@ -575,7 +576,7 @@ bool ReminderCommon::GenReminderIntInner(
     int32_t slotType = 0;
     if (GetInt32(env, value, ReminderAgentNapi::SLOT_TYPE, slotType, false)) {
         enum NotificationConstant::SlotType actureType = NotificationConstant::SlotType::OTHER;
-        if (!NotificationNapi::Common::SlotTypeJSToC(NotificationNapi::SlotType(slotType), actureType)) {
+        if (!NotificationNapi::AnsEnumUtil::SlotTypeJSToC(NotificationNapi::SlotType(slotType), actureType)) {
             ANSR_LOGW("slot type not support.");
             return false;
         }

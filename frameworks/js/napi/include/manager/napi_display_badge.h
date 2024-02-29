@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ using namespace OHOS::Notification;
 
 struct SetBadgeNumberParams {
     int32_t badgeNumber = 0;
+    NotificationBundleOption option;
     napi_ref callback = nullptr;
 };
 
@@ -36,6 +37,7 @@ struct AsyncCallbackSetBadgeNumber {
 napi_value NapiDisplayBadge(napi_env env, napi_callback_info info);
 napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info);
 napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info);
+napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_DISPLAY_BADGE_H

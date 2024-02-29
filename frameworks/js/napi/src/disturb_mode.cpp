@@ -43,7 +43,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     NotificationConstant::DoNotDisturbType outType = NotificationConstant::DoNotDisturbType::NONE;
     napi_get_value_int32(env, value, &type);
     ANS_LOGI("type is: %{public}d", type);
-    if (!Common::DoNotDisturbTypeJSToC(DoNotDisturbType(type), outType)) {
+    if (!AnsEnumUtil::DoNotDisturbTypeJSToC(DoNotDisturbType(type), outType)) {
         return nullptr;
     }
     params.date.SetDoNotDisturbType(outType);
