@@ -64,6 +64,10 @@ public:
     ReminderRequestCalendar& operator = (const ReminderRequestCalendar &other);
     ~ReminderRequestCalendar() override {}
 
+    void SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo);
+
+    std::shared_ptr<ReminderRequest::WantAgentInfo> GetRRuleWantAgentInfo();
+
     inline uint16_t GetYear() const
     {
         return year_;
@@ -215,7 +219,6 @@ private:
 
     // repeat calendar
     std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
-
     static const uint8_t DAY_ARRAY[12];
     static const uint8_t FEBRUARY;
     static const uint8_t LEAP_MONTH;

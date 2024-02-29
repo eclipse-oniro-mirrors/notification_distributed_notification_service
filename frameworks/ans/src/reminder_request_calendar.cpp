@@ -72,6 +72,16 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     rruleWantAgentInfo_ = other.rruleWantAgentInfo_;
 }
 
+void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo)
+{
+    rruleWantAgentInfo_ = wantAgentInfo;
+}
+
+std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequestCalendar::GetRRuleWantAgentInfo()
+{
+    return rruleWantAgentInfo_;
+}
+
 bool ReminderRequestCalendar::SetNextTriggerTime()
 {
     hour_ = static_cast<uint8_t>(dateTime_.tm_hour);
