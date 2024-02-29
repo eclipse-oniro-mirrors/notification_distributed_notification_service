@@ -843,7 +843,7 @@ std::shared_ptr<ReminderRequestCalendar> ReminderCommon::ParseWantAgent(const na
     }
 
     if (!isSysApp && wantAgentInfo != nullptr) {
-        LOGE("Not system app rrule want info not supported")
+        LOGE("Not system app rrule want info not supported");
         return nullptr;
     }
     reminderCalendar->SetRRuleWantAgentInfo(wantAgentInfo);
