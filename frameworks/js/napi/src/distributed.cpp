@@ -214,7 +214,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    
+
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("isDistributedEnabled callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -276,7 +276,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    
+
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("enableDistributed callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -338,7 +338,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    
+
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("enableDistributedByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -400,7 +400,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    
+
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("enableDistributedSelf callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -475,7 +475,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    
+
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("isDistributedEnableByBundle callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -500,7 +500,7 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
             result = Common::NapiGetNull(env);
         } else {
             DeviceRemindType outType = DeviceRemindType::IDLE_DONOT_REMIND;
-            if (!Common::DeviceRemindTypeCToJS(asynccallbackinfo->remindType, outType)) {
+            if (!AnsEnumUtil::DeviceRemindTypeCToJS(asynccallbackinfo->remindType, outType)) {
                 asynccallbackinfo->info.errorCode = ERROR;
                 result = Common::NapiGetNull(env);
             }
@@ -555,7 +555,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    
+
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("getDeviceRemindType callback is nullptr.");
         return Common::NapiGetNull(env);
@@ -665,7 +665,7 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    
+
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("setSyncNotificationEnabledWithoutApp callback is nullptr.");
         return Common::NapiGetNull(env);

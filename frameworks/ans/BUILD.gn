@@ -48,6 +48,7 @@ ohos_shared_library("ans_innerkits") {
   include_dirs = [ "${inner_api_path}" ]
 
   sources = [
+    "${core_path}/common/src/ans_convert_enum.cpp",
     "${core_path}/common/src/ans_log_wrapper.cpp",
     "${core_path}/common/src/ans_watchdog.cpp",
     "${core_path}/src/ans_dialog_callback_interface.cpp",

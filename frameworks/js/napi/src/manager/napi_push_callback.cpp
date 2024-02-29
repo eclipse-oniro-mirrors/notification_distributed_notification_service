@@ -22,6 +22,7 @@
 #include "notification_check_info.h"
 #include "napi_common_want.h"
 #include "napi_common_util.h"
+#include "ans_log_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -152,9 +153,9 @@ int32_t JSPushCallBack::OnCheckNotification(
 
     NotificationNapi::SlotType slotType;
     NotificationNapi::ContentType contentType;
-    NotificationNapi::Common::ContentTypeCToJS(
+    NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
         static_cast<NotificationContent::Type>(checkInfo->GetContentType()), contentType);
-    NotificationNapi::Common::SlotTypeCToJS(
+    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(
         static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType()), slotType);
     SetJsPropertyString("bundleName", checkInfo->GetPkgName(), jsResult);
     SetJsPropertyInt32("notificationId", checkInfo->GetNotifyId(), jsResult);

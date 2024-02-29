@@ -193,7 +193,7 @@ napi_value NapiPush::ParseCheckRequest(const napi_env &env,
         return nullptr;
     }
     NotificationContent::Type outContentType = NotificationContent::Type::NONE;
-    if (!Common::ContentTypeJSToC(ContentType(value), outContentType)) {
+    if (!AnsEnumUtil::ContentTypeJSToC(ContentType(value), outContentType)) {
         ANS_LOGE("Failed to convert contentType.");
         return nullptr;
     }
@@ -205,7 +205,7 @@ napi_value NapiPush::ParseCheckRequest(const napi_env &env,
         return nullptr;
     }
     NotificationConstant::SlotType outSlotType = NotificationConstant::SlotType::OTHER;
-    if (!Common::SlotTypeJSToC(SlotType(value), outSlotType)) {
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(value), outSlotType)) {
         ANS_LOGE("Failed to convert slotType.");
         return nullptr;
     }

@@ -213,7 +213,7 @@ napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_inf
         paras.isAddSlotByType = true;
         int32_t slotType = 0;
         napi_get_value_int32(env, argv[PARAM0], &slotType);
-        if (!Common::SlotTypeJSToC(SlotType(slotType), paras.inType)) {
+        if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), paras.inType)) {
             return nullptr;
         }
     } else {
@@ -374,7 +374,7 @@ napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_inf
     }
     int32_t slotType = 0;
     napi_get_value_int32(env, argv[PARAM0], &slotType);
-    if (!Common::SlotTypeJSToC(SlotType(slotType), paras.outType)) {
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), paras.outType)) {
         return nullptr;
     }
 
@@ -479,7 +479,7 @@ napi_value ParseParametersSetSlotFlagsByBundle(
         ANS_LOGI("ParseParametersSetSlotByBundle out!");
         return Common::NapiGetNull(env);
     }
-    
+
 napi_value ParseParametersGetSlotFlagsByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotFlagsByBundle &params)
     {
@@ -494,7 +494,7 @@ napi_value ParseParametersGetSlotFlagsByBundle(
             ANS_LOGE("Wrong number of arguments");
             return nullptr;
         }
-        
+
         // argv[0]: bundle
         NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
         if (valuetype != napi_object) {
@@ -582,7 +582,7 @@ napi_value ParseParametersByRemoveSlot(
     }
     int32_t slotType = 0;
     napi_get_value_int32(env, argv[PARAM0], &slotType);
-    if (!Common::SlotTypeJSToC(SlotType(slotType), paras.outType)) {
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), paras.outType)) {
         return nullptr;
     }
 
@@ -1291,7 +1291,7 @@ napi_value ParseParametersEnableSlot(
     }
     int slotType = 0;
     napi_get_value_int32(env, argv[PARAM1], &slotType);
-    if (!Common::SlotTypeJSToC(SlotType(slotType), params.outType)) {
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), params.outType)) {
         return nullptr;
     }
 
@@ -1420,7 +1420,7 @@ napi_value ParseParametersIsEnableSlot(
     }
     int slotType = 0;
     napi_get_value_int32(env, argv[PARAM1], &slotType);
-    if (!Common::SlotTypeJSToC(SlotType(slotType), params.outType)) {
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), params.outType)) {
         return nullptr;
     }
 

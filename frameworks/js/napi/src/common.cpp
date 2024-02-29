@@ -137,7 +137,7 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     napi_value value = nullptr;
     // type: SlotType
     SlotType outType = SlotType::UNKNOWN_TYPE;
-    if (!SlotTypeCToJS(slot.GetType(), outType)) {
+    if (!AnsEnumUtil::SlotTypeCToJS(slot.GetType(), outType)) {
         return NapiGetBoolean(env, false);
     }
     napi_create_int32(env, static_cast<int32_t>(outType), &value);
@@ -146,7 +146,7 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
 
     // level?: number
     SlotLevel outLevel = SlotLevel::LEVEL_NONE;
-    if (!SlotLevelCToJS(slot.GetLevel(), outLevel)) {
+    if (!AnsEnumUtil::SlotLevelCToJS(slot.GetLevel(), outLevel)) {
         return NapiGetBoolean(env, false);
     }
     napi_create_int32(env, static_cast<int32_t>(outLevel), &value);
@@ -208,7 +208,7 @@ napi_value Common::SetDoNotDisturbDate(
 {
     ANS_LOGD("enter");
     DoNotDisturbType outType = DoNotDisturbType::TYPE_NONE;
-    if (!DoNotDisturbTypeCToJS(date.GetDoNotDisturbType(), outType)) {
+    if (!AnsEnumUtil::DoNotDisturbTypeCToJS(date.GetDoNotDisturbType(), outType)) {
         return NapiGetBoolean(env, false);
     }
 
@@ -703,7 +703,7 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
     }
 
     NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
-    if (!Common::SlotTypeJSToC(SlotType(slotType), outType)) {
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
         return nullptr;
     }
     slot.SetType(outType);
@@ -846,7 +846,7 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
         ANS_LOGI("level is: %{public}d", inLevel);
 
         NotificationSlot::NotificationLevel outLevel {NotificationSlot::NotificationLevel::LEVEL_NONE};
-        if (!Common::SlotLevelJSToC(SlotLevel(inLevel), outLevel)) {
+        if (!AnsEnumUtil::SlotLevelJSToC(SlotLevel(inLevel), outLevel)) {
             return nullptr;
         }
         slot.SetLevel(outLevel);

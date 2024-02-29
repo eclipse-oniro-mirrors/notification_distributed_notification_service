@@ -118,7 +118,7 @@ napi_value Common::SetNotificationContent(
     // contentType: ContentType
     NotificationContent::Type type = content->GetContentType();
     ContentType outType = ContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
-    if (!ContentTypeCToJS(type, outType)) {
+    if (!AnsEnumUtil::ContentTypeCToJS(type, outType)) {
         return NapiGetBoolean(env, false);
     }
     napi_create_int32(env, static_cast<int32_t>(outType), &value);
@@ -456,7 +456,7 @@ napi_value Common::GetNotificationContent(const napi_env &env, const napi_value 
         return nullptr;
     }
     NotificationContent::Type outType = NotificationContent::Type::NONE;
-    if (!ContentTypeJSToC(ContentType(type), outType)) {
+    if (!AnsEnumUtil::ContentTypeJSToC(ContentType(type), outType)) {
         return nullptr;
     }
     switch (outType) {
