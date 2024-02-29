@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -226,6 +226,20 @@ public:
      * @return Returns the number to be displayed for this notification.
      */
     uint32_t GetBadgeNumber() const;
+
+    /**
+     * @brief Sets the notification control flags for this notification.
+     *
+     * @param notificationControlFlags Indicates the flags to set.
+     */
+    void SetNotificationControlFlags(uint32_t notificationControlFlags);
+
+    /**
+     * @brief Obtains the notification control flags for this notification.
+     *
+     * @return Returns the notification control flags for this notification.
+     */
+    uint32_t GetNotificationControlFlags() const;
 
     /**
      * @brief Sets the current notification ID to uniquely identify the notification in the application.
@@ -1277,6 +1291,7 @@ private:
     int32_t notificationId_ {0};
     uint32_t color_ {NotificationRequest::COLOR_DEFAULT};
     uint32_t badgeNumber_ {0};
+    uint32_t notificationControlFlags_ {0};
     int32_t progressValue_ {0};
     int32_t progressMax_ {0};
     int64_t createTime_ {0};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -546,6 +546,10 @@ napi_value Common::GetNotificationRequestByNumber(
     }
     // badgeNumber?: number
     if (GetNotificationBadgeNumber(env, value, request) == nullptr) {
+        return nullptr;
+    }
+    // notificationControlFlags?: number
+    if (GetNotificationControlFlags(env, value, request) == nullptr) {
         return nullptr;
     }
 
@@ -1686,6 +1690,37 @@ napi_value Common::GetNotificationBadgeNumber(
         }
 
         request.SetBadgeNumber(badgeNumber);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationControlFlags(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGD("Called.");
+
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    uint32_t notificationControlFlags = 0;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "notificationControlFlags", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "notificationControlFlags", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+
+        napi_get_value_uint32(env, result, &notificationControlFlags);
+        if (notificationControlFlags == 0) {
+            ANS_LOGD("Undefined notification control flags.");
+            return nullptr;
+        }
+
+        request.SetNotificationControlFlags(notificationControlFlags);
     }
 
     return NapiGetNull(env);

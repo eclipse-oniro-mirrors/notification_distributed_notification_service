@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -674,6 +674,7 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
     int slotType = 0;
 
     NAPI_CALL(env, napi_has_named_property(env, value, "notificationType", &hasNotificationType));
+    NAPI_CALL(env, napi_has_named_property(env, value, "type", &hasType));
     if (hasNotificationType) {
         napi_get_named_property(env, value, "notificationType", &nobj);
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
@@ -681,12 +682,7 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
             ANS_LOGE("Wrong argument type. Number expected.");
             return nullptr;
         }
-    } else {
-        ANS_LOGE("Property notificationType expected.");
-    }
-
-    NAPI_CALL(env, napi_has_named_property(env, value, "type", &hasType));
-    if (!hasNotificationType && hasType) {
+    } else if (!hasNotificationType && hasType) {
         napi_get_named_property(env, value, "type", &nobj);
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_number) {
@@ -694,7 +690,7 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
             return nullptr;
         }
     } else {
-        ANS_LOGE("Property type expected.");
+        ANS_LOGE("Property notificationType or type expected.");
         return nullptr;
     }
 
@@ -1280,6 +1276,10 @@ napi_value Common::SetNotificationFlags(
     int32_t vibrationEnabled = static_cast<int32_t>(flags->IsVibrationEnabled());
     napi_create_int32(env, vibrationEnabled, &value);
     napi_set_named_property(env, result, "vibrationEnabled", value);
+
+    uint32_t reminderFlags = flags->GetReminderFlags();
+    napi_create_uint32(env, reminderFlags, &value);
+    napi_set_named_property(env, result, "reminderFlags", value);
 
     return NapiGetBoolean(env, true);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,16 @@ public:
         CUSTOM,                 // the notification type is custom
         LIVE_VIEW,              // the notification type is live view
         CUSTOMER_SERVICE,       // the notification type is customer service
+        EMERGENCY_INFORMATION,  // the notification type is emergency information
+    };
+
+    enum ReminderFlag {
+        SOUND_FLAG = 1 << 0,
+        LOCKSCREEN_FLAG = 1 << 1,
+        BANNER_FLAG = 1 << 2,
+        LIGHTSCREEN_FLAG = 1 << 3,
+        VIBRATION_FLAG = 1 << 4,
+        STATUSBAR_ICON_FLAG = 1 << 5,
     };
 
     enum class VisiblenessType {
@@ -214,7 +224,7 @@ public:
     constexpr static uint8_t SLOTTYPE_MAX = 7;
     constexpr static const char* NOTIFICATION_SLOTFLAG_CONFIG_PATH = "/etc/notification_reminder_config.ccm";
     constexpr static const char* SLOTTYPECCMNAMES[] = {"Social_communication", "Service_reminder",
-        "Content_information", "Other", "Custom", "Live_view", "Custom_service"};
+        "Content_information", "Other", "Custom", "Live_view", "Custom_service", "Emergency_information"};
 };
 }  // namespace Notification
 }  // namespace OHOS

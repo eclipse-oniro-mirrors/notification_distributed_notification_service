@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,11 @@ namespace Notification {
 void NotificationFlags::SetSoundEnabled(NotificationConstant::FlagStatus soundEnabled)
 {
     soundEnabled_ = soundEnabled;
+    if (soundEnabled == NotificationConstant::FlagStatus::OPEN) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::SOUND_FLAG;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::SOUND_FLAG);
+    }
 }
 
 NotificationConstant::FlagStatus NotificationFlags::IsSoundEnabled() const
@@ -37,6 +42,11 @@ NotificationConstant::FlagStatus NotificationFlags::IsSoundEnabled() const
 void NotificationFlags::SetVibrationEnabled(NotificationConstant::FlagStatus vibrationEnabled)
 {
     vibrationEnabled_ = vibrationEnabled;
+    if (vibrationEnabled == NotificationConstant::FlagStatus::OPEN) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::VIBRATION_FLAG);
+    }
 }
 
 NotificationConstant::FlagStatus NotificationFlags::IsVibrationEnabled() const
@@ -44,16 +54,91 @@ NotificationConstant::FlagStatus NotificationFlags::IsVibrationEnabled() const
     return vibrationEnabled_;
 }
 
+uint32_t NotificationFlags::GetReminderFlags()
+{
+    return reminderFlags_;
+}
+
+void NotificationFlags::SetLockScreenVisblenessEnabled(bool visblenessEnabled)
+{
+    if (visblenessEnabled) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
+    }
+}
+
+bool NotificationFlags::IsLockScreenVisblenessEnabled()
+{
+    if ((reminderFlags_ & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
+        return true;
+    }
+    return false;
+}
+
+void NotificationFlags::SetBannerEnabled(bool bannerEnabled)
+{
+    if (bannerEnabled) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::BANNER_FLAG);
+    }
+}
+
+bool NotificationFlags::IsBannerEnabled()
+{
+    if ((reminderFlags_ & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
+        return true;
+    }
+    return false;
+}
+
+void NotificationFlags::SetLightScreenEnabled(bool lightScreenEnabled)
+{
+    if (lightScreenEnabled) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG);
+    }
+}
+
+bool NotificationFlags::IsLightScreenEnabled()
+{
+    if ((reminderFlags_ & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
+        return true;
+    }
+    return false;
+}
+
+void NotificationFlags::SetStatusIconEnabled(bool statusIconEnabled)
+{
+    if (statusIconEnabled) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG);
+    }
+}
+
+bool NotificationFlags::IsStatusIconEnabled()
+{
+    if ((reminderFlags_ & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
+        return true;
+    }
+    return false;
+}
+
 std::string NotificationFlags::Dump()
 {
     return "soundEnabled = " + std::to_string(static_cast<uint8_t>(soundEnabled_)) +
-        ", vibrationEnabled = " + std::to_string(static_cast<uint8_t>(vibrationEnabled_));
+           ", vibrationEnabled = " + std::to_string(static_cast<uint8_t>(vibrationEnabled_)) +
+           ", reminderFlags = " + std::to_string(reminderFlags_);
 }
 
 bool NotificationFlags::ToJson(nlohmann::json &jsonObject) const
 {
     jsonObject["soundEnabled"]     = soundEnabled_;
     jsonObject["vibrationEnabled"] = vibrationEnabled_;
+    jsonObject["reminderFlags"] = reminderFlags_;
 
     return true;
 }
@@ -82,6 +167,11 @@ NotificationFlags *NotificationFlags::FromJson(const nlohmann::json &jsonObject)
         pFlags->vibrationEnabled_ = static_cast<NotificationConstant::FlagStatus>(vibrationEnabled);
     }
 
+    if (jsonObject.find("reminderFlags") != jsonEnd && jsonObject.at("reminderFlags").is_number_integer()) {
+        auto reminderFlags = jsonObject.at("reminderFlags").get<uint32_t>();
+        pFlags->reminderFlags_ = reminderFlags;
+    }
+
     return pFlags;
 }
 
@@ -94,6 +184,11 @@ bool NotificationFlags::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteUint8(static_cast<uint8_t>(vibrationEnabled_))) {
         ANS_LOGE("Failed to write flag vibration enable for the notification");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(reminderFlags_)) {
+        ANS_LOGE("Failed to write reminder flags for the notification.");
         return false;
     }
 
@@ -119,6 +214,7 @@ bool NotificationFlags::ReadFromParcel(Parcel &parcel)
 {
     soundEnabled_ = static_cast<NotificationConstant::FlagStatus>(parcel.ReadUint8());
     vibrationEnabled_ = static_cast<NotificationConstant::FlagStatus>(parcel.ReadUint8());
+    reminderFlags_ = parcel.ReadUint32();
 
     return true;
 }
