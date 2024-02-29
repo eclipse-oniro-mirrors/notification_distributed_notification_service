@@ -1701,6 +1701,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
                 ANS_LOGE("Can not assign valid slot!");
             }
         }
+
+        ChangeNotificationByControlFlags(record);
+
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             return;

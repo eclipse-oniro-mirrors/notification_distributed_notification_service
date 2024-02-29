@@ -754,7 +754,9 @@ void ReminderRequest::SetTriggerTimeInMilli(uint64_t triggerTimeInMilli)
 
 ReminderRequest& ReminderRequest::SetWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo)
 {
-    wantAgentInfo_ = wantAgentInfo;
+    if (wantAgentInfo != nullptr) {
+        wantAgentInfo_ = wantAgentInfo;
+    }
     return *this;
 }
 

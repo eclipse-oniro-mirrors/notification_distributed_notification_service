@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,60 @@ public:
     NotificationConstant::FlagStatus IsVibrationEnabled() const;
 
     /**
+     * Get reminder flags.
+     * @return reminder flags.
+     */
+    uint32_t GetReminderFlags();
+
+    /**
+     * Sets the notification whether enable lock screen.
+     * @param visblenessEnabled whether enable lock screen.
+     */
+    void SetLockScreenVisblenessEnabled(bool visblenessEnabled);
+
+    /**
+     * Checks whether enable lock screen.
+     * @return lock screen enable.
+     */
+    bool IsLockScreenVisblenessEnabled();
+
+    /**
+     * Sets the notification whether enable banner.
+     * @param bannerEnabled whether enable banner.
+     */
+    void SetBannerEnabled(bool bannerEnabled);
+
+    /**
+     * Checks whether enable banner.
+     * @return banner enable.
+     */
+    bool IsBannerEnabled();
+
+    /**
+     * Sets the notification whether light screen.
+     * @param lightScreenEnabled whether light screen.
+     */
+    void SetLightScreenEnabled(bool lightScreenEnabled);
+
+    /**
+     * Checks whether enable light screen.
+     * @return light screen enable.
+     */
+    bool IsLightScreenEnabled();
+
+    /**
+     * Sets the notification whether status icon.
+     * @param statusIconEnabled whether status icon.
+     */
+    void SetStatusIconEnabled(bool statusIconEnabled);
+
+    /**
+     * Checks whether enable status icon.
+     * @return status icon enable.
+     */
+    bool IsStatusIconEnabled();
+
+    /**
      * Returns a string representation of the object.
      * @return a string representation of the object.
      */
@@ -101,6 +155,7 @@ private:
 private:
     NotificationConstant::FlagStatus soundEnabled_ {NotificationConstant::FlagStatus::NONE};
     NotificationConstant::FlagStatus vibrationEnabled_ {NotificationConstant::FlagStatus::NONE};
+    uint32_t reminderFlags_ = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS
