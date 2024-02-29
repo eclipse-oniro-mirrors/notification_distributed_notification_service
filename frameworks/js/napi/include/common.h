@@ -1644,6 +1644,7 @@ public:
     static napi_value GetNotificationUnifiedGroupInfo(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
+    /**
      * @brief Gets the notification control flags of NotificationRequest object from specified js object.
      *
      * @param env Indicates the environment that the API is invoked under
