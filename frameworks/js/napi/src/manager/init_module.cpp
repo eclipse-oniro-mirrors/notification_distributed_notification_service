@@ -15,6 +15,7 @@
 
 #include "init_module.h"
 
+#include "ans_log_wrapper.h"
 #include "constant.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
@@ -31,6 +32,7 @@
 #include "pixel_map_napi.h"
 #include "napi_push.h"
 #include "napi_local_live_view.h"
+#include "napi_distributed_enable.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -109,6 +111,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("triggerSystemLiveView", NapiTriggerLocalLiveView),
         DECLARE_NAPI_FUNCTION("setSlotFlagsByBundle", NapiSetSlotFlagsByBundle),
         DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", NapiGetSlotFlagsByBundle),
+        DECLARE_NAPI_FUNCTION("setDistributedEnabledByBundle", NapiSetDistributedEnabledByBundle),
 };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
