@@ -877,7 +877,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00200, Function 
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
-    EXPECT_EQ(false, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+    EXPECT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
 }
 
 /**

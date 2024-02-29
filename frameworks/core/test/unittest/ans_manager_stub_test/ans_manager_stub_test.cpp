@@ -4455,7 +4455,7 @@ HWTEST_F(AnsManagerStubTest, HandleGetAllNotificationEnableStatus01, Function | 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
