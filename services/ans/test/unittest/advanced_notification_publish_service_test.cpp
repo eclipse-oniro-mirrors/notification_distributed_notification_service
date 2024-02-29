@@ -570,5 +570,118 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0300
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+}
+
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0300
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0400
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0400, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
 }  // namespace Notification
 }  // namespace OHOS

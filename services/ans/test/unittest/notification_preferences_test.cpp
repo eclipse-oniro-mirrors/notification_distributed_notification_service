@@ -1259,5 +1259,64 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00400, Function | S
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
 }
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption,
+        deviceType, true);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
+        deviceType, enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
+        deviceType, enable);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS

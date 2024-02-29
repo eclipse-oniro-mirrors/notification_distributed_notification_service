@@ -945,5 +945,118 @@ HWTEST_F(AnsNotificationUnitTest, SetBadgeNumberByBundle_0200, TestSize.Level1)
     ErrCode res = ans_->SetBadgeNumberByBundle(bundleOption, badgeNumber);
     EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(ret, false);
+
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string deviceType = "testDeviceType";
+    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledByBundle_0300
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("");
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(ret, false);
+
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    MockWriteInterfaceToken(true);
+    NotificationBundleOption bundleOption;
+    std::string deviceType = "testDeviceType";
+
+    bool enable = true;
+    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0300
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    MockWriteInterfaceToken(true);
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("");
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+
+    bool enable = true;
+    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS
