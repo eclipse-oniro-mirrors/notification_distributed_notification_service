@@ -484,7 +484,7 @@ napi_value ReminderCommon::GenReminder(
     if (!GenWantAgent(env, value, ReminderAgentNapi::WANT_AGENT, wantAgentInfo, isSysApp)) {
         return nullptr;
     }
-        reminder->SetWantAgentInfo(wantAgentInfo);
+    reminder->SetWantAgentInfo(wantAgentInfo);
 
     // maxScreenWantAgent
     GenMaxScreenWantAgent(env, value, reminder);
