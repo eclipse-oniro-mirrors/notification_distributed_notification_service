@@ -779,6 +779,17 @@ public:
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
+     * @brief Gets the appMessageId of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationAppMessageId(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
      * @brief Gets the color of NotificationRequest object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1620,6 +1631,17 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationBadgeNumber(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets a NotificationUnifiedGroupInfo object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param templ Indicates a NotificationUnifiedGroupInfo object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationUnifiedGroupInfo(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**

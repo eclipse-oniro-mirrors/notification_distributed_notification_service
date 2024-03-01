@@ -570,5 +570,171 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: DuplicateMsgControl_00001
+ * @tc.desc: Test DuplicateMsgControl
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    auto ret = advancedNotificationService_->DuplicateMsgControl(request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: DuplicateMsgControl_00002
+ * @tc.desc: Test DuplicateMsgControl
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test1");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+
+    auto ret = advancedNotificationService_->DuplicateMsgControl(request);
+    EXPECT_EQ(ret, (int)ERR_ANS_DUPLICATE_MSG);
+}
+
+/**
+ * @tc.name: DuplicateMsgControl_00003
+ * @tc.desc: Test DuplicateMsgControl
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+
+    auto ret = advancedNotificationService_->DuplicateMsgControl(request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: IsDuplicateMsg_00001
+ * @tc.desc: Test IsDuplicateMsg
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    auto uniqueKey = request->GenerateUniqueKey();
+
+    auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsDuplicateMsg_00002
+ * @tc.desc: Test IsDuplicateMsg
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+
+    auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: RemoveExpiredUniqueKey_00001
+ * @tc.desc: Test RemoveExpiredUniqueKey
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(24), uniqueKey));
+
+    sleep(1);
+    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+    advancedNotificationService_->RemoveExpiredUniqueKey();
+    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+}
+
+/**
+ * @tc.name: PublishRemoveDuplicateEvent_00001
+ * @tc.desc: Test PublishRemoveDuplicateEvent
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    request->SetNotificationId(1);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: PublishRemoveDuplicateEvent_00002
+ * @tc.desc: Test PublishRemoveDuplicateEvent
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00002, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationRecord> record= nullptr;
+    auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PublishRemoveDuplicateEvent_00003
+ * @tc.desc: Test PublishRemoveDuplicateEvent
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    request->SetNotificationId(1);
+    request->SetIsAgentNotification(true);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
