@@ -1941,35 +1941,35 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string jsonValue = "{}";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
     
     jsonValue = R"({"pkgName":1})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication"})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":1})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility"})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":1})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":1})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
@@ -1981,7 +1981,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 2);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 }
 
 /**
@@ -1995,7 +1995,11 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00007, Function | SmallTest | Lev
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string jsonValue = "";
     rrc->RecoverWantAgent(jsonValue, 0);
-    SUCCEED();
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
+    rrc->RecoverWantAgent(jsonValue, 1);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
 }
 
 /**

@@ -952,6 +952,7 @@ private:
     bool UpdateNextReminder(const bool &force);
     void UpdateNotificationContent(const bool &setSnooze);
     void UpdateNotificationCommon(bool isSnooze);
+    bool IsJsonString(const std::string& info);
 
     /**
      * @brief Determine whether it is repeated every week.
