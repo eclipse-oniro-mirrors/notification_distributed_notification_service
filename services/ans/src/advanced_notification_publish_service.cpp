@@ -1762,7 +1762,8 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
             ANS_LOGE("Failed to get client bundle name.");
             return result;
         }
-        bool isAgent = true;
+        bool isAgent = false;
+        isAgent = IsAgentRelationship(bundleName, bundle->GetBundleName());
         if (!isAgent) {
             ANS_LOGE("The caller has no agent relationship with the specified bundle.");
             return ERR_ANS_PERMISSION_DENIED;
