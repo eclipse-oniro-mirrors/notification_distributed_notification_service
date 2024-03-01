@@ -899,6 +899,10 @@ public:
     static constexpr int32_t VALUE_NULL = -1;
     // object exist in parcel
     static constexpr int32_t VALUE_OBJECT = 1;
+    // wantAgent flag
+    static constexpr int32_t WANT_AGENT_FLAG = 0;
+    // maxWantAgent flag
+    static constexpr int32_t MAX_WANT_AGENT_FLAG = 1;
 
 protected:
     enum class DbRecoveryType : uint8_t {
