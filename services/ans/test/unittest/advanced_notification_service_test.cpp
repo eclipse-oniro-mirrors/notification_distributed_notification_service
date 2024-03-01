@@ -4484,6 +4484,55 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_00001, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: ChangeNotificationByControlFlags_00001
+ * @tc.desc: Test ChangeNotificationByControlFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ChangeNotificationByControlFlags_00001, Function | SmallTest | Level1)
+{
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+    uint32_t notificationControlFlags = 0;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::SOUND_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    notificationControlFlags |= NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG;
+    request->SetNotificationControlFlags(notificationControlFlags);
+
+    std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenVisblenessEnabled(true);
+    flags->SetBannerEnabled(true);
+    flags->SetLightScreenEnabled(true);
+    flags->SetStatusIconEnabled(true);
+    request->SetFlags(flags);
+
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->ChangeNotificationByControlFlags(record);
+
+    u_int32_t reminderFlags = flags->GetReminderFlags();
+    EXPECT_EQ(reminderFlags, 0);
+}
+
+/**
+ * @tc.name: CheckPublishPreparedNotification_00001
+ * @tc.desc: Test CheckPublishPreparedNotification
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckPublishPreparedNotification_00001, Function | SmallTest | Level1)
+{
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->CheckPublishPreparedNotification(record, true);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: GetRecordFromNotificationList_00001
  * @tc.desc: Test GetRecordFromNotificationList
  * @tc.type: FUNC

@@ -943,6 +943,23 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
 }
 
 /**
+ * @tc.name: RecoverFromDb_00001
+ * @tc.desc: Test RecoverFromDb parameters.
+ * @tc.type: FUNC
+ * @tc.require: I92G9T
+ */
+HWTEST_F(ReminderRequestCalendarTest, RRuleWantAgentInfo_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    wantInfo->pkgName = "testing service";
+    wantInfo->abilityName = "testing ability";
+    calendar->SetRRuleWantAgentInfo(wantInfo);
+    EXPECT_EQ(calendar->GetRRuleWantAgentInfo(), wantInfo);
+}
+
+/**
  * @tc.name: RecoverFromOldVersion_00001
  * @tc.desc: Test RecoverFromOldVersion parameters.
  * @tc.type: FUNC

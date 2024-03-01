@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@
 #include "want_params.h"
 #include "notification_check_request.h"
 #include "notification_bundle_option.h"
+#include "notification_unified_group_Info.h"
+#include <string>
 
 namespace OHOS {
 namespace Notification {
@@ -226,6 +228,20 @@ public:
      * @return Returns the number to be displayed for this notification.
      */
     uint32_t GetBadgeNumber() const;
+
+    /**
+     * @brief Sets the notification control flags for this notification.
+     *
+     * @param notificationControlFlags Indicates the flags to set.
+     */
+    void SetNotificationControlFlags(uint32_t notificationControlFlags);
+
+    /**
+     * @brief Obtains the notification control flags for this notification.
+     *
+     * @return Returns the notification control flags for this notification.
+     */
+    uint32_t GetNotificationControlFlags() const;
 
     /**
      * @brief Sets the current notification ID to uniquely identify the notification in the application.
@@ -1214,6 +1230,41 @@ public:
      */
     bool IsCoverActionButtons() const;
 
+    /**
+     * @brief Set notification appMessageId value.
+     *
+     * @param appMessageId the value of appMessageId.
+     */
+    void SetAppMessageId(const std::string &appMessageId);
+
+    /**
+     * @brief Get notification appMessageId value.
+     *
+     * @return Return the value of appMessageId.
+     */
+    std::string GetAppMessageId() const;
+
+    /**
+     * @brief Generate notification request unique key.
+     *
+     * @return Return the unique key of notification request.
+     */
+    std::string GenerateUniqueKey();
+
+    /**
+     * @brief Sets the unifiedGroupInfo of this notification.
+     *
+     * @param flags Indicates the unifiedGroupInfo of this notification.
+     */
+    void SetUnifiedGroupInfo(const std::shared_ptr<NotificationUnifiedGroupInfo> &unifiedGroupInfo);
+
+    /**
+     * @brief Obtains the unifiedGroupInfo of the notification.
+     *
+     * @return Returns the unifiedGroupInfo of the notification.
+     */
+    std::shared_ptr<NotificationUnifiedGroupInfo> GetUnifiedGroupInfo() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1277,6 +1328,7 @@ private:
     int32_t notificationId_ {0};
     uint32_t color_ {NotificationRequest::COLOR_DEFAULT};
     uint32_t badgeNumber_ {0};
+    uint32_t notificationControlFlags_ {0};
     int32_t progressValue_ {0};
     int32_t progressMax_ {0};
     int64_t createTime_ {0};
@@ -1302,6 +1354,7 @@ private:
     std::string shortcutId_ {};
     std::string sortingKey_ {};
     std::string classification_ {};
+    std::string appMessageId_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};
@@ -1343,6 +1396,7 @@ private:
 
     std::shared_ptr<NotificationTemplate> notificationTemplate_ {};
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
+    std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

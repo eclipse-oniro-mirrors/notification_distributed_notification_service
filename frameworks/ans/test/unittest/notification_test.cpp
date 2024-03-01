@@ -295,7 +295,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "ownerUid = 0, groupName = , statusBarText = , label = , shortcutId = , "
     "sortingKey = , groupAlertType = 0, color = 0, badgeNumber = 0, visiblenessType = 0, "
     "progressValue = 0, progressMax = 0, badgeStyle = 0, classification = , "
-    "notificationContentType = 0, showDeliveryTime = false, tapDismissed = true, "
+    "notificationContentType = 0, notificationControlFlags = 0, showDeliveryTime = false, tapDismissed = true, "
     "colorEnabled = false, alertOneTime = false, showStopwatch = false, isCountdown = false, "
     "inProgress = false, groupOverview = false, isRemoveAllowed = true, progressIndeterminate = false, "
     "unremovable = false, floatingIcon = false, onlyLocal = false, permitted = true, "

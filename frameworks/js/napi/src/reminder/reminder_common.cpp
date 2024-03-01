@@ -119,14 +119,13 @@ void ReminderCommon::HandleActionButtonTitle(const napi_env &env, const napi_val
         title.c_str(), buttonType, resource.c_str());
 }
 
-bool ReminderCommon::IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder)
+bool ReminderCommon::IsSelfSystemApp()
 {
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         ANSR_LOGW("This application is not system-app, can not use system-api");
         return false;
     }
-    reminder->SetSystemApp(true);
     return true;
 }
 
@@ -374,12 +373,13 @@ bool ReminderCommon::ValidateString(const std::string &str)
 }
 
 bool ReminderCommon::GenWantAgent(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp)
+    const napi_env &env, const napi_value &value, const char* name,
+    std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
-    if (GetObject(env, value, ReminderAgentNapi::WANT_AGENT, wantAgent)) {
-        auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    if (GetObject(env, value, name, wantAgent)) {
+        wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
         if (GetStringUtf8(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PKG, str, NotificationNapi::STR_MAX_SIZE)) {
             wantAgentInfo->pkgName = str;
         }
@@ -395,7 +395,6 @@ bool ReminderCommon::GenWantAgent(
             }
             wantAgentInfo->uri = str;
         }
-        reminder->SetWantAgentInfo(wantAgentInfo);
     }
     return true;
 }
@@ -419,7 +418,7 @@ void ReminderCommon::GenMaxScreenWantAgent(
     }
 }
 bool ReminderCommon::CreateReminder(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+    const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)
 {
     napi_value result = nullptr;
     napi_get_named_property(env, value, ReminderAgentNapi::REMINDER_TYPE, &result);
@@ -433,7 +432,7 @@ bool ReminderCommon::CreateReminder(
             CreateReminderAlarm(env, value, reminder);
             break;
         case ReminderRequest::ReminderType::CALENDAR:
-            CreateReminderCalendar(env, value, reminder);
+            CreateReminderCalendar(env, value, isSysApp, reminder);
             break;
         default:
             ANSR_LOGW("Reminder type is not support. (type:%{public}d)", reminderType);
@@ -458,10 +457,11 @@ napi_value ReminderCommon::GenReminder(
     }
 
     // createReminder
-    if (!CreateReminder(env, value, reminder)) {
+    bool isSysApp = IsSelfSystemApp();
+    if (!CreateReminder(env, value, isSysApp, reminder)) {
         return nullptr;
     }
-    bool isSysApp = IsSelfSystemApp(reminder);
+    reminder->SetSystemApp(isSysApp);
     GenReminderStringInner(env, value, reminder);
     if (!GenReminderIntInner(env, value, reminder)) {
         return nullptr;
@@ -481,9 +481,11 @@ napi_value ReminderCommon::GenReminder(
     }
 
     // wantAgent
-    if (!GenWantAgent(env, value, reminder, isSysApp)) {
+    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
+    if (!GenWantAgent(env, value, ReminderAgentNapi::WANT_AGENT, wantAgentInfo, isSysApp)) {
         return nullptr;
     }
+    reminder->SetWantAgentInfo(wantAgentInfo);
 
     // maxScreenWantAgent
     GenMaxScreenWantAgent(env, value, reminder);
@@ -757,6 +759,7 @@ napi_value ReminderCommon::CreateReminderAlarm(
             ReminderAgentNapi::ALARM_HOUR);
         return nullptr;
     }
+
     if ((propertyMinuteVal < 0) || (propertyMinuteVal > maxMinute)) {
         ANSR_LOGW("Create alarm reminder fail: designated %{public}s must between [0, 59].",
             ReminderAgentNapi::ALARM_MINUTE);
@@ -775,7 +778,7 @@ napi_value ReminderCommon::CreateReminderAlarm(
 }
 
 napi_value ReminderCommon::CreateReminderCalendar(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+    const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)
 {
     napi_value dateTimeObj = nullptr;
     if (!GetObject(env, value, ReminderAgentNapi::CALENDAR_DATE_TIME, dateTimeObj)) {
@@ -796,6 +799,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
         !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_MINUTE, propertyMinteVal, true)) {
         return nullptr;
     }
+
     if (!CheckCalendarParams(propertyYearVal, propertyMonthVal, propertyDayVal,
         propertyHourVal, propertyMinteVal)) {
         return nullptr;
@@ -821,7 +825,35 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (ParseInt32Array(env, value, ReminderAgentNapi::REPEAT_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
         return nullptr;
     }
+    tm dateTime = ReminderCalendarConvertDateTime(propertyYearVal, propertyMonthVal, propertyDayVal, propertyHourVal,
+        propertyMinteVal);
+    auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
+    if (!(reminderCalendar->SetNextTriggerTime())) {
+        return nullptr;
+    }
+    reminder = ParseWantAgent(env, value, isSysApp, reminderCalendar);
+    return NotificationNapi::Common::NapiGetNull(env);
+}
 
+std::shared_ptr<ReminderRequestCalendar> ReminderCommon::ParseWantAgent(const napi_env &env,
+    const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar)
+{
+    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
+    if (!GenWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT, wantAgentInfo, isSysApp)) {
+        return nullptr;
+    }
+
+    if (!isSysApp && wantAgentInfo != nullptr) {
+        ANS_LOGE("Not system app rrule want info not supported");
+        return nullptr;
+    }
+    reminderCalendar->SetRRuleWantAgentInfo(wantAgentInfo);
+    return reminderCalendar;
+}
+
+tm ReminderCommon::ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
+    const int32_t propertyDayVal, const int32_t propertyHourVal, const int32_t propertyMinteVal)
+{
     tm dateTime;
     dateTime.tm_year = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::YEAR, propertyYearVal);
     dateTime.tm_mon = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::MONTH, propertyMonthVal);
@@ -830,11 +862,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     dateTime.tm_min = propertyMinteVal;
     dateTime.tm_sec = 0;
     dateTime.tm_isdst = -1;
-    reminder = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    if (!(reminder->SetNextTriggerTime())) {
-        return nullptr;
-    }
-    return NotificationNapi::Common::NapiGetNull(env);
+    return dateTime;
 }
 
 bool ReminderCommon::CheckCalendarParams(const int32_t &year, const int32_t &month, const int32_t &day,

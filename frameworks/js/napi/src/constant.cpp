@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,13 +52,15 @@ napi_value SlotTypeInit(napi_env env, napi_value exports)
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
 
-    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::UNKNOWN_TYPE, "UNKNOWN_TYPE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::SOCIAL_COMMUNICATION, "SOCIAL_COMMUNICATION");
-    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::SERVICE_INFORMATION, "SERVICE_INFORMATION");
-    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::CONTENT_INFORMATION, "CONTENT_INFORMATION");
-    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::LIVE_VIEW, "LIVE_VIEW");
-    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::CUSTOMER_SERVICE, "CUSTOMER_SERVICE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)SlotType::OTHER_TYPES, "OTHER_TYPES");
+    SetNamedPropertyByInteger(env, obj, static_cast<int32_t>(SlotType::UNKNOWN_TYPE), "UNKNOWN_TYPE");
+    SetNamedPropertyByInteger(env, obj, static_cast<int32_t>(SlotType::SOCIAL_COMMUNICATION), "SOCIAL_COMMUNICATION");
+    SetNamedPropertyByInteger(env, obj, static_cast<int32_t>(SlotType::SERVICE_INFORMATION), "SERVICE_INFORMATION");
+    SetNamedPropertyByInteger(env, obj, static_cast<int32_t>(SlotType::CONTENT_INFORMATION), "CONTENT_INFORMATION");
+    SetNamedPropertyByInteger(env, obj, static_cast<int32_t>(SlotType::LIVE_VIEW), "LIVE_VIEW");
+    SetNamedPropertyByInteger(env, obj, static_cast<int32_t>(SlotType::CUSTOMER_SERVICE), "CUSTOMER_SERVICE");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(SlotType::EMERGENCY_INFORMATION), "EMERGENCY_INFORMATION");
+    SetNamedPropertyByInteger(env, obj, static_cast<int32_t>(SlotType::OTHER_TYPES), "OTHER_TYPES");
 
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("SlotType", obj),
@@ -270,6 +272,40 @@ napi_value SourceTypeInit(napi_env env, napi_value exports)
     return exports;
 }
 
+napi_value NotificationControlFlagStatusInit(napi_env env, napi_value exports)
+{
+    ANS_LOGD("Called.");
+
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND),
+        "NOTIFICATION_STATUS_CLOSE_SOUND");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_LOCKSCREEN),
+        "NOTIFICATION_STATUS_CLOSE_LOCKSCREEN");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_BANNER),
+        "NOTIFICATION_STATUS_CLOSE_BANNER");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_LIGHTSCREEN),
+        "NOTIFICATION_STATUS_CLOSE_LIGHTSCREEN");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_VIBRATION),
+        "NOTIFICATION_STATUS_CLOSE_VIBRATION");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_STATUSBAR_ICON),
+        "NOTIFICATION_STATUS_CLOSE_STATUSBAR_ICON");
+
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("NotificationControlFlagStatus", obj),
+    };
+
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
 napi_value NotificationFlagTypeInit(napi_env env, napi_value exports)
 {
     ANS_LOGD("%{public}s, called", __func__);
@@ -321,6 +357,7 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     InputEditTypeInit(env, exports);
     ContentTypeInit(env, exports);
     SourceTypeInit(env, exports);
+    NotificationControlFlagStatusInit(env, exports);
     DoNotDisturbTypeInit(env, exports);
     DeviceRemindTypeInit(env, exports);
     NotificationFlagTypeInit(env, exports);

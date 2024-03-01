@@ -28,6 +28,8 @@
 #include "reminder_request_timer.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request.h"
+#include "reminder_request_calendar.h"
+#include "ability_manager_client.h"
 #undef private
 #undef protected
 
@@ -597,6 +599,25 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
     manager->HandleCustomButtonClick(want);
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: StartExtensionAbilityTest_001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI92G9T
+ */
+HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
+{
+    auto reminder1 = new ReminderRequestCalendar(10);
+    bool ret1 = manager->StartExtensionAbility(reminder1);
+    EXPECT_FALSE(ret1);
+
+    auto reminder2 = new ReminderRequestCalendar(10);
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    reminder2->SetRRuleWantAgentInfo(wantInfo);
+    bool ret2 = manager->StartExtensionAbility(reminder2);
+    EXPECT_TRUE(ret2);
 }
 }  // namespace Notification
 }  // namespace OHOS

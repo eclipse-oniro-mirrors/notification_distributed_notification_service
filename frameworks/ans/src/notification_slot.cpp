@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,14 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetLockscreenVisibleness(NotificationConstant::VisiblenessType::SECRET);
             SetEnableVibration(false);
             SetLevel(LEVEL_LOW);
+            break;
+        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
+            id_ = "EMERGENCY_INFORMATION";
+            SetName("EMERGENCY_INFORMATION");
+            SetLockscreenVisibleness(NotificationConstant::VisiblenessType::PUBLIC);
+            SetSound(DEFAULT_NOTIFICATION_SOUND);
+            SetVibrationStyle(DEFAULT_NOTIFICATION_VIBRATION);
+            SetLevel(LEVEL_HIGH);
             break;
         case NotificationConstant::SlotType::OTHER:
             id_ = "OTHER";

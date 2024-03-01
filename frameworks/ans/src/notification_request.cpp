@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,6 +102,16 @@ void NotificationRequest::SetBadgeNumber(uint32_t number)
 uint32_t NotificationRequest::GetBadgeNumber() const
 {
     return badgeNumber_;
+}
+
+void NotificationRequest::SetNotificationControlFlags(uint32_t notificationControlFlags)
+{
+    notificationControlFlags_ = notificationControlFlags;
+}
+
+uint32_t NotificationRequest::GetNotificationControlFlags() const
+{
+    return notificationControlFlags_;
 }
 
 void NotificationRequest::SetNotificationId(int32_t notificationId)
@@ -722,6 +732,7 @@ std::string NotificationRequest::Dump()
             ", badgeStyle = " + std::to_string(static_cast<int32_t>(badgeStyle_)) +
             ", classification = " + classification_ +
             ", notificationContentType = " + std::to_string(static_cast<int32_t>(notificationContentType_)) +
+            ", notificationControlFlags = " + std::to_string(notificationControlFlags_) +
             ", showDeliveryTime = " + (showDeliveryTime_ ? "true" : "false") +
             ", tapDismissed = " + (tapDismissed_ ? "true" : "false") +
             ", colorEnabled = " + (colorEnabled_ ? "true" : "false") +
@@ -792,6 +803,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["ownerUserId"]       = ownerUserId_;
     jsonObject["ownerUid"]          = ownerUid_;
     jsonObject["receiverUserId"]    = receiverUserId_;
+    jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
 
@@ -944,6 +956,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteUint32(notificationControlFlags_)) {
+        ANS_LOGE("Failed to write notification control flags.");
+        return false;
+    }
+
     // write std::string
     if (!parcel.WriteString(settingsText_)) {
         ANS_LOGE("Failed to write settings text");
@@ -987,6 +1004,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteString(classification_)) {
         ANS_LOGE("Failed to write classification");
+        return false;
+    }
+
+    if (!parcel.WriteString(appMessageId_)) {
+        ANS_LOGE("Failed to write appMessageId");
         return false;
     }
 
@@ -1266,6 +1288,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    valid = unifiedGroupInfo_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write unifiedGroupInfo for the notification");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(unifiedGroupInfo_.get())) {
+            ANS_LOGE("Failed to write notification unifiedGroupInfo");
+            return false;
+        }
+    }
+
     if (!parcel.WriteInt64(updateDeadLine_)) {
         ANS_LOGE("Failed to write max update time");
         return false;
@@ -1307,6 +1342,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     creatorUserId_ = parcel.ReadInt32();
     ownerUserId_ = parcel.ReadInt32();
     receiverUserId_ = parcel.ReadInt32();
+    notificationControlFlags_ = parcel.ReadUint32();
 
     if (!parcel.ReadString(settingsText_)) {
         ANS_LOGE("Failed to read settings text");
@@ -1350,6 +1386,11 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     if (!parcel.ReadString(classification_)) {
         ANS_LOGE("Failed to read classification");
+        return false;
+    }
+
+    if (!parcel.ReadString(appMessageId_)) {
+        ANS_LOGE("Failed to read appMessageId");
         return false;
     }
 
@@ -1512,6 +1553,16 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         }
     }
 
+    valid = parcel.ReadBool();
+    if (valid) {
+        unifiedGroupInfo_ =
+            std::shared_ptr<NotificationUnifiedGroupInfo>(parcel.ReadParcelable<NotificationUnifiedGroupInfo>());
+        if (!unifiedGroupInfo_) {
+            ANS_LOGE("Failed to read unifiedGroupInfo+");
+            return false;
+        }
+    }
+
     updateDeadLine_ = parcel.ReadInt64();
     finishDeadLine_ = parcel.ReadInt64();
 
@@ -1600,6 +1651,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->shortcutId_ = other.shortcutId_;
     this->sortingKey_ = other.sortingKey_;
     this->classification_ = other.classification_;
+    this->appMessageId_ = other.appMessageId_;
 
     this->groupAlertType_ = other.groupAlertType_;
     this->visiblenessType_ = other.visiblenessType_;
@@ -1640,6 +1692,8 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
+    this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
+    this->notificationControlFlags_ = other.notificationControlFlags_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -1720,6 +1774,11 @@ void NotificationRequest::ConvertJsonToNumExt(
 
     if (jsonObject.find("ownerUid") != jsonEnd && jsonObject.at("ownerUid").is_number_integer()) {
         target->ownerUid_ = jsonObject.at("ownerUid").get<int32_t>();
+    }
+
+    if (jsonObject.find("notificationControlFlags") != jsonEnd &&
+        jsonObject.at("notificationControlFlags").is_number_integer()) {
+        target->notificationControlFlags_ = jsonObject.at("notificationControlFlags").get<uint32_t>();
     }
 }
 
@@ -2276,6 +2335,41 @@ void NotificationRequest::SetIsCoverActionButtons(bool isCoverActionButtons)
 bool NotificationRequest::IsCoverActionButtons() const
 {
     return isCoverActionButtons_;
+}
+
+void NotificationRequest::SetAppMessageId(const std::string &appMessageId)
+{
+    appMessageId_ = appMessageId;
+}
+
+std::string NotificationRequest::GetAppMessageId() const
+{
+    return appMessageId_;
+}
+
+std::string NotificationRequest::GenerateUniqueKey()
+{
+    const char *keySpliter = "_";
+
+    std::stringstream stream;
+    if (IsAgentNotification()) {
+        stream << ownerUserId_ << keySpliter << ownerBundleName_ << keySpliter <<
+            slotType_ << keySpliter << appMessageId_;
+    } else {
+        stream << creatorUserId_ << keySpliter << creatorBundleName_ << keySpliter <<
+            slotType_ << keySpliter << appMessageId_;
+    }
+    return stream.str();
+}
+
+void NotificationRequest::SetUnifiedGroupInfo(const std::shared_ptr<NotificationUnifiedGroupInfo> &unifiedGroupInfo)
+{
+    unifiedGroupInfo_ = unifiedGroupInfo;
+}
+
+std::shared_ptr<NotificationUnifiedGroupInfo> NotificationRequest::GetUnifiedGroupInfo() const
+{
+    return unifiedGroupInfo_;
 }
 
 }  // namespace Notification

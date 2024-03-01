@@ -98,6 +98,9 @@ bool AnsEnumUtil::SlotTypeJSToC(const SlotType &inType, NotificationConstant::Sl
         case SlotType::CUSTOMER_SERVICE:
             outType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
             break;
+        case SlotType::EMERGENCY_INFORMATION:
+            outType = NotificationConstant::SlotType::EMERGENCY_INFORMATION;
+            break;
         case SlotType::UNKNOWN_TYPE:
         case SlotType::OTHER_TYPES:
             outType = NotificationConstant::SlotType::OTHER;
@@ -129,6 +132,9 @@ bool AnsEnumUtil::SlotTypeCToJS(const NotificationConstant::SlotType &inType, Sl
             break;
         case NotificationConstant::SlotType::CUSTOMER_SERVICE:
             outType = SlotType::CUSTOMER_SERVICE;
+            break;
+        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
+            outType = SlotType::EMERGENCY_INFORMATION;
             break;
         case NotificationConstant::SlotType::OTHER:
             outType = SlotType::OTHER_TYPES;

@@ -924,7 +924,42 @@ public:
     ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName);
 
     /**
-     * @brief Set the notification SoundEnabled and VibrationEnabled by soltType
+     * @brief Set the notification flags for social communication.
+     */
+    void SetNotificationFlagsForSocialCommunication(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for service reminder.
+     */
+    void SetNotificationFlagsForServiceReminder(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for content information.
+     */
+    void SetNotificationFlagsForContentInformation(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for live view.
+     */
+    void SetNotificationFlagsForLiveView(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for other.
+     */
+    void SetNotificationFlagsForOther(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for custom service.
+     */
+    void SetNotificationFlagsForCustomService(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags for emergency information.
+     */
+    void SetNotificationFlagsForEmergencyInformation(std::shared_ptr<NotificationFlags> &flags);
+
+    /**
+     * @brief Set the notification flags by soltType.
      */
     void SetRequestBySlotType(const sptr<NotificationRequest> &request);
 
@@ -942,7 +977,8 @@ private:
     void StartFilters();
     void StopFilters();
     ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
-
+    void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
@@ -1088,6 +1124,11 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
+    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
+    void RemoveExpiredUniqueKey();
+    bool IsDuplicateMsg(const std::string &uniqueKey);
+    ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
@@ -1116,6 +1157,7 @@ private:
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::set<std::string> localLiveViewSubscribedList_;
     std::mutex liveViewMutext_;
+    std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
 };
 
 /**

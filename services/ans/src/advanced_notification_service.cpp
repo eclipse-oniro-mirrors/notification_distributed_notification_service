@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -501,31 +501,19 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     ANS_LOGI("PublishPreparedNotification");
 
     auto record = MakeNotificationRecord(request, bundleOption);
-    if (record == nullptr) {
-        return ERR_ANS_NO_MEMORY;
+    ErrCode result = CheckPublishPreparedNotification(record, AccessTokenHelper::IsSystemApp());
+    if (result != ERR_OK) {
+        return result;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = AssignValidNotificationSlot(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Can not assign valid slot!");
+        if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
+            (void)PublishRemoveDuplicateEvent(record);
             return;
         }
 
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
-            return;
-        }
-
-        result = AssignToNotificationList(record);
+        result = AddRecordToMemory(record);
         if (result != ERR_OK) {
             return;
         }
@@ -605,6 +593,79 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
     if (result != ERR_OK) {
         ANS_LOGE("Notification slot filter on publish failed with %{public}d.", result);
         return result;
+    }
+
+    return ERR_OK;
+}
+
+void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record)
+{
+    ANS_LOGD("Called.");
+    if (record == nullptr && record->request == nullptr && record->notification == nullptr) {
+        ANS_LOGE("Make notification record failed.");
+        return;
+    }
+    uint32_t notificationControlFlags = record->request->GetNotificationControlFlags();
+    if (notificationControlFlags == 0) {
+        ANS_LOGD("The notificationControlFlags is undefined.");
+        return;
+    }
+
+    auto flags = record->request->GetFlags();
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+
+    if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
+        flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+        record->notification->SetEnableSound(false);
+    }
+
+    if (flags->IsLockScreenVisblenessEnabled() &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
+        flags->SetLockScreenVisblenessEnabled(false);
+        record->request->SetVisibleness(NotificationConstant::VisiblenessType::SECRET);
+    }
+
+    if (flags->IsBannerEnabled() && (notificationControlFlags & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
+        flags->SetBannerEnabled(false);
+    }
+
+    if (flags->IsLightScreenEnabled() &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
+        flags->SetLightScreenEnabled(false);
+    }
+
+    if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
+        flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+        record->notification->SetEnableVibration(false);
+    }
+
+    if (flags->IsStatusIconEnabled() &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
+        flags->SetStatusIconEnabled(false);
+    }
+}
+
+ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(
+    const std::shared_ptr<NotificationRecord> &record, bool isSystemApp)
+{
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (record == nullptr || record->request == nullptr) {
+        ANS_LOGE("Make notification record failed.");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    if (!isSystemApp && record->request->GetSlotType() == NotificationConstant::SlotType::EMERGENCY_INFORMATION) {
+        ANS_LOGE("Non system app used illegal slot type.");
+        return ERR_ANS_INVALID_PARAM;
     }
 
     return ERR_OK;
@@ -1654,6 +1715,32 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
 
     auto deleteTime = request->GetAutoDeletedTime();
     return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
+}
+
+ErrCode AdvancedNotificationService::AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record)
+{
+    auto result = AssignValidNotificationSlot(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Can not assign valid slot!");
+        return result;
+    }
+
+    result = Filter(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Reject by filters: %{public}d", result);
+        return result;
+    }
+
+    if (AccessTokenHelper::IsSystemApp()) {
+        ChangeNotificationByControlFlags(record);
+    }
+
+    result = AssignToNotificationList(record);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    return ERR_OK;
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

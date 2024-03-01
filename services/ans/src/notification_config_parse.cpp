@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -68,6 +68,8 @@ void NotificationConfigFile::getDefaultSlotFlagsMap(std::map<std::string, uint32
         NotificationConstant::SlotType::LIVE_VIEW], 0b11011));
     slotFlagsMap.insert(std::make_pair(NotificationConstant::SLOTTYPECCMNAMES[
         NotificationConstant::SlotType::CUSTOMER_SERVICE], 0b10001));
+    slotFlagsMap.insert(std::make_pair(NotificationConstant::SLOTTYPECCMNAMES[
+        NotificationConstant::SlotType::EMERGENCY_INFORMATION], 0b11111));
     for (auto &iter : slotFlagsMap) {
         ANS_LOGD("Default Got slotFlagsMap item slotType = %{public}s, slotFlags = %{public}d\n",
             iter.first.c_str(), iter.second);
