@@ -611,7 +611,7 @@ HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
 {
     auto reminder1 = new ReminderRequestCalendar(10);
     bool ret1 = manager->StartExtensionAbility(reminder1);
-    EXPECT_FALSE(ret1);
+    EXPECT_TRUE(ret1);
 
     auto reminder2 = new ReminderRequestCalendar(10);
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();

@@ -17,6 +17,7 @@
 
 #include "ans_log_wrapper.h"
 #include "common.h"
+#include "napi_common.h"
 #include "reminder_request.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
@@ -688,6 +689,9 @@ void ParseWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &
 
     napi_create_string_utf8(env, (reminder.GetWantAgentInfo()->uri).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_URI, info);
+
+    napi_value params = AppExecFwk::WrapWantParams(env, reminder.GetWantAgentInfo()->parameters);
+    napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PARAMETERS, params);
 }
 
 void ParseMaxScreenWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &result)
