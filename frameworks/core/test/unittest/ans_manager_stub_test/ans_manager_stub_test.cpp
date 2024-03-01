@@ -4459,5 +4459,49 @@ HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle02, Function | SmallTest 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE((int)ret, (int)res);
 }
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bundleOption->SetBundleName("bundleName");
+    bundleOption->SetUid(1);
+    std::string deviceType = "testDeviceType";
+    bool enabled = true;
+    data.WriteParcelable(bundleOption);
+    data.WriteString(deviceType);
+    data.WriteBool(enabled);
+
+    ErrCode res = ansManagerStub_->HandleSetDistributedEnabledByBundle(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bundleOption->SetBundleName("bundleName");
+    bundleOption->SetUid(1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(bundleOption);
+    data.WriteString(deviceType);
+    data.WriteBool(enable);
+    ErrCode result = ansManagerStub_->HandleIsDistributedEnabledByBundle(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+}
 }
 }

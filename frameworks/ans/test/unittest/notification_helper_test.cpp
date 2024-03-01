@@ -1119,5 +1119,93 @@ HWTEST_F(NotificationHelperTest, SetBadgeNumberByBundle_0200, TestSize.Level1)
     ErrCode ret = notificationHelper.SetBadgeNumberByBundle(bundleOption, badgeNumber);
     EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
 }
+
+/**
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType1111";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, false);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("");
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0300
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
+}
 }
 }
