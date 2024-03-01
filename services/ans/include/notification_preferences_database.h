@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <sstream>
+#include <string>
 
 #include "notification_rdb_data_mgr.h"
 #include "notification_preferences_info.h"
@@ -86,6 +87,28 @@ public:
      */
     bool PutNotificationsEnabledForBundle(
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
+    
+    /**
+     * @brief Put distributed enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool PutDistributedEnabledForBundle(const std::string deviceType,
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
+
+    /**
+     * @brief Get distributed enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool GetDistributedEnabledForBundle(const std::string deviceType,
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, bool &enabled);
 
     /**
      * @brief Put enable notification into disturbe DB.
@@ -169,6 +192,8 @@ private:
     template <typename T>
     int32_t PutBundlePropertyToDisturbeDB(
         const std::string &bundleKey, const BundleType &type, const T &t);
+    template <typename T>
+    int32_t PutDataToDB(const std::string &key, const T &t);
     bool PutBundleToDisturbeDB(
         const std::string &bundleKey, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     bool HandleDataBaseMap(
@@ -232,6 +257,8 @@ private:
     void ParseSlotFlags(sptr<NotificationSlot> &slot, const std::string &value) const;
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
+    std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        const std::string &deviceType) const;
     void GetDoNotDisturbType(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbBeginDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);

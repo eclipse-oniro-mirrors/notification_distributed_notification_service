@@ -16,6 +16,7 @@
 #include "notification_preferences_database.h"
 
 #include <regex>
+#include <string>
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
@@ -84,6 +85,11 @@ const static std::string KEY_BUNDLE_BADGE_TOTAL_NUM = "badgeTotalNum";
  * Indicates that disturbe key which bundle enable notification.
  */
 const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
+
+/**
+ * Indicates that disturbe key which bundle enable notification.
+ */
+const static std::string KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION = "enabledNotificationDistributed";
 
 /**
  * Indicates that disturbe key which bundle popped dialog.
@@ -1573,6 +1579,75 @@ int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key)
     ANS_LOGD("Delete key:%{public}s.", key.c_str());
 
     return NativeRdb::E_OK;
+}
+
+bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::string deviceType,
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(bundleInfo, deviceType);
+    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION);
+    int32_t result = PutDataToDB(key, enabled);
+    ANS_LOGD("result[%{public}d]", result);
+    return (result == NativeRdb::E_OK);
+}
+
+std::string NotificationPreferencesDatabase::GenerateBundleLablel(
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
+{
+    return std::string(bundleInfo.GetBundleName()).append(KEY_UNDER_LINE).append(
+        std::to_string(bundleInfo.GetBundleUid())).append(KEY_UNDER_LINE).append(deviceType);
+}
+
+template <typename T>
+int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, const T &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string valueStr = std::to_string(value);
+    int32_t result = rdbDataManager_->InsertData(key, valueStr);
+    return result;
+}
+
+bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::string deviceType,
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(bundleInfo, deviceType);
+    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION);
+    bool result = false;
+    enabled = false;
+    GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                enabled = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    ANS_LOGD("GetDistributedEnabledForBundle:enabled:[%{public}d]KEY:%{public}s", enabled, key.c_str());
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

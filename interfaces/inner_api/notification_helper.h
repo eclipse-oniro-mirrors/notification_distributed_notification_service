@@ -869,6 +869,34 @@ public:
      * @return Returns unregister push Callback result.
      */
     static ErrCode UnregisterPushCallback();
+
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    static ErrCode SetDistributedEnabledByBundle(
+        const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    static ErrCode IsDistributedEnabledByBundle(
+        const NotificationBundleOption &bundleOption, const std::string &deviceType, bool &enabled);
 };
 }  // namespace Notification
 }  // namespace OHOS

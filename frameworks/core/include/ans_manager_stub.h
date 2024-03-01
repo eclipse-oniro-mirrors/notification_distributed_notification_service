@@ -776,6 +776,34 @@ public:
      */
     ErrCode UnregisterPushCallback() override;
 
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetDistributedEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, const bool enabled) override;
+
+    /**
+     * @brief get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsDistributedEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, bool &enabled) override;
+
 private:
     static const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -864,6 +892,8 @@ private:
     ErrCode HandleGetAllNotificationEnableStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleIsDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

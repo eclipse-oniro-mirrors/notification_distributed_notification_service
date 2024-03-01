@@ -57,6 +57,8 @@ struct AsyncCallbackInfoEnabledByBundle {
 struct IsEnabledByBundleParams {
     NotificationBundleOption option;
     napi_ref callback = nullptr;
+    std::string deviceType;
+    bool hasDeviceType = false;
 };
 
 struct AsyncCallbackInfoIsEnabledByBundle {

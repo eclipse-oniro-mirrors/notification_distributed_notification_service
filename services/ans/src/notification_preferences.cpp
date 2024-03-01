@@ -703,6 +703,43 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
     return ERR_OK;
 }
 
+ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+
 void NotificationPreferences::InitSettingFromDisturbDB()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

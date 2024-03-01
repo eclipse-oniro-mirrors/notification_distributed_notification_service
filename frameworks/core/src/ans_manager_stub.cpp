@@ -253,6 +253,12 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT_SELF,
             std::bind(&AnsManagerStub::HandleGetEnabledForBundleSlotSelf, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_DISTRIBUTED_ENABLED_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleSetDistributedEnabledByBundle, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_DISTRIBUTED_ENABLED_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleIsDistributedEnabledByBundle, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
             std::bind(&AnsManagerStub::HandleDistributedSetEnabledWithoutApp, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
@@ -2089,6 +2095,66 @@ ErrCode AnsManagerStub::HandleUnregisterPushCallback(MessageParcel &data, Messag
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
+}
+
+ErrCode AnsManagerStub::HandleSetDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE(
+            "[HandleSetNotificationsEnabledForSpecialBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleIsDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    
+    bool enabled = false;
+    ErrCode result = IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE(
+            "[HandleIsDistributedEnabledByBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+  
+    if (!reply.WriteBool(enabled)) {
+        ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: write enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS
