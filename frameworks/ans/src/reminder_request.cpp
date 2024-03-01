@@ -679,11 +679,11 @@ void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, c
 
 void ReminderRequest::RecoverWantAgent(const std::string &wantAgentInfo, const uint8_t &type)
 {
-    if (IsJsonString(wantAgentInfo)) {
+    std::vector<std::string> info = StringSplit(wantAgentInfo, ReminderRequest::SEP_WANT_AGENT);
+    if (info.size() == 1) {
         RecoverWantAgentByJson(wantAgentInfo, type);
         return;
     }
-    std::vector<std::string> info = StringSplit(wantAgentInfo, ReminderRequest::SEP_WANT_AGENT);
     uint8_t minLen = 2;
     if (info.size() < minLen) {
         ANSR_LOGW("RecoverWantAgent fail");
@@ -1889,16 +1889,6 @@ int64_t ReminderRequest::GetNextDaysOfWeek(const time_t now, const time_t target
     ANSR_LOGI("NextDayInterval is %{public}d", dayCount);
     time_t nextTriggerTime = target + dayCount * HOURS_PER_DAY * SECONDS_PER_HOUR;
     return GetTriggerTime(now, nextTriggerTime);
-}
-
-bool ReminderRequest::IsJsonString(const std::string& info)
-{
-    try {
-        nlohmann::json root = nlohmann::json::parse(info);
-    } catch (nlohmann::detail::exception& e) {
-        return false;
-    }
-    return true;
 }
 
 bool ReminderRequest::IsRepeatDaysOfWeek(int32_t day) const
