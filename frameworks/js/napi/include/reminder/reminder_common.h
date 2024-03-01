@@ -21,6 +21,7 @@
 #include "napi/native_node_api.h"
 #include "reminder_helper.h"
 #include "reminder_request.h"
+#include "reminder_request_calendar.h"
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -58,6 +59,7 @@ const char* TIME_INTERVAL = "timeInterval";
 const char* TITLE = "title";
 const char* TIMER_COUNT_DOWN_TIME = "triggerTimeInSeconds";
 const char* WANT_AGENT = "wantAgent";
+const char* RRULL_WANT_AGENT = "rruleWantAgent";
 const char* WANT_AGENT_PKG = "pkgName";
 const char* WANT_AGENT_ABILITY = "abilityName";
 const char* WANT_AGENT_URI = "uri";
@@ -138,16 +140,23 @@ private:
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static napi_value CreateReminderCalendar(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+        const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder);
+
+    static tm ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
+        const int32_t propertyDayVal, const int32_t propertyHourVal,
+        const int32_t propertyMinteVal);
 
     static bool CreateReminder(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+        const napi_env &env, const napi_value &value,  const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder);
 
     static bool GetPropertyValIfExist(const napi_env &env, const napi_value &value,
         const char* propertyName, napi_value& propertyVal);
 
-    static bool GenWantAgent(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp);
+    static bool GenWantAgent(const napi_env &env, const napi_value &value, const char* name,
+        std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp);
+
+    static std::shared_ptr<ReminderRequestCalendar> ParseWantAgent(const napi_env &env,
+        const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar);
 
     static void GenMaxScreenWantAgent(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
@@ -194,7 +203,7 @@ private:
 
     static bool ValidateString(const std::string &str);
 
-    static bool IsSelfSystemApp(std::shared_ptr<ReminderRequest>& reminder);
+    static bool IsSelfSystemApp();
 };
 }  // namespace OHOS
 }  // namespace ReminderAgentNapi

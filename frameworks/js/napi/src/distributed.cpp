@@ -134,14 +134,25 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         return nullptr;
     }
 
-    // argv[1]:callback
+    // argv[1]:callback or deviceType
     if (argc >= IS_ENABLED_BUNDLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-        if (valuetype != napi_function) {
+        if (valuetype == napi_string) {
+            char str[STR_MAX_SIZE] = {0};
+            size_t strLen = 0;
+            napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
+            if (std::strlen(str) == 0) {
+                ANS_LOGE("Property deviceType is empty");
+                return nullptr;
+            }
+            params.deviceType = str;
+            params.hasDeviceType = true;
+        } else if (valuetype == napi_function) {
+            napi_create_reference(env, argv[PARAM1], 1, &params.callback);
+        } else {
             ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
-        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
     }
 
     return Common::NapiGetNull(env);

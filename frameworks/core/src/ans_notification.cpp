@@ -17,6 +17,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_manager_proxy.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -1484,6 +1485,42 @@ ErrCode AnsNotification::UnregisterPushCallback()
     }
 
     return ansManagerProxy_->UnregisterPushCallback();
+}
+
+ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->SetDistributedEnabledByBundle(bo, deviceType, enabled);
+}
+
+ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->IsDistributedEnabledByBundle(bo, deviceType, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

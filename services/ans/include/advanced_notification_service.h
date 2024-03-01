@@ -882,6 +882,34 @@ public:
     ErrCode UnregisterPushCallback() override;
 
     /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled) override;
+    
+    /**
+     * @brief Get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, bool &enabled) override;
+
+    /**
      * @brief Reset pushcallback proxy
      */
     void ResetPushCallbackProxy();
@@ -1096,6 +1124,11 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
+    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
+    void RemoveExpiredUniqueKey();
+    bool IsDuplicateMsg(const std::string &uniqueKey);
+    ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
@@ -1124,6 +1157,7 @@ private:
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::set<std::string> localLiveViewSubscribedList_;
     std::mutex liveViewMutext_;
+    std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
 };
 
 /**

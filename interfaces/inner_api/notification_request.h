@@ -31,6 +31,8 @@
 #include "want_params.h"
 #include "notification_check_request.h"
 #include "notification_bundle_option.h"
+#include "notification_unified_group_Info.h"
+#include <string>
 
 namespace OHOS {
 namespace Notification {
@@ -1228,6 +1230,41 @@ public:
      */
     bool IsCoverActionButtons() const;
 
+    /**
+     * @brief Set notification appMessageId value.
+     *
+     * @param appMessageId the value of appMessageId.
+     */
+    void SetAppMessageId(const std::string &appMessageId);
+
+    /**
+     * @brief Get notification appMessageId value.
+     *
+     * @return Return the value of appMessageId.
+     */
+    std::string GetAppMessageId() const;
+
+    /**
+     * @brief Generate notification request unique key.
+     *
+     * @return Return the unique key of notification request.
+     */
+    std::string GenerateUniqueKey();
+
+    /**
+     * @brief Sets the unifiedGroupInfo of this notification.
+     *
+     * @param flags Indicates the unifiedGroupInfo of this notification.
+     */
+    void SetUnifiedGroupInfo(const std::shared_ptr<NotificationUnifiedGroupInfo> &unifiedGroupInfo);
+
+    /**
+     * @brief Obtains the unifiedGroupInfo of the notification.
+     *
+     * @return Returns the unifiedGroupInfo of the notification.
+     */
+    std::shared_ptr<NotificationUnifiedGroupInfo> GetUnifiedGroupInfo() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1317,6 +1354,7 @@ private:
     std::string shortcutId_ {};
     std::string sortingKey_ {};
     std::string classification_ {};
+    std::string appMessageId_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};
@@ -1358,6 +1396,7 @@ private:
 
     std::shared_ptr<NotificationTemplate> notificationTemplate_ {};
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
+    std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

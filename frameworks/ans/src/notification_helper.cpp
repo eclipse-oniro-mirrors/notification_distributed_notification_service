@@ -472,5 +472,19 @@ ErrCode NotificationHelper::UnregisterPushCallback()
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
 }
+
+ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        deviceType, enabled);
+}
+
+ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
+        deviceType, enabled);
+}
 }  // namespace Notification
 }  // namespace OHOS

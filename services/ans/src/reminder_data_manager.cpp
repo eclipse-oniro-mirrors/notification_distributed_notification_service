@@ -21,6 +21,8 @@
 #include "ans_const_define.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
+#include "reminder_request_calendar.h"
+#include "in_process_call_wrapper.h"
 #ifdef DEVICE_STANDBY_ENABLE
 #include "standby_service_client.h"
 #include "allow_type.h"
@@ -69,7 +71,9 @@ std::mutex ReminderDataManager::MUTEX;
 std::mutex ReminderDataManager::SHOW_MUTEX;
 std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
-
+constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
+constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
+std::shared_ptr<AppExecFwk::EventHandler> ReminderDataManager::serviceHandler_;
 ReminderDataManager::~ReminderDataManager() = default;
 
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
@@ -955,6 +959,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
             continue;
         }
+        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES);
         if (!isAlerting) {
             playSoundReminder = (*it);
             isAlerting = true;
@@ -964,6 +969,44 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
     }
     if (playSoundReminder != nullptr) {
         ShowReminder(playSoundReminder, true, false, false, true);
+    }
+}
+
+bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
+{
+    ANSR_LOGD("StartExtensionAbility");
+    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+        std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
+        if (wantInfo != nullptr && wantInfo->pkgName.size() != 0 && wantInfo->abilityName.size() != 0) {
+            AAFwk::Want want;
+            want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
+            want.SetParam(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId());
+            int32_t result = IN_PROCESS_CALL(
+                AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
+            if (result == ERR_OK) {
+                ANSR_LOGD("StartExtensionAbility success");
+                return true;
+            } else {
+                ANSR_LOGE("StartExtensionAbility failed");
+                return false;
+            }
+        } else {
+            ANSR_LOGE("StartExtensionAbility failed");
+            return true;
+        }
+    }
+    return true;
+}
+
+void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times)
+{
+    times--;
+    bool ret = ReminderDataManager::StartExtensionAbility(reminder);
+    if (!ret && times > 0 && serviceHandler_ != nullptr) {
+        ANSR_LOGD("StartExtensionAbilty failed, reminder times: %{public}d", times);
+        auto callback = [reminder, times]() { ReminderDataManager::AsyncStartExtensionAbility(reminder, times); };
+        serviceHandler_->PostTask(callback, CONNECT_EXTENSION_INTERVAL);
     }
 }
 
@@ -1294,6 +1337,9 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
+    if (isFromBootComplete) {
+        InitStartExtensionAbility();
+    }
     if (IsReminderAgentReady()) {
         return;
     }
@@ -1316,10 +1362,32 @@ void ReminderDataManager::Init(bool isFromBootComplete)
         ANSR_LOGW("Db init fail.");
         return;
     }
+    InitServiceHandler();
     LoadReminderFromDb();
     InitUserId();
     isReminderAgentReady_ = true;
     ANSR_LOGD("ReminderAgent is ready.");
+}
+
+void ReminderDataManager::InitServiceHandler()
+{
+    ANSR_LOGD("InitServiceHandler started");
+    if (serviceHandler_ != nullptr) {
+        ANSR_LOGD("InitServiceHandler already init.");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("ReminderDataManager");
+    serviceHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+
+    ANSR_LOGD("InitServiceHandler suceeded.");
+}
+
+void ReminderDataManager::InitStartExtensionAbility()
+{
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        ReminderDataManager::AsyncStartExtensionAbility(*it, CONNECT_EXTENSION_MAX_RETRY_TIMES);
+    }
 }
 
 void ReminderDataManager::InitUserId()
