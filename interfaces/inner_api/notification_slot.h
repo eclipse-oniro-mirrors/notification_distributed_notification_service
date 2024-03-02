@@ -38,6 +38,11 @@ public:
         LEVEL_UNDEFINED,  // the notification does not define an level.
     };
 
+    enum AuthorizedStatus {
+        AUTHORIZED,         // the slot has been authorized
+        NOT_AUTHORIZED,     // the slot has not been authorized
+    };
+
     /**
      * @brief A constructor used to initialize the type of a NotificationSlot object.
      *
@@ -313,6 +318,45 @@ public:
     bool GetForceControl() const;
 
     /**
+     * @brief Sets the authorizedStatus of a NotificationSlot object.
+     * @note SetSlotFlags must be set before the NotificationHelper::AddNotificationSlot(NotificationSlot)
+     * method is called.
+     *       Otherwise, the settings will not take effect.
+     *
+     * @param slotFlags Specifies the authorizedStatus of the NotificationSlot object,
+     * @note which determines the notification authorized status.
+     * The value can be 0,1.
+     */
+    void SetAuthorizedStatus(int32_t status);
+
+    /**
+     * @brief Obtains the authorizedStatus of a NotificationSlot object,
+     *        which is set by SetAuthorizedStatus(int32_t status).
+     *
+     * @return Returns the authorizedStatus of the NotificationSlot object.
+     */
+    int32_t GetAuthorizedStatus() const;
+
+    /**
+     * @brief Sets the authHintCnt of a NotificationSlot object.
+     * @note SetSlotFlags must be set before the NotificationHelper::AddNotificationSlot(NotificationSlot)
+     * method is called.
+     *       Otherwise, the settings will not take effect.
+     *
+     * @param slotFlags Specifies the authHintCnt of the NotificationSlot object,
+     * @note which determines the notification authorized hint count.
+     * The value can be 0,1.
+     */
+    void AddAuthHintCnt();
+
+    /**
+     * @brief Obtains the authHintCnt of a NotificationSlot object, which is set by SetAuthHintCnt(int32_t count).
+     *
+     * @return Returns the authHintCnt of the NotificationSlot object.
+     */
+    int32_t GetAuthHintCnt() const;
+
+    /**
      * @brief Dumps a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -388,6 +432,8 @@ private:
     bool enabled_ {true};
     uint32_t slotFlags_{0};
     bool isForceControl_ {false};
+    int32_t authorizedStatus_ {AuthorizedStatus::NOT_AUTHORIZED};
+    int32_t authHintCnt_ = {0};
 
     // no object in parcel
     static constexpr int32_t VALUE_NULL = -1;

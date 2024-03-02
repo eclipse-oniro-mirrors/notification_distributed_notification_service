@@ -78,6 +78,7 @@ constexpr int32_t DIALOG_DEFAULT_HEIGHT = 240;
 constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
+constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 3;
 
 const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
 
@@ -532,12 +533,38 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         NotificationRequestDb requestDb = { .request = record->request, .bundleOption = bundleOption};
         UpdateNotificationTimerInfo(record);
         result = SetNotificationRequestToDb(requestDb);
+        if (result != ERR_OK) {
+            return;
+        }
+        result = UpdateSlotAuthInfo(record);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
         StartAutoDelete(record->notification->GetKey(),
             record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+    }
+    return result;
+}
+
+ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
+{
+    ErrCode result = ERR_OK;
+    // only update auth info for LIVE_VIEW notification
+    if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
+        record->request->GetNotificationType() == NotificationContent::Type::LIVE_VIEW) {
+        sptr<NotificationSlot> slot = record->slot;
+        // update authHintCnt when authorizedStatus is NOT_AUTHORIZED
+        if (slot->GetAuthorizedStatus() == NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED) {
+            slot->AddAuthHintCnt();
+        }
+        // change authorizedStatus to AUTHORIZED when authHintCnt exceeds MAX_LIVEVIEW_HINT_COUNT
+        if (slot->GetAuthHintCnt() > MAX_LIVEVIEW_HINT_COUNT) {
+            slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        }
+        std::vector<sptr<NotificationSlot>> slots;
+        slots.push_back(slot);
+        result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
     }
     return result;
 }

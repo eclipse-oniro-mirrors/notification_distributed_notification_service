@@ -138,6 +138,73 @@ HWTEST_F(AnsPublishServiceTest, Publish_00002, Function | SmallTest | Level1)
     EXPECT_EQ(ret, (int)ERR_OK);
 }
 
+
+/**
+ * @tc.name: Publish_00003
+ * @tc.desc: Publish live_view notification once
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    auto ret = advancedNotificationService_->Publish(label, request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+
+    sptr<NotificationSlot> slot;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    ret = advancedNotificationService_->GetSlotByType(slotType, slot);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(1, slot->GetAuthorizedStatus());
+    EXPECT_EQ(1, slot->GetAuthHintCnt());
+}
+
+/**
+ * @tc.name: Publish_00004
+ * @tc.desc: Publish live_view notification twice
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    auto ret = advancedNotificationService_->Publish(label, request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+
+    request->SetNotificationId(2);
+    ret = advancedNotificationService_->Publish(label, request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+
+    sptr<NotificationSlot> slot;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    ret = advancedNotificationService_->GetSlotByType(slotType, slot);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(1, slot->GetAuthorizedStatus());
+    EXPECT_EQ(2, slot->GetAuthHintCnt());
+}
+
 /**
  * @tc.name: DeleteByBundle_00001
  * @tc.desc: Test DeleteByBundle
