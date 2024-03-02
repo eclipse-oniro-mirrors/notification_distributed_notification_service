@@ -677,6 +677,10 @@ napi_value Common::GetNotificationRequestByCustom(
     if (GetNotificationTemplate(env, value, request) == nullptr) {
         return nullptr;
     }
+    // representativeBundle?: BundleOption
+    if (GetNotificationBundleOption(env, value, request) == nullptr) {
+        return nullptr;
+    }
     // unifiedGroupInfo?: NotificationUnifiedGroupInfo
     if (GetNotificationUnifiedGroupInfo(env, value, request) == nullptr) {
         return nullptr;

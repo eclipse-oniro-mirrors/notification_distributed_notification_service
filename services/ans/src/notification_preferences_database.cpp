@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1579,6 +1579,28 @@ int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key)
     ANS_LOGD("Delete key:%{public}s.", key.c_str());
 
     return NativeRdb::E_OK;
+}
+
+bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &agentBundleName,
+    const std::string &sourceBundleName)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string agentShip = "";
+    int32_t result = rdbDataManager_->QueryData("PROXY_PKG", agentShip);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Query agent relationships failed.");
+        return false;
+    }
+    ANS_LOGD("The agent relationship is :%{public}s.", agentShip.c_str());
+    std::string target = "{\"service\":'" + agentBundleName + "',\"app\":'" + sourceBundleName + "'}";
+    std::string::size_type idx = agentShip.find(target);
+    if (idx == std::string::npos) {
+        return false;
+    }
+    return true;
 }
 
 bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::string deviceType,

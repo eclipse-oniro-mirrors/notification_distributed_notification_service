@@ -241,14 +241,14 @@ ErrCode AnsNotification::CancelAsBundle(
 }
 
 ErrCode AnsNotification::CancelAsBundle(
-    const NotificationBundleOption &bundleOption, int32_t notificationId)
+    const NotificationBundleOption &bundleOption, int32_t notificationId, const std::string &label)
 {
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->CancelAsBundle(bo, notificationId);
+    return ansManagerProxy_->CancelAsBundle(bo, notificationId, label);
 }
 
 ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
@@ -1485,6 +1485,20 @@ ErrCode AnsNotification::UnregisterPushCallback()
     }
 
     return ansManagerProxy_->UnregisterPushCallback();
+}
+
+ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    if (key.empty()) {
+        ANS_LOGE("Set package config fail: key is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetAdditionConfig(key, value);
 }
 
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,

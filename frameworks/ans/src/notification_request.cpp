@@ -1301,6 +1301,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    valid = notificationBundleOption_ != nullptr ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write bundleOption for the notification");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(notificationBundleOption_.get())) {
+            ANS_LOGE("Failed to write notification bundleOption");
+            return false;
+        }
+    }
+
     if (!parcel.WriteInt64(updateDeadLine_)) {
         ANS_LOGE("Failed to write max update time");
         return false;
@@ -1563,6 +1576,16 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         }
     }
 
+    valid = parcel.ReadBool();
+    if (valid) {
+        notificationBundleOption_ =
+            std::shared_ptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
+        if (!notificationBundleOption_) {
+            ANS_LOGE("Failed to read notificationBundleOption");
+            return false;
+        }
+    }
+
     updateDeadLine_ = parcel.ReadInt64();
     finishDeadLine_ = parcel.ReadInt64();
 
@@ -1596,6 +1619,17 @@ void NotificationRequest::SetFlags(const std::shared_ptr<NotificationFlags> &fla
 std::shared_ptr<NotificationFlags> NotificationRequest::GetFlags() const
 {
     return notificationFlags_;
+}
+
+
+void NotificationRequest::SetBundleOption(const std::shared_ptr<NotificationBundleOption> &bundleOption)
+{
+    notificationBundleOption_ = bundleOption;
+}
+
+std::shared_ptr<NotificationBundleOption> NotificationRequest::GetBundleOption() const
+{
+    return notificationBundleOption_;
 }
 
 void NotificationRequest::SetReceiverUserId(int32_t userId)
@@ -1692,6 +1726,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
+    this->notificationBundleOption_ = other.notificationBundleOption_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
     this->notificationControlFlags_ = other.notificationControlFlags_;
 }
