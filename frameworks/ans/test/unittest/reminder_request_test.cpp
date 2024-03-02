@@ -19,6 +19,8 @@
 #define protected public
 #include "reminder_request.h"
 #include "reminder_table_old.h"
+#include "reminder_table.h"
+#include "string_wrapper.h"
 #undef private
 #undef protected
 
@@ -1248,10 +1250,6 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00002, Function | SmallTest | Lev
     std::string split = "split";
     std::vector<std::string> ret = rrc->StringSplit(source, split);
     EXPECT_EQ(ret.size(), 1);
-
-    std::string wantAgentInfo = "this is wantAgentInfo";
-    uint8_t type = 0;
-    rrc->RecoverWantAgent(wantAgentInfo, type);
 }
 
 /**
@@ -1930,6 +1928,161 @@ HWTEST_F(ReminderRequestTest, InitCreatorBundleName_00002, Function | SmallTest 
     std::string bundleName = "com.example.myapplication.~!@#$%^&*()";
     rrc->InitCreatorBundleName(bundleName);
     EXPECT_EQ(rrc->GetCreatorBundleName(), bundleName);
+}
+
+/**
+ * @tc.name: RecoverWantAgentByJson_00001
+ * @tc.desc: Test invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string jsonValue = "{}";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+    
+    jsonValue = R"({"pkgName":1})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication"})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":1})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility"})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":1})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":""})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":1})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
+    rrc->RecoverWantAgentByJson(jsonValue, 1);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
+    rrc->RecoverWantAgentByJson(jsonValue, 2);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+}
+
+/**
+ * @tc.name: RecoverWantAgent_00007
+ * @tc.desc: Test RecoverWantAgent parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, RecoverWantAgent_00007, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string jsonValue = "";
+    rrc->RecoverWantAgent(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
+    rrc->RecoverWantAgent(jsonValue, 1);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
+}
+
+/**
+ * @tc.name: MarshallingWantParameters_00001
+ * @tc.desc: Test MarshallingWantParameters parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, MarshallingWantParameters_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    AAFwk::WantParams params1;
+    Parcel p1;
+    bool ret = rrc->MarshallingWantParameters(p1, params1);
+    EXPECT_EQ(ret, true);
+
+    std::string key = "key";
+    std::string value = "value";
+    params1.SetParam(key, AAFwk::String::Box(value));
+    Parcel p2;
+    ret = rrc->MarshallingWantParameters(p2, params1);
+    EXPECT_EQ(ret, true);
+
+    AAFwk::WantParams params2;
+    ret = rrc->ReadWantParametersFromParcel(p1, params2);
+    EXPECT_EQ(ret, true);
+
+    ret = rrc->ReadWantParametersFromParcel(p2, params2);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(params2.GetStringParam(key), value);
+}
+
+/**
+ * @tc.name: AppendWantAgentValuesBucket_00001
+ * @tc.desc: Test AppendWantAgentValuesBucket parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, AppendWantAgentValuesBucket_00001, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequestChild> rrc = new ReminderRequestChild;
+    NativeRdb::ValuesBucket values;
+    ReminderRequest::AppendWantAgentValuesBucket(rrc, values);
+
+    NativeRdb::ValueObject object;
+    values.GetObject(ReminderBaseTable::WANT_AGENT, object);
+    std::string result;
+    object.GetString(result);
+    EXPECT_NE(result.find("pkgName"), -1);
+
+    values.GetObject(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, object);
+    object.GetString(result);
+    EXPECT_NE(result.find("pkgName"), -1);
+}
+
+/**
+ * @tc.name: AppendWantAgentValuesBucket_00002
+ * @tc.desc: Test AppendWantAgentValuesBucket parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, AppendWantAgentValuesBucket_00002, Function | SmallTest | Level1)
+{
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    wantInfo->pkgName = "test";
+    auto maxWantInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
+    maxWantInfo->pkgName = "maxTest";
+
+    sptr<ReminderRequestChild> rrc = new ReminderRequestChild;
+    rrc->SetWantAgentInfo(wantInfo);
+    rrc->SetMaxScreenWantAgentInfo(maxWantInfo);
+    NativeRdb::ValuesBucket values;
+    ReminderRequest::AppendWantAgentValuesBucket(rrc, values);
+
+    NativeRdb::ValueObject object;
+    values.GetObject(ReminderBaseTable::WANT_AGENT, object);
+    std::string result;
+    object.GetString(result);
+    EXPECT_NE(result.find("test"), -1);
+
+    values.GetObject(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, object);
+    object.GetString(result);
+    EXPECT_NE(result.find("maxTest"), -1);
 }
 }
 }

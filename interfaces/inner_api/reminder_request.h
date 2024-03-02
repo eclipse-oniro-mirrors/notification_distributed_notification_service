@@ -24,6 +24,7 @@
 #include "notification_constant.h"
 #include "notification_request.h"
 #include "values_bucket.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace Notification {
@@ -249,6 +250,7 @@ public:
         std::string pkgName = "";
         std::string abilityName = "";
         std::string uri = "";
+        AAFwk::WantParams parameters;
     };
 
     struct MaxScreenAgentInfo {
@@ -893,6 +895,15 @@ public:
     static const std::string SEP_BUTTON_VALUE;
     static const std::string SEP_BUTTON_VALUE_BLOB;
 
+    // no object in parcel
+    static constexpr int32_t VALUE_NULL = -1;
+    // object exist in parcel
+    static constexpr int32_t VALUE_OBJECT = 1;
+    // wantAgent flag
+    static constexpr int32_t WANT_AGENT_FLAG = 0;
+    // maxWantAgent flag
+    static constexpr int32_t MAX_WANT_AGENT_FLAG = 1;
+
 protected:
     enum class DbRecoveryType : uint8_t {
         INT,
@@ -977,13 +988,16 @@ private:
     static void AppendWantAgentValuesBucket(const sptr<ReminderRequest>& reminder,
         NativeRdb::ValuesBucket& values);
 
+    bool MarshallingWantParameters(Parcel& parcel, const AAFwk::WantParams& params) const;
     bool MarshallingActionButton(Parcel& parcel) const;
+    bool ReadWantParametersFromParcel(Parcel& parcel, AAFwk::WantParams& wantParams);
     bool ReadActionButtonFromParcel(Parcel& parcel);
 
     void RecoverBasicFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
     void RecoverActionButtonJsonMode(const std::string& jsonString);
     void RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
     void RecoverWantAgent(const std::string& wantAgentInfo, const uint8_t& type);
+    void RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type);
 
     static const uint32_t MIN_TIME_INTERVAL_IN_MILLI;
     static const std::string SEP_BUTTON_SINGLE;
