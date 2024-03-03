@@ -147,12 +147,19 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             bundle, sourceBundleName)) {
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 bundle.c_str(), sourceBundleName.c_str());
-            int32_t userId = 0;
-            GetActiveUserId(userId);
-            std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+            if (request->GetBundleOption()->GetUid() < DEFAULT_UID) {
+                return ERR_ANS_INVALID_UID;
+            }
             int32_t uid = -1;
-            if (bundleManager != nullptr) {
-                uid = bundleManager->GetDefaultUidByBundleName(sourceBundleName, userId);
+            if (request->GetBundleOption()->GetUid() == DEFAULT_UID) {
+                int32_t userId = 0;
+                GetActiveUserId(userId);
+                std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+                if (bundleManager != nullptr) {
+                    uid = bundleManager->GetDefaultUidByBundleName(sourceBundleName, userId);
+                }
+            } else {
+                uid = request->GetBundleOption()->GetUid();
             }
             if (uid < 0) {
                 return ERR_ANS_INVALID_UID;
