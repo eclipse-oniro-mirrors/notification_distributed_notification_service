@@ -536,10 +536,6 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
     const int32_t notificationId, const NotificationButtonOption &buttonOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (bundleOption.GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     if (buttonOption.GetButtonName().empty()) {
         ANS_LOGE("Invalid button name.");
