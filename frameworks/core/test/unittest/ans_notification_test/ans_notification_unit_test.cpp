@@ -911,6 +911,43 @@ HWTEST_F(AnsNotificationUnitTest, CancelGroup_0200, Function | MediumTest | Leve
 }
 
 /*
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(ret, false);
+    ErrCode res = ans_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(ret, false);
+    bool enable = true;
+    ErrCode result = ans_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: SetBadgeNumberByBundle_0100
  * @tc.desc: test SetBadgeNumberByBundle with empty bundleOption, expect ErrCode ERR_ANS_INVALID_PARAM.
  * @tc.type: FUNC

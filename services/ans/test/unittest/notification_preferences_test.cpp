@@ -1200,6 +1200,54 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00300, Function | S
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
+/*
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    ErrCode res = NotificationPreferences::GetInstance().SetSmartReminderEnabled("testDeviceType",
+        true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetSmartReminderEnabled_0200
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0200, TestSize.Level1)
+{
+    ErrCode res = NotificationPreferences::GetInstance().SetSmartReminderEnabled("", true);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsSmartReminderEnabled("testDeviceType1",
+        enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0200
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0200, TestSize.Level1)
+{
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsSmartReminderEnabled("", enable);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
 /**
  * @tc.number    : CheckSlotForUpdateSlot_00100
  * @tc.name      : CheckSlotForUpdateSlot

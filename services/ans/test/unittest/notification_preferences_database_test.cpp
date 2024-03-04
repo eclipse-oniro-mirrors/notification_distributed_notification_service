@@ -870,6 +870,30 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00200, Function 
 }
 
 /**
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    bool ret = preferncesDB_->SetSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    bool result = preferncesDB_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.number    : RemoveAnsBundleDbInfo_00200
  * @tc.name      :
  * @tc.desc      : Test RemoveAnsBundleDbInfo function.

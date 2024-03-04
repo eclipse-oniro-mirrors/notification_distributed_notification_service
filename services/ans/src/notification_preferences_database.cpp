@@ -1,4 +1,4 @@
-/*
+/*os_account_manager
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 #include "ans_log_wrapper.h"
 #include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
+#include "ipc_skeleton.h"
 
 #include "uri.h"
 namespace OHOS {
@@ -90,6 +91,11 @@ const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
  * Indicates that disturbe key which bundle enable notification.
  */
 const static std::string KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION = "enabledNotificationDistributed";
+
+/**
+ * Indicates that disturbe key which bundle enable notification.
+ */
+const static std::string KEY_SMART_REMINDER_ENABLE_NOTIFICATION = "enabledSmartReminder";
 
 /**
  * Indicates that disturbe key which bundle popped dialog.
@@ -1647,6 +1653,66 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
         }
     });
     ANS_LOGD("GetDistributedEnabledForBundle:enabled:[%{public}d]KEY:%{public}s", enabled, key.c_str());
+    return result;
+}
+
+std::string NotificationPreferencesDatabase::GenerateBundleLablel(const std::string &deviceType,
+    const int32_t userId) const
+{
+    return std::string().append(deviceType).append(KEY_UNDER_LINE).append(std::to_string(userId));
+}
+
+
+bool NotificationPreferencesDatabase::SetSmartReminderEnabled(const std::string deviceType, const bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(deviceType, userId);
+    std::string key = GenerateBundleKey(bundleKey, KEY_SMART_REMINDER_ENABLE_NOTIFICATION);
+    ANS_LOGD("%{public}s, key:%{public}s,enabled[%{public}d]", __FUNCTION__, key.c_str(), enabled);
+    int32_t result = PutDataToDB(key, enabled);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(deviceType, userId);
+    std::string key = GenerateBundleKey(bundleKey, KEY_SMART_REMINDER_ENABLE_NOTIFICATION);
+    bool result = false;
+    enabled = false;
+    GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                enabled = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
     return result;
 }
 }  // namespace Notification

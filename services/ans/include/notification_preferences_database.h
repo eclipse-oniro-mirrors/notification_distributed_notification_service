@@ -111,6 +111,24 @@ public:
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, bool &enabled);
 
     /**
+     * @brief Put smart reminder enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool SetSmartReminderEnabled(const std::string deviceType, const bool &enabled);
+
+    /**
+     * @brief Get smart reminder enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool IsSmartReminderEnabled(const std::string deviceType, bool &enabled);
+
+    /**
      * @brief Put enable notification into disturbe DB.
      *
      * @param userId Indicates user.
@@ -259,6 +277,7 @@ private:
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &deviceType) const;
+    std::string GenerateBundleLablel(const std::string &deviceType, const int32_t userId) const;
     void GetDoNotDisturbType(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbBeginDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);

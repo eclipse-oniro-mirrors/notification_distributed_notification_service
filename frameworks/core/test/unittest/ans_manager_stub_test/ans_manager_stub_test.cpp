@@ -4417,6 +4417,39 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotFlagsAsBundle02, Function | SmallTest 
     EXPECT_NE((int)ret, (int)res);
 }
 
+/*
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    bool enabled = true;
+    data.WriteString("testDeviceType");
+    data.WriteBool(enabled);
+
+    ErrCode res = ansManagerStub_->HandleSetSmartReminderEnabled(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("testDeviceType1111");
+    data.WriteBool(enable);
+    ErrCode result = ansManagerStub_->HandleIsSmartReminderEnabled(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+}
+
 /**
  * @tc.name: HandleSetSlotFlagsAsBundle01
  * @tc.desc: Test HandleSetSlotFlagsAsBundle succeeds.

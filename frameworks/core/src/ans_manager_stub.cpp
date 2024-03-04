@@ -259,6 +259,12 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_DISTRIBUTED_ENABLED_BY_BUNDLE,
             std::bind(&AnsManagerStub::HandleIsDistributedEnabledByBundle, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_SMART_REMINDER_ENABLED,
+            std::bind(&AnsManagerStub::HandleSetSmartReminderEnabled, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_SMART_REMINDER_ENABLED,
+            std::bind(&AnsManagerStub::HandleIsSmartReminderEnabled, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
             std::bind(&AnsManagerStub::HandleDistributedSetEnabledWithoutApp, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
@@ -2152,6 +2158,53 @@ ErrCode AnsManagerStub::HandleIsDistributedEnabledByBundle(MessageParcel &data, 
   
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: write enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleSetSmartReminderEnabled] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        ANS_LOGE("[HandleSetSmartReminderEnabled] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetSmartReminderEnabled(deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE(
+            "[HandleSetSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleIsSmartReminderEnabled] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    
+    bool enabled = false;
+    ErrCode result = IsSmartReminderEnabled(deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+  
+    if (!reply.WriteBool(enabled)) {
+        ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

@@ -739,6 +739,31 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
+ErrCode NotificationPreferences::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetSmartReminderEnabled(deviceType, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->IsSmartReminderEnabled(deviceType, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
 
 void NotificationPreferences::InitSettingFromDisturbDB()
 {
