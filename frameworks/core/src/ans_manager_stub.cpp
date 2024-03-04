@@ -301,6 +301,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE,
             std::bind(&AnsManagerStub::HandleGetSlotFlagsAsBundle, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP,
+            std::bind(&AnsManagerStub::HandleSetAdditionConfig, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -405,7 +408,12 @@ ErrCode AnsManagerStub::HandleCancelAsBundleOption(MessageParcel &data, MessageP
         ANS_LOGE("[HandleCancelAsBundle] fail: read notificationId failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    ErrCode result = CancelAsBundle(bundleOption, notificationId);
+    std::string label;
+    if (!data.ReadString(label)) {
+        ANS_LOGE("Read label failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    ErrCode result = CancelAsBundle(bundleOption, notificationId, label);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -459,8 +467,12 @@ ErrCode AnsManagerStub::HandleCancelAsBundleAndUser(MessageParcel &data, Message
         ANS_LOGE("[HandleCancelAsBundle] fail: read userId failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
-    ErrCode result = CancelAsBundle(bundleOption, notificationId, userId);
+    std::string label;
+    if (!data.ReadString(label)) {
+        ANS_LOGE("Read label failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    ErrCode result = CancelAsBundle(bundleOption, notificationId, userId, label);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2161,6 +2173,28 @@ ErrCode AnsManagerStub::HandleIsDistributedEnabledByBundle(MessageParcel &data, 
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetAdditionConfig(MessageParcel &data, MessageParcel &reply)
+{
+    std::string key;
+    if (!data.ReadString(key)) {
+        ANS_LOGE("Failed to read key.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::string value;
+    if (!data.ReadString(value)) {
+        ANS_LOGE("Failed to read value.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetAdditionConfig(key, value);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Failed to write result, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 
 ErrCode AnsManagerStub::HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply)

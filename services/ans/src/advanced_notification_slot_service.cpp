@@ -666,5 +666,51 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
 
     return true;
 }
+
+ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        return ERR_ANS_NOT_SYSTEM_SERVICE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance().SetKvToDb(key, value);
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
+bool AdvancedNotificationService::IsAgentRelationship(const std::string &agentBundleName,
+    const std::string &sourceBundleName)
+{
+    if (agentBundleName.empty() || sourceBundleName.empty()) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool result = false;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance().IsAgentRelationship(agentBundleName, sourceBundleName);
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

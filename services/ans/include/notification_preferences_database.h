@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -195,6 +195,15 @@ public:
      * @return Return true on success, false on failure.
      */
     bool RemoveAllSlotsFromDisturbeDB(const std::string &bundleKey);
+
+    /**
+     * @brief Query whether there is a agent relationship between the two apps.
+     *
+     * @param agentBundleName The bundleName of the agent app.
+     * @param sourceBundleName The bundleName of the source app.
+     * @return Returns true if There is an agent relationship; returns false otherwise.
+     */
+    bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
     bool RemoveNotificationEnable(const int32_t userId);
     bool RemoveDoNotDisturbDate(const int32_t userId);
     bool RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid);

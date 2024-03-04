@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -841,6 +841,16 @@ int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key)
         return ERR_ANS_SERVICE_NOT_READY;
     }
     return preferncesDB_->DeleteKvFromDb(key);
+}
+
+bool NotificationPreferences::IsAgentRelationship(const std::string &agentBundleName,
+    const std::string &sourceBundleName)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+
+    return preferncesDB_->IsAgentRelationship(agentBundleName, sourceBundleName);
 }
 }  // namespace Notification
 }  // namespace OHOS

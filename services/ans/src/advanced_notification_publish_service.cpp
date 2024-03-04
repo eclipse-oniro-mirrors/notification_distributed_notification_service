@@ -221,8 +221,8 @@ ErrCode AdvancedNotificationService::CancelAll()
     return result;
 }
 
-ErrCode AdvancedNotificationService::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
+ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, int32_t userId, const std::string &label)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -249,11 +249,11 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     }
     sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
         bundleOption->GetBundleName(), uid);
-    return CancelPreparedNotification(notificationId, "", bundle);
+    return CancelPreparedNotification(notificationId, label, bundle);
 }
 
 ErrCode AdvancedNotificationService::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label)
 {
     ANS_LOGD("%{public}s, uid = %{public}d", __FUNCTION__, bundleOption->GetUid());
     int32_t userId = -1;
@@ -262,7 +262,11 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     } else {
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
     }
-    return CancelAsBundle(bundleOption, notificationId, userId);
+    if (NotificationPreferences::GetInstance().IsAgentRelationship(GetClientBundleName(),
+        bundleOption->GetBundleName())) {
+        return CancelAsBundleWithAgent(bundleOption, notificationId, label, userId);
+    }
+    return CancelAsBundle(bundleOption, notificationId, userId, label);
 }
 
 ErrCode AdvancedNotificationService::CancelAsBundle(
@@ -272,6 +276,34 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
          representativeBundle, DEFAULT_UID);
     return CancelAsBundle(bundleOption, notificationId, userId);
+}
+
+ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t id, const std::string &label, int32_t userId)
+{
+    ANS_LOGD("Called.");
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    int32_t uid = -1;
+    if (bundleOption->GetUid() == DEFAULT_UID) {
+        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+        if (bundleManager != nullptr) {
+            uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleOption->GetBundleName(), userId);
+        }
+    } else {
+        uid = bundleOption->GetUid();
+    }
+    if (uid < 0) {
+        return ERR_ANS_INVALID_UID;
+    }
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
+        bundleOption->GetBundleName(), uid);
+
+    return CancelPreparedNotification(id, label, bundle);
 }
 
 ErrCode AdvancedNotificationService::PublishAsBundle(
@@ -1769,7 +1801,8 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
             ANS_LOGE("Failed to get client bundle name.");
             return result;
         }
-        bool isAgent = true;
+        bool isAgent = false;
+        isAgent = IsAgentRelationship(bundleName, bundle->GetBundleName());
         if (!isAgent) {
             ANS_LOGE("The caller has no agent relationship with the specified bundle.");
             return ERR_ANS_PERMISSION_DENIED;

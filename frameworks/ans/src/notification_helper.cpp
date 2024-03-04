@@ -105,10 +105,10 @@ ErrCode NotificationHelper::CancelAsBundle(
 }
 
 ErrCode NotificationHelper::CancelAsBundle(
-    const NotificationBundleOption &bundleOption, int32_t notificationId)
+    const NotificationBundleOption &bundleOption, int32_t notificationId, const std::string &label)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
-        bundleOption, notificationId);
+        bundleOption, notificationId, label);
 }
 
 ErrCode NotificationHelper::GetActiveNotificationNums(uint64_t &num)
@@ -471,6 +471,11 @@ ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &push
 ErrCode NotificationHelper::UnregisterPushCallback()
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
+}
+
+ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
 }
 
 ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,

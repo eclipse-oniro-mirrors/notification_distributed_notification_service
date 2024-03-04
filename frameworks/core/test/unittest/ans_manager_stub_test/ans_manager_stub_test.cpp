@@ -342,10 +342,12 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle05, Function | SmallTest | Leve
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t notificationId = 3;
-    
+    std::string label = "";
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(notificationId);
+    data.WriteString(label);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);
@@ -412,11 +414,13 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle08, Function | SmallTest | Leve
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t notificationId = 3;
     int32_t userId = 4;
-    
+    std::string label = "";
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(notificationId);
     data.WriteInt32(userId);
+    data.WriteString(label);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);

@@ -141,6 +141,32 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
         request->SetOwnerUid(uid);
     } else {
+        std::string sourceBundleName =
+            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+            bundle, sourceBundleName)) {
+            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
+                bundle.c_str(), sourceBundleName.c_str());
+            if (request->GetBundleOption()->GetUid() < DEFAULT_UID) {
+                return ERR_ANS_INVALID_UID;
+            }
+            int32_t uid = -1;
+            if (request->GetBundleOption()->GetUid() == DEFAULT_UID) {
+                int32_t userId = 0;
+                GetActiveUserId(userId);
+                std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+                if (bundleManager != nullptr) {
+                    uid = bundleManager->GetDefaultUidByBundleName(sourceBundleName, userId);
+                }
+            } else {
+                uid = request->GetBundleOption()->GetUid();
+            }
+            if (uid < 0) {
+                return ERR_ANS_INVALID_UID;
+            }
+            request->SetOwnerUid(uid);
+            bundle = sourceBundleName;
+        }
         request->SetOwnerBundleName(bundle);
     }
     request->SetCreatorBundleName(bundle);
@@ -353,7 +379,19 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
     } else {
-        bundleOption = GenerateBundleOption();
+        std::string sourceBundleName =
+            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+            GetClientBundleName(), sourceBundleName)) {
+            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
+                GetClientBundleName().c_str(), sourceBundleName.c_str());
+            request->SetCreatorBundleName(request->GetOwnerBundleName());
+            request->SetCreatorUid(request->GetOwnerUid());
+            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
+                request->GetOwnerUid());
+        } else {
+            bundleOption = GenerateBundleOption();
+        }
     }
 
     if (bundleOption == nullptr) {

@@ -129,9 +129,11 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
+     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+        const std::string &label = "") override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -141,10 +143,11 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
+     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId,
+        const std::string &label = "") override;
 
     /**
      * @brief Adds a notification slot by type.
@@ -988,6 +991,25 @@ public:
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
 
+    /**
+     * @brief Set agent relationship.
+     *
+     * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
+     * @param value Indicates key-value pair of agent relationship.
+     * @return Returns set result.
+     */
+    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
+
+protected:
+    /**
+     * @brief Query whether there is a agent relationship between the two apps.
+     *
+     * @param agentBundleName The bundleName of the agent app.
+     * @param sourceBundleName The bundleName of the source app.
+     * @return Returns true if There is an agent relationship; returns false otherwise.
+     */
+    bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
+
 private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
@@ -1146,6 +1168,8 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
+    ErrCode CancelAsBundleWithAgent(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t id, const std::string &label, int32_t userId);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();

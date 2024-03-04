@@ -265,6 +265,15 @@ public:
     ErrCode ClearNotificationInRestoreFactorySettings();
 
     /**
+     * @brief Query whether there is a agent relationship between the two apps.
+     *
+     * @param agentBundleName The bundleName of the agent app.
+     * @param sourceBundleName The bundleName of the source app.
+     * @return Returns true if There is an agent relationship; returns false otherwise.
+     */
+    bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
