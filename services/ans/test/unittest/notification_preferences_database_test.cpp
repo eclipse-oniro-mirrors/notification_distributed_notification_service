@@ -870,6 +870,17 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00200, Function 
 }
 
 /**
+ * @tc.name      : GetAllNotificationEnabledBundles_00100
+ * @tc.number    : GetAllNotificationEnabledBundles
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles,no data in db return false
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    EXPECT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+}
+
+/**
  * @tc.number    : RemoveAnsBundleDbInfo_00200
  * @tc.name      :
  * @tc.desc      : Test RemoveAnsBundleDbInfo function.

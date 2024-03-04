@@ -4441,6 +4441,24 @@ HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle01, Function | SmallTest 
 }
 
 /**
+ * @tc.name: HandleGetAllNotificationEnableStatus
+ * @tc.desc: Test HandleGetAllNotificationEnableStatus.
+ * @tc.type: FUNC
+ * @tc.require: issueI92VGR
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetAllNotificationEnableStatus01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: HandleSetSlotFlagsAsBundle02
  * @tc.desc: Test if the bundleOption in data is null.
  * @tc.type: FUNC
