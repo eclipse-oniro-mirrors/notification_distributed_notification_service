@@ -1497,7 +1497,7 @@ ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleO
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("SetDistributedEnabledByBundleCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
@@ -1515,12 +1515,34 @@ ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOp
     }
 
     if (!GetAnsManagerProxy()) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("IsDistributedEnabledByBundleCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     return ansManagerProxy_->IsDistributedEnabledByBundle(bo, deviceType, enabled);
+}
+
+ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->IsSmartReminderEnabled(deviceType, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

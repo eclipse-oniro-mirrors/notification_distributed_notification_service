@@ -112,6 +112,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setSlotFlagsByBundle", NapiSetSlotFlagsByBundle),
         DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", NapiGetSlotFlagsByBundle),
         DECLARE_NAPI_FUNCTION("setDistributedEnabledByBundle", NapiSetDistributedEnabledByBundle),
+        DECLARE_NAPI_FUNCTION("setSmartReminderEnabled", NapiSetSmartReminderEnabled),
+        DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", NapiIsSmartReminderEnabled),
 };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

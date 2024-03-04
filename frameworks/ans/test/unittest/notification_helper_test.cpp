@@ -1105,6 +1105,78 @@ HWTEST_F(NotificationHelperTest, GetActiveNotificationByFilter_00001, Function |
 }
 
 /**
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetSmartReminderEnabled_0200
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetSmartReminderEnabled_0200, TestSize.Level1)
+{
+    std::string deviceType = "";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType1111";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, false);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0200
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0200, TestSize.Level1)
+{
+    std::string deviceType = "";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0300
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0300, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
+}
+
+/**
  * @tc.name: SetBadgeNumberByBundle_0100
  * @tc.desc: test SetBadgeNumberByBundle with invalid bundleOption, expect errorCode ERR_ANS_INVALID_PARAM.
  * @tc.type: FUNC

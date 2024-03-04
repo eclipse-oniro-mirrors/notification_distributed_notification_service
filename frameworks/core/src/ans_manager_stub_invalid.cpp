@@ -563,5 +563,17 @@ ErrCode AnsManagerStub::IsDistributedEnabledByBundle(const sptr<NotificationBund
     ANS_LOGE("IsDistributedEnabledByBundle called!");
     return ERR_INVALID_OPERATION;
 }
+
+ErrCode AnsManagerStub::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGE("SetSmartReminderEnabled called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGE("IsSmartReminderEnabled called!");
+    return ERR_INVALID_OPERATION;
+}
 }  // namespace Notification
 }  // namespace OHOS

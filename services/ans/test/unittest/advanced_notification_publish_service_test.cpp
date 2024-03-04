@@ -795,6 +795,103 @@ HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTe
     EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
 }
 
+/*
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetSmartReminderEnabled_0200
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0200, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/*
+ * @tc.name: SetSmartReminderEnabled_0300
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+}
+
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0200
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0200, TestSize.Level1)
+{
+    ErrCode ret = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType", enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0300
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0400
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0400, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
 /**
  * @tc.name: PublishRemoveDuplicateEvent_00001
  * @tc.desc: Test PublishRemoveDuplicateEvent
