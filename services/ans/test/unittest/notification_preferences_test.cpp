@@ -1200,6 +1200,54 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00300, Function | S
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
+/*
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    ErrCode res = NotificationPreferences::GetInstance().SetSmartReminderEnabled("testDeviceType",
+        true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetSmartReminderEnabled_0200
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0200, TestSize.Level1)
+{
+    ErrCode res = NotificationPreferences::GetInstance().SetSmartReminderEnabled("", true);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsSmartReminderEnabled("testDeviceType1",
+        enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0200
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0200, TestSize.Level1)
+{
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsSmartReminderEnabled("", enable);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
 /**
  * @tc.number    : CheckSlotForUpdateSlot_00100
  * @tc.name      : CheckSlotForUpdateSlot
@@ -1246,6 +1294,20 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | S
 }
 
 /**
+ * @tc.number    : GetAllNotificationEnabledBundles_00100
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Get all notification enable bundle in DB when db is null,
+ *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+ * @tc.require   : issueI92VGR
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance().GetAllNotificationEnabledBundles(bundleOption),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
  * @tc.number    : CheckSlotForUpdateSlot_00400
  * @tc.name      : CheckSlotForUpdateSlot
  * @tc.desc      : Test CheckSlotForUpdateSlot function after add notification slot, return is ERR_OK.
@@ -1258,6 +1320,65 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00400, Function | S
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption,
+        deviceType, true);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
+        deviceType, enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
+        deviceType, enable);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS

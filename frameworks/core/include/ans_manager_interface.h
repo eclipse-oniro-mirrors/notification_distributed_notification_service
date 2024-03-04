@@ -811,6 +811,28 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, const bool enabled) = 0;
 
     /**
+     * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    virtual ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled) = 0;
+
+    /**
+     * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    virtual ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) = 0;
+
+    /**
      * @brief get whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *

@@ -17,6 +17,7 @@
 
 #include "ans_log_wrapper.h"
 #include "common.h"
+#include "napi_common.h"
 #include "ipc_skeleton.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
@@ -394,6 +395,13 @@ bool ReminderCommon::GenWantAgent(
                 return false;
             }
             wantAgentInfo->uri = str;
+        }
+        napi_value params = nullptr;
+        if (GetObject(env, wantAgent, ReminderAgentNapi::WANT_AGENT_PARAMETERS, params)) {
+            AAFwk::WantParams wantParams;
+            if (AppExecFwk::UnwrapWantParams(env, params, wantParams)) {
+                wantAgentInfo->parameters = wantParams;
+            }
         }
     }
     return true;
@@ -780,42 +788,10 @@ napi_value ReminderCommon::CreateReminderAlarm(
 napi_value ReminderCommon::CreateReminderCalendar(
     const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)
 {
-    napi_value dateTimeObj = nullptr;
-    if (!GetObject(env, value, ReminderAgentNapi::CALENDAR_DATE_TIME, dateTimeObj)) {
-        ANSR_LOGW("Create calendar reminder fail: dateTime must be setted.");
-        return nullptr;
-    }
-
-    // year month day hour minute second
-    int32_t propertyYearVal = 0;
-    int32_t propertyMonthVal = 0;
-    int32_t propertyDayVal = 0;
-    int32_t propertyHourVal = 0;
-    int32_t propertyMinteVal = 0;
-    if (!GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_YEAR, propertyYearVal, true) ||
-        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_MONTH, propertyMonthVal, true) ||
-        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_DAY, propertyDayVal, true) ||
-        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_HOUR, propertyHourVal, true) ||
-        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_MINUTE, propertyMinteVal, true)) {
-        return nullptr;
-    }
-
-    if (!CheckCalendarParams(propertyYearVal, propertyMonthVal, propertyDayVal,
-        propertyHourVal, propertyMinteVal)) {
-        return nullptr;
-    }
-
-    // repeatMonth
     std::vector<uint8_t> repeatMonths;
-    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_MONTHS, repeatMonths,
-        ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) == nullptr) {
-        return nullptr;
-    }
-
-    // repeatDay
     std::vector<uint8_t> repeatDays;
-    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_DAYS, repeatDays,
-        ReminderRequestCalendar::MAX_DAYS_OF_MONTH) == nullptr) {
+    struct tm dateTime;
+    if (!ParseCalendarParams(env, value, repeatMonths, repeatDays, dateTime)) {
         return nullptr;
     }
 
@@ -825,44 +801,24 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (ParseInt32Array(env, value, ReminderAgentNapi::REPEAT_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
         return nullptr;
     }
-    tm dateTime = ReminderCalendarConvertDateTime(propertyYearVal, propertyMonthVal, propertyDayVal, propertyHourVal,
-        propertyMinteVal);
-    auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    if (!(reminderCalendar->SetNextTriggerTime())) {
-        return nullptr;
-    }
-    reminder = ParseWantAgent(env, value, isSysApp, reminderCalendar);
-    return NotificationNapi::Common::NapiGetNull(env);
-}
 
-std::shared_ptr<ReminderRequestCalendar> ReminderCommon::ParseWantAgent(const napi_env &env,
-    const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar)
-{
+    // rruleWantAgent
     std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
     if (!GenWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT, wantAgentInfo, isSysApp)) {
         return nullptr;
     }
-
     if (!isSysApp && wantAgentInfo != nullptr) {
         ANS_LOGE("Not system app rrule want info not supported");
         return nullptr;
     }
+    
+    auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
+    if (!(reminderCalendar->SetNextTriggerTime())) {
+        return nullptr;
+    }
     reminderCalendar->SetRRuleWantAgentInfo(wantAgentInfo);
-    return reminderCalendar;
-}
-
-tm ReminderCommon::ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
-    const int32_t propertyDayVal, const int32_t propertyHourVal, const int32_t propertyMinteVal)
-{
-    tm dateTime;
-    dateTime.tm_year = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::YEAR, propertyYearVal);
-    dateTime.tm_mon = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::MONTH, propertyMonthVal);
-    dateTime.tm_mday = propertyDayVal;
-    dateTime.tm_hour = propertyHourVal;
-    dateTime.tm_min = propertyMinteVal;
-    dateTime.tm_sec = 0;
-    dateTime.tm_isdst = -1;
-    return dateTime;
+    reminder = reminderCalendar;
+    return NotificationNapi::Common::NapiGetNull(env);
 }
 
 bool ReminderCommon::CheckCalendarParams(const int32_t &year, const int32_t &month, const int32_t &day,
@@ -896,6 +852,56 @@ bool ReminderCommon::CheckCalendarParams(const int32_t &year, const int32_t &mon
             ReminderAgentNapi::CALENDAR_MINUTE, maxMinute);
         return false;
     }
+    return true;
+}
+
+bool ReminderCommon::ParseCalendarParams(const napi_env& env, const napi_value& value,
+    std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, struct tm& dateTime)
+{
+    napi_value dateTimeObj = nullptr;
+    if (!GetObject(env, value, ReminderAgentNapi::CALENDAR_DATE_TIME, dateTimeObj)) {
+        ANSR_LOGW("Create calendar reminder fail: dateTime must be setted.");
+        return false;
+    }
+
+    // year month day hour minute second
+    int32_t propertyYearVal = 0;
+    int32_t propertyMonthVal = 0;
+    int32_t propertyDayVal = 0;
+    int32_t propertyHourVal = 0;
+    int32_t propertyMinteVal = 0;
+    if (!GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_YEAR, propertyYearVal, true) ||
+        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_MONTH, propertyMonthVal, true) ||
+        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_DAY, propertyDayVal, true) ||
+        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_HOUR, propertyHourVal, true) ||
+        !GetInt32(env, dateTimeObj, ReminderAgentNapi::CALENDAR_MINUTE, propertyMinteVal, true)) {
+        return false;
+    }
+
+    if (!CheckCalendarParams(propertyYearVal, propertyMonthVal, propertyDayVal,
+        propertyHourVal, propertyMinteVal)) {
+        return false;
+    }
+
+    // repeatMonth
+    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_MONTHS, repeatMonths,
+        ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) == nullptr) {
+        return false;
+    }
+
+    // repeatDay
+    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_DAYS, repeatDays,
+        ReminderRequestCalendar::MAX_DAYS_OF_MONTH) == nullptr) {
+        return false;
+    }
+
+    dateTime.tm_year = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::YEAR, propertyYearVal);
+    dateTime.tm_mon = ReminderRequest::GetCTime(ReminderRequest::TimeTransferType::MONTH, propertyMonthVal);
+    dateTime.tm_mday = propertyDayVal;
+    dateTime.tm_hour = propertyHourVal;
+    dateTime.tm_min = propertyMinteVal;
+    dateTime.tm_sec = 0;
+    dateTime.tm_isdst = -1;
     return true;
 }
 

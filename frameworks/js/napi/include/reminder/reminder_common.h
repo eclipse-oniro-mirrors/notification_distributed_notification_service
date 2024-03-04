@@ -63,6 +63,7 @@ const char* RRULL_WANT_AGENT = "rruleWantAgent";
 const char* WANT_AGENT_PKG = "pkgName";
 const char* WANT_AGENT_ABILITY = "abilityName";
 const char* WANT_AGENT_URI = "uri";
+const char* WANT_AGENT_PARAMETERS = "parameters";
 const char* BUTTON_WANT_AGENT = "wantAgent";
 const char* BUTTON_WANT_AGENT_PKG = "pkgName";
 const char* BUTTON_WANT_AGENT_ABILITY = "abilityName";
@@ -76,6 +77,8 @@ const char* AUTODELETEDTIME = "autoDeletedTime";
 const char* GROUP_ID = "groupId";
 const char* CUSTOM_RING_URI = "customRingUri";
 const char* SNOOZE_SLOT_TYPE = "snoozeSlotType";
+const char* REMINDER_INFO_REMINDER_REQ = "reminderReq";
+const char* REMINDER_INFO_REMINDER_ID = "reminderId";
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
@@ -133,6 +136,9 @@ private:
     static bool CheckCalendarParams(const int32_t &year, const int32_t &month, const int32_t &day,
         const int32_t &hour, const int32_t &min);
 
+    static bool ParseCalendarParams(const napi_env& env, const napi_value& value, std::vector<uint8_t>& repeatMonths,
+        std::vector<uint8_t>& repeatDays, struct tm& dateTime);
+
     static napi_value CreateReminderTimer(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
@@ -142,10 +148,6 @@ private:
     static napi_value CreateReminderCalendar(
         const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder);
 
-    static tm ReminderCalendarConvertDateTime(const int32_t propertyYearVal, const int32_t propertyMonthVal,
-        const int32_t propertyDayVal, const int32_t propertyHourVal,
-        const int32_t propertyMinteVal);
-
     static bool CreateReminder(
         const napi_env &env, const napi_value &value,  const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder);
 
@@ -154,9 +156,6 @@ private:
 
     static bool GenWantAgent(const napi_env &env, const napi_value &value, const char* name,
         std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp);
-
-    static std::shared_ptr<ReminderRequestCalendar> ParseWantAgent(const napi_env &env,
-        const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequestCalendar> reminderCalendar);
 
     static void GenMaxScreenWantAgent(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);

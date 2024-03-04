@@ -508,6 +508,16 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

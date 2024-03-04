@@ -471,11 +471,12 @@ napi_value Common::GetNotificationLocalLiveViewButton(
                 return nullptr;
             }
             pixelMap = Media::PixelMapNapi::GetPixelMap(env, buttonIcon);
-            if (pixelMap == nullptr) {
-                ANS_LOGE("Invalid object pixelMap");
+            if (pixelMap != nullptr && static_cast<uint32_t>(pixelMap->GetByteCount()) <= MAX_ICON_SIZE) {
+                button.addSingleButtonIcon(pixelMap);
+            } else {
+                ANS_LOGE("Invalid pixelMap object or pixelMap is over size.");
                 return nullptr;
             }
-            button.addSingleButtonIcon(pixelMap);
         }
     }
     ANS_LOGD("button buttonIcon = %{public}s", str);

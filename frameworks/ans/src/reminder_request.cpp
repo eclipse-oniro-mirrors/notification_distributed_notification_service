@@ -30,6 +30,7 @@
 #include "system_ability_definition.h"
 #include "want_agent_helper.h"
 #include "nlohmann/json.hpp"
+#include "want_params_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -638,9 +639,51 @@ std::vector<std::string> ReminderRequest::StringSplit(std::string source, const 
     return result;
 }
 
+void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type)
+{
+    nlohmann::json root = nlohmann::json::parse(wantAgentInfo);
+    if (!root.contains("pkgName") || !root["pkgName"].is_string() ||
+        !root.contains("abilityName") || !root["abilityName"].is_string() ||
+        !root.contains("uri") || !root["uri"].is_string() ||
+        !root.contains("parameters") || !root["parameters"].is_string()) {
+        return;
+    }
+
+    std::string pkgName = root.at("pkgName").get<std::string>();
+    std::string abilityName = root.at("abilityName").get<std::string>();
+    std::string uri = root.at("uri").get<std::string>();
+    std::string parameters = root.at("parameters").get<std::string>();
+    switch (type) {
+        case WANT_AGENT_FLAG: {
+            auto wai = std::make_shared<ReminderRequest::WantAgentInfo>();
+            wai->pkgName = pkgName;
+            wai->abilityName = abilityName;
+            wai->uri = uri;
+            wai->parameters = AAFwk::WantParamWrapper::ParseWantParams(parameters);
+            SetWantAgentInfo(wai);
+            break;
+        }
+        case MAX_WANT_AGENT_FLAG: {
+            auto maxScreenWantAgentInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
+            maxScreenWantAgentInfo->pkgName = pkgName;
+            maxScreenWantAgentInfo->abilityName = abilityName;
+            SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
+            break;
+        }
+        default: {
+            ANSR_LOGW("RecoverWantAgent type not support");
+            break;
+        }
+    }
+}
+
 void ReminderRequest::RecoverWantAgent(const std::string &wantAgentInfo, const uint8_t &type)
 {
     std::vector<std::string> info = StringSplit(wantAgentInfo, ReminderRequest::SEP_WANT_AGENT);
+    if (info.size() == 1) {
+        RecoverWantAgentByJson(wantAgentInfo, type);
+        return;
+    }
     uint8_t minLen = 2;
     if (info.size() < minLen) {
         ANSR_LOGW("RecoverWantAgent fail");
@@ -1055,6 +1098,23 @@ bool ReminderRequest::MarshallingActionButton(Parcel& parcel) const
     return true;
 }
 
+bool ReminderRequest::MarshallingWantParameters(Parcel& parcel, const AAFwk::WantParams& params) const
+{
+    if (params.Size() == 0) {
+        if (!parcel.WriteInt32(VALUE_NULL)) {
+            return false;
+        }
+    } else {
+        if (!parcel.WriteInt32(VALUE_OBJECT)) {
+            return false;
+        }
+        if (!parcel.WriteParcelable(&params)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ReminderRequest::Marshalling(Parcel &parcel) const
 {
     // write string
@@ -1065,6 +1125,10 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
     WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
+    if (!MarshallingWantParameters(parcel, wantAgentInfo_->parameters)) {
+        ANSR_LOGE("Failed to write wantAgentInfo's parameters");
+        return false;
+    }
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
@@ -1158,6 +1222,25 @@ bool ReminderRequest::ReadActionButtonFromParcel(Parcel& parcel)
     return true;
 }
 
+bool ReminderRequest::ReadWantParametersFromParcel(Parcel& parcel, AAFwk::WantParams& wantParams)
+{
+    int empty = VALUE_NULL;
+    if (!parcel.ReadInt32(empty)) {
+        return false;
+    }
+    if (empty == VALUE_OBJECT) {
+        auto params = parcel.ReadParcelable<AAFwk::WantParams>();
+        if (params != nullptr) {
+            wantParams = *params;
+            delete params;
+            params = nullptr;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 {
     READ_STRING_RETURN_FALSE_LOG(parcel, content_, "content");
@@ -1167,6 +1250,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
     READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
     READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
+    if (!ReadWantParametersFromParcel(parcel, wantAgentInfo_->parameters)) {
+        ANSR_LOGE("Failed to write wantAgentInfo's parameters");
+        return false;
+    }
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
@@ -1467,6 +1554,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWan
     want->SetElement(element);
     if (isWantAgent) {
         want->SetUri(wantAgentInfo_->uri);
+        want->SetParams(wantAgentInfo_->parameters);
     }
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     wants.push_back(want);
@@ -1713,24 +1801,40 @@ int32_t ReminderRequest::GetUserId(const int32_t &uid)
 void ReminderRequest::AppendWantAgentValuesBucket(const sptr<ReminderRequest>& reminder,
     NativeRdb::ValuesBucket& values)
 {
+    std::string pkgName;
+    std::string abilityName;
+    std::string uri;
+    std::string parameters;
     auto wantAgentInfo = reminder->GetWantAgentInfo();
-    if (wantAgentInfo == nullptr) {
-        std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null" + ReminderRequest::SEP_WANT_AGENT + "null";
-        values.PutString(ReminderBaseTable::WANT_AGENT, info);
-    } else {
-        std::string info = wantAgentInfo->pkgName + ReminderRequest::SEP_WANT_AGENT
-            + wantAgentInfo->abilityName + ReminderRequest::SEP_WANT_AGENT + wantAgentInfo->uri;
-        values.PutString(ReminderBaseTable::WANT_AGENT, info);
+    if (wantAgentInfo != nullptr) {
+        pkgName = wantAgentInfo->pkgName;
+        abilityName = wantAgentInfo->abilityName;
+        uri = wantAgentInfo->uri;
+        AAFwk::WantParamWrapper wrapper(wantAgentInfo->parameters);
+        parameters = wrapper.ToString();
     }
+    nlohmann::json wantInfo;
+    wantInfo["pkgName"] = pkgName;
+    wantInfo["abilityName"] = abilityName;
+    wantInfo["uri"] = uri;
+    wantInfo["parameters"] = parameters;
+    std::string info = wantInfo.dump(INDENT, ' ', false, nlohmann::json::error_handler_t::replace);
+    values.PutString(ReminderBaseTable::WANT_AGENT, info);
 
     auto maxScreenWantAgentInfo = reminder->GetMaxScreenWantAgentInfo();
-    if (maxScreenWantAgentInfo == nullptr) {
-        std::string info = "null" + ReminderRequest::SEP_WANT_AGENT + "null";
-        values.PutString(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, info);
-    } else {
-        values.PutString(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, maxScreenWantAgentInfo->pkgName
-            + ReminderRequest::SEP_WANT_AGENT + maxScreenWantAgentInfo->abilityName);
+    if (maxScreenWantAgentInfo != nullptr) {
+        pkgName = maxScreenWantAgentInfo->pkgName;
+        abilityName = maxScreenWantAgentInfo->abilityName;
+        uri = "";
+        parameters = "";
     }
+    nlohmann::json maxWantInfo;
+    maxWantInfo["pkgName"] = pkgName;
+    maxWantInfo["abilityName"] = abilityName;
+    maxWantInfo["uri"] = uri;
+    maxWantInfo["parameters"] = parameters;
+    info = maxWantInfo.dump(INDENT, ' ', false, nlohmann::json::error_handler_t::replace);
+    values.PutString(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, info);
 }
 
 void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,

@@ -103,10 +103,14 @@ std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueu
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    std::string bundle = GetClientBundleName();
-    if (bundle.empty()) {
-        return nullptr;
+    std::string bundle = "";
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        bundle = GetClientBundleName();
+        if (bundle.empty()) {
+            return nullptr;
+        }
     }
+
     int32_t uid = IPCSkeleton::GetCallingUid();
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (bundleOption == nullptr) {

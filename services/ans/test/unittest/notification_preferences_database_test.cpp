@@ -870,6 +870,41 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00200, Function 
 }
 
 /**
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    bool ret = preferncesDB_->SetSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    bool result = preferncesDB_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name      : GetAllNotificationEnabledBundles_00100
+ * @tc.number    : GetAllNotificationEnabledBundles
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles,no data in db return false
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    EXPECT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+}
+
+/**
  * @tc.number    : RemoveAnsBundleDbInfo_00200
  * @tc.name      :
  * @tc.desc      : Test RemoveAnsBundleDbInfo function.
@@ -880,6 +915,85 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAnsBundleDbInfo_00200, Funct
     std::string bundleName = "bundleName";
     int32_t uid = 1;
     EXPECT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, uid), true);
+}
+
+/**
+ * @tc.name: GenerateBundleLablel_0100
+ * @tc.desc: test GenerateBundleLablel with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GenerateBundleLablel_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("name");
+    bundleInfo.SetBundleUid(1);
+    std::string deviceType = "test";
+    auto ret = preferncesDB_->GenerateBundleLablel(bundleInfo, deviceType);
+    EXPECT_EQ(ret, "name_1_test");
+}
+
+/**
+ * @tc.name: PutDistributedEnabledForBundle_0100
+ * @tc.desc: test PutDistributedEnabledForBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("name");
+    bundleInfo.SetBundleUid(1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: PutDistributedEnabledForBundle_0200
+ * @tc.desc: test PutDistributedEnabledForBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("");
+    bundleInfo.SetBundleUid(1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetDistributedEnabledForBundle_0100
+ * @tc.desc: test GetDistributedEnabledForBundle with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("name");
+    bundleInfo.SetBundleUid(1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GetDistributedEnabledForBundle_0200
+ * @tc.desc: test GetDistributedEnabledForBundle with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("");
+    bundleInfo.SetBundleUid(1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    EXPECT_EQ(result, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

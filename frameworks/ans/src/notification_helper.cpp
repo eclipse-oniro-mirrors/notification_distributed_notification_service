@@ -491,5 +491,15 @@ ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundl
     return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
         deviceType, enabled);
 }
+
+ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
+}
 }  // namespace Notification
 }  // namespace OHOS

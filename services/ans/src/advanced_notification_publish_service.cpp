@@ -1893,6 +1893,10 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (bundleOption->GetUid() <= 0) {
+        bundleOption->SetUid(IPCSkeleton::GetCallingUid());
+    }
+
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
@@ -1916,6 +1920,10 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
         return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (bundleOption->GetUid() <= 0) {
+        bundleOption->SetUid(IPCSkeleton::GetCallingUid());
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
@@ -2013,6 +2021,39 @@ ErrCode AdvancedNotificationService::PublishRemoveDuplicateEvent(const std::shar
     }
 
     return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    return NotificationPreferences::GetInstance().SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    return NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS
