@@ -808,6 +808,15 @@ void NotificationPreferences::RemoveAnsBundleDbInfo(const sptr<NotificationBundl
     }
 }
 
+void NotificationPreferences::RemoveEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("%{public}s", __FUNCTION__);
+    if (preferncesDB_ != nullptr && bundleOption != nullptr) {
+        std::lock_guard<std::mutex> lock(preferenceMutex_);
+        preferncesDB_->RemoveEnabledDbByBundleName(bundleOption->GetBundleName());
+    }
+}
+
 int32_t NotificationPreferences::SetKvToDb(
     const std::string &key, const std::string &value)
 {

@@ -528,6 +528,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 
         NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
     }));
+    NotificationPreferences::GetInstance().RemoveEnabledDbByBundle(bundleOption);
 }
 
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
