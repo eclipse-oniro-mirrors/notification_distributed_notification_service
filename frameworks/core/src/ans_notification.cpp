@@ -17,6 +17,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_manager_proxy.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -240,14 +241,14 @@ ErrCode AnsNotification::CancelAsBundle(
 }
 
 ErrCode AnsNotification::CancelAsBundle(
-    const NotificationBundleOption &bundleOption, int32_t notificationId)
+    const NotificationBundleOption &bundleOption, int32_t notificationId, const std::string &label)
 {
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->CancelAsBundle(bo, notificationId);
+    return ansManagerProxy_->CancelAsBundle(bo, notificationId, label);
 }
 
 ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
@@ -535,10 +536,6 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
     const int32_t notificationId, const NotificationButtonOption &buttonOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (bundleOption.GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     if (buttonOption.GetButtonName().empty()) {
         ANS_LOGE("Invalid button name.");
@@ -1484,6 +1481,78 @@ ErrCode AnsNotification::UnregisterPushCallback()
     }
 
     return ansManagerProxy_->UnregisterPushCallback();
+}
+
+ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    if (key.empty()) {
+        ANS_LOGE("Set package config fail: key is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetAdditionConfig(key, value);
+}
+
+ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("SetDistributedEnabledByBundleCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->SetDistributedEnabledByBundle(bo, deviceType, enabled);
+}
+
+ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("IsDistributedEnabledByBundleCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->IsDistributedEnabledByBundle(bo, deviceType, enabled);
+}
+
+ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->IsSmartReminderEnabled(deviceType, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

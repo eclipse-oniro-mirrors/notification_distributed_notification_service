@@ -50,14 +50,15 @@ ErrCode AnsManagerStub::CancelAsBundle(int32_t notificationId, const std::string
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+ErrCode AnsManagerStub::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label)
 {
     ANS_LOGE("AnsManagerStub::CancelAsBundle called!");
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
+ErrCode AnsManagerStub::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, int32_t userId, const std::string &label)
 {
     ANS_LOGE("AnsManagerStub::CancelAsBundle called!");
     return ERR_INVALID_OPERATION;
@@ -547,6 +548,38 @@ ErrCode AnsManagerStub::RegisterPushCallback(
 ErrCode AnsManagerStub::UnregisterPushCallback()
 {
     ANS_LOGE("UnregisterPushCallback called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    ANS_LOGE("Called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGE("SetDistributedEnabledByBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGE("IsDistributedEnabledByBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGE("SetSmartReminderEnabled called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGE("IsSmartReminderEnabled called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

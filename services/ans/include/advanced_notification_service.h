@@ -129,9 +129,11 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
+     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+        const std::string &label = "") override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -141,10 +143,11 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
+     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId,
+        const std::string &label = "") override;
 
     /**
      * @brief Adds a notification slot by type.
@@ -882,6 +885,56 @@ public:
     ErrCode UnregisterPushCallback() override;
 
     /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled) override;
+    
+    /**
+     * @brief Get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, bool &enabled) override;
+
+    /**
+     * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled) override;
+
+    /**
+     * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
+
+    /**
      * @brief Reset pushcallback proxy
      */
     void ResetPushCallbackProxy();
@@ -937,6 +990,25 @@ public:
 
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
+
+    /**
+     * @brief Set agent relationship.
+     *
+     * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
+     * @param value Indicates key-value pair of agent relationship.
+     * @return Returns set result.
+     */
+    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
+
+protected:
+    /**
+     * @brief Query whether there is a agent relationship between the two apps.
+     *
+     * @param agentBundleName The bundleName of the agent app.
+     * @param sourceBundleName The bundleName of the source app.
+     * @return Returns true if There is an agent relationship; returns false otherwise.
+     */
+    bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
 private:
     struct RecentInfo {
@@ -1096,6 +1168,13 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
+    ErrCode CancelAsBundleWithAgent(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t id, const std::string &label, int32_t userId);
+    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
+    void RemoveExpiredUniqueKey();
+    bool IsDuplicateMsg(const std::string &uniqueKey);
+    ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
@@ -1124,6 +1203,7 @@ private:
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::set<std::string> localLiveViewSubscribedList_;
     std::mutex liveViewMutext_;
+    std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
 };
 
 /**

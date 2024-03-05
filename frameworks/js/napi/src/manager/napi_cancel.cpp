@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -216,7 +216,8 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
         .representativeBundle = paras.representativeBundle,
         .option = paras.option,
         .hasOption = paras.hasOption,
-        .userId = paras.userId
+        .userId = paras.userId,
+        .label = paras.label
     };
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, paras.callback);
@@ -237,7 +238,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->hasOption) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundle(
-                        asynccallbackinfo->option, asynccallbackinfo->id);
+                        asynccallbackinfo->option, asynccallbackinfo->id, asynccallbackinfo->label);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundle(
                         asynccallbackinfo->id, asynccallbackinfo->representativeBundle, asynccallbackinfo->userId);

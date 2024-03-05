@@ -89,9 +89,11 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
+     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) = 0;
+    virtual ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label = "") = 0;
 
     /**
      * @brief Cancels a published agent notification.
@@ -101,10 +103,11 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
+     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode CancelAsBundle(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) = 0;
+    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+        int32_t userId, const std::string &label = "") = 0;
 
     /**
      * @brief Adds a notification slot by type.
@@ -783,6 +786,65 @@ public:
      * @return Returns unregister push Callback result.
      */
     virtual ErrCode UnregisterPushCallback() = 0;
+
+    /**
+     * @brief Set agent relationship.
+     *
+     * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
+     * @param value Indicates key-value pair of agent relationship.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetAdditionConfig(const std::string &key, const std::string &value) = 0;
+
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    virtual ErrCode SetDistributedEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, const bool enabled) = 0;
+
+    /**
+     * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    virtual ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled) = 0;
+
+    /**
+     * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    virtual ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) = 0;
+
+    /**
+     * @brief get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    virtual ErrCode IsDistributedEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, bool &enabled) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -184,7 +184,7 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 }
 
 ErrCode AnsManagerProxy::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -199,6 +199,11 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 
     if (!data.WriteInt32(notificationId)) {
         ANS_LOGE("[CancelAsBundle] fail: write notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(label)) {
+        ANS_LOGE("Write label failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -218,8 +223,8 @@ ErrCode AnsManagerProxy::CancelAsBundle(
     return result;
 }
 
-ErrCode AnsManagerProxy::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
+ErrCode AnsManagerProxy::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+    int32_t userId, const std::string &label)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -238,6 +243,10 @@ ErrCode AnsManagerProxy::CancelAsBundle(
     }
     if (!data.WriteInt32(userId)) {
         ANS_LOGE("[CancelAsBundle] fail: write notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteString(label)) {
+        ANS_LOGE("Write label failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1992,6 +2001,40 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
 
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Set package config fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(key)) {
+        ANS_LOGE("Set package config fail:: write key failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(value)) {
+        ANS_LOGE("Set package config fail:: write value failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Set package config fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

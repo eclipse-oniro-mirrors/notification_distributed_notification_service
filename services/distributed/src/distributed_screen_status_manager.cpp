@@ -133,7 +133,7 @@ void DistributedScreenStatusManager::GetKvStore()
     }
     DistributedKv::Options options = {
         .createIfMissing = true,
-        .autoSync = true,
+        .autoSync = false,
         .securityLevel = DistributedKv::SecurityLevel::S1,
         .area = DistributedKv::EL1,
         .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,

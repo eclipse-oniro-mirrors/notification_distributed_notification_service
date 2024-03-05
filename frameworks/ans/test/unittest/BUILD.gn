@@ -58,6 +58,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_template_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_time_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_unified_group_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_user_input_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_helper_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_request_alarm_test.cpp",
@@ -72,6 +73,7 @@ ohos_unittest("ans_reminder_unit_test") {
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
@@ -117,6 +119,7 @@ ohos_unittest("reminder_request_test") {
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",

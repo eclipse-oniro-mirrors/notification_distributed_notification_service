@@ -1007,6 +1007,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(appMessageId_)) {
+        ANS_LOGE("Failed to write appMessageId");
+        return false;
+    }
+
     // write enum
     if (!parcel.WriteInt32(static_cast<int32_t>(slotType_))) {
         ANS_LOGE("Failed to write slot type");
@@ -1283,6 +1288,32 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    valid = unifiedGroupInfo_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write unifiedGroupInfo for the notification");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(unifiedGroupInfo_.get())) {
+            ANS_LOGE("Failed to write notification unifiedGroupInfo");
+            return false;
+        }
+    }
+
+    valid = notificationBundleOption_ != nullptr ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write bundleOption for the notification");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(notificationBundleOption_.get())) {
+            ANS_LOGE("Failed to write notification bundleOption");
+            return false;
+        }
+    }
+
     if (!parcel.WriteInt64(updateDeadLine_)) {
         ANS_LOGE("Failed to write max update time");
         return false;
@@ -1368,6 +1399,11 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     if (!parcel.ReadString(classification_)) {
         ANS_LOGE("Failed to read classification");
+        return false;
+    }
+
+    if (!parcel.ReadString(appMessageId_)) {
+        ANS_LOGE("Failed to read appMessageId");
         return false;
     }
 
@@ -1530,6 +1566,26 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         }
     }
 
+    valid = parcel.ReadBool();
+    if (valid) {
+        unifiedGroupInfo_ =
+            std::shared_ptr<NotificationUnifiedGroupInfo>(parcel.ReadParcelable<NotificationUnifiedGroupInfo>());
+        if (!unifiedGroupInfo_) {
+            ANS_LOGE("Failed to read unifiedGroupInfo+");
+            return false;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
+        notificationBundleOption_ =
+            std::shared_ptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
+        if (!notificationBundleOption_) {
+            ANS_LOGE("Failed to read notificationBundleOption");
+            return false;
+        }
+    }
+
     updateDeadLine_ = parcel.ReadInt64();
     finishDeadLine_ = parcel.ReadInt64();
 
@@ -1563,6 +1619,17 @@ void NotificationRequest::SetFlags(const std::shared_ptr<NotificationFlags> &fla
 std::shared_ptr<NotificationFlags> NotificationRequest::GetFlags() const
 {
     return notificationFlags_;
+}
+
+
+void NotificationRequest::SetBundleOption(const std::shared_ptr<NotificationBundleOption> &bundleOption)
+{
+    notificationBundleOption_ = bundleOption;
+}
+
+std::shared_ptr<NotificationBundleOption> NotificationRequest::GetBundleOption() const
+{
+    return notificationBundleOption_;
 }
 
 void NotificationRequest::SetReceiverUserId(int32_t userId)
@@ -1618,6 +1685,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->shortcutId_ = other.shortcutId_;
     this->sortingKey_ = other.sortingKey_;
     this->classification_ = other.classification_;
+    this->appMessageId_ = other.appMessageId_;
 
     this->groupAlertType_ = other.groupAlertType_;
     this->visiblenessType_ = other.visiblenessType_;
@@ -1658,6 +1726,8 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
+    this->notificationBundleOption_ = other.notificationBundleOption_;
+    this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
     this->notificationControlFlags_ = other.notificationControlFlags_;
 }
 
@@ -2300,6 +2370,41 @@ void NotificationRequest::SetIsCoverActionButtons(bool isCoverActionButtons)
 bool NotificationRequest::IsCoverActionButtons() const
 {
     return isCoverActionButtons_;
+}
+
+void NotificationRequest::SetAppMessageId(const std::string &appMessageId)
+{
+    appMessageId_ = appMessageId;
+}
+
+std::string NotificationRequest::GetAppMessageId() const
+{
+    return appMessageId_;
+}
+
+std::string NotificationRequest::GenerateUniqueKey()
+{
+    const char *keySpliter = "_";
+
+    std::stringstream stream;
+    if (IsAgentNotification()) {
+        stream << ownerUserId_ << keySpliter << ownerBundleName_ << keySpliter <<
+            slotType_ << keySpliter << appMessageId_;
+    } else {
+        stream << creatorUserId_ << keySpliter << creatorBundleName_ << keySpliter <<
+            slotType_ << keySpliter << appMessageId_;
+    }
+    return stream.str();
+}
+
+void NotificationRequest::SetUnifiedGroupInfo(const std::shared_ptr<NotificationUnifiedGroupInfo> &unifiedGroupInfo)
+{
+    unifiedGroupInfo_ = unifiedGroupInfo;
+}
+
+std::shared_ptr<NotificationUnifiedGroupInfo> NotificationRequest::GetUnifiedGroupInfo() const
+{
+    return unifiedGroupInfo_;
 }
 
 }  // namespace Notification

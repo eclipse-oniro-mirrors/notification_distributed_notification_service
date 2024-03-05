@@ -570,5 +570,381 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0300
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+}
+
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType";
+
+    ErrCode ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0300
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0400
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0400, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: DuplicateMsgControl_00001
+ * @tc.desc: Test DuplicateMsgControl
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    auto ret = advancedNotificationService_->DuplicateMsgControl(request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: DuplicateMsgControl_00002
+ * @tc.desc: Test DuplicateMsgControl
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test1");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+
+    auto ret = advancedNotificationService_->DuplicateMsgControl(request);
+    EXPECT_EQ(ret, (int)ERR_ANS_DUPLICATE_MSG);
+}
+
+/**
+ * @tc.name: DuplicateMsgControl_00003
+ * @tc.desc: Test DuplicateMsgControl
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+
+    auto ret = advancedNotificationService_->DuplicateMsgControl(request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: IsDuplicateMsg_00001
+ * @tc.desc: Test IsDuplicateMsg
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    auto uniqueKey = request->GenerateUniqueKey();
+
+    auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsDuplicateMsg_00002
+ * @tc.desc: Test IsDuplicateMsg
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+
+    auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: RemoveExpiredUniqueKey_00001
+ * @tc.desc: Test RemoveExpiredUniqueKey
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(24), uniqueKey));
+
+    sleep(1);
+    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+    advancedNotificationService_->RemoveExpiredUniqueKey();
+    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+}
+
+/*
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetSmartReminderEnabled_0200
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0200, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/*
+ * @tc.name: SetSmartReminderEnabled_0300
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+}
+
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0200
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0200, TestSize.Level1)
+{
+    ErrCode ret = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType", enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0300
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0300, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0400
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0400, TestSize.Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    bool enable = true;
+    ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: PublishRemoveDuplicateEvent_00001
+ * @tc.desc: Test PublishRemoveDuplicateEvent
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    request->SetNotificationId(1);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: PublishRemoveDuplicateEvent_00002
+ * @tc.desc: Test PublishRemoveDuplicateEvent
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00002, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationRecord> record= nullptr;
+    auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PublishRemoveDuplicateEvent_00003
+ * @tc.desc: Test PublishRemoveDuplicateEvent
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+    request->SetNotificationId(1);
+    request->SetIsAgentNotification(true);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

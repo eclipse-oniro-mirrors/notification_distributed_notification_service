@@ -343,8 +343,15 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
             ANS_LOGI("NapiIsDistributedEnableByBundle work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->enable);
+                if (asynccallbackinfo->params.hasDeviceType) {
+                    std::string deviceType = asynccallbackinfo->params.deviceType;
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnabledByBundle(
+                        asynccallbackinfo->params.option, deviceType, asynccallbackinfo->enable);
+                    ANS_LOGI("has deviceType errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                } else {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->enable);
+                }
             }
         },
         AsyncCompleteCallbackNapiIsDistributedEnableByBundle,

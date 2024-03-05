@@ -289,8 +289,8 @@ napi_value NotificationControlFlagStatusInit(napi_env env, napi_value exports)
         static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_BANNER),
         "NOTIFICATION_STATUS_CLOSE_BANNER");
     SetNamedPropertyByInteger(env, obj,
-        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_LIGHTSCREEN),
-        "NOTIFICATION_STATUS_CLOSE_LIGHTSCREEN");
+        static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_LIGHT_SCREEN),
+        "NOTIFICATION_STATUS_CLOSE_LIGHT_SCREEN");
     SetNamedPropertyByInteger(env, obj,
         static_cast<int32_t>(NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_VIBRATION),
         "NOTIFICATION_STATUS_CLOSE_VIBRATION");

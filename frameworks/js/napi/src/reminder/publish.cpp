@@ -17,6 +17,7 @@
 
 #include "ans_log_wrapper.h"
 #include "common.h"
+#include "napi_common.h"
 #include "reminder_request.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
@@ -688,6 +689,9 @@ void ParseWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &
 
     napi_create_string_utf8(env, (reminder.GetWantAgentInfo()->uri).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_URI, info);
+
+    napi_value params = AppExecFwk::WrapWantParams(env, reminder.GetWantAgentInfo()->parameters);
+    napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PARAMETERS, params);
 }
 
 void ParseMaxScreenWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &result)
@@ -813,6 +817,33 @@ void GetValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest
     ANSR_LOGI("GetValid reminders count = %{public}d", count);
 }
 
+void GetAllValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest>>& validReminders, napi_value& arr)
+{
+    int32_t count = 0;
+    napi_create_array(env, &arr);
+    for (auto reminder : validReminders) {
+        if (reminder == nullptr) {
+            ANSR_LOGW("reminder is null");
+            continue;
+        }
+        napi_value result = nullptr;
+        napi_create_object(env, &result);
+        napi_value reminderReq = nullptr;
+        napi_create_object(env, &reminderReq);
+        napi_set_named_property(env, result, REMINDER_INFO_REMINDER_REQ, reminderReq);
+        if (!SetValidReminder(env, *reminder, reminderReq)) {
+            ANSR_LOGW("Set reminder object failed");
+            continue;
+        }
+        napi_value reminderId = nullptr;
+        napi_create_int32(env, reminder->GetReminderId(), &reminderId);
+        napi_set_named_property(env, result, REMINDER_INFO_REMINDER_ID, reminderId);
+        napi_set_element(env, arr, count, result);
+        count++;
+    }
+    ANSR_LOGI("GetAllValid reminders count = %{public}d", count);
+}
+
 napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool isThrow)
 {
     ANSR_LOGI("Get valid reminders");
@@ -878,14 +909,83 @@ napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool is
     }
 }
 
+napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool isThrow)
+{
+    ANSR_LOGI("Get all valid reminders");
+
+    AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
+    if (!asynccallbackinfo) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+    Parameters params;
+    if (ParseGetValidParameter(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), isThrow);
+    }
+
+    napi_value promise = nullptr;
+    SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->isThrow = isThrow;
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getAllValidReminders", NAPI_AUTO_LENGTH, &resourceName);
+    
+    napi_create_async_work(env, nullptr, resourceName,
+        [](napi_env env, void *data) {
+            ANSR_LOGI("GetAllValid reminders napi_create_async_work start");
+            AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = ReminderHelper::GetValidReminders(
+                    asynccallbackinfo->validReminders);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
+            std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->info.errorCode != ERR_OK) {
+                    asynccallbackinfo->result = NotificationNapi::Common::NapiGetNull(env);
+                } else {
+                    GetAllValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
+                }
+                
+                ReminderCommon::ReturnCallbackPromise(
+                    env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
+            }
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    callbackPtr.release();
+
+    if (asynccallbackinfo->info.isCallback) {
+        return NotificationNapi::Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
+
 napi_value GetValidRemindersMgr(napi_env env, napi_callback_info info)
 {
     return InnerGetValidReminders(env, info, true);
 }
 
+napi_value GetAllValidRemindersMgr(napi_env env, napi_callback_info info)
+{
+    return InnerGetAllValidReminders(env, info, true);
+}
+
 napi_value GetValidReminders(napi_env env, napi_callback_info info)
 {
     return InnerGetValidReminders(env, info, false);
+}
+
+napi_value GetAllValidReminders(napi_env env, napi_callback_info info)
+{
+    return InnerGetAllValidReminders(env, info, false);
 }
 
 napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isThrow)

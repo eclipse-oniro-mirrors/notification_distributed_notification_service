@@ -105,10 +105,10 @@ ErrCode NotificationHelper::CancelAsBundle(
 }
 
 ErrCode NotificationHelper::CancelAsBundle(
-    const NotificationBundleOption &bundleOption, int32_t notificationId)
+    const NotificationBundleOption &bundleOption, int32_t notificationId, const std::string &label)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
-        bundleOption, notificationId);
+        bundleOption, notificationId, label);
 }
 
 ErrCode NotificationHelper::GetActiveNotificationNums(uint64_t &num)
@@ -471,6 +471,35 @@ ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &push
 ErrCode NotificationHelper::UnregisterPushCallback()
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
+}
+
+ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
+}
+
+ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        deviceType, enabled);
+}
+
+ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
+        deviceType, enabled);
+}
+
+ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

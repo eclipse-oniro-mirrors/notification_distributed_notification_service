@@ -141,6 +141,32 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
         request->SetOwnerUid(uid);
     } else {
+        std::string sourceBundleName =
+            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+            bundle, sourceBundleName)) {
+            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
+                bundle.c_str(), sourceBundleName.c_str());
+            if (request->GetBundleOption()->GetUid() < DEFAULT_UID) {
+                return ERR_ANS_INVALID_UID;
+            }
+            int32_t uid = -1;
+            if (request->GetBundleOption()->GetUid() == DEFAULT_UID) {
+                int32_t userId = 0;
+                GetActiveUserId(userId);
+                std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+                if (bundleManager != nullptr) {
+                    uid = bundleManager->GetDefaultUidByBundleName(sourceBundleName, userId);
+                }
+            } else {
+                uid = request->GetBundleOption()->GetUid();
+            }
+            if (uid < 0) {
+                return ERR_ANS_INVALID_UID;
+            }
+            request->SetOwnerUid(uid);
+            bundle = sourceBundleName;
+        }
         request->SetOwnerBundleName(bundle);
     }
     request->SetCreatorBundleName(bundle);
@@ -353,7 +379,19 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
     } else {
-        bundleOption = GenerateBundleOption();
+        std::string sourceBundleName =
+            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+            GetClientBundleName(), sourceBundleName)) {
+            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
+                GetClientBundleName().c_str(), sourceBundleName.c_str());
+            request->SetCreatorBundleName(request->GetOwnerBundleName());
+            request->SetCreatorUid(request->GetOwnerUid());
+            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
+                request->GetOwnerUid());
+        } else {
+            bundleOption = GenerateBundleOption();
+        }
     }
 
     if (bundleOption == nullptr) {
@@ -501,31 +539,19 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     ANS_LOGI("PublishPreparedNotification");
 
     auto record = MakeNotificationRecord(request, bundleOption);
-    bool isSystemApp = AccessTokenHelper::IsSystemApp();
-    ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
+    ErrCode result = CheckPublishPreparedNotification(record, AccessTokenHelper::IsSystemApp());
     if (result != ERR_OK) {
         return result;
     }
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = AssignValidNotificationSlot(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Can not assign valid slot!");
+        if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
+            (void)PublishRemoveDuplicateEvent(record);
             return;
         }
 
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
-            return;
-        }
-
-        if (isSystemApp) {
-            ChangeNotificationByControlFlags(record);
-        }
-
-        result = AssignToNotificationList(record);
+        result = AddRecordToMemory(record);
         if (result != ERR_OK) {
             return;
         }
@@ -1727,6 +1753,32 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
 
     auto deleteTime = request->GetAutoDeletedTime();
     return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
+}
+
+ErrCode AdvancedNotificationService::AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record)
+{
+    auto result = AssignValidNotificationSlot(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Can not assign valid slot!");
+        return result;
+    }
+
+    result = Filter(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Reject by filters: %{public}d", result);
+        return result;
+    }
+
+    if (AccessTokenHelper::IsSystemApp()) {
+        ChangeNotificationByControlFlags(record);
+    }
+
+    result = AssignToNotificationList(record);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    return ERR_OK;
 }
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

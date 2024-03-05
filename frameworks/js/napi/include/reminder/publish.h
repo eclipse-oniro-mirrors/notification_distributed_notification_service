@@ -47,6 +47,15 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info);
 napi_value GetValidReminders(napi_env env, napi_callback_info info);
 
 /**
+ * @brief Obtains all reminders of current bundle，support returning reminderId.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value GetAllValidReminders(napi_env env, napi_callback_info info);
+
+/**
  * @brief Publishes a reminder.
  *
  * @param env Indicates the context.
@@ -90,6 +99,15 @@ napi_value CancelAllRemindersMgr(napi_env env, napi_callback_info info);
  * @return opaque pointer that is used to represent a JavaScript value
  */
 napi_value GetValidRemindersMgr(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Obtains all reminders of current bundle(designed for error code),support returning reminderId.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value GetAllValidRemindersMgr(napi_env env, napi_callback_info info);
 
 /**
  * @brief Publishes a reminder(designed for error code).

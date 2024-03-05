@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <sstream>
+#include <string>
 
 #include "notification_rdb_data_mgr.h"
 #include "notification_preferences_info.h"
@@ -86,6 +87,46 @@ public:
      */
     bool PutNotificationsEnabledForBundle(
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
+    
+    /**
+     * @brief Put distributed enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool PutDistributedEnabledForBundle(const std::string deviceType,
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
+
+    /**
+     * @brief Get distributed enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool GetDistributedEnabledForBundle(const std::string deviceType,
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, bool &enabled);
+
+    /**
+     * @brief Put smart reminder enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool SetSmartReminderEnabled(const std::string deviceType, const bool &enabled);
+
+    /**
+     * @brief Get smart reminder enable notification in the of  bundle into disturbe DB.
+     *
+     * @param deviceType Indicates device type.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool IsSmartReminderEnabled(const std::string deviceType, bool &enabled);
 
     /**
      * @brief Put enable notification into disturbe DB.
@@ -154,6 +195,15 @@ public:
      * @return Return true on success, false on failure.
      */
     bool RemoveAllSlotsFromDisturbeDB(const std::string &bundleKey);
+
+    /**
+     * @brief Query whether there is a agent relationship between the two apps.
+     *
+     * @param agentBundleName The bundleName of the agent app.
+     * @param sourceBundleName The bundleName of the source app.
+     * @return Returns true if There is an agent relationship; returns false otherwise.
+     */
+    bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
     bool RemoveNotificationEnable(const int32_t userId);
     bool RemoveDoNotDisturbDate(const int32_t userId);
     bool RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid);
@@ -169,6 +219,8 @@ private:
     template <typename T>
     int32_t PutBundlePropertyToDisturbeDB(
         const std::string &bundleKey, const BundleType &type, const T &t);
+    template <typename T>
+    int32_t PutDataToDB(const std::string &key, const T &t);
     bool PutBundleToDisturbeDB(
         const std::string &bundleKey, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     bool HandleDataBaseMap(
@@ -232,6 +284,9 @@ private:
     void ParseSlotFlags(sptr<NotificationSlot> &slot, const std::string &value) const;
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
+    std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        const std::string &deviceType) const;
+    std::string GenerateBundleLablel(const std::string &deviceType, const int32_t userId) const;
     void GetDoNotDisturbType(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbBeginDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);

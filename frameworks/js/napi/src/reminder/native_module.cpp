@@ -30,6 +30,7 @@ napi_value ReminderAgentInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("cancelReminder", CancelReminder),
         DECLARE_NAPI_FUNCTION("cancelAllReminders", CancelAllReminders),
         DECLARE_NAPI_FUNCTION("getValidReminders", GetValidReminders),
+        DECLARE_NAPI_FUNCTION("getAllValidReminders", GetAllValidReminders),
         DECLARE_NAPI_FUNCTION("publishReminder", PublishReminder),
         DECLARE_NAPI_FUNCTION("addNotificationSlot", AddSlot),
         DECLARE_NAPI_FUNCTION("removeNotificationSlot", NotificationNapi::RemoveSlot),
