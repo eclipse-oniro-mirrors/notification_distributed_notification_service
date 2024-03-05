@@ -1794,7 +1794,7 @@ int32_t ReminderRequest::GetUserId(const int32_t &uid)
 {
     int32_t userId = -1;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
-    ANSR_LOGD("userId=%{public}d", userId);
+    ANSR_LOGD("userId=%{private}d", userId);
     return userId;
 }
 
