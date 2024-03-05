@@ -1046,6 +1046,7 @@ private:
 
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
+    void ExtendDumpForFlags(std::shared_ptr<NotificationFlags>, std::stringstream &stream);
     ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
     ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
