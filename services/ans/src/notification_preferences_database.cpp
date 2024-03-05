@@ -1515,6 +1515,39 @@ bool NotificationPreferencesDatabase::RemoveAnsBundleDbInfo(std::string bundleNa
     return true;
 }
 
+bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bundleName)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    std::string key = std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(
+        KEY_UNDER_LINE).append(std::string(bundleName).append(KEY_UNDER_LINE));
+    int32_t result = NativeRdb::E_OK;
+    std::unordered_map<std::string, std::string> values;
+    result = rdbDataManager_->QueryDataBeginWithKey(key, values);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        return true;
+    } else if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get failed, key %{public}s,result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    std::vector<std::string> keys;
+    for (auto iter : values) {
+        keys.push_back(iter.first);
+    }
+
+    result = rdbDataManager_->DeleteBathchData(keys);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete bundle Info failed.");
+        return false;
+    }
+
+    return true;
+}
+
 int32_t NotificationPreferencesDatabase::SetKvToDb(
     const std::string &key, const std::string &value)
 {
@@ -1618,8 +1651,7 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
         return false;
     }
 
-    std::string bundleKey = GenerateBundleLablel(bundleInfo, deviceType);
-    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION);
+    std::string key = GenerateBundleLablel(bundleInfo, deviceType);
     int32_t result = PutDataToDB(key, enabled);
     ANS_LOGD("result[%{public}d]", result);
     return (result == NativeRdb::E_OK);
@@ -1628,8 +1660,9 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
 {
-    return std::string(bundleInfo.GetBundleName()).append(KEY_UNDER_LINE).append(
-        std::to_string(bundleInfo.GetBundleUid())).append(KEY_UNDER_LINE).append(deviceType);
+    return std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(KEY_UNDER_LINE).append(
+        std::string(bundleInfo.GetBundleName()).append(KEY_UNDER_LINE).append(std::to_string(
+            bundleInfo.GetBundleUid())).append(KEY_UNDER_LINE).append(deviceType));
 }
 
 template <typename T>
@@ -1653,8 +1686,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
         return false;
     }
 
-    std::string bundleKey = GenerateBundleLablel(bundleInfo, deviceType);
-    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION);
+    std::string key = GenerateBundleLablel(bundleInfo, deviceType);
     bool result = false;
     enabled = false;
     GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {
@@ -1681,7 +1713,8 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(const std::string &deviceType,
     const int32_t userId) const
 {
-    return std::string().append(deviceType).append(KEY_UNDER_LINE).append(std::to_string(userId));
+    return std::string(KEY_SMART_REMINDER_ENABLE_NOTIFICATION).append(
+        deviceType).append(KEY_UNDER_LINE).append(std::to_string(userId));
 }
 
 
@@ -1696,8 +1729,7 @@ bool NotificationPreferencesDatabase::SetSmartReminderEnabled(const std::string 
         return false;
     }
 
-    std::string bundleKey = GenerateBundleLablel(deviceType, userId);
-    std::string key = GenerateBundleKey(bundleKey, KEY_SMART_REMINDER_ENABLE_NOTIFICATION);
+    std::string key = GenerateBundleLablel(deviceType, userId);
     ANS_LOGD("%{public}s, key:%{public}s,enabled[%{public}d]", __FUNCTION__, key.c_str(), enabled);
     int32_t result = PutDataToDB(key, enabled);
     return (result == NativeRdb::E_OK);
@@ -1714,8 +1746,7 @@ bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string d
         return false;
     }
 
-    std::string bundleKey = GenerateBundleLablel(deviceType, userId);
-    std::string key = GenerateBundleKey(bundleKey, KEY_SMART_REMINDER_ENABLE_NOTIFICATION);
+    std::string key = GenerateBundleLablel(deviceType, userId);
     bool result = false;
     enabled = false;
     GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {
