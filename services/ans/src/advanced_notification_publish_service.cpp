@@ -530,12 +530,6 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
-            bool enable = false;
-            result = NotificationPreferences::GetInstance().IsShowBadge(bundle, enable);
-            if (result == ERR_OK && enable == enabled) {
-                ANS_LOGD("Badge enabled state is not going to change, skipping!");
-                return;
-            }
             result = NotificationPreferences::GetInstance().SetShowBadge(bundle, enabled);
             if (result == ERR_OK) {
                 HandleBadgeEnabledChanged(bundle, enabled);
