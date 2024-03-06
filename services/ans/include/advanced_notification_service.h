@@ -1170,7 +1170,7 @@ private:
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     ErrCode CancelAsBundleWithAgent(
         const sptr<NotificationBundleOption> &bundleOption, const int32_t id, const std::string &label, int32_t userId);
-    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);

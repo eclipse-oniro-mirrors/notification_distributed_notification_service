@@ -1657,6 +1657,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->notificationId_ = other.notificationId_;
     this->color_ = other.color_;
     this->badgeNumber_ = other.badgeNumber_;
+    this->notificationControlFlags_ = other.notificationControlFlags_;
     this->progressValue_ = other.progressValue_;
     this->progressMax_ = other.progressMax_;
     this->createTime_ = other.createTime_;
@@ -1728,7 +1729,6 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationFlags_ = other.notificationFlags_;
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
-    this->notificationControlFlags_ = other.notificationControlFlags_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const

@@ -540,7 +540,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     ANS_LOGI("PublishPreparedNotification");
 
     auto record = MakeNotificationRecord(request, bundleOption);
-    ErrCode result = CheckPublishPreparedNotification(record, AccessTokenHelper::IsSystemApp());
+    bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
         return result;
     }
@@ -552,7 +553,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
             return;
         }
 
-        result = AddRecordToMemory(record);
+        result = AddRecordToMemory(record, isSystemApp);
         if (result != ERR_OK) {
             return;
         }
@@ -1782,7 +1783,8 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
     return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
 }
 
-ErrCode AdvancedNotificationService::AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record)
+ErrCode AdvancedNotificationService::AddRecordToMemory(
+    const std::shared_ptr<NotificationRecord> &record, bool isSystemApp)
 {
     auto result = AssignValidNotificationSlot(record);
     if (result != ERR_OK) {
@@ -1796,7 +1798,7 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(const std::shared_ptr<Not
         return result;
     }
 
-    if (AccessTokenHelper::IsSystemApp()) {
+    if (isSystemApp) {
         ChangeNotificationByControlFlags(record);
     }
 
