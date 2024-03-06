@@ -89,6 +89,26 @@ NotificationConstant::SlotType NotificationSlot::GetType() const
     return type_;
 }
 
+int32_t NotificationSlot::GetAuthorizedStatus() const
+{
+    return authorizedStatus_;
+}
+
+void NotificationSlot::SetAuthorizedStatus(int32_t status)
+{
+    authorizedStatus_ = status;
+}
+
+int32_t NotificationSlot::GetAuthHintCnt() const
+{
+    return authHintCnt_;
+}
+
+void NotificationSlot::AddAuthHintCnt()
+{
+    authHintCnt_++;
+}
+
 void NotificationSlot::SetType(NotificationConstant::SlotType type)
 {
     type_ = NotificationConstant::SlotType::CUSTOM;
@@ -353,6 +373,16 @@ bool NotificationSlot::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(authorizedStatus_)) {
+        ANS_LOGE("Failed to write authorizedStatus");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(authHintCnt_)) {
+        ANS_LOGE("Failed to write authHintCnt");
+        return false;
+    }
+
     return true;
 }
 
@@ -383,6 +413,8 @@ bool NotificationSlot::ReadFromParcel(Parcel &parcel)
     parcel.ReadInt64Vector(&vibrationValues_);
     enabled_ = parcel.ReadBool();
     slotFlags_ = parcel.ReadInt32();
+    authorizedStatus_ = parcel.ReadInt32();
+    authHintCnt_ = parcel.ReadInt32();
     return true;
 }
 

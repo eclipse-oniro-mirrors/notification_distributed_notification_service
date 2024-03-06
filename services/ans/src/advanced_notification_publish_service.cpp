@@ -1632,6 +1632,8 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         }
         slot->SetEnable(enabled);
         slot->SetForceControl(isForceControl);
+        // 重置authHintCnt_，设置authorizedStatus为已授权
+        slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         std::vector<sptr<NotificationSlot>> slots;
         slots.push_back(slot);
         result = NotificationPreferences::GetInstance().AddNotificationSlots(bundle, slots);

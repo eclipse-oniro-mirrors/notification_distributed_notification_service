@@ -1175,6 +1175,7 @@ private:
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);
     ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
