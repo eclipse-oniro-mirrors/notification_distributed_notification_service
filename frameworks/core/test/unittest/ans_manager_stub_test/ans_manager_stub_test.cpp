@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4557,6 +4557,52 @@ HWTEST_F(AnsManagerStubTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
     data.WriteBool(enable);
     ErrCode result = ansManagerStub_->HandleIsDistributedEnabledByBundle(data, reply);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumberByBundle01
+ * @tc.desc: Test HandleSetBadgeNumberByBundle with invalid data, expect error code ERR_ANS_PARCELABLE_FAILED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumberByBundle01, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ansManagerStub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    EXPECT_NE(bundleOption, nullptr);
+    data.WriteParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->HandleSetBadgeNumberByBundle(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+
+    int32_t badgeNumber = 4;
+    data.WriteInt32(badgeNumber);
+    ret = ansManagerStub_->HandleSetBadgeNumberByBundle(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumberByBundle02
+ * @tc.desc: Test HandleSetBadgeNumberByBundle with valid data, expect error code ERR_INVALID_OPERATION.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumberByBundle02, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ansManagerStub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    EXPECT_NE(bundleOption, nullptr);
+    std::string bundleName = "bundleName";
+    bundleOption->SetBundleName(bundleName);
+    data.WriteParcelable(bundleOption);
+    int32_t badgeNumber = 4;
+    data.WriteInt32(badgeNumber);
+    ErrCode ret = ansManagerStub_->HandleSetBadgeNumberByBundle(data, reply);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 }
 }

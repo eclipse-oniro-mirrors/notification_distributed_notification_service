@@ -4699,5 +4699,36 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_00003, Function |
     EXPECT_EQ(advancedNotificationService_->IsNeedNotifyConsumed(request), false);
     GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00003 test end";
 }
+
+/**
+ * @tc.number    : SetBadgeNumberByBundle_00001
+ * @tc.name      : SetBadgeNumberByBundle
+ * @tc.desc      : Test SetBadgeNumberByBundle with valid parameters, expect error code ERR_OK.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    ASSERT_NE(bundleOption, nullptr);
+    std::string bundleName = "invalidBundleName";
+    bundleOption->SetBundleName(bundleName);
+    int32_t badgeNumber = 1;
+    EXPECT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber), ERR_OK);
+}
+
+/**
+ * @tc.number    : SetBadgeNumberByBundle_00002
+ * @tc.name      : SetBadgeNumberByBundle
+ * @tc.desc      : Test SetBadgeNumberByBundle with nullptr bundle option, expect error code ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    int32_t badgeNumber = 1;
+    EXPECT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber), ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS
