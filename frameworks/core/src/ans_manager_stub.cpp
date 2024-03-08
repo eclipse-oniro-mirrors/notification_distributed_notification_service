@@ -304,6 +304,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP,
             std::bind(&AnsManagerStub::HandleSetAdditionConfig, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT,
+            std::bind(&AnsManagerStub::HandleCancelAsBundleWithAgent, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -408,12 +411,7 @@ ErrCode AnsManagerStub::HandleCancelAsBundleOption(MessageParcel &data, MessageP
         ANS_LOGE("[HandleCancelAsBundle] fail: read notificationId failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    std::string label;
-    if (!data.ReadString(label)) {
-        ANS_LOGE("Read label failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    ErrCode result = CancelAsBundle(bundleOption, notificationId, label);
+    ErrCode result = CancelAsBundle(bundleOption, notificationId);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -467,12 +465,7 @@ ErrCode AnsManagerStub::HandleCancelAsBundleAndUser(MessageParcel &data, Message
         ANS_LOGE("[HandleCancelAsBundle] fail: read userId failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    std::string label;
-    if (!data.ReadString(label)) {
-        ANS_LOGE("Read label failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    ErrCode result = CancelAsBundle(bundleOption, notificationId, userId, label);
+    ErrCode result = CancelAsBundle(bundleOption, notificationId, userId);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2219,6 +2212,28 @@ ErrCode AnsManagerStub::HandleSetSmartReminderEnabled(MessageParcel &data, Messa
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t id = 0;
+    if (!data.ReadInt32(id)) {
+        ANS_LOGE("Read notification id failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = CancelAsBundleWithAgent(bundleOption, id);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 
 ErrCode AnsManagerStub::HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply)

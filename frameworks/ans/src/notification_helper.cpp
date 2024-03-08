@@ -104,11 +104,10 @@ ErrCode NotificationHelper::CancelAsBundle(
         notificationId, representativeBundle, userId);
 }
 
-ErrCode NotificationHelper::CancelAsBundle(
-    const NotificationBundleOption &bundleOption, int32_t notificationId, const std::string &label)
+ErrCode NotificationHelper::CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
-        bundleOption, notificationId, label);
+        bundleOption, notificationId);
 }
 
 ErrCode NotificationHelper::GetActiveNotificationNums(uint64_t &num)
@@ -495,6 +494,11 @@ ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundl
 ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(bundleOption, id);
 }
 
 ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)

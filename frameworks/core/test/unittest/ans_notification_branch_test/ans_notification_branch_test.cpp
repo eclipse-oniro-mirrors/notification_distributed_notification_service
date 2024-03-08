@@ -72,13 +72,13 @@ public:
     }
 
     ErrCode CancelAsBundle(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label) override
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption,
-        int32_t notificationId, int32_t userId, const std::string &label) override
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -515,6 +515,11 @@ public:
     }
 
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
     {
         return ERR_ANS_INVALID_PARAM;
     }

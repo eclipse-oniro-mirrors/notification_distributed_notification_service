@@ -184,7 +184,7 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 }
 
 ErrCode AnsManagerProxy::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label)
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -199,11 +199,6 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 
     if (!data.WriteInt32(notificationId)) {
         ANS_LOGE("[CancelAsBundle] fail: write notificationId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteString(label)) {
-        ANS_LOGE("Write label failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -223,8 +218,8 @@ ErrCode AnsManagerProxy::CancelAsBundle(
     return result;
 }
 
-ErrCode AnsManagerProxy::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
-    int32_t userId, const std::string &label)
+ErrCode AnsManagerProxy::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -243,10 +238,6 @@ ErrCode AnsManagerProxy::CancelAsBundle(const sptr<NotificationBundleOption> &bu
     }
     if (!data.WriteInt32(userId)) {
         ANS_LOGE("[CancelAsBundle] fail: write notificationId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    if (!data.WriteString(label)) {
-        ANS_LOGE("Write label failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2001,6 +1992,45 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
 
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteStrongParcelable(bundleOption)) {
+        ANS_LOGE("Write bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(id)) {
+        ANS_LOGE("Write notification id failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact fail: ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Read result error.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

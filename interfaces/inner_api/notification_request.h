@@ -1337,6 +1337,7 @@ private:
     static ErrCode CheckImageSizeForConverSation(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
+    static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
 
 private:
     int32_t notificationId_ {0};

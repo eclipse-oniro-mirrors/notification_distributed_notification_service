@@ -241,14 +241,14 @@ ErrCode AnsNotification::CancelAsBundle(
 }
 
 ErrCode AnsNotification::CancelAsBundle(
-    const NotificationBundleOption &bundleOption, int32_t notificationId, const std::string &label)
+    const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->CancelAsBundle(bo, notificationId, label);
+    return ansManagerProxy_->CancelAsBundle(bo, notificationId);
 }
 
 ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
@@ -1542,6 +1542,17 @@ ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, 
     }
 
     return ansManagerProxy_->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode AnsNotification::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->CancelAsBundleWithAgent(bundle, id);
 }
 
 ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)

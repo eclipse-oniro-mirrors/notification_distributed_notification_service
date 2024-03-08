@@ -304,7 +304,8 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "notificationTemplate = null, actionButtons = empty, messageUsers = empty, "
     "userInputHistory = empty, distributedOptions = NotificationDistributedOptions"
     "{ isDistributed = true, devicesSupportDisplay = [], devicesSupportOperate = [] }, "
-    "notificationFlags = null, creatorUserId = -1, ownerUserId = -1, receiverUserId = -1, "
+    "notificationFlags = null, notificationBundleOption = null, "
+    "creatorUserId = -1, ownerUserId = -1, receiverUserId = -1, "
     "updateDeadLine = 0, finishDeadLine = 0 }, postTime = 0, sound = nullptr, vibrationStyle = [], "
     "updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);

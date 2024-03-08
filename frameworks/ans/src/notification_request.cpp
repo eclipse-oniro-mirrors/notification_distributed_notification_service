@@ -760,6 +760,7 @@ std::string NotificationRequest::Dump()
             ", userInputHistory = " + (!userInputHistory_.empty() ? userInputHistory_.at(0) : "empty") +
             ", distributedOptions = " + distributedOptions_.Dump() +
             ", notificationFlags = " + (notificationFlags_ ? "not null" : "null") +
+            ", notificationBundleOption = " + (notificationBundleOption_ != nullptr ? "not null" : "null") +
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) + " }";
@@ -875,6 +876,12 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
     }
 
     if (!ConvertJsonToNotificationFlags(pRequest, jsonObject)) {
+        delete pRequest;
+        pRequest = nullptr;
+        return nullptr;
+    }
+
+    if (!ConvertJsonToNotificationBundleOption(pRequest, jsonObject)) {
         delete pRequest;
         pRequest = nullptr;
         return nullptr;
@@ -1727,8 +1734,8 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
-    this->notificationBundleOption_ = other.notificationBundleOption_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
+    this->notificationBundleOption_ = other.notificationBundleOption_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -1785,6 +1792,15 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
             return false;
         }
         jsonObject["notificationFlags"] = flagsObj;
+    }
+
+    if (notificationBundleOption_ != nullptr) {
+        nlohmann::json bundleOptionObj;
+        if (!NotificationJsonConverter::ConvertToJson(notificationBundleOption_.get(), bundleOptionObj)) {
+            ANS_LOGE("Cannot convert notificationBundleOption to JSON");
+            return false;
+        }
+        jsonObject["notificationBundleOption"] = bundleOptionObj;
     }
 
     return true;
@@ -2105,6 +2121,32 @@ bool NotificationRequest::ConvertJsonToNotificationFlags(
             }
 
             target->notificationFlags_ = std::shared_ptr<NotificationFlags>(pFlags);
+        }
+    }
+
+    return true;
+}
+
+bool NotificationRequest::ConvertJsonToNotificationBundleOption(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    if (target == nullptr) {
+        ANS_LOGE("Invalid input parameter");
+        return false;
+    }
+
+    const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("notificationBundleOption") != jsonEnd) {
+        auto bundleOptionObj = jsonObject.at("notificationBundleOption");
+        if (!bundleOptionObj.is_null()) {
+            auto *pBundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(bundleOptionObj);
+            if (pBundleOption == nullptr) {
+                ANS_LOGE("Failed to parse notificationBundleOption!");
+                return false;
+            }
+
+            target->notificationBundleOption_ = std::shared_ptr<NotificationBundleOption>(pBundleOption);
         }
     }
 
