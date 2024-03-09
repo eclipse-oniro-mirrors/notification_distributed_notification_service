@@ -38,8 +38,6 @@
     *Insert*Data*;
     *IsAllowedNotify*;
     *IsSystemApp*;
-    *Notification*;
-    *Notify*;
     *OnRemoteDied*;
     *Parse*DistureDB*;
     *Publish*;
