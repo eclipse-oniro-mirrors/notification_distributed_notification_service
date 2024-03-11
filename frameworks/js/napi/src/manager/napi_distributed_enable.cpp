@@ -178,7 +178,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[0]: deviceType
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGW("Wrong argument type. Bool expected.");
+        ANS_LOGW("Wrong argument type. String expected.");
         return nullptr;
     }
     char str[STR_MAX_SIZE] = {0};
