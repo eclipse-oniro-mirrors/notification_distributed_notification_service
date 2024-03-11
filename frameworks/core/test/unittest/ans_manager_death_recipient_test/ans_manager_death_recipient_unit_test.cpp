@@ -22,7 +22,6 @@
 #undef private
 #undef protected
 
-#include "iremote_broker.h"
 #include "singleton.h"
 
 using namespace testing::ext;
@@ -53,17 +52,51 @@ void AnsManagerDeathRecipientUnitTest::SetUp() {}
 void AnsManagerDeathRecipientUnitTest::TearDown() {}
 
 /*
- * @tc.name: OnRemoteDiedTest_0100
- * @tc.desc: test if AnsManagerDeathRecipient's OnRemoteDied function executed as expected in normal case.
+ * @tc.name: SubscribeSAManagerTest_0100
+ * @tc.desc: test if AnsManagerDeathRecipient's SubscribeSAManager function executed as expected in normal case.
  * @tc.type: FUNC
  * @tc.require: #I5SJ62
  */
-HWTEST_F(AnsManagerDeathRecipientUnitTest, OnRemoteDiedTest_0100, Function | MediumTest | Level1)
+HWTEST_F(AnsManagerDeathRecipientUnitTest, SubscribeSAManagerTest_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO)
-        << "AnsManagerDeathRecipientUnitTest, OnRemoteDiedTest_0100, TestSize.Level1";
-    std::shared_ptr<AnsManagerDeathRecipient> recipient = std::make_shared<AnsManagerDeathRecipient>();
-    ASSERT_NE(nullptr, recipient);
-    recipient->OnRemoteDied(nullptr);
-    EXPECT_EQ(DelayedSingleton<AnsNotification>::GetInstance()->ansManagerProxy_, nullptr);
+        << "AnsManagerDeathRecipientUnitTest, SubscribeSAManagerTest_0100, TestSize.Level1";
+    auto ansManagerDeathRecipient = OHOS::DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
+    ansManagerDeathRecipient->SubscribeSAManager();
+    EXPECT_EQ(true, ansManagerDeathRecipient->GetIsSubscribeSAManager());
+}
+
+/*
+ * @tc.name: OnRemoveSystemAbilityTest_0100
+ * @tc.desc: test if AnsManagerDeathRecipient's OnRemoveSystemAbility function executed as expected in normal case.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsManagerDeathRecipientUnitTest, OnRemoveSystemAbilityTest_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerDeathRecipientUnitTest, OnRemoveSystemAbilityTest_0100, TestSize.Level1";
+    auto ansManagerDeathRecipient = OHOS::DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
+    ansManagerDeathRecipient->SubscribeSAManager();
+    ansManagerDeathRecipient->statusChangeListener_->OnRemoveSystemAbility(0, "");
+    auto ansNotification = OHOS::DelayedSingleton<AnsNotification>::GetInstance();
+    EXPECT_TRUE(ansNotification->ansManagerProxy_ == nullptr);
+}
+
+/*
+ * @tc.name: OnAddSystemAbilityTest_0100
+ * @tc.desc: test if AnsManagerDeathRecipient's OnAddSystemAbility function executed as expected in normal case.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsManagerDeathRecipientUnitTest, OnAddSystemAbilityTest_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerDeathRecipientUnitTest, OnAddSystemAbilityTest_0100, TestSize.Level1";
+    auto ansManagerDeathRecipient = OHOS::DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
+    ansManagerDeathRecipient->SubscribeSAManager();
+    ansManagerDeathRecipient->statusChangeListener_->OnRemoveSystemAbility(0, "");
+    ansManagerDeathRecipient->statusChangeListener_->OnAddSystemAbility(0, "");
+    auto ansNotification = OHOS::DelayedSingleton<AnsNotification>::GetInstance();
+    EXPECT_TRUE(ansNotification->ansManagerProxy_ != nullptr);
 }

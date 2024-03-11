@@ -13,19 +13,55 @@
  * limitations under the License.
  */
 
-#include <unistd.h>
+#include "ans_manager_death_recipient.h"
 
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
-#include "ans_manager_death_recipient.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace Notification {
-void AnsManagerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+void AnsManagerDeathRecipient::SubscribeSAManager()
 {
-    ANS_LOGE("Ans service died");
+    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    statusChangeListener_ = new (std::nothrow) AnsManagerDeathRecipient::SystemAbilityStatusChangeListener();
+    if (samgrProxy == nullptr || statusChangeListener_ == nullptr) {
+        ANS_LOGI("GetSystemAbilityManager failed or new SystemAbilityStatusChangeListener failed");
+        delete statusChangeListener_;
+        statusChangeListener_ = nullptr;
+        return;
+    }
+    int32_t ret = samgrProxy->SubscribeSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, statusChangeListener_);
+    if (ret != ERR_OK) {
+        ANS_LOGI("SubscribeSystemAbility to sa manager failed");
+        delete statusChangeListener_;
+        statusChangeListener_ = nullptr;
+    }
+}
+
+bool AnsManagerDeathRecipient::GetIsSubscribeSAManager()
+{
+    return statusChangeListener_ != nullptr;
+}
+
+void AnsManagerDeathRecipient::SystemAbilityStatusChangeListener::OnAddSystemAbility(
+    int32_t systemAbilityId, const std::string& deviceId)
+{
+    if (!isSAOffline) {
+        return;
+    }
+    ANS_LOGI("Ans manager service restore, try to reconnect");
+    DelayedSingleton<AnsNotification>::GetInstance()->Reconnect();
+    isSAOffline = false;
+}
+
+void AnsManagerDeathRecipient::SystemAbilityStatusChangeListener::OnRemoveSystemAbility(
+    int32_t systemAbilityId, const std::string& deviceId)
+{
+    ANS_LOGI("Ans manager service died");
     DelayedSingleton<AnsNotification>::GetInstance()->ResetAnsManagerProxy();
+    isSAOffline = true;
 }
 }  // namespace Notification
 }  // namespace OHOS
