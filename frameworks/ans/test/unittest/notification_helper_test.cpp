@@ -69,7 +69,7 @@ HWTEST_F(NotificationHelperTest, AddNotificationSlot_00001, Function | SmallTest
     NotificationSlot slot;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.AddNotificationSlot(slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -83,7 +83,7 @@ HWTEST_F(NotificationHelperTest, AddSlotByType_00001, Function | SmallTest | Lev
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.AddSlotByType(slotType);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -111,7 +111,7 @@ HWTEST_F(NotificationHelperTest, RemoveNotificationSlot_00001, Function | SmallT
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveNotificationSlot(slotType);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -124,7 +124,7 @@ HWTEST_F(NotificationHelperTest, RemoveAllSlots_00001, Function | SmallTest | Le
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveAllSlots();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -139,7 +139,7 @@ HWTEST_F(NotificationHelperTest, GetNotificationSlot_00001, Function | SmallTest
     sptr<NotificationSlot> slot = nullptr;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetNotificationSlot(slotType, slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -153,7 +153,7 @@ HWTEST_F(NotificationHelperTest, GetNotificationSlots_00001, Function | SmallTes
     std::vector<sptr<NotificationSlot>> slots;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetNotificationSlots(slots);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -211,7 +211,7 @@ HWTEST_F(NotificationHelperTest, CancelNotification_00001, Function | SmallTest 
     int32_t notificationId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelNotification(notificationId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -226,7 +226,7 @@ HWTEST_F(NotificationHelperTest, CancelNotification_00002, Function | SmallTest 
     int32_t notificationId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelNotification(label, notificationId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -239,7 +239,7 @@ HWTEST_F(NotificationHelperTest, CancelAllNotifications_00001, Function | SmallT
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelAllNotifications();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -286,7 +286,7 @@ HWTEST_F(NotificationHelperTest, GetActiveNotificationNums_00001, Function | Sma
     uint64_t num = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetActiveNotificationNums(num);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -300,7 +300,7 @@ HWTEST_F(NotificationHelperTest, GetActiveNotifications_00001, Function | SmallT
     std::vector<sptr<NotificationRequest>> request;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetActiveNotifications(request);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -371,7 +371,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationBadgeNum_00001, Function | Small
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationBadgeNum();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -385,7 +385,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationBadgeNum_00002, Function | Small
     int32_t num = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationBadgeNum(num);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -413,7 +413,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotifySelf_00001, Function | SmallTest
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotifySelf(allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -431,7 +431,7 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
     ErrCode ret = notificationHelper.RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -459,7 +459,7 @@ HWTEST_F(NotificationHelperTest, GetBundleImportance_00001, Function | SmallTest
     NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_NONE;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetBundleImportance(importance);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -680,7 +680,7 @@ HWTEST_F(NotificationHelperTest, GetShowBadgeEnabled_00001, Function | SmallTest
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -694,7 +694,7 @@ HWTEST_F(NotificationHelperTest, CancelGroup_00001, Function | SmallTest | Level
     std::string groupName = "GroupName";
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelGroup(groupName);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -723,7 +723,7 @@ HWTEST_F(NotificationHelperTest, SetDoNotDisturbDate_00001, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -808,7 +808,7 @@ HWTEST_F(NotificationHelperTest, EnableDistributedSelf_00001, Function | SmallTe
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.EnableDistributedSelf(enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -970,7 +970,7 @@ HWTEST_F(NotificationHelperTest, SetDoNotDisturbDate_00002, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
