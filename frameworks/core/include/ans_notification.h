@@ -735,6 +735,11 @@ public:
     void ResetAnsManagerProxy();
 
     /**
+     * @brief try to reconnect ans SA when SA manager OnAddSystemAbility called.
+     */
+    void Reconnect();
+
+    /**
      * @brief Publishes a scheduled reminder.
      *
      * @param reminder Indicates a reminder.
@@ -1021,7 +1026,6 @@ private:
 private:
     std::mutex mutex_;
     sptr<AnsManagerInterface> ansManagerProxy_;
-    sptr<AnsManagerDeathRecipient> recipient_;
 };
 }  // namespace Notification
 }  // namespace OHOS
