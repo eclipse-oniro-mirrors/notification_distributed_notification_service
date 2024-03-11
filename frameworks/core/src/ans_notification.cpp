@@ -662,6 +662,24 @@ ErrCode AnsNotification::GetNotificationSlotsForBundle(
     return ansManagerProxy_->GetSlotsByBundle(bo, slots);
 }
 
+ErrCode AnsNotification::GetNotificationSlotForBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Input bundleName is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->GetSlotByBundle(bo, slotType, slot);
+}
+
 ErrCode AnsNotification::UpdateNotificationSlots(
     const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {

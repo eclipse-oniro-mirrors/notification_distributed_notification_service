@@ -258,6 +258,13 @@ ErrCode NotificationHelper::GetNotificationSlotsForBundle(
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotsForBundle(bundleOption, slots);
 }
 
+ErrCode NotificationHelper::GetNotificationSlotForBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotForBundle(bundleOption, slotType, slot);
+}
+
 ErrCode NotificationHelper::UpdateNotificationSlots(
     const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {

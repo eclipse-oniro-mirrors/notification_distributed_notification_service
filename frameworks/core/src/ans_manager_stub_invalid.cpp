@@ -245,6 +245,14 @@ ErrCode AnsManagerStub::GetSlotsByBundle(
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetSlotByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    ANS_LOGE("AnsManagerStub::GetSlotByBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::UpdateSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
