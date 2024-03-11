@@ -1734,8 +1734,8 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
-    this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
     this->notificationBundleOption_ = other.notificationBundleOption_;
+    this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
