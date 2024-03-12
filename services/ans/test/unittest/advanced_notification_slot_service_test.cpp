@@ -78,6 +78,9 @@ void AnsSlotServiceTest::TearDown()
 
 void AnsSlotServiceTest::TestAddSlot(NotificationConstant::SlotType type)
 {
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(type);
     slot->SetEnable(true);
@@ -373,6 +376,9 @@ HWTEST_F(AnsSlotServiceTest, RemoveSlotByType_00001, Function | SmallTest | Leve
  */
 HWTEST_F(AnsSlotServiceTest, RemoveSlotByType_00002, Function | SmallTest | Level1)
 {
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(slotType);
@@ -380,7 +386,6 @@ HWTEST_F(AnsSlotServiceTest, RemoveSlotByType_00002, Function | SmallTest | Leve
     slots.push_back(slot);
     EXPECT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
 
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->RemoveSlotByType(slotType);
     EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);

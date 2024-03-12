@@ -318,6 +318,9 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest 
 HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00002, Function | SmallTest | Level1)
 {
     bool enabled = true;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
     EXPECT_EQ(ret, (int)ERR_OK);
     EXPECT_EQ(enabled, false);

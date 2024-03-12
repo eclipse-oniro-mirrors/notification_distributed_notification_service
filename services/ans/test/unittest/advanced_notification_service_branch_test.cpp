@@ -134,6 +134,9 @@ public:
 
 void AnsBranchTest::TestAddSlot(NotificationConstant::SlotType type)
 {
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(type);
     slots.push_back(slot);
