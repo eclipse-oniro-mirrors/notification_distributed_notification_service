@@ -1466,9 +1466,12 @@ bool ReminderDataManager::IsReminderAgentReady() const
 bool ReminderDataManager::IsBelongToSameApp(const sptr<NotificationBundleOption> &bundleOption,
     const sptr<NotificationBundleOption> &other) const
 {
-    int32_t userIdSrc = ReminderRequest::GetUserId(bundleOption->GetUid());
-    int32_t userIdTar = ReminderRequest::GetUserId(other->GetUid());
-    return ((bundleOption->GetBundleName() == other->GetBundleName()) && (userIdSrc == userIdTar)) ? true : false;
+    int32_t uidSrc = bundleOption->GetUid();
+    int32_t uidTar = other->GetUid();
+    bool result = uidSrc == uidTar;
+    result = result && (ReminderRequest::GetUserId(uidSrc) == ReminderRequest::GetUserId(uidTar));
+    result = result && (bundleOption->GetBundleName() == other->GetBundleName());
+    return result;
 }
 
 void ReminderDataManager::LoadReminderFromDb()

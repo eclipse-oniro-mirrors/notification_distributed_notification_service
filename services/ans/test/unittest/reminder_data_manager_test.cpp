@@ -619,5 +619,25 @@ HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
     bool ret2 = manager->StartExtensionAbility(reminder2);
     EXPECT_TRUE(ret2);
 }
+
+/**
+ * @tc.name: IsBelongToSameAppTest_001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderDataManagerTest, IsBelongToSameAppTest_001, Level1)
+{
+    sptr<NotificationBundleOption> option1 = new NotificationBundleOption("test", 100);
+    sptr<NotificationBundleOption> option2 = new NotificationBundleOption("test", 100);
+    EXPECT_TRUE(manager->IsBelongToSameApp(option1, option2));
+
+    option2->SetUid(101);
+    EXPECT_FALSE(manager->IsBelongToSameApp(option1, option2));
+
+    option2->SetUid(100);
+    option2->SetBundleName("test1");
+    EXPECT_FALSE(manager->IsBelongToSameApp(option1, option2));
+}
 }  // namespace Notification
 }  // namespace OHOS
