@@ -2349,6 +2349,13 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
         return ERR_OK;
     }
 
+    if (GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
+        auto result = CheckLockScreenPictureSizeForLiveView(basicContent);
+        if (result != ERR_OK) {
+            return result;
+        }
+    }
+
     auto contentType = GetNotificationType();
     switch (contentType) {
         case NotificationContent::Type::CONVERSATION:
@@ -2409,6 +2416,16 @@ void NotificationRequest::SetUnifiedGroupInfo(const std::shared_ptr<Notification
 std::shared_ptr<NotificationUnifiedGroupInfo> NotificationRequest::GetUnifiedGroupInfo() const
 {
     return unifiedGroupInfo_;
+}
+
+ErrCode NotificationRequest::CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content)
+{
+    auto lockScreenPicture = content->GetLockScreenPicture();
+    if (CheckImageOverSizeForPixelMap(lockScreenPicture, MAX_PICTURE_SIZE)) {
+        ANS_LOGE("The size of lockScreen picture in live view exceeds limit");
+        return ERR_ANS_PICTURE_OVER_SIZE;
+    }
+    return ERR_OK;
 }
 
 }  // namespace Notification

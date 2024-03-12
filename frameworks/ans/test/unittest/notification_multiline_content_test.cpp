@@ -85,7 +85,7 @@ HWTEST_F(NotificationMultiLineContentTest, Dump_00001, Function | SmallTest | Le
 {
     auto rrc = std::make_shared<NotificationMultiLineContent>();
     std::string ret = "NotificationMultiLineContent{ title = , text = , "
-    "additionalText = , briefText = , expandedTitle = , allLines = [] }";
+    "additionalText = , lockScreenPicture = null, briefText = , expandedTitle = , allLines = [] }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 

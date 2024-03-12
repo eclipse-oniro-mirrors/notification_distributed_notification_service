@@ -1337,6 +1337,7 @@ private:
     static ErrCode CheckImageSizeForConverSation(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
+    static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
 
 private:
     int32_t notificationId_ {0};

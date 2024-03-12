@@ -18,6 +18,7 @@
 
 #include "notification_json_convert.h"
 #include "parcel.h"
+#include "pixel_map.h"
 
 namespace OHOS {
 namespace Notification {
@@ -70,6 +71,20 @@ public:
     virtual std::string GetTitle() const;
 
     /**
+     * @brief Sets the lockScreenPicture of a notification.
+     *
+     * @param lockScreenPicture Indicates the lockScreenPicture of the notification.
+     */
+    virtual void SetLockScreenPicture(const std::shared_ptr<Media::PixelMap> &lockScreenPicture);
+
+    /**
+     * @brief Obtains the lockScreenPicture of a notification.
+     *
+     * @return Returns the lockScreenPicture_ of the notification.
+     */
+    virtual std::shared_ptr<Media::PixelMap> GetLockScreenPicture() const;
+
+    /**
      * @brief Returns a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -114,6 +129,7 @@ protected:
     std::string text_ {};
     std::string title_ {};
     std::string additionalText_ {};
+    std::shared_ptr<Media::PixelMap> lockScreenPicture_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

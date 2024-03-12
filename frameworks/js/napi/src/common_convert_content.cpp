@@ -154,7 +154,8 @@ napi_value Common::SetNotificationBasicContent(
     napi_create_string_utf8(env, basicContent->GetAdditionalText().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "additionalText", value);
 
-    return NapiGetBoolean(env, true);
+    // lockScreenPicture?: pixelMap
+    return SetLockScreenPicture(env, basicContent, result);
 }
 
 napi_value Common::SetNotificationLongTextContent(
@@ -542,22 +543,14 @@ napi_value Common::GetNotificationBasicContentDetailed(
 {
     ANS_LOGD("enter");
 
-    napi_valuetype valuetype = napi_undefined;
-    napi_value value = nullptr;
     bool hasProperty = false;
     char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
 
     // title: string
-    NAPI_CALL(env, napi_has_named_property(env, contentResult, "title", &hasProperty));
-    if (!hasProperty) {
-        ANS_LOGE("Property title expected.");
-        return nullptr;
-    }
-    napi_get_named_property(env, contentResult, "title", &value);
-    NAPI_CALL(env, napi_typeof(env, value, &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+    auto value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "title", napi_string);
+    if (value == nullptr) {
+        ANS_LOGE("Failed to get title from js.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
@@ -569,15 +562,9 @@ napi_value Common::GetNotificationBasicContentDetailed(
     ANS_LOGD("normal::title = %{public}s", str);
 
     // text: string
-    NAPI_CALL(env, napi_has_named_property(env, contentResult, "text", &hasProperty));
-    if (!hasProperty) {
-        ANS_LOGE("Property text expected.");
-        return nullptr;
-    }
-    napi_get_named_property(env, contentResult, "text", &value);
-    NAPI_CALL(env, napi_typeof(env, value, &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+    value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "text", napi_string);
+    if (value == nullptr) {
+        ANS_LOGE("Failed to get text from js.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
@@ -591,10 +578,9 @@ napi_value Common::GetNotificationBasicContentDetailed(
     // additionalText?: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "additionalText", &hasProperty));
     if (hasProperty) {
-        napi_get_named_property(env, contentResult, "additionalText", &value);
-        NAPI_CALL(env, napi_typeof(env, value, &valuetype));
-        if (valuetype != napi_string) {
-            ANS_LOGE("Wrong argument type. String expected.");
+        value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "additionalText", napi_string);
+        if (value == nullptr) {
+            ANS_LOGE("Failed to get additionalText from js.");
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
@@ -602,7 +588,8 @@ napi_value Common::GetNotificationBasicContentDetailed(
         ANS_LOGI("normal::additionalText = %{public}s", str);
     }
 
-    return NapiGetNull(env);
+    // lockScreenPicture?: pixelMap
+    return GetLockScreenPicture(env, contentResult, basicContent);
 }
 
 napi_value Common::GetNotificationLongTextContent(
@@ -1440,6 +1427,49 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
     }
 
     return NapiGetNull(env);
+}
+
+napi_value Common::GetLockScreenPicture(
+    const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent)
+{
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "lockScreenPicture", &hasProperty));
+    if (hasProperty) {
+        auto value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "lockScreenPicture", napi_object);
+        if (value == nullptr) {
+            ANS_LOGE("Failed to get lockScreenPicture from js.");
+            return nullptr;
+        }
+        auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, value);
+        if (pixelMap == nullptr) {
+            ANS_LOGE("Invalid object pixelMap");
+            return nullptr;
+        }
+        basicContent->SetLockScreenPicture(pixelMap);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::SetLockScreenPicture(
+    const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result)
+{
+    if (basicContent->GetLockScreenPicture() == nullptr) {
+        return NapiGetBoolean(env, true);
+    }
+
+    std::shared_ptr<Media::PixelMap> picture = basicContent->GetLockScreenPicture();
+    napi_valuetype valuetype = napi_undefined;
+    napi_value pictureValue = Media::PixelMapNapi::CreatePixelMap(env, picture);
+    NAPI_CALL(env, napi_typeof(env, pictureValue, &valuetype));
+    if (valuetype == napi_undefined) {
+        ANS_LOGI("LockScreenPicture is undefined");
+        napi_set_named_property(env, result, "lockScreenPicture", NapiGetNull(env));
+    } else {
+        napi_set_named_property(env, result, "lockScreenPicture", pictureValue);
+    }
+
+    return NapiGetBoolean(env, true);
 }
 }
 }
