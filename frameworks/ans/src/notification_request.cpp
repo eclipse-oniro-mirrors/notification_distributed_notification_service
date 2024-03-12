@@ -2385,14 +2385,18 @@ std::string NotificationRequest::GetAppMessageId() const
 std::string NotificationRequest::GenerateUniqueKey()
 {
     const char *keySpliter = "_";
+    int typeFlag = 0;
+    if (GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
+        typeFlag = 1;
+    }
 
     std::stringstream stream;
     if (IsAgentNotification()) {
         stream << ownerUserId_ << keySpliter << ownerBundleName_ << keySpliter <<
-            slotType_ << keySpliter << appMessageId_;
+            typeFlag << keySpliter << appMessageId_;
     } else {
         stream << creatorUserId_ << keySpliter << creatorBundleName_ << keySpliter <<
-            slotType_ << keySpliter << appMessageId_;
+            typeFlag << keySpliter << appMessageId_;
     }
     return stream.str();
 }
