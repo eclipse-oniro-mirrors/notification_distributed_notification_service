@@ -1981,7 +1981,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 2);
-    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
 }
 
 /**

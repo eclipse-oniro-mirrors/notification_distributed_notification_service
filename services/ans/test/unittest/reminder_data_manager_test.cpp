@@ -624,7 +624,7 @@ HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
  * @tc.name: IsBelongToSameAppTest_001
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
- * @tc.require: issue
+ * @tc.require: issue#I97Q9Q
  */
 HWTEST_F(ReminderDataManagerTest, IsBelongToSameAppTest_001, Level1)
 {
