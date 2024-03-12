@@ -109,6 +109,12 @@ void NotificationSlot::AddAuthHintCnt()
     authHintCnt_++;
 }
 
+void NotificationSlot::SetAuthHintCnt(int32_t count)
+{
+    authHintCnt_ = count;
+}
+
+
 void NotificationSlot::SetType(NotificationConstant::SlotType type)
 {
     type_ = NotificationConstant::SlotType::CUSTOM;

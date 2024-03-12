@@ -197,6 +197,16 @@ const static std::string KEY_BUNDLE_SLOTFLGS_TYPE = "bundleReminderFlagsType";
  */
 const static std::string KEY_SLOT_SLOTFLGS_TYPE = "reminderFlagsType";
 
+/**
+ * Indicates that disturbe key which slot authorized status.
+ */
+const static std::string KEY_SLOT_AUTHORIZED_STATUS = "authorizedStatus";
+
+/**
+ * Indicates that disturbe key which slot authorized hint count.
+ */
+const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
+
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
     NotificationPreferencesDatabase::slotMap_ = {
@@ -258,6 +268,16 @@ const std::map<std::string,
         {
             KEY_SLOT_SLOTFLGS_TYPE,
             std::bind(&NotificationPreferencesDatabase::ParseSlotFlags, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
+        },
+        {
+            KEY_SLOT_AUTHORIZED_STATUS,
+            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthorizedStatus, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
+        },
+        {
+            KEY_SLOT_AUTH_HINT_CNT,
+            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthHitnCnt, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3),
         },
 };
@@ -943,6 +963,10 @@ void NotificationPreferencesDatabase::GenerateSlotEntry(const std::string &bundl
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_VIBRATION_STYLE),
         VectorToString(slot->GetVibrationStyle()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLED), std::to_string(slot->GetEnable()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_AUTHORIZED_STATUS),
+        std::to_string(slot->GetAuthorizedStatus()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_AUTH_HINT_CNT),
+        std::to_string(slot->GetAuthHintCnt()), values);
 }
 
 void NotificationPreferencesDatabase::ParseBundleFromDistureDB(
@@ -1335,6 +1359,22 @@ void NotificationPreferencesDatabase::ParseSlotEnabled(
     ANS_LOGD("ParseSlotEnabled slot enabled is %{public}s.", value.c_str());
     bool enabled = static_cast<bool>(StringToInt(value));
     slot->SetEnable(enabled);
+}
+
+void NotificationPreferencesDatabase::ParseSlotAuthorizedStatus(
+    sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotAuthorizedStatus slot status is %{public}s.", value.c_str());
+    int32_t status = static_cast<int32_t>(StringToInt(value));
+    slot->SetAuthorizedStatus(status);
+}
+
+void NotificationPreferencesDatabase::ParseSlotAuthHitnCnt(
+    sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotAuthHitnCnt slot count is %{public}s.", value.c_str());
+    int32_t count = static_cast<int32_t>(StringToInt(value));
+    slot->SetAuthHintCnt(count);
 }
 
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(

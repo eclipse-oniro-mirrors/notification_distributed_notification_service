@@ -200,6 +200,10 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     napi_get_boolean(env, slot.GetEnable(), &value);
     napi_set_named_property(env, result, "enabled", value);
 
+    // authorizedStatus?: number
+    napi_create_int32(env, slot.GetAuthorizedStatus(), &value);
+    napi_set_named_property(env, result, "authorizedStatus", value);
+
     return NapiGetBoolean(env, true);
 }
 

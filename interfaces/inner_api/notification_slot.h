@@ -338,16 +338,19 @@ public:
     int32_t GetAuthorizedStatus() const;
 
     /**
-     * @brief Sets the authHintCnt of a NotificationSlot object.
-     * @note SetSlotFlags must be set before the NotificationHelper::AddNotificationSlot(NotificationSlot)
-     * method is called.
-     *       Otherwise, the settings will not take effect.
-     *
-     * @param slotFlags Specifies the authHintCnt of the NotificationSlot object,
+     * @brief Add the authHintCnt of a NotificationSlot object.
      * @note which determines the notification authorized hint count.
      * The value can be 0,1.
      */
     void AddAuthHintCnt();
+
+    /**
+     * @brief Set the authHintCnt of a NotificationSlot object.
+     * @param count Specifies the authHintCnt of the NotificationSlot object,
+     * @note which determines the notification authorized hint count.
+     * The value can be 0,1.
+     */
+    void SetAuthHintCnt(int32_t count);
 
     /**
      * @brief Obtains the authHintCnt of a NotificationSlot object, which is set by SetAuthHintCnt(int32_t count).
