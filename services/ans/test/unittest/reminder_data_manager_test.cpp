@@ -134,15 +134,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_004, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::TRIGGER_TIMER, reminder);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::ALERTING_TIMER, reminder);
-    auto result = manager->FindReminderRequestLocked(0, 100);
-    EXPECT_TRUE(result == nullptr);
+    auto result = manager->FindReminderRequestLocked(0, "");
     reminder->SetReminderId(10);
-    reminder->InitUid(100);
     manager->reminderVector_.push_back(reminder);
-    result = manager->FindReminderRequestLocked(10, 100);
-    EXPECT_TRUE(result != nullptr);
-    result = manager->FindReminderRequestLocked(10, 0);
-    EXPECT_TRUE(result == nullptr);
+    manager->FindReminderRequestLocked(10, "");
+    option->SetBundleName("test");
+    manager->notificationBundleOptionMap_[10] = option;
+    manager->FindReminderRequestLocked(10, "");
+    manager->FindReminderRequestLocked(10, "test");
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }

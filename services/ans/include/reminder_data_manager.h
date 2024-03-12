@@ -363,10 +363,10 @@ private:
      * {@link notificationBundleOptionMap_} by reminder id and uid.
      *
      * @param reminderId Indicates the reminder id.
-     * @param uid Indicates the package name.
+     * @param pkgName Indicates the package name.
      * @return pointer of reminder request or nullptr.
      */
-    sptr<ReminderRequest> FindReminderRequestLocked(const int32_t reminderId, const int32_t uid);
+    sptr<ReminderRequest> FindReminderRequestLocked(const int32_t &reminderId, const std::string &pkgName);
 
     /**
      * Find bundle option from {@link notificationBundleOptionMap_} by reminder id.
