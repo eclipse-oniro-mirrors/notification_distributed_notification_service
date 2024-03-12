@@ -349,6 +349,19 @@ public:
      */
     virtual ErrCode GetSlotsByBundle(
         const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlot>> &slots) override;
+    
+    /**
+     * @brief Get the specified slot corresponding to the bundle.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption object.
+     * @param slotType Indicates the ID of the slot, which is created by AddNotificationSlot(NotificationSlot). This
+     *        parameter must be specified.
+     * @param slot Indicates the notification slot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetSlotByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot) override;
 
     /**
      * @brief Update slots according to bundle.
@@ -874,6 +887,7 @@ private:
     ErrCode HandleDeleteByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDeleteAll(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotsByBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetSlotByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUpdateSlots(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRequestEnableNotification(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledForBundle(MessageParcel &data, MessageParcel &reply);

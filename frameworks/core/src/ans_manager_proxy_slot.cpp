@@ -283,6 +283,54 @@ ErrCode AnsManagerProxy::GetSlotsByBundle(
     return result;
 }
 
+ErrCode AnsManagerProxy::GetSlotByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[GetSlotByBundle] fail: bundleOption is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[GetSlotByBundle] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteParcelable(bundleOption)) {
+        ANS_LOGE("[GetSlotByBundle] fail:: write bundle failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(slotType)) {
+        ANS_LOGE("[GetSlotByBundle] fail:: write slotId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_SLOT_BY_BUNDLE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[GetSlotByBundle] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[GetSlotByBundle] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (result == ERR_OK) {
+        slot = reply.ReadParcelable<NotificationSlot>();
+        if (slot == nullptr) {
+            ANS_LOGE("[GetSlotByBundle] slot is null");
+        }
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::UpdateSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
