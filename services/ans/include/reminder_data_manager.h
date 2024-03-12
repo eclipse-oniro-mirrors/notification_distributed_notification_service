@@ -360,13 +360,13 @@ private:
 
     /**
      * Find the reminder from {@link reminderVector_} and
-     * {@link notificationBundleOptionMap_} by reminder id and pkgName.
+     * {@link notificationBundleOptionMap_} by reminder id and uid.
      *
      * @param reminderId Indicates the reminder id.
-     * @param pkgName Indicates the package name.
+     * @param uid Indicates the package name.
      * @return pointer of reminder request or nullptr.
      */
-    sptr<ReminderRequest> FindReminderRequestLocked(const int32_t &reminderId, const std::string &pkgName);
+    sptr<ReminderRequest> FindReminderRequestLocked(const int32_t reminderId, const int32_t uid);
 
     /**
      * Find bundle option from {@link notificationBundleOptionMap_} by reminder id.

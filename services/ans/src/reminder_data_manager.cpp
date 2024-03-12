@@ -93,7 +93,7 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
 ErrCode ReminderDataManager::CancelReminder(
     const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption)
 {
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, bundleOption->GetBundleName());
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, bundleOption->GetUid());
     if (reminder == nullptr) {
         ANSR_LOGW("Cancel reminder, not find the reminder");
         return ERR_REMINDER_NOT_EXIST;
@@ -466,14 +466,14 @@ sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(const int32
 }
 
 sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(
-    const int32_t &reminderId, const std::string &pkgName)
+    const int32_t reminderId, const int32_t uid)
 {
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     if (reminder == nullptr) {
         return nullptr;
     }
-    if (reminder->GetCreatorBundleName() != pkgName) {
+    if (reminder->GetUid() != uid) {
         ANSR_LOGW("Not find the reminder due to package name not match");
         return nullptr;
     }
