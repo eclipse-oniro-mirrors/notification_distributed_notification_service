@@ -812,7 +812,7 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     reminder->InitReminderId();
     reminder->InitUserId(ReminderRequest::GetUserId(bundleOption->GetUid()));
-    reminder->InitUid(reminder->GetNotificationRequest()->GetCreatorUid());
+    reminder->InitUid(bundleOption->GetUid());
     reminder->InitBundleName(bundleOption->GetBundleName());
 
     if (reminder->GetTriggerTimeInMilli() == ReminderRequest::INVALID_LONG_LONG_VALUE) {

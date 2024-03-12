@@ -134,7 +134,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_004, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::TRIGGER_TIMER, reminder);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::ALERTING_TIMER, reminder);
-    auto result = manager->FindReminderRequestLocked(0, "");
+    manager->FindReminderRequestLocked(0, "");
     reminder->SetReminderId(10);
     manager->reminderVector_.push_back(reminder);
     manager->FindReminderRequestLocked(10, "");

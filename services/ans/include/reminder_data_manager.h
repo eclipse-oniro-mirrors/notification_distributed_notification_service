@@ -360,7 +360,7 @@ private:
 
     /**
      * Find the reminder from {@link reminderVector_} and
-     * {@link notificationBundleOptionMap_} by reminder id and uid.
+     * {@link notificationBundleOptionMap_} by reminder id and pkgName.
      *
      * @param reminderId Indicates the reminder id.
      * @param pkgName Indicates the package name.
