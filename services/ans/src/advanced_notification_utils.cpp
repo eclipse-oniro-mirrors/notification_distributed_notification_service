@@ -229,6 +229,7 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
 
     requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
     requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
+    requestLiveViewContent->SetLockScreenPicture(liveViewContent->GetLockScreenPicture());
 
     std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
     if (requestExtraInfo == nullptr) {

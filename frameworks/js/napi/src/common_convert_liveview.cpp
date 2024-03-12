@@ -224,6 +224,12 @@ napi_value Common::SetNotificationLiveViewContent(
         return NapiGetBoolean(env, false);
     }
 
+    // lockScreenPicture?: pixelMap
+    if (!SetLockScreenPicture(env, basicContent, result)) {
+        ANS_LOGE("lockScreenPicture is null");
+        return NapiGetBoolean(env, false);
+    }
+
     auto liveViewContent = static_cast<NotificationLiveViewContent *>(basicContent);
     if (liveViewContent == nullptr) {
         ANS_LOGE("LiveViewContent is null");
@@ -722,6 +728,12 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
     std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
     ANS_LOGD("enter");
+
+    // lockScreenPicture?: pixelMap
+    if (GetLockScreenPicture(env, contentResult, liveViewContent) == nullptr) {
+        ANS_LOGE("Failed to get lockScreenPicture from liveView content.");
+        return nullptr;
+    }
 
     // status: NotificationLiveViewContent::LiveViewStatus
     int32_t status = 0;

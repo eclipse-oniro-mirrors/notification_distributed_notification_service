@@ -15,6 +15,7 @@
 
 #include "notification_basic_content.h"
 #include "ans_log_wrapper.h"
+#include "ans_image_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -51,9 +52,20 @@ std::string NotificationBasicContent::GetTitle() const
     return title_;
 }
 
+void NotificationBasicContent::SetLockScreenPicture(const std::shared_ptr<Media::PixelMap> &lockScreenPicture)
+{
+    lockScreenPicture_ = lockScreenPicture;
+}
+
+std::shared_ptr<Media::PixelMap> NotificationBasicContent::GetLockScreenPicture() const
+{
+    return lockScreenPicture_;
+}
+
 std::string NotificationBasicContent::Dump()
 {
-    return "title = " + title_ + ", text = " + text_ + ", additionalText = " + additionalText_;
+    return "title = " + title_ + ", text = " + text_ + ", additionalText = " + additionalText_ +
+    ", lockScreenPicture = " + (lockScreenPicture_ ? "not null" : "null");
 }
 
 bool NotificationBasicContent::ToJson(nlohmann::json &jsonObject) const
@@ -61,6 +73,7 @@ bool NotificationBasicContent::ToJson(nlohmann::json &jsonObject) const
     jsonObject["text"]           = text_;
     jsonObject["title"]          = title_;
     jsonObject["additionalText"] = additionalText_;
+    jsonObject["lockScreenPicture"] = AnsImageUtil::PackImage(lockScreenPicture_);
 
     return true;
 }
@@ -84,6 +97,11 @@ void NotificationBasicContent::ReadFromJson(const nlohmann::json &jsonObject)
     if (jsonObject.find("additionalText") != jsonEnd && jsonObject.at("additionalText").is_string()) {
         additionalText_ = jsonObject.at("additionalText").get<std::string>();
     }
+
+    if (jsonObject.find("lockScreenPicture") != jsonEnd && jsonObject.at("lockScreenPicture").is_string()) {
+        auto lockScreenPictureStr = jsonObject.at("lockScreenPicture").get<std::string>();
+        lockScreenPicture_ = AnsImageUtil::UnPackImage(lockScreenPictureStr);
+    }
 }
 
 bool NotificationBasicContent::Marshalling(Parcel &parcel) const
@@ -101,6 +119,19 @@ bool NotificationBasicContent::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(additionalText_)) {
         ANS_LOGE("Failed to write additional text");
         return false;
+    }
+
+    auto valid = lockScreenPicture_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write the flag which indicate whether lockScreenPicture is null");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(lockScreenPicture_.get())) {
+            ANS_LOGE("Failed to write lockScreenPicture");
+            return false;
+        }
     }
 
     return true;
@@ -121,6 +152,15 @@ bool NotificationBasicContent::ReadFromParcel(Parcel &parcel)
     if (!parcel.ReadString(additionalText_)) {
         ANS_LOGE("Failed to read additional text");
         return false;
+    }
+
+    auto valid = parcel.ReadBool();
+    if (valid) {
+        lockScreenPicture_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+        if (!lockScreenPicture_) {
+            ANS_LOGE("Failed to read lockScreenPicture");
+            return false;
+        }
     }
 
     return true;

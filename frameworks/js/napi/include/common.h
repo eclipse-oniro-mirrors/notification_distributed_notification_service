@@ -1689,7 +1689,10 @@ public:
     static void NapiThrow(napi_env env, int32_t errCode);
     static int32_t ErrorToExternal(uint32_t errCode);
     static void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result);
-
+    static napi_value GetLockScreenPicture(
+        const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent);
+    static napi_value SetLockScreenPicture(
+        const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;
