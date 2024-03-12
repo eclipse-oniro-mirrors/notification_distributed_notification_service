@@ -1797,7 +1797,7 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
     if (notificationBundleOption_ != nullptr) {
         nlohmann::json bundleOptionObj;
         if (!NotificationJsonConverter::ConvertToJson(notificationBundleOption_.get(), bundleOptionObj)) {
-            ANS_LOGE("Cannot convert notificationBundleOption to JSON");
+            ANS_LOGE("Cannot convert notificationBundleOption to JSON.");
             return false;
         }
         jsonObject["notificationBundleOption"] = bundleOptionObj;
@@ -2131,7 +2131,7 @@ bool NotificationRequest::ConvertJsonToNotificationBundleOption(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("Invalid input parameter.");
         return false;
     }
 

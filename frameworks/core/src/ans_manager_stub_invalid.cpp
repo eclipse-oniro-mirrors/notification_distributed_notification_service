@@ -584,7 +584,7 @@ ErrCode AnsManagerStub::IsSmartReminderEnabled(const std::string &deviceType, bo
 
 ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
 {
-    ANS_LOGE("Called!");
+    ANS_LOGE("Called.");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification
