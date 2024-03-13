@@ -65,6 +65,7 @@ public:
 private:
     void TestAddSlot(NotificationConstant::SlotType type);
     void TestAddLiveViewSlot(bool isForceControl);
+    void MockSystemApp();
 
 private:
     static sptr<AdvancedNotificationService> advancedNotificationService_;
@@ -136,14 +137,23 @@ public:
 
 void AdvancedNotificationServiceTest::TestAddSlot(NotificationConstant::SlotType type)
 {
+    MockSystemApp();
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(type);
     slots.push_back(slot);
     EXPECT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
 }
 
+void AdvancedNotificationServiceTest::MockSystemApp()
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+}
+
 void AdvancedNotificationServiceTest::TestAddLiveViewSlot(bool isForceControl)
 {
+    MockSystemApp();
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
     slot->SetForceControl(isForceControl);
@@ -557,6 +567,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01300,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01600, Function | SmallTest | Level1)
 {
+    MockSystemApp();
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::OTHER);
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::OTHER);
@@ -851,6 +862,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05000,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05100, Function | SmallTest | Level1)
 {
+    MockSystemApp();
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::OTHER);
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::OTHER);
@@ -1126,6 +1138,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_09500,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_09600, Function | SmallTest | Level1)
 {
+    MockSystemApp();
     EXPECT_EQ(
         (int)advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true), (int)ERR_OK);
     bool allowed = false;
@@ -2198,6 +2211,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15700,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15800, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "GenerateBundleOption_0100 test start";
+    MockSystemApp();
     MockIsNonBundleName(true);
     EXPECT_EQ(advancedNotificationService_->GenerateBundleOption(), nullptr);
     MockIsNonBundleName(false);
@@ -2321,6 +2335,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16500,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16400, Function | SmallTest | Level1)
 {
+    MockSystemApp();
     GTEST_LOG_(INFO) << "ANS_AddSlots_0100 test start";
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
@@ -2340,7 +2355,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16600,
 {
     GTEST_LOG_(INFO) << "ANS_AddSlots_0300 test start";
     MockIsNonBundleName(true);
-
+    MockSystemApp();
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
@@ -2375,7 +2390,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16800,
 {
     GTEST_LOG_(INFO) << "ANS_GetSlots_0100 test start";
     MockIsNonBundleName(true);
-
+    MockSystemApp();
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
@@ -2395,6 +2410,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
 
     MockIsNonBundleName(true);
+    MockSystemApp();
     std::vector<sptr<NotificationRequest>> notifications;
     EXPECT_EQ(advancedNotificationService_->GetActiveNotifications(notifications), ERR_ANS_INVALID_BUNDLE);
     uint64_t num = 1;
@@ -2843,7 +2859,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18600,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18700, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "AddSlotByType_1000 test start";
-
+    MockSystemApp();
     EXPECT_EQ(advancedNotificationService_->AddSlotByType(NotificationConstant::SlotType::SERVICE_REMINDER),
         ERR_OK);
 
@@ -3379,9 +3395,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21700,
     EXPECT_NE(pushCallbackProxy, nullptr);
     sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
-
     EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest),
-        (int)ERR_ANS_NON_SYSTEM_APP);
+        (int)ERR_OK);
     advancedNotificationService_->UnregisterPushCallback();
 
 
@@ -4698,6 +4713,37 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_00003, Function |
     request->SetAutoDeletedTime(0);
     EXPECT_EQ(advancedNotificationService_->IsNeedNotifyConsumed(request), false);
     GTEST_LOG_(INFO) << "IsNeedNotifyConsumed_00003 test end";
+}
+
+/**
+ * @tc.number    : SetBadgeNumberByBundle_00001
+ * @tc.name      : SetBadgeNumberByBundle
+ * @tc.desc      : Test SetBadgeNumberByBundle with valid parameters, expect error code ERR_OK.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    ASSERT_NE(bundleOption, nullptr);
+    std::string bundleName = "invalidBundleName";
+    bundleOption->SetBundleName(bundleName);
+    int32_t badgeNumber = 1;
+    EXPECT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber), ERR_OK);
+}
+
+/**
+ * @tc.number    : SetBadgeNumberByBundle_00002
+ * @tc.name      : SetBadgeNumberByBundle
+ * @tc.desc      : Test SetBadgeNumberByBundle with nullptr bundle option, expect error code ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    int32_t badgeNumber = 1;
+    EXPECT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber), ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -229,6 +229,7 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
 
     requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
     requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
+    requestLiveViewContent->SetLockScreenPicture(liveViewContent->GetLockScreenPicture());
 
     std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
     if (requestExtraInfo == nullptr) {
@@ -334,6 +335,30 @@ void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>
     notificationRequest->SetOwnerBundleName(bundleName);
 }
 
+void AdvancedNotificationService::ExtendDumpForFlags(
+    std::shared_ptr<NotificationFlags> notificationFlags, std::stringstream &stream)
+{
+    if (notificationFlags == nullptr) {
+        ANS_LOGD("The notificationFlags is nullptr.");
+        return;
+    }
+    stream << "\t\tReminderFlags : " << notificationFlags->GetReminderFlags() << "\n";
+    bool isEnable = false;
+    if (notificationFlags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        isEnable = true;
+    }
+    stream << "\t\tSound : " << isEnable << "\n";
+    isEnable = false;
+    if (notificationFlags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        isEnable = true;
+    }
+    stream << "\t\tVibration : " << isEnable << "\n";
+    stream << "\t\tLockScreenVisbleness : " << notificationFlags->IsLockScreenVisblenessEnabled() << "\n";
+    stream << "\t\tBanner : " << notificationFlags->IsBannerEnabled() << "\n";
+    stream << "\t\tLightScreen : " << notificationFlags->IsLightScreenEnabled() << "\n";
+    stream << "\t\tStatusIcon : " << notificationFlags->IsStatusIconEnabled() << "\n";
+}
+
 ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& bundle, int32_t userId,
     std::vector<std::string> &dumpInfo)
 {
@@ -370,6 +395,7 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
         stream << "\t\tId: " << record->notification->GetId() << "\n";
         stream << "\t\tLabel: " << record->notification->GetLabel() << "\n";
         stream << "\t\tSlotType = " << record->request->GetSlotType() << "\n";
+        ExtendDumpForFlags(record->request->GetFlags(), stream);
         ANS_LOGD("DumpInfo push stream.");
         dumpInfo.push_back(stream.str());
     }
@@ -411,6 +437,7 @@ ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& b
         stream << "\t\tId: " << recentNotification->notification->GetId() << "\n";
         stream << "\t\tLabel: " << recentNotification->notification->GetLabel() << "\n";
         stream << "\t\tSlotType = " << notificationRequest.GetSlotType() << "\n";
+        ExtendDumpForFlags(notificationRequest.GetFlags(), stream);
         dumpInfo.push_back(stream.str());
     }
     return ERR_OK;
@@ -450,6 +477,7 @@ ErrCode AdvancedNotificationService::DistributedNotificationDump(const std::stri
         stream << "\t\tId: " << record->notification->GetId() << "\n";
         stream << "\t\tLabel: " << record->notification->GetLabel() << "\n";
         stream << "\t\tSlotType = " << record->request->GetSlotType() << "\n";
+        ExtendDumpForFlags(record->request->GetFlags(), stream);
         dumpInfo.push_back(stream.str());
     }
 

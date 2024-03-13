@@ -388,6 +388,19 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlot>> &slots) override;
 
     /**
+     * @brief Get the specified slot corresponding to the bundle.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption object.
+     * @param slotType Indicates the ID of the slot, which is created by AddNotificationSlot(NotificationSlot). This
+     *        parameter must be specified.
+     * @param slot Indicates the notification slot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetSlotByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot) override;
+
+    /**
      * @brief Update slots according to bundle.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.
@@ -1052,6 +1065,7 @@ private:
 
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
+    void ExtendDumpForFlags(std::shared_ptr<NotificationFlags>, std::stringstream &stream);
     ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
     ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED

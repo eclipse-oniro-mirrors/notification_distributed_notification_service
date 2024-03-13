@@ -536,6 +536,84 @@ napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
     }
 }
 
+void AsyncCompleteCallbackNapiGetSlotByBundle(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("enter");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data.");
+        return;
+    }
+    napi_value result = nullptr;
+    auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotByBundle *>(data);
+    if (asynccallbackinfo) {
+        if (asynccallbackinfo->info.errorCode != ERR_OK) {
+            result = Common::NapiGetNull(env);
+        } else {
+            if (asynccallbackinfo->slot != nullptr) {
+                napi_create_object(env, &result);
+                if (!Common::SetNotificationSlot(env, *asynccallbackinfo->slot, result)) {
+                    asynccallbackinfo->info.errorCode = ERROR;
+                    result = Common::NapiGetNull(env);
+                }
+            }
+        }
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiGetSlotByBundle callback reference.");
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+}
+
+napi_value NapiGetSlotByBundle(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    ParametersInfoGetSlotByBundle params {};
+    if (ParseParametersGetSlotByBundle(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackInfoGetSlotByBundle *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoGetSlotByBundle {.env = env, .asyncWork = nullptr, .params = params};
+    if (!asynccallbackinfo) {
+        return Common::JSParaError(env, params.callback);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getSlotByBundle", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGI("NapiGetSlotByBundle work excute.");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotByBundle *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotForBundle(
+                    asynccallbackinfo->params.option, asynccallbackinfo->params.outType, asynccallbackinfo->slot);
+            }
+        },
+        AsyncCompleteCallbackNapiGetSlotByBundle,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+
+    if (isCallback) {
+        ANS_LOGD("napiGetSlotByBundle callback is nullptr.");
+        return Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
+
 napi_value NapiRemoveSlot(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");

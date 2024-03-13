@@ -307,6 +307,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT,
             std::bind(&AnsManagerStub::HandleCancelAsBundleWithAgent, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_SLOT_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleGetSlotByBundle, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -1100,6 +1103,30 @@ ErrCode AnsManagerStub::HandleGetSlotsByBundle(MessageParcel &data, MessageParce
     ErrCode result = GetSlotsByBundle(bundleOption, slots);
     if (!WriteParcelableVector(slots, reply, result)) {
         ANS_LOGE("[HandleGetSlotsByBundle] fail: write slots failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetSlotByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleGetSlotByBundle] fail: read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(data.ReadInt32());
+
+    sptr<NotificationSlot> slot = nullptr;
+    ErrCode result = GetSlotByBundle(bundleOption, slotType, slot);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetSlotByBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteParcelable(slot)) {
+        ANS_LOGE("[HandleGetSlotByBundle] fail: write slot failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

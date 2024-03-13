@@ -150,8 +150,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         } else if (valuetype == napi_function) {
             napi_create_reference(env, argv[PARAM1], 1, &params.callback);
         } else {
-            ANS_LOGE("Callback is not function excute promise.");
-            return Common::NapiGetNull(env);
+            ANS_LOGE("Property is error");
+            return nullptr;
         }
     }
 

@@ -30,6 +30,10 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
+const int32_t MAX_RETRY_TIME = 30;
+const int32_t SLEEP_TIME = 1000;
+}
 ErrCode AnsNotification::AddNotificationSlot(const NotificationSlot &slot)
 {
     std::vector<NotificationSlot> slots;
@@ -658,6 +662,24 @@ ErrCode AnsNotification::GetNotificationSlotsForBundle(
     return ansManagerProxy_->GetSlotsByBundle(bo, slots);
 }
 
+ErrCode AnsNotification::GetNotificationSlotForBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Input bundleName is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->GetSlotByBundle(bo, slotType, slot);
+}
+
 ErrCode AnsNotification::UpdateNotificationSlots(
     const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
@@ -1010,10 +1032,24 @@ void AnsNotification::ResetAnsManagerProxy()
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(mutex_);
-    if ((ansManagerProxy_ != nullptr) && (ansManagerProxy_->AsObject() != nullptr)) {
-        ansManagerProxy_->AsObject()->RemoveDeathRecipient(recipient_);
-    }
     ansManagerProxy_ = nullptr;
+}
+
+void AnsNotification::Reconnect()
+{
+    ANS_LOGD("enter");
+    for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
+        // try to connect ans
+        if (!GetAnsManagerProxy()) {
+            // Sleep 1000 milliseconds before reconnect.
+            std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+            ANS_LOGE("get ans proxy fail, try again.");
+            continue;
+        }
+
+        ANS_LOGD("get ans proxy success.");
+        return;
+    }
 }
 
 ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
@@ -1104,12 +1140,10 @@ bool AnsNotification::GetAnsManagerProxy()
                 return false;
             }
 
-            recipient_ = new (std::nothrow) AnsManagerDeathRecipient();
-            if (!recipient_) {
-                ANS_LOGE("Failed to create death recipient");
-                return false;
+            auto ansManagerDeathRecipient = DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
+            if (!ansManagerDeathRecipient->GetIsSubscribeSAManager()) {
+                ansManagerDeathRecipient->SubscribeSAManager();
             }
-            ansManagerProxy_->AsObject()->AddDeathRecipient(recipient_);
         }
     }
 

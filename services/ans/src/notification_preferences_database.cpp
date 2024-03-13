@@ -58,6 +58,11 @@ const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
 const static std::string KEY_UNDER_LINE = "_";
 
 /**
+ * Indicates that disturbe key which middle line.
+ */
+const static std::string KEY_MIDDLE_LINE = "-";
+
+/**
  * Indicates that disturbe key which bundle begin key.
  */
 const static std::string KEY_ANS_BUNDLE = "ans_bundle";
@@ -1523,7 +1528,8 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
     }
 
     std::string key = std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(
-        KEY_UNDER_LINE).append(std::string(bundleName).append(KEY_UNDER_LINE));
+        KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
+    ANS_LOGD("key is %{public}s", key.c_str());
     int32_t result = NativeRdb::E_OK;
     std::unordered_map<std::string, std::string> values;
     result = rdbDataManager_->QueryDataBeginWithKey(key, values);
@@ -1536,6 +1542,7 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
 
     std::vector<std::string> keys;
     for (auto iter : values) {
+        ANS_LOGD("Get failed, key %{public}s", iter.first.c_str());
         keys.push_back(iter.first);
     }
 
@@ -1660,9 +1667,9 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
 {
-    return std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(KEY_UNDER_LINE).append(
-        std::string(bundleInfo.GetBundleName()).append(KEY_UNDER_LINE).append(std::to_string(
-            bundleInfo.GetBundleUid())).append(KEY_UNDER_LINE).append(deviceType));
+    return std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
+        std::string(bundleInfo.GetBundleName()).append(KEY_MIDDLE_LINE).append(std::to_string(
+            bundleInfo.GetBundleUid())).append(KEY_MIDDLE_LINE).append(deviceType));
 }
 
 template <typename T>
@@ -1713,8 +1720,8 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(const std::string &deviceType,
     const int32_t userId) const
 {
-    return std::string(KEY_SMART_REMINDER_ENABLE_NOTIFICATION).append(
-        deviceType).append(KEY_UNDER_LINE).append(std::to_string(userId));
+    return std::string(KEY_SMART_REMINDER_ENABLE_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
+        deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
 }
 
 

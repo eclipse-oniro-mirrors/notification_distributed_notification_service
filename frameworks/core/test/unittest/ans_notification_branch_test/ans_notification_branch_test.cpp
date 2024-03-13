@@ -212,6 +212,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetSlotByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode UpdateSlots(
         const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots) override
     {

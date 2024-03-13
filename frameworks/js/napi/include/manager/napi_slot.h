@@ -108,6 +108,20 @@ struct AsyncCallbackInfoGetSlotsByBundle {
     std::vector<sptr<NotificationSlot>> slots;
 };
 
+struct ParametersInfoGetSlotByBundle {
+    NotificationBundleOption option;
+    NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+    napi_ref callback = nullptr;
+};
+
+struct AsyncCallbackInfoGetSlotByBundle {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    ParametersInfoGetSlotByBundle params;
+    CallbackPromiseInfo info;
+    sptr<NotificationSlot> slot;
+};
+
 struct ParametersInfoRemoveSlot {
     NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
     napi_ref callback = nullptr;
@@ -188,6 +202,7 @@ napi_value NapiGetSlot(napi_env env, napi_callback_info info);
 napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info);
 napi_value NapiGetSlots(napi_env env, napi_callback_info info);
 napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info);
+napi_value NapiGetSlotByBundle(napi_env env, napi_callback_info info);
 napi_value NapiRemoveSlot(napi_env env, napi_callback_info info);
 napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info);
 napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info);
@@ -205,6 +220,8 @@ napi_value ParseParametersGetSlotNumByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotNumByBundle &params);
 napi_value ParseParametersGetSlotsByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotsByBundle &params);
+napi_value ParseParametersGetSlotByBundle(
+    const napi_env &env, const napi_callback_info &info, ParametersInfoGetSlotByBundle &params);
 napi_value ParseParametersByRemoveSlot(
     const napi_env &env, const napi_callback_info &info, ParametersInfoRemoveSlot &paras);
 napi_value ParseParametersEnableSlot(

@@ -478,6 +478,18 @@ public:
      */
     ErrCode GetNotificationSlotsForBundle(
         const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots);
+    
+    /**
+     * @brief Obtains notification slot belonging to the specified bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotType Indicates the type of the slot, which is created by AddNotificationSlot.
+     * @param slot Indicates a notification slot.
+     * @return Returns get notification slots for bundle result.
+     */
+    ErrCode GetNotificationSlotForBundle(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot);
 
     /**
      * @brief Updates all notification slots for the specified bundle.
@@ -731,6 +743,11 @@ public:
      * @brief Resets ans manager proxy when OnRemoteDied called.
      */
     void ResetAnsManagerProxy();
+
+    /**
+     * @brief try to reconnect ans SA when SA manager OnAddSystemAbility called.
+     */
+    void Reconnect();
 
     /**
      * @brief Publishes a scheduled reminder.
@@ -1028,7 +1045,6 @@ private:
 private:
     std::mutex mutex_;
     sptr<AnsManagerInterface> ansManagerProxy_;
-    sptr<AnsManagerDeathRecipient> recipient_;
 };
 }  // namespace Notification
 }  // namespace OHOS

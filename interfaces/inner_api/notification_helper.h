@@ -483,6 +483,18 @@ public:
         const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots);
 
     /**
+     * @brief Obtains all notification slots belonging to the specified bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotType Indicates the type of the slot, which is created by AddNotificationSlot.
+     * @param slot Indicates a notification slot.
+     * @return Returns get notification slots for bundle result.
+     */
+    static ErrCode GetNotificationSlotForBundle(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot);
+
+    /**
      * @brief Update all notification slots for the specified bundle.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
