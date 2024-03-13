@@ -98,6 +98,10 @@ ErrCode ReminderDataManager::CancelReminder(
         ANSR_LOGW("Cancel reminder, not find the reminder");
         return ERR_REMINDER_NOT_EXIST;
     }
+    if (!CheckIsSameApp(reminder, bundleOption)) {
+        ANSR_LOGW("Not find the reminder due to not match");
+        return ERR_REMINDER_NOT_EXIST;
+    }
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", reminderId);
         activeReminder_->OnStop();
@@ -1461,6 +1465,14 @@ bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder)
 bool ReminderDataManager::IsReminderAgentReady() const
 {
     return isReminderAgentReady_;
+}
+
+bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &other)
+{
+    std::string bundleName = reminder->GetCreatorBundleName();
+    int32_t uid = ReminderRequest::GetUid(reminder->GetUserId(), bundleName);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+    return IsBelongToSameApp(bundleOption, other);
 }
 
 bool ReminderDataManager::IsBelongToSameApp(const sptr<NotificationBundleOption> &bundleOption,
