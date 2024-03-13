@@ -606,6 +606,8 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
         std::vector<sptr<NotificationSlot>> slots;
         slots.push_back(slot);
         result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
+        ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
+            slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
     }
     return result;
 }
