@@ -87,19 +87,11 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!CheckLocalLiveViewAllowed(request)) {
-        return ERR_ANS_NON_SYSTEM_APP;
+    if (!InitPublishProcess()) {
+        return ERR_ANS_NO_MEMORY;
     }
 
-    if (!CheckLocalLiveViewSubscribed(request)) {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    if (!request->IsRemoveAllowed()) {
-        if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
-            request->SetRemoveAllowed(true);
-        }
-    }
+    publishProcess_[request->GetSlotType()]->PublishPreWork(request);
 
     ErrCode result = ERR_OK;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -108,28 +100,8 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     do {
-        if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
-            if (!AccessTokenHelper::IsSystemApp()) {
-                result = ERR_ANS_NON_SYSTEM_APP;
-                break;
-            }
-            if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-                result = ERR_ANS_PERMISSION_DENIED;
-                break;
-            }
-        }
-
-        // The third-party app needn't support in progress except for live view
-        if (request->IsInProgress() &&
-            !AccessTokenHelper::IsSystemApp() &&
-            !request->IsCommonLiveView()) {
-            request->SetInProgress(false);
-        }
-
-        Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
-        if (AccessTokenHelper::IsDlpHap(callerToken)) {
-            result = ERR_ANS_DLP_HAP;
-            ANS_LOGE("DLP hap not allowed to send notifications");
+        result = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
+        if (result != ERR_OK) {
             break;
         }
 
@@ -153,6 +125,38 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
     SendPublishHiSysEvent(request, result);
     return result;
+}
+
+bool AdvancedNotificationService::InitPublishProcess()
+{
+    if (publishProcess_.size() > 0) {
+        return true;
+    }
+
+    std::shared_ptr<LivePublishProcess> livePublishProcess = LivePublishProcess::GetInstance();
+    if (livePublishProcess != nullptr) {
+        ANS_LOGE("InitPublishProcess fail as livePublishProcess is nullptr.");
+        return false;
+    }
+    publishProcess_.insert_or_assign(NotificationConstant::SlotType::LIVE_VIEW, livePublishProcess);
+    std::shared_ptr<CommonNotificationPublishProcess> commonNotificationPublishProcess =
+        CommonNotificationPublishProcess::GetInstance();
+    if (commonNotificationPublishProcess == nullptr) {
+        ANS_LOGE("InitPublishProcess fail as commonNotificationPublishProcess is nullptr.");
+        publishProcess_.clear();
+        return false;
+    }
+    publishProcess_.insert_or_assign(
+        NotificationConstant::SlotType::SOCIAL_COMMUNICATION, commonNotificationPublishProcess);
+    publishProcess_.insert_or_assign(
+        NotificationConstant::SlotType::SERVICE_REMINDER, commonNotificationPublishProcess);
+    publishProcess_.insert_or_assign(
+        NotificationConstant::SlotType::OTHER, commonNotificationPublishProcess);
+    publishProcess_.insert_or_assign(
+        NotificationConstant::SlotType::CUSTOM, commonNotificationPublishProcess);
+    publishProcess_.insert_or_assign(
+        NotificationConstant::SlotType::CUSTOMER_SERVICE, commonNotificationPublishProcess);
+    return true;
 }
 
 ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::string &label)
@@ -1021,7 +1025,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
 ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std::string& bundleName)
 {
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    EraseLiveViewSubsciber(bundleName);
+    LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(bundleName);
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue is nullptr");
         return ERR_ANS_INVALID_PARAM;
@@ -1827,28 +1831,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
     return result;
 }
 
-void AdvancedNotificationService::AddLiveViewSubscriber()
-{
-    std::string bundleName = GetClientBundleName();
-    std::lock_guard<std::mutex> lock(liveViewMutext_);
-    localLiveViewSubscribedList_.emplace(bundleName);
-}
-
-void AdvancedNotificationService::EraseLiveViewSubsciber(const std::string &bundleName)
-{
-    std::lock_guard<std::mutex> lock(liveViewMutext_);
-    localLiveViewSubscribedList_.erase(bundleName);
-}
-
-bool AdvancedNotificationService::GetLiveViewSubscribeState(const std::string &bundleName)
-{
-    std::lock_guard<std::mutex> lock(liveViewMutext_);
-    if (localLiveViewSubscribedList_.find(bundleName) == localLiveViewSubscribedList_.end()) {
-        return false;
-    }
-    return true;
-}
-
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
@@ -1876,7 +1858,7 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
         }
     } while (0);
     if (errCode == ERR_OK) {
-        AddLiveViewSubscriber();
+        LivePublishProcess::GetInstance()->AddLiveViewSubscriber();
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
