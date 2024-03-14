@@ -639,5 +639,23 @@ HWTEST_F(ReminderDataManagerTest, IsBelongToSameAppTest_001, Level1)
     option2->SetBundleName("test1");
     EXPECT_FALSE(manager->IsBelongToSameApp(option1, option2));
 }
+
+/**
+ * @tc.name: CheckIsSameAppTest_001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I97Q9Q
+ */
+HWTEST_F(ReminderDataManagerTest, CheckIsSameAppTest_001, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    reminder->InitCreatorBundleName("test");
+    reminder->InitUserId(-1);
+    sptr<NotificationBundleOption> option = new NotificationBundleOption("test", -1);
+    EXPECT_TRUE(manager->CheckIsSameApp(reminder, option));
+
+    reminder->InitCreatorBundleName("test1");
+    EXPECT_FALSE(manager->CheckIsSameApp(reminder, option));
+}
 }  // namespace Notification
 }  // namespace OHOS
