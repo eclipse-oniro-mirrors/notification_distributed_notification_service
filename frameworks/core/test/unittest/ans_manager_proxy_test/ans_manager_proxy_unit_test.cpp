@@ -35,6 +35,7 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::Notification;
 using namespace std::placeholders;
+using namespace OHOS::Media;
 
 extern void MockWriteInterfaceToken(bool mockRet);
 
@@ -53,6 +54,7 @@ public:
     void SetUp();
 
     void TearDown();
+    std::shared_ptr<PixelMap> MakeNewPixelMap(int32_t width, int32_t height);
 };
 
 void AnsManagerProxyUnitTest::SetUpTestCase()
@@ -380,6 +382,69 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0600, Function | MediumTest | Leve
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->Publish(label, notification);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+std::shared_ptr<PixelMap> AnsManagerProxyUnitTest::MakeNewPixelMap(int32_t width, int32_t height)
+{
+    const int32_t PIXEL_BYTES = 4;
+    std::shared_ptr<PixelMap> pixelMap = std::make_shared<PixelMap>();
+    if (pixelMap == nullptr) {
+        return nullptr;
+    }
+    ImageInfo info;
+    info.size.width = width;
+    info.size.height = height;
+    info.pixelFormat = PixelFormat::ARGB_8888;
+    info.colorSpace = ColorSpace::SRGB;
+    pixelMap->SetImageInfo(info);
+    int32_t rowDataSize = width * PIXEL_BYTES;
+    uint32_t bufferSize = rowDataSize * height;
+    void *buffer = malloc(bufferSize);
+    if (buffer != nullptr) {
+        pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
+    }
+    return pixelMap;
+}
+
+/*
+ * @tc.name: PublishTest_0700
+ * @tc.desc: test Publish function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0700, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, PublishTest_0700, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, true, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::string label = "label";
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    NotificationRequest request(1);
+    request.SetSlotType(slotType);
+    request.SetNotificationId(1);
+
+    int pictureWidth = 1024;
+    int pictureLength = 1024 * 2 + 1;
+    auto basicContent = std::make_shared<NotificationBasicContent>();
+    basicContent->SetLockScreenPicture(MakeNewPixelMap(pictureWidth, pictureLength));
+    auto result = request.CheckLockScreenPictureSizeForLiveView(basicContent);
+    EXPECT_EQ(ERR_ANS_PICTURE_OVER_SIZE, result);
+
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLockScreenPicture(MakeNewPixelMap(1, 1));
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request.SetContent(content);
+
+    sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
+    ASSERT_NE(nullptr, notification);
+    result = proxy->Publish(label, notification);
+    EXPECT_EQ(ERR_OK, result);
 }
 
 /*
