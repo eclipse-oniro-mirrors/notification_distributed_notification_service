@@ -1889,10 +1889,6 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (bundleOption->GetUid() <= 0) {
-        bundleOption->SetUid(IPCSkeleton::GetCallingUid());
-    }
-
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
@@ -1916,10 +1912,6 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
         return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    if (bundleOption->GetUid() <= 0) {
-        bundleOption->SetUid(IPCSkeleton::GetCallingUid());
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
