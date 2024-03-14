@@ -73,7 +73,7 @@ bool NotificationBasicContent::ToJson(nlohmann::json &jsonObject) const
     jsonObject["text"]           = text_;
     jsonObject["title"]          = title_;
     jsonObject["additionalText"] = additionalText_;
-    jsonObject["lockScreenPicture"] = AnsImageUtil::PackImage(lockScreenPicture_);
+    jsonObject["lockscreenPicture"] = AnsImageUtil::PackImage(lockScreenPicture_);
 
     return true;
 }
@@ -98,8 +98,8 @@ void NotificationBasicContent::ReadFromJson(const nlohmann::json &jsonObject)
         additionalText_ = jsonObject.at("additionalText").get<std::string>();
     }
 
-    if (jsonObject.find("lockScreenPicture") != jsonEnd && jsonObject.at("lockScreenPicture").is_string()) {
-        auto lockScreenPictureStr = jsonObject.at("lockScreenPicture").get<std::string>();
+    if (jsonObject.find("lockscreenPicture") != jsonEnd && jsonObject.at("lockscreenPicture").is_string()) {
+        auto lockScreenPictureStr = jsonObject.at("lockscreenPicture").get<std::string>();
         lockScreenPicture_ = AnsImageUtil::UnPackImage(lockScreenPictureStr);
     }
 }

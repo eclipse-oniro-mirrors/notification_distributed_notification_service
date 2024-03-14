@@ -1433,9 +1433,9 @@ napi_value Common::GetLockScreenPicture(
     const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent)
 {
     bool hasProperty = false;
-    NAPI_CALL(env, napi_has_named_property(env, contentResult, "lockScreenPicture", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "lockscreenPicture", &hasProperty));
     if (hasProperty) {
-        auto value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "lockScreenPicture", napi_object);
+        auto value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "lockscreenPicture", napi_object);
         if (value == nullptr) {
             ANS_LOGE("Failed to get lockScreenPicture from js.");
             return nullptr;
@@ -1464,9 +1464,9 @@ napi_value Common::SetLockScreenPicture(
     NAPI_CALL(env, napi_typeof(env, pictureValue, &valuetype));
     if (valuetype == napi_undefined) {
         ANS_LOGI("LockScreenPicture is undefined");
-        napi_set_named_property(env, result, "lockScreenPicture", NapiGetNull(env));
+        napi_set_named_property(env, result, "lockscreenPicture", NapiGetNull(env));
     } else {
-        napi_set_named_property(env, result, "lockScreenPicture", pictureValue);
+        napi_set_named_property(env, result, "lockscreenPicture", pictureValue);
     }
 
     return NapiGetBoolean(env, true);
