@@ -28,8 +28,10 @@
 
 #include "ans_const_define.h"
 #include "ans_manager_stub.h"
+#include "common_notification_publish_process.h"
 #include "distributed_kv_data_manager.h"
 #include "distributed_kvstore_death_recipient.h"
+#include "live_publish_process.h"
 #include "notification.h"
 #include "notification_bundle_option.h"
 #include "notification_dialog_manager.h"
@@ -907,7 +909,7 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled) override;
-    
+
     /**
      * @brief Get whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
@@ -1018,6 +1020,11 @@ public:
      * @return Returns cancel result.
      */
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+
+    /**
+     * @brief Init publish process.
+     */
+    bool InitPublishProcess();
 
 protected:
     /**
@@ -1171,11 +1178,6 @@ private:
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
         int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);
-    void AddLiveViewSubscriber();
-    void EraseLiveViewSubsciber(const std::string &bundleName);
-    bool GetLiveViewSubscribeState(const std::string &bundleName);
-    bool CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request);
-    bool CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request);
     std::shared_ptr<NotificationRecord> MakeNotificationRecord(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
@@ -1213,6 +1215,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
     std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
     static std::string supportCheckSaPermission_;
+    std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;
@@ -1220,8 +1223,6 @@ private:
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
-    std::set<std::string> localLiveViewSubscribedList_;
-    std::mutex liveViewMutext_;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
 };
 

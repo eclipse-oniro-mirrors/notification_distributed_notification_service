@@ -1685,32 +1685,6 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
     return true;
 }
 
-bool AdvancedNotificationService::CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request)
-{
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
-        request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW &&
-        !GetLiveViewSubscribeState(GetClientBundleName())) {
-        ANS_LOGE("Not subscribe local live view.");
-        return false;
-    }
-    return true;
-}
-
-bool AdvancedNotificationService::CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request)
-{
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
-        request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW) {
-            bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-            if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-                ANS_LOGE("Client is not a system app or subsystem");
-                return false;
-            } else {
-                return true;
-            }
-    }
-    return true;
-}
-
 ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
