@@ -89,11 +89,9 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
-     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode CancelAsBundle(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label = "") = 0;
+    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) = 0;
 
     /**
      * @brief Cancels a published agent notification.
@@ -103,11 +101,10 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
-     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
-        int32_t userId, const std::string &label = "") = 0;
+    virtual ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) = 0;
 
     /**
      * @brief Adds a notification slot by type.
@@ -858,6 +855,15 @@ public:
      */
     virtual ErrCode IsDistributedEnabledByBundle(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, bool &enabled) = 0;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    virtual ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

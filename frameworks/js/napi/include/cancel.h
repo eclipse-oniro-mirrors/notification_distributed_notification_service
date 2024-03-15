@@ -27,6 +27,8 @@ struct ParametersInfoCancel {
     int32_t id = 0;
     std::string label = "";
     napi_ref callback = nullptr;
+    NotificationBundleOption option;
+    bool hasOption = false;
 };
 
 struct AsyncCallbackInfoCancel {
@@ -35,6 +37,8 @@ struct AsyncCallbackInfoCancel {
     int32_t id = 0;
     std::string label;
     CallbackPromiseInfo info;
+    NotificationBundleOption option;
+    bool hasOption = false;
 };
 
 struct ParametersInfoCancelGroup {
@@ -56,7 +60,6 @@ struct  ParametersInfoCancelAsBundle {
     NotificationBundleOption option;
     bool hasOption = false;
     napi_ref callback = nullptr;
-    std::string label = "";
 };
 
 struct AsyncCallbackInfoCancelAsBundle {
@@ -68,7 +71,6 @@ struct AsyncCallbackInfoCancelAsBundle {
     NotificationBundleOption option;
     bool hasOption = false;
     CallbackPromiseInfo info;
-    std::string label = "";
 };
 
 napi_value Cancel(napi_env env, napi_callback_info info);

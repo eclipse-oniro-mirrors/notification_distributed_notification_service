@@ -190,11 +190,9 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
-     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(
-        const NotificationBundleOption &bundleOption, int32_t notificationId, const std::string &label = "");
+    ErrCode CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId);
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -994,6 +992,15 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    ErrCode CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id);
 
 private:
     /**

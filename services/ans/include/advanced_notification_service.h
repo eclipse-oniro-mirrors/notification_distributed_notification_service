@@ -129,11 +129,9 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
-     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
-        const std::string &label = "") override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -143,11 +141,10 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
-     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId,
-        const std::string &label = "") override;
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
 
     /**
      * @brief Adds a notification slot by type.
@@ -1013,6 +1010,15 @@ public:
      */
     ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
 
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1182,8 +1188,6 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
-    ErrCode CancelAsBundleWithAgent(
-        const sptr<NotificationBundleOption> &bundleOption, const int32_t id, const std::string &label, int32_t userId);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();

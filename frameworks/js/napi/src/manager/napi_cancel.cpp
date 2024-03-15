@@ -29,8 +29,14 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoCancel *asynccallbackinfo = new (std::nothrow)
-        AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr, .id = paras.id, .label = paras.label};
+    AsyncCallbackInfoCancel *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoCancel {
+        .env = env,
+        .asyncWork = nullptr,
+        .id = paras.id,
+        .label = paras.label,
+        .option = paras.option,
+        .hasOption = paras.hasOption
+    };
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, paras.callback);
     }
@@ -48,8 +54,13 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
 
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::CancelNotification(asynccallbackinfo->label, asynccallbackinfo->id);
+                if (asynccallbackinfo->hasOption) {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundleWithAgent(
+                        asynccallbackinfo->option, asynccallbackinfo->id);
+                } else {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::CancelNotification(asynccallbackinfo->label, asynccallbackinfo->id);
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -216,8 +227,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
         .representativeBundle = paras.representativeBundle,
         .option = paras.option,
         .hasOption = paras.hasOption,
-        .userId = paras.userId,
-        .label = paras.label
+        .userId = paras.userId
     };
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, paras.callback);
@@ -238,7 +248,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->hasOption) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundle(
-                        asynccallbackinfo->option, asynccallbackinfo->id, asynccallbackinfo->label);
+                        asynccallbackinfo->option, asynccallbackinfo->id);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundle(
                         asynccallbackinfo->id, asynccallbackinfo->representativeBundle, asynccallbackinfo->userId);

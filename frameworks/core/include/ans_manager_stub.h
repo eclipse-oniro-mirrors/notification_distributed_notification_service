@@ -91,11 +91,9 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
-     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption,
-        int32_t notificationId, const std::string &label = "") override;
+    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -105,11 +103,10 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
-     * @param label Indicates the label of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
-        int32_t userId, const std::string &label = "") override;
+    virtual ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
 
     /**
      * @brief Adds a notification slot by type.
@@ -802,6 +799,16 @@ public:
     virtual ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
 
     /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    virtual ErrCode CancelAsBundleWithAgent(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
@@ -945,6 +952,7 @@ private:
     ErrCode HandleIsDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {
