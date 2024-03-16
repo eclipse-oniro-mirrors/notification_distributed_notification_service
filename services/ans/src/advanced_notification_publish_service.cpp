@@ -134,7 +134,7 @@ bool AdvancedNotificationService::InitPublishProcess()
     }
 
     std::shared_ptr<LivePublishProcess> livePublishProcess = LivePublishProcess::GetInstance();
-    if (livePublishProcess != nullptr) {
+    if (livePublishProcess == nullptr) {
         ANS_LOGE("InitPublishProcess fail as livePublishProcess is nullptr.");
         return false;
     }
