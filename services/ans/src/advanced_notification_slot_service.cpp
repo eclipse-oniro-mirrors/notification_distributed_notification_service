@@ -181,6 +181,10 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
         result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
     }));
     notificationSvrQueue_->wait(handler);
+    if (slot != nullptr) {
+        ANS_LOGD("GetSlotByBundle, authStatus: %{public}d), authHintCnt: %{public}d",
+            slot->GetAuthorizedStatus(), slot->GetAuthHintCnt());
+    }
     return result;
 }
 
