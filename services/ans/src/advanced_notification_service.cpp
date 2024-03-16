@@ -218,6 +218,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (request == nullptr) {
+        ANSR_LOGE("NotificationRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     if (request->IsAgentNotification()) {
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
