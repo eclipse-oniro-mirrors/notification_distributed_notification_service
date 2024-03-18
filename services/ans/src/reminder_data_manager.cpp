@@ -1467,7 +1467,8 @@ bool ReminderDataManager::IsReminderAgentReady() const
     return isReminderAgentReady_;
 }
 
-bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &other)
+bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder,
+    const sptr<NotificationBundleOption> &other)
 {
     std::string bundleName = reminder->GetCreatorBundleName();
     int32_t uid = ReminderRequest::GetUid(reminder->GetUserId(), bundleName);
