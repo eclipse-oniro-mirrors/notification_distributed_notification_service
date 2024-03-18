@@ -1222,8 +1222,8 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
     }
 
     auto overlayIcon = request.GetOverlayIcon();
-    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
-        ANS_LOGE("The size of big icon exceeds limit");
+    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
+        ANS_LOGE("The size of overlay icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
