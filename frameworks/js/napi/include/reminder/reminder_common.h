@@ -155,7 +155,7 @@ private:
         const char* propertyName, napi_value& propertyVal);
 
     static bool GenWantAgent(const napi_env &env, const napi_value &value, const char* name,
-        std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp);
+        std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo);
 
     static void GenMaxScreenWantAgent(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
