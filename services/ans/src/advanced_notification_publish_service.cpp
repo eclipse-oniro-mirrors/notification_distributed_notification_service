@@ -151,11 +151,15 @@ bool AdvancedNotificationService::InitPublishProcess()
     publishProcess_.insert_or_assign(
         NotificationConstant::SlotType::SERVICE_REMINDER, commonNotificationPublishProcess);
     publishProcess_.insert_or_assign(
+        NotificationConstant::SlotType::CONTENT_INFORMATION, commonNotificationPublishProcess);
+    publishProcess_.insert_or_assign(
         NotificationConstant::SlotType::OTHER, commonNotificationPublishProcess);
     publishProcess_.insert_or_assign(
         NotificationConstant::SlotType::CUSTOM, commonNotificationPublishProcess);
     publishProcess_.insert_or_assign(
         NotificationConstant::SlotType::CUSTOMER_SERVICE, commonNotificationPublishProcess);
+    publishProcess_.insert_or_assign(
+        NotificationConstant::SlotType::EMERGENCY_INFORMATION, commonNotificationPublishProcess);
     return true;
 }
 
