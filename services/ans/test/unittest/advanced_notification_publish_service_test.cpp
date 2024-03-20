@@ -29,6 +29,7 @@
 #include "notification_constant.h"
 #include "ans_ut_constant.h"
 #include "ans_dialog_host_client.h"
+#include "mock_push_callback_stub.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -48,6 +49,7 @@ public:
 
 private:
     void TestAddNotification(int notificationId, const sptr<NotificationBundleOption> &bundle);
+    void RegisterPushCheck();
 
 private:
     static sptr<AdvancedNotificationService> advancedNotificationService_;
@@ -92,6 +94,18 @@ void AnsPublishServiceTest::TestAddNotification(int notificationId, const sptr<N
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
 }
 
+void AnsPublishServiceTest::RegisterPushCheck()
+{
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
+    checkRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
+}
 /**
  * @tc.name: Publish_00001
  * @tc.desc: Test Publish
@@ -154,11 +168,10 @@ HWTEST_F(AnsPublishServiceTest, Publish_00003, Function | SmallTest | Level1)
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
-
+    RegisterPushCheck();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-
     auto ret = advancedNotificationService_->Publish(label, request);
     EXPECT_EQ(ret, (int)ERR_OK);
 
@@ -185,7 +198,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
-
+    RegisterPushCheck();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);

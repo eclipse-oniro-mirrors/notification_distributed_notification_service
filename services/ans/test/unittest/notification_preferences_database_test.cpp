@@ -929,7 +929,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GenerateBundleLablel_0100, TestSiz
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "test";
     auto ret = preferncesDB_->GenerateBundleLablel(bundleInfo, deviceType);
-    EXPECT_EQ(ret, "name_1_test");
+    EXPECT_EQ(ret, "enabledNotificationDistributed-name-1-test");
 }
 
 /**
