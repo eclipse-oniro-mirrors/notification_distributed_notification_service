@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service_ability.h"
+#include "notification_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -33,6 +34,10 @@ void AdvancedNotificationServiceAbility::OnStart()
     if (service_ != nullptr) {
         return;
     }
+
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->InitExtentionWrapper();
+#endif
 
     service_ = AdvancedNotificationService::GetInstance();
     if (!Publish(service_)) {

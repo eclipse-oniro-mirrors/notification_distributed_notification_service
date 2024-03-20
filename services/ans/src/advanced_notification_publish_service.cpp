@@ -31,6 +31,7 @@
 #include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
 #include "distributed_screen_status_manager.h"
+#include "notification_extension_wrapper.h"
 #include "notification_local_live_view_subscriber_manager.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -1720,6 +1721,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     if (result != ERR_OK) {
         return result;
     }
+
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
+#endif
 
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;

@@ -54,6 +54,7 @@ declare_args() {
   standby_enable = true
   player_framework = true
   ans_hitrace_usage = true
+  notification_ext_feature_summary = false
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
