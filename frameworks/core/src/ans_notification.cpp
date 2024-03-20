@@ -33,6 +33,7 @@ namespace Notification {
 namespace {
 const int32_t MAX_RETRY_TIME = 30;
 const int32_t SLEEP_TIME = 1000;
+const std::string LIVE_VIEW_LABEL = "ans_live_view";
 }
 ErrCode AnsNotification::AddNotificationSlot(const NotificationSlot &slot)
 {
@@ -204,9 +205,14 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
         ANS_LOGE("Create notificationRequest ptr fail.");
         return ERR_ANS_NO_MEMORY;
     }
+
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
+    if (reqPtr->IsCommonLiveView() && reqPtr->GetLabel().empty()) {
+        reqPtr->SetLabel(LIVE_VIEW_LABEL);
+    }
+
     return ansManagerProxy_->Publish(label, reqPtr);
 }
 
