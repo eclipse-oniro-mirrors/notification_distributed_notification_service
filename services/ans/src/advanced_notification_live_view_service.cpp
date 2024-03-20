@@ -200,6 +200,11 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         return ERR_OK;
     }
 
+    if (content->GetIsOnlylocalUpdate() && request->IsCommonLiveView()) {
+        ANS_LOGI("Not saving notification request to db for common live view with isOnlyLocalUpdate set to true.");
+        return ERR_OK;
+    }
+
     nlohmann::json jsonObject;
     if (!NotificationJsonConverter::ConvertToJson(request, jsonObject)) {
         ANS_LOGE("Convert request to json object failed, bundle name %{public}s, id %{public}d.",

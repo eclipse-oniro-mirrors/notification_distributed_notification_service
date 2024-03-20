@@ -90,6 +90,20 @@ HWTEST_F(NotificationLiveViewContentTest, SetPicture_00001, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetIsOnlylocalUpdate_00001
+ * @tc.desc: Test SetIsOnlylocalUpdate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, SetIsOnlylocalUpdate_00001, Function | SmallTest | Level1)
+{
+    bool isOnlyLocalUpdate_ = true;
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    rrc->SetIsOnlylocalUpdate(isOnlyLocalUpdate_);
+    EXPECT_EQ(rrc->GetIsOnlylocalUpdate(), isOnlyLocalUpdate_);
+}
+
+/**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump parameters.
  * @tc.type: FUNC
@@ -153,6 +167,10 @@ HWTEST_F(NotificationLiveViewContentTest, JsonConvert_00001, Function | SmallTes
 
     rrc->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     rrc->SetVersion(NotificationLiveViewContent::MAX_VERSION);
+
+    bool isOnlyLocalUpdate_ = true;
+    rrc->SetIsOnlylocalUpdate(isOnlyLocalUpdate_);
+
     rrc->SetTitle("title");
     rrc->SetText("text");
     rrc->SetAdditionalText("addText");
@@ -173,6 +191,7 @@ HWTEST_F(NotificationLiveViewContentTest, JsonConvert_00001, Function | SmallTes
     EXPECT_EQ(ptr->GetVersion(), NotificationLiveViewContent::MAX_VERSION);
     EXPECT_NE(ptr->GetExtraInfo(), nullptr);
     EXPECT_EQ(ptr->GetPicture().size(), 1);
+    EXPECT_EQ(ptr->GetIsOnlylocalUpdate(), false);
     delete ptr;
 }
 
@@ -216,6 +235,10 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallConvert_00001, Function | Smal
     rrc->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
     uint32_t version = NotificationLiveViewContent::MAX_VERSION - 1;
     rrc->SetVersion(version);
+
+    bool isOnlyLocalUpdate_ = true;
+    rrc->SetIsOnlylocalUpdate(isOnlyLocalUpdate_);
+
     rrc->SetTitle("title");
     rrc->SetText("text");
     rrc->SetAdditionalText("addText");
@@ -232,6 +255,7 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallConvert_00001, Function | Smal
     EXPECT_EQ(ptr->GetVersion(), version);
     EXPECT_NE(ptr->GetExtraInfo(), nullptr);
     EXPECT_EQ(ptr->GetPicture().size(), 2);
+    EXPECT_EQ(ptr->GetIsOnlylocalUpdate(), false);
     delete ptr;
 }
 

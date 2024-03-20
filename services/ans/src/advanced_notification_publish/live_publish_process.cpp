@@ -88,6 +88,15 @@ bool LivePublishProcess::CheckLocalLiveViewSubscribed(const sptr<NotificationReq
         ANS_LOGE("Not subscribe local live view.");
         return false;
     }
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+        request->GetContent()->GetNotificationContent());
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
+        request->GetNotificationType() == NotificationContent::Type::LIVE_VIEW &&
+        liveViewContent->GetIsOnlylocalUpdate() &&
+        !GetLiveViewSubscribeState(GetClientBundleName())) {
+        ANS_LOGE("Not subscribe common live view.");
+        return false;
+    }
     return true;
 }
 

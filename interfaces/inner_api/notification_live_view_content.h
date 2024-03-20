@@ -147,6 +147,10 @@ public:
 
     PictureMarshallingMap GetPictureMarshallingMap() const;
 
+    void SetIsOnlylocalUpdate(const bool &isOnlylocalUpdate);
+
+    bool GetIsOnlylocalUpdate() const;
+
 protected:
     /**
      * @brief Read a NotificationLiveViewContent object from a Parcel.
@@ -163,6 +167,7 @@ private:
     std::shared_ptr<AAFwk::WantParams> extraInfo_ {};
     PictureMap pictureMap_ {};
     PictureMarshallingMap pictureMarshallingMap_ {};
+    bool isOnlylocalUpdate_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -62,6 +62,16 @@ PictureMap NotificationLiveViewContent::GetPicture() const
     return pictureMap_;
 }
 
+void NotificationLiveViewContent::SetIsOnlylocalUpdate(const bool &isOnlylocalUpdate)
+{
+    isOnlylocalUpdate_ = isOnlylocalUpdate;
+}
+
+bool NotificationLiveViewContent::GetIsOnlylocalUpdate() const
+{
+    return isOnlylocalUpdate_;
+}
+
 std::string NotificationLiveViewContent::Dump()
 {
     std::string extraStr{"null"};
@@ -212,6 +222,11 @@ bool NotificationLiveViewContent::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(isOnlylocalUpdate_)) {
+        ANS_LOGE("OnlylocalUpdate is Failed to write.");
+        return false;
+    }
+
     return MarshallingPictureMap(parcel);
 }
 
@@ -260,6 +275,8 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
         }
         pictureMap_[key] = pixelMapVec;
     }
+
+    isOnlylocalUpdate_ = parcel.ReadBool();
 
     return true;
 }
