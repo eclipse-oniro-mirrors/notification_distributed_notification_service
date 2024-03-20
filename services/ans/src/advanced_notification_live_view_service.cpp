@@ -57,6 +57,11 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
             continue;
         }
 
+        if (FlowControl(record) != ERR_OK) {
+            ANS_LOGE("Flow control failed.");
+            continue;
+        }
+
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Add notification to record list failed.");
             continue;
