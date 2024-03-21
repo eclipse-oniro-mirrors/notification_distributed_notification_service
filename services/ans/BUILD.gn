@@ -63,6 +63,7 @@ ohos_shared_library("libans") {
     "src/notification_config_parse.cpp",
     "src/notification_dialog.cpp",
     "src/notification_dialog_manager.cpp",
+    "src/notification_extension_wrapper.cpp",
     "src/notification_local_live_view_subscriber_manager.cpp",
     "src/notification_preferences.cpp",
     "src/notification_preferences_database.cpp",
@@ -150,6 +151,10 @@ ohos_shared_library("libans") {
   if (ans_hitrace_usage) {
     external_deps += [ "hitrace:hitrace_meter" ]
     defines += [ "HITRACE_METER_ENABLE" ]
+  }
+
+  if (notification_ext_feature_summary) {
+    defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
   }
 
   subsystem_name = "${subsystem_name}"
