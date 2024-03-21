@@ -2080,8 +2080,6 @@ void ReminderRequest::RecoverBasicFromOldVersion(const std::shared_ptr<NativeRdb
 
     // expiredContent
     ReminderStore::GetStringVal(resultSet, ReminderTable::EXPIRED_CONTENT, expiredContent_);
-
-    InitNotificationRequest();  // must set before wantAgent & maxScreenWantAgent
 }
 
 void ReminderRequest::RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
