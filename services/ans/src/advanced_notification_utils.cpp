@@ -1018,7 +1018,7 @@ void AdvancedNotificationService::OnDistributedDelete(
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
-                notificationList_.remove(record);
+                RemoveNotificationList(record);
                 break;
             }
         }

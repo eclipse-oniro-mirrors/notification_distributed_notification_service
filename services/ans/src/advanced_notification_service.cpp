@@ -30,6 +30,7 @@
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
 #include "errors.h"
+#include "notification_extension_wrapper.h"
 #include "notification_record.h"
 #ifdef DEVICE_USAGE_STATISTICS_ENABLE
 #include "bundle_active_client.h"
@@ -949,7 +950,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             }
 
             ProcForDeleteLiveView(record);
-            notificationList_.remove(record);
+            RemoveNotificationList(record);
             return ERR_OK;
         }
     }
@@ -977,7 +978,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
             }
         }
 
-        notificationList_.remove(record);
+        RemoveNotificationList(record);
         return ERR_OK;
     }
 
@@ -999,7 +1000,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
             ProcForDeleteLiveView(record);
 
             notification = record->notification;
-            notificationList_.remove(record);
+            RemoveNotificationList(record);
             return ERR_OK;
         }
     }
@@ -1197,7 +1198,7 @@ ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<No
         bundleList.sort(SortNotificationsByLevelAndTime);
         recordToRemove = bundleList.front();
         SendFlowControlOccurHiSysEvent(recordToRemove);
-        notificationList_.remove(bundleList.front());
+        RemoveNotificationList(bundleList.front());
     }
 
     if (notificationList_.size() >= MAX_ACTIVE_NUM) {
@@ -1205,13 +1206,13 @@ ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<No
             bundleList.sort(SortNotificationsByLevelAndTime);
             recordToRemove = bundleList.front();
             SendFlowControlOccurHiSysEvent(recordToRemove);
-            notificationList_.remove(bundleList.front());
+            RemoveNotificationList(bundleList.front());
         } else {
             std::list<std::shared_ptr<NotificationRecord>> sorted = notificationList_;
             sorted.sort(SortNotificationsByLevelAndTime);
             recordToRemove = sorted.front();
             SendFlowControlOccurHiSysEvent(recordToRemove);
-            notificationList_.remove(sorted.front());
+            RemoveNotificationList(sorted.front());
         }
     }
 
@@ -1734,7 +1735,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
             UpdateRecentNotification(record->notification, true, reason);
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteLiveView(record);
-            notificationList_.remove(record);
+            RemoveNotificationList(record);
             break;
         }
     }
@@ -1836,6 +1837,16 @@ void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     ANS_LOGI("Push Callback died, remove the proxy object");
     AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
+}
+
+void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record)
+{
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    std::vector<std::string> hashCodes;
+    hashCodes.emplace_back(record->request->GetNotificationHashCode());
+    EXTENTION_WRAPPER->UpdateByCancel(hashCodes);
+#endif
+    notificationList_.remove(record);
 }
 
 PushCallbackRecipient::PushCallbackRecipient() {}
