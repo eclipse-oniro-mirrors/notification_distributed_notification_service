@@ -1065,6 +1065,7 @@ private:
     static bool NotificationCompare(
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
     ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode PublishFlowControl(const std::shared_ptr<NotificationRecord> &record);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
     static sptr<NotificationBundleOption> GenerateBundleOption();
@@ -1206,8 +1207,10 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
+    static std::mutex flowControlMutex_;
     std::list<std::chrono::system_clock::time_point> flowControlTimestampList_;
     std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
+    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;

@@ -87,6 +87,7 @@ const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
 std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
+std::mutex AdvancedNotificationService::flowControlMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
@@ -313,7 +314,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
 {
     ErrCode result = ERR_OK;
     if (!IsNotificationExists(record->notification->GetKey())) {
-        result = FlowControl(record);
+        result = PublishFlowControl(record);
     } else {
         if (record->request->IsAlertOneTime()) {
             record->notification->SetEnableLight(false);
@@ -548,6 +549,10 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         return result;
     }
 
+    result = FlowControl(record);
+    if (result != ERR_OK) {
+        return result;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
@@ -1160,12 +1165,25 @@ static bool SortNotificationsByLevelAndTime(
 ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::lock_guard<std::mutex> lock(flowControlMutex_);
     RemoveExpired(flowControlTimestampList_, now);
-    if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
+    if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
+        return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+    }
+    flowControlTimestampList_.push_back(now);
+
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<NotificationRecord> &record)
+{
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    RemoveExpired(flowControlPublishTimestampList_, now);
+    if (flowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
 
-    flowControlTimestampList_.push_back(now);
+    flowControlPublishTimestampList_.push_back(now);
 
     std::list<std::shared_ptr<NotificationRecord>> bundleList;
     for (auto item : notificationList_) {

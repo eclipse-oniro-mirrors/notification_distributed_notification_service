@@ -1745,6 +1745,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
+
+    result = FlowControl(record);
+    if (result != ERR_OK) {
+        return result;
+    }
+
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
         if (!record->bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record);

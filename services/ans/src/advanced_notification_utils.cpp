@@ -878,7 +878,7 @@ void AdvancedNotificationService::OnDistributedPublish(
             return;
         }
 
-        result = FlowControl(record);
+        result = PublishFlowControl(record);
         if (result != ERR_OK) {
             return;
         }
