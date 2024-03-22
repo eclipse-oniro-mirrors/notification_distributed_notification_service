@@ -1197,6 +1197,7 @@ private:
     bool IsDuplicateMsg(const std::string &uniqueKey);
     ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record);
+    std::vector<AppExecFwk::BundleInfo> GetBundlesOfActiveUser();
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

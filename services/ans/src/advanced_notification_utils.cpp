@@ -576,6 +576,11 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
+
+            errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            if (errCode != ERR_OK) {
+                ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
+            }
         }
     };
 
@@ -607,6 +612,11 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
+
+            errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            if (errCode != ERR_OK) {
+                ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
+            }
             return;
         }
 
@@ -619,6 +629,10 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
         if (errCode != ERR_OK) {
             ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
+        }
+        errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+        if (errCode != ERR_OK) {
+            ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
         }
     };
 
@@ -1616,29 +1630,9 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::InitNotificationEnableList()
 {
-    auto task = []() {
-        auto bundleMgr = BundleManagerHelper::GetInstance();
-        if (bundleMgr == nullptr) {
-            ANS_LOGE("Get bundle mgr error!");
-            return;
-        }
-        std::vector<int32_t> activeUserId;
-        AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-        if (activeUserId.empty()) {
-            activeUserId.push_back(MAIN_USER_ID);
-        }
-        AppExecFwk::BundleFlag flag = AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
-        std::vector<AppExecFwk::BundleInfo> bundleInfos;
-        for (auto &itemUser: activeUserId) {
-            std::vector<AppExecFwk::BundleInfo> infos;
-            if (!bundleMgr->GetBundleInfos(flag, infos, itemUser)) {
-                ANS_LOGW("Get bundle infos error");
-                continue;
-            }
-            bundleInfos.insert(bundleInfos.end(), infos.begin(), infos.end());
-        }
+    auto task = [&]() {
+        std::vector<AppExecFwk::BundleInfo> bundleInfos = GetBundlesOfActiveUser();
         bool notificationEnable = false;
-        ErrCode saveRef = ERR_OK;
         for (const auto &bundleInfo : bundleInfos) {
             // Currently only the input from the whitelist is written
             if (!bundleInfo.applicationInfo.allowEnableNotification) {
@@ -1651,16 +1645,19 @@ void AdvancedNotificationService::InitNotificationEnableList()
                     bundleInfo.applicationInfo.bundleName.c_str());
                 continue;
             }
-            saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
+            ErrCode saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
                 bundleOption, notificationEnable);
             // record already exists
             if (saveRef == ERR_OK) {
                 continue;
             }
-            saveRef = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
-                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
+            saveRef = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleOption, true);
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set enable error! code: %{public}d", saveRef);
+            }
+            saveRef = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            if (saveRef != ERR_OK) {
+                ANS_LOGE("Set badge enable error! code: %{public}d", saveRef);
             }
         }
     };
@@ -1719,6 +1716,33 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
 
     bundleOption->SetUid(uid);
     return ERR_OK;
+}
+
+std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfActiveUser()
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    auto bundleMgr = BundleManagerHelper::GetInstance();
+    if (bundleMgr == nullptr) {
+        ANS_LOGE("Get bundle mgr error!");
+        return bundleInfos;
+    }
+
+    std::vector<int32_t> activeUserId;
+    AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+    if (activeUserId.empty()) {
+        activeUserId.push_back(MAIN_USER_ID);
+    }
+    AppExecFwk::BundleFlag flag = AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
+    for (auto &itemUser: activeUserId) {
+        std::vector<AppExecFwk::BundleInfo> infos;
+        if (!bundleMgr->GetBundleInfos(flag, infos, itemUser)) {
+            ANS_LOGW("Get bundle infos error");
+            continue;
+        }
+        bundleInfos.insert(bundleInfos.end(), infos.begin(), infos.end());
+    }
+
+    return bundleInfos;
 }
 }  // namespace Notification
 }  // namespace OHOS
