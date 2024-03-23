@@ -67,7 +67,6 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V4:
                 CreateTable(store);
-                CopyData(store);
                 [[fallthrough]];
             default:
                 break;
