@@ -1022,7 +1022,7 @@ bool ReminderRequest::SetNextTriggerTime()
     return false;
 }
 
-std::string ReminderRequest::GetWantAgentStr();
+std::string ReminderRequest::GetWantAgentStr()
 {
     return wantAgentStr_;
 }
