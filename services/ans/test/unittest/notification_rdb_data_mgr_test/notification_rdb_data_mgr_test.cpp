@@ -214,11 +214,23 @@ class RdbStoreTest : public RdbStore {
         {
             return NativeRdb::E_ERROR;
         };
+        virtual std::pair<int, int64_t> BeginTrans()
+        {
+            return {NativeRdb::E_ERROR, 0};
+        };
         virtual int RollBack()
         {
             return NativeRdb::E_ERROR;
         };
+        int RollBack(int64_t trxId)
+        {
+            return NativeRdb::E_ERROR;
+        };
         virtual int Commit()
+        {
+            return NativeRdb::E_ERROR;
+        };
+        int Commit(int64_t trxId)
         {
             return NativeRdb::E_ERROR;
         };
