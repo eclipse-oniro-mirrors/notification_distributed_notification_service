@@ -752,6 +752,9 @@ public:
     virtual bool UpdateNextReminder();
     virtual bool SetNextTriggerTime();
 
+    std::string GetWantAgentStr();
+    std::string GetMaxWantAgentStr();
+
     /**
      * @brief Sets tapDismissed.
      *
@@ -840,7 +843,8 @@ public:
     static int32_t GetUid(const int32_t &userId, const std::string &bundleName);
     static int32_t GetUserId(const int32_t &uid);
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
+        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values,
+        bool oldVersion = false);
     static std::vector<std::string> StringSplit(std::string source, const std::string &split);
 
     static int32_t GLOBAL_ID;
@@ -1039,6 +1043,9 @@ private:
     std::shared_ptr<WantAgentInfo> wantAgentInfo_ = nullptr;
     std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ = nullptr;
     std::map<ActionButtonType, ActionButtonInfo> actionButtonMap_ {};
+
+    std::string wantAgentStr_{};
+    std::string maxWantAgentStr_{};
 };
 }  // namespace Reminder
 }  // namespace OHOS
