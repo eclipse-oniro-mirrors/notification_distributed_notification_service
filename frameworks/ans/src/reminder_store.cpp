@@ -67,6 +67,7 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V4:
                 CreateTable(store);
+                CopyData(store);
                 [[fallthrough]];
             default:
                 break;
@@ -184,7 +185,7 @@ void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::Rdb
         }
         bundleOption->SetBundleName(reminder->GetBundleName());
         NativeRdb::ValuesBucket baseValues;
-        ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues);
+        ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues, true);
 
         store.BeginTransaction();
         // insert reminder_base

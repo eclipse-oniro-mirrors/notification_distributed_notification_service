@@ -2084,5 +2084,20 @@ HWTEST_F(ReminderRequestTest, AppendWantAgentValuesBucket_00002, Function | Smal
     object.GetString(result);
     EXPECT_NE(result.find("maxTest"), -1);
 }
+
+/**
+ * @tc.name: WantAgentStr_00001
+ * @tc.desc: Test want agent str parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, WantAgentStr_00001, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequestChild> rrc = new ReminderRequestChild;
+    rrc->wantAgentStr_ = "test";
+    rrc->maxWantAgentStr_ = "test_max";
+    EXPECT_EQ(rrc->GetWantAgentStr(), "test");
+    EXPECT_EQ(rrc->GetMaxWantAgentStr(), "test_max");
+}
 }
 }
