@@ -622,7 +622,8 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     values.PutString(ReminderCalendarTable::EXCLUDE_DATES, "");  // next
 }
 
-bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t oriTriggerTime, const uint64_t now, const uint64_t durationTime)
+bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t oriTriggerTime, const uint64_t now,
+    const uint64_t durationTime)
 {
     uint64_t newEndTime = oriTriggerTime + durationTime;
     if (now <= newEndTime && now >= oriTriggerTime) {

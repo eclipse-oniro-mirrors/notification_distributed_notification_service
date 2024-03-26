@@ -828,7 +828,9 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
     
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    reminderCalendar->SetDateTime(ReminderRequest::GetDurationSinceEpochInMilli(mktime(&dateTime)));
+    time_t time = mktime(&dateTime);
+    reminderCalendar->SetDateTime(ReminderRequest::GetDurationSinceEpochInMilli(time));
+    time_t endTime = mktime(&endDateTime);
     reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(mktime(&endDateTime)));
     reminderCalendar->setDurationTime(dateTime, endDateTime);
     if (!(reminderCalendar->SetNextTriggerTime())) {
