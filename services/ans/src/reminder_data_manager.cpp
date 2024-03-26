@@ -957,7 +957,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         uint64_t tempTriggerTime = (*it)->GetTriggerTimeInMilli();
         if (tempTriggerTime < triggerTime) {
             ANSR_LOGE("this reminder triggerTime is less than target triggerTime. "
-                "now trigger time is %{public}llu.", tempTriggerTime);
+                "now trigger time is %{public}" PRIu64 ".", tempTriggerTime);
             continue;
         }
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
