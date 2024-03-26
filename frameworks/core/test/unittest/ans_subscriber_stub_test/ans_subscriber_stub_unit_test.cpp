@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -554,6 +554,38 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnBadgeChanged02, Function | SmallTest
     sptr<BadgeNumberCallbackData> badgeData = new BadgeNumberCallbackData();
     data.WriteParcelable(badgeData);
 
+    ErrCode res = stub_->HandleOnBadgeChanged(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: HandleOnBadgeEnabledChanged01
+ * @tc.desc: test HandleOnBadgeEnabledChanged with empty callback data, expect error code ERR_ANS_PARCELABLE_FAILED.
+ * @tc.type: Fun
+ */
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnBadgeEnabledChanged01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ErrCode res = stub_->HandleOnBadgeChanged(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleOnBadgeEnabledChanged02
+ * @tc.desc: test HandleOnBadgeEnabledChanged success with valid parameters, expect error code ERR_OK.
+ * @tc.type: Fun
+ */
+HWTEST_F(AnsSubscriberStubUnitTest, HandleOnBadgeEnabledChanged02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    std::string bundleName = "bundleName";
+    int32_t uid = 123456;
+    bool enabled = false;
+    sptr<EnabledNotificationCallbackData> callbackData = new EnabledNotificationCallbackData(bundleName, uid, enabled);
+    data.WriteParcelable(callbackData);
     ErrCode res = stub_->HandleOnBadgeChanged(data, reply);
     EXPECT_EQ(res, ERR_OK);
 }

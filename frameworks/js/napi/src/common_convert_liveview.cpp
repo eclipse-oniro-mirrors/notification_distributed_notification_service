@@ -224,6 +224,12 @@ napi_value Common::SetNotificationLiveViewContent(
         return NapiGetBoolean(env, false);
     }
 
+    // lockScreenPicture?: pixelMap
+    if (!SetLockScreenPicture(env, basicContent, result)) {
+        ANS_LOGE("lockScreenPicture is null");
+        return NapiGetBoolean(env, false);
+    }
+
     auto liveViewContent = static_cast<NotificationLiveViewContent *>(basicContent);
     if (liveViewContent == nullptr) {
         ANS_LOGE("LiveViewContent is null");
@@ -471,11 +477,12 @@ napi_value Common::GetNotificationLocalLiveViewButton(
                 return nullptr;
             }
             pixelMap = Media::PixelMapNapi::GetPixelMap(env, buttonIcon);
-            if (pixelMap == nullptr) {
-                ANS_LOGE("Invalid object pixelMap");
+            if (pixelMap != nullptr && static_cast<uint32_t>(pixelMap->GetByteCount()) <= MAX_ICON_SIZE) {
+                button.addSingleButtonIcon(pixelMap);
+            } else {
+                ANS_LOGE("Invalid pixelMap object or pixelMap is over size.");
                 return nullptr;
             }
-            button.addSingleButtonIcon(pixelMap);
         }
     }
     ANS_LOGD("button buttonIcon = %{public}s", str);
@@ -721,6 +728,12 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
     std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
     ANS_LOGD("enter");
+
+    // lockScreenPicture?: pixelMap
+    if (GetLockScreenPicture(env, contentResult, liveViewContent) == nullptr) {
+        ANS_LOGE("Failed to get lockScreenPicture from liveView content.");
+        return nullptr;
+    }
 
     // status: NotificationLiveViewContent::LiveViewStatus
     int32_t status = 0;

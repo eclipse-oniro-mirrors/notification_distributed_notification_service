@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -342,7 +342,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle05, Function | SmallTest | Leve
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t notificationId = 3;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(notificationId);
@@ -412,7 +412,7 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle08, Function | SmallTest | Leve
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     int32_t notificationId = 3;
     int32_t userId = 4;
-    
+
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteStrongParcelable(bundleOption);
     data.WriteInt32(notificationId);
@@ -4417,6 +4417,39 @@ HWTEST_F(AnsManagerStubTest, HandleGetSlotFlagsAsBundle02, Function | SmallTest 
     EXPECT_NE((int)ret, (int)res);
 }
 
+/*
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    bool enabled = true;
+    data.WriteString("testDeviceType");
+    data.WriteBool(enabled);
+
+    ErrCode res = ansManagerStub_->HandleSetSmartReminderEnabled(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    bool enable = true;
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("testDeviceType1111");
+    data.WriteBool(enable);
+    ErrCode result = ansManagerStub_->HandleIsSmartReminderEnabled(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+}
+
 /**
  * @tc.name: HandleSetSlotFlagsAsBundle01
  * @tc.desc: Test HandleSetSlotFlagsAsBundle succeeds.
@@ -4441,6 +4474,24 @@ HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle01, Function | SmallTest 
 }
 
 /**
+ * @tc.name: HandleGetAllNotificationEnableStatus
+ * @tc.desc: Test HandleGetAllNotificationEnableStatus.
+ * @tc.type: FUNC
+ * @tc.require: issueI92VGR
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetAllNotificationEnableStatus01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: HandleSetSlotFlagsAsBundle02
  * @tc.desc: Test if the bundleOption in data is null.
  * @tc.type: FUNC
@@ -4458,6 +4509,96 @@ HWTEST_F(AnsManagerStubTest, HandleSetSlotFlagsAsBundle02, Function | SmallTest 
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE((int)ret, (int)res);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bundleOption->SetBundleName("bundleName");
+    bundleOption->SetUid(1);
+    std::string deviceType = "testDeviceType";
+    bool enabled = true;
+    data.WriteParcelable(bundleOption);
+    data.WriteString(deviceType);
+    data.WriteBool(enabled);
+
+    ErrCode res = ansManagerStub_->HandleSetDistributedEnabledByBundle(data, reply);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bundleOption->SetBundleName("bundleName");
+    bundleOption->SetUid(1);
+    std::string deviceType = "testDeviceType1111";
+    bool enable = true;
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(bundleOption);
+    data.WriteString(deviceType);
+    data.WriteBool(enable);
+    ErrCode result = ansManagerStub_->HandleIsDistributedEnabledByBundle(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumberByBundle01
+ * @tc.desc: Test HandleSetBadgeNumberByBundle with invalid data, expect error code ERR_ANS_PARCELABLE_FAILED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumberByBundle01, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ansManagerStub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    EXPECT_NE(bundleOption, nullptr);
+    data.WriteParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->HandleSetBadgeNumberByBundle(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+
+    int32_t badgeNumber = 4;
+    data.WriteInt32(badgeNumber);
+    ret = ansManagerStub_->HandleSetBadgeNumberByBundle(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumberByBundle02
+ * @tc.desc: Test HandleSetBadgeNumberByBundle with valid data, expect error code ERR_INVALID_OPERATION.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumberByBundle02, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ansManagerStub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    EXPECT_NE(bundleOption, nullptr);
+    std::string bundleName = "bundleName";
+    bundleOption->SetBundleName(bundleName);
+    data.WriteParcelable(bundleOption);
+    int32_t badgeNumber = 4;
+    data.WriteInt32(badgeNumber);
+    ErrCode ret = ansManagerStub_->HandleSetBadgeNumberByBundle(data, reply);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 }
 }

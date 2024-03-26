@@ -104,8 +104,7 @@ ErrCode NotificationHelper::CancelAsBundle(
         notificationId, representativeBundle, userId);
 }
 
-ErrCode NotificationHelper::CancelAsBundle(
-    const NotificationBundleOption &bundleOption, int32_t notificationId)
+ErrCode NotificationHelper::CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
         bundleOption, notificationId);
@@ -256,6 +255,13 @@ ErrCode NotificationHelper::GetNotificationSlotsForBundle(
     const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotsForBundle(bundleOption, slots);
+}
+
+ErrCode NotificationHelper::GetNotificationSlotForBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotForBundle(bundleOption, slotType, slot);
 }
 
 ErrCode NotificationHelper::UpdateNotificationSlots(
@@ -471,6 +477,40 @@ ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &push
 ErrCode NotificationHelper::UnregisterPushCallback()
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
+}
+
+ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
+}
+
+ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        deviceType, enabled);
+}
+
+ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
+        deviceType, enabled);
+}
+
+ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(bundleOption, id);
+}
+
+ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

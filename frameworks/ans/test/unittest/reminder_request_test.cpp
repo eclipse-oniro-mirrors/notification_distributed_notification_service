@@ -1981,7 +1981,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 2);
-    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
 }
 
 /**
@@ -2083,6 +2083,21 @@ HWTEST_F(ReminderRequestTest, AppendWantAgentValuesBucket_00002, Function | Smal
     values.GetObject(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, object);
     object.GetString(result);
     EXPECT_NE(result.find("maxTest"), -1);
+}
+
+/**
+ * @tc.name: WantAgentStr_00001
+ * @tc.desc: Test want agent str parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, WantAgentStr_00001, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequestChild> rrc = new ReminderRequestChild;
+    rrc->wantAgentStr_ = "test";
+    rrc->maxWantAgentStr_ = "test_max";
+    EXPECT_EQ(rrc->GetWantAgentStr(), "test");
+    EXPECT_EQ(rrc->GetMaxWantAgentStr(), "test_max");
 }
 }
 }

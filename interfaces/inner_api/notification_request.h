@@ -1231,6 +1231,20 @@ public:
     bool IsCoverActionButtons() const;
 
     /**
+     * @brief Sets the bundleOption of this notification.
+     *
+     * @param bundleOption Indicates the bundleOption of this notification.
+     */
+    void SetBundleOption(const std::shared_ptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains the bundleOption of the notification.
+     *
+     * @return Returns the bundleOption of the notification.
+     */
+    std::shared_ptr<NotificationBundleOption> GetBundleOption() const;
+
+    /**
      * @brief Set notification appMessageId value.
      *
      * @param appMessageId the value of appMessageId.
@@ -1323,6 +1337,8 @@ private:
     static ErrCode CheckImageSizeForConverSation(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
+    static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
 
 private:
     int32_t notificationId_ {0};
@@ -1396,6 +1412,7 @@ private:
 
     std::shared_ptr<NotificationTemplate> notificationTemplate_ {};
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
+    std::shared_ptr<NotificationBundleOption> notificationBundleOption_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
 };
 }  // namespace Notification

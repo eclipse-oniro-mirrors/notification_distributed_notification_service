@@ -244,6 +244,14 @@ ErrCode AnsManagerStub::GetSlotsByBundle(
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetSlotByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    ANS_LOGE("AnsManagerStub::GetSlotByBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::UpdateSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
@@ -547,6 +555,44 @@ ErrCode AnsManagerStub::RegisterPushCallback(
 ErrCode AnsManagerStub::UnregisterPushCallback()
 {
     ANS_LOGE("UnregisterPushCallback called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    ANS_LOGE("Called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGE("SetDistributedEnabledByBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGE("IsDistributedEnabledByBundle called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGE("SetSmartReminderEnabled called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGE("IsSmartReminderEnabled called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
+{
+    ANS_LOGE("Called.");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

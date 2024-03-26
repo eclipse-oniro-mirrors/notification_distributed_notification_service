@@ -15,21 +15,33 @@
 #ifndef BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_MANAGER_DEATH_RECIPIENT_H
 #define BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_MANAGER_DEATH_RECIPIENT_H
 
-#include "iremote_object.h"
+#include <singleton.h>
+
+#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
 namespace Notification {
-class AnsManagerDeathRecipient : public IRemoteObject::DeathRecipient {
+class AnsManagerDeathRecipient : public DelayedSingleton<AnsManagerDeathRecipient> {
 public:
     AnsManagerDeathRecipient() = default;
-    virtual ~AnsManagerDeathRecipient() = default;
+    ~AnsManagerDeathRecipient() = default;
 
-    /**
-     * @brief The callback function on remote object died.
-     *
-     * @param remote Indicates the died object.
-     */
-    virtual void OnRemoteDied(const wptr<IRemoteObject> &object) override;
+    void SubscribeSAManager();
+
+    bool GetIsSubscribeSAManager();
+private:
+    class SystemAbilityStatusChangeListener : public SystemAbilityStatusChangeStub {
+    public:
+        SystemAbilityStatusChangeListener() = default;
+        ~SystemAbilityStatusChangeListener() = default;
+        void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+        void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
+    private:
+        bool isSAOffline = false;
+    };
+
+    sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 };
 }  // namespace Notification
 }  // namespace OHOS

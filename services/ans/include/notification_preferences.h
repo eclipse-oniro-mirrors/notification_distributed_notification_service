@@ -21,6 +21,7 @@
 
 #include "notification_do_not_disturb_date.h"
 #include "notification_preferences_database.h"
+#include <mutex>
 
 namespace OHOS {
 namespace Notification {
@@ -262,9 +263,70 @@ public:
      * @return Return ERR_OK on success, others on failure.
      */
     ErrCode ClearNotificationInRestoreFactorySettings();
+
+    /**
+     * @brief Query whether there is a agent relationship between the two apps.
+     *
+     * @param agentBundleName The bundleName of the agent app.
+     * @param sourceBundleName The bundleName of the source app.
+     * @return Returns true if There is an agent relationship; returns false otherwise.
+     */
+    bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
+
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled);
+    
+    /**
+     * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled);
+
+    /**
+     * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, bool &enabled);
+
     void InitSettingFromDisturbDB();
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
+    void RemoveEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption);
     int32_t SetKvToDb(const std::string &key, const std::string &value);
     int32_t GetKvFromDb(const std::string &key, std::string &value);
     int32_t GetBatchKvsFromDb(const std::string &key, std::unordered_map<std::string, std::string>  &values);

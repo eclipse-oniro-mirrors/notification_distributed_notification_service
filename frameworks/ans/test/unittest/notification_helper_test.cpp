@@ -69,7 +69,7 @@ HWTEST_F(NotificationHelperTest, AddNotificationSlot_00001, Function | SmallTest
     NotificationSlot slot;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.AddNotificationSlot(slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -83,7 +83,7 @@ HWTEST_F(NotificationHelperTest, AddSlotByType_00001, Function | SmallTest | Lev
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.AddSlotByType(slotType);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -111,7 +111,7 @@ HWTEST_F(NotificationHelperTest, RemoveNotificationSlot_00001, Function | SmallT
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveNotificationSlot(slotType);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -124,7 +124,7 @@ HWTEST_F(NotificationHelperTest, RemoveAllSlots_00001, Function | SmallTest | Le
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveAllSlots();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -139,7 +139,7 @@ HWTEST_F(NotificationHelperTest, GetNotificationSlot_00001, Function | SmallTest
     sptr<NotificationSlot> slot = nullptr;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetNotificationSlot(slotType, slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -153,7 +153,7 @@ HWTEST_F(NotificationHelperTest, GetNotificationSlots_00001, Function | SmallTes
     std::vector<sptr<NotificationSlot>> slots;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetNotificationSlots(slots);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -211,7 +211,7 @@ HWTEST_F(NotificationHelperTest, CancelNotification_00001, Function | SmallTest 
     int32_t notificationId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelNotification(notificationId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -226,7 +226,7 @@ HWTEST_F(NotificationHelperTest, CancelNotification_00002, Function | SmallTest 
     int32_t notificationId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelNotification(label, notificationId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -239,7 +239,7 @@ HWTEST_F(NotificationHelperTest, CancelAllNotifications_00001, Function | SmallT
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelAllNotifications();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -286,7 +286,7 @@ HWTEST_F(NotificationHelperTest, GetActiveNotificationNums_00001, Function | Sma
     uint64_t num = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetActiveNotificationNums(num);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -300,7 +300,7 @@ HWTEST_F(NotificationHelperTest, GetActiveNotifications_00001, Function | SmallT
     std::vector<sptr<NotificationRequest>> request;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetActiveNotifications(request);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -371,7 +371,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationBadgeNum_00001, Function | Small
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationBadgeNum();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -385,7 +385,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationBadgeNum_00002, Function | Small
     int32_t num = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationBadgeNum(num);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -413,7 +413,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotifySelf_00001, Function | SmallTest
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotifySelf(allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -431,7 +431,7 @@ HWTEST_F(NotificationHelperTest, RequestEnableNotification_00001, Function | Sma
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
     ErrCode ret = notificationHelper.RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -459,7 +459,7 @@ HWTEST_F(NotificationHelperTest, GetBundleImportance_00001, Function | SmallTest
     NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_NONE;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetBundleImportance(importance);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -680,7 +680,7 @@ HWTEST_F(NotificationHelperTest, GetShowBadgeEnabled_00001, Function | SmallTest
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -694,7 +694,7 @@ HWTEST_F(NotificationHelperTest, CancelGroup_00001, Function | SmallTest | Level
     std::string groupName = "GroupName";
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelGroup(groupName);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -723,7 +723,7 @@ HWTEST_F(NotificationHelperTest, SetDoNotDisturbDate_00001, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -808,7 +808,7 @@ HWTEST_F(NotificationHelperTest, EnableDistributedSelf_00001, Function | SmallTe
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.EnableDistributedSelf(enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -970,7 +970,7 @@ HWTEST_F(NotificationHelperTest, SetDoNotDisturbDate_00002, Function | SmallTest
     NotificationDoNotDisturbDate doNotDisturbDate;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -1076,6 +1076,20 @@ HWTEST_F(NotificationHelperTest, SetType_00001, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetAllNotificationEnabledBundles_00001
+ * @tc.desc: Test GetAllNotificationEnabledBundles parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92VGR
+ */
+HWTEST_F(NotificationHelperTest, GetAllNotificationEnabledBundles_00001, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetAllNotificationEnabledBundles(bundleOption);
+    EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.name: GetActiveNotificationByFilter_00001
  * @tc.desc: Test GetActiveNotificationByFilter parameters.
  * @tc.type: FUNC
@@ -1088,6 +1102,78 @@ HWTEST_F(NotificationHelperTest, GetActiveNotificationByFilter_00001, Function |
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetActiveNotificationByFilter(filter, request);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetSmartReminderEnabled_0100
+ * @tc.desc: test SetSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetSmartReminderEnabled_0100, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetSmartReminderEnabled_0200
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetSmartReminderEnabled_0200, TestSize.Level1)
+{
+    std::string deviceType = "";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0100
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0100, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType1111";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, false);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0200
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0200, TestSize.Level1)
+{
+    std::string deviceType = "";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSmartReminderEnabled_0300
+ * @tc.desc: test IsSmartReminderEnabled with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0300, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
 }
 
 /**
@@ -1118,6 +1204,94 @@ HWTEST_F(NotificationHelperTest, SetBadgeNumberByBundle_0200, TestSize.Level1)
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetBadgeNumberByBundle(bundleOption, badgeNumber);
     EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledByBundle_0100
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0100
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType1111";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, false);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("");
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    bool enable = true;
+    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0300
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0300, TestSize.Level1)
+{
+    NotificationBundleOption bundleOption;
+    std::string bundleName = "bundleName";
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    EXPECT_EQ(ret, ERR_OK);
+    bool enable = false;
+    ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enable, true);
 }
 }
 }

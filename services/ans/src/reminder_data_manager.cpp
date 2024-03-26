@@ -98,6 +98,10 @@ ErrCode ReminderDataManager::CancelReminder(
         ANSR_LOGW("Cancel reminder, not find the reminder");
         return ERR_REMINDER_NOT_EXIST;
     }
+    if (!CheckIsSameApp(reminder, bundleOption)) {
+        ANSR_LOGW("Not find the reminder due to not match");
+        return ERR_REMINDER_NOT_EXIST;
+    }
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", reminderId);
         activeReminder_->OnStop();
@@ -116,7 +120,7 @@ ErrCode ReminderDataManager::CancelReminder(
 
 ErrCode ReminderDataManager::CancelAllReminders(const std::string &packageName, const int32_t &userId)
 {
-    ANSR_LOGD("CancelAllReminders, userId=%{public}d, pkgName=%{public}s",
+    ANSR_LOGD("CancelAllReminders, userId=%{private}d, pkgName=%{public}s",
         userId, packageName.c_str());
     CancelRemindersImplLocked(packageName, userId);
     return ERR_OK;
@@ -144,7 +148,7 @@ void ReminderDataManager::GetValidReminders(
 
 void ReminderDataManager::CancelAllReminders(const int32_t &userId)
 {
-    ANSR_LOGD("CancelAllReminders, userId=%{public}d", userId);
+    ANSR_LOGD("CancelAllReminders, userId=%{private}d", userId);
     CancelRemindersImplLocked(ALL_PACKAGES, userId);
 }
 
@@ -289,9 +293,9 @@ void ReminderDataManager::AddToShowedReminders(const sptr<ReminderRequest> &remi
 
 void ReminderDataManager::OnUserRemove(const int32_t& userId)
 {
-    ANSR_LOGD("Remove user id: %{public}d", userId);
+    ANSR_LOGD("Remove user id: %{private}d", userId);
     if (!IsReminderAgentReady()) {
-        ANSR_LOGW("Give up to remove user id: %{public}d for reminderAgent is not ready", userId);
+        ANSR_LOGW("Give up to remove user id: %{private}d for reminderAgent is not ready", userId);
         return;
     }
     CancelAllReminders(userId);
@@ -308,7 +312,7 @@ void ReminderDataManager::OnServiceStart()
 
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
 {
-    ANSR_LOGD("Switch user id from %{public}d to %{public}d", currentUserId_, userId);
+    ANSR_LOGD("Switch user id from %{private}d to %{private}d", currentUserId_, userId);
     currentUserId_ = userId;
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     if ((alertingReminderId_ != -1) && IsReminderAgentReady()) {
@@ -853,7 +857,7 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
     int32_t userId = ReminderRequest::GetUserId(bundleOption->GetUid());
     if (currentUserId_ != userId) {
         ANSR_LOGD("The reminder (reminderId=%{public}d) is silent for not in active user, " \
-            "current user id: %{public}d, reminder user id: %{public}d", reminderId, currentUserId_, userId);
+            "current user id: %{private}d, reminder user id: %{private}d", reminderId, currentUserId_, userId);
         return false;
     }
 
@@ -1396,7 +1400,7 @@ void ReminderDataManager::InitUserId()
     AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
     if (activeUserId.size() > 0) {
         currentUserId_ = activeUserId[0];
-        ANSR_LOGD("Init user id=%{public}d", currentUserId_);
+        ANSR_LOGD("Init user id=%{private}d", currentUserId_);
     } else {
         currentUserId_ = MAIN_USER_ID;
         ANSR_LOGE("Failed to get active user id.");
@@ -1463,12 +1467,24 @@ bool ReminderDataManager::IsReminderAgentReady() const
     return isReminderAgentReady_;
 }
 
+bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder,
+    const sptr<NotificationBundleOption> &other)
+{
+    std::string bundleName = reminder->GetCreatorBundleName();
+    int32_t uid = ReminderRequest::GetUid(reminder->GetUserId(), bundleName);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+    return IsBelongToSameApp(bundleOption, other);
+}
+
 bool ReminderDataManager::IsBelongToSameApp(const sptr<NotificationBundleOption> &bundleOption,
     const sptr<NotificationBundleOption> &other) const
 {
-    int32_t userIdSrc = ReminderRequest::GetUserId(bundleOption->GetUid());
-    int32_t userIdTar = ReminderRequest::GetUserId(other->GetUid());
-    return ((bundleOption->GetBundleName() == other->GetBundleName()) && (userIdSrc == userIdTar)) ? true : false;
+    int32_t uidSrc = bundleOption->GetUid();
+    int32_t uidTar = other->GetUid();
+    bool result = uidSrc == uidTar;
+    result = result && (ReminderRequest::GetUserId(uidSrc) == ReminderRequest::GetUserId(uidTar));
+    result = result && (bundleOption->GetBundleName() == other->GetBundleName());
+    return result;
 }
 
 void ReminderDataManager::LoadReminderFromDb()

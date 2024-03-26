@@ -253,6 +253,18 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT_SELF,
             std::bind(&AnsManagerStub::HandleGetEnabledForBundleSlotSelf, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_DISTRIBUTED_ENABLED_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleSetDistributedEnabledByBundle, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_DISTRIBUTED_ENABLED_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleIsDistributedEnabledByBundle, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_SMART_REMINDER_ENABLED,
+            std::bind(&AnsManagerStub::HandleSetSmartReminderEnabled, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_SMART_REMINDER_ENABLED,
+            std::bind(&AnsManagerStub::HandleIsSmartReminderEnabled, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
             std::bind(&AnsManagerStub::HandleDistributedSetEnabledWithoutApp, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
@@ -289,6 +301,15 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE,
             std::bind(&AnsManagerStub::HandleGetSlotFlagsAsBundle, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP,
+            std::bind(&AnsManagerStub::HandleSetAdditionConfig, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT,
+            std::bind(&AnsManagerStub::HandleCancelAsBundleWithAgent, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_SLOT_BY_BUNDLE,
+            std::bind(&AnsManagerStub::HandleGetSlotByBundle, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -447,7 +468,6 @@ ErrCode AnsManagerStub::HandleCancelAsBundleAndUser(MessageParcel &data, Message
         ANS_LOGE("[HandleCancelAsBundle] fail: read userId failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
     ErrCode result = CancelAsBundle(bundleOption, notificationId, userId);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAsBundle] fail: write result failed, ErrCode=%{public}d", result);
@@ -1083,6 +1103,30 @@ ErrCode AnsManagerStub::HandleGetSlotsByBundle(MessageParcel &data, MessageParce
     ErrCode result = GetSlotsByBundle(bundleOption, slots);
     if (!WriteParcelableVector(slots, reply, result)) {
         ANS_LOGE("[HandleGetSlotsByBundle] fail: write slots failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetSlotByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleGetSlotByBundle] fail: read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(data.ReadInt32());
+
+    sptr<NotificationSlot> slot = nullptr;
+    ErrCode result = GetSlotByBundle(bundleOption, slotType, slot);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetSlotByBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteParcelable(slot)) {
+        ANS_LOGE("[HandleGetSlotByBundle] fail: write slot failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -2089,6 +2133,157 @@ ErrCode AnsManagerStub::HandleUnregisterPushCallback(MessageParcel &data, Messag
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
+}
+
+ErrCode AnsManagerStub::HandleSetDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE(
+            "[HandleSetNotificationsEnabledForSpecialBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleIsDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    
+    bool enabled = false;
+    ErrCode result = IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE(
+            "[HandleIsDistributedEnabledByBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+  
+    if (!reply.WriteBool(enabled)) {
+        ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: write enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetAdditionConfig(MessageParcel &data, MessageParcel &reply)
+{
+    std::string key;
+    if (!data.ReadString(key)) {
+        ANS_LOGE("Failed to read key.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::string value;
+    if (!data.ReadString(value)) {
+        ANS_LOGE("Failed to read value.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetAdditionConfig(key, value);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Failed to write result, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleSetSmartReminderEnabled] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        ANS_LOGE("[HandleSetSmartReminderEnabled] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetSmartReminderEnabled(deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE(
+            "[HandleSetSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Read bundleOption failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t id = 0;
+    if (!data.ReadInt32(id)) {
+        ANS_LOGE("Read notification id failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = CancelAsBundleWithAgent(bundleOption, id);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleIsSmartReminderEnabled] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    
+    bool enabled = false;
+    ErrCode result = IsSmartReminderEnabled(deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+  
+    if (!reply.WriteBool(enabled)) {
+        ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,14 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
-    AsyncCallbackInfoCancel *asynccallbackinfo = new (std::nothrow)
-        AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr, .id = paras.id, .label = paras.label};
+    AsyncCallbackInfoCancel *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoCancel {
+        .env = env,
+        .asyncWork = nullptr,
+        .id = paras.id,
+        .label = paras.label,
+        .option = paras.option,
+        .hasOption = paras.hasOption
+    };
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, paras.callback);
     }
@@ -48,8 +54,13 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
 
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::CancelNotification(asynccallbackinfo->label, asynccallbackinfo->id);
+                if (asynccallbackinfo->hasOption) {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundleWithAgent(
+                        asynccallbackinfo->option, asynccallbackinfo->id);
+                } else {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::CancelNotification(asynccallbackinfo->label, asynccallbackinfo->id);
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {

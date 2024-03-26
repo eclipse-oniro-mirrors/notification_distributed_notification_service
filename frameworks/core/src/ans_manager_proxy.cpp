@@ -1997,5 +1997,78 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
 
     return result;
 }
+
+ErrCode AnsManagerProxy::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteStrongParcelable(bundleOption)) {
+        ANS_LOGE("Write bundle failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(id)) {
+        ANS_LOGE("Write notification id failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact fail: ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Read result error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Set package config fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(key)) {
+        ANS_LOGE("Set package config fail:: write key failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(value)) {
+        ANS_LOGE("Set package config fail:: write value failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Set package config fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

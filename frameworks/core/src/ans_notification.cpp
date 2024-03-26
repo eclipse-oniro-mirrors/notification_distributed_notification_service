@@ -17,6 +17,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_manager_proxy.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -29,6 +30,11 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
+const int32_t MAX_RETRY_TIME = 30;
+const int32_t SLEEP_TIME = 1000;
+const std::string LIVE_VIEW_LABEL = "ans_live_view";
+}
 ErrCode AnsNotification::AddNotificationSlot(const NotificationSlot &slot)
 {
     std::vector<NotificationSlot> slots;
@@ -199,9 +205,14 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
         ANS_LOGE("Create notificationRequest ptr fail.");
         return ERR_ANS_NO_MEMORY;
     }
+
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
+    if (reqPtr->IsCommonLiveView() && reqPtr->GetLabel().empty()) {
+        reqPtr->SetLabel(LIVE_VIEW_LABEL);
+    }
+
     return ansManagerProxy_->Publish(label, reqPtr);
 }
 
@@ -535,10 +546,6 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
     const int32_t notificationId, const NotificationButtonOption &buttonOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (bundleOption.GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     if (buttonOption.GetButtonName().empty()) {
         ANS_LOGE("Invalid button name.");
@@ -659,6 +666,24 @@ ErrCode AnsNotification::GetNotificationSlotsForBundle(
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     return ansManagerProxy_->GetSlotsByBundle(bo, slots);
+}
+
+ErrCode AnsNotification::GetNotificationSlotForBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Input bundleName is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->GetSlotByBundle(bo, slotType, slot);
 }
 
 ErrCode AnsNotification::UpdateNotificationSlots(
@@ -1013,10 +1038,24 @@ void AnsNotification::ResetAnsManagerProxy()
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(mutex_);
-    if ((ansManagerProxy_ != nullptr) && (ansManagerProxy_->AsObject() != nullptr)) {
-        ansManagerProxy_->AsObject()->RemoveDeathRecipient(recipient_);
-    }
     ansManagerProxy_ = nullptr;
+}
+
+void AnsNotification::Reconnect()
+{
+    ANS_LOGD("enter");
+    for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
+        // try to connect ans
+        if (!GetAnsManagerProxy()) {
+            // Sleep 1000 milliseconds before reconnect.
+            std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+            ANS_LOGE("get ans proxy fail, try again.");
+            continue;
+        }
+
+        ANS_LOGD("get ans proxy success.");
+        return;
+    }
 }
 
 ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
@@ -1107,12 +1146,10 @@ bool AnsNotification::GetAnsManagerProxy()
                 return false;
             }
 
-            recipient_ = new (std::nothrow) AnsManagerDeathRecipient();
-            if (!recipient_) {
-                ANS_LOGE("Failed to create death recipient");
-                return false;
+            auto ansManagerDeathRecipient = DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
+            if (!ansManagerDeathRecipient->GetIsSubscribeSAManager()) {
+                ansManagerDeathRecipient->SubscribeSAManager();
             }
-            ansManagerProxy_->AsObject()->AddDeathRecipient(recipient_);
         }
     }
 
@@ -1191,8 +1228,8 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
     }
 
     auto overlayIcon = request.GetOverlayIcon();
-    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
-        ANS_LOGE("The size of big icon exceeds limit");
+    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
+        ANS_LOGE("The size of overlay icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
@@ -1484,6 +1521,89 @@ ErrCode AnsNotification::UnregisterPushCallback()
     }
 
     return ansManagerProxy_->UnregisterPushCallback();
+}
+
+ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    if (key.empty()) {
+        ANS_LOGE("Set package config fail: key is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetAdditionConfig(key, value);
+}
+
+ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("SetDistributedEnabledByBundleCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->SetDistributedEnabledByBundle(bo, deviceType, enabled);
+}
+
+ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("IsDistributedEnabledByBundleCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->IsDistributedEnabledByBundle(bo, deviceType, enabled);
+}
+
+ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode AnsNotification::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption(bundleOption));
+    return ansManagerProxy_->CancelAsBundleWithAgent(bundle, id);
+}
+
+ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->IsSmartReminderEnabled(deviceType, enabled);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/*os_account_manager
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,13 @@
 #include "notification_preferences_database.h"
 
 #include <regex>
+#include <string>
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
+#include "ipc_skeleton.h"
 
 #include "uri.h"
 namespace OHOS {
@@ -56,6 +58,11 @@ const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
 const static std::string KEY_UNDER_LINE = "_";
 
 /**
+ * Indicates that disturbe key which middle line.
+ */
+const static std::string KEY_MIDDLE_LINE = "-";
+
+/**
  * Indicates that disturbe key which bundle begin key.
  */
 const static std::string KEY_ANS_BUNDLE = "ans_bundle";
@@ -84,6 +91,16 @@ const static std::string KEY_BUNDLE_BADGE_TOTAL_NUM = "badgeTotalNum";
  * Indicates that disturbe key which bundle enable notification.
  */
 const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
+
+/**
+ * Indicates that disturbe key which bundle enable notification.
+ */
+const static std::string KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION = "enabledNotificationDistributed";
+
+/**
+ * Indicates that disturbe key which bundle enable notification.
+ */
+const static std::string KEY_SMART_REMINDER_ENABLE_NOTIFICATION = "enabledSmartReminder";
 
 /**
  * Indicates that disturbe key which bundle popped dialog.
@@ -180,6 +197,16 @@ const static std::string KEY_BUNDLE_SLOTFLGS_TYPE = "bundleReminderFlagsType";
  */
 const static std::string KEY_SLOT_SLOTFLGS_TYPE = "reminderFlagsType";
 
+/**
+ * Indicates that disturbe key which slot authorized status.
+ */
+const static std::string KEY_SLOT_AUTHORIZED_STATUS = "authorizedStatus";
+
+/**
+ * Indicates that disturbe key which slot authorized hint count.
+ */
+const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
+
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
     NotificationPreferencesDatabase::slotMap_ = {
@@ -241,6 +268,16 @@ const std::map<std::string,
         {
             KEY_SLOT_SLOTFLGS_TYPE,
             std::bind(&NotificationPreferencesDatabase::ParseSlotFlags, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
+        },
+        {
+            KEY_SLOT_AUTHORIZED_STATUS,
+            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthorizedStatus, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
+        },
+        {
+            KEY_SLOT_AUTH_HINT_CNT,
+            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthHitnCnt, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3),
         },
 };
@@ -926,6 +963,10 @@ void NotificationPreferencesDatabase::GenerateSlotEntry(const std::string &bundl
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_VIBRATION_STYLE),
         VectorToString(slot->GetVibrationStyle()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_ENABLED), std::to_string(slot->GetEnable()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_AUTHORIZED_STATUS),
+        std::to_string(slot->GetAuthorizedStatus()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_AUTH_HINT_CNT),
+        std::to_string(slot->GetAuthHintCnt()), values);
 }
 
 void NotificationPreferencesDatabase::ParseBundleFromDistureDB(
@@ -1320,6 +1361,22 @@ void NotificationPreferencesDatabase::ParseSlotEnabled(
     slot->SetEnable(enabled);
 }
 
+void NotificationPreferencesDatabase::ParseSlotAuthorizedStatus(
+    sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotAuthorizedStatus slot status is %{public}s.", value.c_str());
+    int32_t status = static_cast<int32_t>(StringToInt(value));
+    slot->SetAuthorizedStatus(status);
+}
+
+void NotificationPreferencesDatabase::ParseSlotAuthHitnCnt(
+    sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotAuthHitnCnt slot count is %{public}s.", value.c_str());
+    int32_t count = static_cast<int32_t>(StringToInt(value));
+    slot->SetAuthHintCnt(count);
+}
+
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo) const
 {
@@ -1503,6 +1560,41 @@ bool NotificationPreferencesDatabase::RemoveAnsBundleDbInfo(std::string bundleNa
     return true;
 }
 
+bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bundleName)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    std::string key = std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(
+        KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
+    ANS_LOGD("key is %{public}s", key.c_str());
+    int32_t result = NativeRdb::E_OK;
+    std::unordered_map<std::string, std::string> values;
+    result = rdbDataManager_->QueryDataBeginWithKey(key, values);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        return true;
+    } else if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get failed, key %{public}s,result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    std::vector<std::string> keys;
+    for (auto iter : values) {
+        ANS_LOGD("Get failed, key %{public}s", iter.first.c_str());
+        keys.push_back(iter.first);
+    }
+
+    result = rdbDataManager_->DeleteBathchData(keys);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete bundle Info failed.");
+        return false;
+    }
+
+    return true;
+}
+
 int32_t NotificationPreferencesDatabase::SetKvToDb(
     const std::string &key, const std::string &value)
 {
@@ -1573,6 +1665,155 @@ int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key)
     ANS_LOGD("Delete key:%{public}s.", key.c_str());
 
     return NativeRdb::E_OK;
+}
+
+bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &agentBundleName,
+    const std::string &sourceBundleName)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string agentShip = "";
+    int32_t result = rdbDataManager_->QueryData("PROXY_PKG", agentShip);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Query agent relationships failed.");
+        return false;
+    }
+    ANS_LOGD("The agent relationship is :%{public}s.", agentShip.c_str());
+    std::string target = "{\"service\":'" + agentBundleName + "',\"app\":'" + sourceBundleName + "'}";
+    std::string::size_type idx = agentShip.find(target);
+    if (idx == std::string::npos) {
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::string deviceType,
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(bundleInfo, deviceType);
+    int32_t result = PutDataToDB(key, enabled);
+    ANS_LOGD("result[%{public}d]", result);
+    return (result == NativeRdb::E_OK);
+}
+
+std::string NotificationPreferencesDatabase::GenerateBundleLablel(
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
+{
+    return std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
+        std::string(bundleInfo.GetBundleName()).append(KEY_MIDDLE_LINE).append(std::to_string(
+            bundleInfo.GetBundleUid())).append(KEY_MIDDLE_LINE).append(deviceType));
+}
+
+template <typename T>
+int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, const T &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string valueStr = std::to_string(value);
+    int32_t result = rdbDataManager_->InsertData(key, valueStr);
+    return result;
+}
+
+bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::string deviceType,
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(bundleInfo, deviceType);
+    bool result = false;
+    enabled = false;
+    GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                enabled = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    ANS_LOGD("GetDistributedEnabledForBundle:enabled:[%{public}d]KEY:%{public}s", enabled, key.c_str());
+    return result;
+}
+
+std::string NotificationPreferencesDatabase::GenerateBundleLablel(const std::string &deviceType,
+    const int32_t userId) const
+{
+    return std::string(KEY_SMART_REMINDER_ENABLE_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
+        deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
+}
+
+
+bool NotificationPreferencesDatabase::SetSmartReminderEnabled(const std::string deviceType, const bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(deviceType, userId);
+    ANS_LOGD("%{public}s, key:%{public}s,enabled[%{public}d]", __FUNCTION__, key.c_str(), enabled);
+    int32_t result = PutDataToDB(key, enabled);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(deviceType, userId);
+    bool result = false;
+    enabled = false;
+    GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                enabled = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,16 +38,26 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     }
 
     napi_valuetype valuetype = napi_undefined;
-    // argv[0]: id: number
+    // argv[0]: id: number / representativeBundle: BundleOption
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGW("Argument type is not number");
+    if (valuetype != napi_number && valuetype != napi_object) {
+        ANS_LOGW("Wrong argument type. Number object expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &paras.id));
 
-    // argv[1]: label: string / callback
-    if (argc >= CANCEL_MAX_PARA - 1) {
+    if (valuetype == napi_number) {
+        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &paras.id));
+    } else {
+        auto retValue = Common::GetBundleOption(env, argv[PARAM0], paras.option);
+        if (retValue == nullptr) {
+            ANS_LOGE("GetBundleOption failed.");
+            return nullptr;
+        }
+        paras.hasOption = true;
+    }
+
+    // argv[1]: label: string / callback / id : number
+    if (argc >= CANCEL_MAX_PARA - 1 && !paras.hasOption) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype == napi_undefined || valuetype == napi_null) {
             return Common::NapiGetNull(env);
@@ -73,6 +83,13 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         } else {
             napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
         }
+    } else if (argc >= CANCEL_MAX_PARA - 1 && paras.hasOption) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGW("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &paras.id));
     }
 
     // argv[2]: callback

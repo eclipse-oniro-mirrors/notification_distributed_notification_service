@@ -200,6 +200,10 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     napi_get_boolean(env, slot.GetEnable(), &value);
     napi_set_named_property(env, result, "enabled", value);
 
+    // authorizedStatus?: number
+    napi_create_int32(env, slot.GetAuthorizedStatus(), &value);
+    napi_set_named_property(env, result, "authorizedStatus", value);
+
     return NapiGetBoolean(env, true);
 }
 
@@ -1161,6 +1165,39 @@ napi_value Common::GetNotificationTemplate(const napi_env &env, const napi_value
         }
 
         request.SetTemplate(templ);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationBundleOption(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGD("Called.");
+
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "representativeBundle", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "representativeBundle", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return nullptr;
+        }
+
+        std::shared_ptr<NotificationBundleOption> bundleOption = std::make_shared<NotificationBundleOption>();
+        if (bundleOption == nullptr) {
+            ANS_LOGE("The bundleOption is null.");
+            return nullptr;
+        }
+        if (GetBundleOption(env, result, *bundleOption) == nullptr) {
+            return nullptr;
+        }
+
+        request.SetBundleOption(bundleOption);
     }
 
     return NapiGetNull(env);

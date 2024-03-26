@@ -1022,6 +1022,16 @@ bool ReminderRequest::SetNextTriggerTime()
     return false;
 }
 
+std::string ReminderRequest::GetWantAgentStr()
+{
+    return wantAgentStr_;
+}
+
+std::string ReminderRequest::GetMaxWantAgentStr()
+{
+    return maxWantAgentStr_;
+}
+
 void ReminderRequest::UpdateNotificationRequest(UpdateNotificationType type, std::string extra)
 {
     switch (type) {
@@ -1794,7 +1804,7 @@ int32_t ReminderRequest::GetUserId(const int32_t &uid)
 {
     int32_t userId = -1;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
-    ANSR_LOGD("userId=%{public}d", userId);
+    ANSR_LOGD("userId=%{private}d", userId);
     return userId;
 }
 
@@ -1838,7 +1848,7 @@ void ReminderRequest::AppendWantAgentValuesBucket(const sptr<ReminderRequest>& r
 }
 
 void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-    const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values)
+    const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values, bool oldVersion)
 {
     values.PutInt(ReminderBaseTable::REMINDER_ID, reminder->GetReminderId());
     values.PutString(ReminderBaseTable::PACKAGE_NAME, bundleOption->GetBundleName());
@@ -1864,7 +1874,12 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ReminderBaseTable::SNOOZE_CONTENT, reminder->GetSnoozeContent());
     values.PutString(ReminderBaseTable::EXPIRED_CONTENT, reminder->GetExpiredContent());
 
-    AppendWantAgentValuesBucket(reminder, values);
+    if (oldVersion) {
+        values.PutString(ReminderBaseTable::WANT_AGENT, reminder->GetWantAgentStr());
+        values.PutString(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, reminder->GetMaxWantAgentStr());
+    } else {
+        AppendWantAgentValuesBucket(reminder, values);
+    }
     
     values.PutString(ReminderBaseTable::TAP_DISMISSED, reminder->IsTapDismissed() ? "true" : "false");
     values.PutLong(ReminderBaseTable::AUTO_DELETED_TIME, reminder->GetAutoDeletedTime());
@@ -2080,8 +2095,6 @@ void ReminderRequest::RecoverBasicFromOldVersion(const std::shared_ptr<NativeRdb
 
     // expiredContent
     ReminderStore::GetStringVal(resultSet, ReminderTable::EXPIRED_CONTENT, expiredContent_);
-
-    InitNotificationRequest();  // must set before wantAgent & maxScreenWantAgent
 }
 
 void ReminderRequest::RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
@@ -2096,12 +2109,12 @@ void ReminderRequest::RecoverFromOldVersion(const std::shared_ptr<NativeRdb::Res
     // wantAgent
     std::string wantAgent;
     ReminderStore::GetStringVal(resultSet, ReminderTable::AGENT, wantAgent);
-    RecoverWantAgent(wantAgent, 0);
+    wantAgentStr_ = wantAgent;
 
     // maxScreenWantAgent
     std::string maxScreenWantAgent;
     ReminderStore::GetStringVal(resultSet, ReminderTable::MAX_SCREEN_AGENT, maxScreenWantAgent);
-    RecoverWantAgent(maxScreenWantAgent, 1);
+    maxWantAgentStr_ = maxScreenWantAgent;
 
     // tapDismissed
     std::string tapDismissed;

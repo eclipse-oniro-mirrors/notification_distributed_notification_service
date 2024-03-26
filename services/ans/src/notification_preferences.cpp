@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -703,6 +703,68 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
     return ERR_OK;
 }
 
+ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetSmartReminderEnabled(deviceType, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->IsSmartReminderEnabled(deviceType, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
 void NotificationPreferences::InitSettingFromDisturbDB()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -746,6 +808,15 @@ void NotificationPreferences::RemoveAnsBundleDbInfo(const sptr<NotificationBundl
     }
 }
 
+void NotificationPreferences::RemoveEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("%{public}s", __FUNCTION__);
+    if (preferncesDB_ != nullptr && bundleOption != nullptr) {
+        std::lock_guard<std::mutex> lock(preferenceMutex_);
+        preferncesDB_->RemoveEnabledDbByBundleName(bundleOption->GetBundleName());
+    }
+}
+
 int32_t NotificationPreferences::SetKvToDb(
     const std::string &key, const std::string &value)
 {
@@ -779,6 +850,16 @@ int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key)
         return ERR_ANS_SERVICE_NOT_READY;
     }
     return preferncesDB_->DeleteKvFromDb(key);
+}
+
+bool NotificationPreferences::IsAgentRelationship(const std::string &agentBundleName,
+    const std::string &sourceBundleName)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+
+    return preferncesDB_->IsAgentRelationship(agentBundleName, sourceBundleName);
 }
 }  // namespace Notification
 }  // namespace OHOS

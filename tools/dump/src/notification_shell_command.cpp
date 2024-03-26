@@ -143,6 +143,10 @@ ErrCode NotificationShellCommand::RunHelp()
 
 ErrCode NotificationShellCommand::RunAsDumpCommand()
 {
+#ifdef ANM_BUILD_VARIANT_USER
+     resultReceiver_.append("error: user version cannot use dump.\n");
+     return ERR_INVALID_VALUE;
+#endif
     ErrCode ret = ERR_OK;
     std::vector<std::string> infos;
     std::string cmd;

@@ -30,6 +30,7 @@
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
 #include "errors.h"
+#include "notification_extension_wrapper.h"
 #include "notification_record.h"
 #ifdef DEVICE_USAGE_STATISTICS_ENABLE
 #include "bundle_active_client.h"
@@ -78,6 +79,7 @@ constexpr int32_t DIALOG_DEFAULT_HEIGHT = 240;
 constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
+constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 3;
 
 const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
 
@@ -86,6 +88,7 @@ const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
 std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
+std::mutex AdvancedNotificationService::flowControlMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
@@ -132,7 +135,9 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_GET_ACTIVE_USER_FAILED;
             }
             if (request->GetOwnerUid() == DEFAULT_UID) {
-                uid = IPCSkeleton::GetCallingUid();
+                int32_t userId = 0;
+                GetActiveUserId(userId);
+                uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), userId);
             } else {
                 uid = request->GetOwnerUid();
             }
@@ -141,6 +146,32 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
         request->SetOwnerUid(uid);
     } else {
+        std::string sourceBundleName =
+            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+            bundle, sourceBundleName)) {
+            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
+                bundle.c_str(), sourceBundleName.c_str());
+            if (request->GetBundleOption()->GetUid() < DEFAULT_UID) {
+                return ERR_ANS_INVALID_UID;
+            }
+            int32_t uid = -1;
+            if (request->GetBundleOption()->GetUid() == DEFAULT_UID) {
+                int32_t userId = 0;
+                GetActiveUserId(userId);
+                std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+                if (bundleManager != nullptr) {
+                    uid = bundleManager->GetDefaultUidByBundleName(sourceBundleName, userId);
+                }
+            } else {
+                uid = request->GetBundleOption()->GetUid();
+            }
+            if (uid < 0) {
+                return ERR_ANS_INVALID_UID;
+            }
+            request->SetOwnerUid(uid);
+            bundle = sourceBundleName;
+        }
         request->SetOwnerBundleName(bundle);
     }
     request->SetCreatorBundleName(bundle);
@@ -284,7 +315,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
 {
     ErrCode result = ERR_OK;
     if (!IsNotificationExists(record->notification->GetKey())) {
-        result = FlowControl(record);
+        result = PublishFlowControl(record);
     } else {
         if (record->request->IsAlertOneTime()) {
             record->notification->SetEnableLight(false);
@@ -353,7 +384,19 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
     } else {
-        bundleOption = GenerateBundleOption();
+        std::string sourceBundleName =
+            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+            GetClientBundleName(), sourceBundleName)) {
+            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
+                GetClientBundleName().c_str(), sourceBundleName.c_str());
+            request->SetCreatorBundleName(request->GetOwnerBundleName());
+            request->SetCreatorUid(request->GetOwnerUid());
+            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
+                request->GetOwnerUid());
+        } else {
+            bundleOption = GenerateBundleOption();
+        }
     }
 
     if (bundleOption == nullptr) {
@@ -501,11 +544,16 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
     ANS_LOGI("PublishPreparedNotification");
 
     auto record = MakeNotificationRecord(request, bundleOption);
-    ErrCode result = CheckPublishPreparedNotification(record, AccessTokenHelper::IsSystemApp());
+    bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
         return result;
     }
 
+    result = FlowControl(record);
+    if (result != ERR_OK) {
+        return result;
+    }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
@@ -513,7 +561,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
             return;
         }
 
-        result = AddRecordToMemory(record);
+        result = AddRecordToMemory(record, isSystemApp);
         if (result != ERR_OK) {
             return;
         }
@@ -532,12 +580,40 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         NotificationRequestDb requestDb = { .request = record->request, .bundleOption = bundleOption};
         UpdateNotificationTimerInfo(record);
         result = SetNotificationRequestToDb(requestDb);
+        if (result != ERR_OK) {
+            return;
+        }
+        result = UpdateSlotAuthInfo(record);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
         StartAutoDelete(record->notification->GetKey(),
             record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+    }
+    return result;
+}
+
+ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
+{
+    ErrCode result = ERR_OK;
+    // only update auth info for LIVE_VIEW notification
+    if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
+        record->request->GetNotificationType() == NotificationContent::Type::LIVE_VIEW) {
+        sptr<NotificationSlot> slot = record->slot;
+        // update authHintCnt when authorizedStatus is NOT_AUTHORIZED
+        if (slot->GetAuthorizedStatus() == NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED) {
+            slot->AddAuthHintCnt();
+        }
+        // change authorizedStatus to AUTHORIZED when authHintCnt exceeds MAX_LIVEVIEW_HINT_COUNT
+        if (slot->GetAuthHintCnt() > MAX_LIVEVIEW_HINT_COUNT) {
+            slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        }
+        std::vector<sptr<NotificationSlot>> slots;
+        slots.push_back(slot);
+        result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
+        ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
+            slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
     }
     return result;
 }
@@ -874,7 +950,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             }
 
             ProcForDeleteLiveView(record);
-            notificationList_.remove(record);
+            RemoveNotificationList(record);
             return ERR_OK;
         }
     }
@@ -902,7 +978,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
             }
         }
 
-        notificationList_.remove(record);
+        RemoveNotificationList(record);
         return ERR_OK;
     }
 
@@ -924,7 +1000,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
             ProcForDeleteLiveView(record);
 
             notification = record->notification;
-            notificationList_.remove(record);
+            RemoveNotificationList(record);
             return ERR_OK;
         }
     }
@@ -1090,12 +1166,25 @@ static bool SortNotificationsByLevelAndTime(
 ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::lock_guard<std::mutex> lock(flowControlMutex_);
     RemoveExpired(flowControlTimestampList_, now);
-    if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
+    if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
+        return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+    }
+    flowControlTimestampList_.push_back(now);
+
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<NotificationRecord> &record)
+{
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    RemoveExpired(flowControlPublishTimestampList_, now);
+    if (flowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
 
-    flowControlTimestampList_.push_back(now);
+    flowControlPublishTimestampList_.push_back(now);
 
     std::list<std::shared_ptr<NotificationRecord>> bundleList;
     for (auto item : notificationList_) {
@@ -1109,7 +1198,7 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
         bundleList.sort(SortNotificationsByLevelAndTime);
         recordToRemove = bundleList.front();
         SendFlowControlOccurHiSysEvent(recordToRemove);
-        notificationList_.remove(bundleList.front());
+        RemoveNotificationList(bundleList.front());
     }
 
     if (notificationList_.size() >= MAX_ACTIVE_NUM) {
@@ -1117,13 +1206,13 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
             bundleList.sort(SortNotificationsByLevelAndTime);
             recordToRemove = bundleList.front();
             SendFlowControlOccurHiSysEvent(recordToRemove);
-            notificationList_.remove(bundleList.front());
+            RemoveNotificationList(bundleList.front());
         } else {
             std::list<std::shared_ptr<NotificationRecord>> sorted = notificationList_;
             sorted.sort(SortNotificationsByLevelAndTime);
             recordToRemove = sorted.front();
             SendFlowControlOccurHiSysEvent(recordToRemove);
-            notificationList_.remove(sorted.front());
+            RemoveNotificationList(sorted.front());
         }
     }
 
@@ -1646,7 +1735,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
             UpdateRecentNotification(record->notification, true, reason);
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteLiveView(record);
-            notificationList_.remove(record);
+            RemoveNotificationList(record);
             break;
         }
     }
@@ -1717,7 +1806,8 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
     return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
 }
 
-ErrCode AdvancedNotificationService::AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record)
+ErrCode AdvancedNotificationService::AddRecordToMemory(
+    const std::shared_ptr<NotificationRecord> &record, bool isSystemApp)
 {
     auto result = AssignValidNotificationSlot(record);
     if (result != ERR_OK) {
@@ -1731,7 +1821,7 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(const std::shared_ptr<Not
         return result;
     }
 
-    if (AccessTokenHelper::IsSystemApp()) {
+    if (isSystemApp) {
         ChangeNotificationByControlFlags(record);
     }
 
@@ -1747,6 +1837,16 @@ void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     ANS_LOGI("Push Callback died, remove the proxy object");
     AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
+}
+
+void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record)
+{
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    std::vector<std::string> hashCodes;
+    hashCodes.emplace_back(record->request->GetNotificationHashCode());
+    EXTENTION_WRAPPER->UpdateByCancel(hashCodes);
+#endif
+    notificationList_.remove(record);
 }
 
 PushCallbackRecipient::PushCallbackRecipient() {}

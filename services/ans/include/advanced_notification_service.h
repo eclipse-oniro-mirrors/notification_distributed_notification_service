@@ -28,8 +28,10 @@
 
 #include "ans_const_define.h"
 #include "ans_manager_stub.h"
+#include "common_notification_publish_process.h"
 #include "distributed_kv_data_manager.h"
 #include "distributed_kvstore_death_recipient.h"
+#include "live_publish_process.h"
 #include "notification.h"
 #include "notification_bundle_option.h"
 #include "notification_dialog_manager.h"
@@ -386,6 +388,19 @@ public:
      */
     ErrCode GetSlotsByBundle(
         const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlot>> &slots) override;
+
+    /**
+     * @brief Get the specified slot corresponding to the bundle.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption object.
+     * @param slotType Indicates the ID of the slot, which is created by AddNotificationSlot(NotificationSlot). This
+     *        parameter must be specified.
+     * @param slot Indicates the notification slot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetSlotByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot) override;
 
     /**
      * @brief Update slots according to bundle.
@@ -882,6 +897,56 @@ public:
     ErrCode UnregisterPushCallback() override;
 
     /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled) override;
+
+    /**
+     * @brief Get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, bool &enabled) override;
+
+    /**
+     * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled) override;
+
+    /**
+     * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given device to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
+
+    /**
      * @brief Reset pushcallback proxy
      */
     void ResetPushCallbackProxy();
@@ -938,6 +1003,39 @@ public:
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
 
+    /**
+     * @brief Set agent relationship.
+     *
+     * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
+     * @param value Indicates key-value pair of agent relationship.
+     * @return Returns set result.
+     */
+    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+
+    /**
+     * @brief Init publish process.
+     */
+    bool InitPublishProcess();
+
+protected:
+    /**
+     * @brief Query whether there is a agent relationship between the two apps.
+     *
+     * @param agentBundleName The bundleName of the agent app.
+     * @param sourceBundleName The bundleName of the source app.
+     * @return Returns true if There is an agent relationship; returns false otherwise.
+     */
+    bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
+
 private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
@@ -967,6 +1065,7 @@ private:
     static bool NotificationCompare(
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
     ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode PublishFlowControl(const std::shared_ptr<NotificationRecord> &record);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
     static sptr<NotificationBundleOption> GenerateBundleOption();
@@ -974,6 +1073,7 @@ private:
 
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
+    void ExtendDumpForFlags(std::shared_ptr<NotificationFlags>, std::stringstream &stream);
     ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
     ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1079,11 +1179,6 @@ private:
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
         int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);
-    void AddLiveViewSubscriber();
-    void EraseLiveViewSubsciber(const std::string &bundleName);
-    bool GetLiveViewSubscribeState(const std::string &bundleName);
-    bool CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request);
-    bool CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request);
     std::shared_ptr<NotificationRecord> MakeNotificationRecord(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
@@ -1096,11 +1191,14 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
-    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);
     ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record);
+    std::vector<AppExecFwk::BundleInfo> GetBundlesOfActiveUser();
+    void RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
@@ -1111,8 +1209,10 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
+    static std::mutex flowControlMutex_;
     std::list<std::chrono::system_clock::time_point> flowControlTimestampList_;
     std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
+    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
@@ -1120,6 +1220,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
     std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
     static std::string supportCheckSaPermission_;
+    std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;
@@ -1127,8 +1228,6 @@ private:
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
-    std::set<std::string> localLiveViewSubscribedList_;
-    std::mutex liveViewMutext_;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
 };
 

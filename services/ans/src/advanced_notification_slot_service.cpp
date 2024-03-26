@@ -149,6 +149,45 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
     return result;
 }
 
+ErrCode AdvancedNotificationService::GetSlotByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+    sptr<NotificationSlot> &slot)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is false.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundleOption == nullptr) {
+        ANS_LOGD("Failed to generateBundleOption.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
+    }));
+    notificationSvrQueue_->wait(handler);
+    if (slot != nullptr) {
+        ANS_LOGD("GetSlotByBundle, authStatus: %{public}d), authHintCnt: %{public}d",
+            slot->GetAuthorizedStatus(), slot->GetAuthHintCnt());
+    }
+    return result;
+}
+
 ErrCode AdvancedNotificationService::UpdateSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
@@ -665,6 +704,52 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
     }
 
     return true;
+}
+
+ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        return ERR_ANS_NOT_SYSTEM_SERVICE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance().SetKvToDb(key, value);
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
+bool AdvancedNotificationService::IsAgentRelationship(const std::string &agentBundleName,
+    const std::string &sourceBundleName)
+{
+    if (agentBundleName.empty() || sourceBundleName.empty()) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool result = false;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance().IsAgentRelationship(agentBundleName, sourceBundleName);
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

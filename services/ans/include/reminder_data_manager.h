@@ -415,6 +415,7 @@ private:
      */
     bool IsBelongToSameApp(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &other) const;
+    bool CheckIsSameApp(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &other);
 
     /**
      * @brief Judges whether the reminder is matched with the bundleOption or userId.

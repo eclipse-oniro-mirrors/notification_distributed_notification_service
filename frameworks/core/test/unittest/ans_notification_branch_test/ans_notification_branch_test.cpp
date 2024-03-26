@@ -212,6 +212,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetSlotByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode UpdateSlots(
         const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots) override
     {
@@ -488,6 +495,38 @@ public:
 
     ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
         const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
     {
         return ERR_ANS_INVALID_PARAM;
     }

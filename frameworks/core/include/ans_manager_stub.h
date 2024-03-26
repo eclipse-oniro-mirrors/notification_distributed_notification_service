@@ -346,6 +346,19 @@ public:
      */
     virtual ErrCode GetSlotsByBundle(
         const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlot>> &slots) override;
+    
+    /**
+     * @brief Get the specified slot corresponding to the bundle.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption object.
+     * @param slotType Indicates the ID of the slot, which is created by AddNotificationSlot(NotificationSlot). This
+     *        parameter must be specified.
+     * @param slot Indicates the notification slot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetSlotByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot) override;
 
     /**
      * @brief Update slots according to bundle.
@@ -776,6 +789,75 @@ public:
      */
     ErrCode UnregisterPushCallback() override;
 
+    /**
+     * @brief Set agent relationship.
+     *
+     * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
+     * @param value Indicates key-value pair of agent relationship.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    virtual ErrCode CancelAsBundleWithAgent(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetDistributedEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, const bool enabled) override;
+
+    /**
+     * @brief get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsDistributedEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, bool &enabled) override;
+    
+    /**
+     * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled) override;
+
+    /**
+     * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
+
 private:
     static const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -812,6 +894,7 @@ private:
     ErrCode HandleDeleteByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDeleteAll(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotsByBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetSlotByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUpdateSlots(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRequestEnableNotification(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledForBundle(MessageParcel &data, MessageParcel &reply);
@@ -864,6 +947,12 @@ private:
     ErrCode HandleGetAllNotificationEnableStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetAdditionConfig(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleIsDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

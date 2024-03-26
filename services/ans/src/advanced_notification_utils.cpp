@@ -103,10 +103,14 @@ std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueu
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    std::string bundle = GetClientBundleName();
-    if (bundle.empty()) {
-        return nullptr;
+    std::string bundle = "";
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        bundle = GetClientBundleName();
+        if (bundle.empty()) {
+            return nullptr;
+        }
     }
+
     int32_t uid = IPCSkeleton::GetCallingUid();
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (bundleOption == nullptr) {
@@ -225,6 +229,7 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
 
     requestLiveViewContent->SetLiveViewStatus(liveViewContent->GetLiveViewStatus());
     requestLiveViewContent->SetVersion(liveViewContent->GetVersion());
+    requestLiveViewContent->SetLockScreenPicture(liveViewContent->GetLockScreenPicture());
 
     std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
     if (requestExtraInfo == nullptr) {
@@ -330,6 +335,30 @@ void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>
     notificationRequest->SetOwnerBundleName(bundleName);
 }
 
+void AdvancedNotificationService::ExtendDumpForFlags(
+    std::shared_ptr<NotificationFlags> notificationFlags, std::stringstream &stream)
+{
+    if (notificationFlags == nullptr) {
+        ANS_LOGD("The notificationFlags is nullptr.");
+        return;
+    }
+    stream << "\t\tReminderFlags : " << notificationFlags->GetReminderFlags() << "\n";
+    bool isEnable = false;
+    if (notificationFlags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        isEnable = true;
+    }
+    stream << "\t\tSound : " << isEnable << "\n";
+    isEnable = false;
+    if (notificationFlags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        isEnable = true;
+    }
+    stream << "\t\tVibration : " << isEnable << "\n";
+    stream << "\t\tLockScreenVisbleness : " << notificationFlags->IsLockScreenVisblenessEnabled() << "\n";
+    stream << "\t\tBanner : " << notificationFlags->IsBannerEnabled() << "\n";
+    stream << "\t\tLightScreen : " << notificationFlags->IsLightScreenEnabled() << "\n";
+    stream << "\t\tStatusIcon : " << notificationFlags->IsStatusIconEnabled() << "\n";
+}
+
 ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& bundle, int32_t userId,
     std::vector<std::string> &dumpInfo)
 {
@@ -366,6 +395,7 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
         stream << "\t\tId: " << record->notification->GetId() << "\n";
         stream << "\t\tLabel: " << record->notification->GetLabel() << "\n";
         stream << "\t\tSlotType = " << record->request->GetSlotType() << "\n";
+        ExtendDumpForFlags(record->request->GetFlags(), stream);
         ANS_LOGD("DumpInfo push stream.");
         dumpInfo.push_back(stream.str());
     }
@@ -407,6 +437,7 @@ ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& b
         stream << "\t\tId: " << recentNotification->notification->GetId() << "\n";
         stream << "\t\tLabel: " << recentNotification->notification->GetLabel() << "\n";
         stream << "\t\tSlotType = " << notificationRequest.GetSlotType() << "\n";
+        ExtendDumpForFlags(notificationRequest.GetFlags(), stream);
         dumpInfo.push_back(stream.str());
     }
     return ERR_OK;
@@ -446,6 +477,7 @@ ErrCode AdvancedNotificationService::DistributedNotificationDump(const std::stri
         stream << "\t\tId: " << record->notification->GetId() << "\n";
         stream << "\t\tLabel: " << record->notification->GetLabel() << "\n";
         stream << "\t\tSlotType = " << record->request->GetSlotType() << "\n";
+        ExtendDumpForFlags(record->request->GetFlags(), stream);
         dumpInfo.push_back(stream.str());
     }
 
@@ -524,6 +556,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
 
         NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
     }));
+    NotificationPreferences::GetInstance().RemoveEnabledDbByBundle(bundleOption);
 }
 
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
@@ -542,6 +575,11 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
             auto errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
+            }
+
+            errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            if (errCode != ERR_OK) {
+                ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
             }
         }
     };
@@ -574,6 +612,11 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
+
+            errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            if (errCode != ERR_OK) {
+                ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
+            }
             return;
         }
 
@@ -586,6 +629,10 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
         if (errCode != ERR_OK) {
             ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
+        }
+        errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+        if (errCode != ERR_OK) {
+            ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
         }
     };
 
@@ -845,7 +892,7 @@ void AdvancedNotificationService::OnDistributedPublish(
             return;
         }
 
-        result = FlowControl(record);
+        result = PublishFlowControl(record);
         if (result != ERR_OK) {
             return;
         }
@@ -971,7 +1018,7 @@ void AdvancedNotificationService::OnDistributedDelete(
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
-                notificationList_.remove(record);
+                RemoveNotificationList(record);
                 break;
             }
         }
@@ -1583,29 +1630,9 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::InitNotificationEnableList()
 {
-    auto task = []() {
-        auto bundleMgr = BundleManagerHelper::GetInstance();
-        if (bundleMgr == nullptr) {
-            ANS_LOGE("Get bundle mgr error!");
-            return;
-        }
-        std::vector<int32_t> activeUserId;
-        AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-        if (activeUserId.empty()) {
-            activeUserId.push_back(MAIN_USER_ID);
-        }
-        AppExecFwk::BundleFlag flag = AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
-        std::vector<AppExecFwk::BundleInfo> bundleInfos;
-        for (auto &itemUser: activeUserId) {
-            std::vector<AppExecFwk::BundleInfo> infos;
-            if (!bundleMgr->GetBundleInfos(flag, infos, itemUser)) {
-                ANS_LOGW("Get bundle infos error");
-                continue;
-            }
-            bundleInfos.insert(bundleInfos.end(), infos.begin(), infos.end());
-        }
+    auto task = [&]() {
+        std::vector<AppExecFwk::BundleInfo> bundleInfos = GetBundlesOfActiveUser();
         bool notificationEnable = false;
-        ErrCode saveRef = ERR_OK;
         for (const auto &bundleInfo : bundleInfos) {
             // Currently only the input from the whitelist is written
             if (!bundleInfo.applicationInfo.allowEnableNotification) {
@@ -1618,16 +1645,19 @@ void AdvancedNotificationService::InitNotificationEnableList()
                     bundleInfo.applicationInfo.bundleName.c_str());
                 continue;
             }
-            saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
+            ErrCode saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
                 bundleOption, notificationEnable);
             // record already exists
             if (saveRef == ERR_OK) {
                 continue;
             }
-            saveRef = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
-                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
+            saveRef = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleOption, true);
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set enable error! code: %{public}d", saveRef);
+            }
+            saveRef = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            if (saveRef != ERR_OK) {
+                ANS_LOGE("Set badge enable error! code: %{public}d", saveRef);
             }
         }
     };
@@ -1648,32 +1678,6 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
     if (!bundleMgr->GetBundleInfoByBundleName(bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
         ANS_LOGE("Get bundle info error!");
         return false;
-    }
-    return true;
-}
-
-bool AdvancedNotificationService::CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request)
-{
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
-        request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW &&
-        !GetLiveViewSubscribeState(GetClientBundleName())) {
-        ANS_LOGE("Not subscribe local live view.");
-        return false;
-    }
-    return true;
-}
-
-bool AdvancedNotificationService::CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request)
-{
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
-        request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW) {
-            bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-            if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-                ANS_LOGE("Client is not a system app or subsystem");
-                return false;
-            } else {
-                return true;
-            }
     }
     return true;
 }
@@ -1712,6 +1716,33 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
 
     bundleOption->SetUid(uid);
     return ERR_OK;
+}
+
+std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfActiveUser()
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    auto bundleMgr = BundleManagerHelper::GetInstance();
+    if (bundleMgr == nullptr) {
+        ANS_LOGE("Get bundle mgr error!");
+        return bundleInfos;
+    }
+
+    std::vector<int32_t> activeUserId;
+    AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+    if (activeUserId.empty()) {
+        activeUserId.push_back(MAIN_USER_ID);
+    }
+    AppExecFwk::BundleFlag flag = AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
+    for (auto &itemUser: activeUserId) {
+        std::vector<AppExecFwk::BundleInfo> infos;
+        if (!bundleMgr->GetBundleInfos(flag, infos, itemUser)) {
+            ANS_LOGW("Get bundle infos error");
+            continue;
+        }
+        bundleInfos.insert(bundleInfos.end(), infos.begin(), infos.end());
+    }
+
+    return bundleInfos;
 }
 }  // namespace Notification
 }  // namespace OHOS

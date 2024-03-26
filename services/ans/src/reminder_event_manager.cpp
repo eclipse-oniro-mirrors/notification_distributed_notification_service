@@ -207,7 +207,7 @@ sptr<NotificationBundleOption> ReminderEventManager::ReminderEventSubscriber::Ge
     std::string bundleName = ele.GetBundleName();
     int32_t userId = want.GetIntParam(OHOS::AppExecFwk::Constants::USER_ID, -1);
     int32_t uid = ReminderRequest::GetUid(userId, bundleName);
-    ANSR_LOGD("bundleName=%{public}s, userId=%{public}d, uid=%{public}d", bundleName.c_str(), userId, uid);
+    ANSR_LOGD("bundleName=%{public}s, userId=%{private}d, uid=%{public}d", bundleName.c_str(), userId, uid);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
     if (bundleOption == nullptr) {
         ANSR_LOGE("new NotificationBundleOption fail due to no memory.");

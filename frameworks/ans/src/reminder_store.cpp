@@ -185,7 +185,7 @@ void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::Rdb
         }
         bundleOption->SetBundleName(reminder->GetBundleName());
         NativeRdb::ValuesBucket baseValues;
-        ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues);
+        ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues, true);
 
         store.BeginTransaction();
         // insert reminder_base
