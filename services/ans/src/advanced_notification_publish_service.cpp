@@ -1334,19 +1334,21 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
     sptr<Notification> notification = nullptr;
     sptr<NotificationRequest> notificationRequest = nullptr;
 
-    for (auto record : notificationList_) {
-        if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
-            (record->bundleOption->GetUid() == bundle->GetUid()) &&
-            (record->request->GetSlotType() == slot->GetType())) {
-            if (!record->notification->IsRemoveAllowed() || !record->request->IsCommonLiveView()) {
-                continue;
-            }
+    for (std::list<std::shared_ptr<NotificationRecord>>::iterator it = notificationList_.begin();
+        it != notificationList_.end();) {
+        if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+            ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
+            ((*it)->request->GetSlotType() == slot->GetType())) {
+            notification = (*it)->notification;
+            notificationRequest = (*it)->request;
 
-            notification = record->notification;
-            notificationRequest = record->request;
-
-            ProcForDeleteLiveView(record);
-            RemoveNotificationList(record);
+            ProcForDeleteLiveView(*it);
+            #ifdef ENABLE_ANS_EXT_WRAPPER
+            std::vector<std::string> hashCodes;
+            hashCodes.emplace_back((*it)->request->GetNotificationHashCode());
+            EXTENTION_WRAPPER->UpdateByCancel(hashCodes);
+            #endif
+            it = notificationList_.erase(it);
 
             if (notification != nullptr) {
                 UpdateRecentNotification(notification, true, NotificationConstant::CANCEL_REASON_DELETE);
@@ -1356,9 +1358,10 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
 
             TriggerRemoveWantAgent(notificationRequest);
             result = ERR_OK;
+        } else {
+            it++;
         }
     }
-
     return result;
 }
 
