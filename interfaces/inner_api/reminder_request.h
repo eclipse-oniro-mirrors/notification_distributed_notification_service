@@ -934,6 +934,8 @@ protected:
     uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
+    bool CanDisplayTmmediatelySys(uint64_t oriTriggerTime, uint64_t optTriggerTime, uint64_t now);
+    bool CanDisplayTmmediatelyTimeZone(uuint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
     virtual HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
     virtual HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
     bool isExpired_ {false};

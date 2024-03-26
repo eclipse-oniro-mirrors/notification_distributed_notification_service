@@ -275,21 +275,8 @@ bool ReminderRequest::OnDateTimeChange()
     return HandleSysTimeChange(triggerTimeInMilli_, nextTriggerTime);
 }
 
-bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
+bool ReminderRequest::CanDisplayTmmediatelySys(uint64_t oriTriggerTime, uint64_t optTriggerTime, uint64_t now)
 {
-    if (isExpired_) {
-        return false;
-    }
-    uint64_t now = GetNowInstantMilli();
-    if (now == 0) {
-        ANSR_LOGE("get now time failed.");
-        return false;
-    }
-    if (oriTriggerTime == 0 && optTriggerTime < now) {
-        ANSR_LOGW("trigger time is less than now time.");
-        return false;
-    }
-    bool showImmediately = false;
     if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
         // case1. switch to a previous time
         SetTriggerTimeInMilli(optTriggerTime);
@@ -299,27 +286,17 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
             // case2. switch to a future time, trigger time is less than now time.
             // when the reminder show immediately, trigger time will update in onShow function.
             snoozeTimesDynamic_ = 0;
-            showImmediately = true;
+            return true;
         } else {
             // case3. switch to a future time, trigger time is larger than now time.
-            showImmediately = false;
+            return false;
         }
     }
-    return showImmediately;
+    return false;
 }
 
-bool ReminderRequest::HandleTimeZoneChange(
-    uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime)
+bool CanDisplayTmmediatelyTimeZone(uuint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime)
 {
-    if (isExpired_) {
-        return false;
-    }
-    ANSR_LOGD("Handle timezone change, old:%{public}" PRIu64 ", new:%{public}" PRIu64 "",
-        oldZoneTriggerTime, newZoneTriggerTime);
-    if (oldZoneTriggerTime == newZoneTriggerTime) {
-        return false;
-    }
-    bool showImmediately = false;
     if (optTriggerTime != INVALID_LONG_LONG_VALUE && oldZoneTriggerTime < newZoneTriggerTime) {
         // case1. timezone change to smaller
         SetTriggerTimeInMilli(optTriggerTime);
@@ -334,12 +311,45 @@ bool ReminderRequest::HandleTimeZoneChange(
         }
         if (newZoneTriggerTime <= GetDurationSinceEpochInMilli(now)) {
             snoozeTimesDynamic_ = 0;
-            showImmediately = true;
+            return true;
         } else {
             SetTriggerTimeInMilli(newZoneTriggerTime);
-            showImmediately = false;
+            return false;
         }
     }
+    return false;
+}
+
+bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
+{
+    if (isExpired_) {
+        return false;
+    }
+    uint64_t now = GetNowInstantMilli();
+    if (now == 0) {
+        ANSR_LOGE("get now time failed.");
+        return false;
+    }
+    if (oriTriggerTime == 0 && optTriggerTime < now) {
+        ANSR_LOGW("trigger time is less than now time.");
+        return false;
+    }
+    bool showImmediately = CanDisplayTmmediatelySys(oriTriggerTime, optTriggerTime, now);
+    return showImmediately;
+}
+
+bool ReminderRequest::HandleTimeZoneChange(
+    uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime)
+{
+    if (isExpired_) {
+        return false;
+    }
+    ANSR_LOGD("Handle timezone change, old:%{public}" PRIu64 ", new:%{public}" PRIu64 "",
+        oldZoneTriggerTime, newZoneTriggerTime);
+    if (oldZoneTriggerTime == newZoneTriggerTime) {
+        return false;
+    }
+    bool showImmediately = CanDisplayTmmediatelyTimeZone(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime);
     return showImmediately;
 }
 
@@ -436,8 +446,8 @@ bool ReminderRequest::OnTerminate()
 bool ReminderRequest::OnTimeZoneChange()
 {
     time_t oldZoneTriggerTime = static_cast<time_t>(triggerTimeInMilli_ / MILLI_SECONDS);
-    struct tm oriTime;
-    (void)gmtime_r(&oldZoneTriggerTime, &oriTime);
+    struct tm *localOriTime = localtime(&oldZoneTriggerTime);
+    struct tm oriTime = *localOriTime;
     time_t newZoneTriggerTime = mktime(&oriTime);
     uint64_t nextTriggerTime = PreGetNextTriggerTimeIgnoreSnooze(true, false);
     return HandleTimeZoneChange(

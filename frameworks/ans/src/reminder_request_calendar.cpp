@@ -650,24 +650,7 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
     }
     bool showImmediately = false;
     uint64_t durationTime = GetDurationTime();
-    if (!CheckCalenderIsExpired(oriTriggerTime, now, durationTime)) {
-        return false;
-    }
-    if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
-        // case1. switch to a previous time
-        SetTriggerTimeInMilli(optTriggerTime);
-        snoozeTimesDynamic_ = snoozeTimes_;
-    } else {
-        if (oriTriggerTime <= now) {
-            // case2. switch to a future time, trigger time is less than now time.
-            // when the reminder show immediately, trigger time will update in onShow function.
-            snoozeTimesDynamic_ = 0;
-            showImmediately = true;
-        } else {
-            // case3. switch to a future time, trigger time is larger than now time.
-            showImmediately = false;
-        }
-    }
+    showImmediately = CanDisplayTmmediatelySys(oriTriggerTime, optTriggerTime, now);
     return showImmediately;
 }
 
@@ -688,26 +671,7 @@ bool ReminderRequest::HandleTimeZoneChange(
     if (!CheckCalenderIsExpired(oriTriggerTime, now, durationTime)) {
         return false;
     }
-    if (optTriggerTime != INVALID_LONG_LONG_VALUE && oldZoneTriggerTime < newZoneTriggerTime) {
-        // case1. timezone change to smaller
-        SetTriggerTimeInMilli(optTriggerTime);
-        snoozeTimesDynamic_ = snoozeTimes_;
-    } else {
-        // case2. timezone change to larger
-        time_t now;
-        (void)time(&now);  // unit is seconds.
-        if (static_cast<int64_t>(now) < 0) {
-            ANSR_LOGE("Get now time error");
-            return false;
-        }
-        if (newZoneTriggerTime <= GetDurationSinceEpochInMilli(now)) {
-            snoozeTimesDynamic_ = 0;
-            showImmediately = true;
-        } else {
-            SetTriggerTimeInMilli(newZoneTriggerTime);
-            showImmediately = false;
-        }
-    }
+    showImmediately = CanDisplayTmmediatelyTimeZone(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime);
     return showImmediately;
 }
 
