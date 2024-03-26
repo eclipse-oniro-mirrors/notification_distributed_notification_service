@@ -84,7 +84,7 @@ constexpr char HIDUMPER_HELP_MSG[] =
     "  --active, -a                 list all active notifications\n"
     "  --recent, -r                 list recent notifications\n";
 }
-
+const std::string LIVE_VIEW_LABEL = "ans_live_view";
 
 static bool SortNotificationsByLevelAndTime(
     const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second)
@@ -291,12 +291,16 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
-
+    std::string liveViewLabel = label;
+    if (liveViewLabel.empty()) {
+        liveViewLabel = LIVE_VIEW_LABEL;
+    }
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 
-        auto record = GetRecordFromNotificationList(notificationId, bundle->GetUid(), label, bundle->GetBundleName());
+        auto record = GetRecordFromNotificationList(notificationId, bundle->GetUid(),
+            liveViewLabel, bundle->GetBundleName());
         if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
             return;
         }
