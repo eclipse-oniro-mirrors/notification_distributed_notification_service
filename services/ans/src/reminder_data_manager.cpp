@@ -1880,9 +1880,17 @@ void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderReques
 void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)
 {
     ANSR_LOGI("System language config changed.");
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        UpdateReminderLanguage(*it);
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+        for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            UpdateReminderLanguage(*it);
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
+            ShowReminder((*it), false, false, false, false);
+        }
     }
 }
 
