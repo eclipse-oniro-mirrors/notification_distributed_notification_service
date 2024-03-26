@@ -167,7 +167,7 @@ NotificationLocalLiveViewContent *NotificationLocalLiveViewContent::FromJson(con
     pContent->ReadFromJson(jsonObject);
 
     const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("typeCode") != jsonEnd) {
+    if (jsonObject.find("typeCode") != jsonEnd && jsonObject.at("typeCode").is_number_integer()) {
         pContent->type_ = jsonObject.at("typeCode").get<int32_t>();
     }
 
