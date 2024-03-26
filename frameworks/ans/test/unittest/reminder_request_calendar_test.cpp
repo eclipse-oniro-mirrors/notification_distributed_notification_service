@@ -943,6 +943,129 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
 }
 
 /**
+ * @tc.name: CheckCalenderIsExpired_00001
+ * @tc.desc: Test CheckCalenderIsExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    uint64_t oriTriggerTime = 1711422174;
+    uint64_t durationTime = 5;
+    uint64_t now = 1711422175;
+    EXPECT_EQ(rrc->CheckCalenderIsExpired(oriTriggerTime, now, durationTime), true);
+}
+
+/**
+ * @tc.name: CheckCalenderIsExpired_00002
+ * @tc.desc: Test CheckCalenderIsExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    uint64_t oriTriggerTime = 1711422174;
+    uint64_t durationTime = 5;
+    uint64_t now = 1711422180;
+    EXPECT_EQ(rrc->CheckCalenderIsExpired(oriTriggerTime, now, durationTime), false);
+}
+
+/**
+ * @tc.name: CheckCalenderIsExpired_00003
+ * @tc.desc: Test CheckCalenderIsExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    uint64_t oriTriggerTime = 1711422174;
+    uint64_t durationTime = 5;
+    uint64_t now = 1711422173;
+    EXPECT_EQ(rrc->CheckCalenderIsExpired(oriTriggerTime, now, durationTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00001
+ * @tc.desc: Test HandleTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleTimeZoneChange_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(false);
+    uint64_t oldZoneTriggerTime = 1998;
+    uint64_t newZoneTriggerTime = 1999;
+    uint64_t optTriggerTime = 0;
+    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), true);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00002
+ * @tc.desc: Test HandleTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleTimeZoneChange_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(true);
+    uint64_t oldZoneTriggerTime = 1998;
+    uint64_t newZoneTriggerTime = 1998;
+    uint64_t optTriggerTime = 0;
+    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00003
+ * @tc.desc: Test HandleTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleTimeZoneChange_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(true);
+    uint64_t oldZoneTriggerTime = 1998;
+    uint64_t newZoneTriggerTime = 1999;
+    uint64_t optTriggerTime = 10;
+    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00001
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(true);
+    uint64_t oriTriggerTime = 10;
+    uint64_t optTriggerTime = 10;
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00002
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(false);
+    uint64_t oriTriggerTime = 10;
+    uint64_t optTriggerTime = 20;
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
+}
+
+/**
  * @tc.name: RecoverFromDb_00001
  * @tc.desc: Test RecoverFromDb parameters.
  * @tc.type: FUNC

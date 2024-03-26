@@ -788,17 +788,32 @@ napi_value ReminderCommon::CreateReminderAlarm(
 napi_value ReminderCommon::CreateReminderCalendar(
     const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)
 {
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
     struct tm dateTime;
-    if (!ParseCalendarParams(env, value, repeatMonths, repeatDays, dateTime)) {
+    napi_value dateTimeObj = nullptr;
+    if (!GetObject(env, value, ReminderAgentNapi::CALENDAR_DATE_TIME, dateTimeObj)) {
+        ANSR_LOGW("Create calendar reminder fail: dateTime must be setted.");
         return nullptr;
     }
 
-    // daysOfWeek
+    if (!ParseLocalDateTime(env, dateTimeObj, dateTime)) {
+        ANSR_LOGW("Parce DateTime failed.");
+        return nullptr;
+    }
+
+    struct tm endDateTime;
+    napi_value endDateTimeObj = nullptr;
+    if (GetObject(env, value, ReminderAgentNapi::CAlENDAR_END_DATE_TIME, endDateTimeObj)) {
+        if (!ParseLocalDateTime(env, endDateTimeObj, endDateTime)) {
+            ANSR_LOGW("Parse EndDateTime failed.");
+            return nullptr;
+        }
+    }
+
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
     std::vector<uint8_t> daysOfWeek;
-    uint8_t maxDaysOfWeek = 7;
-    if (ParseInt32Array(env, value, ReminderAgentNapi::REPEAT_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
+
+    if (!ParseCalendarParams(env, value, repeatMonths, repeatDays, dateTime)) {
         return nullptr;
     }
 
@@ -813,6 +828,9 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
     
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
+    reminderCalendar->SetDateTime(ReminderRequest::GetDurationSinceEpochInMilli(mktime(&dateTime)));
+    reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(mktime(&endDateTime)));
+    reminderCalendar->setDurationTime(dateTime, endDateTime);
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
     }
@@ -856,15 +874,31 @@ bool ReminderCommon::CheckCalendarParams(const int32_t &year, const int32_t &mon
 }
 
 bool ReminderCommon::ParseCalendarParams(const napi_env& env, const napi_value& value,
-    std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, struct tm& dateTime)
+    std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, std::vector<uint8_t>& daysOfWeek)
 {
-    napi_value dateTimeObj = nullptr;
-    if (!GetObject(env, value, ReminderAgentNapi::CALENDAR_DATE_TIME, dateTimeObj)) {
-        ANSR_LOGW("Create calendar reminder fail: dateTime must be setted.");
+    // repeatMonth
+    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_MONTHS, repeatMonths,
+        ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) == nullptr) {
         return false;
     }
 
-    // year month day hour minute second
+    // repeatDay
+    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_DAYS, repeatDays,
+        ReminderRequestCalendar::MAX_DAYS_OF_MONTH) == nullptr) {
+        return false;
+    }
+
+    // daysOfWeek
+    uint8_t maxDaysOfWeek = 7;
+    if (ParseInt32Array(env, value, ReminderAgentNapi::REPEAT_DAYS_OF_WEEK, daysOfWeek, maxDaysOfWeek) == nullptr) {
+        return false;
+    }
+    
+    return true;
+}
+
+bool ReminderCommon::ParseLocalDateTime(const napi_env& env, const napi_value& dateTimeObj, struct tm& dateTime)
+{
     int32_t propertyYearVal = 0;
     int32_t propertyMonthVal = 0;
     int32_t propertyDayVal = 0;
@@ -880,18 +914,6 @@ bool ReminderCommon::ParseCalendarParams(const napi_env& env, const napi_value& 
 
     if (!CheckCalendarParams(propertyYearVal, propertyMonthVal, propertyDayVal,
         propertyHourVal, propertyMinteVal)) {
-        return false;
-    }
-
-    // repeatMonth
-    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_MONTHS, repeatMonths,
-        ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) == nullptr) {
-        return false;
-    }
-
-    // repeatDay
-    if (ParseInt32Array(env, value, ReminderAgentNapi::CALENDAR_REPEAT_DAYS, repeatDays,
-        ReminderRequestCalendar::MAX_DAYS_OF_MONTH) == nullptr) {
         return false;
     }
 

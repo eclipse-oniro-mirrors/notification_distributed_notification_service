@@ -934,6 +934,12 @@ protected:
     uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
+    virtual HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
+    virtual HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
+    bool isExpired_ {false};
+    uint64_t GetNowInstantMilli() const;
+    uint8_t snoozeTimes_ {0};
+    uint8_t snoozeTimesDynamic_ {0};
 
 private:
     void AddActionButtons(const bool includeSnooze);
@@ -941,12 +947,9 @@ private:
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element,
         bool isWantAgent) const;
     std::string GetButtonInfo() const;
-    uint64_t GetNowInstantMilli() const;
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;
-    bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
-    bool HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
     bool InitNotificationRequest();
     void InitServerObj();
     void SetMaxScreenWantAgent(AppExecFwk::ElementName &element);
@@ -1010,9 +1013,6 @@ private:
     std::string displayContent_ {};
     std::string title_ {};
     std::string bundleName_ {};
-    bool isExpired_ {false};
-    uint8_t snoozeTimes_ {0};
-    uint8_t snoozeTimesDynamic_ {0};
     uint8_t state_ {0};
     int32_t notificationId_ {0};
     std::string groupId_ {};

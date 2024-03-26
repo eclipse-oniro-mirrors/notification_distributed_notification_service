@@ -57,6 +57,7 @@ ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime, const std::
 ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &other) : ReminderRequest(other)
 {
     dateTime_ = other.dateTime_;
+    endDateTime = other.endDateTime_;
     firstDesignateYear_ = other.firstDesignateYear_;
     firstDesignateMonth_ = other.firstDesignateMonth_;
     firstDesignateDay_ = other.firstDesignateDay_;
@@ -70,6 +71,7 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     repeatDay_ = other.repeatDay_;
     repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
     rruleWantAgentInfo_ = other.rruleWantAgentInfo_;
+    durationTime_ = other.durationTime_;
 }
 
 void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo)
@@ -339,6 +341,21 @@ void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &r
     }
 }
 
+void ReminderRequestCalendar::setDurationTime(const tm &dateTime, const tm &endDateTime)
+{
+    uint64_t beginTime = GetDateTime();
+    uint64_t endTime = GetEndDateTime();
+    if (endTime == INVALID_LONG_LONG_VALUE) {
+        durationTime_ = 0;
+    }
+    durationTime_ = endTime - beginTime;
+}
+
+uint64_t ReminderRequestCalendar::setDurationTime() const
+{
+    return durationTime_;
+}
+
 std::vector<uint8_t> ReminderRequestCalendar::GetRepeatMonths() const
 {
     std::vector<uint8_t> repeatMonths;
@@ -417,6 +434,7 @@ bool ReminderRequestCalendar::Marshalling(Parcel &parcel) const
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
         WRITE_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
         WRITE_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
+        WRITE_UINT64_RETURN_FALSE_LOG(parcel, durationTime_, "durationTime");
         WRITE_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateDay_, "firstDesignateDay");
@@ -461,6 +479,7 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         READ_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
         READ_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
         READ_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
+        READ_UINT64_RETURN_FALSE_LOG(parcel, durationTime_, "durationTime");
 
         InitDateTime();
 
@@ -547,6 +566,7 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
 
     uint64_t endDateTime;
     ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
+    setEndDateTime(endDateTime);
 
     int32_t repeatDay;
     ReminderStore::GetInt32Val(resultSet, ReminderCalendarTable::REPEAT_DAYS, repeatDay);
@@ -573,6 +593,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     uint32_t repeatDay = 0;
     uint16_t repeatMonth = 0;
     uint8_t repeatDaysOfWeek = 0;
+    uint64_t durationTime = 0;
     std::string rruleWantAgent;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
@@ -584,6 +605,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
             firstDesignateDay = calendar->GetFirstDesignateDay();
             dateTime = calendar->GetDateTime();
             repeatDaysOfWeek = calendar->GetRepeatDaysOfWeek();
+            durationTime = calendar->GetDurationTime();
             rruleWantAgent = calendar->SerializationRRule();
         }
     }
@@ -600,6 +622,95 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     values.PutString(ReminderCalendarTable::EXCLUDE_DATES, "");  // next
 }
 
+bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t oriTriggerTime, const uint64_t now, const uint64_t durationTime)
+{
+    uint64_t newEndTime = oriTriggerTime + durationTime;
+    if (now <= newEndTime && now >= oriTriggerTime) {
+        return true;
+    }
+    if (newEndTime < now) {
+        return false;
+    }
+    return false;
+}
+
+bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
+{
+    if (isExpired_) {
+        return false;
+    }
+    uint64_t now = GetNowInstantMilli();
+    if (now == 0) {
+        ANSR_LOGE("get now time failed.");
+        return false;
+    }
+    if (oriTriggerTime == 0 && optTriggerTime < now) {
+        ANSR_LOGW("trigger time is less than now time.");
+        return false;
+    }
+    bool showImmediately = false;
+    uint64_t durationTime = GetDurationTime();
+    if (!CheckCalenderIsExpired(oriTriggerTime, now, durationTime)) {
+        return false;
+    }
+    if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
+        // case1. switch to a previous time
+        SetTriggerTimeInMilli(optTriggerTime);
+        snoozeTimesDynamic_ = snoozeTimes_;
+    } else {
+        if (oriTriggerTime <= now) {
+            // case2. switch to a future time, trigger time is less than now time.
+            // when the reminder show immediately, trigger time will update in onShow function.
+            snoozeTimesDynamic_ = 0;
+            showImmediately = true;
+        } else {
+            // case3. switch to a future time, trigger time is larger than now time.
+            showImmediately = false;
+        }
+    }
+    return showImmediately;
+}
+
+bool ReminderRequest::HandleTimeZoneChange(
+    uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime)
+{
+    if (isExpired_) {
+        return false;
+    }
+    uint64_t now = GetNowInstantMilli();
+    ANSR_LOGD("Handle timezone change, old:%{public}" PRIu64 ", new:%{public}" PRIu64 "",
+        oldZoneTriggerTime, newZoneTriggerTime);
+    if (oldZoneTriggerTime == newZoneTriggerTime) {
+        return false;
+    }
+    bool showImmediately = false;
+    uint64_t durationTime = GetDurationTime();
+    if (!CheckCalenderIsExpired(oriTriggerTime, now, durationTime)) {
+        return false;
+    }
+    if (optTriggerTime != INVALID_LONG_LONG_VALUE && oldZoneTriggerTime < newZoneTriggerTime) {
+        // case1. timezone change to smaller
+        SetTriggerTimeInMilli(optTriggerTime);
+        snoozeTimesDynamic_ = snoozeTimes_;
+    } else {
+        // case2. timezone change to larger
+        time_t now;
+        (void)time(&now);  // unit is seconds.
+        if (static_cast<int64_t>(now) < 0) {
+            ANSR_LOGE("Get now time error");
+            return false;
+        }
+        if (newZoneTriggerTime <= GetDurationSinceEpochInMilli(now)) {
+            snoozeTimesDynamic_ = 0;
+            showImmediately = true;
+        } else {
+            SetTriggerTimeInMilli(newZoneTriggerTime);
+            showImmediately = false;
+        }
+    }
+    return showImmediately;
+}
+
 void ReminderRequestCalendar::SetDateTime(const uint64_t time)
 {
     time_t t = static_cast<time_t>(time / MILLI_SECONDS);
@@ -614,6 +725,20 @@ void ReminderRequestCalendar::SetDateTime(const uint64_t time)
     second_ = static_cast<uint8_t>(dateTime.tm_sec);
 }
 
+void ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
+{
+    time_t t = static_cast<time_t>(time / MILLI_SECONDS);
+    struct tm endDateTime;
+    (void)localtime_r(&t, &endDateTime);
+
+    endYear_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, endDateTime.tm_year));
+    endMonth_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, endDateTime.tm_mon));
+    endDay_ = static_cast<uint8_t>(endDateTime.tm_mday);
+    endHour_ = static_cast<uint8_t>(endDateTime.tm_hour);
+    endMinute_ = static_cast<uint8_t>(endDateTime.tm_min);
+    endSecond_ = static_cast<uint8_t>(endDateTime.tm_sec);
+}
+
 uint64_t ReminderRequestCalendar::GetDateTime()
 {
     struct tm dateTime;
@@ -626,6 +751,21 @@ uint64_t ReminderRequestCalendar::GetDateTime()
     dateTime.tm_isdst = -1;
 
     time_t time = mktime(&dateTime);
+    return GetDurationSinceEpochInMilli(time);
+}
+
+uint64_t ReminderRequestCalendar::GetEndDateTime()
+{
+    struct tm endDateTime;
+    endDateTime.tm_year = GetCTime(TimeTransferType::YEAR, endYear_);
+    endDateTime.tm_mon = GetCTime(TimeTransferType::MONTH, endMonth_);
+    endDateTime.tm_mday = static_cast<int>(endDay_);
+    endDateTime.tm_hour = static_cast<int>(endHour_);
+    endDateTime.tm_min = static_cast<int>(endMinute_);
+    endDateTime.tm_sec = static_cast<int>(endSecond_);
+    endDateTime.tm_isdst = -1;
+
+    time_t time = mktime(&endDateTime);
     return GetDurationSinceEpochInMilli(time);
 }
 

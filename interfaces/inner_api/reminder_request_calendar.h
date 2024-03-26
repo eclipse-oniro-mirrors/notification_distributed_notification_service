@@ -144,12 +144,18 @@ public:
 
     virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
     virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
+    virtual bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime) override;
+    virtual bool HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime) override;
 
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
+    void SetDateTime(const uint64_t time);
+    void setEndDateTime(const uint64_t time);
+    uint64_t GetEndDateTime();
+    void setDurationTime(const tm &dateTime, const tm &endDateTime);
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const override;
@@ -183,8 +189,8 @@ private:
     void SetMonth(const uint8_t &month, const bool &isSet);
     void SetRepeatMonths(const std::vector<uint8_t> &repeatMonths);
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
+    bool CheckCalenderIsExpired(const uint64_t oriTriggerTime, const uint64_t now, const uint64_t durationTime);
 
-    void SetDateTime(const uint64_t time);
     uint64_t GetDateTime();
 
     std::string SerializationRRule();
@@ -205,6 +211,17 @@ private:
         .tm_yday = 0,
         .tm_isdst = -1
     };
+    tm endDateTime_ = {
+        .tm_sec = 0,
+        .tm_min = 0,
+        .tm_hour = 0,
+        .tm_mday = 1,
+        .tm_mon = 0,
+        .tm_year = 0,
+        .tm_wday = 0,
+        .tm_yday = 0,
+        .tm_isdst = -1
+    };
     uint16_t firstDesignateYear_ {1};
     uint8_t firstDesignateMonth_ {1};
     uint8_t firstDesignateDay_ {1};
@@ -214,8 +231,15 @@ private:
     uint8_t hour_ {1};
     uint8_t minute_ {1};
     uint8_t second_ {0};
+    uint16_t endYear_ {1};
+    uint8_t endMonth_ {1};
+    uint8_t endDay_ {1};
+    uint8_t endHour_ {1};
+    uint8_t endMinute_ {1};
+    uint8_t endSecond_ {0};
     uint16_t repeatMonth_ {0};
     uint32_t repeatDay_ {0};
+    uint64_t durationTime_{0};
 
     // repeat calendar
     std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
