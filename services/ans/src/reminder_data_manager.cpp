@@ -957,7 +957,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         uint64_t tempTriggerTime = (*it)->GetTriggerTimeInMilli();
         if (tempTriggerTime < triggerTime) {
             ANSR_LOGE("this reminder triggerTime is less than target triggerTime. "
-                "now trigger time is %{public}" PRIu64 ".", tempTriggerTime);
+                "now trigger time is %{public}llu.", tempTriggerTime);
             continue;
         }
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
@@ -1880,17 +1880,9 @@ void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderReques
 void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)
 {
     ANSR_LOGI("System language config changed.");
-    {
-        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-            UpdateReminderLanguage(*it);
-        }
-    }
-    {
-        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
-        for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
-            ShowReminder((*it), false, false, false, false);
-        }
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        UpdateReminderLanguage(*it);
     }
 }
 
