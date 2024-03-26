@@ -108,6 +108,9 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
     if (jsonObject.find("icons") != jsonEnd) {
         auto iconArr = jsonObject.at("icons");
         for (auto &iconObj : iconArr) {
+            if (!iconObj.is_string()) {
+                continue;
+            }
             auto pIcon = AnsImageUtil::UnPackImage(iconObj.get<std::string>());
             if (pIcon == nullptr) {
                 ANS_LOGE("Failed to parse button icon");
