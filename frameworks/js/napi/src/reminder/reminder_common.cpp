@@ -783,7 +783,7 @@ napi_value ReminderCommon::CreateReminderAlarm(
     reminder = std::make_shared<ReminderRequestAlarm>(
         static_cast<uint8_t>(propertyHourVal), static_cast<uint8_t>(propertyMinuteVal), daysOfWeek);
     return NotificationNapi::Common::NapiGetNull(env);
-} 
+}
 
 napi_value ReminderCommon::CreateReminderCalendar(
     const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)

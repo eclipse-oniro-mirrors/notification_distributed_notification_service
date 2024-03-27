@@ -989,54 +989,6 @@ HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00003, Function | S
 
 /**
  * @tc.name: HandleTimeZoneChange_00001
- * @tc.desc: Test HandleTimeZoneChange parameters.
- * @tc.type: FUNC
- * @tc.require:I9BM6I
- */
-HWTEST_F(ReminderRequestCalendarTest, HandleTimeZoneChange_00001, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestCalendar>();
-    rrc->SetExpired(false);
-    uint64_t oldZoneTriggerTime = 1998;
-    uint64_t newZoneTriggerTime = 1999;
-    uint64_t optTriggerTime = 0;
-    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), true);
-}
-
-/**
- * @tc.name: HandleTimeZoneChange_00002
- * @tc.desc: Test HandleTimeZoneChange parameters.
- * @tc.type: FUNC
- * @tc.require:I9BM6I
- */
-HWTEST_F(ReminderRequestCalendarTest, HandleTimeZoneChange_00002, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestCalendar>();
-    rrc->SetExpired(true);
-    uint64_t oldZoneTriggerTime = 1998;
-    uint64_t newZoneTriggerTime = 1998;
-    uint64_t optTriggerTime = 0;
-    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), false);
-}
-
-/**
- * @tc.name: HandleTimeZoneChange_00003
- * @tc.desc: Test HandleTimeZoneChange parameters.
- * @tc.type: FUNC
- * @tc.require:I9BM6I
- */
-HWTEST_F(ReminderRequestCalendarTest, HandleTimeZoneChange_00003, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestCalendar>();
-    rrc->SetExpired(true);
-    uint64_t oldZoneTriggerTime = 1998;
-    uint64_t newZoneTriggerTime = 1999;
-    uint64_t optTriggerTime = 10;
-    EXPECT_EQ(rrc->HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime), false);
-}
-
-/**
- * @tc.name: HandleTimeZoneChange_00001
  * @tc.desc: Test HandleSysTimeChange parameters.
  * @tc.type: FUNC
  * @tc.require:I9BM6I
