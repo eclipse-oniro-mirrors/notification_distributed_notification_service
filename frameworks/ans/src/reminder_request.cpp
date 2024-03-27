@@ -295,31 +295,6 @@ bool ReminderRequest::CanDisplayTmmediatelySys(uint64_t oriTriggerTime, uint64_t
     return false;
 }
 
-bool CanDisplayTmmediatelyTimeZone(uuint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime)
-{
-    if (optTriggerTime != INVALID_LONG_LONG_VALUE && oldZoneTriggerTime < newZoneTriggerTime) {
-        // case1. timezone change to smaller
-        SetTriggerTimeInMilli(optTriggerTime);
-        snoozeTimesDynamic_ = snoozeTimes_;
-    } else {
-        // case2. timezone change to larger
-        time_t now;
-        (void)time(&now);  // unit is seconds.
-        if (static_cast<int64_t>(now) < 0) {
-            ANSR_LOGE("Get now time error");
-            return false;
-        }
-        if (newZoneTriggerTime <= GetDurationSinceEpochInMilli(now)) {
-            snoozeTimesDynamic_ = 0;
-            return true;
-        } else {
-            SetTriggerTimeInMilli(newZoneTriggerTime);
-            return false;
-        }
-    }
-    return false;
-}
-
 bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
 {
     if (isExpired_) {
@@ -349,7 +324,27 @@ bool ReminderRequest::HandleTimeZoneChange(
     if (oldZoneTriggerTime == newZoneTriggerTime) {
         return false;
     }
-    bool showImmediately = CanDisplayTmmediatelyTimeZone(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime);
+    bool showImmediately = false;
+    if (optTriggerTime != INVALID_LONG_LONG_VALUE && oldZoneTriggerTime < newZoneTriggerTime) {
+        // case1. timezone change to smaller
+        SetTriggerTimeInMilli(optTriggerTime);
+        snoozeTimesDynamic_ = snoozeTimes_;
+    } else {
+        // case2. timezone change to larger
+        time_t now;
+        (void)time(&now);  // unit is seconds.
+        if (static_cast<int64_t>(now) < 0) {
+            ANSR_LOGE("Get now time error");
+             showImmediately = false;
+        }
+        if (newZoneTriggerTime <= GetDurationSinceEpochInMilli(now)) {
+            snoozeTimesDynamic_ = 0;
+            showImmediately = true;
+        } else {
+            SetTriggerTimeInMilli(newZoneTriggerTime);
+            showImmediately = false;
+        }
+    }
     return showImmediately;
 }
 

@@ -682,28 +682,10 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
     }
     bool showImmediately = false;
     uint64_t durationTime = GetDurationTime();
-    showImmediately = CanDisplayTmmediatelySys(oriTriggerTime, optTriggerTime, now);
-    return showImmediately;
-}
-
-bool ReminderRequest::HandleTimeZoneChange(
-    uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime)
-{
-    if (isExpired_) {
-        return false;
-    }
-    uint64_t now = GetNowInstantMilli();
-    ANSR_LOGD("Handle timezone change, old:%{public}" PRIu64 ", new:%{public}" PRIu64 "",
-        oldZoneTriggerTime, newZoneTriggerTime);
-    if (oldZoneTriggerTime == newZoneTriggerTime) {
-        return false;
-    }
-    bool showImmediately = false;
-    uint64_t durationTime = GetDurationTime();
     if (!CheckCalenderIsExpired(oriTriggerTime, now, durationTime)) {
         return false;
     }
-    showImmediately = CanDisplayTmmediatelyTimeZone(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime);
+    showImmediately = CanDisplayTmmediatelySys(oriTriggerTime, optTriggerTime, now);
     return showImmediately;
 }
 

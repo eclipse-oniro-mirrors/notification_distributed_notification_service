@@ -935,10 +935,7 @@ protected:
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
     bool CanDisplayTmmediatelySys(uint64_t oriTriggerTime, uint64_t optTriggerTime, uint64_t now);
-    bool CanDisplayTmmediatelyTimeZone(uuint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime,
-        uint64_t optTriggerTime);
     virtual HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
-    virtual HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
     bool isExpired_ {false};
     uint64_t GetNowInstantMilli() const;
     uint8_t snoozeTimes_ {0};
@@ -953,6 +950,7 @@ private:
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;
+    HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
     bool InitNotificationRequest();
     void InitServerObj();
     void SetMaxScreenWantAgent(AppExecFwk::ElementName &element);
