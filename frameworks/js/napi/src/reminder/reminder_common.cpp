@@ -783,7 +783,7 @@ napi_value ReminderCommon::CreateReminderAlarm(
     reminder = std::make_shared<ReminderRequestAlarm>(
         static_cast<uint8_t>(propertyHourVal), static_cast<uint8_t>(propertyMinuteVal), daysOfWeek);
     return NotificationNapi::Common::NapiGetNull(env);
-}
+} 
 
 napi_value ReminderCommon::CreateReminderCalendar(
     const napi_env &env, const napi_value &value, const bool isSysApp, std::shared_ptr<ReminderRequest>& reminder)
@@ -798,15 +798,6 @@ napi_value ReminderCommon::CreateReminderCalendar(
     if (!ParseLocalDateTime(env, dateTimeObj, dateTime)) {
         ANSR_LOGW("Parce DateTime failed.");
         return nullptr;
-    }
-
-    struct tm endDateTime;
-    napi_value endDateTimeObj = nullptr;
-    if (GetObject(env, value, ReminderAgentNapi::CAlENDAR_END_DATE_TIME, endDateTimeObj)) {
-        if (!ParseLocalDateTime(env, endDateTimeObj, endDateTime)) {
-            ANSR_LOGW("Parse EndDateTime failed.");
-            return nullptr;
-        }
     }
 
     std::vector<uint8_t> repeatMonths;
@@ -828,19 +819,25 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
     
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    time_t time = mktime(&dateTime);
+    uint64_t time = mktime(&dateTime);
     if (time = -1) {
-        ANSR_LOGE("Mktime dateTime Error.");
         return nullptr;
     }
     reminderCalendar->SetDateTime(ReminderRequest::GetDurationSinceEpochInMilli(time));
-    time_t endTime = mktime(&endDateTime);
-    if (endTime = -1) {
-        ANSR_LOGE("Mktime endDateTime Error.");
-        return nullptr;
+    napi_value endDateTimeObj = nullptr;
+    if (GetObject(env, value, ReminderAgentNapi::CAlENDAR_END_DATE_TIME, endDateTimeObj)) {
+        struct tm endDateTime;
+        if (!ParseLocalDateTime(env, endDateTimeObj, endDateTime)) {
+            return nullptr;
+        }
+        uint64_t endTime = mktime(&endDateTime);
+        if (endTime = -1) {
+            return nullptr;
+        }
+        reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime)));
+        reminderCalendar->setDurationTime();
     }
-    reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime)));
-    reminderCalendar->setDurationTime(dateTime, endDateTime);
+    
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
     }

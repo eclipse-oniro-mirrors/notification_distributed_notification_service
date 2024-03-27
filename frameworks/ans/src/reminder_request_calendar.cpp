@@ -358,7 +358,7 @@ void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &r
     }
 }
 
-void ReminderRequestCalendar::setDurationTime(const tm &dateTime, const tm &endDateTime)
+void ReminderRequestCalendar::setDurationTime()
 {
     uint64_t beginTime = GetDateTime();
     uint64_t endTime = GetEndDateTime();
@@ -594,10 +594,12 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
     ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
     SetDateTime(dateTime);
 
-    uint64_t durationTime;
-    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, durationTime);
-    setEndDateTime(dateTime + durationTime);
-    durationTime_ = durationTime;
+    uint64_t endDateTime;
+    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
+    if (endDateTime != 0) {
+        setEndDateTime(endDateTime);
+        durationTime_ = durationTime;
+    }
 
     int32_t repeatDay;
     ReminderStore::GetInt32Val(resultSet, ReminderCalendarTable::REPEAT_DAYS, repeatDay);
@@ -645,7 +647,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth);
     values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_DAY, firstDesignateDay);
     values.PutLong(ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
-    values.PutLong(ReminderCalendarTable::CALENDAR_END_DATE_TIME, durationTime);
+    values.PutLong(ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
     values.PutInt(ReminderCalendarTable::REPEAT_DAYS, repeatDay);
     values.PutInt(ReminderCalendarTable::REPEAT_MONTHS, repeatMonth);
     values.PutInt(ReminderCalendarTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
@@ -659,9 +661,6 @@ bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t oriTriggerTi
     uint64_t newEndTime = oriTriggerTime + durationTime;
     if (now <= newEndTime && now >= oriTriggerTime) {
         return true;
-    }
-    if (newEndTime < now) {
-        return false;
     }
     return false;
 }

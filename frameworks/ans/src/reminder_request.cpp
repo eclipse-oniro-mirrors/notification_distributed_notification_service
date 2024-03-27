@@ -335,7 +335,7 @@ bool ReminderRequest::HandleTimeZoneChange(
         (void)time(&now);  // unit is seconds.
         if (static_cast<int64_t>(now) < 0) {
             ANSR_LOGE("Get now time error");
-             showImmediately = false;
+            return false;
         }
         if (newZoneTriggerTime <= GetDurationSinceEpochInMilli(now)) {
             snoozeTimesDynamic_ = 0;

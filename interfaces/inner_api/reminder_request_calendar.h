@@ -156,7 +156,7 @@ public:
     void SetDateTime(const uint64_t time);
     void setEndDateTime(const uint64_t time);
     uint64_t GetEndDateTime();
-    void setDurationTime(const tm &dateTime, const tm &endDateTime);
+    void setDurationTime();
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const override;
