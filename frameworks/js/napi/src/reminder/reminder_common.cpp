@@ -375,7 +375,7 @@ bool ReminderCommon::ValidateString(const std::string &str)
 
 bool ReminderCommon::GenWantAgent(
     const napi_env &env, const napi_value &value, const char* name,
-    std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo, bool isSysApp)
+    std::shared_ptr<ReminderRequest::WantAgentInfo>& wantAgentInfo)
 {
     char str[NotificationNapi::STR_MAX_SIZE] = {0};
     napi_value wantAgent = nullptr;
@@ -390,10 +390,6 @@ bool ReminderCommon::GenWantAgent(
         }
         if (GetStringUtf8(env, wantAgent,
             ReminderAgentNapi::WANT_AGENT_URI, str, NotificationNapi::STR_MAX_SIZE)) {
-            if (!isSysApp) {
-                ANSR_LOGW("not system app, want uri is not support use.");
-                return false;
-            }
             wantAgentInfo->uri = str;
         }
         napi_value params = nullptr;
@@ -490,7 +486,7 @@ napi_value ReminderCommon::GenReminder(
 
     // wantAgent
     std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
-    if (!GenWantAgent(env, value, ReminderAgentNapi::WANT_AGENT, wantAgentInfo, isSysApp)) {
+    if (!GenWantAgent(env, value, ReminderAgentNapi::WANT_AGENT, wantAgentInfo)) {
         return nullptr;
     }
     reminder->SetWantAgentInfo(wantAgentInfo);
@@ -804,7 +800,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
 
     // rruleWantAgent
     std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo;
-    if (!GenWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT, wantAgentInfo, isSysApp)) {
+    if (!GenWantAgent(env, value, ReminderAgentNapi::RRULL_WANT_AGENT, wantAgentInfo)) {
         return nullptr;
     }
     if (!isSysApp && wantAgentInfo != nullptr) {
