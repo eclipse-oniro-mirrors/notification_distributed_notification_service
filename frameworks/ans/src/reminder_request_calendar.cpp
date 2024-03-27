@@ -67,6 +67,12 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     hour_ = other.hour_;
     minute_ = other.minute_;
     second_ = other.second_;
+    endYear_ = other.endYear_;
+    endMonth_ = other.endMonth_;
+    endDay_ = other.endDay_;
+    endHour_ = other.endHour_;
+    endMinute_ = other.endMinute_;
+    endSecond_ = other.endSecond_;
     repeatMonth_ = other.repeatMonth_;
     repeatDay_ = other.repeatDay_;
     repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
@@ -260,6 +266,17 @@ void ReminderRequestCalendar::InitDateTime()
     dateTime_.tm_isdst = -1;
 }
 
+void ReminderRequestCalendar::InitEndDateTime()
+{
+    endDateTime_.tm_year = GetCTime(TimeTransferType::YEAR, endYear_);
+    endDateTime_.tm_mon = GetCTime(TimeTransferType::MONTH, endMonth_);
+    endDateTime_.tm_mday = static_cast<int>(endDay_);
+    endDateTime_.tm_hour = static_cast<int>(endHour_);
+    endDateTime_.tm_min = static_cast<int>(endMinute_);
+    endDateTime_.tm_sec = static_cast<int>(endSecond_);
+    endDateTime_.tm_isdst = -1;
+}
+
 void ReminderRequestCalendar::InitDateTime(const tm &dateTime)
 {
     dateTime_.tm_year = dateTime.tm_year;
@@ -432,6 +449,12 @@ bool ReminderRequestCalendar::Marshalling(Parcel &parcel) const
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
+        WRITE_UINT16_RETURN_FALSE_LOG(parcel, endYear_, "endYear");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endMonth_, "endMonth");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endDay_, "endDay");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endHour_, "endHour");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endMinute_, "endMinute");
+        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endSecond_, "endSecond");
         WRITE_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
         WRITE_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
         WRITE_UINT64_RETURN_FALSE_LOG(parcel, durationTime_, "durationTime");
@@ -477,11 +500,18 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         READ_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
         READ_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
         READ_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
+        READ_UINT16_RETURN_FALSE_LOG(parcel, endYear_, "endYear");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, endMonth_, "endMonth");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, endDay_, "endDay");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, endHour_, "endHour");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, endMinute_, "endMinute");
+        READ_UINT8_RETURN_FALSE_LOG(parcel, endSecond_, "endSecond");
         READ_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
         READ_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
         READ_UINT64_RETURN_FALSE_LOG(parcel, durationTime_, "durationTime");
 
         InitDateTime();
+        InitEndDateTime();
 
         READ_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
@@ -564,9 +594,10 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
     ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
     SetDateTime(dateTime);
 
-    uint64_t endDateTime;
-    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
-    setEndDateTime(endDateTime);
+    uint64_t durationTime;
+    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, durationTime);
+    setEndDateTime(dateTime + durationTime);
+    durationTime_ = durationTime;
 
     int32_t repeatDay;
     ReminderStore::GetInt32Val(resultSet, ReminderCalendarTable::REPEAT_DAYS, repeatDay);
@@ -614,7 +645,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth);
     values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_DAY, firstDesignateDay);
     values.PutLong(ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
-    values.PutLong(ReminderCalendarTable::CALENDAR_END_DATE_TIME, 0);  // next
+    values.PutLong(ReminderCalendarTable::CALENDAR_END_DATE_TIME, durationTime);
     values.PutInt(ReminderCalendarTable::REPEAT_DAYS, repeatDay);
     values.PutInt(ReminderCalendarTable::REPEAT_MONTHS, repeatMonth);
     values.PutInt(ReminderCalendarTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);

@@ -183,6 +183,7 @@ private:
      */
     void InitDateTime();
     void InitDateTime(const tm &dateTime);
+    void InitEndDateTime();
     bool IsRepeatReminder() const;
     bool IsRepeatMonth(uint8_t month) const;
     bool IsRepeatDay(uint8_t day) const;
