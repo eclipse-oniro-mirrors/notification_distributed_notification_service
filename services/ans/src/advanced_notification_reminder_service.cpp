@@ -40,6 +40,16 @@
 
 namespace OHOS {
 namespace Notification {
+inline bool AdvancedNotificationService::IsSystemApp()
+{
+    auto callerToken = IPCSkeleton::GetCallingFullTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken)) {
+        ANSR_LOGW("This application is not system-app");
+        return false;
+    }
+    return true;
+}
+
 inline bool AdvancedNotificationService::CheckReminderPermission()
 {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
@@ -60,7 +70,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
-
+    reminder->SetSystemApp(IsSystemApp());
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     std::string bundle = GetClientBundleName();
     reminder->InitCreatorBundleName(bundle);

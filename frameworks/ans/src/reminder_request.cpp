@@ -1147,7 +1147,6 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
 
     // write bool
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
-    WRITE_BOOL_RETURN_FALSE_LOG(parcel, isSystemApp_, "isSystemApp");
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, tapDismissed_, "tapDismissed");
 
     // write int
@@ -1271,7 +1270,6 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     READ_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
 
     READ_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
-    READ_BOOL_RETURN_FALSE_LOG(parcel, isSystemApp_, "isSystemApp");
     READ_BOOL_RETURN_FALSE_LOG(parcel, tapDismissed_, "tapDismissed");
 
     READ_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
