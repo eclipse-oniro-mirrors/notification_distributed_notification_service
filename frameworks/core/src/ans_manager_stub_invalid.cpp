@@ -595,5 +595,11 @@ ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOpt
     ANS_LOGE("Called.");
     return ERR_INVALID_OPERATION;
 }
+
+ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+{
+    ANS_LOGE("SetTargetDeviceStatus called!");
+    return ERR_INVALID_OPERATION;
+}
 }  // namespace Notification
 }  // namespace OHOS

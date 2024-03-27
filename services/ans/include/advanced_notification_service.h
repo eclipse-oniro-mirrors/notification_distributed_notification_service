@@ -42,6 +42,7 @@
 #include "push_callback_interface.h"
 #include "system_event_observer.h"
 #include "notification_subscriber_manager.h"
+#include "distributed_device_status.h"
 
 namespace OHOS {
 namespace Notification {
@@ -947,6 +948,14 @@ public:
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
 
     /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+    /**
      * @brief Reset pushcallback proxy
      */
     void ResetPushCallbackProxy();
@@ -1228,6 +1237,7 @@ private:
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
+    OHOS::Notification::DistributedDeviceStatus DistributedDeviceStatus_;
 };
 
 /**
