@@ -829,9 +829,17 @@ napi_value ReminderCommon::CreateReminderCalendar(
     
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     time_t time = mktime(&dateTime);
+    if (time = -1) {
+        ANSR_LOGE("Mktime dateTime Error.");
+        return nullptr;
+    }
     reminderCalendar->SetDateTime(ReminderRequest::GetDurationSinceEpochInMilli(time));
     time_t endTime = mktime(&endDateTime);
-    reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(mktime(&endDateTime)));
+    if (endTime = -1) {
+        ANSR_LOGE("Mktime endDateTime Error.");
+        return nullptr;
+    }
+    reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime)));
     reminderCalendar->setDurationTime(dateTime, endDateTime);
     if (!(reminderCalendar->SetNextTriggerTime())) {
         return nullptr;
