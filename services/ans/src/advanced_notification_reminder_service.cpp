@@ -24,6 +24,7 @@
 #include "ans_log_wrapper.h"
 #include "errors.h"
 
+#include "tokenid_kit.h"
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
 #include "notification_request.h"
