@@ -145,9 +145,6 @@ public:
     virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
     virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
     virtual bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime) override;
-    virtual bool HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime,
-        uint64_t optTriggerTime) override;
-
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
