@@ -138,7 +138,7 @@ private:
         const int32_t &hour, const int32_t &min);
 
     static bool ParseCalendarParams(const napi_env& env, const napi_value& value, std::vector<uint8_t>& repeatMonths,
-        std::vector<uint8_t>& repeatDays, std::vector<uint_t> &daysOfWeek);
+        std::vector<uint8_t>& repeatDays, std::vector<uint8_t> &daysOfWeek);
 
     static bool ParseLocalDateTime(const napi_env& env, const napi_value& dateTimeObj, struct tm& dateTime);
    

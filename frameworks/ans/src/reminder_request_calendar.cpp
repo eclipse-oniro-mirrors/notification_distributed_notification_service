@@ -57,7 +57,7 @@ ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime, const std::
 ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &other) : ReminderRequest(other)
 {
     dateTime_ = other.dateTime_;
-    endDateTime = other.endDateTime_;
+    endDateTime_ = other.endDateTime_;
     firstDesignateYear_ = other.firstDesignateYear_;
     firstDesignateMonth_ = other.firstDesignateMonth_;
     firstDesignateDay_ = other.firstDesignateDay_;
