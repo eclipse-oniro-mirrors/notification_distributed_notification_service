@@ -41,16 +41,6 @@
 
 namespace OHOS {
 namespace Notification {
-inline bool AdvancedNotificationService::IsSystemApp()
-{
-    auto callerToken = IPCSkeleton::GetCallingFullTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken)) {
-        ANSR_LOGW("This application is not system-app");
-        return false;
-    }
-    return true;
-}
-
 inline bool AdvancedNotificationService::CheckReminderPermission()
 {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
