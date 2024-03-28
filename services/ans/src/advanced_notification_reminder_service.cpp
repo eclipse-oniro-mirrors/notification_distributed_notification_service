@@ -25,6 +25,7 @@
 #include "errors.h"
 
 #include "ipc_skeleton.h"
+#include "access_token_helper.h"
 #include "notification_constant.h"
 #include "notification_request.h"
 #include "os_account_manager.h"
@@ -60,7 +61,8 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
-
+    ANSR_LOGD("is system app: %{public}d", AccessTokenHelper::IsSystemApp());
+    reminder->SetSystemApp(AccessTokenHelper::IsSystemApp());
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     std::string bundle = GetClientBundleName();
     reminder->InitCreatorBundleName(bundle);
