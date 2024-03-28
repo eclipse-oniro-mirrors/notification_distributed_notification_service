@@ -27,9 +27,11 @@
 #include "accesstoken_kit.h"
 #include "notification_preferences.h"
 #include "notification_constant.h"
+#include "pixel_map.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
+using namespace OHOS::Media;
 
 namespace OHOS {
 namespace Notification {
@@ -169,5 +171,49 @@ HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00002, Function | 
     ret = advancedNotificationService_->GetNotificationRequestFromDb(request->GetKey(), requestdbTmp);
     EXPECT_EQ(ret, (int)ERR_OK);
 }
+
+/**
+ * @tc.name: FillLockScreenPicture_00001
+ * @tc.desc: Test FillLockScreenPicture
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, FillLockScreenPicture_00001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> newRequest = new (std::nothrow) NotificationRequest();
+    newRequest->SetSlotType(slotType);
+    newRequest->SetNotificationId(1);
+    auto newLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto newContent = std::make_shared<NotificationContent>(newLiveContent);
+    newRequest->SetContent(newContent);
+
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    oldRequest->SetSlotType(slotType);
+    oldRequest->SetNotificationId(1);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+
+    std::shared_ptr<PixelMap> pixelMap = std::make_shared<PixelMap>();
+    const int32_t PIXEL_BYTES = 4;
+    ImageInfo info;
+    info.size.width = 1;
+    info.size.height = 1;
+    info.pixelFormat = PixelFormat::ARGB_8888;
+    info.colorSpace = ColorSpace::SRGB;
+    pixelMap->SetImageInfo(info);
+    int32_t rowDataSize = 1 * PIXEL_BYTES;
+    uint32_t bufferSize = rowDataSize * 1;
+    void *buffer = malloc(bufferSize);
+    if (buffer != nullptr) {
+        pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
+    }
+    oldLiveContent->SetLockScreenPicture(pixelMap);
+    oldRequest->SetContent(oldContent);
+
+    advancedNotificationService_->FillLockScreenPicture(newRequest, oldRequest);
+    EXPECT_NE(newRequest->GetContent()->GetNotificationContent()->GetLockScreenPicture(), nullptr);
+}
+
 }  // namespace Notification
 }  // namespace OHOS
