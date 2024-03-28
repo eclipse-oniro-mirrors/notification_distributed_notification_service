@@ -119,7 +119,7 @@ private:
      * @return next trigger time in milli.
      */
     uint64_t GetNextTriggerTime(bool forceToGetNext) const;
-    bool IsRepeatReminder() const;
+    virtual IsRepeatReminder() const;
 
     static const uint8_t MINUTES_PER_HOUR;
     static const int8_t DEFAULT_SNOOZE_TIMES;

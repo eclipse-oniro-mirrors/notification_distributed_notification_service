@@ -269,33 +269,26 @@ void ReminderRequest::OnClose(bool updateNext)
     }
 }
 
-bool ReminderRequest::OnDateTimeChange()
+bool ReminderRequest::IsRepeatReminder() const
 {
-    uint64_t nextTriggerTime = PreGetNextTriggerTimeIgnoreSnooze(true, false);
-    return HandleSysTimeChange(triggerTimeInMilli_, nextTriggerTime);
-}
-
-bool ReminderRequest::CanDisplayTmmediatelySys(uint64_t oriTriggerTime, uint64_t optTriggerTime, uint64_t now)
-{
-    if (optTriggerTime != INVALID_LONG_LONG_VALUE && (optTriggerTime <= oriTriggerTime || oriTriggerTime == 0)) {
-        // case1. switch to a previous time
-        SetTriggerTimeInMilli(optTriggerTime);
-        snoozeTimesDynamic_ = snoozeTimes_;
-    } else {
-        if (oriTriggerTime <= now) {
-            // case2. switch to a future time, trigger time is less than now time.
-            // when the reminder show immediately, trigger time will update in onShow function.
-            snoozeTimesDynamic_ = 0;
-            return true;
-        } else {
-            // case3. switch to a future time, trigger time is larger than now time.
-            return false;
-        }
-    }
     return false;
 }
 
-bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
+uint64_t ReminderRequest::CaclculationTriggerTime()
+{
+    if (IsRepeatReminder()) {
+        return PreGetNextTriggerTimeIgnoreSnooze(true, false);
+    }
+    return triggerTimeInMilli_;
+}
+
+bool ReminderRequest::OnDateTimeChange()
+{
+    uint64_t triggerTime = CaclculationTriggerTime();
+    return HandleSysTimeChange(triggerTime);
+}
+
+bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime)
 {
     if (isExpired_) {
         return false;
@@ -305,11 +298,16 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
         ANSR_LOGE("get now time failed.");
         return false;
     }
-    if (oriTriggerTime == 0 && optTriggerTime < now) {
-        ANSR_LOGW("trigger time is less than now time.");
-        return false;
+    bool showImmediately = false;
+    if (oriTriggerTime <= now) {
+        // case2. switch to a future time, trigger time is less than now time.
+        // when the reminder show immediately, trigger time will update in onShow function.
+        snoozeTimesDynamic_ = 0;
+        showImmediately = true;
+    } else {
+        // case3. switch to a future time, trigger time is larger than now time.
+        showImmediately = false;
     }
-    bool showImmediately = CanDisplayTmmediatelySys(oriTriggerTime, optTriggerTime, now);
     return showImmediately;
 }
 

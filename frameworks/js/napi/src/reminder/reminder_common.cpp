@@ -835,7 +835,6 @@ napi_value ReminderCommon::CreateReminderCalendar(
             return nullptr;
         }
         reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime));
-        reminderCalendar->SetDurationTime();
     }
     
     if (!(reminderCalendar->SetNextTriggerTime())) {

@@ -331,6 +331,21 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_01000, Function | SmallTest |
 }
 
 /**
+ * @tc.name: initEndDateTime_00100
+ * @tc.desc: Test InitEndDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, initEndDateTime_01000, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    calendar->InitEndDateTime();
+    EXPECT_EQ(calendar->IsRepeatReminder(), true);
+}
+
+/**
  * @tc.name: OnDateTimeChange_01000
  * @tc.desc: Test OnDateTimeChange parameters.
  * @tc.type: FUNC

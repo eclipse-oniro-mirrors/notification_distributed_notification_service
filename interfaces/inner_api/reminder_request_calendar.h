@@ -144,7 +144,7 @@ public:
 
     virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
     virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
-    virtual bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime) override;
+    virtual bool HandleSysTimeChange(uint64_t oriTriggerTime) override;
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
@@ -153,8 +153,8 @@ public:
     void SetDateTime(const uint64_t time);
     void SetEndDateTime(const uint64_t time);
     uint64_t GetEndDateTime();
-    void SetDurationTime();
     uint64_t GetDurationTime() const;
+    void CalculationDurationTime();
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const override;
@@ -173,6 +173,7 @@ private:
     {
         return repeatMonth_;
     }
+    uint64_t GetDurationTime() const;
     uint64_t GetTimeInstantMilli(
         uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) const;
 
@@ -182,7 +183,7 @@ private:
     void InitDateTime();
     void InitDateTime(const tm &dateTime);
     void InitEndDateTime();
-    bool IsRepeatReminder() const;
+    virtual bool IsRepeatReminder() const override;
     bool IsRepeatMonth(uint8_t month) const;
     bool IsRepeatDay(uint8_t day) const;
     void SetDay(const uint8_t &day, const bool &isSet);
@@ -211,17 +212,6 @@ private:
         .tm_yday = 0,
         .tm_isdst = -1
     };
-    tm endDateTime_ = {
-        .tm_sec = 0,
-        .tm_min = 0,
-        .tm_hour = 0,
-        .tm_mday = 1,
-        .tm_mon = 0,
-        .tm_year = 0,
-        .tm_wday = 0,
-        .tm_yday = 0,
-        .tm_isdst = -1
-    };
     uint16_t firstDesignateYear_ {1};
     uint8_t firstDesignateMonth_ {1};
     uint8_t firstDesignateDay_ {1};
@@ -239,6 +229,7 @@ private:
     uint8_t endSecond_ {0};
     uint16_t repeatMonth_ {0};
     uint32_t repeatDay_ {0};
+    uint64_t endDateTime_{0};
     uint64_t durationTime_{0};
 
     // repeat calendar

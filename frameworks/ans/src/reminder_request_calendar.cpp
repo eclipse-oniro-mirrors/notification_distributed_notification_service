@@ -67,12 +67,6 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     hour_ = other.hour_;
     minute_ = other.minute_;
     second_ = other.second_;
-    endYear_ = other.endYear_;
-    endMonth_ = other.endMonth_;
-    endDay_ = other.endDay_;
-    endHour_ = other.endHour_;
-    endMinute_ = other.endMinute_;
-    endSecond_ = other.endSecond_;
     repeatMonth_ = other.repeatMonth_;
     repeatDay_ = other.repeatDay_;
     repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
@@ -181,7 +175,7 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime() const
     ANSR_LOGD("Now time is: %{public}s", GetDateTimeInfo(now).c_str());
     if (repeatMonth_ > 0 && repeatDay_ > 0) {
         triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
-    } else if (repeatDaysOfWeek_ > 0 && (target <= now)) {
+    } else if (repeatDaysOfWeek_ > 0 && ((target + durationTime) <= now)) {
         nowTime.tm_hour = tarTime.tm_hour;
         nowTime.tm_min = tarTime.tm_min;
         nowTime.tm_sec = tarTime.tm_sec;
@@ -197,6 +191,9 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime() const
         if (now < target) {
             triggerTimeInMilli = ReminderRequest::GetDurationSinceEpochInMilli(target);
             ANSR_LOGD("Next calendar time:%{public}s", GetDateTimeInfo(target).c_str());
+        }
+        if ((target <= now) && now <= (target + (durationTime_ / 1000))) {
+            triggerTimeInMilli = ReminderRequest::GetDurationSinceEpochInMilli(now) + 3000;
         }
     }
     return triggerTimeInMilli;
@@ -264,17 +261,6 @@ void ReminderRequestCalendar::InitDateTime()
     dateTime_.tm_min = static_cast<int>(minute_);
     dateTime_.tm_sec = static_cast<int>(second_);
     dateTime_.tm_isdst = -1;
-}
-
-void ReminderRequestCalendar::InitEndDateTime()
-{
-    endDateTime_.tm_year = GetCTime(TimeTransferType::YEAR, endYear_);
-    endDateTime_.tm_mon = GetCTime(TimeTransferType::MONTH, endMonth_);
-    endDateTime_.tm_mday = static_cast<int>(endDay_);
-    endDateTime_.tm_hour = static_cast<int>(endHour_);
-    endDateTime_.tm_min = static_cast<int>(endMinute_);
-    endDateTime_.tm_sec = static_cast<int>(endSecond_);
-    endDateTime_.tm_isdst = -1;
 }
 
 void ReminderRequestCalendar::InitDateTime(const tm &dateTime)
@@ -346,6 +332,11 @@ void ReminderRequestCalendar::SetRepeatMonths(const std::vector<uint8_t> &repeat
     }
 }
 
+uint64_t ReminderRequestCalendar::GetDurationTime() const
+{
+    return durationTime_;
+}
+
 void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays)
 {
     if (repeatDays.size() > MAX_DAYS_OF_MONTH) {
@@ -356,16 +347,6 @@ void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &r
     for (auto it = repeatDays.begin(); it != repeatDays.end(); ++it) {
         SetDay((*it), true);
     }
-}
-
-void ReminderRequestCalendar::SetDurationTime()
-{
-    uint64_t beginTime = GetDateTime();
-    uint64_t endTime = GetEndDateTime();
-    if (endTime == INVALID_LONG_LONG_VALUE) {
-        durationTime_ = 0;
-    }
-    durationTime_ = endTime - beginTime;
 }
 
 uint64_t ReminderRequestCalendar::GetDurationTime() const
@@ -449,14 +430,9 @@ bool ReminderRequestCalendar::Marshalling(Parcel &parcel) const
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
-        WRITE_UINT16_RETURN_FALSE_LOG(parcel, endYear_, "endYear");
-        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endMonth_, "endMonth");
-        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endDay_, "endDay");
-        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endHour_, "endHour");
-        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endMinute_, "endMinute");
-        WRITE_UINT8_RETURN_FALSE_LOG(parcel, endSecond_, "endSecond");
         WRITE_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
         WRITE_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
+        WRITE_UINT64_RETURN_FALSE_LOG(parcel, endDateTime_, "endDateTime");
         WRITE_UINT64_RETURN_FALSE_LOG(parcel, durationTime_, "durationTime");
         WRITE_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
@@ -500,14 +476,9 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         READ_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
         READ_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
         READ_UINT8_RETURN_FALSE_LOG(parcel, second_, "second");
-        READ_UINT16_RETURN_FALSE_LOG(parcel, endYear_, "endYear");
-        READ_UINT8_RETURN_FALSE_LOG(parcel, endMonth_, "endMonth");
-        READ_UINT8_RETURN_FALSE_LOG(parcel, endDay_, "endDay");
-        READ_UINT8_RETURN_FALSE_LOG(parcel, endHour_, "endHour");
-        READ_UINT8_RETURN_FALSE_LOG(parcel, endMinute_, "endMinute");
-        READ_UINT8_RETURN_FALSE_LOG(parcel, endSecond_, "endSecond");
         READ_UINT16_RETURN_FALSE_LOG(parcel, repeatMonth_, "repeatMonth");
         READ_UINT32_RETURN_FALSE_LOG(parcel, repeatDay_, "repeatDay");
+        READ_UINT64_RETURN_FALSE_LOG(parcel, endDateTime_, "endDateTime");
         READ_UINT64_RETURN_FALSE_LOG(parcel, durationTime_, "durationTime");
 
         InitDateTime();
@@ -596,7 +567,7 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
 
     uint64_t endDateTime;
     ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
-    if (endDateTime != 0) {
+    if (endDateTime != 0 && endDateTime >= dateTime) {
         SetEndDateTime(endDateTime);
         durationTime_ = endDateTime - dateTime;
     }
@@ -665,9 +636,9 @@ bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t oriTriggerTi
     return false;
 }
 
-bool ReminderRequestCalendar::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
+bool ReminderRequestCalendar::HandleSysTimeChange(uint64_t oriTriggerTime)
 {
-    if (ReminderRequest::isExpired_) {
+    if (isExpired_) {
         return false;
     }
     uint64_t now = GetNowInstantMilli();
@@ -675,17 +646,11 @@ bool ReminderRequestCalendar::HandleSysTimeChange(uint64_t oriTriggerTime, uint6
         ANSR_LOGE("get now time failed.");
         return false;
     }
-    if (oriTriggerTime == 0 && optTriggerTime < now) {
-        ANSR_LOGW("trigger time is less than now time.");
-        return false;
-    }
-    bool showImmediately = false;
     uint64_t durationTime = GetDurationTime();
-    if (!CheckCalenderIsExpired(oriTriggerTime, now, durationTime)) {
-        return false;
+    if (CheckCalenderIsExpired(oriTriggerTime, now, durationTime)) {
+        return true;
     }
-    showImmediately = CanDisplayTmmediatelySys(oriTriggerTime, optTriggerTime, now);
-    return showImmediately;
+    return false;
 }
 
 void ReminderRequestCalendar::SetDateTime(const uint64_t time)
@@ -704,16 +669,12 @@ void ReminderRequestCalendar::SetDateTime(const uint64_t time)
 
 void ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
 {
-    time_t t = static_cast<time_t>(time / MILLI_SECONDS);
-    struct tm endDateTime;
-    (void)localtime_r(&t, &endDateTime);
-
-    endYear_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, endDateTime.tm_year));
-    endMonth_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, endDateTime.tm_mon));
-    endDay_ = static_cast<uint8_t>(endDateTime.tm_mday);
-    endHour_ = static_cast<uint8_t>(endDateTime.tm_hour);
-    endMinute_ = static_cast<uint8_t>(endDateTime.tm_min);
-    endSecond_ = static_cast<uint8_t>(endDateTime.tm_sec);
+    endDateTime_ = time;
+    uint64_t dateTime = mktime(&dateTime_);
+    if (dateTime == -1) {
+        return;
+    }
+    durationTime_ = endDateTime_ - ReminderRequest::GetDurationSinceEpochInMilli(dateTime);
 }
 
 uint64_t ReminderRequestCalendar::GetDateTime()
