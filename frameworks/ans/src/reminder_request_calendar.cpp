@@ -358,7 +358,7 @@ void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &r
     }
 }
 
-void ReminderRequestCalendar::setDurationTime()
+void ReminderRequestCalendar::SetDurationTime()
 {
     uint64_t beginTime = GetDateTime();
     uint64_t endTime = GetEndDateTime();
@@ -368,7 +368,7 @@ void ReminderRequestCalendar::setDurationTime()
     durationTime_ = endTime - beginTime;
 }
 
-uint64_t ReminderRequestCalendar::setDurationTime() const
+uint64_t ReminderRequestCalendar::GetDurationTime() const
 {
     return durationTime_;
 }
@@ -598,7 +598,7 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
     ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
     if (endDateTime != 0) {
         setEndDateTime(endDateTime);
-        durationTime_ = durationTime;
+        durationTime_ = endDateTime - dateTime;
     }
 
     int32_t repeatDay;
@@ -626,7 +626,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     uint32_t repeatDay = 0;
     uint16_t repeatMonth = 0;
     uint8_t repeatDaysOfWeek = 0;
-    uint64_t durationTime = 0;
+    uint64_t endDateTime = 0;
     std::string rruleWantAgent;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
@@ -638,7 +638,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
             firstDesignateDay = calendar->GetFirstDesignateDay();
             dateTime = calendar->GetDateTime();
             repeatDaysOfWeek = calendar->GetRepeatDaysOfWeek();
-            durationTime = calendar->GetDurationTime();
+            endDateTime = calendar->GetEndDateTime();
             rruleWantAgent = calendar->SerializationRRule();
         }
     }
@@ -667,7 +667,7 @@ bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t oriTriggerTi
 
 bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
 {
-    if (isExpired_) {
+    if (ReminderRequest::isExpired_) {
         return false;
     }
     uint64_t now = GetNowInstantMilli();
