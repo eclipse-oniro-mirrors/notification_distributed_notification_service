@@ -597,7 +597,7 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
     uint64_t endDateTime;
     ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
     if (endDateTime != 0) {
-        setEndDateTime(endDateTime);
+        SetEndDateTime(endDateTime);
         durationTime_ = endDateTime - dateTime;
     }
 
@@ -665,7 +665,7 @@ bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t oriTriggerTi
     return false;
 }
 
-bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
+bool ReminderRequestCalendar::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime)
 {
     if (ReminderRequest::isExpired_) {
         return false;

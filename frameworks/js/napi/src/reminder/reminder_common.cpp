@@ -804,7 +804,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     std::vector<uint8_t> repeatDays;
     std::vector<uint8_t> daysOfWeek;
 
-    if (!ParseCalendarParams(env, value, repeatMonths, repeatDays, dateTime)) {
+    if (!ParseCalendarParams(env, value, repeatMonths, repeatDays, daysOfWeek)) {
         return nullptr;
     }
 
@@ -820,21 +820,21 @@ napi_value ReminderCommon::CreateReminderCalendar(
     
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
     uint64_t time = mktime(&dateTime);
-    if (time = -1) {
+    if (time == -1) {
         return nullptr;
     }
     reminderCalendar->SetDateTime(ReminderRequest::GetDurationSinceEpochInMilli(time));
     napi_value endDateTimeObj = nullptr;
-    if (GetObject(env, value, ReminderAgentNapi::CAlENDAR_END_DATE_TIME, endDateTimeObj)) {
+    if (GetObject(env, value, ReminderAgentNapi::CALENDAR_END_DATE_TIME, endDateTimeObj)) {
         struct tm endDateTime;
         if (!ParseLocalDateTime(env, endDateTimeObj, endDateTime)) {
             return nullptr;
         }
         uint64_t endTime = mktime(&endDateTime);
-        if (endTime = -1) {
+        if (endTime == -1) {
             return nullptr;
         }
-        reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime)));
+        reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime));
         reminderCalendar->SetDurationTime();
     }
     
