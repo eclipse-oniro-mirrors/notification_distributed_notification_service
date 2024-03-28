@@ -992,6 +992,8 @@ void UvQueueWorkOnBadgeChanged(uv_work_t *work, int status)
     }
 
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetBadgeCallbackData(dataWorkerData->env, dataWorkerData->badge, result)) {
@@ -999,6 +1001,7 @@ void UvQueueWorkOnBadgeChanged(uv_work_t *work, int status)
     }
 
     Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
+    napi_close_handle_scope(dataWorkerData->env, scope);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
@@ -1074,12 +1077,15 @@ void UvQueueWorkOnBadgeEnabledChanged(uv_work_t *work, int status)
     }
 
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
     napi_create_object(dataWorkerData->env, &result);
     if (!Common::SetEnabledNotificationCallbackData(dataWorkerData->env, dataWorkerData->callbackData, result)) {
         result = Common::NapiGetNull(dataWorkerData->env);
     }
 
     Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
+    napi_close_handle_scope(dataWorkerData->env, scope);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
