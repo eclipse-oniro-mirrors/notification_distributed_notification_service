@@ -330,222 +330,6 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_01000, Function | SmallTest |
     EXPECT_EQ(calendar->IsRepeatReminder(), true);
 }
 
-
-
-/**
- * @tc.name: initDateTime_00300
- * @tc.desc: Check firstDesignateDay set successfully.
- * @tc.type: FUNC
- * @tc.require: SR000GN4CU AR000GNF1V
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_00300, Function | SmallTest | Level1)
-{
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
-    int firstDesignateDay = nowTime.tm_mday;
-    EXPECT_TRUE(firstDesignateDay == calendar->GetFirstDesignateDay()) << "Set first designate day error.";
-}
-
-/**
- * @tc.name: initDateTime_00400
- * @tc.desc: Check repeatMonth set with normal value successfully.
- * @tc.type: FUNC
- * @tc.require: SR000GN4CU AR000GNF1V
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_00400, Function | SmallTest | Level1)
-{
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-    tm *tmp = localtime(&now);
-    EXPECT_NE(nullptr, tmp);
-    struct tm nowTime = *tmp;
-
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    daysOfWeek.push_back(1);
-    repeatMonths.push_back(1);
-    repeatDays.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    std::vector<uint8_t> actualRepeatMonths = calendar->GetRepeatMonths();
-    EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatMonths, actualRepeatMonths))
-        << "Set repeat month with 1 error.";
-
-    repeatMonths.clear();
-    repeatMonths.push_back(12);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    actualRepeatMonths = calendar->GetRepeatMonths();
-    EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatMonths, actualRepeatMonths))
-        << "Set repeat month with 12 error.";
-
-    repeatMonths.clear();
-    for (uint8_t i = 1; i <= 12; i++) {
-        repeatMonths.push_back(i);
-    }
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    actualRepeatMonths = calendar->GetRepeatMonths();
-    EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatMonths, actualRepeatMonths))
-        << "Set repeat month with 1~12 error.";
-}
-
-/**
- * @tc.name: initDateTime_00500
- * @tc.desc: Check repeatMonth set with exception value successfully.
- * @tc.type: FUNC
- * @tc.require: SR000GN4CU AR000GNF1V
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_00500, Function | SmallTest | Level1)
-{
-    time_t now;
-    time(&now);  // unit is seconds.
-    tm *tmp = localtime(&now);
-    EXPECT_NE(nullptr, tmp);
-    tm nowTime = *tmp;
-    nowTime.tm_year += 1;
-    std::vector<uint8_t> repeatMonth;
-    std::vector<uint8_t> repeatDay;
-    std::vector<uint8_t> daysOfWeek;
-    daysOfWeek.push_back(1);
-    repeatMonth.push_back(-1);
-    repeatDay.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    std::vector<uint8_t> actualRepeatMonths = calendar->GetRepeatMonths();
-    EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with -1 error.";
-
-    repeatMonth.clear();
-    repeatMonth.push_back(13);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonth, repeatDay, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    actualRepeatMonths = calendar->GetRepeatMonths();
-    EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with 13 error.";
-}
-
-/**
- * @tc.name: initDateTime_00600
- * @tc.desc: Check repeatDay set with nomal value successfully.
- * @tc.type: FUNC
- * @tc.require: SR000GN4CU AR000GNF1V
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_00600, Function | SmallTest | Level1)
-{
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-    tm *tmp = localtime(&now);
-    EXPECT_NE(nullptr, tmp);
-    tm nowTime = *tmp;
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    daysOfWeek.push_back(1);
-    repeatMonths.push_back(1);
-    repeatDays.push_back(1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    std::vector<uint8_t> actualRepeatDays = calendar->GetRepeatDays();
-    EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatDays, actualRepeatDays))
-        << "Set repeat day with 1 error.";
-
-    repeatDays.clear();
-    repeatDays.push_back(31);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    actualRepeatDays = calendar->GetRepeatDays();
-    EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatDays, actualRepeatDays))
-        << "Set repeat day with 31 error.";
-
-    repeatDays.clear();
-    for (uint8_t i = 1; i <= 31; i++) {
-        repeatDays.push_back(i);
-    }
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    actualRepeatDays = calendar->GetRepeatDays();
-    EXPECT_TRUE(ReminderRequestCalendarTest::IsVectorEqual(repeatDays, actualRepeatDays))
-        << "Set repeat day with 1~31 error.";
-}
-
-/**
- * @tc.name: initDateTime_00700
- * @tc.desc: Check repeatDay set with exception value successfully.
- * @tc.type: FUNC
- * @tc.require: SR000GN4CU AR000GNF1V
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_00700, Function | SmallTest | Level1)
-{
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-    tm *tmp = localtime(&now);
-    EXPECT_NE(nullptr, tmp);
-    tm nowTime = *tmp;
-    nowTime.tm_year += 1;
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    daysOfWeek.push_back(-1);
-    repeatMonths.push_back(-1);
-    repeatDays.push_back(-1);
-    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    std::vector<uint8_t> actualRepeatDays = calendar->GetRepeatDays();
-    EXPECT_TRUE(actualRepeatDays.size() == 0) << "Set repeat day with -1 error.";
-
-    repeatDays.clear();
-    repeatDays.push_back(32);
-    calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    calendar->SetNextTriggerTime();
-    actualRepeatDays = calendar->GetRepeatDays();
-    EXPECT_TRUE(actualRepeatDays.size() == 0) << "Set repeat day with 32 error.";
-}
-
-/**
- * @tc.name: initDateTime_00800
- * @tc.desc: Check hour set successfully.
- * @tc.type: FUNC
- * @tc.require: SR000GN4CU AR000GNF1V
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_00800, Function | SmallTest | Level1)
-{
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
-    EXPECT_TRUE(1 == calendar->GetHour()) << "Set hour error.";
-}
-
-/**
- * @tc.name: initDateTime_00900
- * @tc.desc: Check minut set successfully.
- * @tc.type: FUNC
- * @tc.require: SR000GN4CU AR000GNF1V
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_00900, Function | SmallTest | Level1)
-{
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
-    EXPECT_TRUE(1 == calendar->GetMinute()) << "Set minute error.";
-    EXPECT_TRUE(0 == calendar->GetSecond()) << "Set seconds error.";
-}
-
-/**
- * @tc.name: initDateTime_01000
- * @tc.desc: Test InitDateTime parameters.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestCalendarTest, initDateTime_01000, Function | SmallTest | Level1)
-{
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
-    calendar->InitDateTime();
-    EXPECT_EQ(calendar->IsRepeatReminder(), true);
-}
-
 /**
  * @tc.name: OnDateTimeChange_01000
  * @tc.desc: Test OnDateTimeChange parameters.
@@ -1284,6 +1068,21 @@ HWTEST_F(ReminderRequestCalendarTest, SetDateTime_00001, Function | SmallTest | 
     EXPECT_EQ(calendar->GetDateTime(), 0);
 }
 
+
+/**
+ * @tc.name: SetEndDateTime_00001
+ * @tc.desc: Test SetEndDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetEndDateTime_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    calendar->SetEndDateTime(0);
+    EXPECT_EQ(calendar->GetEndDateTime(), 0);
+}
 /**
  * @tc.name: SerializationRRule_00001
  * @tc.desc: Test SerializationRRule parameters.
