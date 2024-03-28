@@ -317,5 +317,19 @@ ErrCode AdvancedNotificationService::IsAllowedRemoveSlot(const sptr<Notification
 
     return ERR_OK;
 }
+
+void AdvancedNotificationService::FillLockScreenPicture(const sptr<NotificationRequest> &newRequest,
+    const sptr<NotificationRequest> &oldRequest)
+{
+    if (newRequest->GetSlotType() != NotificationConstant::SlotType::LIVE_VIEW) {
+        return;
+    }
+
+    auto oldContent = oldRequest->GetContent()->GetNotificationContent();
+    auto newContent = newRequest->GetContent()->GetNotificationContent();
+    if (newContent->GetLockScreenPicture() == nullptr) {
+        newContent->SetLockScreenPicture(oldContent->GetLockScreenPicture());
+    }
+}
 }
 }

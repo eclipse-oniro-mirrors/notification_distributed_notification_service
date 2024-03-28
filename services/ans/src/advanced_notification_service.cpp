@@ -766,6 +766,7 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
     while (iter != notificationList_.end()) {
         if ((*iter)->notification->GetKey() == record->notification->GetKey()) {
             record->request->FillMissingParameters((*iter)->request);
+            FillLockScreenPicture(record->request, (*iter)->request);
             record->notification->SetUpdateTimer((*iter)->notification->GetUpdateTimer());
             record->notification->SetFinishTimer((*iter)->notification->GetFinishTimer());
             *iter = record;
