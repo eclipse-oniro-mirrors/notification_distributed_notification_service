@@ -654,11 +654,6 @@ public:
     bool CheckReminderPermission();
 
     /**
-     * @brief Check is system app
-     */
-    bool IsSystemApp();
-
-    /**
      * @brief Publishes a reminder notification.
      *
      * @param reminder Identifies the reminder notification request that needs to be published.
