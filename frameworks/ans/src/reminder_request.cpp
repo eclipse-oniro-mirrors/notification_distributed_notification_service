@@ -557,7 +557,15 @@ void ReminderRequest::RecoverFromDbBase(const std::shared_ptr<NativeRdb::ResultS
 
 void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
 {
-    nlohmann::json root = nlohmann::json::parse(jsonString);
+    if (!nlohmann::json::accept(jsonString)) {
+        ANSR_LOGW("not a json string!");
+        return;
+    }
+    nlohmann::json root = nlohmann::json::parse(jsonString, nullptr, false);
+    if (root.is_discarded()) {
+        ANSR_LOGW("parse json data failed!");
+        return;
+    }
     std::string type = root.at("type").get<std::string>();
     std::string title = root.at("title").get<std::string>();
     std::string resource = root.at("resource").get<std::string>();
@@ -641,7 +649,11 @@ std::vector<std::string> ReminderRequest::StringSplit(std::string source, const 
 
 void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type)
 {
-    nlohmann::json root = nlohmann::json::parse(wantAgentInfo);
+    nlohmann::json root = nlohmann::json::parse(wantAgentInfo, nullptr, false);
+    if (root.is_discarded()) {
+        ANSR_LOGW("parse json data failed");
+        return;
+    }
     if (!root.contains("pkgName") || !root["pkgName"].is_string() ||
         !root.contains("abilityName") || !root["abilityName"].is_string() ||
         !root.contains("uri") || !root["uri"].is_string() ||
@@ -679,11 +691,11 @@ void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, c
 
 void ReminderRequest::RecoverWantAgent(const std::string &wantAgentInfo, const uint8_t &type)
 {
-    std::vector<std::string> info = StringSplit(wantAgentInfo, ReminderRequest::SEP_WANT_AGENT);
-    if (info.size() == 1) {
+    if (nlohmann::json::accept(wantAgentInfo)) {
         RecoverWantAgentByJson(wantAgentInfo, type);
         return;
     }
+    std::vector<std::string> info = StringSplit(wantAgentInfo, ReminderRequest::SEP_WANT_AGENT);
     uint8_t minLen = 2;
     if (info.size() < minLen) {
         ANSR_LOGW("RecoverWantAgent fail");

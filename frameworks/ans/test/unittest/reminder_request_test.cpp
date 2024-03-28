@@ -1939,7 +1939,11 @@ HWTEST_F(ReminderRequestTest, InitCreatorBundleName_00002, Function | SmallTest 
 HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string jsonValue = "{}";
+    std::string jsonValue = "";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+
+    jsonValue = "{}";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
     EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
     
@@ -1982,6 +1986,10 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 2);
     EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
+
+    jsonValue = "awefasdfawefasdfaswe";
+    rrc->RecoverWantAgentByJson(jsonValue, 0);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
 }
 
 /**
@@ -1998,6 +2006,14 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00007, Function | SmallTest | Lev
     EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
+    rrc->RecoverWantAgent(jsonValue, 1);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
+
+    jsonValue = R"(})";
+    rrc->RecoverWantAgent(jsonValue, 1);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
+
+    jsonValue = R"({})";
     rrc->RecoverWantAgent(jsonValue, 1);
     EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
 }
