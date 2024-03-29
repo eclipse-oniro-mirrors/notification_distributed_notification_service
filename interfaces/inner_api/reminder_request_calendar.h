@@ -147,6 +147,7 @@ public:
     virtual bool HandleSysTimeChange(uint64_t oriTriggerTime) override;
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
+    static const uint8_t DELAY_REMINDER;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
@@ -173,7 +174,6 @@ private:
     {
         return repeatMonth_;
     }
-    uint64_t GetDurationTime() const;
     uint64_t GetTimeInstantMilli(
         uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) const;
 
@@ -182,7 +182,6 @@ private:
      */
     void InitDateTime();
     void InitDateTime(const tm &dateTime);
-    void InitEndDateTime();
     virtual bool IsRepeatReminder() const override;
     bool IsRepeatMonth(uint8_t month) const;
     bool IsRepeatDay(uint8_t day) const;

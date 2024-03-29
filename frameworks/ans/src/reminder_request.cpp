@@ -300,12 +300,12 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime)
     }
     bool showImmediately = false;
     if (oriTriggerTime <= now) {
-        // case2. switch to a future time, trigger time is less than now time.
+        // switch to a future time, trigger time is less than now time.
         // when the reminder show immediately, trigger time will update in onShow function.
         snoozeTimesDynamic_ = 0;
         showImmediately = true;
     } else {
-        // case3. switch to a future time, trigger time is larger than now time.
+        // switch to a future time, trigger time is larger than now time.
         showImmediately = false;
     }
     return showImmediately;

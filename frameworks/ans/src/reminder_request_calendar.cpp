@@ -25,6 +25,7 @@ namespace OHOS {
 namespace Notification {
 const uint8_t ReminderRequestCalendar::MAX_MONTHS_OF_YEAR = 12;
 const uint8_t ReminderRequestCalendar::MAX_DAYS_OF_MONTH = 31;
+const uint8_t ReminderRequestCalendar::DELAY_REMINDER = 3000;
 const uint8_t ReminderRequestCalendar::JANUARY = 1;
 const uint8_t ReminderRequestCalendar::DECEMBER = 12;
 const uint8_t ReminderRequestCalendar::DEFAULT_SNOOZE_TIMES = 3;
@@ -192,8 +193,10 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime() const
             triggerTimeInMilli = ReminderRequest::GetDurationSinceEpochInMilli(target);
             ANSR_LOGD("Next calendar time:%{public}s", GetDateTimeInfo(target).c_str());
         }
-        if ((target <= now) && now <= (target + (durationTime_ / 1000))) {
-            triggerTimeInMilli = ReminderRequest::GetDurationSinceEpochInMilli(now) + 3000;
+        uint64_t targetInMilli = GetDurationSinceEpochInMilli(target);
+        uint64_t nowInMilli = GetDurationSinceEpochInMilli(now);
+        if ((targetInMilli <= nowInMilli) && nowInMilli <= (targetInMilli + durationTime_ )) {
+            triggerTimeInMilli = nowInMilli + DELAY_REMINDER;
         }
     }
     return triggerTimeInMilli;
@@ -482,8 +485,7 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         READ_UINT64_RETURN_FALSE_LOG(parcel, durationTime_, "durationTime");
 
         InitDateTime();
-        InitEndDateTime();
-
+    
         READ_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateDay_, "firstDesignateDay");
@@ -694,17 +696,7 @@ uint64_t ReminderRequestCalendar::GetDateTime()
 
 uint64_t ReminderRequestCalendar::GetEndDateTime()
 {
-    struct tm endDateTime;
-    endDateTime.tm_year = GetCTime(TimeTransferType::YEAR, endYear_);
-    endDateTime.tm_mon = GetCTime(TimeTransferType::MONTH, endMonth_);
-    endDateTime.tm_mday = static_cast<int>(endDay_);
-    endDateTime.tm_hour = static_cast<int>(endHour_);
-    endDateTime.tm_min = static_cast<int>(endMinute_);
-    endDateTime.tm_sec = static_cast<int>(endSecond_);
-    endDateTime.tm_isdst = -1;
-
-    time_t time = mktime(&endDateTime);
-    return GetDurationSinceEpochInMilli(time);
+    return endDateTime_;
 }
 
 std::string ReminderRequestCalendar::SerializationRRule()
