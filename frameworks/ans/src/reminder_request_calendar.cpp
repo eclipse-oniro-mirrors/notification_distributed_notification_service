@@ -195,7 +195,7 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime() const
         }
         uint64_t targetInMilli = GetDurationSinceEpochInMilli(target);
         uint64_t nowInMilli = GetDurationSinceEpochInMilli(now);
-        if ((targetInMilli <= nowInMilli) && nowInMilli <= (targetInMilli + durationTime_ )) {
+        if ((targetInMilli <= nowInMilli) && nowInMilli <= (targetInMilli + durationTime_)) {
             triggerTimeInMilli = nowInMilli + DELAY_REMINDER;
         }
     }
