@@ -331,21 +331,6 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_01000, Function | SmallTest |
 }
 
 /**
- * @tc.name: initEndDateTime_00100
- * @tc.desc: Test InitEndDateTime parameters.
- * @tc.type: FUNC
- * @tc.require: I9BM6I
- */
-HWTEST_F(ReminderRequestCalendarTest, initEndDateTime_01000, Function | SmallTest | Level1)
-{
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
-    calendar->InitEndDateTime();
-    EXPECT_EQ(calendar->IsRepeatReminder(), true);
-}
-
-/**
  * @tc.name: OnDateTimeChange_01000
  * @tc.desc: Test OnDateTimeChange parameters.
  * @tc.type: FUNC
@@ -1013,8 +998,7 @@ HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00001, Function | Smal
     auto rrc = std::make_shared<ReminderRequestCalendar>();
     rrc->SetExpired(true);
     uint64_t oriTriggerTime = 10;
-    uint64_t optTriggerTime = 10;
-    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), false);
 }
 
 /**
@@ -1028,8 +1012,23 @@ HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00002, Function | Smal
     auto rrc = std::make_shared<ReminderRequestCalendar>();
     rrc->SetExpired(false);
     uint64_t oriTriggerTime = 10;
-    uint64_t optTriggerTime = 20;
-    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00003
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(false);
+    rrc->SetDateTime(1711630020000);
+    rrc->SetEndDateTime(1711630029999);
+    uint64_t oriTriggerTime = 1711630028888;
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), true);
 }
 
 /**

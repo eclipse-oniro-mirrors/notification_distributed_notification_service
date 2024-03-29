@@ -220,12 +220,6 @@ private:
     uint8_t hour_ {1};
     uint8_t minute_ {1};
     uint8_t second_ {0};
-    uint16_t endYear_ {1};
-    uint8_t endMonth_ {1};
-    uint8_t endDay_ {1};
-    uint8_t endHour_ {1};
-    uint8_t endMinute_ {1};
-    uint8_t endSecond_ {0};
     uint16_t repeatMonth_ {0};
     uint32_t repeatDay_ {0};
     uint64_t endDateTime_{0};

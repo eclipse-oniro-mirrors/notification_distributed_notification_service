@@ -673,6 +673,50 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00002, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: HandleTimeZoneChange_00001
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(true);
+    uint64_t oriTriggerTime = 10;
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00002
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(false);
+    uint64_t oriTriggerTime = 10;
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), false);
+}
+
+/**
+ * @tc.name: HandleTimeZoneChange_00003
+ * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->SetExpired(false);
+    rrc->SetDateTime(1711630020000);
+    rrc->SetEndDateTime(1711630029999);
+    uint64_t oriTriggerTime = 1711630028888;
+    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), true);
+}
+
+/**
  * @tc.name: OnSnooze_00001
  * @tc.desc: Test OnSnooze parameters.
  * @tc.type: FUNC

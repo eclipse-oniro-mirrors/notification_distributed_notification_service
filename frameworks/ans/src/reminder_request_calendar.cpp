@@ -352,11 +352,6 @@ void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &r
     }
 }
 
-uint64_t ReminderRequestCalendar::GetDurationTime() const
-{
-    return durationTime_;
-}
-
 std::vector<uint8_t> ReminderRequestCalendar::GetRepeatMonths() const
 {
     std::vector<uint8_t> repeatMonths;
