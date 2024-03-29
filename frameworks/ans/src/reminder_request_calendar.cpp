@@ -176,7 +176,7 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime() const
     ANSR_LOGD("Now time is: %{public}s", GetDateTimeInfo(now).c_str());
     if (repeatMonth_ > 0 && repeatDay_ > 0) {
         triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
-    } else if (repeatDaysOfWeek_ > 0 && ((target + durationTime) <= now)) {
+    } else if (repeatDaysOfWeek_ > 0 && ((target + durationTime_) <= now)) {
         nowTime.tm_hour = tarTime.tm_hour;
         nowTime.tm_min = tarTime.tm_min;
         nowTime.tm_sec = tarTime.tm_sec;
