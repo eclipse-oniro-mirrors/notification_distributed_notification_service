@@ -43,7 +43,6 @@ const std::string NotificationRequest::CLASSIFICATION_SOCIAL {"social"};
 const std::string NotificationRequest::CLASSIFICATION_STATUS {"status"};
 const std::string NotificationRequest::CLASSIFICATION_SYSTEM {"sys"};
 const std::string NotificationRequest::CLASSIFICATION_TRANSPORT {"transport"};
-const std::string LIVE_VIEW_LABEL = "ans_live_view";
 
 const uint32_t NotificationRequest::COLOR_DEFAULT {0};
 
@@ -2288,20 +2287,16 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
 std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
 {
     const char *keySpliter = "_";
-    std::string label = label_;
-    if (IsCommonLiveView() && label.empty()) {
-        label = LIVE_VIEW_LABEL;
-    }
 
     std::stringstream stream;
     if (IsAgentNotification()) {
         stream << deviceId << keySpliter << ownerUserId_ << keySpliter <<
             ownerUid_ << keySpliter << ownerBundleName_ << keySpliter <<
-            label << keySpliter << notificationId_;
+            label_ << keySpliter << notificationId_;
     } else {
         stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
             creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<
-            label << keySpliter << notificationId_;
+            label_ << keySpliter << notificationId_;
     }
     return stream.str();
 }
