@@ -934,11 +934,7 @@ protected:
     uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
-    virtual bool IsRepeatReminder() const;
-    bool isExpired_ {false};
     uint64_t GetNowInstantMilli() const;
-    uint8_t snoozeTimes_ {0};
-    uint8_t snoozeTimesDynamic_ {0};
 
 private:
     void AddActionButtons(const bool includeSnooze);
@@ -1014,6 +1010,9 @@ private:
     std::string displayContent_ {};
     std::string title_ {};
     std::string bundleName_ {};
+    bool isExpired_ {false};
+    uint8_t snoozeTimes_ {0};
+    uint8_t snoozeTimesDynamic_ {0};
     uint8_t state_ {0};
     int32_t notificationId_ {0};
     std::string groupId_ {};
