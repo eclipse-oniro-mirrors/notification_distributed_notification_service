@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Notification {
 const uint8_t ReminderRequestCalendar::MAX_MONTHS_OF_YEAR = 12;
 const uint8_t ReminderRequestCalendar::MAX_DAYS_OF_MONTH = 31;
-const uint32_t ReminderRequestCalendar::DELAY_REMINDER = 3000;
+const uint64_t ReminderRequestCalendar::DELAY_REMINDER = 3000;
 const uint8_t ReminderRequestCalendar::JANUARY = 1;
 const uint8_t ReminderRequestCalendar::DECEMBER = 12;
 const uint8_t ReminderRequestCalendar::DEFAULT_SNOOZE_TIMES = 3;

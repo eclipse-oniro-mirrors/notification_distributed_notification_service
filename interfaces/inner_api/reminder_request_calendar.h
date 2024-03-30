@@ -199,7 +199,7 @@ private:
     static const uint8_t JANUARY;
     static const uint8_t DECEMBER;
     static const uint8_t DEFAULT_SNOOZE_TIMES;
-    static const uint32_t DELAY_REMINDER;
+    static const uint64_t DELAY_REMINDER;
 
     tm dateTime_ = {
         .tm_sec = 0,
