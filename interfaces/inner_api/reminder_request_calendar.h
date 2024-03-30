@@ -192,7 +192,7 @@ private:
     void SetMonth(const uint8_t &month, const bool &isSet);
     void SetRepeatMonths(const std::vector<uint8_t> &repeatMonths);
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
-    bool CheckCalenderIsExpired(const uint64_t oriTriggerTime, const uint64_t now, const uint64_t durationTime);
+    bool CheckCalenderIsExpired(const uint64_t now);
 
     uint64_t GetDateTime();
 
