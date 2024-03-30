@@ -678,7 +678,7 @@ void ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
     uint64_t dateTimeMilli = ReminderRequest::GetDurationSinceEpochInMilli(dateTime);
     if (endDateTime_ >= dateTimeMilli) {
         durationTime_ = endDateTime_ - dateTimeMilli;
-    } 
+    }
 }
 
 uint64_t ReminderRequestCalendar::GetDateTime()
