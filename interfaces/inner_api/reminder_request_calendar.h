@@ -155,7 +155,7 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
     void SetDateTime(const uint64_t time);
-    void SetEndDateTime(const uint64_t time);
+    bool SetEndDateTime(const uint64_t time);
     uint64_t GetEndDateTime();
     uint64_t GetDurationTime() const;
     void CalculationDurationTime();
@@ -225,6 +225,8 @@ private:
     uint8_t second_ {0};
     uint16_t repeatMonth_ {0};
     uint32_t repeatDay_ {0};
+
+    uint64_t startDateTime_{0};
     uint64_t endDateTime_{0};
     uint64_t durationTime_{0};
 

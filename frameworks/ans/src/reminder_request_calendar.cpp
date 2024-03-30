@@ -224,7 +224,7 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime()
         triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
         startDateTime_ = triggerTimeInMilli;
         endDateTime_ = triggerTimeInMilli + durationTime_;
-    } else if (repeatDaysOfWeek_ > 0 && ((target + durationTime_) <= now)) {
+    } else if (repeatDaysOfWeek_ > 0 && (target + <= now)) {
         nowTime.tm_hour = tarTime.tm_hour;
         nowTime.tm_min = tarTime.tm_min;
         nowTime.tm_sec = tarTime.tm_sec;
