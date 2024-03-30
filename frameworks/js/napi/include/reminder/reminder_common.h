@@ -35,6 +35,7 @@ const char* ACTION_BUTTON_RESOURCE = "titleResource";
 const char* ALARM_HOUR = "hour";
 const char* REPEAT_DAYS_OF_WEEK = "daysOfWeek";
 const char* ALARM_MINUTE = "minute";
+const char* CALENDAR_END_DATE_TIME = "endDateTime";
 const char* CALENDAR_DATE_TIME = "dateTime";
 const char* CALENDAR_YEAR = "year";
 const char* CALENDAR_MONTH = "month";
@@ -137,8 +138,10 @@ private:
         const int32_t &hour, const int32_t &min);
 
     static bool ParseCalendarParams(const napi_env& env, const napi_value& value, std::vector<uint8_t>& repeatMonths,
-        std::vector<uint8_t>& repeatDays, struct tm& dateTime);
+        std::vector<uint8_t>& repeatDays, std::vector<uint8_t> &daysOfWeek);
 
+    static bool ParseLocalDateTime(const napi_env& env, const napi_value& dateTimeObj, struct tm& dateTime);
+   
     static napi_value CreateReminderTimer(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 

@@ -436,9 +436,12 @@ bool ReminderRequest::OnTerminate()
 bool ReminderRequest::OnTimeZoneChange()
 {
     time_t oldZoneTriggerTime = static_cast<time_t>(triggerTimeInMilli_ / MILLI_SECONDS);
-    struct tm oriTime;
-    (void)gmtime_r(&oldZoneTriggerTime, &oriTime);
-    time_t newZoneTriggerTime = mktime(&oriTime);
+    struct tm *localOriTime = localtime(&oldZoneTriggerTime);
+    if (localOriTime == nullptr) {
+        ANSR_LOGE("oldZoneTriggerTime is null");
+        return false;
+    }
+    time_t newZoneTriggerTime = mktime(localOriTime);
     uint64_t nextTriggerTime = PreGetNextTriggerTimeIgnoreSnooze(true, false);
     return HandleTimeZoneChange(
         triggerTimeInMilli_, GetDurationSinceEpochInMilli(newZoneTriggerTime), nextTriggerTime);

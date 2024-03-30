@@ -113,10 +113,13 @@ public:
         return firstDesignateDay_;
     }
 
+    bool InitTriggerTime();
+
     std::vector<uint8_t> GetRepeatMonths() const;
     std::vector<uint8_t> GetRepeatDays() const;
 
     virtual bool UpdateNextReminder() override;
+    virtual bool OnDateTimeChange() override;
 
     /**
      * Marshal a reminder object into a Parcel.
@@ -150,15 +153,16 @@ public:
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
+    bool SetEndDateTime(const uint64_t time);
 
 protected:
-    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const override;
+    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
     ReminderRequestCalendar() : ReminderRequest() {}
 
     uint8_t GetNextDay(const uint16_t &settedYear, const uint8_t &settedMonth, const tm &now, const tm &target) const;
-    uint64_t GetNextTriggerTime() const;
+    uint64_t GetNextTriggerTime();
     uint64_t GetNextTriggerTimeAsRepeatReminder(const tm &nowTime, const tm &tarTime) const;
     uint32_t GetRepeatDay() const
     {
@@ -183,9 +187,11 @@ private:
     void SetMonth(const uint8_t &month, const bool &isSet);
     void SetRepeatMonths(const std::vector<uint8_t> &repeatMonths);
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
+    bool CheckCalenderIsExpired(const uint64_t now);
 
     void SetDateTime(const uint64_t time);
     uint64_t GetDateTime();
+    uint64_t GetEndDateTime();
 
     std::string SerializationRRule();
     void DeserializationRRule(const std::string& str);
@@ -193,6 +199,7 @@ private:
     static const uint8_t JANUARY;
     static const uint8_t DECEMBER;
     static const uint8_t DEFAULT_SNOOZE_TIMES;
+    static const uint64_t DELAY_REMINDER;
 
     tm dateTime_ = {
         .tm_sec = 0,
@@ -216,6 +223,10 @@ private:
     uint8_t second_ {0};
     uint16_t repeatMonth_ {0};
     uint32_t repeatDay_ {0};
+
+    uint64_t startDateTime_{0};
+    uint64_t endDateTime_{0};
+    uint64_t durationTime_{0};
 
     // repeat calendar
     std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;

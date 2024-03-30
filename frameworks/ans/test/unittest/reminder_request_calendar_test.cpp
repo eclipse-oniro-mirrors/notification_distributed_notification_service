@@ -209,6 +209,24 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00500, Function | SmallTest |
     EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with 13 error.";
 }
 
+namespace {
+    bool g_mockNowInstantMilliRet = true;
+    uint64_t g_mockNumber = 1675876480000;
+}
+
+void MockNowInstantMilli(bool mockRet)
+{
+    g_mockNowInstantMilliRet = mockRet;
+}
+
+uint64_t ReminderRequest::GetNowInstantMilli() const
+{
+    if (g_mockNowInstantMilliRet == false) {
+        return 0;
+    }
+    return g_mockNumber;
+}
+
 /**
  * @tc.name: initDateTime_00600
  * @tc.desc: Check repeatDay set with nomal value successfully.
@@ -943,6 +961,93 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
 }
 
 /**
+ * @tc.name: InitTriggerTime_00001
+ * @tc.desc: Test InitTriggerTime parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, InitTriggerTime_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->InitTriggerTime(), true);
+}
+
+
+/**
+ * @tc.name: CheckCalenderIsExpired_00001
+ * @tc.desc: Test CheckCalenderIsExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->startDateTime_ = 1675876470000;
+    rrc->endDateTime_ = 1675876480005;
+    uint64_t now = 1675876480005;
+    EXPECT_EQ(rrc->CheckCalenderIsExpired(now), true);
+}
+
+/**
+ * @tc.name: CheckCalenderIsExpired_00002
+ * @tc.desc: Test CheckCalenderIsExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    uint64_t now = 1675876480005;
+    EXPECT_EQ(rrc->CheckCalenderIsExpired(now), false);
+}
+
+/**
+ * @tc.name: OnDateTimeChange_00001
+ * @tc.desc: Test OnDateTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    EXPECT_NE(rrc, nullptr);
+    rrc->SetExpired(true);
+    EXPECT_EQ(rrc->OnDateTimeChange(), false);
+}
+
+/**
+ * @tc.name: OnDateTimeChange_00002
+ * @tc.desc: Test OnDateTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    EXPECT_NE(rrc, nullptr);
+    rrc->SetExpired(false);
+    EXPECT_EQ(rrc->OnDateTimeChange(), false);
+}
+
+/**
+ * @tc.name: OnDateTimeChange_00003
+ * @tc.desc: Test OnDateTimeChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    EXPECT_NE(rrc, nullptr);
+    rrc->SetExpired(false);
+    rrc->startDateTime_ = 1675876470000;
+    rrc->endDateTime_ = 1901086458000;
+    EXPECT_EQ(rrc->OnDateTimeChange(), true);
+}
+
+/**
  * @tc.name: RecoverFromDb_00001
  * @tc.desc: Test RecoverFromDb parameters.
  * @tc.type: FUNC
@@ -991,6 +1096,35 @@ HWTEST_F(ReminderRequestCalendarTest, SetDateTime_00001, Function | SmallTest | 
     EXPECT_NE(nullptr, calendar);
     calendar->SetDateTime(0);
     EXPECT_EQ(calendar->GetDateTime(), 0);
+}
+
+/**
+ * @tc.name: SetEndDateTime_00001
+ * @tc.desc: Test SetEndDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetEndDateTime_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->SetEndDateTime(0), true);
+}
+
+/**
+ * @tc.name: SetEndDateTime_00002
+ * @tc.desc: Test SetEndDateTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetEndDateTime_00002, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    calendar->startDateTime_ = 5;
+    EXPECT_EQ(calendar->SetEndDateTime(0), false);
 }
 
 /**

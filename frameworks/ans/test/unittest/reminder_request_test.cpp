@@ -1202,6 +1202,7 @@ HWTEST_F(ReminderRequestTest, OnStart_00001, Function | SmallTest | Level1)
  * @tc.require: issueI65R21
  */
 HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | Level1)
+
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::shared_ptr<NativeRdb::ResultSet> resultSet =

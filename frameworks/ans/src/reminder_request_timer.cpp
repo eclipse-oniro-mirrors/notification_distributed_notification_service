@@ -58,7 +58,7 @@ uint64_t ReminderRequestTimer::GetInitInfo() const
     return countDownTimeInSeconds_;
 }
 
-uint64_t ReminderRequestTimer::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const
+uint64_t ReminderRequestTimer::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext)
 {
     ANSR_LOGD("countdown time not support PreGetNextTriggerTimeIgnoreSnooze");
     return ReminderRequest::INVALID_LONG_LONG_VALUE;

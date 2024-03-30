@@ -916,7 +916,7 @@ protected:
     ReminderRequest();
     explicit ReminderRequest(ReminderType reminderType);
     std::string GetDateTimeInfo(const time_t &timeInSecond) const;
-    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const
+    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext)
     {
         return INVALID_LONG_LONG_VALUE;
     }
@@ -938,6 +938,7 @@ protected:
     uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
+    uint64_t GetNowInstantMilli() const;
 
 private:
     void AddActionButtons(const bool includeSnooze);
@@ -945,7 +946,6 @@ private:
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element,
         bool isWantAgent) const;
     std::string GetButtonInfo() const;
-    uint64_t GetNowInstantMilli() const;
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;

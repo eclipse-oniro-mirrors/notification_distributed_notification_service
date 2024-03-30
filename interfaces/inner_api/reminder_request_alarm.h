@@ -101,7 +101,7 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
 
 protected:
-    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const override;
+    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
     ReminderRequestAlarm() : ReminderRequest() {};
