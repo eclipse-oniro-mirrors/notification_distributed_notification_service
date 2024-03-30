@@ -113,10 +113,14 @@ public:
         return firstDesignateDay_;
     }
 
+    bool InitTriggerTime();
+    uint64_t InitNextTriggerTime(bool duration);
+
     std::vector<uint8_t> GetRepeatMonths() const;
     std::vector<uint8_t> GetRepeatDays() const;
 
     virtual bool UpdateNextReminder() override;
+    virtual bool OnDateTimeChange() override;
 
     /**
      * Marshal a reminder object into a Parcel.

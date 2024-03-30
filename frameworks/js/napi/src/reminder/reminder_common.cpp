@@ -819,11 +819,6 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
     
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    time_t time = mktime(&dateTime);
-    if (time == -1) {
-        return nullptr;
-    }
-    reminderCalendar->SetDateTime(ReminderRequest::GetDurationSinceEpochInMilli(time));
     napi_value endDateTimeObj = nullptr;
     if (GetObject(env, value, ReminderAgentNapi::CALENDAR_END_DATE_TIME, endDateTimeObj)) {
         struct tm endDateTime;
@@ -834,10 +829,13 @@ napi_value ReminderCommon::CreateReminderCalendar(
         if (endTime == -1) {
             return nullptr;
         }
-        reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime));
+        if (!reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime))) {
+            ANSR_LOGW("The end time must be greater than start time");
+            return nullptr;
+        }
     }
     
-    if (!(reminderCalendar->SetNextTriggerTime())) {
+    if (!(reminderCalendar->InitTriggerTime())) {
         return nullptr;
     }
     reminderCalendar->SetRRuleWantAgentInfo(wantAgentInfo);

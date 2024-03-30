@@ -67,7 +67,7 @@ bool ReminderRequestAlarm::IsRepeatReminder() const
 }
 
 
-uint64_t ReminderRequestAlarm::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const
+uint64_t ReminderRequestAlarm::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext)
 {
     if (ignoreRepeat || (repeatDaysOfWeek_)) {
         return GetNextTriggerTime(forceToGetNext);

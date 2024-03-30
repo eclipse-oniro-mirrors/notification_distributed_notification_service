@@ -912,7 +912,7 @@ protected:
     ReminderRequest();
     explicit ReminderRequest(ReminderType reminderType);
     std::string GetDateTimeInfo(const time_t &timeInSecond) const;
-    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const
+    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext)
     {
         return INVALID_LONG_LONG_VALUE;
     }
