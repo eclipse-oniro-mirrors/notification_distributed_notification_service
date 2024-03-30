@@ -644,7 +644,7 @@ HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00003, Function | SmallTest |
 
 /**
  * @tc.name: HandleTimeZoneChange_00001
- * @tc.desc: Test HandleTimeZoneChange parameters.
+ * @tc.desc: Test HandleSysTimeChange parameters.
  * @tc.type: FUNC
  * @tc.require: issueI5UYHP
  */
@@ -658,10 +658,10 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00001, Function | SmallTest | 
 }
 
 /**
- * @tc.name: HandleSysTimeChange_00002
+ * @tc.name: HandleTimeZoneChange_00002
  * @tc.desc: Test HandleSysTimeChange parameters.
  * @tc.type: FUNC
- * @tc.require:I9BM6I
+ * @tc.require: issueI5UYHP
  */
 HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00002, Function | SmallTest | Level1)
 {
@@ -670,19 +670,6 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00002, Function | SmallTest | 
     uint64_t oriTriggerTime = 10;
     uint64_t optTriggerTime = 20;
     EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
-}
-/**
- * @tc.name: HandleSysTimeChange_00003
- * @tc.desc: Test HandleSysTimeChange parameters.
- * @tc.type: FUNC
- * @tc.require:I9BM6I
- */
-HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00003, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->SetExpired(false);
-    uint64_t oriTriggerTime = 1711630028888;
-    EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), true);
 }
 
 /**
