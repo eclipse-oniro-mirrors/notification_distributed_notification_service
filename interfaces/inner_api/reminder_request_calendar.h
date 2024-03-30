@@ -114,7 +114,6 @@ public:
     }
 
     bool InitTriggerTime();
-    uint64_t InitNextTriggerTime(bool duration);
 
     std::vector<uint8_t> GetRepeatMonths() const;
     std::vector<uint8_t> GetRepeatDays() const;
@@ -150,15 +149,10 @@ public:
     virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
-    static const uint32_t DELAY_REMINDER;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
-    void SetDateTime(const uint64_t time);
     bool SetEndDateTime(const uint64_t time);
-    uint64_t GetEndDateTime();
-    uint64_t GetDurationTime() const;
-    void CalculationDurationTime();
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
@@ -185,7 +179,7 @@ private:
      */
     void InitDateTime();
     void InitDateTime(const tm &dateTime);
-    virtual bool IsRepeatReminder() const override;
+    bool IsRepeatReminder() const;
     bool IsRepeatMonth(uint8_t month) const;
     bool IsRepeatDay(uint8_t day) const;
     void SetDay(const uint8_t &day, const bool &isSet);
@@ -194,7 +188,9 @@ private:
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
     bool CheckCalenderIsExpired(const uint64_t now);
 
+    void SetDateTime(const uitn64_t time);
     uint64_t GetDateTime();
+    uint64_t GetEndDateTime();
 
     std::string SerializationRRule();
     void DeserializationRRule(const std::string& str);
@@ -202,6 +198,7 @@ private:
     static const uint8_t JANUARY;
     static const uint8_t DECEMBER;
     static const uint8_t DEFAULT_SNOOZE_TIMES;
+    static const uint32_t DELAY_REMINDER;
 
     tm dateTime_ = {
         .tm_sec = 0,
