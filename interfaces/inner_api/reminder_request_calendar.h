@@ -162,7 +162,7 @@ public:
     void CalculationDurationTime();
 
 protected:
-    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) const override;
+    virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
     ReminderRequestCalendar() : ReminderRequest() {}
