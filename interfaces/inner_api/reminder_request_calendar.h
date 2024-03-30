@@ -148,7 +148,6 @@ public:
 
     virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
     virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
-    virtual bool HandleSysTimeChange(uint64_t oriTriggerTime) override;
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
     static const uint32_t DELAY_REMINDER;
