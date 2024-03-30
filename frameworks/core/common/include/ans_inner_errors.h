@@ -89,7 +89,8 @@ enum ErrorCode : uint32_t {
     ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE,
     ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID,
     ERR_ANS_OVER_MAX_UPDATE_PERSECOND,
-    ERR_ANS_DUPLICATE_MSG
+    ERR_ANS_DUPLICATE_MSG,
+    ERR_ANS_NO_AGENT_SETTING
 };
 
 enum ReminderErrorCode : uint32_t {
@@ -132,6 +133,7 @@ const int32_t ERROR_DIALOG_IS_POPPING            = 1600013;    // Enable notific
 const int32_t ERROR_NO_RIGHT                     = 1600014;    // No right.
 const int32_t ERROR_REPEAT_SET                   = 1600015;    // Repeat create or end.
 const int32_t ERROR_EXPIRED_NOTIFICATION         = 1600016;    // Low update version.
+const int32_t ERROR_NO_AGENT_SETTING             = 1600017;    // No corresponding agent relationship configuration.
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification

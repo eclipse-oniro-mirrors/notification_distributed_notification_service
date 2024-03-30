@@ -293,9 +293,7 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if ((CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-        CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) ||
-        IsAgentRelationship(GetClientBundleName(), bundleOption->GetBundleName())) {
+    if (IsAgentRelationship(GetClientBundleName(), bundleOption->GetBundleName())) {
         int32_t userId = -1;
         if (bundleOption->GetUid() != 0) {
             OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
@@ -320,7 +318,7 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
         return CancelPreparedNotification(id, "", bundle);
     }
 
-    return ERR_ANS_PERMISSION_DENIED;
+    return ERR_ANS_NO_AGENT_SETTING;
 }
 
 ErrCode AdvancedNotificationService::PublishAsBundle(
@@ -1833,7 +1831,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         isAgent = IsAgentRelationship(bundleName, bundle->GetBundleName());
         if (!isAgent) {
             ANS_LOGE("The caller has no agent relationship with the specified bundle.");
-            return ERR_ANS_PERMISSION_DENIED;
+            return ERR_ANS_NO_AGENT_SETTING;
         }
     }
 
