@@ -988,7 +988,7 @@ HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00003, Function | S
 }
 
 /**
- * @tc.name: HandleTimeZoneChange_00001
+ * @tc.name: HandleSysTimeChange_00001
  * @tc.desc: Test HandleSysTimeChange parameters.
  * @tc.type: FUNC
  * @tc.require:I9BM6I
@@ -1002,7 +1002,7 @@ HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00001, Function | Smal
 }
 
 /**
- * @tc.name: HandleTimeZoneChange_00002
+ * @tc.name: HandleSysTimeChange_00002
  * @tc.desc: Test HandleSysTimeChange parameters.
  * @tc.type: FUNC
  * @tc.require:I9BM6I
@@ -1016,7 +1016,7 @@ HWTEST_F(ReminderRequestCalendarTest, HandleSysTimeChange_00002, Function | Smal
 }
 
 /**
- * @tc.name: HandleTimeZoneChange_00003
+ * @tc.name: HandleSysTimeChange_00003
  * @tc.desc: Test HandleSysTimeChange parameters.
  * @tc.type: FUNC
  * @tc.require:I9BM6I

@@ -819,7 +819,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
     }
     
     auto reminderCalendar = std::make_shared<ReminderRequestCalendar>(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    uint64_t time = mktime(&dateTime);
+    time_t time = mktime(&dateTime);
     if (time == -1) {
         return nullptr;
     }
@@ -830,7 +830,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
         if (!ParseLocalDateTime(env, endDateTimeObj, endDateTime)) {
             return nullptr;
         }
-        uint64_t endTime = mktime(&endDateTime);
+        time_t endTime = mktime(&endDateTime);
         if (endTime == -1) {
             return nullptr;
         }

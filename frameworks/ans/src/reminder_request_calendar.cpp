@@ -664,14 +664,21 @@ void ReminderRequestCalendar::SetDateTime(const uint64_t time)
     second_ = static_cast<uint8_t>(dateTime.tm_sec);
 }
 
+
 void ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
 {
+    if (time == 0) {
+        return;
+    }
     endDateTime_ = time;
-    uint64_t dateTime = mktime(&dateTime_);
+    time_t dateTime = mktime(&dateTime_);
     if (dateTime == -1) {
         return;
     }
-    durationTime_ = endDateTime_ - ReminderRequest::GetDurationSinceEpochInMilli(dateTime);
+    uint64_t dateTimeMilli = ReminderRequest::GetDurationSinceEpochInMilli(dateTime);
+    if (endDateTime_ >= dateTimeMilli) {
+        durationTime_ = endDateTime_ - dateTimeMilli;
+    } 
 }
 
 uint64_t ReminderRequestCalendar::GetDateTime()
