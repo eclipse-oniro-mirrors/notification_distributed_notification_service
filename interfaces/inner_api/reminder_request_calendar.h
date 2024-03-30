@@ -147,6 +147,7 @@ public:
 
     virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
     virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
+
     static const uint8_t MAX_MONTHS_OF_YEAR;
     static const uint8_t MAX_DAYS_OF_MONTH;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
@@ -188,7 +189,7 @@ private:
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
     bool CheckCalenderIsExpired(const uint64_t now);
 
-    void SetDateTime(const uitn64_t time);
+    void SetDateTime(const uint64_t time);
     uint64_t GetDateTime();
     uint64_t GetEndDateTime();
 

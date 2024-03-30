@@ -58,7 +58,6 @@ ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime, const std::
 ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &other) : ReminderRequest(other)
 {
     dateTime_ = other.dateTime_;
-    endDateTime_ = other.endDateTime_;
     firstDesignateYear_ = other.firstDesignateYear_;
     firstDesignateMonth_ = other.firstDesignateMonth_;
     firstDesignateDay_ = other.firstDesignateDay_;
@@ -188,7 +187,7 @@ bool ReminderRequestCalendar::OnDateTimeChange()
     if (IsExpired()) {
         return false;
     }
-    int64_t now = GetNowInstantMilli();
+    uint64_t now = GetNowInstantMilli();
     if (now == 0) {
         ANSR_LOGE("get now time failed");
         return false;
@@ -242,11 +241,6 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime()
         if (now < target) {
             triggerTimeInMilli = ReminderRequest::GetDurationSinceEpochInMilli(target);
             ANSR_LOGD("Next calendar time:%{public}s", GetDateTimeInfo(target).c_str());
-        }
-        uint64_t targetInMilli = GetDurationSinceEpochInMilli(target);
-        uint64_t nowInMilli = GetDurationSinceEpochInMilli(now);
-        if ((targetInMilli <= nowInMilli) && nowInMilli <= (targetInMilli + durationTime_)) {
-            triggerTimeInMilli = nowInMilli + DELAY_REMINDER;
         }
     }
     return triggerTimeInMilli;
@@ -400,11 +394,6 @@ void ReminderRequestCalendar::SetRepeatMonths(const std::vector<uint8_t> &repeat
     }
 }
 
-uint64_t ReminderRequestCalendar::GetDurationTime() const
-{
-    return durationTime_;
-}
-
 void ReminderRequestCalendar::SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays)
 {
     if (repeatDays.size() > MAX_DAYS_OF_MONTH) {
@@ -547,7 +536,7 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         READ_UINT64_RETURN_FALSE_LOG(parcel, endDateTime_, "endDateTime");
 
         InitDateTime();
-    
+
         READ_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateDay_, "firstDesignateDay");
@@ -703,8 +692,8 @@ void ReminderRequestCalendar::SetDateTime(const uint64_t time)
     hour_ = static_cast<uint8_t>(dateTime.tm_hour);
     minute_ = static_cast<uint8_t>(dateTime.tm_min);
     second_ = static_cast<uint8_t>(dateTime.tm_sec);
+    startDateTime_ = time;
 }
-
 
 bool ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
 {
