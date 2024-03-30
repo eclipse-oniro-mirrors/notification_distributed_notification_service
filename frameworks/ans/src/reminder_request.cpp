@@ -304,6 +304,7 @@ bool ReminderRequest::HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optT
             // case3. switch to a future time, trigger time is larger than now time.
             showImmediately = false;
         }
+    }
     return showImmediately;
 }
 
