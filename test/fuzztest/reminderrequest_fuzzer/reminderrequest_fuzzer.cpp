@@ -51,7 +51,6 @@ namespace OHOS {
         reminderRequest.OnClose(enabled);
         reminderRequest.OnDateTimeChange();
         uint64_t oriTriggerTime = static_cast<uint64_t>(GetU32Data(data));
-        uint64_t optTriggerTimes = static_cast<uint64_t>(GetU32Data(data));
         reminderRequest.HandleSysTimeChange(oriTriggerTime);
         uint64_t oldZoneTriggerTime = static_cast<uint64_t>(GetU32Data(data));
         uint64_t newZoneTriggerTime = static_cast<uint64_t>(GetU32Data(data));

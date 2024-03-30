@@ -91,8 +91,7 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00100, Function | SmallT
     reminderRequest->isExpired_ = false;
     MockNowInstantMilli(true);
     uint64_t oriTriggerTime = 0;
-    uint64_t optTriggerTime = 1675876470000;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime), false);
 }
 
 /**
@@ -109,8 +108,7 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00200, Function | SmallT
     reminderRequest->isExpired_ = false;
     MockNowInstantMilli(true);
     uint64_t oriTriggerTime = 0;
-    uint64_t optTriggerTime = 1675876480001;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime), false);
 }
 
 /**
@@ -127,8 +125,7 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00300, Function | SmallT
     reminderRequest->isExpired_ = false;
     MockNowInstantMilli(true);
     uint64_t oriTriggerTime = 1675876480001;
-    uint64_t optTriggerTime = 1675876480001;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime), false);
 }
 
 /**
@@ -145,8 +142,7 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00400, Function | SmallT
     reminderRequest->isExpired_ = false;
     MockNowInstantMilli(true);
     uint64_t oriTriggerTime = 1675876470000;
-    uint64_t optTriggerTime = 0;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime), true);
 }
 
 /**
@@ -162,8 +158,7 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00500, Function | SmallT
     EXPECT_NE(reminderRequest, nullptr);
     reminderRequest->isExpired_ = false;
     uint64_t oriTriggerTime = 1675876480001;
-    uint64_t optTriggerTime = 0;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime), true);
 }
 
 /**

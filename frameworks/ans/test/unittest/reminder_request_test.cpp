@@ -680,7 +680,6 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00003, Function | SmallTest | 
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetExpired(false);
-    rrc->SetDateTime(1711630020000);
     uint64_t oriTriggerTime = 1711630028888;
     EXPECT_EQ(rrc->HandleSysTimeChange(oriTriggerTime), true);
 }
