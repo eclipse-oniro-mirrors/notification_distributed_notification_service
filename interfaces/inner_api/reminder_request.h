@@ -934,8 +934,6 @@ protected:
     uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
-    uint64_t CaclculationTriggerTime();
-    virtual bool HandleSysTimeChange(uint64_t oriTriggerTime);
     virtual bool IsRepeatReminder() const;
     bool isExpired_ {false};
     uint64_t GetNowInstantMilli() const;
@@ -951,6 +949,7 @@ private:
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;
+    bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
     bool HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
     bool InitNotificationRequest();
     void InitServerObj();
