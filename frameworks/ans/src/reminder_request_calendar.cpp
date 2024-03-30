@@ -73,8 +73,8 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     repeatDaysOfWeek_ = other.repeatDaysOfWeek_;
     rruleWantAgentInfo_ = other.rruleWantAgentInfo_;
     durationTime_ = other.durationTime_;
-    startDateTime = other.startDateTime_;
-    endDateTime = other.endDateTime_;
+    startDateTime_ = other.startDateTime_;
+    endDateTime_ = other.endDateTime_;
 }
 
 void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo)
@@ -224,7 +224,7 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime()
         triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
         startDateTime_ = triggerTimeInMilli;
         endDateTime_ = triggerTimeInMilli + durationTime_;
-    } else if (repeatDaysOfWeek_ > 0 && (target + <= now)) {
+    } else if (repeatDaysOfWeek_ > 0 && (target <= now)) {
         nowTime.tm_hour = tarTime.tm_hour;
         nowTime.tm_min = tarTime.tm_min;
         nowTime.tm_sec = tarTime.tm_sec;
@@ -706,7 +706,7 @@ void ReminderRequestCalendar::SetDateTime(const uint64_t time)
 }
 
 
-void ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
+bool ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
 {
     if (time < startDateTime_) {
         return false;
