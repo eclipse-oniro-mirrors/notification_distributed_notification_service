@@ -83,6 +83,21 @@ const uint8_t ReminderRequest::SUNDAY = 7;
 const uint8_t ReminderRequest::HOURS_PER_DAY = 24;
 const uint16_t ReminderRequest::SECONDS_PER_HOUR = 3600;
 
+template<typename T>
+void GetJsonValue(const nlohmann::json& root, const std::string& name, T& value)
+{
+    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::is_save_v<std::string, ValueType>) {
+        if (!root.contains(name) || !root[name].is_string()) {
+            value = T();
+            return;
+        }
+        value = root[name].get<std::string>();
+        return;
+    }
+    value = T();
+}
+
 ReminderRequest::ReminderRequest()
 {
     InitServerObj();
@@ -566,21 +581,24 @@ void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
         ANSR_LOGW("parse json data failed!");
         return;
     }
-    std::string type = root.at("type").get<std::string>();
-    std::string title = root.at("title").get<std::string>();
-    std::string resource = root.at("resource").get<std::string>();
+    std::string type;
+    GetJsonValue<std::string>(root, "type", type);
+    std::string title;
+    GetJsonValue<std::string>(root, "title", title);
+    std::string resource;
+    GetJsonValue<std::string>(root, "resource", resource);
     auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
-    if (!root["wantAgent"].empty()) {
+    if (root.contains("wantAgent") && !root["wantAgent"].empty()) {
         nlohmann::json wantAgent = root["wantAgent"];
-        buttonWantAgent->pkgName = wantAgent.at("pkgName").get<std::string>();
-        buttonWantAgent->abilityName = wantAgent.at("abilityName").get<std::string>();
+        GetJsonValue<std::string>(wantAgent, "pkgName", buttonWantAgent->pkgName);
+        GetJsonValue<std::string>(wantAgent, "abilityName", buttonWantAgent->abilityName);
     }
     auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
-    if (!root["dataShareUpdate"].empty()) {
+    if (root.contains("dataShareUpdate") && !root["dataShareUpdate"].empty()) {
         nlohmann::json dataShareUpdate = root["dataShareUpdate"];
-        buttonDataShareUpdate->uri = dataShareUpdate.at("uri").get<std::string>();
-        buttonDataShareUpdate->equalTo = dataShareUpdate.at("equalTo").get<std::string>();
-        buttonDataShareUpdate->valuesBucket = dataShareUpdate.at("valuesBucket").get<std::string>();
+        GetJsonValue<std::string>(dataShareUpdate, "uri", buttonDataShareUpdate->uri);
+        GetJsonValue<std::string>(dataShareUpdate, "equalTo", buttonDataShareUpdate->equalTo);
+        GetJsonValue<std::string>(dataShareUpdate, "valuesBucket", buttonDataShareUpdate->valuesBucket);
     }
     SetActionButton(title, ActionButtonType(std::stoi(type, nullptr)),
         resource, buttonWantAgent, buttonDataShareUpdate);

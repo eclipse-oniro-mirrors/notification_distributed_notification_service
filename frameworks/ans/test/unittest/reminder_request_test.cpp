@@ -2016,6 +2016,10 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00007, Function | SmallTest | Lev
     jsonValue = R"({})";
     rrc->RecoverWantAgent(jsonValue, 1);
     EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
+
+    jsonValue = "fawexcdvasdfwessdf";
+    rrc->RecoverWantAgent(jsonValue, 1);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
 }
 
 /**
@@ -2114,6 +2118,150 @@ HWTEST_F(ReminderRequestTest, WantAgentStr_00001, Function | SmallTest | Level1)
     rrc->maxWantAgentStr_ = "test_max";
     EXPECT_EQ(rrc->GetWantAgentStr(), "test");
     EXPECT_EQ(rrc->GetMaxWantAgentStr(), "test_max");
+}
+
+/**
+ * @tc.name: RecoverActionButtonJsonMode_00001
+ * @tc.desc: Test action button json string.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string jsonValue = "";
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_.size(), 0);
+
+    // test title
+    jsonValue = R"({"type":"1"})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].title, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":1})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].title, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test"})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].title, "test");
+
+    // test resource
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test"})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].resource, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":1})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].resource, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource"})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].resource, "resource");
+}
+
+/**
+ * @tc.name: RecoverActionButtonJsonMode_00002
+ * @tc.desc: Test action button json string wantAgent.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    // test wantAgent.pkgName
+    std::string jsonValue = R"({"type":"1","title":"test","resource":"resource"})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->pkgName, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":1}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->pkgName, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->pkgName, "pkgName");
+
+    // test wantAgent.abilityName
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName","abilityName":1}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"abilityName":"abilityName"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "abilityName");
+}
+
+/**
+ * @tc.name: RecoverActionButtonJsonMode_00003
+ * @tc.desc: Test action button json string dataShareUpdate.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    constexpr auto type = ReminderRequest::ActionButtonType::SNOOZE;
+    // test dataShareUpdate.uri
+    std::string jsonValue = R"({"type":"1","title":"test","resource":"resource"})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->uri, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":1}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->uri, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->uri, "uri");
+
+    // test dataShareUpdate.equalTo
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->equalTo, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"equalTo":1}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->equalTo, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"equalTo":"equalTo"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->equalTo, "equalTo");
+
+    // test dataShareUpdate.valuesBucket
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"valuesBucket":1}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "");
+
+    rrc->actionButtonMap_.clear();
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"valuesBucket":"valuesBucket"}})"
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "valuesBucket");
 }
 }
 }
