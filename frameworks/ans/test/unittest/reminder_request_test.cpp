@@ -2213,7 +2213,7 @@ HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00002, Function | Smal
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName","abilityName":1}})";
+    jsonValue = R"({"type":"1","title":"test","resource":"res","wantAgent":{"pkgName":"pkgName","abilityName":1}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "");
 
@@ -2276,7 +2276,7 @@ HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00003, Function | Smal
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"valuesBucket":"valuesBucket"}})";
+    jsonValue = R"({"type":"1","title":"test","resource":"res","dataShareUpdate":{"valuesBucket":"valuesBucket"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "valuesBucket");
 }
