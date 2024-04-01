@@ -83,11 +83,11 @@ const uint8_t ReminderRequest::SUNDAY = 7;
 const uint8_t ReminderRequest::HOURS_PER_DAY = 24;
 const uint16_t ReminderRequest::SECONDS_PER_HOUR = 3600;
 
-template<typename T>
+template <typename T>
 void GetJsonValue(const nlohmann::json& root, const std::string& name, T& value)
 {
     using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
-    if constexpr (std::is_save_v<std::string, ValueType>) {
+    if constexpr (std::is_same_v<std::string, ValueType>) {
         if (!root.contains(name) || !root[name].is_string()) {
             value = T();
             return;

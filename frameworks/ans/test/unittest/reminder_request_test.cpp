@@ -2134,33 +2134,33 @@ HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00001, Function | Smal
     EXPECT_EQ(rrc->actionButtonMap_.size(), 0);
 
     // test title
-    jsonValue = R"({"type":"1"})"
+    jsonValue = R"({"type":"1"})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].title, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":1})"
+    jsonValue = R"({"type":"1","title":1})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].title, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test"})"
+    jsonValue = R"({"type":"1","title":"test"})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].title, "test");
 
     // test resource
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test"})"
+    jsonValue = R"({"type":"1","title":"test"})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].resource, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":1})"
+    jsonValue = R"({"type":"1","title":"test","resource":1})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].resource, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource"})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource"})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].resource, "resource");
 }
@@ -2175,33 +2175,33 @@ HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00002, Function | Smal
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     // test wantAgent.pkgName
-    std::string jsonValue = R"({"type":"1","title":"test","resource":"resource"})"
+    std::string jsonValue = R"({"type":"1","title":"test","resource":"resource"})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->pkgName, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":1}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":1}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->pkgName, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->pkgName, "pkgName");
 
     // test wantAgent.abilityName
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName","abilityName":1}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"pkgName":"pkgName","abilityName":1}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"abilityName":"abilityName"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","wantAgent":{"abilityName":"abilityName"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[ReminderRequest::ActionButtonType::SNOOZE].wantAgent->abilityName, "abilityName");
 }
@@ -2217,49 +2217,49 @@ HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00003, Function | Smal
     auto rrc = std::make_shared<ReminderRequestChild>();
     constexpr auto type = ReminderRequest::ActionButtonType::SNOOZE;
     // test dataShareUpdate.uri
-    std::string jsonValue = R"({"type":"1","title":"test","resource":"resource"})"
+    std::string jsonValue = R"({"type":"1","title":"test","resource":"resource"})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->uri, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":1}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":1}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->uri, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->uri, "uri");
 
     // test dataShareUpdate.equalTo
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->equalTo, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"equalTo":1}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"equalTo":1}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->equalTo, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"equalTo":"equalTo"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"equalTo":"equalTo"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->equalTo, "equalTo");
 
     // test dataShareUpdate.valuesBucket
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"uri":"uri"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"valuesBucket":1}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"valuesBucket":1}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "");
 
     rrc->actionButtonMap_.clear();
-    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"valuesBucket":"valuesBucket"}})"
+    jsonValue = R"({"type":"1","title":"test","resource":"resource","dataShareUpdate":{"valuesBucket":"valuesBucket"}})";
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "valuesBucket");
 }
