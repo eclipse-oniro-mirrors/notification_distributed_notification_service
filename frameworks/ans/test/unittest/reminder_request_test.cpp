@@ -2133,6 +2133,23 @@ HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00001, Function | Smal
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_.size(), 0);
 
+    // test type
+    jsonValue = R"({})";
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_.size(), 0);
+
+    jsonValue = R"({"type":1})";
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_.size(), 0);
+
+    jsonValue = R"({"type":"a"})";
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_.size(), 0);
+
+    jsonValue = R"({"type":"asdfwe"})";
+    rrc->RecoverActionButtonJsonMode(jsonValue);
+    EXPECT_EQ(rrc->actionButtonMap_.size(), 0);
+
     // test title
     jsonValue = R"({"type":"1"})";
     rrc->RecoverActionButtonJsonMode(jsonValue);

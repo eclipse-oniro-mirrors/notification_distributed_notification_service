@@ -98,6 +98,17 @@ void GetJsonValue(const nlohmann::json& root, const std::string& name, T& value)
     value = T();
 }
 
+inline static bool IsVaildButtonType(const std::string& type) {
+    // check action button type range
+    if (type.size() != 1) {
+        return false;
+    }
+    if (type[0] >= '0' && type[0] <= '3') {
+        return true;
+    }
+    return false;
+}
+
 ReminderRequest::ReminderRequest()
 {
     InitServerObj();
@@ -583,6 +594,10 @@ void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
     }
     std::string type;
     GetJsonValue<std::string>(root, "type", type);
+    if (!IsVaildButtonType(type)) {
+        ANSR_LOGW("unkown button type!");
+        return;
+    }
     std::string title;
     GetJsonValue<std::string>(root, "title", title);
     std::string resource;
