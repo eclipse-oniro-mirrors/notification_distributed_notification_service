@@ -24,9 +24,12 @@
 #include "access_token_helper.h"
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
+#include "image_source.h"
+#include <memory>
 
 namespace OHOS {
 namespace Notification {
+const std::string LOCK_SCREEN_PICTURE_TAG = "lock_screen_picture";
 void AdvancedNotificationService::RecoverLiveViewFromDb()
 {
     ANS_LOGI("Start recover live view from db.");
@@ -225,6 +228,12 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
         return result;
     }
+
+    result = SetLockScreenPictureToDb(request);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to set lock screen picture to db");
+        return result;
+    }
     return ERR_OK;
 }
 
@@ -246,6 +255,11 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
     auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
     if (bundleOption == nullptr) {
         ANS_LOGE("Parse json string to bundle option failed, str: %{public}s.", value.c_str());
+        return ERR_ANS_TASK_ERR;
+    }
+
+    if (GetLockScreenPictureFromDb(request) != ERR_OK) {
+        ANS_LOGE("Get request lock screen picture failed, key %{public}s.", key.c_str());
         return ERR_ANS_TASK_ERR;
     }
     requestDb.request = request;
@@ -275,6 +289,11 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
             (void)DeleteNotificationRequestFromDb(request->GetKey());
             continue;
         }
+
+        if (GetLockScreenPictureFromDb(request) != ERR_OK) {
+            ANS_LOGE("Get request lock screen picture failed.");
+            continue;
+        }
         NotificationRequestDb requestDb = { .request = request, .bundleOption = bundleOption };
         requests.emplace_back(requestDb);
     }
@@ -286,6 +305,13 @@ int32_t AdvancedNotificationService::DeleteNotificationRequestFromDb(const std::
     auto result = NotificationPreferences::GetInstance().DeleteKvFromDb(key);
     if (result != ERR_OK) {
         ANS_LOGE("Delete notification request failed, key %{public}s.", key.c_str());
+        return result;
+    }
+
+    std::string lockScreenPictureKey = LOCK_SCREEN_PICTURE_TAG + key;
+    result = NotificationPreferences::GetInstance().DeleteKvFromDb(lockScreenPictureKey);
+    if (result != ERR_OK) {
+        ANS_LOGE("Delete notification lock screen picture failed, key %{public}s.", lockScreenPictureKey.c_str());
         return result;
     }
     return ERR_OK;
@@ -330,6 +356,58 @@ void AdvancedNotificationService::FillLockScreenPicture(const sptr<NotificationR
     if (newContent->GetLockScreenPicture() == nullptr) {
         newContent->SetLockScreenPicture(oldContent->GetLockScreenPicture());
     }
+}
+
+ErrCode AdvancedNotificationService::SetLockScreenPictureToDb(const sptr<NotificationRequest> &request)
+{
+    auto lockScreenPicture = request->GetContent()->GetNotificationContent()->GetLockScreenPicture();
+    if (!request->IsCommonLiveView() || lockScreenPicture == nullptr) {
+        return ERR_OK;
+    }
+
+    auto size = static_cast<size_t>(lockScreenPicture->GetCapacity());
+    auto pixels = lockScreenPicture->GetPixels();
+    std::vector<uint8_t> pixelsVec(pixels, pixels + size);
+
+    std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
+    auto res = NotificationPreferences::GetInstance().SetByteToDb(key, pixelsVec);
+    if (res != ERR_OK) {
+        ANS_LOGE("Failed to set lock screen picture to db, res is %{public}d.", res);
+        return res;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequest *request)
+{
+    std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
+    std::vector<uint8_t> pixelsVec;
+    uint32_t res = NotificationPreferences::GetInstance().GetByteFromDb(key, pixelsVec);
+    if (res != ERR_OK) {
+        ANS_LOGE("Failed to get lock screen picture from db, res is %{public}d.", res);
+        return res;
+    }
+
+    Media::SourceOptions sourceOptions;
+    auto imageSource = Media::ImageSource::CreateImageSource((const uint8_t *)pixelsVec.data(), pixelsVec.size(),
+        sourceOptions, res);
+    if (res != ERR_OK) {
+        ANS_LOGE("Failed to create image source, res is %{public}d.", res);
+        return res;
+    }
+
+    Media::DecodeOptions decodeOpts;
+    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, res);
+    if (res != ERR_OK) {
+        ANS_LOGE("Failed to create pixel map, res is %{public}d.", res);
+        return res;
+    }
+
+    std::shared_ptr<Media::PixelMap> picture = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    request->GetContent()->GetNotificationContent()->SetLockScreenPicture(picture);
+
+    return ERR_OK;
 }
 }
 }
