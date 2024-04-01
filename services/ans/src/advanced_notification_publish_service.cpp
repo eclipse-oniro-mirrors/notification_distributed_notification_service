@@ -1635,7 +1635,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
             allowed = CheckApiCompatibility(bundle);
             SetDefaultNotificationEnabled(bundle, allowed);
         }
-        
+
         slot->SetEnable(enabled);
         slot->SetForceControl(isForceControl);
         // 重置authHintCnt_，设置authorizedStatus为已授权
@@ -1773,6 +1773,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     });
     notificationSvrQueue_->wait(handler);
 
+    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
+        StartAutoDelete(record->notification->GetKey(),
+            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+    }
     return result;
 }
 
