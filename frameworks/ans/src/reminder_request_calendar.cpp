@@ -744,7 +744,15 @@ void ReminderRequestCalendar::DeserializationRRule(const std::string& str)
     if (str.empty()) {
         return;
     }
-    nlohmann::json root = nlohmann::json::parse(str);
+    if (!nlohmann::json::accept(str)) {
+        ANSR_LOGW("not a json string!");
+        return;
+    }
+    nlohmann::json root = nlohmann::json::parse(str, nullptr, false);
+    if (root.is_discarded()) {
+        ANSR_LOGW("parse json data failed!");
+        return;
+    }
     if (!root.contains("pkgName") || !root["pkgName"].is_string() ||
         !root.contains("abilityName") || !root["abilityName"].is_string() ||
         !root.contains("uri") || !root["uri"].is_string()) {
