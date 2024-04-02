@@ -200,7 +200,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         return ERR_OK;
     }
 
-    if (content->GetIsOnlylocalUpdate() && request->IsCommonLiveView()) {
+    if (content->GetIsOnlyLocalUpdate()) {
         ANS_LOGI("Not saving notification request to db for common live view with isOnlyLocalUpdate set to true.");
         return ERR_OK;
     }

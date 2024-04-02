@@ -62,14 +62,14 @@ PictureMap NotificationLiveViewContent::GetPicture() const
     return pictureMap_;
 }
 
-void NotificationLiveViewContent::SetIsOnlylocalUpdate(const bool &isOnlylocalUpdate)
+void NotificationLiveViewContent::SetIsOnlyLocalUpdate(const bool &isOnlyLocalUpdate)
 {
-    isOnlylocalUpdate_ = isOnlylocalUpdate;
+    isOnlyLocalUpdate_ = isOnlyLocalUpdate;
 }
 
-bool NotificationLiveViewContent::GetIsOnlylocalUpdate() const
+bool NotificationLiveViewContent::GetIsOnlyLocalUpdate() const
 {
-    return isOnlylocalUpdate_;
+    return isOnlyLocalUpdate_;
 }
 
 std::string NotificationLiveViewContent::Dump()
@@ -92,7 +92,8 @@ std::string NotificationLiveViewContent::Dump()
 
     return "NotificationLiveViewContent{ " + NotificationBasicContent::Dump() +
         ", status = " + std::to_string(static_cast<int32_t>(liveViewStatus_)) + ", version = " +
-        std::to_string(static_cast<int32_t>(version_)) + ", extraInfo = " + extraStr + pictureStr + "}";
+        std::to_string(static_cast<int32_t>(version_)) + ", extraInfo = " + extraStr +
+        ", isOnlyLocalUpdate_ = " + (GetIsOnlyLocalUpdate()?"true":"false") + pictureStr + "}";
 }
 
 bool NotificationLiveViewContent::PictureToJson(nlohmann::json &jsonObject) const
@@ -127,6 +128,8 @@ bool NotificationLiveViewContent::ToJson(nlohmann::json &jsonObject) const
         AAFwk::WantParamWrapper wWrapper(*extraInfo_);
         jsonObject["extraInfo"] = wWrapper.ToString();
     }
+
+    jsonObject["isLocalUpdateOnly"] = isOnlyLocalUpdate_;
 
     return PictureToJson(jsonObject);
 }
@@ -181,6 +184,9 @@ NotificationLiveViewContent *NotificationLiveViewContent::FromJson(const nlohman
             pContent->extraInfo_ = std::make_shared<AAFwk::WantParams>(params);
         }
     }
+    if (jsonObject.find("isOnlyLocalUpdate") != jsonEnd && jsonObject.at("isOnlyLocalUpdate").is_boolean()) {
+        pContent->isOnlyLocalUpdate_ = jsonObject.at("isOnlyLocalUpdate").get<bool>();
+    }
     pContent->ConvertPictureFromJson(jsonObject);
     return pContent;
 }
@@ -216,14 +222,12 @@ bool NotificationLiveViewContent::Marshalling(Parcel &parcel) const
             return false;
         }
     }
-
-    if (!parcel.WriteUint64(pictureMap_.size())) {
-        ANS_LOGE("Failed to write the size of pictureMap.");
+    if (!parcel.WriteBool(isOnlyLocalUpdate_)) {
+        ANS_LOGE("OnlyLocalUpdate is Failed to write.");
         return false;
     }
-
-    if (!parcel.WriteBool(isOnlylocalUpdate_)) {
-        ANS_LOGE("OnlylocalUpdate is Failed to write.");
+    if (!parcel.WriteUint64(pictureMap_.size())) {
+        ANS_LOGE("Failed to write the size of pictureMap.");
         return false;
     }
 
@@ -260,6 +264,8 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
         }
     }
 
+    isOnlyLocalUpdate_ = parcel.ReadBool();
+    
     uint64_t len = parcel.ReadUint64();
     for (uint64_t i = 0; i < len; i++) {
         auto key = parcel.ReadString();
@@ -275,8 +281,6 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
         }
         pictureMap_[key] = pixelMapVec;
     }
-
-    isOnlylocalUpdate_ = parcel.ReadBool();
 
     return true;
 }

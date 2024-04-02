@@ -147,9 +147,9 @@ public:
 
     PictureMarshallingMap GetPictureMarshallingMap() const;
 
-    void SetIsOnlylocalUpdate(const bool &isOnlylocalUpdate);
+    void SetIsOnlyLocalUpdate(const bool &isOnlyLocalUpdate);
 
-    bool GetIsOnlylocalUpdate() const;
+    bool GetIsOnlyLocalUpdate() const;
 
 protected:
     /**
@@ -167,7 +167,7 @@ private:
     std::shared_ptr<AAFwk::WantParams> extraInfo_ {};
     PictureMap pictureMap_ {};
     PictureMarshallingMap pictureMarshallingMap_ {};
-    bool isOnlylocalUpdate_ = false;
+    bool isOnlyLocalUpdate_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

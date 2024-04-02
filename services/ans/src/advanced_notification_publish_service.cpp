@@ -1036,21 +1036,14 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        if (GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
-            NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) {
+        if ((GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) &&
+            (GetCommonTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationContent::Type::LIVE_VIEW, recordList) != ERR_OK)) {
             ANS_LOGE("Get Target record list fail.");
             result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
             return;
         }
-        result = RemoveNotificationFromRecordList(recordList);
-    }));
-    ffrt::task_handle commonHandler = notificationSvrQueue_->submit_h(std::bind([&]() {
-    if (GetCommonTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
-        NotificationContent::Type::LIVE_VIEW, recordList) != ERR_OK) {
-        ANS_LOGE("Get Common Target record list fail.");
-        result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-        return;
-    }
         result = RemoveNotificationFromRecordList(recordList);
     }));
     notificationSvrQueue_->wait(handler);
@@ -1856,13 +1849,6 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
             errCode = ERR_ANS_INVALID_PARAM;
             break;
         }
-
-        // bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-        // if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        //     ANS_LOGE("Client is not a system app or subsystem");
-        //     errCode = ERR_ANS_NON_SYSTEM_APP;
-        //     break;
-        // }
 
         errCode = NotificationLocalLiveViewSubscriberManager::GetInstance()->AddLocalLiveViewSubscriber(
             subscriber, info);

@@ -90,17 +90,17 @@ HWTEST_F(NotificationLiveViewContentTest, SetPicture_00001, Function | SmallTest
 }
 
 /**
- * @tc.name: SetIsOnlylocalUpdate_00001
- * @tc.desc: Test SetIsOnlylocalUpdate parameters.
+ * @tc.name: SetIsOnlyLocalUpdate_00001
+ * @tc.desc: Test SetIsOnlyLocalUpdate parameters.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationLiveViewContentTest, SetIsOnlylocalUpdate_00001, Function | SmallTest | Level1)
+HWTEST_F(NotificationLiveViewContentTest, SetIsOnlyLocalUpdate_00001, Function | SmallTest | Level1)
 {
-    bool isOnlyLocalUpdate_ = true;
+    bool isOnlyLocalUpdate = true;
     auto rrc = std::make_shared<NotificationLiveViewContent>();
-    rrc->SetIsOnlylocalUpdate(isOnlyLocalUpdate_);
-    EXPECT_EQ(rrc->GetIsOnlylocalUpdate(), isOnlyLocalUpdate_);
+    rrc->SetIsOnlyLocalUpdate(isOnlyLocalUpdate);
+    EXPECT_EQ(rrc->GetIsOnlyLocalUpdate(), isOnlyLocalUpdate);
 }
 
 /**
@@ -113,7 +113,8 @@ HWTEST_F(NotificationLiveViewContentTest, Dump_00001, Function | SmallTest | Lev
 {
     auto rrc = std::make_shared<NotificationLiveViewContent>();
     std::string ret = "NotificationLiveViewContent{ title = , text = , "
-    "additionalText = , lockScreenPicture = null, status = 0, version = -1, extraInfo = null, pictureMap = {}}";
+    "additionalText = , lockScreenPicture = null, status = 0, version = -1, extraInfo = null, "
+    "isOnlyLocalUpdate_ = false, pictureMap = {}}";
 
     EXPECT_EQ(rrc->Dump(), ret);
 }
@@ -140,7 +141,7 @@ HWTEST_F(NotificationLiveViewContentTest, Dump_00002, Function | SmallTest | Lev
 
     std::string ret = "NotificationLiveViewContent{ title = title, text = text, "
         "additionalText = addText, lockScreenPicture = null, status = 0, version = -1, extraInfo = null, "
-        "pictureMap = { { key = test, value = not empty } }}";
+        "isOnlyLocalUpdate_ = false, pictureMap = { { key = test, value = not empty } }}";
 
     EXPECT_EQ(rrc->Dump(), ret);
 }
@@ -167,10 +168,6 @@ HWTEST_F(NotificationLiveViewContentTest, JsonConvert_00001, Function | SmallTes
 
     rrc->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
     rrc->SetVersion(NotificationLiveViewContent::MAX_VERSION);
-
-    bool isOnlyLocalUpdate_ = true;
-    rrc->SetIsOnlylocalUpdate(isOnlyLocalUpdate_);
-
     rrc->SetTitle("title");
     rrc->SetText("text");
     rrc->SetAdditionalText("addText");
@@ -191,7 +188,6 @@ HWTEST_F(NotificationLiveViewContentTest, JsonConvert_00001, Function | SmallTes
     EXPECT_EQ(ptr->GetVersion(), NotificationLiveViewContent::MAX_VERSION);
     EXPECT_NE(ptr->GetExtraInfo(), nullptr);
     EXPECT_EQ(ptr->GetPicture().size(), 1);
-    EXPECT_EQ(ptr->GetIsOnlylocalUpdate(), false);
     delete ptr;
 }
 
@@ -236,8 +232,8 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallConvert_00001, Function | Smal
     uint32_t version = NotificationLiveViewContent::MAX_VERSION - 1;
     rrc->SetVersion(version);
 
-    bool isOnlyLocalUpdate_ = true;
-    rrc->SetIsOnlylocalUpdate(isOnlyLocalUpdate_);
+    bool isOnlyLocalUpdate = true;
+    rrc->SetIsOnlyLocalUpdate(isOnlyLocalUpdate);
 
     rrc->SetTitle("title");
     rrc->SetText("text");
@@ -255,7 +251,7 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallConvert_00001, Function | Smal
     EXPECT_EQ(ptr->GetVersion(), version);
     EXPECT_NE(ptr->GetExtraInfo(), nullptr);
     EXPECT_EQ(ptr->GetPicture().size(), 2);
-    EXPECT_EQ(ptr->GetIsOnlylocalUpdate(), false);
+    EXPECT_EQ(ptr->GetIsOnlyLocalUpdate(), true);
     delete ptr;
 }
 

@@ -684,13 +684,15 @@ ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const std::string
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
     for (auto& notification : notificationList_) {
-        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
-            notification->request->GetContent()->GetNotificationContent());
-        if (notification->request != nullptr && notification->request->GetOwnerBundleName() == bundleName &&
+        if (notification->request->IsCommonLiveView()) {
+            auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+                notification->request->GetContent()->GetNotificationContent());
+            if (notification->request != nullptr && notification->request->GetOwnerBundleName() == bundleName &&
                 notification->request->GetSlotType()== slotType &&
                 notification->request->GetNotificationType() == contentType &&
-                liveViewContent->GetIsOnlylocalUpdate()) {
-                recordList.emplace_back(notification);
+                liveViewContent->GetIsOnlyLocalUpdate()) {
+                    recordList.emplace_back(notification);
+            }
         }
     }
     if (recordList.empty()) {
