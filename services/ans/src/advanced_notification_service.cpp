@@ -677,7 +677,7 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
 void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Called.");
-    if (record == nullptr && record->request == nullptr && record->notification == nullptr) {
+    if (record == nullptr || record->request == nullptr || record->notification == nullptr) {
         ANS_LOGE("Make notification record failed.");
         return;
     }
