@@ -260,7 +260,6 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
 
     if (GetLockScreenPictureFromDb(request) != ERR_OK) {
         ANS_LOGE("Get request lock screen picture failed, key %{public}s.", key.c_str());
-        return ERR_ANS_TASK_ERR;
     }
     requestDb.request = request;
     requestDb.bundleOption = bundleOption;
@@ -292,7 +291,6 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
 
         if (GetLockScreenPictureFromDb(request) != ERR_OK) {
             ANS_LOGE("Get request lock screen picture failed.");
-            continue;
         }
         NotificationRequestDb requestDb = { .request = request, .bundleOption = bundleOption };
         requests.emplace_back(requestDb);
