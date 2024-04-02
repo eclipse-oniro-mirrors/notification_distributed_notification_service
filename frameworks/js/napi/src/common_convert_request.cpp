@@ -1170,7 +1170,10 @@ napi_value Common::GetNotificationRemovalWantAgent(
         }
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent =
             std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgent);
-        request.SetRemovalWantAgent(removeWantAgent);
+        if ((uint32_t)removeWantAgent->GetPendingWant()->GetType(
+            removeWantAgent->GetPendingWant()->GetTarget()) >= OPERATION_MAX_TYPE) {
+            request.SetRemovalWantAgent(removeWantAgent);
+        }
     }
 
     return NapiGetNull(env);
