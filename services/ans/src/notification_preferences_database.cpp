@@ -207,6 +207,9 @@ const static std::string KEY_SLOT_AUTHORIZED_STATUS = "authorizedStatus";
  */
 const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
 
+constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
+constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
+
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
     NotificationPreferencesDatabase::slotMap_ = {
@@ -1713,12 +1716,24 @@ bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &age
         return false;
     }
     ANS_LOGD("The agent relationship is :%{public}s.", agentShip.c_str());
-    std::string target = "{\"service\":'" + agentBundleName + "',\"app\":'" + sourceBundleName + "'}";
-    std::string::size_type idx = agentShip.find(target);
-    if (idx == std::string::npos) {
+    nlohmann::json jsonAgentShip = nlohmann::json::parse(agentShip, nullptr, false);
+    if (jsonAgentShip.is_discarded() || !jsonAgentShip.is_array()) {
+        ANS_LOGE("Parse agent ship failed due to data is discarded or not array");
         return false;
     }
-    return true;
+
+    nlohmann::json jsonTarget;
+    jsonTarget[RELATIONSHIP_JSON_KEY_SERVICE] = agentBundleName;
+    jsonTarget[RELATIONSHIP_JSON_KEY_APP] = sourceBundleName;
+    bool isAgentRelationship = false;
+    for (const auto &item : jsonAgentShip) {
+        if (jsonTarget == item) {
+            isAgentRelationship = true;
+            break;
+        }
+    }
+
+    return isAgentRelationship;
 }
 
 bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::string deviceType,
