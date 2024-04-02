@@ -1613,6 +1613,21 @@ int32_t NotificationPreferencesDatabase::SetKvToDb(
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::SetByteToDb(const std::string &key, const std::vector<uint8_t> &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+    int32_t result = rdbDataManager_->InsertData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationPreferencesDatabase::GetKvFromDb(
     const std::string &key, std::string &value)
 {
@@ -1628,6 +1643,23 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
     }
 
     ANS_LOGD("Key:%{public}s, value:%{public}s.", key.c_str(), value.c_str());
+
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationPreferencesDatabase::GetByteFromDb(
+    const std::string &key, std::vector<uint8_t> &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->QueryData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get byte failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
 
     return NativeRdb::E_OK;
 }

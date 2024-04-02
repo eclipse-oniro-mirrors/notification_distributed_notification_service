@@ -77,6 +77,13 @@ public:
     int32_t InsertData(const std::string &key, const std::string &value);
 
     /**
+     * @brief Insert data in DB.
+     * @param key The data Key.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t InsertData(const std::string &key, const std::vector<uint8_t> &value);
+
+    /**
      * @brief Insert batch data in DB.
      * @param key The data Key.
      * @return Returns ERR_OK on success, others on failure.
@@ -102,6 +109,12 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t QueryData(const std::string &key, std::string &value);
+
+    /**
+     * @brief Query data in DB.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t QueryData(const std::string &key, std::vector<uint8_t> &value);
 
     /**
      * @brief Query data begin whith key in DB.

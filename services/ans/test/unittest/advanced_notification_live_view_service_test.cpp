@@ -44,12 +44,36 @@ public:
     static void TearDownTestCase() {};
     void SetUp();
     void TearDown();
+    std::shared_ptr<PixelMap> MakePixelMap(int32_t width, int32_t height);
 
 private:
     static sptr<AdvancedNotificationService> advancedNotificationService_;
 };
 
 sptr<AdvancedNotificationService> AnsLiveViewServiceTest::advancedNotificationService_ = nullptr;
+
+std::shared_ptr<PixelMap> AnsLiveViewServiceTest::MakePixelMap(int32_t width, int32_t height)
+{
+    const int32_t PIXEL_BYTES = 4;
+    std::shared_ptr<PixelMap> pixelMap = std::make_shared<PixelMap>();
+    if (pixelMap == nullptr) {
+        return pixelMap;
+    }
+    ImageInfo info;
+    info.size.width = width;
+    info.size.height = height;
+    info.pixelFormat = PixelFormat::ARGB_8888;
+    info.colorSpace = ColorSpace::SRGB;
+    pixelMap->SetImageInfo(info);
+    int32_t rowDataSize = width * PIXEL_BYTES;
+    uint32_t bufferSize = rowDataSize * height;
+    void *buffer = malloc(bufferSize);
+    if (buffer != nullptr) {
+        pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
+    }
+    EXPECT_NE(buffer, nullptr);
+    return pixelMap;
+}
 
 void AnsLiveViewServiceTest::SetUp()
 {
@@ -194,25 +218,36 @@ HWTEST_F(AnsLiveViewServiceTest, FillLockScreenPicture_00001, Function | SmallTe
     auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
     auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
 
-    std::shared_ptr<PixelMap> pixelMap = std::make_shared<PixelMap>();
-    const int32_t PIXEL_BYTES = 4;
-    ImageInfo info;
-    info.size.width = 1;
-    info.size.height = 1;
-    info.pixelFormat = PixelFormat::ARGB_8888;
-    info.colorSpace = ColorSpace::SRGB;
-    pixelMap->SetImageInfo(info);
-    int32_t rowDataSize = 1 * PIXEL_BYTES;
-    uint32_t bufferSize = rowDataSize * 1;
-    void *buffer = malloc(bufferSize);
-    if (buffer != nullptr) {
-        pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, AllocatorType::HEAP_ALLOC, nullptr);
-    }
+    std::shared_ptr<PixelMap> pixelMap = MakePixelMap(1, 1);
     oldLiveContent->SetLockScreenPicture(pixelMap);
     oldRequest->SetContent(oldContent);
 
     advancedNotificationService_->FillLockScreenPicture(newRequest, oldRequest);
     EXPECT_NE(newRequest->GetContent()->GetNotificationContent()->GetLockScreenPicture(), nullptr);
+}
+
+/**
+ * @tc.name: SetLockScreenPictureToDb_001
+ * @tc.desc: Test SetLockScreenPictureToDb
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, SetLockScreenPictureToDb_001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetAutoDeletedTime(NotificationConstant::NO_DELAY_DELETE_TIME);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    std::shared_ptr<PixelMap> pixelMap = MakePixelMap(1024, 1);
+    liveContent->SetLockScreenPicture(pixelMap);
+    request->SetContent(content);
+
+    auto ret = advancedNotificationService_->SetLockScreenPictureToDb(request);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 }  // namespace Notification

@@ -1201,6 +1201,8 @@ private:
     void RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void FillLockScreenPicture(const sptr<NotificationRequest> &newRequest,
         const sptr<NotificationRequest> &oldRequest);
+    static ErrCode SetLockScreenPictureToDb(const sptr<NotificationRequest> &request);
+    static ErrCode GetLockScreenPictureFromDb(NotificationRequest *request);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
