@@ -767,6 +767,12 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
         liveViewContent->SetExtraInfo(extras);
     }
 
+    //isOnlyLocalUpdate_?: boolean
+    bool isLocalUpdateOnly = false;
+    if (AppExecFwk::UnwrapBooleanByPropertyName(env, contentResult, "isLocalUpdateOnly", isLocalUpdateOnly)) {
+        liveViewContent->SetIsOnlyLocalUpdate(isLocalUpdateOnly);
+    }
+
     // pictureInfo?: {[key, string]: Array<image.pixelMap>}
     jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "pictureInfo", napi_object);
     if (jsValue == nullptr) {

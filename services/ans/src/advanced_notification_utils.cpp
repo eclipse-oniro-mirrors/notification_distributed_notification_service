@@ -692,6 +692,28 @@ ErrCode AdvancedNotificationService::GetTargetRecordList(const std::string& bund
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const std::string& bundleName,
+    NotificationConstant::SlotType slotType, NotificationContent::Type contentType,
+    std::vector<std::shared_ptr<NotificationRecord>>& recordList)
+{
+    for (auto& notification : notificationList_) {
+        if (notification->request->IsCommonLiveView()) {
+            auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+                notification->request->GetContent()->GetNotificationContent());
+            if (notification->request != nullptr && notification->request->GetOwnerBundleName() == bundleName &&
+                notification->request->GetSlotType()== slotType &&
+                notification->request->GetNotificationType() == contentType &&
+                liveViewContent->GetIsOnlyLocalUpdate()) {
+                    recordList.emplace_back(notification);
+            }
+        }
+    }
+    if (recordList.empty()) {
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    }
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
