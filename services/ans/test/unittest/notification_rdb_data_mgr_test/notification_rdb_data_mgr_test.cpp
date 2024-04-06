@@ -153,7 +153,7 @@ class RdbStoreTest : public RdbStore {
         {
             return NativeRdb::E_ERROR;
         };
-        virtual int Backup(const std::string databasePath, const std::vector<uint8_t> destEncryptKey)
+        virtual int Backup(const std::string &databasePath, const std::vector<uint8_t> &destEncryptKey)
         {
             return NativeRdb::E_ERROR;
         };
@@ -246,7 +246,7 @@ class RdbStoreTest : public RdbStore {
         {
             return false;
         };
-        virtual int Restore(const std::string backupPath, const std::vector<uint8_t> &newKey)
+        virtual int Restore(const std::string &backupPath, const std::vector<uint8_t> &newKey)
         {
             return NativeRdb::E_ERROR;
         };
@@ -323,6 +323,11 @@ class RdbStoreTest : public RdbStore {
         {
             return E_ERROR;
         };
+
+        virtual int GetRebuilt(RebuiltType &rebuilt)
+        {
+            return E_OK;
+        }
 };
 
 /**
