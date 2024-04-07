@@ -334,6 +334,27 @@ napi_value Common::GetNotificationSubscriberInfo(
         subscriberInfo.hasSubscribeInfo = true;
     }
 
+    // deviceType?: number
+    NAPI_CALL(env, napi_has_named_property(env, value, "deviceType", &hasProperty));
+    if (hasProperty) {
+        napi_value nDeviceType = nullptr;
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        napi_get_named_property(env, value, "deviceType", &nDeviceType);
+        NAPI_CALL(env, napi_typeof(env, nDeviceType, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, nDeviceType, str, STR_MAX_SIZE - 1, &strLen));
+        if (std::strlen(str) == 0) {
+            ANS_LOGE("Property deviceType is empty");
+            return nullptr;
+        }
+        subscriberInfo.deviceType = str;
+        subscriberInfo.hasSubscribeInfo = true;
+    }
+
     return NapiGetNull(env);
 }
 

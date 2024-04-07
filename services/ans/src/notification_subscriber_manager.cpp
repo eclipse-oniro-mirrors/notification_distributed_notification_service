@@ -35,6 +35,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     std::set<std::string> bundleList_ {};
     bool subscribedAll {false};
     int32_t userId {SUBSCRIBE_USER_INIT};
+    std::string deviceType;
 };
 
 NotificationSubscriberManager::NotificationSubscriberManager()
@@ -307,6 +308,7 @@ void NotificationSubscriberManager::AddRecordInfo(
             record->subscribedAll = false;
         }
         record->userId = subscribeInfo->GetAppUserId();
+        record->deviceType = subscribeInfo->GetDeviceType();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -391,8 +393,8 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     int32_t sendUserId = notification->GetUserId();
     for (auto record : subscriberRecordList_) {
         auto BundleNames = notification->GetBundleName();
-        ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s",
-            __FUNCTION__, record->userId, BundleNames.c_str());
+        ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
+            __FUNCTION__, record->userId, BundleNames.c_str(), record->deviceType.c_str());
         auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
         if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
             ((record->userId == sendUserId) ||

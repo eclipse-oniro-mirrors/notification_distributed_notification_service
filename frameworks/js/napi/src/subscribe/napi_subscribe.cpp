@@ -68,6 +68,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                     OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
                     subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
                     subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    subscribeInfo.AddDeviceType(asynccallbackinfo->subscriberInfo.deviceType);
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
                 } else {

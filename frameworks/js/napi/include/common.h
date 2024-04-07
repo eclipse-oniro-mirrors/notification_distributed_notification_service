@@ -84,6 +84,7 @@ struct NotificationSubscribeInfo {
     std::vector<std::string> bundleNames;
     int32_t userId = 0;
     bool hasSubscribeInfo = false;
+    std::string deviceType;
 };
 
 struct CallbackPromiseInfo {
