@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #include "notification_bundle_option.h"
@@ -1292,6 +1293,20 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0300, TestSize.Lev
     ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(enable, true);
+}
+
+/**
+ * @tc.name: SetTargetDeviceStatus_0100
+ * @tc.desc: test SetTargetDeviceStatus with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetTargetDeviceStatus_0100, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType";
+    int32_t status = 1;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetTargetDeviceStatus(deviceType, status);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }
 }

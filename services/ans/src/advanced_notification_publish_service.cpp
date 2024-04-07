@@ -2051,5 +2051,24 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
 
     return NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, enabled);
 }
+
+ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    uint32_t status_ = status;
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        ANS_LOGD("isSubsystem is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    int ret = DistributedDeviceStatus_.setDeviceStatus(deviceType, status_);
+    ANS_LOGI("%{public}s device status update with %{public}u",
+        deviceType.c_str(), DistributedDeviceStatus_.getDeviceStatus(deviceType));
+    return ret;
+}
 }  // namespace Notification
 }  // namespace OHOS
