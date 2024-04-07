@@ -1642,6 +1642,11 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     ANS_LOGD("NotificationRequest slotType:%{public}d, contentType:%{public}d", slotType, contentType);
 
     if (request->IsCommonLiveView()) {
+        if (CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            ANS_LOGI("The creator has the permission, no need to check.");
+            return false;
+        }
         std::shared_ptr<NotificationContent> content = request->GetContent();
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
         auto status = liveViewContent->GetLiveViewStatus();
