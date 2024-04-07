@@ -657,5 +657,28 @@ HWTEST_F(ReminderDataManagerTest, CheckIsSameAppTest_001, Level1)
     reminder->InitCreatorBundleName("test1");
     EXPECT_FALSE(manager->CheckIsSameApp(reminder, option));
 }
+
+/**
+ * @tc.name: OnConfigurationChanged
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I97Q9Q
+ */
+HWTEST_F(ReminderDataManagerTest, OnConfigurationChanged_0001, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    reminder->SetReminderId(10);
+    std::string title = "this is title";
+    std::string resource = "close";
+    ReminderRequest::ActionButtonType type = ReminderRequest::ActionButtonType::CLOSE;
+    reminder->SetActionButton(title, type, resource);
+
+    manager->reminderVector_.push_back(reminder);
+    manager->showedReminderVector_.push_back(reminder);
+
+    AppExecFwk::Configuration config;
+    manager->OnConfigurationChanged(config);
+    EXPECT_TRUE(reminder->actionButtonMap_[type].title == "this is title");
+}
 }  // namespace Notification
 }  // namespace OHOS
