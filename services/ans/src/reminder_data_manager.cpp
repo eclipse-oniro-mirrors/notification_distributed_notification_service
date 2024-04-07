@@ -510,16 +510,10 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
     }
     std::string packageName = reminder->GetBundleName();
     std::string groupId = reminder->GetGroupId();
-    if (packageName.empty() || groupId.empty()) {
-        ANSR_LOGD("reminder packageName is null or default close reminder, \
-            the group id is not set, this reminder can not close by groupId");
-        CloseReminder(reminder, cancelNotification);
-        UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-        CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
-        StartRecentReminder();
-        return;
+    if (!(packageName.empty() || groupId.empty())) {
+        ANSR_LOGD("this reminder can close by groupId");
+        CloseRemindersByGroupId(reminderId, packageName, groupId);
     }
-    CloseRemindersByGroupId(reminderId, packageName, groupId);
     CloseReminder(reminder, cancelNotification);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
