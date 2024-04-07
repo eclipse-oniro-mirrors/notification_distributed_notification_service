@@ -1886,11 +1886,13 @@ void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration
             UpdateReminderLanguage(*it);
         }
     }
+    std::vector<sptr<ReminderRequest>> showedReminder;
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
-        for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
-            ShowReminder((*it), false, false, false, false);
-        }
+        showedReminder = showedReminderVector_;
+    }
+    for (auto it = showedReminder.begin(); it != showedReminder.end(); ++it) {
+        ShowReminder((*it), false, false, false, false);
     }
 }
 
