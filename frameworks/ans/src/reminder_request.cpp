@@ -98,7 +98,8 @@ void GetJsonValue(const nlohmann::json& root, const std::string& name, T& value)
     value = T();
 }
 
-inline static bool IsVaildButtonType(const std::string& type) {
+inline static bool IsVaildButtonType(const std::string& type)
+{
     // check action button type range
     if (type.size() != 1) {
         return false;
