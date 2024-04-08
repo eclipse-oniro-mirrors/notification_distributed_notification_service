@@ -325,7 +325,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("ShowNotification work excute.");
+            ANS_LOGD("ShowNotification work excute.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("Show napi_create_async_work start notificationId = %{public}d, contentType = "
@@ -338,7 +338,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("ShowNotification work complete.");
+            ANS_LOGD("ShowNotification work complete.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->info.callback != nullptr) {
@@ -470,7 +470,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("PublishAsBundle work excute.");
+            ANS_LOGD("PublishAsBundle work excute.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("PublishAsBundle napi_create_async_work start notificationId = %{public}d, contentType = "
@@ -483,7 +483,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("PublishAsBundle work complete.");
+            ANS_LOGD("PublishAsBundle work complete.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));

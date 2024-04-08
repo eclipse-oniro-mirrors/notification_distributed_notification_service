@@ -127,7 +127,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiRemoveGroupByBundle work excute.");
+            ANS_LOGD("NapiRemoveGroupByBundle work excute.");
             AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
             if (asynccallbackinfo) {

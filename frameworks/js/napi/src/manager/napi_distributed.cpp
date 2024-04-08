@@ -72,7 +72,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiIsDistributedEnabled work excute.");
+            ANS_LOGD("NapiIsDistributedEnabled work excute.");
             AsyncCallbackInfoIsEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnabled *>(data);
 
             if (asynccallbackinfo) {
@@ -124,7 +124,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiEnableDistributed work excute.");
+            ANS_LOGD("NapiEnableDistributed work excute.");
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
 
             if (asynccallbackinfo) {
@@ -133,7 +133,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiEnableDistributed work complete.");
+            ANS_LOGD("NapiEnableDistributed work complete.");
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -187,7 +187,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiEnableDistributedByBundle work excute.");
+            ANS_LOGD("NapiEnableDistributedByBundle work excute.");
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::EnableDistributedByBundle(
@@ -195,7 +195,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiEnableDistributedByBundle work complete.");
+            ANS_LOGD("NapiEnableDistributedByBundle work complete.");
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -250,7 +250,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiEnableDistributedSelf work excute.");
+            ANS_LOGD("NapiEnableDistributedSelf work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -259,7 +259,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiEnableDistributedSelf work complete.");
+            ANS_LOGD("NapiEnableDistributedSelf work complete.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -340,7 +340,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiIsDistributedEnableByBundle work excute.");
+            ANS_LOGD("NapiIsDistributedEnableByBundle work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasDeviceType) {
@@ -426,7 +426,7 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetDeviceRemindType work excute.");
+            ANS_LOGD("NapiGetDeviceRemindType work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetRemindType *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -474,7 +474,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetSyncNotificationEnabledWithoutApp work excute.");
+            ANS_LOGD("NapiSetSyncNotificationEnabledWithoutApp work excute.");
             AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
@@ -483,7 +483,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSetSyncNotificationEnabledWithoutApp work complete.");
+            ANS_LOGD("NapiSetSyncNotificationEnabledWithoutApp work complete.");
             AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
@@ -539,7 +539,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetSyncNotificationEnabledWithoutApp work excute.");
+            ANS_LOGD("NapiGetSyncNotificationEnabledWithoutApp work excute.");
             AsyncCallbackInfoGetEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
@@ -548,7 +548,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiGetSyncNotificationEnabledWithoutApp work complete.");
+            ANS_LOGD("NapiGetSyncNotificationEnabledWithoutApp work complete.");
             AsyncCallbackInfoGetEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {

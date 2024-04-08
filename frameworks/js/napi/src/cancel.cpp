@@ -179,7 +179,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Cancel work excute.");
+            ANS_LOGD("Cancel work excute.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
 
             if (asynccallbackinfo) {
@@ -188,7 +188,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("Cancel work complete.");
+            ANS_LOGD("Cancel work complete.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -240,14 +240,14 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("CancelAll work excute.");
+            ANS_LOGD("CancelAll work excute.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::CancelAllNotifications();
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("CancelAll work complete.");
+            ANS_LOGD("CancelAll work complete.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -300,7 +300,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("CancelGroup work excute.");
+            ANS_LOGD("CancelGroup work excute.");
             AsyncCallbackInfoCancelGroup *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelGroup *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("asynccallbackinfo->params.groupName = %{public}s",
@@ -310,7 +310,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("CancelGroup work complete.");
+            ANS_LOGD("CancelGroup work complete.");
             AsyncCallbackInfoCancelGroup *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelGroup *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -444,7 +444,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("CancelAsBundle work excute.");
+            ANS_LOGD("CancelAsBundle work excute.");
             AsyncCallbackInfoCancelAsBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelAsBundle *>(data);
 
             if (asynccallbackinfo) {
@@ -453,7 +453,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("CancelAsBundle work complete");
+            ANS_LOGD("CancelAsBundle work complete");
             AsyncCallbackInfoCancelAsBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelAsBundle *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));

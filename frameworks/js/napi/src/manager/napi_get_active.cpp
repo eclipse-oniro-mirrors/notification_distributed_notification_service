@@ -99,7 +99,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetAllActiveNotifications work excute.");
+            ANS_LOGD("NapiGetAllActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -196,7 +196,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetActiveNotifications work excute.");
+            ANS_LOGD("NapiGetActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -269,7 +269,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetActiveNotificationCount work excute.");
+            ANS_LOGD("NapiGetActiveNotificationCount work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -370,7 +370,7 @@ napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info 
 
 void AsyncGetLiveViewExecute(napi_env env, void *data)
 {
-    ANS_LOGI("NapiGetActiveNotificationByFilter work excute.");
+    ANS_LOGD("NapiGetActiveNotificationByFilter work excute.");
 
     auto asyncLiveViewCallBackInfo = static_cast<AsyncLiveViewCallBackInfo *>(data);
     if (asyncLiveViewCallBackInfo) {

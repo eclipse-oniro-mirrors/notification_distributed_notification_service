@@ -62,7 +62,7 @@ napi_value Common::SetNotificationSortingMap(
         if (sortingMap->GetNotificationSorting(key, sorting)) {
             // sortedHashCode: Array<string>
             napi_value keyValue = nullptr;
-            ANS_LOGI("sortingMap key = %{public}s", key.c_str());
+            ANS_LOGD("sortingMap key = %{public}s", key.c_str());
             napi_create_string_utf8(env, key.c_str(), NAPI_AUTO_LENGTH, &keyValue);
             napi_set_element(env, arrSortedHashCode, count, keyValue);
 

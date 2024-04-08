@@ -87,7 +87,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Unsubscribe work excute.");
+            ANS_LOGD("Unsubscribe work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoUnsubscribe *>(data);
 
             if (asynccallbackinfo->objectInfo == nullptr) {
@@ -109,7 +109,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("Unsubscribe work complete.");
+            ANS_LOGD("Unsubscribe work complete.");
             AsyncCallbackInfoUnsubscribe *asynccallbackinfo = static_cast<AsyncCallbackInfoUnsubscribe *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));

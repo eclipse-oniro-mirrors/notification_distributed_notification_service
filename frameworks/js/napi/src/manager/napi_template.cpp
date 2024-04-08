@@ -44,7 +44,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiIsSupportTemplate work excute.");
+            ANS_LOGD("NapiIsSupportTemplate work excute.");
             AsyncCallbackInfoTemplate *asyncCallbackinfo = static_cast<AsyncCallbackInfoTemplate *>(data);
 
             if (asyncCallbackinfo) {
@@ -53,7 +53,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiIsSupportTemplate work complete.");
+            ANS_LOGD("NapiIsSupportTemplate work complete.");
             AsyncCallbackInfoTemplate *asyncCallbackinfo = static_cast<AsyncCallbackInfoTemplate *>(data);
             if (asyncCallbackinfo) {
                 napi_value result = nullptr;
