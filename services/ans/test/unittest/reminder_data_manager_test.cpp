@@ -659,12 +659,12 @@ HWTEST_F(ReminderDataManagerTest, CheckIsSameAppTest_001, Level1)
 }
 
 /**
- * @tc.name: OnConfigurationChanged
+ * @tc.name: OnLanguageChanged
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
  * @tc.require: issue#I97Q9Q
  */
-HWTEST_F(ReminderDataManagerTest, OnConfigurationChanged_0001, Level1)
+HWTEST_F(ReminderDataManagerTest, OnLanguageChanged_0001, Level1)
 {
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     reminder->SetReminderId(10);
@@ -676,8 +676,7 @@ HWTEST_F(ReminderDataManagerTest, OnConfigurationChanged_0001, Level1)
     manager->reminderVector_.push_back(reminder);
     manager->showedReminderVector_.push_back(reminder);
 
-    AppExecFwk::Configuration config;
-    manager->OnConfigurationChanged(config);
+    manager->OnLanguageChanged();
     EXPECT_TRUE(reminder->actionButtonMap_[type].title == "this is title");
 }
 }  // namespace Notification

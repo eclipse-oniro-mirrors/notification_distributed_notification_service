@@ -1877,7 +1877,7 @@ void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderReques
     UpdateReminderLanguage(reminder);
 }
 
-void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)
+void ReminderDataManager::OnLanguageChanged()
 {
     ANSR_LOGI("System language config changed.");
     {

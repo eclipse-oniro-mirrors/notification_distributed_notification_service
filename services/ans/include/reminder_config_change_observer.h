@@ -32,6 +32,9 @@ public:
 
 public:
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
+
+private:
+    std::string languageInfo_;
 };
 } // namespace Notification
 } // namespace OHOS
