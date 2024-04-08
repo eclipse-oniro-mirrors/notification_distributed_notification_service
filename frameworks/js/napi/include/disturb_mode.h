@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,13 @@ struct AsyncCallbackInfoSetDoNotDisturb {
     CallbackPromiseInfo info;
 };
 
+struct AsyncCallbackInfoDoNotDisturbProfile {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    CallbackPromiseInfo info;
+};
+
 struct AsyncCallbackInfoGetDoNotDisturb {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
@@ -63,6 +70,9 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info);
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetDoNotDisturbDateParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetDoNotDisturbDateParams &params);
+bool ParseProfilesParameters(
+    const napi_env &env, const napi_callback_info &info, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+bool AnalyseTrustlist(const napi_env &env, const napi_value &value, sptr<NotificationDoNotDisturbProfile> &profile);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_DISTURB_MODE_H

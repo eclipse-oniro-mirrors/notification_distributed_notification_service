@@ -26,6 +26,7 @@
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_do_not_disturb_date.h"
+#include "notification_do_not_disturb_profile.h"
 #include "notification_request.h"
 #include "notification_slot.h"
 #include "notification_subscribe_info.h"
@@ -519,6 +520,22 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) = 0;
+
+    /**
+     * @brief Add do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) = 0;
+
+    /**
+     * @brief Remove do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) = 0;
 
     /**
      * @brief Get whether Do Not Disturb mode is supported.

@@ -35,6 +35,7 @@
 #include "notification.h"
 #include "notification_bundle_option.h"
 #include "notification_dialog_manager.h"
+#include "notification_do_not_disturb_profile.h"
 #include "notification_record.h"
 #include "notification_slot_filter.h"
 #include "notification_sorting_map.h"
@@ -555,6 +556,22 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
+
+    /**
+     * @brief Add Do Not Disturb profiles.
+     *
+     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to add.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
+     * @brief Remove Do Not Disturb profiles.
+     *
+     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to remove.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
 
     /**
      * @brief Get whether Do Not Disturb mode is supported.
@@ -1187,6 +1204,9 @@ private:
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
+    void QueryDoNotDisturbProfile(std::string &enable, std::string &profileId);
+    void CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record);
+    void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
         int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);

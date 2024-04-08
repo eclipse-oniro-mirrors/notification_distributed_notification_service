@@ -345,6 +345,17 @@ ErrCode NotificationHelper::GetDoNotDisturbDate(NotificationDoNotDisturbDate &do
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(doNotDisturbDate);
 }
 
+ErrCode NotificationHelper::AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(profiles);
+}
+
+ErrCode NotificationHelper::RemoveDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(profiles);
+}
+
 ErrCode NotificationHelper::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(doesSupport);

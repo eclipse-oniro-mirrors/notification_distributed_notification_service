@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,8 @@ constexpr int32_t SUBSCRIBE_USER_SYSTEM_BEGIN = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_END = 99;
 constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
 constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
+constexpr int32_t DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
+constexpr int32_t DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
 
 // Default sound for notification
 const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");

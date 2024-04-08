@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -250,6 +250,25 @@ public:
     ErrCode GetTemplateSupported(const std::string &templateName, bool &support);
 
     /**
+     * @brief Add do not disturb profiles from DB.
+     *
+     * @param userId Indicates user.
+     * @param profiles Indicates to add do not disturb profiles.
+     * @return Return ERR_OK on success, others on failure.
+     */
+    ErrCode AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles);
+
+    /**
+     * @brief Remove do not disturb profiles from DB.
+     *
+     * @param userId Indicates user.
+     * @param profiles Indicates to remove do not disturb profiles.
+     * @return Return ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(
+        int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles);
+
+    /**
      * @brief Obtains allow notification application list.
      *
      * @param bundleOption Indicates the bundle bundleOption.
@@ -333,6 +352,9 @@ public:
     int32_t GetByteFromDb(const std::string &key, std::vector<uint8_t> &value);
     int32_t GetBatchKvsFromDb(const std::string &key, std::unordered_map<std::string, std::string>  &values);
     int32_t DeleteKvFromDb(const std::string &key);
+    ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
+    bool CheckDoNotDisturbProfileID(int32_t profileId);
+
 private:
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const;

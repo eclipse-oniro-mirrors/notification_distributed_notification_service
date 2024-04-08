@@ -473,6 +473,69 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
     return result;
 }
 
+bool NotificationPreferences::CheckDoNotDisturbProfileID(int32_t profileId)
+{
+    if (profileId < DO_NOT_DISTURB_PROFILE_MIN_ID || profileId > DO_NOT_DISTURB_PROFILE_MAX_ID) {
+        ANS_LOGE("The profile id is out of range.");
+        return false;
+    }
+    return true;
+}
+
+ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
+    int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
+{
+    ANS_LOGE("Called.");
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is nullptr.");
+            return ERR_ANS_INVALID_PARAM;
+        }
+        if (!CheckDoNotDisturbProfileID(profile->GetProfileId())) {
+            return ERR_ANS_INVALID_PARAM;
+        }
+    }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    preferencesInfo.AddDoNotDisturbProfiles(userId, profiles);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("The prefernces db is nullptr.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->AddDoNotDisturbProfiles(userId, profiles)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    preferencesInfo_ = preferencesInfo;
+    return ERR_OK;
+}
+
+ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
+    int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
+{
+    ANS_LOGE("Called.");
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is nullptr.");
+            return ERR_ANS_INVALID_PARAM;
+        }
+        if (!CheckDoNotDisturbProfileID(profile->GetProfileId())) {
+            return ERR_ANS_INVALID_PARAM;
+        }
+    }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    preferencesInfo.RemoveDoNotDisturbProfiles(userId, profiles);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("The prefernces db is nullptr.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->RemoveDoNotDisturbProfiles(userId, profiles)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    preferencesInfo_ = preferencesInfo;
+    return ERR_OK;
+}
+
 ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
@@ -502,6 +565,20 @@ ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
         preferencesInfo_ = NotificationPreferencesInfo();
     }
     return result;
+}
+
+ErrCode NotificationPreferences::GetDoNotDisturbProfile(
+    int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    if (!CheckDoNotDisturbProfileID(profileId)) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    if (!preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ERR_OK;
 }
 
 ErrCode NotificationPreferences::CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,

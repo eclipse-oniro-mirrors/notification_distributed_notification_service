@@ -20,6 +20,7 @@
 #include "notification_bundle_option.h"
 #include "notification_button_option.h"
 #include "notification_do_not_disturb_date.h"
+#include "notification_do_not_disturb_profile.h"
 #include "enabled_notification_callback_data.h"
 #include "notification_request.h"
 #include "notification_slot.h"
@@ -789,6 +790,24 @@ public:
      * @return Returns set do not disturb time result.
      */
     static ErrCode GetDoNotDisturbDate(const int32_t &userId, NotificationDoNotDisturbDate &doNotDisturbDate);
+
+    /**
+     * @brief Obtains the do not disturb  on a specified user.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param profiles Indicates the do not disturb time to add.
+     * @return Returns set do not disturb time result.
+     */
+    static ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    /**
+     * @brief Obtains the do not disturb on a specified user.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param profiles Indicates the do not disturb time to remove.
+     * @return Returns set do not disturb time result.
+     */
+    static ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
 
     /**
      * Set whether the application slot is enabled.

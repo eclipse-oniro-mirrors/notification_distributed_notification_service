@@ -647,6 +647,24 @@ public:
     ErrCode GetDoNotDisturbDate(NotificationDoNotDisturbDate &doNotDisturbDate);
 
     /**
+     * @brief Add the do not disturb profiles.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param doNotDisturbProfiles Indicates the do not disturb profiles to add.
+     * @return Returns add do not disturb profiles result.
+     */
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    /**
+     * @brief Remove the do not disturb profiles.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param doNotDisturbProfiles Indicates the do not disturb profiles to remove.
+     * @return Returns remove do not disturb profiles result.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    /**
      * @brief Obtains the flag that whether to support do not disturb mode.
      *
      * @param doesSupport Specifies whether to support do not disturb mode.

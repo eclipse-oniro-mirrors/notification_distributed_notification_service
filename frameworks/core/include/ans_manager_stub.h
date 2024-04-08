@@ -511,6 +511,22 @@ public:
     virtual ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
+     * @brief Add do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
+     * @brief Remove do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
      * @brief Get whether Do Not Disturb mode is supported.
      *
      * @param doesSupport Indicates the flag that supports DND mode.
@@ -962,6 +978,8 @@ private:
     ErrCode HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
