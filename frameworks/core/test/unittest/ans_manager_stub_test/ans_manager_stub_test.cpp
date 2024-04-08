@@ -4600,5 +4600,87 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumberByBundle02, Function | SmallTes
     ErrCode ret = ansManagerStub_->HandleSetBadgeNumberByBundle(data, reply);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
+
+/**
+ * @tc.name: HandleAddDoNotDisturbProfiles_0100
+ * @tc.desc: test HandleAddDoNotDisturbProfiles when ReadParcelableVector return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleAddDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ErrCode ret = ansManagerStub_->HandleAddDoNotDisturbProfiles(data, reply);
+    EXPECT_EQ(ret, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleAddDoNotDisturbProfiles_0200
+ * @tc.desc: test HandleAddDoNotDisturbProfiles success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleAddDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTS);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    ErrCode result = ansManagerStub_->AddDoNotDisturbProfiles(profiles);
+    ansManagerStub_->WriteParcelableVector(profiles, reply, result);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleRemoveDoNotDisturbProfiles_0100
+ * @tc.desc: test HandleRemoveDoNotDisturbProfiles when ReadParcelableVector return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleRemoveDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ErrCode ret = ansManagerStub_->HandleRemoveDoNotDisturbProfiles(data, reply);
+    EXPECT_EQ(ret, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleRemoveDoNotDisturbProfiles_0200
+ * @tc.desc: test HandleRemoveDoNotDisturbProfiles success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleRemoveDoNotDisturbProfiles, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTS);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    ErrCode result = ansManagerStub_->AddDoNotDisturbProfiles(profiles);
+    ansManagerStub_->WriteParcelableVector(profiles, reply, result);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
 }
 }

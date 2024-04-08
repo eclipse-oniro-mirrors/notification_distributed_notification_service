@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 #include "notification_preferences_database.h"
+#include "notification_rdb_data_mgr.h"
 #undef private
 #undef protected
 
@@ -994,6 +995,89 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_020
     bool enable = true;
     bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0100
+ * @tc.desc: test AddDoNotDisturbProfiles run success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile->SetProfileId(1);
+    profile->SetProfileName("Name");
+    std::string bundleName = "bundleName";
+    int32_t uid = 1;
+    NotificationBundleOption notificationBundleOption(bundleName, uid);
+    vector<NotificationBundleOption> trustlist;
+    trustlist.emplace_back(notificationBundleOption);
+    profile->SetProfileTrustList(trustlist);
+    profiles.emplace_back(profile);
+
+    auto res = preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0100
+ * @tc.desc: test RemoveDoNotDisturbProfiles run success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile->SetProfileId(1);
+    profile->SetProfileName("Name");
+    std::string bundleName = "bundleName";
+    int32_t uid = 1;
+    NotificationBundleOption notificationBundleOption(bundleName, uid);
+    vector<NotificationBundleOption> trustlist;
+    trustlist.emplace_back(notificationBundleOption);
+    profile->SetProfileTrustList(trustlist);
+    profiles.emplace_back(profile);
+
+    preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
+    auto res = preferncesDB_->RemoveDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfiles_0100
+ * @tc.desc: test GetDoNotDisturbProfiles return of QueryData is not zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profiles.emplace_back(profile);
+    preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
+    std::string key;
+    auto res = preferncesDB_->GetDoNotDisturbProfiles(key, profile);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0100
+ * @tc.desc: test GetDoNotDisturbProfile when profiles is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDoNotDisturbProfile_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo info;
+    int32_t userId = 1;
+    preferncesDB_->GetDoNotDisturbProfile(info, userId);
+    int32_t profileId = 1;
+    sptr<NotificationDoNotDisturbProfile> profile;
+    auto res = info.GetDoNotDisturbProfiles(profileId, userId, profile);
+    auto infos = new (std::nothrow) NotificationPreferencesInfo();
+    EXPECT_EQ(res, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

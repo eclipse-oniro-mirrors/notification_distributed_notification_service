@@ -89,5 +89,77 @@ HWTEST_F(NotificationPreferencesInfoTest, SetSlotFlagsForSlot_00001, Function | 
     int res = bundleInfo.GetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     EXPECT_NE(res, 0);
 }
+
+/**
+ * @tc.name: MakeDoNotDisturbProfileKey_0100
+ * @tc.desc: test MakeDoNotDisturbProfileKey can convert key right.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, MakeDoNotDisturbProfileKey_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    int32_t userId = 1;
+    int32_t profileId = 1;
+    string profilekey = "1_1";
+    auto res = preferencesInfo->MakeDoNotDisturbProfileKey(userId, profileId);
+    EXPECT_EQ(res, profilekey);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0100
+ * @tc.desc: test AddDoNotDisturbProfiles can add success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    int32_t profileId = 1;
+    profile->SetProfileId(profileId);
+    profiles.emplace_back(profile);
+    preferencesInfo->AddDoNotDisturbProfiles(userId, profiles);
+
+    auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0100
+ * @tc.desc: test RemoveDoNotDisturbProfiles can remove success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profiles.emplace_back(profile);
+    preferencesInfo->RemoveDoNotDisturbProfiles(userId, profiles);
+    int32_t profileId = 1;
+    auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfiles_0100
+ * @tc.desc: test GetDoNotDisturbProfiles can get success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    int32_t profileId = 1;
+    profile->SetProfileId(profileId);
+    profiles.emplace_back(profile);
+    preferencesInfo->AddDoNotDisturbProfiles(userId, profiles);
+    auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
+    EXPECT_EQ(res, true);
+}
 }
 }

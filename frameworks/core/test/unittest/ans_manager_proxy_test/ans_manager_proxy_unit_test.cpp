@@ -7934,5 +7934,151 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0200, Functi
         extraInfoKeys, liveViewRequest);
     EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0100
+ * @tc.desc: test AddDoNotDisturbProfiles when profiles is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    auto res = proxy->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0200
+ * @tc.desc: test AddDoNotDisturbProfiles when WriteInterfaceToken return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, AddDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    MockWriteInterfaceToken(false);
+    auto res = proxy->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0300
+ * @tc.desc: test AddDoNotDisturbProfiles run success and return result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, AddDoNotDisturbProfiles_0300, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    MockWriteInterfaceToken(true);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillRepeatedly(
+            DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+            ERR_OK, false, true, true)), Return(NO_ERROR)));
+    auto res = proxy->AddDoNotDisturbProfiles(profiles);
+    EXPECT_NE(ERR_OK, res);
+    EXPECT_NE(ERR_ANS_PARCELABLE_FAILED, res);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0100
+ * @tc.desc: test RemoveDoNotDisturbProfiles when profiles is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    auto res = proxy->RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0200
+ * @tc.desc: test RemoveDoNotDisturbProfiles when WriteInterfaceToken return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, RemoveDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    MockWriteInterfaceToken(false);
+    auto res = proxy->RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0300
+ * @tc.desc: test RemoveDoNotDisturbProfiles run success and return result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, RemoveDoNotDisturbProfiles_0300, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    MockWriteInterfaceToken(true);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillRepeatedly(
+            DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+            ERR_OK, false, true, true)), Return(NO_ERROR)));
+    auto res = proxy->RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_NE(ERR_OK, res);
+    EXPECT_NE(ERR_ANS_PARCELABLE_FAILED, res);
+}
 }  // namespace Notification
 }  // namespace OHOS
