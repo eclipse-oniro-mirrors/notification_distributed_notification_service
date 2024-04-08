@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,9 @@ namespace NotificationNapi {
 const int SET_DISTURB_MAX_PARA = 3;
 const int SET_DISTURB_MIN_PARA = 1;
 const int GET_DISTURB_MAX_PARA = 2;
+const int DISTURB_PROFILES_PARA = 1;
+const int DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
+const int DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
 
 napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetDoNotDisturbDateParams &params)
 {
@@ -85,6 +88,92 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     return Common::NapiGetNull(env);
 }
 
+bool GetDoNotDisturbProfile(
+    const napi_env &env, const napi_value &value, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    ANS_LOGD("Called.");
+    bool hasProperty = false;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, value, "id", &hasProperty), false);
+    if (!hasProperty) {
+        ANS_LOGE("Wrong argument type. Property type expected.");
+        return false;
+    }
+    int profileId = 0;
+    napi_value obj = nullptr;
+    napi_get_named_property(env, value, "id", &obj);
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL_BASE(env, napi_typeof(env, obj, &valuetype), false);
+    if (valuetype != napi_number) {
+        ANS_LOGE("Wrong argument type. Number expected.");
+        return false;
+    }
+    napi_get_value_int32(env, obj, &profileId);
+    if (profileId < DO_NOT_DISTURB_PROFILE_MIN_ID || profileId > DO_NOT_DISTURB_PROFILE_MAX_ID) {
+        ANS_LOGE("The profile id is out of range.");
+        return false;
+    }
+    profile->SetProfileId(profileId);
+
+    NAPI_CALL_BASE(env, napi_has_named_property(env, value, "name", &hasProperty), false);
+    if (!hasProperty) {
+        ANS_LOGE("Wrong argument type. Property type expected.");
+        return false;
+    }
+    char name[STR_MAX_SIZE] = {0};
+    napi_get_named_property(env, value, "name", &obj);
+    NAPI_CALL_BASE(env, napi_typeof(env, obj, &valuetype), false);
+    if (valuetype != napi_string) {
+        ANS_LOGE("Wrong argument type. String expected.");
+        return false;
+    }
+    size_t strLen = 0;
+    NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, obj, name, STR_MAX_SIZE - 1, &strLen), false);
+    profile->SetProfileName(name);
+
+    return AnalyseTrustlist(env, value, profile);
+}
+
+bool AnalyseTrustlist(const napi_env &env, const napi_value &value, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    bool hasProperty = false;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, value, "trustlist", &hasProperty), false);
+    if (!hasProperty) {
+        return true;
+    }
+    napi_value obj = nullptr;
+    napi_get_named_property(env, value, "trustlist", &obj);
+    bool isArray = false;
+    NAPI_CALL_BASE(env, napi_is_array(env, obj, &isArray), false);
+    if (!isArray) {
+        ANS_LOGE("Value is not an array.");
+        return false;
+    }
+    uint32_t length = 0;
+    napi_get_array_length(env, obj, &length);
+    if (length == 0) {
+        ANS_LOGD("The array is empty.");
+        return true;
+    }
+    std::vector<NotificationBundleOption> options;
+    for (size_t index = 0; index < length; index++) {
+        napi_value nOption = nullptr;
+        napi_get_element(env, obj, index, &nOption);
+        napi_valuetype valuetype = napi_undefined;
+        NAPI_CALL_BASE(env, napi_typeof(env, nOption, &valuetype), false);
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return false;
+        }
+        NotificationBundleOption option;
+        if (!Common::GetBundleOption(env, nOption, option)) {
+            return false;
+        }
+        options.emplace_back(option);
+    }
+    profile->SetProfileTrustList(options);
+    return true;
+}
+
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetDoNotDisturbDateParams &params)
 {
     ANS_LOGD("enter");
@@ -136,6 +225,48 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     }
 
     return Common::NapiGetNull(env);
+}
+
+bool ParseProfilesParameters(
+    const napi_env &env, const napi_callback_info &info, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    size_t argc = DISTURB_PROFILES_PARA;
+    napi_value argv[DISTURB_PROFILES_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
+    if (argc != DISTURB_PROFILES_PARA) {
+        ANS_LOGE("Wrong number of arguments.");
+        return false;
+    }
+    napi_valuetype valuetype = napi_undefined;
+    bool isArray = false;
+    napi_is_array(env, argv[PARAM0], &isArray);
+    if (!isArray) {
+        ANS_LOGE("Wrong argument type. Array expected.");
+        return false;
+    }
+    uint32_t length = 0;
+    napi_get_array_length(env, argv[PARAM0], &length);
+    if (length == 0) {
+        ANS_LOGD("The array is empty.");
+        return false;
+    }
+    for (size_t index = 0; index < length; index++) {
+        napi_value nProfile = nullptr;
+        napi_get_element(env, argv[PARAM0], index, &nProfile);
+        NAPI_CALL_BASE(env, napi_typeof(env, nProfile, &valuetype), false);
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return false;
+        }
+        sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+        if (!GetDoNotDisturbProfile(env, nProfile, profile)) {
+            return false;
+        }
+        profiles.emplace_back(profile);
+    }
+    return true;
 }
 
 napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)

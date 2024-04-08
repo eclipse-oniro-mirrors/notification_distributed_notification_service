@@ -792,6 +792,64 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDate(sptr<NotificationDoNotD
     return GetDoNotDisturbDateByUser(userId, date);
 }
 
+ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!GetActiveUserId(userId)) {
+        ANS_LOGW("No active user found.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+            ANS_LOGD("The ffrt enter.");
+            NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(copyUserId, copyProfiles);
+        }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!GetActiveUserId(userId)) {
+        ANS_LOGW("No active user found.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+            ANS_LOGD("The ffrt enter.");
+            NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(copyUserId, copyProfiles);
+        }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

@@ -22,6 +22,7 @@ namespace {
     bool g_mockQueryDataBeginWithKeyRet = true;
     bool g_mockDeleteBathchDataRet = true;
     bool g_mockDeleteDataRet = true;
+    bool g_mockQueryAllData = true;
 }
 
 void MockInit(bool mockRet)
@@ -57,6 +58,11 @@ void MockDeleteBathchData(bool mockRet)
 void MockDeleteData(bool mockRet)
 {
     g_mockDeleteDataRet = mockRet;
+}
+
+void MockQueryAllData(bool mockRet)
+{
+    g_mockQueryAllData = mockRet;
 }
 
 namespace OHOS {
@@ -126,6 +132,14 @@ int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &ke
 int32_t NotificationDataMgr::DeleteData(const std::string &key)
 {
     if (g_mockDeleteDataRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &values)
+{
+    if (g_mockQueryAllData == false) {
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;

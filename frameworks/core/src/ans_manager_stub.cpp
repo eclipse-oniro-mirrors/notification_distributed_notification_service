@@ -310,6 +310,12 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_SLOT_BY_BUNDLE,
             std::bind(&AnsManagerStub::HandleGetSlotByBundle, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+        {NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES,
+            std::bind(&AnsManagerStub::HandleAddDoNotDisturbProfiles, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES,
+            std::bind(&AnsManagerStub::HandleRemoveDoNotDisturbProfiles, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -2135,6 +2141,27 @@ ErrCode AnsManagerStub::HandleUnregisterPushCallback(MessageParcel &data, Messag
     return result;
 }
 
+ErrCode AnsManagerStub::HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    if (!ReadParcelableVector(profiles, data)) {
+        ANS_LOGE("Read profiles failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("The profiles is exceeds limit.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode result = AddDoNotDisturbProfiles(profiles);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode is %{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode AnsManagerStub::HandleSetDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply)
 {
     ANS_LOGD("enter");
@@ -2160,6 +2187,27 @@ ErrCode AnsManagerStub::HandleSetDistributedEnabledByBundle(MessageParcel &data,
     if (!reply.WriteInt32(result)) {
         ANS_LOGE(
             "[HandleSetNotificationsEnabledForSpecialBundle] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    if (!ReadParcelableVector(profiles, data)) {
+        ANS_LOGE("Read profiles failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("The profiles is exceeds limit.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode result = RemoveDoNotDisturbProfiles(profiles);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode is %{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

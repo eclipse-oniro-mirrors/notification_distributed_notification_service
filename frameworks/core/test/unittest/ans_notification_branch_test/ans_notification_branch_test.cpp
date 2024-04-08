@@ -316,6 +316,16 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override
     {
         return ERR_ANS_INVALID_PARAM;

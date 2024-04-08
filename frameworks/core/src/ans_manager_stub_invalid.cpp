@@ -374,6 +374,18 @@ ErrCode AnsManagerStub::GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     ANS_LOGE("AnsManagerStub::DoesSupportDoNotDisturbMode called!");

@@ -207,6 +207,10 @@ public:
     bool RemoveNotificationEnable(const int32_t userId);
     bool RemoveDoNotDisturbDate(const int32_t userId);
     bool RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid);
+    bool AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    bool RemoveDoNotDisturbProfiles(
+        int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    bool GetDoNotDisturbProfiles(const std::string &key, sptr<NotificationDoNotDisturbProfile> &profile);
     bool RemoveEnabledDbByBundleName(std::string bundleName);
     int32_t SetKvToDb(const std::string &key, const std::string &value);
     int32_t GetKvFromDb(const std::string &key, std::string &value);
@@ -259,6 +263,7 @@ private:
     void ParseDoNotDisturbBeginDate(NotificationPreferencesInfo &info);
     void ParseDoNotDisturbEndDate(NotificationPreferencesInfo &info);
     void ParseEnableAllNotification(NotificationPreferencesInfo &info);
+    void ParseGetDoNotDisturbProfile(NotificationPreferencesInfo &info);
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
@@ -294,6 +299,7 @@ private:
     void GetDoNotDisturbBeginDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetEnableAllNotification(NotificationPreferencesInfo &info, int32_t userId);
+    void GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId);
 
     static const std::map<std::string,
         std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>

@@ -43,6 +43,11 @@ const static std::string KEY_DO_NOT_DISTURB_BEGIN_DATE = "ans_doNotDisturbBeginD
 const static std::string KEY_DO_NOT_DISTURB_END_DATE = "ans_doNotDisturbEndDate";
 
 /**
+ * Indicates that disturbe key which do not disturbe id.
+ */
+const static std::string KEY_DO_NOT_DISTURB_ID = "ans_doNotDisturbId";
+
+/**
  * Indicates that disturbe key which enable all notification.
  */
 const static std::string KEY_ENABLE_ALL_NOTIFICATION = "ans_notificationAll";
@@ -575,6 +580,86 @@ bool NotificationPreferencesDatabase::PutDoNotDisturbDate(
     return true;
 }
 
+bool NotificationPreferencesDatabase::AddDoNotDisturbProfiles(
+    int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGE("Invalid dates.");
+        return false;
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::unordered_map<std::string, std::string> values;
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is null.");
+            return false;
+        }
+        std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+        values[key] = profile->ToJson();
+    }
+    int32_t result = rdbDataManager_->InsertBatchData(values);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Add do not disturb profiles failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::RemoveDoNotDisturbProfiles(
+    int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("Invalid dates.");
+        return false;
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::vector<std::string> keys;
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is null.");
+            return false;
+        }
+        std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+        keys.push_back(key);
+    }
+    int32_t result = rdbDataManager_->DeleteBathchData(keys);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Delete do not disturb profiles failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::GetDoNotDisturbProfiles(
+    const std::string &key, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string values;
+    int32_t result = rdbDataManager_->QueryData(key, values);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Use default value. error code is %{public}d", result);
+        return false;
+    }
+    profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    if (profile == nullptr) {
+        ANS_LOGE("The profile is null.");
+        return false;
+    }
+    profile->FromJson(values);
+    return true;
+}
+
 void NotificationPreferencesDatabase::GetValueFromDisturbeDB(
     const std::string &key, std::function<void(std::string &)> callback)
 {
@@ -668,6 +753,7 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
     ParseDoNotDisturbBeginDate(info);
     ParseDoNotDisturbEndDate(info);
     ParseEnableAllNotification(info);
+    ParseGetDoNotDisturbProfile(info);
 
     if (!CheckRdbStore()) {
         ANS_LOGE("RdbStore is nullptr.");
@@ -1211,6 +1297,16 @@ void NotificationPreferencesDatabase::ParseEnableAllNotification(NotificationPre
     }
 }
 
+void NotificationPreferencesDatabase::ParseGetDoNotDisturbProfile(NotificationPreferencesInfo &info)
+{
+    std::vector<int> activeUserId;
+    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+
+    for (auto iter : activeUserId) {
+        NotificationPreferencesDatabase::GetDoNotDisturbProfile(info, iter);
+    }
+}
+
 void NotificationPreferencesDatabase::ParseBundleName(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
@@ -1489,6 +1585,31 @@ void NotificationPreferencesDatabase::GetEnableAllNotification(NotificationPrefe
                 ANS_LOGW("Parse enable all notification failed, use default value.");
             }
         });
+}
+
+void NotificationPreferencesDatabase::GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return;
+    }
+    std::unordered_map<std::string, std::string> datas;
+    int32_t result = rdbDataManager_->QueryAllData(datas);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Query all data failed.");
+        return;
+    }
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    for (const auto &data : datas) {
+        std::string key = data.first;
+        auto result = key.find(KEY_DO_NOT_DISTURB_ID);
+        if (result != std::string::npos) {
+            sptr<NotificationDoNotDisturbProfile> profile;
+            GetDoNotDisturbProfiles(data.first, profile);
+            profiles.emplace_back(profile);
+        }
+    }
+    info.AddDoNotDisturbProfiles(userId, profiles);
 }
 
 bool NotificationPreferencesDatabase::RemoveNotificationEnable(const int32_t userId)

@@ -906,6 +906,32 @@ ErrCode AnsNotification::GetDoNotDisturbDate(NotificationDoNotDisturbDate &doNot
     return ret;
 }
 
+ErrCode AnsNotification::AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("The profiles is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGW("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->AddDoNotDisturbProfiles(profiles);
+}
+
+ErrCode AnsNotification::RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("The profiles is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGW("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->RemoveDoNotDisturbProfiles(profiles);
+}
+
 ErrCode AnsNotification::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     if (!GetAnsManagerProxy()) {

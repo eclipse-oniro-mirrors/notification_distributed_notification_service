@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 #include "notification_preferences_info.h"
+
+#include "ans_log_wrapper.h"
 #include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
+namespace {
+const static std::string KEY_UNDER_LINE = "_";
+} // namespace
 NotificationPreferencesInfo::BundleInfo::BundleInfo()
 {
 }
@@ -264,6 +269,53 @@ void NotificationPreferencesInfo::SetDoNotDisturbDate(const int32_t &userId,
     const sptr<NotificationDoNotDisturbDate> &doNotDisturbDate)
 {
     doNotDisturbDate_.insert_or_assign(userId, doNotDisturbDate);
+}
+
+std::string NotificationPreferencesInfo::MakeDoNotDisturbProfileKey(int32_t userId, int32_t profileId)
+{
+    return std::to_string(userId).append(KEY_UNDER_LINE).append(std::to_string(profileId));
+}
+
+void NotificationPreferencesInfo::AddDoNotDisturbProfiles(
+    int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is nullptr.");
+            continue;
+        }
+        std::string key = MakeDoNotDisturbProfileKey(userId, profile->GetProfileId());
+        doNotDisturbProfiles_.insert_or_assign(key, profile);
+    }
+}
+
+void NotificationPreferencesInfo::RemoveDoNotDisturbProfiles(
+    int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is nullptr.");
+            continue;
+        }
+        std::string key = MakeDoNotDisturbProfileKey(userId, profile->GetProfileId());
+        doNotDisturbProfiles_.erase(key);
+    }
+}
+
+bool NotificationPreferencesInfo::GetDoNotDisturbProfiles(
+    int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    if (profile == nullptr) {
+        ANS_LOGE("The profile is nullptr.");
+        return false;
+    }
+    std::string key = MakeDoNotDisturbProfileKey(userId, profileId);
+    auto iter = doNotDisturbProfiles_.find(key);
+    if (iter != doNotDisturbProfiles_.end()) {
+        profile = iter->second;
+        return true;
+    }
+    return false;
 }
 
 bool NotificationPreferencesInfo::GetDoNotDisturbDate(const int32_t &userId,
