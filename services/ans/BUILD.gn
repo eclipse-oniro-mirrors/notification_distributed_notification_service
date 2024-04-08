@@ -60,6 +60,7 @@ ohos_shared_library("libans") {
     "src/advanced_notification_subscriber_service.cpp",
     "src/advanced_notification_utils.cpp",
     "src/bundle_manager_helper.cpp",
+    "src/distributed_device_status.cpp",
     "src/event_report.cpp",
     "src/notification_config_parse.cpp",
     "src/notification_dialog.cpp",

@@ -310,6 +310,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::GET_SLOT_BY_BUNDLE,
             std::bind(&AnsManagerStub::HandleGetSlotByBundle, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+        {NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS,
+            std::bind(&AnsManagerStub::HandleSetTargetDeviceStatus, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -2281,6 +2284,28 @@ ErrCode AnsManagerStub::HandleIsSmartReminderEnabled(MessageParcel &data, Messag
   
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply)
+{
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: read deviceType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t status = 0;
+    if (!data.ReadInt32(status)) {
+        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: read status failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetTargetDeviceStatus(deviceType, status);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

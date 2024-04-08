@@ -530,6 +530,11 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

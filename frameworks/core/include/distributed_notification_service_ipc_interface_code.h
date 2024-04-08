@@ -138,6 +138,7 @@ namespace Notification {
         GET_SMART_REMINDER_ENABLED,
         GET_SLOT_BY_BUNDLE,
         CANCEL_AS_BUNDLE_WITH_AGENT,
+        SET_TARGET_DEVICE_STATUS,
     };
 }
 }

@@ -512,5 +512,10 @@ ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
+
+ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status);
+}
 }  // namespace Notification
 }  // namespace OHOS
