@@ -30,7 +30,7 @@ void ReminderConfigChangeObserver::OnConfigurationUpdated(const AppExecFwk::Conf
         return;
     }
     std::string newLanguageInfo = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    if (newLanguageInfo != languageInfo_) {
+    if (!newLanguageInfo.empty() && newLanguageInfo != languageInfo_) {
         ANSR_LOGD("language change: %{public}s -> %{public}s", languageInfo_.c_str(), newLanguageInfo.c_str());
         reminderDataMgr->OnLanguageChanged();
         languageInfo_ = newLanguageInfo;
