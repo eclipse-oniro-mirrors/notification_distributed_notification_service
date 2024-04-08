@@ -75,7 +75,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         }
         napi_get_value_bool(env, argv[PARAM2], &params.enable);
     }
-    
+
     return Common::NapiGetNull(env);
 }
 
@@ -123,7 +123,7 @@ napi_value NapiSetDistributedEnabledByBundle(napi_env env, napi_callback_info in
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetDistributedEnableByBundle work excute.");
+            ANS_LOGD("NapiSetDistributedEnableByBundle work excute.");
             AsyncCallbackDistributedEnable *asynccallbackinfo = static_cast<AsyncCallbackDistributedEnable *>(data);
             if (asynccallbackinfo) {
                 std::string deviceType = asynccallbackinfo->params.deviceType;
@@ -199,7 +199,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         }
         napi_get_value_bool(env, argv[PARAM1], &params.enable);
     }
-    
+
     return Common::NapiGetNull(env);
 }
 
@@ -227,7 +227,7 @@ napi_value NapiSetSmartReminderEnabled(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetSmartReminderEnabled work excute.");
+            ANS_LOGD("NapiSetSmartReminderEnabled work excute.");
             AsyncCallbackSmartReminderEnabled *asynccallbackinfo =
                 static_cast<AsyncCallbackSmartReminderEnabled *>(data);
             if (asynccallbackinfo) {
@@ -295,7 +295,7 @@ napi_value NapiIsSmartReminderEnabled(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiIsSmartReminderEnabled work excute.");
+            ANS_LOGD("NapiIsSmartReminderEnabled work excute.");
             AsyncCallbackSmartReminderEnabled *asynccallbackinfo =
                 static_cast<AsyncCallbackSmartReminderEnabled *>(data);
             if (asynccallbackinfo) {

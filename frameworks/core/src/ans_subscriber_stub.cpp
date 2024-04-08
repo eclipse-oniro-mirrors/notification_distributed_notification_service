@@ -122,7 +122,7 @@ ErrCode AnsSubscriberStub::HandleOnConsumedMap(MessageParcel &data, MessageParce
 
 ErrCode AnsSubscriberStub::HandleOnConsumedListMap(MessageParcel &data, MessageParcel &reply)
 {
-    ANS_LOGI("Start handle notifications in consumed list.");
+    ANS_LOGD("Start handle notifications in consumed list.");
 
     std::vector<sptr<Notification>> notifications;
     if (!ReadParcelableVector(notifications, data)) {

@@ -42,7 +42,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
     // Asynchronous function call
     napi_create_async_work(env,
         nullptr, resourceName, [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetDoNotDisturbDate work excute.");
+            ANS_LOGD("NapiSetDoNotDisturbDate work excute.");
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
@@ -59,7 +59,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSetDoNotDisturbDate work complete.");
+            ANS_LOGD("NapiSetDoNotDisturbDate work complete.");
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -136,7 +136,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetDoNotDisturbDate work excute.");
+            ANS_LOGD("NapiGetDoNotDisturbDate work excute.");
             AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
@@ -195,7 +195,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSupportDoNotDisturbMode work excute.");
+            ANS_LOGD("NapiSupportDoNotDisturbMode work excute.");
             AsyncCallbackInfoSupportDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {
@@ -206,7 +206,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSupportDoNotDisturbMode work complete.");
+            ANS_LOGD("NapiSupportDoNotDisturbMode work complete.");
             AsyncCallbackInfoSupportDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {

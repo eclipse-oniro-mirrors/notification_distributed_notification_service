@@ -258,7 +258,7 @@ napi_value Common::SetNotificationLiveViewContent(
 
     // pictureInfo?: {[key, string]: Array<image.pixelMap>}
     if (liveViewContent->GetPicture().empty()) {
-        ANS_LOGI("No pictures in live view.");
+        ANS_LOGD("No pictures in live view.");
         return NapiGetBoolean(env, true);
     }
 

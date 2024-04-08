@@ -57,7 +57,7 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSubscribeLocalLiveView work excute.");
+            ANS_LOGD("NapiSubscribeLocalLiveView work excute.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -68,7 +68,7 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
                 NotificationHelper::SubscribeLocalLiveViewNotification(*(asynccallbackinfo->objectInfo));
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSubscribeLocalLiveView work complete.");
+            ANS_LOGD("NapiSubscribeLocalLiveView work complete.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -178,7 +178,7 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiTriggerLocalLiveView work excute.");
+            ANS_LOGD("NapiTriggerLocalLiveView work excute.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -190,7 +190,7 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
                     asynccallbackinfo->notificationId, asynccallbackinfo->buttonOption);
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSubscribeLocalLiveView work complete.");
+            ANS_LOGD("NapiSubscribeLocalLiveView work complete.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;

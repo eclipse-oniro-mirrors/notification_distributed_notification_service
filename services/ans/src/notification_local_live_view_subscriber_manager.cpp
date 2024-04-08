@@ -92,14 +92,14 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
         ANS_LOGE("queue is nullptr");
         return result;
     }
-    ANS_LOGI("ffrt start!");
+    ANS_LOGD("ffrt start!");
     ffrt::task_handle handler =
         notificationButtonQueue_->submit_h(std::bind([this, &subscriber, &bundleOption, &result]() {
-            ANS_LOGI("ffrt enter!");
+            ANS_LOGD("ffrt enter!");
             result = this->AddSubscriberInner(subscriber, bundleOption);
     }));
     notificationButtonQueue_->wait(handler);
-    ANS_LOGI("ffrt end!");
+    ANS_LOGD("ffrt end!");
     return result;
 }
 
@@ -117,14 +117,14 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveLocalLiveViewSubscribe
         ANS_LOGE("queue is nullptr");
         return result;
     }
-    ANS_LOGI("ffrt start!");
+    ANS_LOGD("ffrt start!");
     ffrt::task_handle handler = notificationButtonQueue_->submit_h(std::bind([this, &subscriber,
         &subscribeInfo, &result]() {
-        ANS_LOGI("ffrt enter!");
+        ANS_LOGD("ffrt enter!");
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationButtonQueue_->wait(handler);
-    ANS_LOGI("ffrt end!");
+    ANS_LOGD("ffrt end!");
     return result;
 }
 
@@ -140,9 +140,9 @@ void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponse(const spt
         std::bind(&NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner,
             this, notification, buttonOption);
 
-    ANS_LOGI("ffrt start!");
+    ANS_LOGD("ffrt start!");
     notificationButtonQueue_->submit(NotifyTriggerResponseFunc);
-    ANS_LOGI("ffrt end!");
+    ANS_LOGD("ffrt end!");
 }
 
 void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &object)
@@ -153,7 +153,7 @@ void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemote
         return;
     }
     ffrt::task_handle handler = notificationButtonQueue_->submit_h(std::bind([this, object]() {
-        ANS_LOGI("ffrt enter!");
+        ANS_LOGD("ffrt enter!");
         std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
             ANS_LOGW("subscriber removed.");
@@ -161,9 +161,9 @@ void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemote
             buttonRecordList_.remove(record);
         }
     }));
-    ANS_LOGI("ffrt start!");
+    ANS_LOGD("ffrt start!");
     notificationButtonQueue_->wait(handler);
-    ANS_LOGI("ffrt end!");
+    ANS_LOGD("ffrt end!");
 }
 
 std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::FindSubscriberRecord(
@@ -255,7 +255,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveSubscriberInner(
 void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner(
     const sptr<Notification> &notification, const sptr<NotificationButtonOption> buttonOption)
 {
-    ANS_LOGI("ffrt enter!");
+    ANS_LOGD("ffrt enter!");
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
 
     int32_t sendUserId = notification->GetUid();

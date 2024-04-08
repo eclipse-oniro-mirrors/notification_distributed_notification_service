@@ -48,7 +48,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiDisplayBadge work excute.");
+            ANS_LOGD("NapiDisplayBadge work excute.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d enable = %{public}d",
@@ -61,7 +61,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiDisplayBadge work complete.");
+            ANS_LOGD("NapiDisplayBadge work complete.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -135,7 +135,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiIsBadgeDisplayed work excute.");
+            ANS_LOGD("NapiIsBadgeDisplayed work excute.");
             AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
@@ -261,7 +261,7 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetBadgeNumber work excute.");
+            ANS_LOGD("NapiSetBadgeNumber work excute.");
             AsyncCallbackSetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("option.badgeNumber: %{public}d", asynccallbackinfo->params.badgeNumber);

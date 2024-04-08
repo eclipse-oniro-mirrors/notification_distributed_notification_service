@@ -169,7 +169,7 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("EnableNotification work excute.");
+            ANS_LOGD("EnableNotification work excute.");
             AsyncCallbackInfoEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoEnable *>(data);
             if (asynccallbackinfo) {
                 std::string deviceId {""};
@@ -243,7 +243,7 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsNotificationEnabled work excute.");
+            ANS_LOGD("IsNotificationEnabled work excute.");
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
@@ -304,7 +304,7 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsNotificationEnabledSelf work excute.");
+            ANS_LOGD("IsNotificationEnabledSelf work excute.");
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {

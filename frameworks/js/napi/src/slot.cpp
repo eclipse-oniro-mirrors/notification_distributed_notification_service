@@ -695,7 +695,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("AddSlot work excute.");
+            ANS_LOGD("AddSlot work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlot *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGD("asynccallbackinfo is not nullptr.");
@@ -708,7 +708,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("AddSlot work complete.");
+            ANS_LOGD("AddSlot work complete.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlot *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -760,14 +760,14 @@ napi_value AddSlots(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("AddSlots work excute.");
+            ANS_LOGD("AddSlots work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::AddNotificationSlots(asynccallbackinfo->slots);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("AddSlots work complete.");
+            ANS_LOGD("AddSlots work complete.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlots *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -858,7 +858,7 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetSlot(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("GetSlot work complete.");
+    ANS_LOGD("GetSlot work complete.");
 
     if (!data) {
         ANS_LOGE("Invalid async callback data");

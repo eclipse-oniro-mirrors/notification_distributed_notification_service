@@ -143,7 +143,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("DisplayBadge work excute.");
+            ANS_LOGD("DisplayBadge work excute.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("option.bundle : %{public}s option.uid : %{public}d enable = %{public}d",
@@ -156,7 +156,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("DisplayBadge work complete.");
+            ANS_LOGD("DisplayBadge work complete.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -231,7 +231,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsBadgeDisplayed work excute.");
+            ANS_LOGD("IsBadgeDisplayed work excute.");
             AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {

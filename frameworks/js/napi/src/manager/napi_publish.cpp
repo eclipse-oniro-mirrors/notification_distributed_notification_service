@@ -47,10 +47,10 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiPublish work excute.");
+            ANS_LOGD("NapiPublish work excute.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("notificationId : %{public}d, contentType : "
+                ANS_LOGD("notificationId : %{public}d, contentType : "
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
@@ -60,7 +60,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiPublish work complete.");
+            ANS_LOGD("NapiPublish work complete.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -72,7 +72,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
-            ANS_LOGI("Publish napi_create_async_work complete end");
+            ANS_LOGD("Publish napi_create_async_work complete end");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -115,7 +115,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("NapiShowNotification work excute notificationId = %{public}d, contentType = "
+                ANS_LOGD("NapiShowNotification work excute notificationId = %{public}d, contentType = "
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
@@ -170,10 +170,10 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiPublishAsBundle work excute.");
+            ANS_LOGD("NapiPublishAsBundle work excute.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("notificationId = %{public}d, contentType = "
+                ANS_LOGD("notificationId = %{public}d, contentType = "
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
@@ -183,7 +183,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiPublishAsBundle work complete.");
+            ANS_LOGD("NapiPublishAsBundle work complete.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));

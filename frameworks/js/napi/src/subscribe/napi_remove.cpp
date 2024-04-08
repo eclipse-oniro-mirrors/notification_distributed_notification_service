@@ -115,7 +115,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiRemoveAll work excute.");
+            ANS_LOGD("NapiRemoveAll work excute.");
             AsyncCallbackInfoRemove *asynccallbackinfo = static_cast<AsyncCallbackInfoRemove *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {
@@ -130,7 +130,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiRemoveAll work complete.");
+            ANS_LOGD("NapiRemoveAll work complete.");
             AsyncCallbackInfoRemove *asynccallbackinfo = static_cast<AsyncCallbackInfoRemove *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
