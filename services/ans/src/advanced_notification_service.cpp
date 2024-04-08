@@ -80,7 +80,7 @@ constexpr int32_t DIALOG_DEFAULT_HEIGHT = 240;
 constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
-constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 3;
+constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
 
 const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
 const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
@@ -570,6 +570,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         }
 
         UpdateRecentNotification(record->notification, false, 0);
+        UpdateSlotAuthInfo(record);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());
         if (IsNeedNotifyConsumed(record->request)) {
@@ -586,7 +587,6 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         if (result != ERR_OK) {
             return;
         }
-        result = UpdateSlotAuthInfo(record);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
@@ -706,6 +706,9 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
         result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
         ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
             slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
+        if (result != ERR_OK) {
+            ANS_LOGE("UpdateSlotAuthInfo failed result: %{public}d.", result);
+        }
     }
     return result;
 }
