@@ -470,10 +470,12 @@ public:
      *
      * @param env Indicates the environment that the API is invoked under
      * @param time Indicates a NotificationTime object to be converted
+     * @param isInitialTimeExist Indicates is initialTime exists
      * @param result Indicates a js object to be set
      * @return Returns the null object if success, returns the null value otherwise
      */
-    static napi_value SetTime(const napi_env &env, const NotificationTime &time, napi_value &result);
+    static napi_value SetTime(const napi_env &env, const NotificationTime &time,
+        napi_value &result, bool isInitialTimeExist);
 
     /**
      * @brief Sets a js NotificationLiveViewContent object by specified NotificationBasicContent object
