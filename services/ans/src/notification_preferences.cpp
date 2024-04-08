@@ -903,6 +903,15 @@ int32_t NotificationPreferences::SetKvToDb(
     return preferncesDB_->SetKvToDb(key, value);
 }
 
+int32_t NotificationPreferences::SetByteToDb(
+    const std::string &key, const std::vector<uint8_t> &value)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->SetByteToDb(key, value);
+}
+
 int32_t NotificationPreferences::GetKvFromDb(
     const std::string &key, std::string &value)
 {
@@ -910,6 +919,15 @@ int32_t NotificationPreferences::GetKvFromDb(
         return ERR_ANS_SERVICE_NOT_READY;
     }
     return preferncesDB_->GetKvFromDb(key, value);
+}
+
+int32_t NotificationPreferences::GetByteFromDb(
+    const std::string &key, std::vector<uint8_t> &value)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->GetByteFromDb(key, value);
 }
 
 int32_t NotificationPreferences::GetBatchKvsFromDb(

@@ -968,6 +968,15 @@ public:
      * @return Returns cancel result.
      */
     static ErrCode CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id);
+
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
 };
 }  // namespace Notification
 }  // namespace OHOS

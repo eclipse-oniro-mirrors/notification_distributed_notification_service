@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <string>
 
 #define private public
 #define protected public
@@ -127,6 +128,42 @@ HWTEST_F(NotificationSubscribeInfoTest, ReadFromParcel_00001, Function | SmallTe
     NotificationSubscribeInfo subscribeInfo;
     auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
+}
+
+/**
+ * @tc.name: AddDeviceType_00001
+ * @tc.desc: Test AddDeviceType.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, AddDeviceType_00001, Function | SmallTest | Level1)
+{
+    std::string deviceType = "test";
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->AddDeviceType(deviceType);
+    EXPECT_EQ(rrc->GetDeviceType(), deviceType);
+}
+
+/**
+ * @tc.name: Dump_00001
+ * @tc.desc: Test Dump.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, Dump_00001, Function | SmallTest | Level1)
+{
+    std::string deviceType = "test";
+    std::string appName = "AppName";
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->AddDeviceType(deviceType);
+    rrc->AddAppName(appName);
+    std::string res = "NotificationSubscribeInfo{ "
+            "appNames = [" + appName + ", ]" +
+            "deviceType = " + deviceType +
+            " }";
+    EXPECT_EQ(res, rrc->Dump());
 }
 }
 }

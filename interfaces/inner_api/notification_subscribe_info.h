@@ -73,6 +73,20 @@ public:
     int32_t GetAppUserId() const;
 
     /**
+     * @brief Adds application deviceType.
+     *
+     * @param appNames Indicates the deviceType of application.
+     **/
+    void AddDeviceType(const std::string deviceType);
+
+    /**
+     * @brief Obtains the deviceType of application.
+     *
+     * @return Returns the deviceType of application.
+     **/
+    std::string GetDeviceType() const;
+
+    /**
      * @brief Marshals a NotificationSubscribeInfo object into a Parcel.
      *
      * @param parcel Indicates the Parcel object for marshalling.
@@ -101,6 +115,7 @@ private:
 private:
     std::vector<std::string> appNames_ {};
     int32_t userId_ {-1};
+    std::string deviceType_;
 };
 }  // namespace Notification
 }  // namespace OHOS

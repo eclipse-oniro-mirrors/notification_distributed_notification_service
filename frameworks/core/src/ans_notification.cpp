@@ -1627,5 +1627,16 @@ ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, b
 
     return ansManagerProxy_->IsSmartReminderEnabled(deviceType, enabled);
 }
+
+ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return ansManagerProxy_->SetTargetDeviceStatus(deviceType, status);
+}
 }  // namespace Notification
 }  // namespace OHOS

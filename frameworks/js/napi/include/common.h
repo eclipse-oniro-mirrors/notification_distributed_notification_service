@@ -31,6 +31,7 @@ using namespace OHOS::Notification;
 
 constexpr int32_t STR_MAX_SIZE = 200;
 constexpr int32_t LONG_STR_MAX_SIZE = 1024;
+constexpr uint8_t OPERATION_MAX_TYPE = 3;
 constexpr int8_t NO_ERROR = 0;
 constexpr int8_t ERROR = -1;
 constexpr uint8_t PARAM0 = 0;
@@ -83,6 +84,7 @@ struct NotificationSubscribeInfo {
     std::vector<std::string> bundleNames;
     int32_t userId = 0;
     bool hasSubscribeInfo = false;
+    std::string deviceType;
 };
 
 struct CallbackPromiseInfo {

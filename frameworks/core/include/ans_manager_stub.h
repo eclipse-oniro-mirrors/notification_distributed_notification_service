@@ -874,6 +874,15 @@ public:
      */
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
 
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+
 private:
     static const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -971,6 +980,7 @@ private:
     ErrCode HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

@@ -140,6 +140,7 @@ namespace Notification {
         CANCEL_AS_BUNDLE_WITH_AGENT,
         ADD_DO_NOTDISTURB_PROFILES,
         REMOVE_DO_NOT_DISTURB_PROFILES,
+        SET_TARGET_DEVICE_STATUS,
     };
 }
 }

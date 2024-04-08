@@ -212,6 +212,9 @@ const static std::string KEY_SLOT_AUTHORIZED_STATUS = "authorizedStatus";
  */
 const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
 
+constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
+constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
+
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
     NotificationPreferencesDatabase::slotMap_ = {
@@ -1734,6 +1737,21 @@ int32_t NotificationPreferencesDatabase::SetKvToDb(
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::SetByteToDb(const std::string &key, const std::vector<uint8_t> &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+    int32_t result = rdbDataManager_->InsertData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationPreferencesDatabase::GetKvFromDb(
     const std::string &key, std::string &value)
 {
@@ -1749,6 +1767,23 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
     }
 
     ANS_LOGD("Key:%{public}s, value:%{public}s.", key.c_str(), value.c_str());
+
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationPreferencesDatabase::GetByteFromDb(
+    const std::string &key, std::vector<uint8_t> &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->QueryData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get byte failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
 
     return NativeRdb::E_OK;
 }
@@ -1802,12 +1837,24 @@ bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &age
         return false;
     }
     ANS_LOGD("The agent relationship is :%{public}s.", agentShip.c_str());
-    std::string target = "{\"service\":'" + agentBundleName + "',\"app\":'" + sourceBundleName + "'}";
-    std::string::size_type idx = agentShip.find(target);
-    if (idx == std::string::npos) {
+    nlohmann::json jsonAgentShip = nlohmann::json::parse(agentShip, nullptr, false);
+    if (jsonAgentShip.is_discarded() || !jsonAgentShip.is_array()) {
+        ANS_LOGE("Parse agent ship failed due to data is discarded or not array");
         return false;
     }
-    return true;
+
+    nlohmann::json jsonTarget;
+    jsonTarget[RELATIONSHIP_JSON_KEY_SERVICE] = agentBundleName;
+    jsonTarget[RELATIONSHIP_JSON_KEY_APP] = sourceBundleName;
+    bool isAgentRelationship = false;
+    for (const auto &item : jsonAgentShip) {
+        if (jsonTarget == item) {
+            isAgentRelationship = true;
+            break;
+        }
+    }
+
+    return isAgentRelationship;
 }
 
 bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::string deviceType,

@@ -1156,6 +1156,43 @@ HWTEST_F(ReminderRequestCalendarTest, DeserializationRRule_00001, Function | Sma
     std::string str;
     calendar->DeserializationRRule(str);
     EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    str = "asdfwsbsdf";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    // pkgName
+    str = "{}";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    str = R"({"pkgName":1})";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    // abilityName
+    str = R"({"pkgName":"com.example.myapplication"})";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    str = R"({"pkgName":"com.example.myapplication","abilityName":1})";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    // uri
+    str = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility"})";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    str = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":1})";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_, nullptr);
+
+    str = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"uri"})";
+    calendar->DeserializationRRule(str);
+    EXPECT_EQ(calendar->rruleWantAgentInfo_->pkgName, "com.example.myapplication");
+    EXPECT_EQ(calendar->rruleWantAgentInfo_->abilityName, "MainAbility");
+    EXPECT_EQ(calendar->rruleWantAgentInfo_->uri, "uri");
 }
 }
 }

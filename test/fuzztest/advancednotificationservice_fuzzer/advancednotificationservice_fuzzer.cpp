@@ -131,6 +131,9 @@ namespace OHOS {
         advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = static_cast<int32_t>(GetU32Data(data));
         advancedNotificationService.SetBadgeNumber(badgeNum);
+        sptr<Notification::AnsDialogCallback> dialogCallback = NULL;
+        sptr<IRemoteObject> callerToken = NULL;
+        advancedNotificationService.RequestEnableNotification(stringData, dialogCallback, callerToken);
 
         return true;
     }

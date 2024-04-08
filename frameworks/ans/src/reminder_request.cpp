@@ -83,6 +83,33 @@ const uint8_t ReminderRequest::SUNDAY = 7;
 const uint8_t ReminderRequest::HOURS_PER_DAY = 24;
 const uint16_t ReminderRequest::SECONDS_PER_HOUR = 3600;
 
+template <typename T>
+void GetJsonValue(const nlohmann::json& root, const std::string& name, T& value)
+{
+    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::is_same_v<std::string, ValueType>) {
+        if (!root.contains(name) || !root[name].is_string()) {
+            value = T();
+            return;
+        }
+        value = root[name].get<std::string>();
+        return;
+    }
+    value = T();
+}
+
+inline static bool IsVaildButtonType(const std::string& type)
+{
+    // check action button type range
+    if (type.size() != 1) {
+        return false;
+    }
+    if (type[0] >= '0' && type[0] <= '3') {
+        return true;
+    }
+    return false;
+}
+
 ReminderRequest::ReminderRequest()
 {
     InitServerObj();
@@ -560,22 +587,37 @@ void ReminderRequest::RecoverFromDbBase(const std::shared_ptr<NativeRdb::ResultS
 
 void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
 {
-    nlohmann::json root = nlohmann::json::parse(jsonString);
-    std::string type = root.at("type").get<std::string>();
-    std::string title = root.at("title").get<std::string>();
-    std::string resource = root.at("resource").get<std::string>();
+    if (!nlohmann::json::accept(jsonString)) {
+        ANSR_LOGW("not a json string!");
+        return;
+    }
+    nlohmann::json root = nlohmann::json::parse(jsonString, nullptr, false);
+    if (root.is_discarded()) {
+        ANSR_LOGW("parse json data failed!");
+        return;
+    }
+    std::string type;
+    GetJsonValue<std::string>(root, "type", type);
+    if (!IsVaildButtonType(type)) {
+        ANSR_LOGW("unkown button type!");
+        return;
+    }
+    std::string title;
+    GetJsonValue<std::string>(root, "title", title);
+    std::string resource;
+    GetJsonValue<std::string>(root, "resource", resource);
     auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
-    if (!root["wantAgent"].empty()) {
+    if (root.contains("wantAgent") && !root["wantAgent"].empty()) {
         nlohmann::json wantAgent = root["wantAgent"];
-        buttonWantAgent->pkgName = wantAgent.at("pkgName").get<std::string>();
-        buttonWantAgent->abilityName = wantAgent.at("abilityName").get<std::string>();
+        GetJsonValue<std::string>(wantAgent, "pkgName", buttonWantAgent->pkgName);
+        GetJsonValue<std::string>(wantAgent, "abilityName", buttonWantAgent->abilityName);
     }
     auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
-    if (!root["dataShareUpdate"].empty()) {
+    if (root.contains("dataShareUpdate") && !root["dataShareUpdate"].empty()) {
         nlohmann::json dataShareUpdate = root["dataShareUpdate"];
-        buttonDataShareUpdate->uri = dataShareUpdate.at("uri").get<std::string>();
-        buttonDataShareUpdate->equalTo = dataShareUpdate.at("equalTo").get<std::string>();
-        buttonDataShareUpdate->valuesBucket = dataShareUpdate.at("valuesBucket").get<std::string>();
+        GetJsonValue<std::string>(dataShareUpdate, "uri", buttonDataShareUpdate->uri);
+        GetJsonValue<std::string>(dataShareUpdate, "equalTo", buttonDataShareUpdate->equalTo);
+        GetJsonValue<std::string>(dataShareUpdate, "valuesBucket", buttonDataShareUpdate->valuesBucket);
     }
     SetActionButton(title, ActionButtonType(std::stoi(type, nullptr)),
         resource, buttonWantAgent, buttonDataShareUpdate);
@@ -644,7 +686,11 @@ std::vector<std::string> ReminderRequest::StringSplit(std::string source, const 
 
 void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type)
 {
-    nlohmann::json root = nlohmann::json::parse(wantAgentInfo);
+    nlohmann::json root = nlohmann::json::parse(wantAgentInfo, nullptr, false);
+    if (root.is_discarded()) {
+        ANSR_LOGW("parse json data failed");
+        return;
+    }
     if (!root.contains("pkgName") || !root["pkgName"].is_string() ||
         !root.contains("abilityName") || !root["abilityName"].is_string() ||
         !root.contains("uri") || !root["uri"].is_string() ||
@@ -682,11 +728,11 @@ void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, c
 
 void ReminderRequest::RecoverWantAgent(const std::string &wantAgentInfo, const uint8_t &type)
 {
-    std::vector<std::string> info = StringSplit(wantAgentInfo, ReminderRequest::SEP_WANT_AGENT);
-    if (info.size() == 1) {
+    if (nlohmann::json::accept(wantAgentInfo)) {
         RecoverWantAgentByJson(wantAgentInfo, type);
         return;
     }
+    std::vector<std::string> info = StringSplit(wantAgentInfo, ReminderRequest::SEP_WANT_AGENT);
     uint8_t minLen = 2;
     if (info.size() < minLen) {
         ANSR_LOGW("RecoverWantAgent fail");

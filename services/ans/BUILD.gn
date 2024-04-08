@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,6 +45,7 @@ ohos_shared_library("libans") {
 
   sources = [
     "src/access_token_helper.cpp",
+    "src/advanced_datashare_helper.cpp",
     "src/advanced_notification_event_service.cpp",
     "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
@@ -59,6 +60,7 @@ ohos_shared_library("libans") {
     "src/advanced_notification_subscriber_service.cpp",
     "src/advanced_notification_utils.cpp",
     "src/bundle_manager_helper.cpp",
+    "src/distributed_device_status.cpp",
     "src/event_report.cpp",
     "src/notification_config_parse.cpp",
     "src/notification_dialog.cpp",
@@ -104,6 +106,7 @@ ohos_shared_library("libans") {
   }
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",

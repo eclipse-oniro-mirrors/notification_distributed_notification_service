@@ -166,6 +166,27 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value)
+{
+    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("notification rdb is null");
+        return NativeRdb::E_ERROR;
+    }
+    int64_t rowId = -1;
+    NativeRdb::ValuesBucket valuesBucket;
+    valuesBucket.PutString(NOTIFICATION_KEY, key);
+    valuesBucket.PutBlob(NOTIFICATION_VALUE, value);
+    int32_t ret = rdbStore_->InsertWithConflictResolution(
+        rowId, notificationRdbConfig_.tableName, valuesBucket,
+        NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("Insert operation failed, result: %{public}d, key=%{public}s.", ret, key.c_str());
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values)
 {
     ANS_LOGD("InsertBatchData start");
@@ -267,6 +288,36 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &valu
         }
         absSharedResultSet->Close();
     }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::QueryData(const std::string &key, std::vector<uint8_t> &value)
+{
+    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("notification rdb is null");
+        return NativeRdb::E_ERROR;
+    }
+    NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
+    absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
+    auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    if (absSharedResultSet == nullptr) {
+        ANS_LOGD("absSharedResultSet failed");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("GoToFirstRow failed.It is empty!, key=%{public}s", key.c_str());
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    ret = absSharedResultSet->GetBlob(NOTIFICATION_VALUE_INDEX, value);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("GetString value failed");
+        return NativeRdb::E_ERROR;
+    }
+    absSharedResultSet->Close();
+
     return NativeRdb::E_OK;
 }
 

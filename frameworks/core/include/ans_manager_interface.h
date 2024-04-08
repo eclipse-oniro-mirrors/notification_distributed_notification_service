@@ -881,6 +881,15 @@ public:
      * @return Returns cancel result.
      */
     virtual ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) = 0;
+
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS
