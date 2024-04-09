@@ -1391,8 +1391,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0100, TestSize.Lev
 {
     int32_t userId = 1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    sptr<NotificationDoNotDisturbProfile> profile = 
-    new (std::nothrow) NotificationDoNotDisturbProfile();
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(0);
     profiles.emplace_back(profile);
     auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
@@ -1422,8 +1421,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0300, TestSize.Lev
 {
     int32_t userId = 1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    sptr<NotificationDoNotDisturbProfile> profile = 
-    new (std::nothrow) NotificationDoNotDisturbProfile();
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(1);
     profiles.emplace_back(profile);
     auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
@@ -1439,8 +1437,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0100, TestSize.
 {
     int32_t userId = 1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    sptr<NotificationDoNotDisturbProfile> profile = 
-    new (std::nothrow) NotificationDoNotDisturbProfile();
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(0);
     profiles.emplace_back(profile);
     auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);
@@ -1471,8 +1468,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0300, TestSize.
 {
     int32_t userId = 1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    sptr<NotificationDoNotDisturbProfile> profile = 
-    new (std::nothrow) NotificationDoNotDisturbProfile();
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(1);
     profiles.emplace_back(profile);
     auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);

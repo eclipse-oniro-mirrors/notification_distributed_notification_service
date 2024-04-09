@@ -1323,6 +1323,7 @@ HWTEST_F(NotificationHelperTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level
     EXPECT_EQ(ERR_ANS_INVALID_PARAM, ret);
 }
 
+/**
  * @tc.name: SetTargetDeviceStatus_0100
  * @tc.desc: test SetTargetDeviceStatus with parameters
  * @tc.type: FUNC
