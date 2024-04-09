@@ -647,6 +647,24 @@ public:
     ErrCode GetDoNotDisturbDate(NotificationDoNotDisturbDate &doNotDisturbDate);
 
     /**
+     * @brief Add the do not disturb profiles.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param doNotDisturbProfiles Indicates the do not disturb profiles to add.
+     * @return Returns add do not disturb profiles result.
+     */
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    /**
+     * @brief Remove the do not disturb profiles.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param doNotDisturbProfiles Indicates the do not disturb profiles to remove.
+     * @return Returns remove do not disturb profiles result.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    /**
      * @brief Obtains the flag that whether to support do not disturb mode.
      *
      * @param doesSupport Specifies whether to support do not disturb mode.
@@ -1001,6 +1019,15 @@ public:
      * @return Returns cancel result.
      */
     ErrCode CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id);
+
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
 
 private:
     /**

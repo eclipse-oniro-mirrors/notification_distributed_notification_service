@@ -94,7 +94,7 @@ napi_value GetAllActiveNotifications(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetAllActiveNotifications work excute.");
+            ANS_LOGD("GetAllActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -192,7 +192,7 @@ napi_value GetActiveNotifications(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetActiveNotifications work excute.");
+            ANS_LOGD("GetActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -268,7 +268,7 @@ napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetActiveNotificationCount work excute.");
+            ANS_LOGD("GetActiveNotificationCount work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =

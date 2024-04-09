@@ -1614,7 +1614,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Subscribe work excuted.");
+            ANS_LOGD("Subscribe work excuted.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -1636,7 +1636,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("Subscribe work complete.");
+            ANS_LOGD("Subscribe work complete.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;

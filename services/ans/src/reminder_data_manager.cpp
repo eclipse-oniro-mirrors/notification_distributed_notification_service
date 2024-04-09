@@ -510,19 +510,14 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
     }
     std::string packageName = reminder->GetBundleName();
     std::string groupId = reminder->GetGroupId();
-    if (packageName.empty() || groupId.empty()) {
-        ANSR_LOGD("reminder packageName is null or default close reminder, \
-            the group id is not set, this reminder can not close by groupId");
-        CloseReminder(reminder, cancelNotification);
-        UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-        StartRecentReminder();
-        return;
+    if (!(packageName.empty() || groupId.empty())) {
+        ANSR_LOGD("this reminder can close by groupId");
+        CloseRemindersByGroupId(reminderId, packageName, groupId);
     }
-    CloseRemindersByGroupId(reminderId, packageName, groupId);
     CloseReminder(reminder, cancelNotification);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-    StartRecentReminder();
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    StartRecentReminder();
 }
 
 void ReminderDataManager::CloseRemindersByGroupId(const int32_t &oldReminderId, const std::string &packageName,
@@ -963,7 +958,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
             continue;
         }
-        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES);
+        ReminderDataManager::AsyncStartExtensionAbility((*it), CONNECT_EXTENSION_MAX_RETRY_TIMES);
         if (!isAlerting) {
             playSoundReminder = (*it);
             isAlerting = true;
@@ -1877,12 +1872,22 @@ void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderReques
     UpdateReminderLanguage(reminder);
 }
 
-void ReminderDataManager::OnConfigurationChanged(const AppExecFwk::Configuration &configuration)
+void ReminderDataManager::OnLanguageChanged()
 {
     ANSR_LOGI("System language config changed.");
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        UpdateReminderLanguage(*it);
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+        for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            UpdateReminderLanguage(*it);
+        }
+    }
+    std::vector<sptr<ReminderRequest>> showedReminder;
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        showedReminder = showedReminderVector_;
+    }
+    for (auto it = showedReminder.begin(); it != showedReminder.end(); ++it) {
+        ShowReminder((*it), false, false, false, false);
     }
 }
 

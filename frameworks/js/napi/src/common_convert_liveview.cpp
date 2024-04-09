@@ -92,7 +92,9 @@ napi_value Common::SetNotificationLocalLiveViewContent(
     if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::TIME)) {
         napi_value time = nullptr;
         napi_create_object(env, &time);
-        if (!SetTime(env, localLiveViewContent->GetTime(), time)) {
+        bool flag = localLiveViewContent->isFlagExist(
+            NotificationLocalLiveViewContent::LiveViewContentInner::INITIAL_TIME);
+        if (!SetTime(env, localLiveViewContent->GetTime(), time, flag)) {
             ANS_LOGE("SetMessageUser call failed");
             return NapiGetBoolean(env, false);
         }
@@ -152,14 +154,17 @@ napi_value Common::SetProgress(const napi_env &env, const NotificationProgress &
     return NapiGetBoolean(env, true);
 }
 
-napi_value Common::SetTime(const napi_env &env, const NotificationTime &time, napi_value &result)
+napi_value Common::SetTime(const napi_env &env, const NotificationTime &time,
+    napi_value &result, bool isInitialTimeExist)
 {
     ANS_LOGD("enter");
 
     napi_value value = nullptr;
     // initialTime: int32_t
-    napi_create_int32(env, time.GetInitialTime(), &value);
-    napi_set_named_property(env, result, "initialTime", value);
+    if (isInitialTimeExist) {
+        napi_create_int32(env, time.GetInitialTime(), &value);
+        napi_set_named_property(env, result, "initialTime", value);
+    }
 
     // isCountDown: bool
     napi_get_boolean(env, time.GetIsCountDown(), &value);
@@ -258,7 +263,7 @@ napi_value Common::SetNotificationLiveViewContent(
 
     // pictureInfo?: {[key, string]: Array<image.pixelMap>}
     if (liveViewContent->GetPicture().empty()) {
-        ANS_LOGI("No pictures in live view.");
+        ANS_LOGD("No pictures in live view.");
         return NapiGetBoolean(env, true);
     }
 
@@ -589,6 +594,7 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         }
         napi_get_value_int32(env, result, &intValue);
         time.SetInitialTime(intValue);
+        content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::INITIAL_TIME);
         ANS_LOGD("time initialTime = %{public}d", intValue);
     }
 
@@ -765,6 +771,12 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
             return nullptr;
         }
         liveViewContent->SetExtraInfo(extras);
+    }
+
+    //isOnlyLocalUpdate_?: boolean
+    bool isLocalUpdateOnly = false;
+    if (AppExecFwk::UnwrapBooleanByPropertyName(env, contentResult, "isLocalUpdateOnly", isLocalUpdateOnly)) {
+        liveViewContent->SetIsOnlyLocalUpdate(isLocalUpdateOnly);
     }
 
     // pictureInfo?: {[key, string]: Array<image.pixelMap>}

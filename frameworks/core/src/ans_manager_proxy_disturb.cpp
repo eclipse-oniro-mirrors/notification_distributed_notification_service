@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,73 @@ ErrCode AnsManagerProxy::GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> 
         }
     }
 
+    return result;
+}
+
+ErrCode AnsManagerProxy::AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("The profiles is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("The profiles is exceeds limit.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!WriteParcelableVector(profiles, data)) {
+        ANS_LOGE("Write profiles vector error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact ErrCode is %{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Read result error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerProxy::RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("The profiles is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("The profiles is exceeds limit.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!WriteParcelableVector(profiles, data)) {
+        ANS_LOGE("Write profiles vector error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact ErrCode is %{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Read result error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return result;
 }
 

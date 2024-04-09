@@ -35,6 +35,7 @@
 #include "notification.h"
 #include "notification_bundle_option.h"
 #include "notification_dialog_manager.h"
+#include "notification_do_not_disturb_profile.h"
 #include "notification_record.h"
 #include "notification_slot_filter.h"
 #include "notification_sorting_map.h"
@@ -42,6 +43,7 @@
 #include "push_callback_interface.h"
 #include "system_event_observer.h"
 #include "notification_subscriber_manager.h"
+#include "distributed_device_status.h"
 
 namespace OHOS {
 namespace Notification {
@@ -556,6 +558,22 @@ public:
     ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
+     * @brief Add Do Not Disturb profiles.
+     *
+     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to add.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
+     * @brief Remove Do Not Disturb profiles.
+     *
+     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to remove.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
      * @brief Get whether Do Not Disturb mode is supported.
      *
      * @param doesSupport Indicates the flag that supports DND mode.
@@ -947,6 +965,14 @@ public:
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
 
     /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+    /**
      * @brief Reset pushcallback proxy
      */
     void ResetPushCallbackProxy();
@@ -1155,6 +1181,8 @@ private:
 
     ErrCode GetTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
+    ErrCode GetCommonTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
+        NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     void RecoverLiveViewFromDb();
@@ -1176,6 +1204,9 @@ private:
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
+    void QueryDoNotDisturbProfile(std::string &enable, std::string &profileId);
+    void CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record);
+    void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
         int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);
@@ -1201,6 +1232,8 @@ private:
     void RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void FillLockScreenPicture(const sptr<NotificationRequest> &newRequest,
         const sptr<NotificationRequest> &oldRequest);
+    static ErrCode SetLockScreenPictureToDb(const sptr<NotificationRequest> &request);
+    static ErrCode GetLockScreenPictureFromDb(NotificationRequest *request);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
@@ -1232,6 +1265,7 @@ private:
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
+    OHOS::Notification::DistributedDeviceStatus DistributedDeviceStatus_;
 };
 
 /**

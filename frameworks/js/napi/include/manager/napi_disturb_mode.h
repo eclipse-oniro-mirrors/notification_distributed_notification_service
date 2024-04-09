@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,8 @@ using namespace OHOS::Notification;
 napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info);
 napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info);
 napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info);
+napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info);
+napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_DISTURB_MODE_H

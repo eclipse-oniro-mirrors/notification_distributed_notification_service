@@ -511,6 +511,22 @@ public:
     ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
+     * @brief Add do not disturb Profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
+     * @brief Remove do not disturb Profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
      * @brief Get whether Do Not Disturb mode is supported.
      *
      * @param doesSupport Indicates the flag that supports DND mode.
@@ -856,6 +872,15 @@ public:
      */
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
 
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+    
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
 

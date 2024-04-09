@@ -32,6 +32,7 @@ NotificationSubscribeInfo::~NotificationSubscribeInfo()
 NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribeInfo &subscribeInfo)
 {
     appNames_ = subscribeInfo.GetAppNames();
+    deviceType_ = subscribeInfo.GetDeviceType();
 }
 
 void NotificationSubscribeInfo::AddAppName(const std::string appName)
@@ -59,11 +60,26 @@ int32_t NotificationSubscribeInfo::GetAppUserId() const
     return userId_;
 }
 
+void NotificationSubscribeInfo::AddDeviceType(const std::string deviceType)
+{
+    deviceType_ = deviceType;
+}
+
+std::string NotificationSubscribeInfo::GetDeviceType() const
+{
+    return deviceType_;
+}
+
 bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
 {
     // write appNames_
     if (!parcel.WriteStringVector(appNames_)) {
         ANS_LOGE("Can't write appNames_");
+        return false;
+    }
+    // write deviceType_
+    if (!parcel.WriteString(deviceType_)) {
+        ANS_LOGE("Can't write deviceType_");
         return false;
     }
     return true;
@@ -82,7 +98,16 @@ NotificationSubscribeInfo *NotificationSubscribeInfo::Unmarshalling(Parcel &parc
 
 bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
 {
-    parcel.ReadStringVector(&appNames_);
+    // read appNames_
+    if (!parcel.ReadStringVector(&appNames_)) {
+        ANS_LOGE("Can't read appNames_");
+        return false;
+    }
+    //read deviceType_
+    if (!parcel.ReadString(deviceType_)) {
+        ANS_LOGE("Can't read deviceType_");
+        return false;
+    }
     return true;
 }
 
@@ -95,6 +120,7 @@ std::string NotificationSubscribeInfo::Dump()
     }
     return "NotificationSubscribeInfo{ "
             "appNames = [" + appNames + "]" +
+            "deviceType = " + deviceType_ +
             " }";
 }
 }  // namespace Notification

@@ -316,6 +316,16 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -527,6 +537,11 @@ public:
     }
 
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
     {
         return ERR_ANS_INVALID_PARAM;
     }

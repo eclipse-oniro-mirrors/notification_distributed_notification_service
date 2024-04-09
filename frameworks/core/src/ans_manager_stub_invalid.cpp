@@ -374,6 +374,18 @@ ErrCode AnsManagerStub::GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     ANS_LOGE("AnsManagerStub::DoesSupportDoNotDisturbMode called!");
@@ -593,6 +605,12 @@ ErrCode AnsManagerStub::IsSmartReminderEnabled(const std::string &deviceType, bo
 ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
 {
     ANS_LOGE("Called.");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+{
+    ANS_LOGE("SetTargetDeviceStatus called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

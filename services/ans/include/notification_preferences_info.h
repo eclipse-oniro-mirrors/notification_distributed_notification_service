@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -310,9 +310,15 @@ public:
     void RemoveNotificationEnable(const int32_t userId);
     void RemoveDoNotDisturbDate(const int32_t userId);
     void SetBundleInfoFromDb(const BundleInfo &info, std::string bundleKey);
+    std::string MakeDoNotDisturbProfileKey(int32_t userId, int32_t profileId);
+    void AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    bool GetDoNotDisturbProfiles(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profiles);
+
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
     std::map<int32_t, sptr<NotificationDoNotDisturbDate>> doNotDisturbDate_;
+    std::map<std::string, sptr<NotificationDoNotDisturbProfile>> doNotDisturbProfiles_;
     std::map<std::string, BundleInfo> infos_;
 };
 }  // namespace Notification

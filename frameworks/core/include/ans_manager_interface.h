@@ -26,6 +26,7 @@
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_do_not_disturb_date.h"
+#include "notification_do_not_disturb_profile.h"
 #include "notification_request.h"
 #include "notification_slot.h"
 #include "notification_subscribe_info.h"
@@ -521,6 +522,22 @@ public:
     virtual ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) = 0;
 
     /**
+     * @brief Add do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) = 0;
+
+    /**
+     * @brief Remove do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) = 0;
+
+    /**
      * @brief Get whether Do Not Disturb mode is supported.
      *
      * @param doesSupport Indicates the flag that supports DND mode.
@@ -864,6 +881,15 @@ public:
      * @return Returns cancel result.
      */
     virtual ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) = 0;
+
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

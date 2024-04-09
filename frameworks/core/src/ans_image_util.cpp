@@ -46,7 +46,7 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
     }
 
     auto size = static_cast<uint32_t>(pixelMap->GetByteCount());
-    ANS_LOGI("size of pixelMap : %{public}u", size);
+    ANS_LOGD("size of pixelMap : %{public}u", size);
     auto pbuf = new (std::nothrow) uint8_t [size];
     if (pbuf == nullptr) {
         ANS_LOGE("create buffer failed");
@@ -57,7 +57,7 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
     imagePacker.AddImage(*pixelMap);
     int64_t packedSize {0};
     imagePacker.FinalizePacking(packedSize);
-    ANS_LOGI("packed size : %{public}" PRId64, packedSize);
+    ANS_LOGD("packed size : %{public}" PRId64, packedSize);
 
     std::string pixelMapStr(reinterpret_cast<char*>(pbuf), static_cast<size_t>(packedSize));
     delete [] pbuf;

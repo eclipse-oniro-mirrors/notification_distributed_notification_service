@@ -585,7 +585,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
         basicContent->SetAdditionalText(str);
-        ANS_LOGI("normal::additionalText = %{public}s", str);
+        ANS_LOGD("normal::additionalText = %{public}s", str);
     }
 
     // lockScreenPicture?: pixelMap

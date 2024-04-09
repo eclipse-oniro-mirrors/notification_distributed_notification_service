@@ -36,6 +36,7 @@ public:
         BUTTON,
         PROGRESS,
         TIME,
+        INITIAL_TIME,
     };
     
     NotificationLocalLiveViewContent() = default;

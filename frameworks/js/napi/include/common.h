@@ -31,6 +31,7 @@ using namespace OHOS::Notification;
 
 constexpr int32_t STR_MAX_SIZE = 200;
 constexpr int32_t LONG_STR_MAX_SIZE = 1024;
+constexpr uint8_t OPERATION_MAX_TYPE = 3;
 constexpr int8_t NO_ERROR = 0;
 constexpr int8_t ERROR = -1;
 constexpr uint8_t PARAM0 = 0;
@@ -83,6 +84,7 @@ struct NotificationSubscribeInfo {
     std::vector<std::string> bundleNames;
     int32_t userId = 0;
     bool hasSubscribeInfo = false;
+    std::string deviceType;
 };
 
 struct CallbackPromiseInfo {
@@ -468,10 +470,12 @@ public:
      *
      * @param env Indicates the environment that the API is invoked under
      * @param time Indicates a NotificationTime object to be converted
+     * @param isInitialTimeExist Indicates is initialTime exists
      * @param result Indicates a js object to be set
      * @return Returns the null object if success, returns the null value otherwise
      */
-    static napi_value SetTime(const napi_env &env, const NotificationTime &time, napi_value &result);
+    static napi_value SetTime(const napi_env &env, const NotificationTime &time,
+        napi_value &result, bool isInitialTimeExist);
 
     /**
      * @brief Sets a js NotificationLiveViewContent object by specified NotificationBasicContent object

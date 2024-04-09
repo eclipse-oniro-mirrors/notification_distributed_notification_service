@@ -1035,8 +1035,10 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        if (GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
-            NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) {
+        if ((GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) &&
+            (GetCommonTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationContent::Type::LIVE_VIEW, recordList) != ERR_OK)) {
             ANS_LOGE("Get Target record list fail.");
             result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
             return;
@@ -1621,6 +1623,11 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
             }
         } else if ((result == ERR_OK) && (slot != nullptr)) {
             if (slot->GetEnable() == enabled && slot->GetForceControl() == isForceControl) {
+                // 设置authorizedStatus为已授权
+                slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+                std::vector<sptr<NotificationSlot>> slots;
+                slots.push_back(slot);
+                result = NotificationPreferences::GetInstance().AddNotificationSlots(bundle, slots);
                 return;
             }
             NotificationPreferences::GetInstance().RemoveNotificationSlot(bundle, slotType);
@@ -1635,10 +1642,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
             allowed = CheckApiCompatibility(bundle);
             SetDefaultNotificationEnabled(bundle, allowed);
         }
-        
+
         slot->SetEnable(enabled);
         slot->SetForceControl(isForceControl);
-        // 重置authHintCnt_，设置authorizedStatus为已授权
+        // 设置authorizedStatus为已授权
         slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         std::vector<sptr<NotificationSlot>> slots;
         slots.push_back(slot);
@@ -1773,6 +1780,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     });
     notificationSvrQueue_->wait(handler);
 
+    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
+        StartAutoDelete(record->notification->GetKey(),
+            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+    }
     return result;
 }
 
@@ -1859,13 +1870,6 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     do {
         if (subscriber == nullptr) {
             errCode = ERR_ANS_INVALID_PARAM;
-            break;
-        }
-
-        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-        if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-            ANS_LOGE("Client is not a system app or subsystem");
-            errCode = ERR_ANS_NON_SYSTEM_APP;
             break;
         }
 
@@ -2050,6 +2054,25 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
     }
 
     return NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    uint32_t status_ = status;
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        ANS_LOGD("isSubsystem is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    int ret = DistributedDeviceStatus_.setDeviceStatus(deviceType, status_);
+    ANS_LOGI("%{public}s device status update with %{public}u",
+        deviceType.c_str(), DistributedDeviceStatus_.getDeviceStatus(deviceType));
+    return ret;
 }
 }  // namespace Notification
 }  // namespace OHOS

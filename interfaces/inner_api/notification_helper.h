@@ -20,6 +20,7 @@
 #include "notification_bundle_option.h"
 #include "notification_button_option.h"
 #include "notification_do_not_disturb_date.h"
+#include "notification_do_not_disturb_profile.h"
 #include "enabled_notification_callback_data.h"
 #include "notification_request.h"
 #include "notification_slot.h"
@@ -791,6 +792,24 @@ public:
     static ErrCode GetDoNotDisturbDate(const int32_t &userId, NotificationDoNotDisturbDate &doNotDisturbDate);
 
     /**
+     * @brief Obtains the do not disturb  on a specified user.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param profiles Indicates the do not disturb time to add.
+     * @return Returns set do not disturb time result.
+     */
+    static ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    /**
+     * @brief Obtains the do not disturb on a specified user.
+     * @note Your application must have system signature to call this method.
+     *
+     * @param profiles Indicates the do not disturb time to remove.
+     * @return Returns set do not disturb time result.
+     */
+    static ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    /**
      * Set whether the application slot is enabled.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -949,6 +968,15 @@ public:
      * @return Returns cancel result.
      */
     static ErrCode CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id);
+
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -345,6 +345,17 @@ ErrCode NotificationHelper::GetDoNotDisturbDate(NotificationDoNotDisturbDate &do
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(doNotDisturbDate);
 }
 
+ErrCode NotificationHelper::AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(profiles);
+}
+
+ErrCode NotificationHelper::RemoveDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(profiles);
+}
+
 ErrCode NotificationHelper::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(doesSupport);
@@ -511,6 +522,11 @@ ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOpti
 ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
+}
+
+ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status);
 }
 }  // namespace Notification
 }  // namespace OHOS

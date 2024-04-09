@@ -43,6 +43,11 @@ const static std::string KEY_DO_NOT_DISTURB_BEGIN_DATE = "ans_doNotDisturbBeginD
 const static std::string KEY_DO_NOT_DISTURB_END_DATE = "ans_doNotDisturbEndDate";
 
 /**
+ * Indicates that disturbe key which do not disturbe id.
+ */
+const static std::string KEY_DO_NOT_DISTURB_ID = "ans_doNotDisturbId";
+
+/**
  * Indicates that disturbe key which enable all notification.
  */
 const static std::string KEY_ENABLE_ALL_NOTIFICATION = "ans_notificationAll";
@@ -206,6 +211,9 @@ const static std::string KEY_SLOT_AUTHORIZED_STATUS = "authorizedStatus";
  * Indicates that disturbe key which slot authorized hint count.
  */
 const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
+
+constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
+constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 
 const std::map<std::string,
     std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
@@ -575,6 +583,86 @@ bool NotificationPreferencesDatabase::PutDoNotDisturbDate(
     return true;
 }
 
+bool NotificationPreferencesDatabase::AddDoNotDisturbProfiles(
+    int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGE("Invalid dates.");
+        return false;
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::unordered_map<std::string, std::string> values;
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is null.");
+            return false;
+        }
+        std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+        values[key] = profile->ToJson();
+    }
+    int32_t result = rdbDataManager_->InsertBatchData(values);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Add do not disturb profiles failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::RemoveDoNotDisturbProfiles(
+    int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("Invalid dates.");
+        return false;
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::vector<std::string> keys;
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is null.");
+            return false;
+        }
+        std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+        keys.push_back(key);
+    }
+    int32_t result = rdbDataManager_->DeleteBathchData(keys);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Delete do not disturb profiles failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::GetDoNotDisturbProfiles(
+    const std::string &key, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string values;
+    int32_t result = rdbDataManager_->QueryData(key, values);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Use default value. error code is %{public}d", result);
+        return false;
+    }
+    profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    if (profile == nullptr) {
+        ANS_LOGE("The profile is null.");
+        return false;
+    }
+    profile->FromJson(values);
+    return true;
+}
+
 void NotificationPreferencesDatabase::GetValueFromDisturbeDB(
     const std::string &key, std::function<void(std::string &)> callback)
 {
@@ -668,6 +756,7 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
     ParseDoNotDisturbBeginDate(info);
     ParseDoNotDisturbEndDate(info);
     ParseEnableAllNotification(info);
+    ParseGetDoNotDisturbProfile(info);
 
     if (!CheckRdbStore()) {
         ANS_LOGE("RdbStore is nullptr.");
@@ -1211,6 +1300,16 @@ void NotificationPreferencesDatabase::ParseEnableAllNotification(NotificationPre
     }
 }
 
+void NotificationPreferencesDatabase::ParseGetDoNotDisturbProfile(NotificationPreferencesInfo &info)
+{
+    std::vector<int> activeUserId;
+    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+
+    for (auto iter : activeUserId) {
+        NotificationPreferencesDatabase::GetDoNotDisturbProfile(info, iter);
+    }
+}
+
 void NotificationPreferencesDatabase::ParseBundleName(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
@@ -1491,6 +1590,31 @@ void NotificationPreferencesDatabase::GetEnableAllNotification(NotificationPrefe
         });
 }
 
+void NotificationPreferencesDatabase::GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return;
+    }
+    std::unordered_map<std::string, std::string> datas;
+    int32_t result = rdbDataManager_->QueryAllData(datas);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Query all data failed.");
+        return;
+    }
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    for (const auto &data : datas) {
+        std::string key = data.first;
+        auto result = key.find(KEY_DO_NOT_DISTURB_ID);
+        if (result != std::string::npos) {
+            sptr<NotificationDoNotDisturbProfile> profile;
+            GetDoNotDisturbProfiles(data.first, profile);
+            profiles.emplace_back(profile);
+        }
+    }
+    info.AddDoNotDisturbProfiles(userId, profiles);
+}
+
 bool NotificationPreferencesDatabase::RemoveNotificationEnable(const int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1613,6 +1737,21 @@ int32_t NotificationPreferencesDatabase::SetKvToDb(
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::SetByteToDb(const std::string &key, const std::vector<uint8_t> &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+    int32_t result = rdbDataManager_->InsertData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationPreferencesDatabase::GetKvFromDb(
     const std::string &key, std::string &value)
 {
@@ -1628,6 +1767,23 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
     }
 
     ANS_LOGD("Key:%{public}s, value:%{public}s.", key.c_str(), value.c_str());
+
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationPreferencesDatabase::GetByteFromDb(
+    const std::string &key, std::vector<uint8_t> &value)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->QueryData(key, value);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get byte failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
 
     return NativeRdb::E_OK;
 }
@@ -1681,12 +1837,24 @@ bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &age
         return false;
     }
     ANS_LOGD("The agent relationship is :%{public}s.", agentShip.c_str());
-    std::string target = "{\"service\":'" + agentBundleName + "',\"app\":'" + sourceBundleName + "'}";
-    std::string::size_type idx = agentShip.find(target);
-    if (idx == std::string::npos) {
+    nlohmann::json jsonAgentShip = nlohmann::json::parse(agentShip, nullptr, false);
+    if (jsonAgentShip.is_discarded() || !jsonAgentShip.is_array()) {
+        ANS_LOGE("Parse agent ship failed due to data is discarded or not array");
         return false;
     }
-    return true;
+
+    nlohmann::json jsonTarget;
+    jsonTarget[RELATIONSHIP_JSON_KEY_SERVICE] = agentBundleName;
+    jsonTarget[RELATIONSHIP_JSON_KEY_APP] = sourceBundleName;
+    bool isAgentRelationship = false;
+    for (const auto &item : jsonAgentShip) {
+        if (jsonTarget == item) {
+            isAgentRelationship = true;
+            break;
+        }
+    }
+
+    return isAgentRelationship;
 }
 
 bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::string deviceType,

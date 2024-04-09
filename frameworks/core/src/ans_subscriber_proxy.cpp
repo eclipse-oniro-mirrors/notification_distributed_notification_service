@@ -136,7 +136,7 @@ void AnsSubscriberProxy::OnConsumed(
 void AnsSubscriberProxy::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap)
 {
-    ANS_LOGI("Start consumed list in proxy.");
+    ANS_LOGD("Start consumed list in proxy.");
     if (notifications.empty() || notificationMap == nullptr) {
         ANS_LOGE("Invalid notification to consumed.");
         return;

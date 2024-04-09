@@ -56,7 +56,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSubscribe work excute.");
+            ANS_LOGD("NapiSubscribe work excute.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -68,6 +68,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                     OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
                     subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
                     subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    subscribeInfo.AddDeviceType(asynccallbackinfo->subscriberInfo.deviceType);
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
                 } else {
@@ -77,7 +78,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSubscribe work complete.");
+            ANS_LOGD("NapiSubscribe work complete.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -144,7 +145,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSubscribeSelf work excute.");
+            ANS_LOGD("NapiSubscribeSelf work excute.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -156,7 +157,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSubscribeSelf work complete.");
+            ANS_LOGD("NapiSubscribeSelf work complete.");
             if (!data) {
                 ANS_LOGE("Invalid asynccallbackinfo!");
                 return;
@@ -213,7 +214,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiUnsubscribe work excute.");
+            ANS_LOGD("NapiUnsubscribe work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoUnsubscribe *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->objectInfo == nullptr) {
@@ -235,7 +236,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiUnsubscribe work complete.");
+            ANS_LOGD("NapiUnsubscribe work complete.");
             AsyncCallbackInfoUnsubscribe *asynccallbackinfo = static_cast<AsyncCallbackInfoUnsubscribe *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));

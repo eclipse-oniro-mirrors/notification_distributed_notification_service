@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #include "notification_bundle_option.h"
@@ -1320,6 +1321,19 @@ HWTEST_F(NotificationHelperTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level
     profiles.clear();
     ErrCode ret = notificationHelper.RemoveDoNotDisturbProfiles(profiles);
     EXPECT_EQ(ERR_ANS_INVALID_PARAM, ret);
+}
+
+ * @tc.name: SetTargetDeviceStatus_0100
+ * @tc.desc: test SetTargetDeviceStatus with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetTargetDeviceStatus_0100, TestSize.Level1)
+{
+    std::string deviceType = "testDeviceType";
+    int32_t status = 1;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetTargetDeviceStatus(deviceType, status);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }
 }

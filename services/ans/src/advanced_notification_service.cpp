@@ -23,6 +23,7 @@
 #include "ability_info.h"
 #include "access_token_helper.h"
 #include "accesstoken_kit.h"
+#include "advanced_datashare_helper.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -79,10 +80,12 @@ constexpr int32_t DIALOG_DEFAULT_HEIGHT = 240;
 constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
-constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 3;
+constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
 
 const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
-
+const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
+const std::string CONTACTS_BUNDLE_NAME = "com.ohos.contacts";
+const std::string DO_NOT_DISTURB_MODE = "1";
 }  // namespace
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
@@ -567,6 +570,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         }
 
         UpdateRecentNotification(record->notification, false, 0);
+        UpdateSlotAuthInfo(record);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());
         if (IsNeedNotifyConsumed(record->request)) {
@@ -583,7 +587,6 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
         if (result != ERR_OK) {
             return;
         }
-        result = UpdateSlotAuthInfo(record);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
@@ -592,6 +595,95 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(
             record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
     }
     return result;
+}
+
+void AdvancedNotificationService::QueryDoNotDisturbProfile(std::string &enable, std::string &profileId)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("The data share helper is nullptr.");
+        return;
+    }
+    Uri enableUri(datashareHelper->GetFocusModeEnableUri());
+    bool ret = datashareHelper->Query(enableUri, KEY_FOCUS_MODE_ENABLE, enable);
+    if (!ret) {
+        ANS_LOGE("Query focus mode enable fail.");
+        return;
+    }
+    if (enable != DO_NOT_DISTURB_MODE) {
+        ANS_LOGI("Currently not is do not disturb mode.");
+        return;
+    }
+    Uri idUri(datashareHelper->GetFocusModeProfileUri());
+    ret = datashareHelper->Query(idUri, KEY_FOCUS_MODE_PROFILE, profileId);
+    if (!ret) {
+        ANS_LOGE("Query focus mode id fail.");
+        return;
+    }
+}
+
+void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record)
+{
+    ANS_LOGD("Called.");
+    if (record == nullptr || record->notification == nullptr || record->bundleOption == nullptr) {
+        ANS_LOGE("Make notification record failed.");
+        return;
+    }
+    std::string enable;
+    std::string profileId;
+    QueryDoNotDisturbProfile(enable, profileId);
+    if (enable != DO_NOT_DISTURB_MODE) {
+        ANS_LOGD("Currently not is do not disturb mode.");
+        return;
+    }
+    std::string bundleName = record->bundleOption->GetBundleName();
+    ANS_LOGD("The bundle name is %{public}s", bundleName.c_str());
+    if (bundleName == MMS_BUNDLE_NAME || bundleName == CONTACTS_BUNDLE_NAME) {
+        ANS_LOGI("Currently in do not disturb mode, the bundle name is mms or contacts, keep reminder method.");
+        return;
+    }
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    int32_t userId = record->notification->GetUserId();
+    if (NotificationPreferences::GetInstance().GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
+        ERR_OK) {
+        ANS_LOGE("Get do not disturb profile failed.");
+        return;
+    }
+    if (profile == nullptr) {
+        ANS_LOGE("The do not disturb profile is nullptr.");
+        return;
+    }
+    std::vector<NotificationBundleOption> trustlist = profile->GetProfileTrustlist();
+    for (auto &trust : trustlist) {
+        if (bundleName == trust.GetBundleName()) {
+            ANS_LOGW("Do not disturb profile bundle name is in trust.");
+            return;
+        }
+    }
+    DoNotDisturbUpdataReminderFlags(record);
+}
+
+void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record)
+{
+    ANS_LOGD("Called.");
+    if (record == nullptr || record->request == nullptr || record->notification == nullptr) {
+        ANS_LOGE("Make notification record failed.");
+        return;
+    }
+    auto flags = record->request->GetFlags();
+    if (flags == nullptr) {
+        ANS_LOGE("The flags is nullptr.");
+        return;
+    }
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+    record->notification->SetEnableSound(false);
+    flags->SetLockScreenVisblenessEnabled(false);
+    record->request->SetVisibleness(NotificationConstant::VisiblenessType::SECRET);
+    flags->SetBannerEnabled(false);
+    flags->SetLightScreenEnabled(false);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+    record->notification->SetEnableVibration(false);
+    flags->SetStatusIconEnabled(false);
 }
 
 ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
@@ -614,6 +706,9 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
         result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
         ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
             slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
+        if (result != ERR_OK) {
+            ANS_LOGE("UpdateSlotAuthInfo failed result: %{public}d.", result);
+        }
     }
     return result;
 }
@@ -1642,6 +1737,11 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     ANS_LOGD("NotificationRequest slotType:%{public}d, contentType:%{public}d", slotType, contentType);
 
     if (request->IsCommonLiveView()) {
+        if (CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            ANS_LOGI("The creator has the permission, no need to check.");
+            return false;
+        }
         std::shared_ptr<NotificationContent> content = request->GetContent();
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
         auto status = liveViewContent->GetLiveViewStatus();
@@ -1825,6 +1925,7 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
     if (isSystemApp) {
         ChangeNotificationByControlFlags(record);
     }
+    CheckDoNotDisturbProfile(record);
 
     result = AssignToNotificationList(record);
     if (result != ERR_OK) {

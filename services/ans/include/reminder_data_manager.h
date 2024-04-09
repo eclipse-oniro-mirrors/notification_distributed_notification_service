@@ -212,7 +212,7 @@ public:
     /**
      * @brief System language change
      */
-    void OnConfigurationChanged(const AppExecFwk::Configuration &configuration);
+    void OnLanguageChanged();
 
     /**
      * @brief When OnRemoveSystemAbility occurs.

@@ -511,6 +511,22 @@ public:
     virtual ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
+     * @brief Add do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
+     * @brief Remove do not disturb profiles.
+     *
+     * @param profiles Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+
+    /**
      * @brief Get whether Do Not Disturb mode is supported.
      *
      * @param doesSupport Indicates the flag that supports DND mode.
@@ -858,6 +874,15 @@ public:
      */
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
 
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+
 private:
     static const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -953,6 +978,9 @@ private:
     ErrCode HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

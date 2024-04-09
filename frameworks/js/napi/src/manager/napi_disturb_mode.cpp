@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
     // Asynchronous function call
     napi_create_async_work(env,
         nullptr, resourceName, [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetDoNotDisturbDate work excute.");
+            ANS_LOGD("NapiSetDoNotDisturbDate work excute.");
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
@@ -59,7 +59,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSetDoNotDisturbDate work complete.");
+            ANS_LOGD("NapiSetDoNotDisturbDate work complete.");
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -83,6 +83,96 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+}
+
+napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("Called.");
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    if (!ParseProfilesParameters(env, info, profiles)) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles};
+    if (!asynccallbackinfo) {
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "AddDoNotDisturbProfiles", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr, resourceName, [](napi_env env, void *data) {
+            ANS_LOGE("Napi add do not disturb profiles work excute.");
+            AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
+                static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::AddDoNotDisturbProfiles(asynccallbackinfo->profiles);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANS_LOGE("Napi add do not disturb profiles work complete.");
+            AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
+                static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
+            if (asynccallbackinfo) {
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
+            }
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
+
+napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("Called.");
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    if (!ParseProfilesParameters(env, info, profiles)) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles};
+    if (!asynccallbackinfo) {
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "RemoveDoNotDisturbProfiles", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr, resourceName, [](napi_env env, void *data) {
+            ANS_LOGE("Napi remove do not disturb profiles work excute.");
+            AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
+                static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::RemoveDoNotDisturbProfiles(asynccallbackinfo->profiles);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANS_LOGE("Napi remove do not disturb profiles work complete.");
+            AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
+                static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
+            if (asynccallbackinfo) {
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
+            }
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
 }
 
 void AsyncCompleteCallbackNapiGetDoNotDisturbDate(napi_env env, napi_status status, void *data)
@@ -136,7 +226,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetDoNotDisturbDate work excute.");
+            ANS_LOGD("NapiGetDoNotDisturbDate work excute.");
             AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
@@ -195,7 +285,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSupportDoNotDisturbMode work excute.");
+            ANS_LOGD("NapiSupportDoNotDisturbMode work excute.");
             AsyncCallbackInfoSupportDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {
@@ -206,7 +296,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiSupportDoNotDisturbMode work complete.");
+            ANS_LOGD("NapiSupportDoNotDisturbMode work complete.");
             AsyncCallbackInfoSupportDoNotDisturb *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {

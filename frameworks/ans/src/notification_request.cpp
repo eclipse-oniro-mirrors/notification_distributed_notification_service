@@ -2269,6 +2269,11 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
         }
     }
 
+    auto oldIsOnlyLocalUpdate = oldLiveViewContent->GetIsOnlyLocalUpdate();
+    if (oldIsOnlyLocalUpdate!= newLiveViewContent->GetIsOnlyLocalUpdate()) {
+        newLiveViewContent->SetIsOnlyLocalUpdate(oldIsOnlyLocalUpdate);
+    }
+    
     auto newPicture = newLiveViewContent->GetPicture();
     auto oldPicture = oldLiveViewContent->GetPicture();
     bool isSet = false;
