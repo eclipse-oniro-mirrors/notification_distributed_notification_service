@@ -49,6 +49,7 @@ private:
     ErrCode RunDumpCmd(const std::string& cmd, const std::string& bundle, int32_t userId,
         std::vector<std::string> &infos);
     ErrCode RunSetEnableCmd();
+    ErrCode RunSetDeviceStatusCmd();
     void SetNativeToken();
 
 private:
