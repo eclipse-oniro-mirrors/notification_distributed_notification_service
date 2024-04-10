@@ -552,10 +552,22 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
         }
-
         NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
+        RemoveDoNotDisturbProfileTrustList(bundleOption);
     }));
     NotificationPreferences::GetInstance().RemoveEnabledDbByBundle(bundleOption);
+}
+
+void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    int32_t userId = 0;
+    if (!GetActiveUserId(userId)) {
+        ANS_LOGE("Failed to get active user id.");
+        return;
+    }
+    NotificationPreferences::GetInstance().RemoveDoNotDisturbProfileTrustList(userId, bundleOption);
 }
 
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)

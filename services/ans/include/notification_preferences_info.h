@@ -314,6 +314,7 @@ public:
     void AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     bool GetDoNotDisturbProfiles(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profiles);
+    void GetAllDoNotDisturbProfiles(int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;

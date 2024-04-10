@@ -55,7 +55,7 @@ std::string NotificationDoNotDisturbProfile::GetProfileName() const
     return name_;
 }
 
-std::vector<NotificationBundleOption> NotificationDoNotDisturbProfile::GetProfileTrustlist() const
+std::vector<NotificationBundleOption> NotificationDoNotDisturbProfile::GetProfileTrustList() const
 {
     return trustList_;
 }

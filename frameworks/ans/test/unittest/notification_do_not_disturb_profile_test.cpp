@@ -86,7 +86,7 @@ HWTEST_F(NotificationDoNotDisturbProfileTest, SetProfileTrustList_0100, TestSize
     bundleOption.SetUid(1);
     myTrustlist.emplace_back(bundleOption);
     rrc->SetProfileTrustList(myTrustlist);
-    auto getTrust = rrc->GetProfileTrustlist();
+    auto getTrust = rrc->GetProfileTrustList();
     EXPECT_EQ(getTrust[0].GetUid(), myTrustlist[0].GetUid());
     EXPECT_EQ(getTrust[0].GetBundleName(), myTrustlist[0].GetBundleName());
 }

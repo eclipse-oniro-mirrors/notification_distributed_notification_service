@@ -1234,6 +1234,7 @@ private:
         const sptr<NotificationRequest> &oldRequest);
     static ErrCode SetLockScreenPictureToDb(const sptr<NotificationRequest> &request);
     static ErrCode GetLockScreenPictureFromDb(NotificationRequest *request);
+    void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
