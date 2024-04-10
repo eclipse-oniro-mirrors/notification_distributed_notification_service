@@ -225,9 +225,9 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr,
         .id = paras.id,
         .representativeBundle = paras.representativeBundle,
+        .userId = paras.userId,
         .option = paras.option,
-        .hasOption = paras.hasOption,
-        .userId = paras.userId
+        .hasOption = paras.hasOption
     };
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, paras.callback);
