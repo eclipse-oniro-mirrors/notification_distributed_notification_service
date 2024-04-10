@@ -81,7 +81,9 @@
         "kv_store",
         "ffrt",
         "device_standby",
-        "resource_management"
+        "resource_management",
+        "config_policy",
+        "screenlock_mgr"
       ],
       "third_party": [
         "libuv",

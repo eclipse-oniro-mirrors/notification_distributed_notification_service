@@ -1266,7 +1266,6 @@ private:
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
-    OHOS::Notification::DistributedDeviceStatus DistributedDeviceStatus_;
 };
 
 /**

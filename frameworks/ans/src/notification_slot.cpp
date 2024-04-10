@@ -19,6 +19,7 @@
 
 namespace OHOS {
 namespace Notification {
+std::map<std::string, NotificationConstant::SlotType> NotificationSlot::convertStrToSlotType_;
 const int32_t MAX_TEXT_LENGTH = 1000;
 
 NotificationSlot::NotificationSlot(NotificationConstant::SlotType type) : sound_("")
@@ -455,6 +456,27 @@ std::string NotificationSlot::TruncateString(const std::string &in)
         temp = in.substr(0, MAX_TEXT_LENGTH);
     }
     return temp;
+}
+
+bool NotificationSlot::GetSlotTypeByString(
+    const std::string &strSlotType, NotificationConstant::SlotType &slotType)
+{
+    if (convertStrToSlotType_.size() <= 0) {
+        convertStrToSlotType_[SOCIAL_COMMUNICATION] = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+        convertStrToSlotType_[SERVICE_REMINDER] = NotificationConstant::SlotType::SERVICE_REMINDER;
+        convertStrToSlotType_[CONTENT_INFORMATION] = NotificationConstant::SlotType::CONTENT_INFORMATION;
+        convertStrToSlotType_[OTHER] = NotificationConstant::SlotType::OTHER;
+        convertStrToSlotType_[LIVE_VIEW] = NotificationConstant::SlotType::LIVE_VIEW;
+        convertStrToSlotType_[CUSTOM_SERVICE] = NotificationConstant::SlotType::CUSTOMER_SERVICE;
+        convertStrToSlotType_[EMERGENCY_INFORMATION] = NotificationConstant::SlotType::EMERGENCY_INFORMATION;
+    }
+    auto iterSlotType = convertStrToSlotType_.find(strSlotType);
+    if (iterSlotType != convertStrToSlotType_.end()) {
+        slotType = iterSlotType->second;
+        return true;
+    }
+    ANS_LOGE("GetSlotTypeByString failed as Invalid strSlotType.");
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS

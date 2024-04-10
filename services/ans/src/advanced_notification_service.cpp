@@ -209,8 +209,6 @@ sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
             ANS_LOGE("Failed to create AdvancedNotificationService instance");
             return nullptr;
         }
-        std::string configPath(NotificationConstant::NOTIFICATION_SLOTFLAG_CONFIG_PATH);
-        NotificationConfigFile::getNotificationSlotFlagConfig(configPath, slotFlagsDefaultMap_);
     }
 
     return instance_;

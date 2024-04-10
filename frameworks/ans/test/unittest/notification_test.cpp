@@ -122,6 +122,20 @@ HWTEST_F(NotificationTest, GetGroup_00002, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetNotificationRequestPoint_00001
+ * @tc.desc: Test GetNotificationRequestPoint parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetNotificationRequestPoint_00001, Function | SmallTest | Level1)
+{
+    int32_t notificationId = 10;
+    sptr<NotificationRequest> request = new(std::nothrow) NotificationRequest(notificationId);
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->GetNotificationRequestPoint()->GetNotificationId(), notificationId);
+}
+
+/**
  * @tc.name: GetPostTime_00001
  * @tc.desc: Test GetPostTime parameters.
  * @tc.type: FUNC

@@ -114,6 +114,10 @@ public:
         return false;
     }
 
+    void SetDeviceType(const std::string &deviceType);
+
+    std::string GetDeviceType() const;
+
 private:
     class SubscriberImpl final : public AnsSubscriberStub {
     public:
@@ -176,6 +180,7 @@ private:
 
 private:
     sptr<SubscriberImpl> impl_ = nullptr;
+    std::string deviceType_;
 
     friend class AnsNotification;
 };
