@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "notification_preferences.h"
+#include "notification_preferences_database.h"
 #include "advanced_notification_service.h"
 #undef private
 #undef protected
@@ -1379,6 +1380,145 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSiz
     ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
         deviceType, enable);
     EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0100
+ * @tc.desc: test AddDoNotDisturbProfiles id of profile out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile->SetProfileId(0);
+    profiles.emplace_back(profile);
+    auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0200
+ * @tc.desc: test AddDoNotDisturbProfiles when AddDoNotDisturbProfiles of preferncesDB_ return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0300
+ * @tc.desc: test AddDoNotDisturbProfiles success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0300, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile->SetProfileId(1);
+    profiles.emplace_back(profile);
+    auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0100
+ * @tc.desc: test RemoveDoNotDisturbProfiles id of profile out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile->SetProfileId(0);
+    profiles.emplace_back(profile);
+    auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0200
+ * @tc.desc: test RemoveDoNotDisturbProfiles_0100 when RemoveDoNotDisturbProfiles
+ *       of preferncesDB_ return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0300
+ * @tc.desc: test RemoveDoNotDisturbProfiles success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0300, TestSize.Level1)
+{
+    int32_t userId = 1;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile->SetProfileId(1);
+    profiles.emplace_back(profile);
+    auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0100
+ * @tc.desc: test GetDoNotDisturbProfile when profileId Not within the correct range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0100, TestSize.Level1)
+{
+    int32_t profileId = 0;
+    int32_t userId = 1;
+    sptr<NotificationDoNotDisturbProfile> profile;
+    auto res = NotificationPreferences::GetInstance().GetDoNotDisturbProfile(profileId, userId, profile);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0200
+ * @tc.desc: test GetDoNotDisturbProfile when GetDoNotDisturbProfiles of preferncesDB_ return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0200, TestSize.Level1)
+{
+    int32_t profileId = 1;
+    int32_t userId = 1;
+    sptr<NotificationDoNotDisturbProfile> profile;
+    auto res = NotificationPreferences::GetInstance().GetDoNotDisturbProfile(profileId, userId, profile);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0300
+ * @tc.desc: test GetDoNotDisturbProfile when GetDoNotDisturbProfiles of preferncesDB_ return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0300, TestSize.Level1)
+{
+    int32_t userId = 1;
+    int32_t profileId = 1;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profile->SetProfileId(profileId);
+    profiles.emplace_back(profile);
+    NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance().GetDoNotDisturbProfile(profileId, userId, profile);
+    EXPECT_EQ(res, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

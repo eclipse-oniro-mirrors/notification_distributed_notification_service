@@ -1114,5 +1114,85 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0300, TestSize.Le
     ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: AddDoNotDisturbProfiles_0100
+ * @tc.desc: test AddDoNotDisturbProfiles ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    ErrCode ret1 = ans_->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: AddDoNotDisturbProfiles_0200
+ * @tc.desc: test AddDoNotDisturbProfiles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AddDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    ErrCode ret1 = ans_->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: RemoveDoNotDisturbProfiles_0100
+ * @tc.desc: test RemoveDoNotDisturbProfiles ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    ErrCode ret1 = ans_->RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: RemoveDoNotDisturbProfiles_0200
+ * @tc.desc: test RemoveDoNotDisturbProfiles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, RemoveDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    int32_t id = 1;
+    std::string name = "Name";
+    std::vector<NotificationBundleOption> trustlist;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> disturbProfile =
+        new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
+    profiles.emplace_back(disturbProfile);
+
+    ErrCode ret1 = ans_->RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
 }  // namespace Notification
 }  // namespace OHOS

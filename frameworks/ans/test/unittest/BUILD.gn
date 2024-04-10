@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,6 +41,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_conversational_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_conversational_message_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_do_not_disturb_date_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_do_not_disturb_profile_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_flags_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_helper_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_live_view_content_test.cpp",

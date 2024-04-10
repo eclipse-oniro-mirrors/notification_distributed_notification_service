@@ -29,6 +29,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_notification.h"
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -4744,6 +4745,55 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function
     sptr<NotificationBundleOption> bundleOption = nullptr;
     int32_t badgeNumber = 1;
     EXPECT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber), ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: QueryDoNotDisturbProfile_0100
+ * @tc.desc: test QueryDoNotDisturbProfile successfully called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, QueryDoNotDisturbProfile_0100, TestSize.Level1)
+{
+    std::string enable;
+    std::string profileId;
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->QueryDoNotDisturbProfile(enable, profileId);
+}
+
+/**
+ * @tc.name: CheckDoNotDisturbProfile_0100
+ * @tc.desc: test CheckDoNotDisturbProfile successfully called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckDoNotDisturbProfile_0100, TestSize.Level1)
+{
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->CheckDoNotDisturbProfile(record);
+}
+
+/**
+ * @tc.name: DoNotDisturbUpdataReminderFlags_0100
+ * @tc.desc: test DoNotDisturbUpdataReminderFlags can turn off all reminders.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, DoNotDisturbUpdataReminderFlags_0100, TestSize.Level1)
+{
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto request = new (std::nothrow) NotificationRequest();
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    std::shared_ptr<NotificationFlags> flagsSet = std::make_shared<NotificationFlags>();
+    record->request->SetFlags(flagsSet);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->DoNotDisturbUpdataReminderFlags(record);
+    auto flags = record->request->GetFlags();
+    EXPECT_NE(flags, nullptr);
+    auto res = flags->IsStatusIconEnabled();
+    EXPECT_EQ(res, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

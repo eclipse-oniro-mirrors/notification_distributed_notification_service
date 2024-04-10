@@ -1296,6 +1296,34 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0300, TestSize.Lev
 }
 
 /**
+ * @tc.name: AddDoNotDisturbProfiles_0100
+ * @tc.desc: test AddDoNotDisturbProfiles when profiles is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    NotificationHelper notificationHelper;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    ErrCode ret = notificationHelper.AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0100
+ * @tc.desc: test RemoveDoNotDisturbProfiles when profiles is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    NotificationHelper notificationHelper;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.clear();
+    ErrCode ret = notificationHelper.RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ERR_ANS_INVALID_PARAM, ret);
+}
+
+/**
  * @tc.name: SetTargetDeviceStatus_0100
  * @tc.desc: test SetTargetDeviceStatus with parameters
  * @tc.type: FUNC

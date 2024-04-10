@@ -1,0 +1,158 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include "ans_log_wrapper.h"
+
+#define private public
+#define protected public
+#include "notification_do_not_disturb_profile.h"
+#undef private
+#undef protected
+
+using namespace testing::ext;
+namespace OHOS {
+namespace Notification {
+class NotificationDoNotDisturbProfileTest : public testing::Test {
+public:
+    static void SetUpTestCase() {}
+    static void TearDownTestCase() {}
+    void SetUp() {}
+    void TearDown() {}
+};
+
+/**
+ * @tc.name: SetProfileId_0100
+ * @tc.desc: test SetProfileId parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, SetProfileId_0100, TestSize.Level1)
+{
+    int32_t id = 1;
+    std::string name = "name";
+    std::vector<NotificationBundleOption> trustlist;
+    NotificationBundleOption bundleOption;
+    trustlist.emplace_back(bundleOption);
+    auto rrc = std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
+    rrc->SetProfileId(2);
+    EXPECT_EQ(rrc->GetProfileId(), 2);
+}
+
+/**
+ * @tc.name: SetProfileName_0100
+ * @tc.desc: test SetProfileName parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, SetProfileName_0100, TestSize.Level1)
+{
+    int32_t id = 1;
+    std::string name = "name";
+    std::vector<NotificationBundleOption> trustlist;
+    NotificationBundleOption bundleOption;
+    trustlist.emplace_back(bundleOption);
+    auto rrc = std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
+    rrc->SetProfileName("newName");
+    EXPECT_EQ(rrc->GetProfileName(), "newName");
+}
+
+/**
+ * @tc.name: SetProfileTrustList_0100
+ * @tc.desc: test SetProfileTrustList parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, SetProfileTrustList_0100, TestSize.Level1)
+{
+    int32_t id = 1;
+    std::string name = "name";
+    std::vector<NotificationBundleOption> trustlist;
+    NotificationBundleOption bundleOption;
+    trustlist.emplace_back(bundleOption);
+    auto rrc = std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
+    std::vector<NotificationBundleOption> myTrustlist;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    myTrustlist.emplace_back(bundleOption);
+    rrc->SetProfileTrustList(myTrustlist);
+    auto getTrust = rrc->GetProfileTrustlist();
+    EXPECT_EQ(getTrust[0].GetUid(), myTrustlist[0].GetUid());
+    EXPECT_EQ(getTrust[0].GetBundleName(), myTrustlist[0].GetBundleName());
+}
+
+/**
+ * @tc.name: Marshalling_0100
+ * @tc.desc: test Marshalling when it can run to end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, Marshalling_0100, TestSize.Level1)
+{
+    int32_t id = 1;
+    std::string name = "name";
+    std::vector<NotificationBundleOption> trustlist;
+    NotificationBundleOption bundleOption;
+    trustlist.emplace_back(bundleOption);
+    auto rrc = std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
+    Parcel parcel;
+    auto res = rrc->Marshalling(parcel);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: ReadFromParcel_0100
+ * @tc.desc: test it when trustlist_ emplace success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, ReadFromParcel_0100, TestSize.Level1)
+{
+    int32_t id = 1;
+    std::string name = "name";
+    std::vector<NotificationBundleOption> trustlist;
+    NotificationBundleOption bundleOption;
+    trustlist.emplace_back(bundleOption);
+    auto rrc = std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
+
+    Parcel parcel;
+    parcel.WriteUint32(10);
+    auto res = rrc->ReadFromParcel(parcel);
+    sptr<NotificationBundleOption> notification = new (std::nothrow) NotificationBundleOption();
+    parcel.WriteParcelable(notification);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: Unmarshalling_0100
+ * @tc.desc: test it when Unmarshalling success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, Unmarshalling_0100, TestSize.Level1)
+{
+    bool unmarshalling = true;
+    Parcel parcel;
+    int32_t id = 1;
+    std::string name = "name";
+    std::vector<NotificationBundleOption> trustlist;
+    NotificationBundleOption bundleOption;
+    trustlist.emplace_back(bundleOption);
+    std::shared_ptr<NotificationDoNotDisturbProfile> result =
+        std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
+    if (nullptr != result) {
+        if (nullptr == result->Unmarshalling(parcel)) {
+            unmarshalling = false;
+        }
+    }
+    EXPECT_EQ(unmarshalling, true);
+}
+}  // namespace Notification
+}  // namespace OHOS
