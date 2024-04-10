@@ -354,6 +354,7 @@ public:
     int32_t DeleteKvFromDb(const std::string &key);
     ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     bool CheckDoNotDisturbProfileID(int32_t profileId);
+    void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
 
 private:
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,

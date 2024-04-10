@@ -85,7 +85,7 @@ public:
      * @return the profile trustlist of this NotificationDoNotDisturbProfile,
      * For available values, see NotificationBundleOption.
      */
-    std::vector<NotificationBundleOption> GetProfileTrustlist() const;
+    std::vector<NotificationBundleOption> GetProfileTrustList() const;
 
     /**
      * Marshal a object into a Parcel.

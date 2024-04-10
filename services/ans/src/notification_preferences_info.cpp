@@ -318,6 +318,19 @@ bool NotificationPreferencesInfo::GetDoNotDisturbProfiles(
     return false;
 }
 
+void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
+    int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    for (const auto &doNotDisturbProfile : doNotDisturbProfiles_) {
+        std::string key = doNotDisturbProfile.first;
+        auto result = key.find(std::to_string(userId));
+        if (result != std::string::npos) {
+            auto profile = doNotDisturbProfile.second;
+            profiles.emplace_back(profile);
+        }
+    }
+}
+
 bool NotificationPreferencesInfo::GetDoNotDisturbDate(const int32_t &userId,
     sptr<NotificationDoNotDisturbDate> &doNotDisturbDate) const
 {

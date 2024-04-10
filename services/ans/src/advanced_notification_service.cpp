@@ -653,7 +653,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         ANS_LOGE("The do not disturb profile is nullptr.");
         return;
     }
-    std::vector<NotificationBundleOption> trustlist = profile->GetProfileTrustlist();
+    std::vector<NotificationBundleOption> trustlist = profile->GetProfileTrustList();
     for (auto &trust : trustlist) {
         if (bundleName == trust.GetBundleName()) {
             ANS_LOGW("Do not disturb profile bundle name is in trust.");

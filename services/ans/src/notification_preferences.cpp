@@ -581,6 +581,45 @@ ErrCode NotificationPreferences::GetDoNotDisturbProfile(
     return ERR_OK;
 }
 
+void NotificationPreferences::RemoveDoNotDisturbProfileTrustList(
+    int32_t userId, const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("The bundle option is nullptr.");
+        return;
+    }
+    auto bundleName = bundleOption->GetBundleName();
+    ANS_LOGD("Called, bundle name is %{public}s.", bundleName.c_str());
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    preferencesInfo.GetAllDoNotDisturbProfiles(userId, profiles);
+    for (auto profile : profiles) {
+        if (profile == nullptr) {
+            ANS_LOGE("The profile is nullptr.");
+            continue;
+        }
+        auto trustList = profile->GetProfileTrustList();
+        for (auto it = trustList.begin(); it != trustList.end(); it++) {
+            if (it->GetBundleName() == bundleName) {
+                trustList.erase(it);
+                break;
+            }
+        }
+        profile->SetProfileTrustList(trustList);
+    }
+    preferencesInfo.AddDoNotDisturbProfiles(userId, profiles);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("The prefernces db is nullptr.");
+        return;
+    }
+    if (!preferncesDB_->AddDoNotDisturbProfiles(userId, profiles)) {
+        return;
+    }
+    preferencesInfo_ = preferencesInfo;
+}
+
 ErrCode NotificationPreferences::CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
     const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const
 {
