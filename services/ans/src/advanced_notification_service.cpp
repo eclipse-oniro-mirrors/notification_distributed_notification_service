@@ -61,6 +61,7 @@
 #include "time_service_client.h"
 #include "notification_config_parse.h"
 #include "want_params_wrapper.h"
+#include "reminder_swing_decision_center.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -1934,6 +1935,22 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
 
     return ERR_OK;
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+ErrCode AdvancedNotificationService::RegisterSwingCallback(const sptr<IRemoteObject> &swingCallback)
+{
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem) {
+        ANS_LOGW("Not SA!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    return ReminderSwingDecisionCenter::GetInstance().RegisterSwingCallback(swingCallback);
+}
+#endif
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {

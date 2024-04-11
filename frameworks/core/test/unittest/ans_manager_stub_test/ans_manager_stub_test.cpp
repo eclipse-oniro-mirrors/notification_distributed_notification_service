@@ -4682,5 +4682,37 @@ HWTEST_F(AnsManagerStubTest, HandleRemoveDoNotDisturbProfiles, TestSize.Level1)
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+/*
+ * @tc.name: RegisterSwingCallback_0100
+ * @tc.desc: test RegisterSwingCallback with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, RegisterSwingCallback_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> swingCallback = nullptr;
+    data.WriteRemoteObject(swingCallback);
+    ErrCode res = ansManagerStub_->HandleRegisterSwingCallback(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
+/*
+ * @tc.name: RegisterSwingCallback_0200
+ * @tc.desc: test RegisterSwingCallback with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, RegisterSwingCallback_0200, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> swingCallback = nullptr;
+    data.WriteRemoteObject(swingCallback);
+    ErrCode res = ansManagerStub_->HandleRegisterSwingCallback(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+#endif
 }
 }

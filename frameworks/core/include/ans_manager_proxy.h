@@ -880,7 +880,17 @@ public:
      * @return Returns set result.
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
-    
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    /**
+     * @brief Register Swing Callback.
+     *
+     * @param swingCallback SwingCallBack.
+     * @return Returns register SwingCallback result.
+     */
+    ErrCode RegisterSwingCallback(const sptr<IRemoteObject> &swingCallback) override;
+#endif
+
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
 

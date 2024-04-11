@@ -4795,5 +4795,37 @@ HWTEST_F(AdvancedNotificationServiceTest, DoNotDisturbUpdataReminderFlags_0100, 
     auto res = flags->IsStatusIconEnabled();
     EXPECT_EQ(res, false);
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+/**
+ * @tc.name: RegisterSwingCallback_00001
+ * @tc.desc: Test RegisterSwingCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    sptr<IRemoteObject> swingCallback = nullptr;
+    auto ret = advancedNotificationService_->RegisterSwingCallback(swingCallback);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: RegisterSwingCallback_00002
+ * @tc.desc: Test RegisterSwingCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    sptr<IRemoteObject> swingCallback = nullptr;
+    auto ret = advancedNotificationService_->RegisterSwingCallback(swingCallback);
+    EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

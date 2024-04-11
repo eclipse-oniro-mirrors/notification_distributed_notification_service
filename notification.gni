@@ -55,6 +55,7 @@ declare_args() {
   player_framework = true
   ans_hitrace_usage = true
   notification_ext_feature_summary = false
+  notification_smart_reminder_supported = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {

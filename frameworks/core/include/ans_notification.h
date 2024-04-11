@@ -24,6 +24,9 @@
 #include "notification_subscriber.h"
 #include "notification_local_live_view_subscriber.h"
 #include "want_params.h"
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+#include "swing_callback_stub.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -1029,6 +1032,16 @@ public:
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    /**
+     * @brief Register Swing swingCbFunc.
+     *
+     * @param swingCallback swingCbFunc.
+     * @return Returns register swingCbFunc result.
+     */
+    ErrCode RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc);
+#endif
+
 private:
     /**
      * @brief Gets Ans Manager proxy.
@@ -1072,6 +1085,9 @@ private:
 private:
     std::mutex mutex_;
     sptr<AnsManagerInterface> ansManagerProxy_;
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    sptr<SwingCallBackStub> swingCallBackStub_;
+#endif
 };
 }  // namespace Notification
 }  // namespace OHOS

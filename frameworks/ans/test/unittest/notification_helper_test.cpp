@@ -57,6 +57,12 @@ public:
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    void UpdateStatuts(bool isEnable, int status)
+    {
+        ANS_LOGI("NotificationHelperTest UpdateStatuts");
+    }
+#endif
 };
 
 /**
@@ -1335,6 +1341,23 @@ HWTEST_F(NotificationHelperTest, SetTargetDeviceStatus_0100, TestSize.Level1)
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetTargetDeviceStatus(deviceType, status);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RegisterSwingCallback_0100
+ * @tc.desc: test RegisterSwingCallback with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, RegisterSwingCallback_0100, TestSize.Level1)
+{
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    std::function<void(bool, int)> swingCbFunc =
+        std::bind(&NotificationHelperTest::UpdateStatuts, this, std::placeholders::_1, std::placeholders::_2);
+    EXPECT_TRUE(swingCbFunc);
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.RegisterSwingCallback(swingCbFunc);
+    EXPECT_EQ(ret, ERR_OK);
+#endif
 }
 }
 }
