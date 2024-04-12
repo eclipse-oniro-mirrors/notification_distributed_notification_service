@@ -35,7 +35,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     std::set<std::string> bundleList_ {};
     bool subscribedAll {false};
     int32_t userId {SUBSCRIBE_USER_INIT};
-    std::string deviceType;
+    std::string deviceType {CURRENT_DEVICE_TYPE};
 };
 
 NotificationSubscriberManager::NotificationSubscriberManager()
@@ -308,7 +308,10 @@ void NotificationSubscriberManager::AddRecordInfo(
             record->subscribedAll = false;
         }
         record->userId = subscribeInfo->GetAppUserId();
-        record->deviceType = subscribeInfo->GetDeviceType();
+        // deviceType is empty, use default
+        if (!subscribeInfo->GetDeviceType().empty()) {
+            record->deviceType = subscribeInfo->GetDeviceType();
+        }
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
