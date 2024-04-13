@@ -82,6 +82,7 @@ constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
 constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
+constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 
 const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
 const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
@@ -270,6 +271,7 @@ AdvancedNotificationService::AdvancedNotificationService()
         ANS_LOGE("ffrt create failed!");
         return;
     }
+    soundPermissionInfo_ = std::make_shared<SoundPermissionInfo>();
     recentInfo_ = std::make_shared<RecentInfo>();
     distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
         std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
@@ -1920,6 +1922,41 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
 
     auto deleteTime = request->GetAutoDeletedTime();
     return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
+}
+
+ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<NotificationRequest> &request,
+    std::string bundleName)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (request->GetSound().empty()) {
+        ANS_LOGD("request sound length empty");
+        return ERR_OK;
+    }
+
+    int32_t length = request->GetSound().length();
+    if (length > MAX_SOUND_ITEM_LENGTH) {
+        ANS_LOGE("Check sound length failed: %{public}d", length);
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    // Update sound permission info cache
+    ANS_LOGD("Check sound permission: %{public}d, %{public}s, %{public}d", length, bundleName.c_str(),
+        soundPermissionInfo_->needUpdateCache_.load());
+    if (soundPermissionInfo_->needUpdateCache_.load()) {
+        std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
+        if (soundPermissionInfo_->needUpdateCache_.load()) {
+            soundPermissionInfo_->allPackage_ = false;
+            soundPermissionInfo_->bundleName_.clear();
+            NotificationPreferences::GetInstance().GetBundleSoundPermission(
+                soundPermissionInfo_->allPackage_, soundPermissionInfo_->bundleName_);
+            soundPermissionInfo_->needUpdateCache_ = false;
+        }
+    }
+
+    if (soundPermissionInfo_->allPackage_ && soundPermissionInfo_->bundleName_.count(bundleName) == 0) {
+        request->SetSound("");
+    }
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::AddRecordToMemory(

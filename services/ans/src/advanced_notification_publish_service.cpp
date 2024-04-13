@@ -115,6 +115,11 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
+        result = CheckSoundPermission(request, bundleOption->GetBundleName());
+        if (result != ERR_OK) {
+            break;
+        }
+
         if (IsNeedPushCheck(request)) {
             result = PushCheck(request);
         }
@@ -1743,6 +1748,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
+    // SA not support sound
+    if (!request->GetSound().empty()) {
+        request->SetSound("");
+    }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);

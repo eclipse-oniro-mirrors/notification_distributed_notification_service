@@ -764,7 +764,8 @@ std::string NotificationRequest::Dump()
             ", agentBundle = " + (agentBundle_ != nullptr ? "not null" : "null") +
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
-            std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) + " }";
+            std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
+            ", sound = " + sound_ + " }";
 }
 
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
@@ -1017,6 +1018,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteString(appMessageId_)) {
         ANS_LOGE("Failed to write appMessageId");
+        return false;
+    }
+
+    if (!parcel.WriteString(sound_)) {
+        ANS_LOGE("Failed to write sound");
         return false;
     }
 
@@ -1428,6 +1434,11 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
+    if (!parcel.ReadString(sound_)) {
+        ANS_LOGE("Failed to read sound");
+        return false;
+    }
+
     slotType_ = static_cast<NotificationConstant::SlotType>(parcel.ReadInt32());
     groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(parcel.ReadInt32());
     visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(parcel.ReadInt32());
@@ -1739,6 +1750,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->sortingKey_ = other.sortingKey_;
     this->classification_ = other.classification_;
     this->appMessageId_ = other.appMessageId_;
+    this->sound_ = other.sound_;
 
     this->groupAlertType_ = other.groupAlertType_;
     this->visiblenessType_ = other.visiblenessType_;
@@ -2515,6 +2527,16 @@ void NotificationRequest::SetAppMessageId(const std::string &appMessageId)
 std::string NotificationRequest::GetAppMessageId() const
 {
     return appMessageId_;
+}
+
+void NotificationRequest::SetSound(const std::string &sound)
+{
+    sound_ = sound;
+}
+
+std::string NotificationRequest::GetSound() const
+{
+    return sound_;
 }
 
 std::string NotificationRequest::GenerateUniqueKey()

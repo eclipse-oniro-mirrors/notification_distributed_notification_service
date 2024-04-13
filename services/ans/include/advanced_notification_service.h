@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_ADVANCED_NOTIFICATION_SERVICE_H
 
 #include <ctime>
+#include <set>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -1053,6 +1054,13 @@ private:
         size_t recentCount = 16;
     };
 
+    struct SoundPermissionInfo {
+        std::set<std::string> bundleName_;
+        std::atomic<bool> needUpdateCache_ = true;
+        bool allPackage_ = false;
+        std::mutex dbMutex_;
+    };
+
     AdvancedNotificationService();
 
     void StartFilters();
@@ -1224,6 +1232,7 @@ private:
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
+    ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request, std::string bundleName);
     void GenerateSlotReminderMode(
         const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot = false);
     static void CloseAlert(const std::shared_ptr<NotificationRecord> &record);
@@ -1254,6 +1263,7 @@ private:
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;
 #endif
+    std::shared_ptr<SoundPermissionInfo> soundPermissionInfo_ = nullptr;
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
