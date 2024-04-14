@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-#include "notification_config_parse.h"
-#include <gtest/gtest.h>
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_FILE_UTILS_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_FILE_UTILS_H
 
-using namespace testing::ext;
+#include "nlohmann/json.hpp"
+
 namespace OHOS {
 namespace Notification {
-
-class NotificationConfigParseTest : public testing::Test {
+class FileUtils {
 public:
-    static void SetUpTestCas(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
+    static bool GetJsonByFilePath(const char *filePath, std::vector<nlohmann::json> &roots);
+
+private:
+    static bool GetJsonFromFile(const char *path, nlohmann::json &root);
 };
-}   //namespace Notification
-}   //namespace OHOS
+}  // namespace Notification
+}  // namespace OHOS
+
+#endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_FILE_UTILS_H

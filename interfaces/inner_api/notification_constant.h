@@ -220,11 +220,9 @@ public:
     constexpr static const char* NOTIFICATION_JOURNAL_MODE = "WAL";
     constexpr static const char* NOTIFICATION_SYNC_MODE = "FULL";
     constexpr static int32_t NOTIFICATION_RDB_VERSION = 1;
-    constexpr static uint8_t DECIMAL_BASE = 2;
-    constexpr static uint8_t SLOTTYPE_MAX = 7;
-    constexpr static const char* NOTIFICATION_SLOTFLAG_CONFIG_PATH = "/etc/notification_reminder_config.ccm";
     constexpr static const char* SLOTTYPECCMNAMES[] = {"Social_communication", "Service_reminder",
         "Content_information", "Other", "Custom", "Live_view", "Custom_service", "Emergency_information"};
+    constexpr static const char* CURRENT_DEVICE_TYPE = "current";
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-#include "notification_config_parse.h"
-#include <gtest/gtest.h>
+#define private public
+#define protected public
+#include "reminder_affected.h"
+#undef private
+#undef protected
 
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
-
-class NotificationConfigParseTest : public testing::Test {
+class ReminderAffectedTest : public testing::Test {
 public:
-    static void SetUpTestCas(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
+    static void SetUpTestCase() {};
+    static void TearDownTestCase() {};
+    void SetUp() {};
+    void TearDown() {};
 };
-}   //namespace Notification
-}   //namespace OHOS
+}  // namespace Notification
+}  // namespace OHOS

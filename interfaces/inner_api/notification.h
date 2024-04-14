@@ -135,6 +135,13 @@ public:
     NotificationRequest GetNotificationRequest() const;
 
     /**
+     * @brief Obtains the notification request point set by ANS.
+     *
+     * @return Returns NotificationRequest sptr.
+     */
+    sptr<NotificationRequest> GetNotificationRequestPoint() const;
+
+    /**
      * @brief Obtains the time notification was posted.
      *
      * @return Returns the time notificationRequest was posted.

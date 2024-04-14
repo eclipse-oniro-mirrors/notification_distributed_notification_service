@@ -15,6 +15,7 @@
 
 #include "notification_subscriber.h"
 
+#include "notification_constant.h"
 #include "hitrace_meter_adapter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -24,10 +25,21 @@ namespace Notification {
 NotificationSubscriber::NotificationSubscriber()
 {
     impl_ = new (std::nothrow) SubscriberImpl(*this);
+    deviceType_ = NotificationConstant::CURRENT_DEVICE_TYPE;
 };
 
 NotificationSubscriber::~NotificationSubscriber()
 {}
+
+void NotificationSubscriber::SetDeviceType(const std::string &deviceType)
+{
+    deviceType_ = deviceType;
+}
+
+std::string NotificationSubscriber::GetDeviceType() const
+{
+    return deviceType_;
+}
 
 const sptr<NotificationSubscriber::SubscriberImpl> NotificationSubscriber::GetImpl() const
 {

@@ -1628,6 +1628,17 @@ std::shared_ptr<NotificationFlags> NotificationRequest::GetFlags() const
     return notificationFlags_;
 }
 
+void NotificationRequest::SetDeviceFlags(
+    const std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> &mapFlags)
+{
+    notificationFlagsOfDevices_ = mapFlags;
+}
+
+std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> NotificationRequest::GetDeviceFlags() const
+{
+    return notificationFlagsOfDevices_;
+}
+
 
 void NotificationRequest::SetBundleOption(const std::shared_ptr<NotificationBundleOption> &bundleOption)
 {
