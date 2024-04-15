@@ -53,6 +53,9 @@ public:
     void TearDown();
     std::shared_ptr<AnsNotification> ans_;
     sptr<AnsManagerInterface> ansManagerProxy_{nullptr};
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    void UpdateStatuts(bool isEnable, int status) {}
+#endif
 };
 
 void AnsNotificationUnitTest::SetUpTestCase()
@@ -1194,5 +1197,27 @@ HWTEST_F(AnsNotificationUnitTest, RemoveDoNotDisturbProfiles_0200, TestSize.Leve
     ErrCode ret1 = ans_->RemoveDoNotDisturbProfiles(profiles);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+/*
+ * @tc.name: RegisterSwingCallback_0100
+ * @tc.desc: test RegisterSwingCallback with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, RegisterSwingCallback_0100, TestSize.Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(ret, false);
+    std::function<void(bool, int)> swingCbFunc =
+        std::bind(&AnsNotificationUnitTest::UpdateStatuts, this, std::placeholders::_1, std::placeholders::_2);
+    ErrCode res = ans_->RegisterSwingCallback(swingCbFunc);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

@@ -977,6 +977,14 @@ public:
      * @return Returns set result.
      */
     static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
+
+    /**
+     * @brief Register Swing Callback Function.
+     *
+     * @param swingCallback swing Callback Function.
+     * @return Returns register swing callback result.
+     */
+    static ErrCode RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc);
 };
 }  // namespace Notification
 }  // namespace OHOS

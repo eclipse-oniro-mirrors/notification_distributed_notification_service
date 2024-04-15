@@ -55,6 +55,7 @@ declare_args() {
   player_framework = true
   ans_hitrace_usage = true
   notification_ext_feature_summary = false
+  notification_smart_reminder_supported = true
   ans_config_policy_enable = true
   screenlock_mgr_enable = true
 

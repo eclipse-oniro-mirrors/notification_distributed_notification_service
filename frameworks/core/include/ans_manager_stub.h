@@ -883,6 +883,15 @@ public:
      */
     virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    /**
+     * @brief Register Swing Callback.
+     *
+     * @param swingCallback SwingCallBack.
+     * @return Returns register SwingCallback result.
+     */
+    ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
+#endif
 private:
     static const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
         interfaces_;
@@ -981,6 +990,9 @@ private:
     ErrCode HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
+#endif
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

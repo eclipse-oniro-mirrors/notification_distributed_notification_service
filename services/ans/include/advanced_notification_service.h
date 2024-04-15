@@ -1052,6 +1052,16 @@ public:
      */
     bool InitPublishProcess();
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    /**
+     * @brief Register Swing Callback.
+     *
+     * @param swingCallback SwingCallBack.
+     * @return Returns register swing Callback result.
+     */
+    ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
+#endif
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

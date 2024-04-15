@@ -2104,5 +2104,36 @@ ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, co
 
     return result;
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+ErrCode AnsManagerProxy::RegisterSwingCallback(const sptr<IRemoteObject> &swingCallback)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(swingCallback)) {
+        ANS_LOGE("write swingCallback failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REGISTER_SWING_CALLBACK, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

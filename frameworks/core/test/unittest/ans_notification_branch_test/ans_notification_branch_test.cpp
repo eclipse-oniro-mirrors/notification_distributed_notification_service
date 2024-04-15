@@ -545,6 +545,13 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ErrCode RegisterSwingCallback(const sptr<IRemoteObject> &swingCallback) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+#endif
 };
 
 class AnsNotificationBranchTest : public testing::Test {

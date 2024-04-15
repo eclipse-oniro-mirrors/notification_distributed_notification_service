@@ -890,6 +890,16 @@ public:
      * @return Returns set result.
      */
     virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) = 0;
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    /**
+     * @brief Register Swing Callback.
+     *
+     * @param swingCallback SwingCallBack.
+     * @return Returns register SwingCallback result.
+     */
+    virtual ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) = 0;
+#endif
 };
 }  // namespace Notification
 }  // namespace OHOS
