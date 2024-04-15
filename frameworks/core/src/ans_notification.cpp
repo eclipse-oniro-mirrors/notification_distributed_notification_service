@@ -496,6 +496,7 @@ ErrCode AnsNotification::SubscribeNotification(
         ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
+    subscriberSptr->subscriber_.SetDeviceType(subscribeInfo.GetDeviceType());
     return ansManagerProxy_->Subscribe(subscriberSptr, sptrInfo);
 }
 

@@ -142,6 +142,11 @@ NotificationRequest Notification::GetNotificationRequest() const
     return *request_;
 }
 
+sptr<NotificationRequest> Notification::GetNotificationRequestPoint() const
+{
+    return request_;
+}
+
 int64_t Notification::GetPostTime() const
 {
     return postTime_;

@@ -217,6 +217,15 @@ public:
      */
     static NotificationContent *Unmarshalling(Parcel &parcel);
 
+    /**
+     * @brief convert string contentType to NotificationContent contentType.
+     *
+     * @param strContentType string contentType
+     * @param contentType NotificationContent contentType
+     * @return Returns the result for converting string contentType to NotificationContent contentType.
+     */
+    static bool GetContentTypeByString(const std::string &strContentType, NotificationContent::Type &contentType);
+
 private:
     NotificationContent() = default;
 
@@ -237,9 +246,21 @@ private:
      */
     static bool ConvertJsonToContent(NotificationContent *target, const nlohmann::json &jsonObject);
 
+public:
+    constexpr static const char* CONTENT_TYPE_NONE = "None";
+    constexpr static const char* CONTENT_TYPE_BASIC_TEXT = "Basic_text";
+    constexpr static const char* CONTENT_TYPE_CONVERSATION = "Conversation";
+    constexpr static const char* CONTENT_TYPE_LONG_TEXT = "Long_text";
+    constexpr static const char* CONTENT_TYPE_MEDIA = "Media";
+    constexpr static const char* CONTENT_TYPE_MULTILINE = "Mutiline";
+    constexpr static const char* CONTENT_TYPE_PICTURE = "Picture";
+    constexpr static const char* CONTENT_TYPE_LOCAL_LIVE_VIEW = "Local_live_view";
+    constexpr static const char* CONTENT_TYPE_LIVE_VIEW = "Live_view";
+
 private:
     NotificationContent::Type contentType_ {NotificationContent::Type::NONE};
     std::shared_ptr<NotificationBasicContent> content_ {};
+    static std::map<std::string, NotificationContent::Type> convertStrToContentType_;
 };
 }  // namespace Notification
 }  // namespace OHOS

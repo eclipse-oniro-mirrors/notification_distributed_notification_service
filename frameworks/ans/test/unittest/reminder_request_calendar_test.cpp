@@ -1109,7 +1109,7 @@ HWTEST_F(ReminderRequestCalendarTest, SetEndDateTime_00001, Function | SmallTest
     struct tm nowTime;
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
-    EXPECT_EQ(calendar->SetEndDateTime(0), true);
+    EXPECT_EQ(calendar->SetEndDateTime(0), false);
 }
 
 /**

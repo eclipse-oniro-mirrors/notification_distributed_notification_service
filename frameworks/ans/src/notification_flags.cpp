@@ -218,5 +218,42 @@ bool NotificationFlags::ReadFromParcel(Parcel &parcel)
 
     return true;
 }
+
+bool NotificationFlags::GetReminderFlagsByString(
+    const std::string &strReminderFlags, std::shared_ptr<NotificationFlags> &reminderFlags)
+{
+    if (strReminderFlags.size() <= SOUND_ENABLED_SEQ) {
+        ANS_LOGE("GetReminderFlagsByString failed as Invalid reminderFlags size.");
+        return false;
+    }
+    for (int32_t seq = 0; seq < strReminderFlags.size(); seq++) {
+        if (!ValidCharReminderFlag(strReminderFlags[seq], seq)) {
+            return false;
+        }
+    }
+    if (reminderFlags == nullptr) {
+        reminderFlags = std::make_shared<NotificationFlags>();
+    }
+    reminderFlags->SetSoundEnabled(
+        static_cast<NotificationConstant::FlagStatus>(strReminderFlags[SOUND_ENABLED_SEQ] - '0'));
+    reminderFlags->SetLockScreenVisblenessEnabled(
+        static_cast<bool>(strReminderFlags[LOCK_SCREEN_VISIBLENESS_ENABLED_SEQ] - '0'));
+    reminderFlags->SetBannerEnabled(static_cast<bool>(strReminderFlags[BANNER_ENABLED_SEQ] - '0'));
+    reminderFlags->SetLightScreenEnabled(static_cast<bool>(strReminderFlags[LIGHT_SCREEN_ENABLED_SEQ] - '0'));
+    reminderFlags->SetVibrationEnabled(
+        static_cast<NotificationConstant::FlagStatus>(strReminderFlags[VIBRATION_ENABLED_SEQ] - '0'));
+    return true;
+}
+
+bool NotificationFlags::ValidCharReminderFlag(const char &charReminderFlag, const int32_t &seq)
+{
+    if (charReminderFlag == CHAR_REMIND_DISABLE || charReminderFlag == CHAR_REMIND_ENABLE) {
+        return true;
+    }
+    if ((seq == SOUND_ENABLED_SEQ || seq == VIBRATION_ENABLED_SEQ) && charReminderFlag == CHAR_FLAG_STATUS_CLOSE) {
+        return true;
+    }
+    return false;
+}
 }  // namespace Notification
 }  // namespace OHOS

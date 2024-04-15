@@ -382,6 +382,15 @@ public:
      */
     static NotificationSlot *Unmarshalling(Parcel &parcel);
 
+    /**
+     * @brief convert string slottype to NotificationConstant slottype.
+     *
+     * @param strSlotType string slottype
+     * @param slotType NotificationConstant slottype
+     * @return Returns the result for converting string slottype to NotificationConstant slottype.
+     */
+    static bool GetSlotTypeByString(const std::string &strSlotType, NotificationConstant::SlotType &slotType);
+
 private:
     /**
      * @brief Read NotificationSlot object from a Parcel.
@@ -418,6 +427,15 @@ private:
      */
     void SetName(const std::string &name);
 
+public:
+    constexpr static const char* SOCIAL_COMMUNICATION = "Social_communication";
+    constexpr static const char* SERVICE_REMINDER = "Service_reminder";
+    constexpr static const char* CONTENT_INFORMATION = "Content_information";
+    constexpr static const char* LIVE_VIEW = "Live_view";
+    constexpr static const char* CUSTOM_SERVICE = "Custom_service";
+    constexpr static const char* OTHER = "Other";
+    constexpr static const char* EMERGENCY_INFORMATION = "Emergency_information";
+
 private:
     std::string id_ {};
     std::string name_ {};
@@ -442,6 +460,7 @@ private:
     static constexpr int32_t VALUE_NULL = -1;
     // object exist in parcel
     static constexpr int32_t VALUE_OBJECT = 1;
+    static std::map<std::string, NotificationConstant::SlotType> convertStrToSlotType_;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -25,6 +25,9 @@
 #include "ans_watchdog.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
+#include "notification_flags.h"
+#include "notification_constant.h"
+#include "notification_config_parse.h"
 #include "os_account_manager.h"
 #include "remote_death_recipient.h"
 
@@ -35,7 +38,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     std::set<std::string> bundleList_ {};
     bool subscribedAll {false};
     int32_t userId {SUBSCRIBE_USER_INIT};
-    std::string deviceType;
+    std::string deviceType {CURRENT_DEVICE_TYPE};
 };
 
 NotificationSubscriberManager::NotificationSubscriberManager()
@@ -308,7 +311,10 @@ void NotificationSubscriberManager::AddRecordInfo(
             record->subscribedAll = false;
         }
         record->userId = subscribeInfo->GetAppUserId();
-        record->deviceType = subscribeInfo->GetDeviceType();
+        // deviceType is empty, use default
+        if (!subscribeInfo->GetDeviceType().empty()) {
+            record->deviceType = subscribeInfo->GetDeviceType();
+        }
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -391,6 +397,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
+
     for (auto record : subscriberRecordList_) {
         auto BundleNames = notification->GetBundleName();
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
@@ -401,9 +408,70 @@ void NotificationSubscriberManager::NotifyConsumedInner(
             (record->userId == SUBSCRIBE_USER_ALL) ||
             (record->userId == recvUserId) ||
             IsSystemUser(record->userId) ||  // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId))) {
+            IsSystemUser(sendUserId)) &&
+            ProcessSyncDecision(record->deviceType, notification)) {
             record->subscriber->OnConsumed(notification, notificationMap);
         }
+    }
+}
+
+bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
+{
+    // Ignore the impact of the bundleName and userId for smart reminder switch now.
+    for (auto record : subscriberRecordList_) {
+        if (record->deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NotificationSubscriberManager::ProcessSyncDecision(
+    const std::string &deviceType, const sptr<Notification> &notification) const
+{
+    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGD("No need to consume cause invalid reqeuest.");
+        return false;
+    }
+    if (request->GetDeviceFlags() == nullptr) {
+        return true;
+    }
+    auto flagsMap = request->GetDeviceFlags();
+    auto flagIter = flagsMap->find(deviceType);
+    if (flagIter != flagsMap->end()) {
+        std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
+        tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
+        tempFlags->SetVibrationEnabled(
+            DowngradeReminder(tempFlags->IsVibrationEnabled(), flagIter->second->IsVibrationEnabled()));
+        tempFlags->SetLockScreenVisblenessEnabled(
+            tempFlags->IsLockScreenVisblenessEnabled() && flagIter->second->IsLockScreenVisblenessEnabled());
+        tempFlags->SetBannerEnabled(
+            tempFlags->IsBannerEnabled() && flagIter->second->IsBannerEnabled());
+        tempFlags->SetLightScreenEnabled(
+            tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
+        request->SetFlags(tempFlags);
+        request->GetDeviceFlags().reset();
+        return true;
+    }
+    if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
+        request->GetDeviceFlags().reset();
+        return true;
+    }
+    ANS_LOGD("No need to consume cause cannot find deviceFlags. deviceType: %{public}s.", deviceType.c_str());
+    return false;
+}
+
+NotificationConstant::FlagStatus NotificationSubscriberManager::DowngradeReminder(
+    const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const
+{
+    if (judgeFlags == NotificationConstant::FlagStatus::NONE || oldFlags == NotificationConstant::FlagStatus::NONE) {
+        return NotificationConstant::FlagStatus::NONE;
+    }
+    if (judgeFlags > oldFlags) {
+        return judgeFlags;
+    } else {
+        return oldFlags;
     }
 }
 
@@ -432,7 +500,8 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
             (record->userId == SUBSCRIBE_USER_ALL) ||
             (record->userId == recvUserId) ||
             IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId))) {
+            IsSystemUser(sendUserId)) &&
+            ProcessSyncDecision(record->deviceType, notification)) {
             currNotifications.emplace_back(notification);
         }
     }

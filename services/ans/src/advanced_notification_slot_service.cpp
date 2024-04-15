@@ -28,6 +28,7 @@
 #include "common_event_support.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
+#include "smart_reminder_center.h"
 
 #include "advanced_notification_inline.cpp"
 
@@ -559,6 +560,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
             break;
     }
     request->SetFlags(flags);
+    DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(

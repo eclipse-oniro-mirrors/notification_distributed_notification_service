@@ -1151,6 +1151,20 @@ public:
      */
     std::shared_ptr<NotificationFlags> GetFlags() const;
 
+     /**
+     * @brief Sets the flags of this notification and device.
+     *
+     * @param flags Indicates the flags of this notification and device.
+     */
+    void SetDeviceFlags(const std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> &mapFlags);
+
+    /**
+     * @brief Obtains the flags of the notification and device.
+     *
+     * @return Returns the flags of the notification and device.
+     */
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> GetDeviceFlags() const;
+
     /**
      * @brief Sets the userId of the notification receiver.
      *
@@ -1414,6 +1428,7 @@ private:
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
     std::shared_ptr<NotificationBundleOption> notificationBundleOption_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

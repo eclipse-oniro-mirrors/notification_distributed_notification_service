@@ -60,9 +60,10 @@ ohos_shared_library("libans") {
     "src/advanced_notification_subscriber_service.cpp",
     "src/advanced_notification_utils.cpp",
     "src/bundle_manager_helper.cpp",
+    "src/common/file_utils.cpp",
+    "src/common/notification_config_parse.cpp",
     "src/distributed_device_status.cpp",
     "src/event_report.cpp",
-    "src/notification_config_parse.cpp",
     "src/notification_dialog.cpp",
     "src/notification_dialog_manager.cpp",
     "src/notification_extension_wrapper.cpp",
@@ -72,6 +73,8 @@ ohos_shared_library("libans") {
     "src/notification_preferences_info.cpp",
     "src/notification_rdb_data_mgr.cpp",
     "src/notification_slot_filter.cpp",
+    "src/notification_smart_reminder/reminder_affected.cpp",
+    "src/notification_smart_reminder/smart_reminder_center.cpp",
     "src/notification_subscriber_manager.cpp",
     "src/notification_timer_info.cpp",
     "src/permission_filter.cpp",
@@ -163,6 +166,16 @@ ohos_shared_library("libans") {
 
   if (notification_ext_feature_summary) {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
+  }
+
+  if (ans_config_policy_enable) {
+    external_deps += [ "config_policy:configpolicy_util" ]
+    defines += [ "CONFIG_POLICY_ENABLE" ]
+  }
+
+  if (screenlock_mgr_enable) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+    defines += [ "SCREENLOCK_MGR_ENABLE" ]
   }
 
   subsystem_name = "${subsystem_name}"

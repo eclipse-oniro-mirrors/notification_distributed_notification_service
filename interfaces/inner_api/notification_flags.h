@@ -145,6 +145,11 @@ public:
      */
     static NotificationFlags *Unmarshalling(Parcel &parcel);
 
+    static bool GetReminderFlagsByString(
+        const std::string &strReminderFlags, std::shared_ptr<NotificationFlags> &reminderFlags);
+
+    static bool ValidCharReminderFlag(const char &charReminderFlag, const int32_t &seq);
+
 private:
     /**
      * Read a NotificationFlags object from a Parcel.
@@ -156,6 +161,15 @@ private:
     NotificationConstant::FlagStatus soundEnabled_ {NotificationConstant::FlagStatus::NONE};
     NotificationConstant::FlagStatus vibrationEnabled_ {NotificationConstant::FlagStatus::NONE};
     uint32_t reminderFlags_ = 0;
+
+    static constexpr char CHAR_REMIND_DISABLE = '0';
+    static constexpr char CHAR_REMIND_ENABLE = '1';
+    static constexpr char CHAR_FLAG_STATUS_CLOSE = '2';
+    static constexpr int32_t SOUND_ENABLED_SEQ = 4;
+    static constexpr int32_t LOCK_SCREEN_VISIBLENESS_ENABLED_SEQ = 3;
+    static constexpr int32_t BANNER_ENABLED_SEQ = 2;
+    static constexpr int32_t LIGHT_SCREEN_ENABLED_SEQ = 1;
+    static constexpr int32_t VIBRATION_ENABLED_SEQ = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -2069,9 +2069,9 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
         return ERR_ANS_INVALID_PARAM;
     }
 
-    int ret = DistributedDeviceStatus_.setDeviceStatus(deviceType, status_);
+    int ret = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status_);
     ANS_LOGI("%{public}s device status update with %{public}u",
-        deviceType.c_str(), DistributedDeviceStatus_.getDeviceStatus(deviceType));
+        deviceType.c_str(), DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType));
     return ret;
 }
 }  // namespace Notification

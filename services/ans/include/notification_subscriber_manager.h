@@ -134,6 +134,8 @@ public:
 
     std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
 
+    bool GetIsEnableEffectedRemind();
+
 private:
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
@@ -162,6 +164,11 @@ private:
     bool IsSystemUser(int32_t userId);
 
 private:
+    bool ProcessSyncDecision(
+        const std::string &deviceType, const sptr<Notification> &notification) const;
+    NotificationConstant::FlagStatus DowngradeReminder(
+        const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const;
+
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};
