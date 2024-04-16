@@ -1044,7 +1044,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             }
 
             ProcForDeleteLiveView(record);
-            RemoveNotificationList(record);
+            notificationList_.remove(record);
             return ERR_OK;
         }
     }
@@ -1072,7 +1072,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
             }
         }
 
-        RemoveNotificationList(record);
+        notificationList_.remove(record);
         return ERR_OK;
     }
 
@@ -1094,7 +1094,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
             ProcForDeleteLiveView(record);
 
             notification = record->notification;
-            RemoveNotificationList(record);
+            notificationList_.remove(record);
             return ERR_OK;
         }
     }
@@ -1834,7 +1834,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
             UpdateRecentNotification(record->notification, true, reason);
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteLiveView(record);
-            RemoveNotificationList(record);
+            notificationList_.remove(record);
             break;
         }
     }
@@ -1958,9 +1958,9 @@ void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
 #ifdef ENABLE_ANS_EXT_WRAPPER
-    std::vector<std::string> hashCodes;
-    hashCodes.emplace_back(record->request->GetNotificationHashCode());
-    EXTENTION_WRAPPER->UpdateByCancel(hashCodes);
+    std::vector<sptr<Notification>> notifications;
+    notifications.emplace_back(record->notification);
+    EXTENTION_WRAPPER->UpdateByCancel(notifications, NotificationConstant::FLOW_CONTROL_REASON_DELETE);
 #endif
     notificationList_.remove(record);
 }
