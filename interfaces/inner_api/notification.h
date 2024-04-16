@@ -312,7 +312,7 @@ private:
     void ReadFromParcelInt32(Parcel &parcel);
     void ReadFromParcelInt64(Parcel &parcel);
     void ReadFromParcelUint64(Parcel &parcel);
-    void ReadFromParcelParcelable(Parcel &parcel);
+    bool ReadFromParcelParcelable(Parcel &parcel);
     bool MarshallingBool(Parcel &parcel) const;
     bool MarshallingString(Parcel &parcel) const;
     bool MarshallingInt32(Parcel &parcel) const;

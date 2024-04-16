@@ -434,10 +434,11 @@ void Notification::ReadFromParcelUint64(Parcel &parcel)
     archiveTimerId_ = parcel.ReadUint64();
 }
 
-void Notification::ReadFromParcelParcelable(Parcel &parcel)
+bool Notification::ReadFromParcelParcelable(Parcel &parcel)
 {
     // Read request_
     request_ = parcel.ReadStrongParcelable<NotificationRequest>();
+    return request_ != nullptr;
 }
 
 bool Notification::ReadFromParcel(Parcel &parcel)
@@ -447,7 +448,10 @@ bool Notification::ReadFromParcel(Parcel &parcel)
     ReadFromParcelInt32(parcel);
     ReadFromParcelInt64(parcel);
     ReadFromParcelUint64(parcel);
-    ReadFromParcelParcelable(parcel);
+    if (!ReadFromParcelParcelable(parcel)) {
+        ANS_LOGE("ReadFromParcelParcelable from parcel error");
+        return false;
+    }
 
     return true;
 }
