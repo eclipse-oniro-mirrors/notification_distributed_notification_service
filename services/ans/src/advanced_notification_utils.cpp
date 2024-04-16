@@ -1109,7 +1109,7 @@ void AdvancedNotificationService::OnDistributedDelete(
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
-                RemoveNotificationList(record);
+                notificationList_.remove(record);
                 break;
             }
         }
@@ -1387,7 +1387,17 @@ bool AdvancedNotificationService::CheckApiCompatibility(const sptr<NotificationB
     return bundleManager->CheckApiCompatibility(bundleOption);
 }
 
+void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
+{
+    DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE);
+}
+
 ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
+{
+    return DeleteAllByUserInner(userId, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+}
+
+ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId, int32_t deleteReason)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1424,21 +1434,20 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
             }
 
             if (notification->GetUserId() == userId) {
-                int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
-                UpdateRecentNotification(notification, true, reason);
+                UpdateRecentNotification(notification, true, deleteReason);
                 notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
             if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
-                SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+                SendNotificationsOnCanceled(notifications, nullptr, deleteReason);
             }
         }
 
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+                notifications, nullptr, deleteReason);
         }
 
         result = ERR_OK;

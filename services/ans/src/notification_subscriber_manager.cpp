@@ -28,6 +28,7 @@
 #include "notification_flags.h"
 #include "notification_constant.h"
 #include "notification_config_parse.h"
+#include "notification_extension_wrapper.h"
 #include "os_account_manager.h"
 #include "remote_death_recipient.h"
 
@@ -170,6 +171,12 @@ void NotificationSubscriberManager::NotifyCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    std::vector<sptr<Notification>> notifications;
+    notifications.emplace_back(notification);
+    EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
+#endif
+    
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
@@ -184,6 +191,10 @@ void NotificationSubscriberManager::BatchNotifyCanceled(const std::vector<sptr<N
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
+#endif
+
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGD("queue is nullptr");
         return;

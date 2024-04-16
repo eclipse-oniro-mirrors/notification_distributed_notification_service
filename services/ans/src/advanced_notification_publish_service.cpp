@@ -67,7 +67,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
 
     if (!enabled) {
         ANS_LOGI("result = %{public}d", result);
-        result = RemoveAllNotifications(bundle);
+        result = RemoveAllNotificationsForDisable(bundle);
     }
     if (result == ERR_OK) {
         NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
@@ -752,7 +752,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         // Local device
         result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
         if (!enabled) {
-            result = RemoveAllNotifications(bundle);
+            result = RemoveAllNotificationsForDisable(bundle);
         }
         if (result == ERR_OK) {
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
@@ -1010,7 +1010,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
             if ((record->bundleOption->GetBundleName().empty()) && (record->bundleOption->GetUid() == uid) &&
                 (record->notification->GetId() == notificationId) && (record->notification->GetLabel() == label)) {
                 notification = record->notification;
-                RemoveNotificationList(record);
+                notificationList_.remove(record);
                 result = ERR_OK;
                 break;
             }
@@ -1151,7 +1151,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
                     ProcForDeleteLiveView(record);
                 }
 
-                RemoveNotificationList(record);
+                notificationList_.remove(record);
                 result = ERR_OK;
                 break;
             }
@@ -1174,7 +1174,19 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     return result;
 }
 
+ErrCode AdvancedNotificationService::RemoveAllNotificationsForDisable(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    return RemoveAllNotificationsInner(bundleOption, NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE);
+}
+
 ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption)
+{
+    return RemoveAllNotificationsInner(bundleOption, NotificationConstant::CANCEL_REASON_DELETE);
+}
+
+ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1200,7 +1212,6 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
-        int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
         ANS_LOGD("ffrt enter!");
         for (auto record : notificationList_) {
             bool isAllowedNotification = true;
@@ -1228,7 +1239,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
 
         std::vector<sptr<Notification>> notifications;
         for (auto record : removeList) {
-            RemoveNotificationList(record);
+            notificationList_.remove(record);
             if (record->notification != nullptr) {
                 ANS_LOGD("record->notification is not nullptr.");
                 UpdateRecentNotification(record->notification, true, reason);
@@ -1343,17 +1354,12 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
             notificationRequest = (*it)->request;
 
             ProcForDeleteLiveView(*it);
-            #ifdef ENABLE_ANS_EXT_WRAPPER
-            std::vector<std::string> hashCodes;
-            hashCodes.emplace_back((*it)->request->GetNotificationHashCode());
-            EXTENTION_WRAPPER->UpdateByCancel(hashCodes);
-            #endif
             it = notificationList_.erase(it);
 
             if (notification != nullptr) {
-                UpdateRecentNotification(notification, true, NotificationConstant::CANCEL_REASON_DELETE);
+                UpdateRecentNotification(notification, true, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr,
-                    NotificationConstant::CANCEL_REASON_DELETE);
+                    NotificationConstant::DISABLE_SLOT_REASON_DELETE);
             }
 
             TriggerRemoveWantAgent(notificationRequest);
@@ -1398,8 +1404,7 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName)
 
         std::vector<sptr<Notification>> notifications;
         for (auto record : removeList) {
-            RemoveNotificationList(record);
-
+            notificationList_.remove(record);
             if (record->notification != nullptr) {
                 int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
                 UpdateRecentNotification(record->notification, true, reason);
@@ -1474,7 +1479,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
 
         std::vector<sptr<Notification>> notifications;
         for (auto record : removeList) {
-            RemoveNotificationList(record);
+            notificationList_.remove(record);
             ProcForDeleteLiveView(record);
 
             if (record->notification != nullptr) {

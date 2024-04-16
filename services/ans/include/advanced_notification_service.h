@@ -352,6 +352,8 @@ public:
      */
     ErrCode RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption) override;
 
+    ErrCode RemoveAllNotificationsForDisable(const sptr<NotificationBundleOption> &bundleOption);
+
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
 
     ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -772,6 +774,13 @@ public:
      * @param bundleOption Indicates the bundle info.
      */
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains the event of user removed.
+     *
+     * @param userId Indicates the user.
+     */
+    void OnUserRemoved(const int32_t &userId);
 
     /**
      * @brief Set whether to sync notifications to devices that do not have the app installed.
@@ -1245,6 +1254,8 @@ private:
     static ErrCode SetLockScreenPictureToDb(const sptr<NotificationRequest> &request);
     static ErrCode GetLockScreenPictureFromDb(NotificationRequest *request);
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason);
+    ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

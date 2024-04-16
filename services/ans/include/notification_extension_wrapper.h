@@ -20,6 +20,7 @@
 
 #include "errors.h"
 #include "nocopyable.h"
+#include "notification.h"
 #include "notification_request.h"
 #include "singleton.h"
 
@@ -30,14 +31,16 @@ public:
     DISALLOW_COPY_AND_MOVE(ExtensionWrapper);
     void InitExtentionWrapper();
     typedef void (*SYNC_ADDITION_CONFIG)(const std::string& key, const std::string& value);
-    typedef void (*UPDATE_BY_CANCEL)(std::vector<std::string>& hashCodes);
+    typedef void (*UPDATE_BY_CANCEL)(const std::vector<sptr<Notification>>& notifications, int deleteType);
     typedef ErrCode (*GET_UNIFIED_GROUP_INFO)(const sptr<NotificationRequest> &request);
 
     void SyncAdditionConfig(const std::string& key, const std::string& value);
-    void UpdateByCancel(std::vector<std::string>& hashCodes);
+    void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
     ErrCode GetUnifiedGroupInfo(const sptr<NotificationRequest> &request);
 
 private:
+    static int32_t convertToDelType(int32_t deleteReason);
+
     void* extensionWrapperHandle_ = nullptr;
     SYNC_ADDITION_CONFIG syncAdditionConfig_ = nullptr;
     UPDATE_BY_CANCEL updateByCancel_ = nullptr;
