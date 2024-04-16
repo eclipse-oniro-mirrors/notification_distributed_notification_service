@@ -59,7 +59,10 @@ const int INDEX_VALUE = 2;
 /**
  * Default reminder sound.
  */
-const static Uri DEFAULT_REMINDER_SOUND("file://system/etc/capture.ogg");
+const std::string DEFAULT_REMINDER_SOUND_1 =
+    "/sys_prod/resource/media/audio/alarms/Aegean_Sea.ogg";
+const std::string DEFAULT_REMINDER_SOUND_2 =
+    "/sys_prod/variant/region_comm/china/resource/media/audio/alarms/Aegean_Sea.ogg";
 
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM = 12000;
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYS_APP = 10000;
@@ -1539,9 +1542,16 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
             return;
         }
     }
+    std::string defaultPath;
+    if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
+        defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
+    } else {
+        defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_2;
+    }
     std::string ringUri = GetCustomRingUri(reminder);
     Uri reminderSound(ringUri);
-    Uri soundUri = ringUri.empty() ? DEFAULT_REMINDER_SOUND : reminderSound;
+    Uri defaultSound(defaultPath);
+    Uri soundUri = ringUri.empty() ? defaultSound : reminderSound;
     std::string uri = soundUri.GetSchemeSpecificPart();
     ANSR_LOGD("uri:%{public}s", uri.c_str());
     soundPlayer_->SetSource(uri);
