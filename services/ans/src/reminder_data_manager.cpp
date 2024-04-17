@@ -962,7 +962,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
             continue;
         }
         ReminderDataManager::AsyncStartExtensionAbility((*it), CONNECT_EXTENSION_MAX_RETRY_TIMES);
-        if (!isAlerting) {
+        if (((*it)->GetRingDuration() > 0) && !isAlerting) {
             playSoundReminder = (*it);
             isAlerting = true;
         } else {
