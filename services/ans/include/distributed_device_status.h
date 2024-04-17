@@ -38,10 +38,10 @@ private:
 
 public:
     static constexpr int32_t STATUS_SIZE = 4;
-    static constexpr int32_t USING_FLAG = 3;
-    static constexpr int32_t LOCK_FLAG = 2;
-    static constexpr int32_t OWNER_FLAG = 1;
-    static constexpr int32_t DISTURB_MODE_FLAG = 0;
+    static constexpr int32_t USING_FLAG = 0;
+    static constexpr int32_t LOCK_FLAG = 1;
+    static constexpr int32_t OWNER_FLAG = 2;
+    static constexpr int32_t DISTURB_MODE_FLAG = 3;
 };
 }  // namespace Notification
 }  // namespace OHOS
