@@ -303,6 +303,8 @@ void ReminderDataManager::OnUserRemove(const int32_t& userId)
 
 void ReminderDataManager::OnServiceStart()
 {
+    ANSR_LOGI("OnServiceStart start");
+    LoadReminderFromDb();
     std::vector<sptr<ReminderRequest>> immediatelyShowReminders;
     GetImmediatelyShowRemindersLocked(immediatelyShowReminders);
     ANSR_LOGD("immediatelyShowReminders size=%{public}zu", immediatelyShowReminders.size());
@@ -1362,7 +1364,6 @@ void ReminderDataManager::Init(bool isFromBootComplete)
         return;
     }
     InitServiceHandler();
-    LoadReminderFromDb();
     InitUserId();
     isReminderAgentReady_ = true;
     ANSR_LOGD("ReminderAgent is ready.");

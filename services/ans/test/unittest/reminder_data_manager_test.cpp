@@ -679,5 +679,19 @@ HWTEST_F(ReminderDataManagerTest, OnLanguageChanged_0001, Level1)
     manager->OnLanguageChanged();
     EXPECT_TRUE(reminder->actionButtonMap_[type].title == "this is title");
 }
+
+/**
+ * @tc.name: ReminderDataManagerTest_019
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_019, Level1)
+{
+    manager->OnServiceStart();
+    EXPECT_TRUE(manager->reminderVector_.size() == 0);
+    system("rm -rf /data/service/el1/public/notification/");
+    EXPECT_TRUE(manager != nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS
