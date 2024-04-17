@@ -168,7 +168,9 @@ private:
         const std::string &deviceType, const sptr<Notification> &notification) const;
     NotificationConstant::FlagStatus DowngradeReminder(
         const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const;
-
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    void UpdateCrossDeviceNotificationStatus();
+#endif
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};

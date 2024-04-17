@@ -44,6 +44,9 @@
 #include "system_event_observer.h"
 #include "notification_subscriber_manager.h"
 #include "distributed_device_status.h"
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+#include "reminder_swing_decision_center.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -1069,6 +1072,16 @@ public:
      * @return Returns register swing Callback result.
      */
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
+
+    /**
+     * @brief screen lock event callback.
+     */
+    void OnScreenLock();
+
+    /**
+     * @brief screen unlock event callback.
+     */
+    void OnScreenUnlock();
 #endif
 
 protected:

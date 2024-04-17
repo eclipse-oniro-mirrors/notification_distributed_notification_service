@@ -44,6 +44,7 @@ public:
     ~SmartReminderCenter() = default;
 
     void ReminderDecisionProcess(const sptr<NotificationRequest> &request) const;
+    bool CompareStatus(const string &status, const bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
 
 private:
     void GetMultiDeviceReminder();
@@ -69,7 +70,6 @@ private:
         const string &deviceType,
         const shared_ptr<ReminderAffected> &reminderAffected,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;
-    bool CompareStatus(const string &status, const bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
     void GetReminderAffecteds(
         const map<string, vector<shared_ptr<ReminderAffected>>> &reminderFilterDevice,
         const sptr<NotificationRequest> &request,

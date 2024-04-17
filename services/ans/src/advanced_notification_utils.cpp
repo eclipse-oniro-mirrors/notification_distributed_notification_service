@@ -1844,5 +1844,17 @@ std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfAct
 
     return bundleInfos;
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+void AdvancedNotificationService::OnScreenLock()
+{
+    ReminderSwingDecisionCenter::GetInstance().OnScreenLock();
+}
+
+void AdvancedNotificationService::OnScreenUnlock()
+{
+    ReminderSwingDecisionCenter::GetInstance().OnScreenUnlock();
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS
