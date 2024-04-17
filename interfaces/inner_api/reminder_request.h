@@ -1033,7 +1033,7 @@ private:
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.
     uint64_t reminderTimeInMilli_ {0};
-    uint64_t ringDurationInMilli_ {MILLI_SECONDS};
+    uint64_t ringDurationInMilli_ {0};
     uint64_t triggerTimeInMilli_ {0};
     uint64_t timeIntervalInMilli_ {0};
     ReminderType reminderType_ {ReminderType::INVALID};
@@ -1046,6 +1046,9 @@ private:
 
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
+
+private:  // static value
+    static constexpr uint64_t MAX_RING_DURATION = 30 * 60 * 1000;  // 30 min
 };
 }  // namespace Reminder
 }  // namespace OHOS
