@@ -996,44 +996,10 @@ public:
     ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName);
 
     /**
-     * @brief Set the notification flags for social communication.
-     */
-    void SetNotificationFlagsForSocialCommunication(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for service reminder.
-     */
-    void SetNotificationFlagsForServiceReminder(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for content information.
-     */
-    void SetNotificationFlagsForContentInformation(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for live view.
-     */
-    void SetNotificationFlagsForLiveView(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for other.
-     */
-    void SetNotificationFlagsForOther(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for custom service.
-     */
-    void SetNotificationFlagsForCustomService(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for emergency information.
-     */
-    void SetNotificationFlagsForEmergencyInformation(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
      * @brief Set the notification flags by soltType.
      */
-    void SetRequestBySlotType(const sptr<NotificationRequest> &request);
+    void SetRequestBySlotType(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption);
 
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
@@ -1256,6 +1222,11 @@ private:
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason);
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
+    ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
+    void GenerateSlotReminderMode(
+        const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot = false);
+    static void CloseAlert(const std::shared_ptr<NotificationRecord> &record);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

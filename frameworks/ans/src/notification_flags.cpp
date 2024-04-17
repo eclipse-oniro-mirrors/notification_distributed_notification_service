@@ -222,7 +222,7 @@ bool NotificationFlags::ReadFromParcel(Parcel &parcel)
 bool NotificationFlags::GetReminderFlagsByString(
     const std::string &strReminderFlags, std::shared_ptr<NotificationFlags> &reminderFlags)
 {
-    if (strReminderFlags.size() <= SOUND_ENABLED_SEQ) {
+    if (strReminderFlags.size() <= ICON_ENABLED_SEQ) {
         ANS_LOGE("GetReminderFlagsByString failed as Invalid reminderFlags size.");
         return false;
     }
@@ -242,6 +242,7 @@ bool NotificationFlags::GetReminderFlagsByString(
     reminderFlags->SetLightScreenEnabled(static_cast<bool>(strReminderFlags[LIGHT_SCREEN_ENABLED_SEQ] - '0'));
     reminderFlags->SetVibrationEnabled(
         static_cast<NotificationConstant::FlagStatus>(strReminderFlags[VIBRATION_ENABLED_SEQ] - '0'));
+    reminderFlags->SetStatusIconEnabled(static_cast<bool>(strReminderFlags[ICON_ENABLED_SEQ] - '0'));
     return true;
 }
 

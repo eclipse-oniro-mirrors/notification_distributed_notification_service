@@ -29,13 +29,13 @@ NotificationConfigParse::NotificationConfigParse()
         ANS_LOGE("Failed to get notification config file, fileName: %{public}s.", NOTIFICAITON_CONFIG_FILE);
     }
     defaultCurrentSlotReminder_ = {
-        {NotificationConstant::SlotType::SOCIAL_COMMUNICATION, "11111"},
-        {NotificationConstant::SlotType::SERVICE_REMINDER, "11011"},
-        {NotificationConstant::SlotType::CONTENT_INFORMATION, "00000"},
-        {NotificationConstant::SlotType::OTHER, "00000"},
-        {NotificationConstant::SlotType::LIVE_VIEW, "11011"},
-        {NotificationConstant::SlotType::CUSTOMER_SERVICE, "10001"},
-        {NotificationConstant::SlotType::EMERGENCY_INFORMATION, "11111"}
+        {NotificationConstant::SlotType::SOCIAL_COMMUNICATION, 0b111111},
+        {NotificationConstant::SlotType::SERVICE_REMINDER, 0b111111},
+        {NotificationConstant::SlotType::CONTENT_INFORMATION, 0b000000},
+        {NotificationConstant::SlotType::OTHER, 0b000000},
+        {NotificationConstant::SlotType::LIVE_VIEW, 0b110011},
+        {NotificationConstant::SlotType::CUSTOMER_SERVICE, 0b110001},
+        {NotificationConstant::SlotType::EMERGENCY_INFORMATION, 0b111111}
     };
 }
 
@@ -67,17 +67,6 @@ bool NotificationConfigParse::GetConfigJson(const std::string &keyCheck, nlohman
     return ret;
 }
 
-void NotificationConfigParse::GetDefaultCurrentSlotReminder(
-    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const
-{
-    for (auto defaultCurrentSlotReminder : defaultCurrentSlotReminder_) {
-        std::shared_ptr<NotificationFlags> reminderFlags;
-        NotificationFlags::GetReminderFlagsByString(defaultCurrentSlotReminder.second, reminderFlags);
-        FillStatusIcon(defaultCurrentSlotReminder.first, reminderFlags);
-        currentSlotReminder[defaultCurrentSlotReminder.first] = reminderFlags;
-    }
-}
-
 bool NotificationConfigParse::GetCurrentSlotReminder(
     std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const
 {
@@ -107,7 +96,6 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
                 reminderFilterSlot[CFG_KEY_REMINDER_FLAGS].get<std::string>(), reminderFlags)) {
             continue;
         }
-        FillStatusIcon(slotType, reminderFlags);
         currentSlotReminder[slotType] = reminderFlags;
     }
     if (currentSlotReminder.size() <= 0) {
@@ -117,24 +105,24 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
     return true;
 }
 
-void NotificationConfigParse::FillStatusIcon(
-    const NotificationConstant::SlotType &slotType, std::shared_ptr<NotificationFlags> &reminderFlags) const
+uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const
 {
-    switch (slotType) {
-        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
-        case NotificationConstant::SlotType::SERVICE_REMINDER:
-        case NotificationConstant::SlotType::CONTENT_INFORMATION:
-        case NotificationConstant::SlotType::LIVE_VIEW:
-        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
-        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
-            reminderFlags->SetStatusIconEnabled(true);
-            break;
-        case NotificationConstant::SlotType::OTHER:
-            reminderFlags->SetStatusIconEnabled(false);
-            break;
-        default:
-            break;
+    static std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> configSlotsReminder;
+    if (configSlotsReminder.empty()) {
+        GetCurrentSlotReminder(configSlotsReminder);
     }
+
+    auto iter = configSlotsReminder.find(slotType);
+    if (iter != configSlotsReminder.end()) {
+        return iter->second->GetReminderFlags();
+    }
+
+    auto defaultIter = defaultCurrentSlotReminder_.find(slotType);
+    if (defaultIter != defaultCurrentSlotReminder_.end()) {
+        return defaultIter->second;
+    }
+
+    return 0;
 }
 } // namespace Notification
 } // namespace OHOS

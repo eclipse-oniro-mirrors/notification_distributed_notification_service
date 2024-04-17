@@ -21,6 +21,12 @@ namespace OHOS {
 namespace Notification {
 std::map<std::string, NotificationConstant::SlotType> NotificationSlot::convertStrToSlotType_;
 const int32_t MAX_TEXT_LENGTH = 1000;
+const uint32_t SOUND_OPNE = 1 << 0;
+const uint32_t LOCKSCREEN_OPNE = 1 << 1;
+const uint32_t BANNER_OPNE = 1 << 2;
+const uint32_t LIGHTSCREEN_OPNE = 1 << 3;
+const uint32_t VIBRATION_OPNE = 1 << 4;
+const uint32_t STATUSBAR_ICON_OPNE = 1 << 5;
 
 NotificationSlot::NotificationSlot(NotificationConstant::SlotType type) : sound_("")
 {
@@ -271,6 +277,19 @@ bool NotificationSlot::GetForceControl() const
     return isForceControl_;
 }
 
+void NotificationSlot::SetReminderMode(uint32_t reminderMode)
+{
+    reminderMode_ = reminderMode;
+}
+
+uint32_t NotificationSlot::GetReminderMode() const
+{
+    if (reminderMode_ != INVALID_REMINDER_MODE) {
+        return reminderMode_;
+    }
+    return GetDefaultReminderMode();
+}
+
 std::string NotificationSlot::Dump() const
 {
     return "NotificationSlot{ "
@@ -289,6 +308,7 @@ std::string NotificationSlot::Dump() const
             ", isShowBadge = " + (isShowBadge_ ? "true" : "false") +
             ", enabled = " + (enabled_ ? "true" : "false") +
             ", slotFlags = " + std::to_string(static_cast<int32_t>(slotFlags_)) +
+            ", remindMode = " + std::to_string(static_cast<int32_t>(GetReminderMode())) +
             " }";
 }
 
@@ -390,6 +410,11 @@ bool NotificationSlot::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(reminderMode_)) {
+        ANS_LOGE("Failed to write reminderMode");
+        return false;
+    }
+
     return true;
 }
 
@@ -422,6 +447,7 @@ bool NotificationSlot::ReadFromParcel(Parcel &parcel)
     slotFlags_ = parcel.ReadInt32();
     authorizedStatus_ = parcel.ReadInt32();
     authHintCnt_ = parcel.ReadInt32();
+    reminderMode_ = parcel.ReadInt32();
     return true;
 }
 
@@ -477,6 +503,41 @@ bool NotificationSlot::GetSlotTypeByString(
     }
     ANS_LOGE("GetSlotTypeByString failed as Invalid strSlotType.");
     return false;
+}
+
+uint32_t NotificationSlot::GetDefaultReminderMode() const
+{
+    uint32_t reminderMode = 0;
+    switch (type_) {
+        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
+            reminderMode = SOUND_OPNE + LOCKSCREEN_OPNE + BANNER_OPNE + LIGHTSCREEN_OPNE +
+                VIBRATION_OPNE + STATUSBAR_ICON_OPNE;
+            break;
+        case NotificationConstant::SlotType::SERVICE_REMINDER:
+            reminderMode = SOUND_OPNE + LOCKSCREEN_OPNE + BANNER_OPNE + LIGHTSCREEN_OPNE +
+                VIBRATION_OPNE + STATUSBAR_ICON_OPNE;
+            break;
+        case NotificationConstant::SlotType::CONTENT_INFORMATION:
+            reminderMode = 0;
+            break;
+        case NotificationConstant::SlotType::LIVE_VIEW:
+            reminderMode = SOUND_OPNE + LOCKSCREEN_OPNE + VIBRATION_OPNE + STATUSBAR_ICON_OPNE;
+            break;
+        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
+            reminderMode = SOUND_OPNE + VIBRATION_OPNE + STATUSBAR_ICON_OPNE;
+            break;
+        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
+            reminderMode = SOUND_OPNE + LOCKSCREEN_OPNE + BANNER_OPNE + LIGHTSCREEN_OPNE +
+                VIBRATION_OPNE + STATUSBAR_ICON_OPNE;
+            break;
+        case NotificationConstant::SlotType::OTHER:
+            reminderMode = 0;
+            break;
+        default:
+            break;
+    }
+
+    return reminderMode;
 }
 }  // namespace Notification
 }  // namespace OHOS

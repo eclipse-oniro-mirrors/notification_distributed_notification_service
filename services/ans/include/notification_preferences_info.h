@@ -221,7 +221,7 @@ public:
     private:
         std::string bundleName_;
         int32_t uid_ = 0;
-        uint32_t slotFlags_ = 27; // 0b11011
+        uint32_t slotFlags_ = 59; // 0b111011
         int32_t importance_ = BUNDLE_IMPORTANCE;
         bool isShowBadge_ = BUNDLE_SHOW_BADGE;
         int32_t badgeTotalNum_ = BUNDLE_BADGE_TOTAL_NUM;
