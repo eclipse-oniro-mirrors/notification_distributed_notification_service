@@ -90,7 +90,7 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnDowngrade(
         }
         return ret;
     }
-    store.SetVersion(newVersion);
+    store.SetVersion(targetVersion);
     return NativeRdb::E_OK;
 }
 
