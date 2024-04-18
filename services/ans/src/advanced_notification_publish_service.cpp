@@ -92,9 +92,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_NO_MEMORY;
     }
 
-    publishProcess_[request->GetSlotType()]->PublishPreWork(request);
+    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request);
+    if (result != ERR_OK) {
+        ANSR_LOGE("Failed to process request, result is %{public}d", result);
+        return result;
+    }
 
-    ErrCode result = ERR_OK;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (isSubsystem) {
         return PublishNotificationBySa(request);
