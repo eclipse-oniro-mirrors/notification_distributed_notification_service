@@ -1059,9 +1059,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
 
         if (IsNotificationExists(record->notification->GetKey())) {
             if (record->request->IsAlertOneTime()) {
-                record->notification->SetEnableLight(false);
-                record->notification->SetEnableSound(false);
-                record->notification->SetEnableVibration(false);
+                CloseAlert(record);
             }
             UpdateInNotificationList(record);
         }
@@ -1843,6 +1841,18 @@ std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfAct
     }
 
     return bundleInfos;
+}
+
+void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationRecord> &record)
+{
+    record->notification->SetEnableLight(false);
+    record->notification->SetEnableSound(false);
+    record->notification->SetEnableVibration(false);
+    auto flag = record->request->GetFlags();
+    flag->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+    flag->SetLightScreenEnabled(false);
+    flag->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+    record->request->SetFlags(flag);
 }
 }  // namespace Notification
 }  // namespace OHOS

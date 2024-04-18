@@ -572,9 +572,9 @@ ErrCode AnsManagerProxy::SetSlotFlagsAsBundle(const sptr<NotificationBundleOptio
         ANS_LOGE("[SetSlotFlagsAsBundle] fail:: write bundleoption failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    
-    // got the LSB 5 bits as slotflags;
-    uint32_t validSlotFlag = 0x001f&slotFlags;
+
+    // got the LSB 6 bits as slotflags;
+    uint32_t validSlotFlag = 0b111111&slotFlags;
     if (!data.WriteInt32(validSlotFlag)) {
         ANS_LOGE("[SetSlotFlagsAsBundle] fail: write slots failed");
         return ERR_ANS_PARCELABLE_FAILED;
