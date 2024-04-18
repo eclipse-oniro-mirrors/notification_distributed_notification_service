@@ -77,6 +77,23 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
     return NativeRdb::E_OK;
 }
 
+int32_t ReminderStore::ReminderStoreDataCallBack::OnDowngrade(
+    NativeRdb::RdbStore& store, int32_t currentVersion, int32_t targetVersion)
+{
+    ANSR_LOGI("OnDowngrade currentVersion is %{public}d, targetVersion is %{public}d", currentVersion, targetVersion);
+    if (currentVersion > targetVersion && targetVersion <= REMINDER_RDB_VERSION_V4) {
+        std::string createSql = "CREATE TABLE IF NOT EXISTS " + ReminderTable::TABLE_NAME + " ("
+            + ReminderTable::ADD_COLUMNS + ")";
+        int32_t ret = store.ExecuteSql(createSql);
+        if (ret != NativeRdb::E_OK) {
+            ANSR_LOGE("Create reminder table failed:%{public}d", ret);
+        }
+        return ret;
+    }
+    store.SetVersion(newVersion);
+    return NativeRdb::E_OK;
+}
+
 int32_t ReminderStore::ReminderStoreDataCallBack::CreateTable(NativeRdb::RdbStore& store)
 {
     std::string createSql = "CREATE TABLE IF NOT EXISTS " + ReminderBaseTable::TABLE_NAME + " ("
