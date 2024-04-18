@@ -122,7 +122,7 @@ int32_t ReminderStore::ReminderStoreDataCallBack::CopyData(NativeRdb::RdbStore& 
         InsertNewReminders(store, reminders);
     }
     // delete old table
-    std::string sql = "DELETE TABLE " + ReminderTable::TABLE_NAME;
+    std::string sql = "DELETE FROM " + ReminderTable::TABLE_NAME;
     store.ExecuteSql(sql);
     return NativeRdb::E_OK;
 }

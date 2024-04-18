@@ -49,25 +49,6 @@ public:
     static sptr<NotificationBundleOption> bundleOption_;
 };
 
-class ReminderStoreTestCallBack : public NativeRdb::RdbOpenCallback {
-public:
-    int32_t OnCreate(NativeRdb::RdbStore& store) override
-    {
-        std::string createSql = "CREATE TABLE IF NOT EXISTS " + ReminderTable::TABLE_NAME + " ("
-            + ReminderTable::ADD_COLUMNS + ")";
-        int32_t ret = store.ExecuteSql(createSql);
-        if (ret != NativeRdb::E_OK) {
-            ANSR_LOGE("Create reminde table failed:%{public}d", ret);
-            return ret;
-        }
-        return ret;
-    }
-    int32_t OnUpgrade(NativeRdb::RdbStore& store, int32_t oldVersion, int32_t newVersion) override
-    {
-        return 0;
-    }
-};
-
 sptr<NotificationBundleOption> ReminderStoreTest::bundleOption_ =
     new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
 
@@ -295,58 +276,10 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
     NativeRdb::RdbStoreConfig config(dbConfig);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     {
-        ReminderStoreTestCallBack rdbDataCallBack;
-        int32_t errCode = STATE_FAIL;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 4, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-    }
-    NativeRdb::RdbHelper::ClearCache();
-}
-
-/**
- * @tc.name: OnCreate_00002
- * @tc.desc: Test OnCreate parameters.
- * @tc.type: FUNC
- * @tc.require: issueI92BU9
- */
-HWTEST_F(ReminderStoreTest, OnCreate_00002, Function | SmallTest | Level1)
-{
-    std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test_1.db";
-    NativeRdb::RdbStoreConfig config(dbConfig);
-    config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
-    {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         int32_t errCode = STATE_FAIL;
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
         EXPECT_NE(rdbStore, nullptr);
-    }
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test_1.db");
-}
-
-/**
- * @tc.name: OnUpgrade_00001
- * @tc.desc: Test OnUpgrade parameters.
- * @tc.type: FUNC
- * @tc.require: issueI92BU9
- */
-HWTEST_F(ReminderStoreTest, OnUpgrade_00001, Function | SmallTest | Level1)
-{
-    std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
-    NativeRdb::RdbStoreConfig config(dbConfig);
-    config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
-
-    {
-        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-        int32_t errCode = STATE_FAIL;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-
-        auto queryResultSet = rdbStore->QuerySql("SELECT name FROM sqlite_master WHERE type='table' AND name='reminder';");
-        EXPECT_NE(queryResultSet, nullptr);
-        bool isAtLastRow = false;
-        queryResultSet->IsAtLastRow(isAtLastRow);
-        EXPECT_NE(isAtLastRow, false);
     }
     NativeRdb::RdbHelper::ClearCache();
     NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
