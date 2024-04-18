@@ -210,14 +210,16 @@ void SmartReminderCenter::HandleReminderMethods(
     bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus;
     GetDeviceStatusByType(deviceType, bitStatus);
     bool enabledAffectedBy = true;
-    if (NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, enabledAffectedBy) != ERR_OK) {
+    bool tempEnable = true;
+    if (NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, tempEnable) != ERR_OK ||
+        !tempEnable) {
         enabledAffectedBy = false;
     }
     int uid = IPCSkeleton::GetCallingUid();
     sptr<NotificationBundleOption> bundleOption =
         new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(), uid);
     if (NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(
-        bundleOption, deviceType, enabledAffectedBy) != ERR_OK) {
+        bundleOption, deviceType, tempEnable) != ERR_OK || !tempEnable) {
         enabledAffectedBy = false;
     }
     delete bundleOption;
@@ -234,13 +236,13 @@ void SmartReminderCenter::HandleReminderMethods(
             (*notificationFlagsOfDevices)[deviceType] = reminderAffected->reminderFlags_;
             continue;
         }
-        if (enabledAffectedBy) {
-            HandleAffectedReminder(deviceType, reminderAffected, notificationFlagsOfDevices);
+        if (enabledAffectedBy && HandleAffectedReminder(deviceType, reminderAffected, notificationFlagsOfDevices)) {
+            break;
         }
     }
 }
 
-void SmartReminderCenter::HandleAffectedReminder(
+bool SmartReminderCenter::HandleAffectedReminder(
     const string &deviceType,
     const shared_ptr<ReminderAffected> &reminderAffected,
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const
@@ -257,6 +259,7 @@ void SmartReminderCenter::HandleAffectedReminder(
     if (ret) {
         (*notificationFlagsOfDevices)[deviceType] = reminderAffected->reminderFlags_;
     }
+    return ret;
 }
 
 bool SmartReminderCenter::CompareStatus(
@@ -265,8 +268,11 @@ bool SmartReminderCenter::CompareStatus(
     if (status.size() <= 0) {
         return true;
     }
+    // bitset.to_string() and config is reverse, bit[0] is behind
+    string localStatus = status;
+    reverse(localStatus.begin(), localStatus.end());
     for (int32_t seq = 0; seq < DistributedDeviceStatus::STATUS_SIZE; seq++) {
-        if (status[seq] != ReminderAffected::STATUS_DEFAULT && bitStatus[seq] != status[seq] - '0') {
+        if (localStatus[seq] != ReminderAffected::STATUS_DEFAULT && bitStatus[seq] != localStatus[seq] - '0') {
             return false;
         }
     }
@@ -318,7 +324,7 @@ void SmartReminderCenter::GetDeviceStatusByType(
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
         bool screenLocked = true;
         screenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
-        bitStatus.set(DistributedDeviceStatus::LOCK_FLAG, screenLocked);
+        bitStatus.set(DistributedDeviceStatus::LOCK_FLAG, !screenLocked);
     }
     ANS_LOGD("GetDeviceStatusByType deviceType: %{public}s, bitStatus: %{public}s.",
         deviceType.c_str(), bitStatus.to_string().c_str());
