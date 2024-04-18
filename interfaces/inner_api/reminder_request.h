@@ -1047,7 +1047,8 @@ private:
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
 
-private:  // static value
+private:
+    // static value
     static constexpr uint64_t MAX_RING_DURATION = 30 * 60 * 1000;  // 30 min
 };
 }  // namespace Reminder
