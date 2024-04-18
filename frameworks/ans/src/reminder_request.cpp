@@ -928,12 +928,7 @@ void ReminderRequest::SetReminderTimeInMilli(const uint64_t reminderTimeInMilli)
 ReminderRequest& ReminderRequest::SetRingDuration(const uint64_t ringDurationInSeconds)
 {
     uint64_t ringDuration = ringDurationInSeconds * MILLI_SECONDS;
-    if (ringDuration > MAX_RING_DURATION) {
-        ANSR_LOGW("setRingDuration, replace to set (30 smin), for the given is out of legal range");
-        ringDurationInMilli_ = MAX_RING_DURATION;
-    } else {
-        ringDurationInMilli_ = ringDuration;
-    }
+    ringDurationInMilli_ = std::min(ringDuration, MAX_RING_DURATION);
     return *this;
 }
 
