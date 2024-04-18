@@ -18,6 +18,8 @@
 #define private public
 #define protected public
 #include "reminder_store.h"
+#include "reminder_table.h"
+#include "reminder_table_old.h"
 #undef private
 #undef protected
 #include "reminder_helper.h"
@@ -59,6 +61,10 @@ public:
             return ret;
         }
         return ret;
+    }
+    int32_t OnUpgrade(NativeRdb::RdbStore& store, int32_t oldVersion, int32_t newVersion) override
+    {
+        return 0;
     }
 };
 
@@ -285,13 +291,13 @@ HWTEST_F(ReminderStoreTest, UpdateOrInsert_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
 {
-    std::string dbConfig = REMINDER_DB_DIR + "notification_test.db";
+    std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
     NativeRdb::RdbStoreConfig config(dbConfig);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     {
         ReminderStoreTestCallBack rdbDataCallBack;
         int32_t errCode = STATE_FAIL;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, REMINDER_RDB_VERSION_V4, rdbDataCallBack, errCode);
+        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 4, rdbDataCallBack, errCode);
         EXPECT_NE(rdbStore, nullptr);
     }
     NativeRdb::RdbHelper::ClearCache();
@@ -305,13 +311,13 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderStoreTest, OnCreate_00002, Function | SmallTest | Level1)
 {
-    std::string dbConfig = REMINDER_DB_DIR + "notification_test_1.db";
+    std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test_1.db";
     NativeRdb::RdbStoreConfig config(dbConfig);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         int32_t errCode = STATE_FAIL;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, REMINDER_RDB_VERSION, rdbDataCallBack, errCode);
+        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
         EXPECT_NE(rdbStore, nullptr);
     }
     NativeRdb::RdbHelper::ClearCache();
@@ -326,17 +332,17 @@ HWTEST_F(ReminderStoreTest, OnCreate_00002, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderStoreTest, OnUpgrade_00001, Function | SmallTest | Level1)
 {
-    std::string dbConfig = REMINDER_DB_DIR + "notification_test.db";
+    std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
     NativeRdb::RdbStoreConfig config(dbConfig);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
 
     {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         int32_t errCode = STATE_FAIL;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, REMINDER_RDB_VERSION, rdbDataCallBack, errCode);
+        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
         EXPECT_NE(rdbStore, nullptr);
 
-        auto queryResultSet = rdbStore.QuerySql("SELECT name FROM sqlite_master WHERE type='table' AND name='reminder';");
+        auto queryResultSet = rdbStore->QuerySql("SELECT name FROM sqlite_master WHERE type='table' AND name='reminder';");
         EXPECT_NE(queryResultSet, nullptr);
         bool isAtLastRow = false;
         queryResultSet->IsAtLastRow(isAtLastRow);
@@ -344,5 +350,6 @@ HWTEST_F(ReminderStoreTest, OnUpgrade_00001, Function | SmallTest | Level1)
     }
     NativeRdb::RdbHelper::ClearCache();
     NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+}
 }
 }
