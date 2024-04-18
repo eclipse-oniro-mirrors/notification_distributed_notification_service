@@ -58,6 +58,19 @@ public:
 std::shared_ptr<ReminderDataManager> ReminderDataManagerTest::manager = nullptr;
 
 /**
+ * @tc.name: ReminderDataManagerTest_000
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_000, Level1)
+{
+    manager->Init(true);
+    EXPECT_TRUE(manager->reminderVector_.size() == 0);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
  * @tc.name: ReminderDataManagerTest_001
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
@@ -689,7 +702,6 @@ HWTEST_F(ReminderDataManagerTest, OnLanguageChanged_0001, Level1)
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_019, Level1)
 {
     manager->OnServiceStart();
-    EXPECT_TRUE(manager->reminderVector_.size() == 0);
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
