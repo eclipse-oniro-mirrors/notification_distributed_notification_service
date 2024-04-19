@@ -92,9 +92,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_NO_MEMORY;
     }
 
-    publishProcess_[request->GetSlotType()]->PublishPreWork(request);
+    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request);
+    if (result != ERR_OK) {
+        ANSR_LOGE("Failed to process request, result is %{public}d", result);
+        return result;
+    }
 
-    ErrCode result = ERR_OK;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (isSubsystem) {
         return PublishNotificationBySa(request);
@@ -972,9 +975,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
             AddToNotificationList(record);
         } else {
             if (record->request->IsAlertOneTime()) {
-                record->notification->SetEnableLight(false);
-                record->notification->SetEnableSound(false);
-                record->notification->SetEnableVibration(false);
+                CloseAlert(record);
             }
             UpdateInNotificationList(record);
         }
@@ -1626,6 +1627,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
                 result = ERR_ANS_NO_MEMORY;
                 return;
             }
+            GenerateSlotReminderMode(slot, bundleOption);
         } else if ((result == ERR_OK) && (slot != nullptr)) {
             if (slot->GetEnable() == enabled && slot->GetForceControl() == isForceControl) {
                 // 设置authorizedStatus为已授权
@@ -1763,6 +1765,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     if (result != ERR_OK) {
         return result;
     }
+    SetRequestBySlotType(record->request, record->bundleOption);
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
         if (!record->bundleOption->GetBundleName().empty()) {

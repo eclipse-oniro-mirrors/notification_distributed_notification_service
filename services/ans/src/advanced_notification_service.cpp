@@ -149,6 +149,24 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             request->SetOwnerUserId(userId);
         }
         request->SetOwnerUid(uid);
+        // set agentBundle
+        std::string bundle = "";
+        if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+            bundle = GetClientBundleName();
+            if (bundle.empty()) {
+                ANS_LOGE("Failed to GetClientBundleName");
+                return ERR_ANS_INVALID_BUNDLE;
+            }
+        }
+
+        int32_t agentUid = IPCSkeleton::GetCallingUid();
+        std::shared_ptr<NotificationBundleOption> agentBundle =
+            std::make_shared<NotificationBundleOption>(bundle, agentUid);
+        if (agentBundle == nullptr) {
+            ANS_LOGE("Failed to create agentBundle instance");
+            return ERR_ANS_INVALID_BUNDLE;
+        }
+        request->SetAgentBundle(agentBundle);
     } else {
         std::string sourceBundleName =
             request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
@@ -194,7 +212,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         request->SetDeliveryTime(GetCurrentTime());
     }
 
-    SetRequestBySlotType(request);
     FillActionButtons(request);
 
     return result;
@@ -324,9 +341,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
         result = PublishFlowControl(record);
     } else {
         if (record->request->IsAlertOneTime()) {
-            record->notification->SetEnableLight(false);
-            record->notification->SetEnableSound(false);
-            record->notification->SetEnableVibration(false);
+            CloseAlert(record);
         }
         result = UpdateInNotificationList(record);
     }
@@ -410,6 +425,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
     ANS_LOGI(
         "bundleName=%{public}s, uid=%{public}d", (bundleOption->GetBundleName()).c_str(), bundleOption->GetUid());
+
+    SetRequestBySlotType(request, bundleOption);
     return ERR_OK;
 }
 

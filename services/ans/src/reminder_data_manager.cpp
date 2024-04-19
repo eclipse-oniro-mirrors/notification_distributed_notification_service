@@ -800,7 +800,7 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
         return;
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
-    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
     advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
 }
@@ -1042,7 +1042,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
-    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
     ANSR_LOGD("publish notification.(reminderId=%{public}d)", reminder->GetReminderId());
     ErrCode errCode = advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     if (errCode != ERR_OK) {
@@ -1130,7 +1130,7 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
         return;
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
-    advancedNotificationService_->SetRequestBySlotType(notificationRequest);
+    advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
     advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     StartRecentReminder();
 }

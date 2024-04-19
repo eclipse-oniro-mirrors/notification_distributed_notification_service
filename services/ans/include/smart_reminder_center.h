@@ -66,7 +66,7 @@ private:
         const map<string, vector<shared_ptr<ReminderAffected>>> &reminderFilterDevice,
         const sptr<NotificationRequest> &request,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;
-    void HandleAffectedReminder(
+    bool HandleAffectedReminder(
         const string &deviceType,
         const shared_ptr<ReminderAffected> &reminderAffected,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;

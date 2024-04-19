@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Notification {
+static const uint32_t INVALID_REMINDER_MODE = 0xffffffff;
 class NotificationSlot : public Parcelable {
 public:
     enum NotificationLevel {
@@ -353,6 +354,19 @@ public:
     void SetAuthHintCnt(int32_t count);
 
     /**
+     * @brief Set reminder mode of a NotificationSlot object.
+     * @param reminderMode Specifies the reminder mode of the NotificationSlot object,
+     * @note which determines the notification reminder mode.
+     */
+    void SetReminderMode(uint32_t reminderMode);
+
+    /**
+     * @brief Obtains the reminder mode of a NotificationSlot object
+     * @return Returns the reminder mode of the NotificationSlot object.
+     */
+    uint32_t GetReminderMode() const;
+
+    /**
      * @brief Obtains the authHintCnt of a NotificationSlot object, which is set by SetAuthHintCnt(int32_t count).
      *
      * @return Returns the authHintCnt of the NotificationSlot object.
@@ -427,6 +441,11 @@ private:
      */
     void SetName(const std::string &name);
 
+    /**
+     * @brief Obtains the default reminder mode of a NotificationSlot object
+     * @return Returns the default reminder mode of slot.
+     */
+    uint32_t GetDefaultReminderMode() const;
 public:
     constexpr static const char* SOCIAL_COMMUNICATION = "Social_communication";
     constexpr static const char* SERVICE_REMINDER = "Service_reminder";
@@ -455,6 +474,7 @@ private:
     bool isForceControl_ {false};
     int32_t authorizedStatus_ {AuthorizedStatus::NOT_AUTHORIZED};
     int32_t authHintCnt_ = {0};
+    uint32_t reminderMode_ = {INVALID_REMINDER_MODE};
 
     // no object in parcel
     static constexpr int32_t VALUE_NULL = -1;

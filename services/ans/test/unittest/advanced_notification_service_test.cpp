@@ -4103,6 +4103,9 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0001, Function | S
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
     EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), true);
 
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0001 test end";
@@ -4456,6 +4459,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00001, Functi
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
     request->SetSlotType(slotType);
     request->SetNotificationId(1);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);

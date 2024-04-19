@@ -68,33 +68,6 @@ inline tm GetLocalTime(time_t time)
     return ret;
 }
 
-inline ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record)
-{
-    sptr<NotificationSlot> slot;
-    NotificationConstant::SlotType slotType = record->request->GetSlotType();
-    ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(record->bundleOption, slotType, slot);
-    if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
-        (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
-        slot = new (std::nothrow) NotificationSlot(slotType);
-        if (slot == nullptr) {
-            ANS_LOGE("Failed to create NotificationSlot instance");
-            return ERR_NO_MEMORY;
-        }
-        std::vector<sptr<NotificationSlot>> slots;
-        slots.push_back(slot);
-        result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
-    }
-    if (result == ERR_OK) {
-        if (slot != nullptr && slot->GetEnable()) {
-            record->slot = slot;
-        } else {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
-            ANS_LOGE("Type[%{public}d] slot enable closed", slotType);
-        }
-    }
-    return result;
-}
-
 inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
 {
     auto result = request->CheckImageSizeForContent();

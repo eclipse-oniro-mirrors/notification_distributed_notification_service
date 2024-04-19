@@ -609,7 +609,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00002, Function | Small
     auto slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 
     ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**

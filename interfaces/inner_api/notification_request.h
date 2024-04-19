@@ -1259,6 +1259,20 @@ public:
     std::shared_ptr<NotificationBundleOption> GetBundleOption() const;
 
     /**
+     * @brief Sets the agentBundle of this notification.
+     *
+     * @param bundleOption Indicates the agentBundle of this notification.
+     */
+    void SetAgentBundle(const std::shared_ptr<NotificationBundleOption> &agentBundle);
+
+    /**
+     * @brief Obtains the agentBundle of the notification.
+     *
+     * @return Returns the agentBundle of the notification.
+     */
+    std::shared_ptr<NotificationBundleOption> GetAgentBundle() const;
+
+    /**
      * @brief Set notification appMessageId value.
      *
      * @param appMessageId the value of appMessageId.
@@ -1352,6 +1366,7 @@ private:
     static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
     static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static bool ConvertJsonToAgentBundle(NotificationRequest *target, const nlohmann::json &jsonObject);
     static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
 
 private:
@@ -1427,6 +1442,7 @@ private:
     std::shared_ptr<NotificationTemplate> notificationTemplate_ {};
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
     std::shared_ptr<NotificationBundleOption> notificationBundleOption_ {};
+    std::shared_ptr<NotificationBundleOption> agentBundle_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
 };
