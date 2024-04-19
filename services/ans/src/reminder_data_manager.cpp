@@ -63,6 +63,7 @@ const std::string DEFAULT_REMINDER_SOUND_1 =
     "/sys_prod/resource/media/audio/alarms/Aegean_Sea.ogg";
 const std::string DEFAULT_REMINDER_SOUND_2 =
     "/sys_prod/variant/region_comm/china/resource/media/audio/alarms/Aegean_Sea.ogg";
+const std::string DEFAULT_REMINDER_SOUND_3 = "/system/etc/capture.ogg";
 
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM = 12000;
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYS_APP = 10000;
@@ -1545,8 +1546,10 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     std::string defaultPath;
     if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
         defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
-    } else {
+    } else if (access(DEFAULT_REMINDER_SOUND_2.c_str(), F_OK) == 0) {
         defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_2;
+    } else {
+        defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_3;
     }
     std::string ringUri = GetCustomRingUri(reminder);
     Uri reminderSound(ringUri);
