@@ -485,7 +485,7 @@ bool NotificationPreferences::CheckDoNotDisturbProfileID(int32_t profileId)
 ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
-    ANS_LOGE("Called.");
+    ANS_LOGD("Called.");
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");

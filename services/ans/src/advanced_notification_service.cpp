@@ -81,6 +81,7 @@ constexpr int32_t WINDOW_DEFAULT_WIDTH = 720;
 constexpr int32_t WINDOW_DEFAULT_HEIGHT = 1280;
 constexpr int32_t UI_HALF = 2;
 constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
+constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
 
 const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
 const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
@@ -653,9 +654,12 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         ANS_LOGE("The do not disturb profile is nullptr.");
         return;
     }
+    auto uid = record->bundleOption->GetUid();
+    ANS_LOGD("The uid is %{public}d", uid);
     std::vector<NotificationBundleOption> trustlist = profile->GetProfileTrustList();
     for (auto &trust : trustlist) {
-        if (bundleName == trust.GetBundleName()) {
+        if ((bundleName == trust.GetBundleName()) &&
+            (trust.GetUid() == BUNDLE_OPTION_UID_DEFAULT_VALUE || trust.GetUid() == uid)) {
             ANS_LOGW("Do not disturb profile bundle name is in trust.");
             return;
         }
