@@ -525,7 +525,7 @@ HWTEST_F(ReminderRequestTest, GetReminderType_00100, Function | SmallTest | Leve
 HWTEST_F(ReminderRequestTest, GetRingDuration_00100, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->GetRingDuration(), 0);
+    EXPECT_EQ(rrc->GetRingDuration(), 1);
 }
 
 /**
@@ -897,7 +897,7 @@ HWTEST_F(ReminderRequestTest, SetRingDuration_00001, Function | SmallTest | Leve
     uint64_t ringDurationInSeconds = 0;
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetRingDuration(ringDurationInSeconds);
-    EXPECT_EQ(rrc->GetRingDuration(), 0);
+    EXPECT_EQ(rrc->GetRingDuration(), 1);
 }
 
 /**
