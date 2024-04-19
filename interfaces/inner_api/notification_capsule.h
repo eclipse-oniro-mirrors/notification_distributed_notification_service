@@ -30,31 +30,40 @@ public:
     ~NotificationCapsule() = default;
 
     /**
-     * @brief Obtains the text to be displayed as the content of this message.
+     * @brief Obtains the title of the notification capsule.
      *
-     * @return Returns the message content.
+     * @return Returns the title of the notification capsule.
      */
     std::string GetTitle() const;
 
     void SetTitle(const std::string &title);
 
     /**
-     * @brief Obtains the time when this message arrived.
+     * @brief Obtains the icon of the notification capsule.
      *
-     * @return Returns the time when this message arrived.
+     * @return Returns the icon of the notification capsule.
      */
     const std::shared_ptr<Media::PixelMap> GetIcon() const;
 
     void SetIcon(const std::shared_ptr<Media::PixelMap> &icon);
 
     /**
-     * @brief Obtains the sender of this message.
+     * @brief Obtains the backgroundcolor of the notification capsule.
      *
-     * @return Returns the message sender.
+     * @return Returns the backgroundcolor of the notification capsule.
      */
     std::string GetBackgroundColor() const;
 
     void SetBackgroundColor(const std::string &color);
+
+    /**
+     * @brief Obtains the content of the notification capsule.
+     *
+     * @return Returns the content of the notification capsule.
+     */
+    std::string GetContent() const;
+
+    void SetContent(const std::string &content);
 
     /**
      * @brief Returns a string representation of the object.
@@ -64,7 +73,7 @@ public:
     std::string Dump();
 
     /**
-     * @brief Converts a NotificationConversationalMessage object into a Json.
+     * @brief Converts a notification capsule object into a Json.
      *
      * @param jsonObject Indicates the Json object.
      * @return Returns true if succeed; returns false otherwise.
@@ -72,10 +81,10 @@ public:
     bool ToJson(nlohmann::json &jsonObject) const override;
 
     /**
-     * @brief Creates a NotificationConversationalMessage object from a Json.
+     * @brief Creates a notification capsule object from a Json.
      *
      * @param jsonObject Indicates the Json object.
-     * @return Returns the NotificationConversationalMessage.
+     * @return Returns the notification capsule.
      */
     static NotificationCapsule *FromJson(const nlohmann::json &jsonObject);
 
@@ -91,7 +100,7 @@ public:
      * @brief Unmarshal object from a Parcel.
      *
      * @param parcel Indicates the parcel object.
-     * @return Returns the NotificationConversationalMessage.
+     * @return Returns the notification capsule.
      */
     static NotificationCapsule *Unmarshalling(Parcel &parcel);
 
@@ -106,8 +115,9 @@ private:
 
 private:
     std::string title_ {};
-    std::shared_ptr<Media::PixelMap> icon_ {};
     std::string backgroundColor_ {};
+    std::string content_ {};
+    std::shared_ptr<Media::PixelMap> icon_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS
