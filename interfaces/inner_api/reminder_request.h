@@ -1036,7 +1036,7 @@ private:
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.
     uint64_t reminderTimeInMilli_ {0};
-    uint64_t ringDurationInMilli_ {0};
+    uint64_t ringDurationInMilli_ {MILLI_SECONDS};
     uint64_t triggerTimeInMilli_ {0};
     uint64_t timeIntervalInMilli_ {0};
     ReminderType reminderType_ {ReminderType::INVALID};
