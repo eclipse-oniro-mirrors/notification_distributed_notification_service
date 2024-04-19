@@ -1341,5 +1341,28 @@ napi_value Common::SetNotificationFlags(
 
     return NapiGetBoolean(env, true);
 }
+
+napi_value Common::SetAgentBundle(
+    const napi_env &env, const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result)
+{
+    ANS_LOGD("enter");
+
+    if (agentBundle == nullptr) {
+        ANS_LOGE("agentBundle is null");
+        return NapiGetBoolean(env, false);
+    }
+
+    // bundle: string
+    napi_value bundleNapi = nullptr;
+    napi_create_string_utf8(env, agentBundle->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
+
+    // uid: uid_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, agentBundle->GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
+
+    return result;
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

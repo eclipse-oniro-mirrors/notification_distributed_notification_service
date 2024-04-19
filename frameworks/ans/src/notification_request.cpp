@@ -761,6 +761,7 @@ std::string NotificationRequest::Dump()
             ", distributedOptions = " + distributedOptions_.Dump() +
             ", notificationFlags = " + (notificationFlags_ ? "not null" : "null") +
             ", notificationBundleOption = " + (notificationBundleOption_ != nullptr ? "not null" : "null") +
+            ", agentBundle = " + (agentBundle_ != nullptr ? "not null" : "null") +
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) + " }";
@@ -1321,6 +1322,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    valid = agentBundle_ != nullptr ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write agentBundle for the notification");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(agentBundle_.get())) {
+            ANS_LOGE("Failed to write notification agentBundle");
+            return false;
+        }
+    }
+
     if (!parcel.WriteInt64(updateDeadLine_)) {
         ANS_LOGE("Failed to write max update time");
         return false;
@@ -1593,6 +1607,16 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         }
     }
 
+    valid = parcel.ReadBool();
+    if (valid) {
+        agentBundle_ =
+            std::shared_ptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
+        if (!agentBundle_) {
+            ANS_LOGE("Failed to read agentBundle");
+            return false;
+        }
+    }
+
     updateDeadLine_ = parcel.ReadInt64();
     finishDeadLine_ = parcel.ReadInt64();
 
@@ -1648,6 +1672,16 @@ void NotificationRequest::SetBundleOption(const std::shared_ptr<NotificationBund
 std::shared_ptr<NotificationBundleOption> NotificationRequest::GetBundleOption() const
 {
     return notificationBundleOption_;
+}
+
+void NotificationRequest::SetAgentBundle(const std::shared_ptr<NotificationBundleOption> &agentBundle)
+{
+    agentBundle_ = agentBundle;
+}
+
+std::shared_ptr<NotificationBundleOption> NotificationRequest::GetAgentBundle() const
+{
+    return agentBundle_;
 }
 
 void NotificationRequest::SetReceiverUserId(int32_t userId)
@@ -1746,6 +1780,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
     this->notificationBundleOption_ = other.notificationBundleOption_;
+    this->agentBundle_ = other.agentBundle_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
 }
 
@@ -1812,6 +1847,15 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
             return false;
         }
         jsonObject["notificationBundleOption"] = bundleOptionObj;
+    }
+
+    if (agentBundle_ != nullptr) {
+        nlohmann::json bundleOptionObj;
+        if (!NotificationJsonConverter::ConvertToJson(agentBundle_.get(), bundleOptionObj)) {
+            ANS_LOGE("Cannot convert agentBundle to JSON.");
+            return false;
+        }
+        jsonObject["agentBundle"] = bundleOptionObj;
     }
 
     return true;
@@ -2158,6 +2202,32 @@ bool NotificationRequest::ConvertJsonToNotificationBundleOption(
             }
 
             target->notificationBundleOption_ = std::shared_ptr<NotificationBundleOption>(pBundleOption);
+        }
+    }
+
+    return true;
+}
+
+bool NotificationRequest::ConvertJsonToAgentBundle(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    if (target == nullptr) {
+        ANS_LOGE("Invalid input parameter.");
+        return false;
+    }
+
+    const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("agentBundle") != jsonEnd) {
+        auto bundleOptionObj = jsonObject.at("agentBundle");
+        if (!bundleOptionObj.is_null()) {
+            auto *pBundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(bundleOptionObj);
+            if (pBundleOption == nullptr) {
+                ANS_LOGE("Failed to parse agentBundle!");
+                return false;
+            }
+
+            target->agentBundle_ = std::shared_ptr<NotificationBundleOption>(pBundleOption);
         }
     }
 
