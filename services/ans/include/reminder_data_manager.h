@@ -578,6 +578,8 @@ private:
     void CheckNeedNotifyStatus(const sptr<ReminderRequest> &reminder,
         const ReminderRequest::ActionButtonType buttonType);
 
+    std::string GetFullPath(const std::string& path);
+
    /**
     * Single instance.
     */

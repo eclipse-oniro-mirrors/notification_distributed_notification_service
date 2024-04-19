@@ -42,6 +42,7 @@
 #include "system_ability_definition.h"
 #include "app_mgr_constants.h"
 #include "iservice_registry.h"
+#include "config_policy_utils.h"
 
 namespace OHOS {
 namespace Notification {
@@ -59,11 +60,8 @@ const int INDEX_VALUE = 2;
 /**
  * Default reminder sound.
  */
-const std::string DEFAULT_REMINDER_SOUND_1 =
-    "/sys_prod/resource/media/audio/alarms/Aegean_Sea.ogg";
-const std::string DEFAULT_REMINDER_SOUND_2 =
-    "/sys_prod/variant/region_comm/china/resource/media/audio/alarms/Aegean_Sea.ogg";
-const std::string DEFAULT_REMINDER_SOUND_3 = "/system/etc/capture.ogg";
+const std::string DEFAULT_REMINDER_SOUND_1 = "/system/etc/capture.ogg";
+const std::string DEFAULT_REMINDER_SOUND_2 = "resource/media/audio/alarms/Aegean_Sea.ogg";
 
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM = 12000;
 const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYS_APP = 10000;
@@ -1525,6 +1523,18 @@ std::string ReminderDataManager::GetCustomRingUri(const sptr<ReminderRequest> &r
     return reminder->GetCustomRingUri();
 }
 
+std::string ReminderDataManager::GetFullPath(const std::string& oriPath)
+{
+    char buf[MAX_PATH_LEN] = {0};
+    char* path = GetOneCfgFile(oriPath.c_str(), buf, MAX_PATH_LEN);
+    if (path == nullptr || *path == '\0') {
+        ANSR_LOGE("GetOneCfgFile failed");
+        return "";
+    }
+    std::string filePath = path;
+    return filePath;
+}
+
 void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &reminder)
 {
     if (reminder == nullptr) {
@@ -1544,12 +1554,11 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         }
     }
     std::string defaultPath;
+    ANSR_LOGE("%{public}s", GetFullPath("etc/capture.ogg").c_str());
     if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
         defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
-    } else if (access(DEFAULT_REMINDER_SOUND_2.c_str(), F_OK) == 0) {
-        defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_2;
     } else {
-        defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_3;
+        defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
     }
     std::string ringUri = GetCustomRingUri(reminder);
     Uri reminderSound(ringUri);
