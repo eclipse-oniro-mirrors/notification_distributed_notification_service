@@ -477,7 +477,9 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     }
 
     for (auto slot : slots) {
-        slot->SetReminderMode(slot->GetReminderMode() & slotFlags);
+        auto configSlotReminderMode =
+            DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
+        slot->SetReminderMode(slotFlags & configSlotReminderMode);
         std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
         ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
             slot->GetType(), bundleName.c_str(), slot->GetReminderMode());

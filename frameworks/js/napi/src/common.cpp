@@ -204,6 +204,10 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     napi_create_int32(env, slot.GetAuthorizedStatus(), &value);
     napi_set_named_property(env, result, "authorizedStatus", value);
 
+    // reminderMode?: number
+    napi_create_int32(env, slot.GetReminderMode(), &value);
+    napi_set_named_property(env, result, "reminderMode", value);
+
     return NapiGetBoolean(env, true);
 }
 
