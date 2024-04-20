@@ -1843,6 +1843,17 @@ std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfAct
     return bundleInfos;
 }
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+void AdvancedNotificationService::OnScreenLock()
+{
+    ReminderSwingDecisionCenter::GetInstance().OnScreenLock();
+}
+
+void AdvancedNotificationService::OnScreenUnlock()
+{
+    ReminderSwingDecisionCenter::GetInstance().OnScreenUnlock();
+}
+#endif
 void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationRecord> &record)
 {
     record->notification->SetEnableLight(false);

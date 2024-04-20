@@ -31,7 +31,9 @@
 #include "notification_extension_wrapper.h"
 #include "os_account_manager.h"
 #include "remote_death_recipient.h"
-
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+#include "reminder_swing_decision_center.h"
+#endif
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
@@ -270,6 +272,9 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
         if (record != nullptr) {
             ANS_LOGW("subscriber removed.");
             subscriberRecordList_.remove(record);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+            UpdateCrossDeviceNotificationStatus();
+#endif
         }
     }));
     notificationSubQueue_->wait(handler);
@@ -369,6 +374,9 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     }
 
     AddRecordInfo(record, subscribeInfo);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    UpdateCrossDeviceNotificationStatus();
+#endif
     if (onSubscriberAddCallback_ != nullptr) {
         onSubscriberAddCallback_(record);
     }
@@ -393,7 +401,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
         record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
 
         subscriberRecordList_.remove(record);
-
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+        UpdateCrossDeviceNotificationStatus();
+#endif
         record->subscriber->OnDisconnected();
         ANS_LOGI("subscriber is disconnected.");
     }
@@ -663,6 +673,27 @@ void NotificationSubscriberManager::UnRegisterOnSubscriberAddCallback()
 {
     onSubscriberAddCallback_ = nullptr;
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+void NotificationSubscriberManager::UpdateCrossDeviceNotificationStatus()
+{
+    bool isEnable = false;
+    std::string deviceType = ReminderSwingDecisionCenter::GetInstance().GetSwingDeviceType();
+    if (deviceType.empty()) {
+        ANS_LOGE("GetIsEnableSwingEffectedRemind deviceType is empty");
+        return;
+    }
+
+    for (auto record : subscriberRecordList_) {
+        if (record->deviceType.compare(deviceType) == 0) {
+            isEnable = true;
+            break;
+        }
+    }
+
+    ReminderSwingDecisionCenter::GetInstance().UpdateCrossDeviceNotificationStatus(isEnable);
+}
+#endif
 
 using SubscriberRecordPtr = std::shared_ptr<NotificationSubscriberManager::SubscriberRecord>;
 std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecords()

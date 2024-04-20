@@ -32,6 +32,10 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
 #endif
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+#endif
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
@@ -119,6 +123,12 @@ void SystemEventObserver::InitEventList()
         &SystemEventObserver::OnBundleUpdateEventInner;
     memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED] =
         &SystemEventObserver::OnBootSystemCompletedEventInner;
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED] =
+        &SystemEventObserver::OnScreenLock;
+    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED] =
+        &SystemEventObserver::OnScreenUnlock;
+#endif
 }
 
 void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &data)
@@ -164,5 +174,21 @@ void SystemEventObserver::OnBootSystemCompletedEventInner(const EventFwk::Common
         callbacks_.onBootSystemCompleted();
     }
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+void SystemEventObserver::OnScreenLock(const EventFwk::CommonEventData &data)
+{
+    if (callbacks_.onScreenLock != nullptr) {
+        callbacks_.onScreenLock();
+    }
+}
+
+void SystemEventObserver::OnScreenUnlock(const EventFwk::CommonEventData &data)
+{
+    if (callbacks_.onScreenUnlock != nullptr) {
+        callbacks_.onScreenUnlock();
+    }
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS
