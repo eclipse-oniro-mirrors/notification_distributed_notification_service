@@ -342,6 +342,15 @@ public:
     ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, bool &enabled);
 
+    /**
+     * @brief Get the bundle name set for send the sound.
+     *
+     * @param allPackage Specifies whether to allow all bundle to publish notification with sound.
+     * @param bundleNames Indicates bundle name set, allow to publish notification with sound.
+     * @return true if get the permission; returns false otherwise.
+     */
+    bool GetBundleSoundPermission(bool &allPackage, std::set<std::string> &bundleNames);
+
     void InitSettingFromDisturbDB();
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);

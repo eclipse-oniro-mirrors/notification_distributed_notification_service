@@ -712,14 +712,24 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
 ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     ANS_LOGD("Called.");
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem) {
-        return ERR_ANS_NOT_SYSTEM_SERVICE;
+    if (key == RING_TRUST_PKG_KEY) {
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (!isSubsystem) {
+            return ERR_ANS_NOT_SYSTEM_SERVICE;
+        }
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (key == RING_TRUST_PKG_KEY) {
+        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            return ERR_ANS_PERMISSION_DENIED;
+        }
+        std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
+        soundPermissionInfo_->needUpdateCache_ = true;
     }
 
     ErrCode result = ERR_OK;

@@ -1287,6 +1287,20 @@ public:
     std::string GetAppMessageId() const;
 
     /**
+     * @brief Set notification sound value.
+     *
+     * @param sound the value of sound.
+     */
+    void SetSound(const std::string &sound);
+
+    /**
+     * @brief Get notification sound value.
+     *
+     * @return Return the value of sound.
+     */
+    std::string GetSound() const;
+
+    /**
      * @brief Generate notification request unique key.
      *
      * @return Return the unique key of notification request.
@@ -1400,6 +1414,7 @@ private:
     std::string sortingKey_ {};
     std::string classification_ {};
     std::string appMessageId_ {};
+    std::string sound_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};
