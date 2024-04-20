@@ -33,7 +33,7 @@ NotificationConfigParse::NotificationConfigParse()
         {NotificationConstant::SlotType::SERVICE_REMINDER, 0b111111},
         {NotificationConstant::SlotType::CONTENT_INFORMATION, 0b000000},
         {NotificationConstant::SlotType::OTHER, 0b000000},
-        {NotificationConstant::SlotType::LIVE_VIEW, 0b110011},
+        {NotificationConstant::SlotType::LIVE_VIEW, 0b111011},
         {NotificationConstant::SlotType::CUSTOMER_SERVICE, 0b110001},
         {NotificationConstant::SlotType::EMERGENCY_INFORMATION, 0b111111}
     };
