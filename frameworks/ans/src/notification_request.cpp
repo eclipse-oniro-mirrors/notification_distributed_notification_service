@@ -760,6 +760,7 @@ std::string NotificationRequest::Dump()
             ", userInputHistory = " + (!userInputHistory_.empty() ? userInputHistory_.at(0) : "empty") +
             ", distributedOptions = " + distributedOptions_.Dump() +
             ", notificationFlags = " + (notificationFlags_ ? "not null" : "null") +
+            ", notificationFlagsOfDevices = " + (notificationFlagsOfDevices_ ? "not null" : "null") +
             ", notificationBundleOption = " + (notificationBundleOption_ != nullptr ? "not null" : "null") +
             ", agentBundle = " + (agentBundle_ != nullptr ? "not null" : "null") +
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
@@ -1302,6 +1303,29 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    valid = notificationFlagsOfDevices_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write notification device flags cause invalid sptr");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteInt32(static_cast<int32_t>(notificationFlagsOfDevices_->size()))) {
+            ANS_LOGE("Failed to write notification devices flags size");
+            return false;
+        }
+        for (auto deviceFlag : *notificationFlagsOfDevices_) {
+            if (!parcel.WriteString(deviceFlag.first)) {
+                ANS_LOGE("Failed to write notification devices flags key");
+                return false;
+            }
+            if (!parcel.WriteParcelable(deviceFlag.second.get())) {
+                ANS_LOGE("Failed to write notification devices flags value");
+                return false;
+            }
+        }
+    }
+
     valid = unifiedGroupInfo_ ? true : false;
     if (!parcel.WriteBool(valid)) {
         ANS_LOGE("Failed to write unifiedGroupInfo for the notification");
@@ -1600,6 +1624,18 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
+        notificationFlagsOfDevices_ = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+        int32_t mapSize = parcel.ReadInt32();
+        for (int32_t seq = 0; seq < mapSize; seq++) {
+            std::string deviceType = parcel.ReadString();
+            std::shared_ptr<NotificationFlags> notificationFlags =
+                std::shared_ptr<NotificationFlags>(parcel.ReadParcelable<NotificationFlags>());
+            (*notificationFlagsOfDevices_)[deviceType] = notificationFlags;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
         unifiedGroupInfo_ =
             std::shared_ptr<NotificationUnifiedGroupInfo>(parcel.ReadParcelable<NotificationUnifiedGroupInfo>());
         if (!unifiedGroupInfo_) {
@@ -1791,6 +1827,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
+    this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->agentBundle_ = other.agentBundle_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
@@ -2366,7 +2403,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     if (oldIsOnlyLocalUpdate!= newLiveViewContent->GetIsOnlyLocalUpdate()) {
         newLiveViewContent->SetIsOnlyLocalUpdate(oldIsOnlyLocalUpdate);
     }
-    
+
     auto newPicture = newLiveViewContent->GetPicture();
     auto oldPicture = oldLiveViewContent->GetPicture();
     bool isSet = false;

@@ -222,8 +222,6 @@ void SmartReminderCenter::HandleReminderMethods(
         bundleOption, deviceType, tempEnable) != ERR_OK || !tempEnable) {
         enabledAffectedBy = false;
     }
-    delete bundleOption;
-    bundleOption = nullptr;
     if (!NotificationSubscriberManager::GetInstance()->GetIsEnableEffectedRemind()) {
         enabledAffectedBy = false;
     }
