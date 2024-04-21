@@ -164,10 +164,6 @@ private:
     bool IsSystemUser(int32_t userId);
 
 private:
-    bool ProcessSyncDecision(
-        const std::string &deviceType, const sptr<Notification> &notification) const;
-    NotificationConstant::FlagStatus DowngradeReminder(
-        const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     void UpdateCrossDeviceNotificationStatus();
 #endif

@@ -178,7 +178,7 @@ void NotificationSubscriberManager::NotifyCanceled(
     notifications.emplace_back(notification);
     EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
 #endif
-    
+
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
@@ -429,8 +429,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
             (record->userId == SUBSCRIBE_USER_ALL) ||
             (record->userId == recvUserId) ||
             IsSystemUser(record->userId) ||  // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId)) &&
-            ProcessSyncDecision(record->deviceType, notification)) {
+            IsSystemUser(sendUserId))) {
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }
@@ -445,55 +444,6 @@ bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
         }
     }
     return false;
-}
-
-bool NotificationSubscriberManager::ProcessSyncDecision(
-    const std::string &deviceType, const sptr<Notification> &notification) const
-{
-    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
-    if (request == nullptr) {
-        ANS_LOGD("No need to consume cause invalid reqeuest.");
-        return false;
-    }
-    if (request->GetDeviceFlags() == nullptr) {
-        return true;
-    }
-    auto flagsMap = request->GetDeviceFlags();
-    auto flagIter = flagsMap->find(deviceType);
-    if (flagIter != flagsMap->end()) {
-        std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
-        tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
-        tempFlags->SetVibrationEnabled(
-            DowngradeReminder(tempFlags->IsVibrationEnabled(), flagIter->second->IsVibrationEnabled()));
-        tempFlags->SetLockScreenVisblenessEnabled(
-            tempFlags->IsLockScreenVisblenessEnabled() && flagIter->second->IsLockScreenVisblenessEnabled());
-        tempFlags->SetBannerEnabled(
-            tempFlags->IsBannerEnabled() && flagIter->second->IsBannerEnabled());
-        tempFlags->SetLightScreenEnabled(
-            tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
-        request->SetFlags(tempFlags);
-        request->GetDeviceFlags().reset();
-        return true;
-    }
-    if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
-        request->GetDeviceFlags().reset();
-        return true;
-    }
-    ANS_LOGD("No need to consume cause cannot find deviceFlags. deviceType: %{public}s.", deviceType.c_str());
-    return false;
-}
-
-NotificationConstant::FlagStatus NotificationSubscriberManager::DowngradeReminder(
-    const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const
-{
-    if (judgeFlags == NotificationConstant::FlagStatus::NONE || oldFlags == NotificationConstant::FlagStatus::NONE) {
-        return NotificationConstant::FlagStatus::NONE;
-    }
-    if (judgeFlags > oldFlags) {
-        return judgeFlags;
-    } else {
-        return oldFlags;
-    }
 }
 
 void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
@@ -521,8 +471,7 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
             (record->userId == SUBSCRIBE_USER_ALL) ||
             (record->userId == recvUserId) ||
             IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId)) &&
-            ProcessSyncDecision(record->deviceType, notification)) {
+            IsSystemUser(sendUserId))) {
             currNotifications.emplace_back(notification);
         }
     }
