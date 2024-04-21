@@ -18,6 +18,8 @@
 #define private public
 #define protected public
 #include "reminder_store.h"
+#include "reminder_table.h"
+#include "reminder_table_old.h"
 #undef private
 #undef protected
 #include "reminder_helper.h"
@@ -260,6 +262,27 @@ HWTEST_F(ReminderStoreTest, UpdateOrInsert_00001, Function | SmallTest | Level1)
     ReminderStore reminderStore;
     int64_t ret = reminderStore.UpdateOrInsert(reminder, bundleOption_);
     EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: OnCreate_00001
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
+{
+    std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
+    NativeRdb::RdbStoreConfig config(dbConfig);
+    config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
+    {
+        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
+        int32_t errCode = STATE_FAIL;
+        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
+        EXPECT_NE(rdbStore, nullptr);
+    }
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
 }
 }
