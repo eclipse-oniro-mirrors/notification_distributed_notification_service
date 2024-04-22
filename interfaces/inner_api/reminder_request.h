@@ -908,6 +908,9 @@ public:
     // maxWantAgent flag
     static constexpr int32_t MAX_WANT_AGENT_FLAG = 1;
 
+    // max ring duration
+    static constexpr uint64_t MAX_RING_DURATION = 30 * 60 * 1000;  // 30 min
+
 protected:
     enum class DbRecoveryType : uint8_t {
         INT,

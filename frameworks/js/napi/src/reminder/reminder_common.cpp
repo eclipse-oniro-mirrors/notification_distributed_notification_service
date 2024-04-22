@@ -544,12 +544,12 @@ bool ReminderCommon::GenReminderIntInner(
     // ringDuration
     int64_t propVal = 0;
     if (GetInt64(env, value, ReminderAgentNapi::RING_DURATION, propVal)) {
-        if (propVal < 0) {
-            reminder->SetRingDuration(0);
-        } else {
-            uint64_t ringDuration = static_cast<uint64_t>(propVal);
-            reminder->SetRingDuration(ringDuration);
+        if (propVal < 0 || propVal > (ReminderRequest::MAX_RING_DURATION / ReminderRequest::MILLI_SECONDS)) {
+            ANSR_LOGE("ring duration value is error!");
+            return false;
         }
+        uint64_t ringDuration = static_cast<uint64_t>(propVal);
+        reminder->SetRingDuration(ringDuration);
     }
 
     // timeInterval
