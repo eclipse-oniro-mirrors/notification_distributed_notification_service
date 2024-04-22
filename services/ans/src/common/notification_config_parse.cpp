@@ -79,17 +79,26 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
         return false;
     }
 
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("GetCurrentSlotReminder failed as can not find notificationService.");
+        return false;
+    }
     nlohmann::json currentDeviceRemindJson = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_SLOT_TYPE_REMINDER];
     if (currentDeviceRemindJson.is_null() || !currentDeviceRemindJson.is_array() || currentDeviceRemindJson.empty()) {
         ANS_LOGE("GetCurrentSlotReminder failed as invalid currentDeviceReminder json.");
         return false;
     }
     for (auto &reminderFilterSlot : currentDeviceRemindJson) {
-        std::shared_ptr<NotificationFlags> reminderFlags;
         NotificationConstant::SlotType slotType;
-        if (reminderFilterSlot[CFG_KEY_NAME].is_null() ||
+        if (reminderFilterSlot.find(CFG_KEY_NAME) == reminderFilterSlot.end() ||
+            reminderFilterSlot[CFG_KEY_NAME].is_null() ||
             !reminderFilterSlot[CFG_KEY_NAME].is_string() ||
-            !NotificationSlot::GetSlotTypeByString(reminderFilterSlot[CFG_KEY_NAME].get<std::string>(), slotType) ||
+            !NotificationSlot::GetSlotTypeByString(reminderFilterSlot[CFG_KEY_NAME].get<std::string>(), slotType)) {
+            continue;
+        }
+
+        std::shared_ptr<NotificationFlags> reminderFlags;
+        if (reminderFilterSlot.find(CFG_KEY_REMINDER_FLAGS) == reminderFilterSlot.end() ||
             reminderFilterSlot[CFG_KEY_REMINDER_FLAGS].is_null() ||
             !reminderFilterSlot[CFG_KEY_REMINDER_FLAGS].is_string() ||
             !NotificationFlags::GetReminderFlagsByString(

@@ -46,7 +46,7 @@ bool NotificationSubscriber::ProcessSyncDecision(
 {
     sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
     if (request == nullptr) {
-        ANS_LOGD("No need to consume cause invalid reqeuest.");
+        ANS_LOGE("No need to consume cause invalid reqeuest.");
         return false;
     }
     auto flagsMap = request->GetDeviceFlags();
