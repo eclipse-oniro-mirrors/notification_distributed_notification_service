@@ -44,35 +44,46 @@ void SmartReminderCenter::GetMultiDeviceReminder()
     multiJsonPoint.append("/");
     multiJsonPoint.append(MULTI_DEVICE_REMINDER);
     if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigJson(multiJsonPoint, root)) {
-        ANS_LOGI("Failed to get multiDeviceReminder CCM config file.");
+        ANS_LOGW("Failed to get multiDeviceReminder CCM config file.");
+        return;
+    }
+
+    if (root.find(NotificationConfigParse::CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGW("GetMultiDeviceReminder failed as can not find notificationService.");
         return;
     }
 
     nlohmann::json multiDeviceRemindJson =
         root[NotificationConfigParse::CFG_KEY_NOTIFICATION_SERVICE][MULTI_DEVICE_REMINDER];
     if (multiDeviceRemindJson.is_null() || !multiDeviceRemindJson.is_array() || multiDeviceRemindJson.empty()) {
-        ANS_LOGI("GetMultiDeviceReminder failed as invalid multiDeviceReminder json.");
+        ANS_LOGW("GetMultiDeviceReminder failed as invalid multiDeviceReminder json.");
         return;
     }
+
     reminderMethods_.clear();
     for (auto &singleDeviceRemindJson : multiDeviceRemindJson) {
         if (singleDeviceRemindJson.is_null() || !singleDeviceRemindJson.is_object()) {
             continue;
         }
-        string deviceType;
-        if (singleDeviceRemindJson[ReminderAffected::DEVICE_TYPE].is_null() ||
-            !singleDeviceRemindJson[ReminderAffected::DEVICE_TYPE].is_string() ||
+
+        if (singleDeviceRemindJson.find(ReminderAffected::DEVICE_TYPE) == singleDeviceRemindJson.end() ||
+            singleDeviceRemindJson[ReminderAffected::DEVICE_TYPE].is_null() ||
+            !singleDeviceRemindJson[ReminderAffected::DEVICE_TYPE].is_string()) {
+            continue;
+        }
+
+        if (singleDeviceRemindJson.find(REMINDER_FILTER_DEVICE) == singleDeviceRemindJson.end() ||
             singleDeviceRemindJson[REMINDER_FILTER_DEVICE].is_null() ||
             !singleDeviceRemindJson[REMINDER_FILTER_DEVICE].is_array() ||
             singleDeviceRemindJson[REMINDER_FILTER_DEVICE].empty()) {
             continue;
         }
-        deviceType = singleDeviceRemindJson[ReminderAffected::DEVICE_TYPE].get<string>();
-        ParseReminderFilterDevice(singleDeviceRemindJson[REMINDER_FILTER_DEVICE], deviceType);
+        ParseReminderFilterDevice(singleDeviceRemindJson[REMINDER_FILTER_DEVICE],
+            singleDeviceRemindJson[ReminderAffected::DEVICE_TYPE].get<string>());
     }
 
     if (reminderMethods_.size() <= 0) {
-        ANS_LOGI("GetMultiDeviceReminder failed as Invalid reminderMethods size.");
+        ANS_LOGW("GetMultiDeviceReminder failed as Invalid reminderMethods size.");
     }
 }
 
@@ -81,9 +92,14 @@ void SmartReminderCenter::ParseReminderFilterDevice(const nlohmann::json &root, 
     map<string, vector<shared_ptr<ReminderAffected>>> reminderFilterDevice;
     for (auto &reminderFilterDeviceJson : root) {
         NotificationConstant::SlotType slotType;
-        if (reminderFilterDeviceJson[SLOT_TYPE].is_null() ||
+        if (reminderFilterDeviceJson.find(SLOT_TYPE) == reminderFilterDeviceJson.end() ||
+            reminderFilterDeviceJson[SLOT_TYPE].is_null() ||
             !reminderFilterDeviceJson[SLOT_TYPE].is_string() ||
-            !NotificationSlot::GetSlotTypeByString(reminderFilterDeviceJson[SLOT_TYPE].get<std::string>(), slotType) ||
+            !NotificationSlot::GetSlotTypeByString(reminderFilterDeviceJson[SLOT_TYPE].get<std::string>(), slotType)) {
+            continue;
+        }
+
+        if (reminderFilterDeviceJson.find(REMINDER_FILTER_SLOT) == reminderFilterDeviceJson.end() ||
             reminderFilterDeviceJson[REMINDER_FILTER_SLOT].is_null() ||
             !reminderFilterDeviceJson[REMINDER_FILTER_SLOT].is_array() ||
             reminderFilterDeviceJson[REMINDER_FILTER_SLOT].empty()) {
@@ -108,13 +124,24 @@ void SmartReminderCenter::ParseReminderFilterSlot(
     vector<shared_ptr<ReminderAffected>> reminderFilterSlot;
     for (auto &reminderFilterSlotJson : root) {
         NotificationContent::Type contentType;
-        if (!reminderFilterSlotJson[CONTENT_TYPE].is_null() &&
-            reminderFilterSlotJson[CONTENT_TYPE].is_string() &&
-            NotificationContent::GetContentTypeByString(
-                reminderFilterSlotJson[CONTENT_TYPE].get<std::string>(), contentType) &&
-            !reminderFilterSlotJson[REMINDER_FILTER_CONTENT].is_null() &&
-            reminderFilterSlotJson[REMINDER_FILTER_CONTENT].is_array() &&
-            !reminderFilterSlotJson[REMINDER_FILTER_CONTENT].empty()) {
+        bool validContentType = true;
+
+        if (reminderFilterSlotJson.find(CONTENT_TYPE) == reminderFilterSlotJson.end() ||
+            reminderFilterSlotJson[CONTENT_TYPE].is_null() ||
+            !reminderFilterSlotJson[CONTENT_TYPE].is_string() ||
+            !NotificationContent::GetContentTypeByString(
+                reminderFilterSlotJson[CONTENT_TYPE].get<std::string>(), contentType)) {
+            validContentType = false;
+        }
+
+        if (reminderFilterSlotJson.find(REMINDER_FILTER_CONTENT) == reminderFilterSlotJson.end() ||
+            reminderFilterSlotJson[REMINDER_FILTER_CONTENT].is_null() ||
+            !reminderFilterSlotJson[REMINDER_FILTER_CONTENT].is_array() ||
+            reminderFilterSlotJson[REMINDER_FILTER_CONTENT].empty()) {
+            validContentType = false;
+        }
+
+        if (validContentType) {
             string localNotificationType = notificationType;
             localNotificationType.append("#");
             localNotificationType.append(to_string(static_cast<int32_t>(contentType)));
@@ -139,11 +166,21 @@ void SmartReminderCenter::ParseReminderFilterContent(
 {
     vector<shared_ptr<ReminderAffected>> reminderFilterContent;
     for (auto &reminderFilterContentJson : root) {
-        if (!reminderFilterContentJson[TYPE_CODE].is_null() &&
-            reminderFilterContentJson[TYPE_CODE].is_number() &&
-            !reminderFilterContentJson[REMINDER_FILTER_CODE].is_null() &&
-            reminderFilterContentJson[REMINDER_FILTER_CODE].is_array() &&
-            !reminderFilterContentJson[REMINDER_FILTER_CODE].empty()) {
+        bool validTypeCode = true;
+        if (reminderFilterContentJson.find(TYPE_CODE) == reminderFilterContentJson.end() ||
+            reminderFilterContentJson[TYPE_CODE].is_null() ||
+            !reminderFilterContentJson[TYPE_CODE].is_number()) {
+            validTypeCode = false;
+        }
+
+        if (reminderFilterContentJson.find(REMINDER_FILTER_CODE) == reminderFilterContentJson.end() ||
+            reminderFilterContentJson[REMINDER_FILTER_CODE].is_null() ||
+            !reminderFilterContentJson[REMINDER_FILTER_CODE].is_array() ||
+            reminderFilterContentJson[REMINDER_FILTER_CODE].empty()) {
+            validTypeCode = false;
+        }
+
+        if (validTypeCode) {
             int32_t typeCode = reminderFilterContentJson[TYPE_CODE].get<int32_t>();
             string localNotificationType = notificationType;
             localNotificationType.append("#");
