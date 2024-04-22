@@ -1554,7 +1554,6 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         }
     }
     std::string defaultPath;
-    ANSR_LOGE("%{public}s", GetFullPath("etc/capture.ogg").c_str());
     if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
         defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
     } else {
