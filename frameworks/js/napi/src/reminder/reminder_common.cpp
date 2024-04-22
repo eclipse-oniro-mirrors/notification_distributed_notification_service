@@ -544,7 +544,7 @@ bool ReminderCommon::GenReminderIntInner(
     // ringDuration
     int64_t propVal = 0;
     if (GetInt64(env, value, ReminderAgentNapi::RING_DURATION, propVal)) {
-        if (propVal < 0 && propVal > ReminderRequest::MAX_RING_DURATION) {
+        if (propVal < 0 || propVal > ReminderRequest::MAX_RING_DURATION) {
             ANSR_LOGE("ring duration value is error!");
             return false;
         }
