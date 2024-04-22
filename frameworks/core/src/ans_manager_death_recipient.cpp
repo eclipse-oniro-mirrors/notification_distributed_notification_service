@@ -28,14 +28,12 @@ void AnsManagerDeathRecipient::SubscribeSAManager()
     statusChangeListener_ = new (std::nothrow) AnsManagerDeathRecipient::SystemAbilityStatusChangeListener();
     if (samgrProxy == nullptr || statusChangeListener_ == nullptr) {
         ANS_LOGI("GetSystemAbilityManager failed or new SystemAbilityStatusChangeListener failed");
-        delete statusChangeListener_;
         statusChangeListener_ = nullptr;
         return;
     }
     int32_t ret = samgrProxy->SubscribeSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, statusChangeListener_);
     if (ret != ERR_OK) {
         ANS_LOGI("SubscribeSystemAbility to sa manager failed");
-        delete statusChangeListener_;
         statusChangeListener_ = nullptr;
     }
 }

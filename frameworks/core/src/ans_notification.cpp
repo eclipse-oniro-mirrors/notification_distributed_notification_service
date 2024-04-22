@@ -496,6 +496,7 @@ ErrCode AnsNotification::SubscribeNotification(
         ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
+    subscriberSptr->subscriber_.SetDeviceType(subscribeInfo.GetDeviceType());
     return ansManagerProxy_->Subscribe(subscriberSptr, sptrInfo);
 }
 
@@ -1638,5 +1639,22 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
 
     return ansManagerProxy_->SetTargetDeviceStatus(deviceType, status);
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+ErrCode AnsNotification::RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc)
+{
+    ANS_LOGD("enter");
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("RegisterSwingCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    swingCallBackStub_ = new(std::nothrow) SwingCallBackStub(swingCbFunc);
+    if (swingCallBackStub_ == nullptr) {
+        ANS_LOGE("RegisterSwingCallback swingCallBackStub_ == null");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ansManagerProxy_->RegisterSwingCallback(swingCallBackStub_->AsObject());
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

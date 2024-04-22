@@ -135,6 +135,13 @@ public:
     NotificationRequest GetNotificationRequest() const;
 
     /**
+     * @brief Obtains the notification request point set by ANS.
+     *
+     * @return Returns NotificationRequest sptr.
+     */
+    sptr<NotificationRequest> GetNotificationRequestPoint() const;
+
+    /**
      * @brief Obtains the time notification was posted.
      *
      * @return Returns the time notificationRequest was posted.
@@ -305,7 +312,7 @@ private:
     void ReadFromParcelInt32(Parcel &parcel);
     void ReadFromParcelInt64(Parcel &parcel);
     void ReadFromParcelUint64(Parcel &parcel);
-    void ReadFromParcelParcelable(Parcel &parcel);
+    bool ReadFromParcelParcelable(Parcel &parcel);
     bool MarshallingBool(Parcel &parcel) const;
     bool MarshallingString(Parcel &parcel) const;
     bool MarshallingInt32(Parcel &parcel) const;

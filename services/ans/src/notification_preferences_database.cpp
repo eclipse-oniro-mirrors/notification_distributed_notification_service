@@ -212,6 +212,11 @@ const static std::string KEY_SLOT_AUTHORIZED_STATUS = "authorizedStatus";
  */
 const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
 
+/**
+ * Indicates that reminder mode of slot.
+ */
+const static std::string KEY_REMINDER_MODE = "reminderMode";
+
 constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
 constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 
@@ -286,6 +291,11 @@ const std::map<std::string,
         {
             KEY_SLOT_AUTH_HINT_CNT,
             std::bind(&NotificationPreferencesDatabase::ParseSlotAuthHitnCnt, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
+        },
+        {
+            KEY_REMINDER_MODE,
+            std::bind(&NotificationPreferencesDatabase::ParseSlotReminderMode, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3),
         },
 };
@@ -1056,6 +1066,8 @@ void NotificationPreferencesDatabase::GenerateSlotEntry(const std::string &bundl
         std::to_string(slot->GetAuthorizedStatus()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_AUTH_HINT_CNT),
         std::to_string(slot->GetAuthHintCnt()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_REMINDER_MODE),
+        std::to_string(slot->GetReminderMode()), values);
 }
 
 void NotificationPreferencesDatabase::ParseBundleFromDistureDB(
@@ -1474,6 +1486,14 @@ void NotificationPreferencesDatabase::ParseSlotAuthHitnCnt(
     ANS_LOGD("ParseSlotAuthHitnCnt slot count is %{public}s.", value.c_str());
     int32_t count = static_cast<int32_t>(StringToInt(value));
     slot->SetAuthHintCnt(count);
+}
+
+void NotificationPreferencesDatabase::ParseSlotReminderMode(
+    sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotReminderMode slot reminder mode is %{public}s.", value.c_str());
+    int32_t reminderMode = static_cast<int32_t>(StringToInt(value));
+    slot->SetReminderMode(reminderMode);
 }
 
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(

@@ -13,39 +13,48 @@
 * limitations under the License.
 */
 
-#ifndef NOTIFICATION_CONFIG_FILE_H
-#define NOTIFICATION_CONFIG_FILE_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CONFIG_FILE_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CONFIG_FILE_H
 
-#include <iostream>
 #include <map>
+#include <string>
+#include <vector>
+#include <singleton.h>
+
+#ifdef CONFIG_POLICY_ENABLE
+#include "config_policy_utils.h"
+#endif
+#include "nlohmann/json.hpp"
+#include "notification_constant.h"
+#include "notification_flags.h"
 
 namespace OHOS {
 namespace Notification {
-static enum ReminderModeFlag : unsigned int {
-    kRMFRing = 0x01,       // Ring
-    kRMFLockScreen = 0x02, // LockScreen
-    kRMFHangUp = 0x04,     // HangUp
-    kRMFLight = 0x08,      // Light
-    kRMFVibration = 0x10,  // Vibration
-} ReminderModeFlag;
-
-class NotificationConfigFile {
+class NotificationConfigParse : public DelayedSingleton<NotificationConfigParse> {
 public:
-    NotificationConfigFile();
-    NotificationConfigFile(const std::string &filePath);
-    ~NotificationConfigFile();
+    NotificationConfigParse();
+    ~NotificationConfigParse() = default;
 
+    bool GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const;
+    bool GetCurrentSlotReminder(
+        std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
+    uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
 private:
-    static int binaryToDecimal(const char *binaryString);
+    std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
+    std::vector<nlohmann::json> notificationConfigJsons_;
 
 public:
-    static void getDefaultSlotFlagsMap(std::map<std::string, uint32_t> &slotFlagsMap);
-    static bool getNotificationSlotFlagConfig(std::string &filePath,
-        std::map<std::string, uint32_t> &slotFlagsMap);
-    static bool parseNotificationConfigCcmFile(std::string &filePath,
-        std::map<std::string, uint32_t> &slotFlagsMap);
+    constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
+    constexpr static const char* CFG_KEY_SLOT_TYPE_REMINDER = "slotTypeReminder";
+    constexpr static const char* CFG_KEY_NAME = "name";
+    constexpr static const char* CFG_KEY_REMINDER_FLAGS = "reminderFlags";
+    #ifdef CONFIG_POLICY_ENABLE
+        constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
+    # else
+        constexpr static const char* NOTIFICAITON_CONFIG_FILE = "system/etc/notification/notification_config.json";
+    #endif
 };
 } // namespace Notification
 } // namespace OHOS
 
-#endif
+#endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CONFIG_FILE_H

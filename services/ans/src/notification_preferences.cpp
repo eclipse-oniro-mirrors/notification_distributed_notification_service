@@ -933,6 +933,31 @@ void NotificationPreferences::RemoveEnabledDbByBundle(const sptr<NotificationBun
     }
 }
 
+bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::set<std::string> &bundleNames)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::string value = "";
+    if (GetKvFromDb("RING_TRUSTLIST_PKG", value) != ERR_OK) {
+        ANS_LOGD("Get bundle sound permission failed.");
+        return false;
+    }
+
+    ANS_LOGD("The bundle permission is :%{public}s.", value.c_str());
+    nlohmann::json jsonPermission = nlohmann::json::parse(value, nullptr, false);
+    if (jsonPermission.is_discarded() || !jsonPermission.is_array()) {
+        ANS_LOGE("Parse bundle permission failed due to data is discarded or not array");
+        return false;
+    }
+
+    for (const auto &item : jsonPermission) {
+        bundleNames.insert(item);
+        if (item == "ALL_PKG") {
+            allPackage = true;
+        }
+    }
+    return true;
+}
+
 int32_t NotificationPreferences::SetKvToDb(
     const std::string &key, const std::string &value)
 {

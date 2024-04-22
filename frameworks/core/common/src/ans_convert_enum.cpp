@@ -249,6 +249,18 @@ bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
         case NotificationConstant::APP_CANCEL_ALL_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_ALL_REASON_REMOVE);
             break;
+        case NotificationConstant::USER_REMOVED_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::USER_REMOVED_REASON_DELETE);
+            break;
+        case NotificationConstant::FLOW_CONTROL_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::FLOW_CONTROL_REASON_DELETE);
+            break;
+        case NotificationConstant::DISABLE_SLOT_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::DISABLE_SLOT_REASON_DELETE);
+            break;
+        case NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::DISABLE_NOTIFICATION_REASON_DELETE);
+            break;
         case NotificationConstant::APP_CANCEL_REASON_OTHER:
             outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
             break;

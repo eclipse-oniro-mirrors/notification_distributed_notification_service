@@ -69,6 +69,8 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/ans_subscriber_local_live_view_stub.cpp",
     "${core_path}/src/ans_subscriber_proxy.cpp",
     "${core_path}/src/ans_subscriber_stub.cpp",
+    "${core_path}/src/swing_callback_proxy.cpp",
+    "${core_path}/src/swing_callback_stub.cpp",
     "${frameworks_module_ans_path}/src/ans_dialog_host_client.cpp",
     "${frameworks_module_ans_path}/src/badge_number_callback_data.cpp",
     "${frameworks_module_ans_path}/src/enabled_notification_callback_data.cpp",
@@ -152,6 +154,10 @@ ohos_shared_library("ans_innerkits") {
   if (ans_hitrace_usage) {
     external_deps += [ "hitrace:hitrace_meter" ]
     defines += [ "HITRACE_METER_ENABLE" ]
+  }
+
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

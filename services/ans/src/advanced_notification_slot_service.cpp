@@ -28,11 +28,13 @@
 #include "common_event_support.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
+#include "smart_reminder_center.h"
 
 #include "advanced_notification_inline.cpp"
 
 namespace OHOS {
 namespace Notification {
+const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -69,9 +71,10 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
                 NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slot->GetType(), originalSlot);
             if ((result == ERR_OK) && (originalSlot != nullptr)) {
                 continue;
-            } else {
-                addSlots.push_back(slot);
             }
+
+            GenerateSlotReminderMode(slot, bundleOption, true);
+            addSlots.push_back(slot);
         }
 
         if (addSlots.size() == 0) {
@@ -301,17 +304,18 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
         result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
         if ((result == ERR_OK) && (slot != nullptr)) {
             return;
-        } else {
-            slot = new (std::nothrow) NotificationSlot(slotType);
-            if (slot == nullptr) {
-                ANS_LOGE("Failed to create NotificationSlot instance");
-                return;
-            }
-
-            std::vector<sptr<NotificationSlot>> slots;
-            slots.push_back(slot);
-            result = NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, slots);
         }
+
+        slot = new (std::nothrow) NotificationSlot(slotType);
+        if (slot == nullptr) {
+            ANS_LOGE("Failed to create NotificationSlot instance");
+            return;
+        }
+
+        GenerateSlotReminderMode(slot, bundleOption);
+        std::vector<sptr<NotificationSlot>> slots;
+        slots.push_back(slot);
+        result = NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, slots);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -357,7 +361,6 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
     uint32_t &slotFlags)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -383,7 +386,7 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
         result = NotificationPreferences::GetInstance().GetNotificationSlotFlagsForBundle(bundle, slotFlags);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            slotFlags = 0;
+            slotFlags = DEFAULT_SLOT_FLAGS;
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -424,141 +427,141 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             result = NotificationPreferences::GetInstance().SetNotificationSlotFlagsForBundle(bundle, slotFlags);
+            if (result != ERR_OK) {
+                return;
+            }
+            ANS_LOGD("Set slotflags %{public}d to %{public}s.", slotFlags, bundle->GetBundleName().c_str());
+            result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
     return result;
 }
 
-void AdvancedNotificationService::SetNotificationFlagsForSocialCommunication(std::shared_ptr<NotificationFlags> &flags)
+ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record)
 {
-    if (flags == nullptr) {
-        ANS_LOGE("The flags is nullptr.");
-        return;
+    sptr<NotificationSlot> slot;
+    NotificationConstant::SlotType slotType = record->request->GetSlotType();
+    ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(record->bundleOption, slotType, slot);
+    if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
+        (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
+        slot = new (std::nothrow) NotificationSlot(slotType);
+        if (slot == nullptr) {
+            ANS_LOGE("Failed to create NotificationSlot instance");
+            return ERR_NO_MEMORY;
+        }
+
+        GenerateSlotReminderMode(slot, record->bundleOption);
+        std::vector<sptr<NotificationSlot>> slots;
+        slots.push_back(slot);
+        result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
     }
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetLockScreenVisblenessEnabled(true);
-    flags->SetBannerEnabled(true);
-    flags->SetLightScreenEnabled(true);
-    flags->SetStatusIconEnabled(true);
+    if (result == ERR_OK) {
+        if (slot != nullptr && slot->GetEnable()) {
+            record->slot = slot;
+        } else {
+            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
+            ANS_LOGE("Type[%{public}d] slot enable closed", slotType);
+        }
+    }
+    return result;
 }
 
-void AdvancedNotificationService::SetNotificationFlagsForServiceReminder(std::shared_ptr<NotificationFlags> &flags)
+ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
+    const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags)
 {
-    if (flags == nullptr) {
-        ANS_LOGE("The flags is nullptr.");
-        return;
+    std::vector<sptr<NotificationSlot>> slots;
+    ErrCode ret = NotificationPreferences::GetInstance().GetNotificationAllSlots(bundle, slots);
+    if (ret != ERR_OK || slots.empty()) {
+        ANS_LOGE("Failed to get slots by bundle, ret is %{public}d.", ret);
+        return ret;
     }
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetLockScreenVisblenessEnabled(true);
-    flags->SetBannerEnabled(false);
-    flags->SetLightScreenEnabled(true);
-    flags->SetStatusIconEnabled(true);
+
+    for (auto slot : slots) {
+        auto configSlotReminderMode =
+            DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
+        slot->SetReminderMode(slotFlags & configSlotReminderMode);
+        std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
+        ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
+            slot->GetType(), bundleName.c_str(), slot->GetReminderMode());
+    }
+
+    ret = NotificationPreferences::GetInstance().UpdateNotificationSlots(bundle, slots);
+    if (ret == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        ret = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+    }
+    return ret;
 }
 
-void AdvancedNotificationService::SetNotificationFlagsForContentInformation(std::shared_ptr<NotificationFlags> &flags)
+void AdvancedNotificationService::GenerateSlotReminderMode(
+    const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot)
 {
-    if (flags == nullptr) {
-        ANS_LOGE("The flags is nullptr.");
-        return;
+    uint32_t slotFlags = DEFAULT_SLOT_FLAGS;
+    auto ret = NotificationPreferences::GetInstance().GetNotificationSlotFlagsForBundle(bundle, slotFlags);
+    if (ret != ERR_OK) {
+        ANS_LOGI("Failed to get slotflags for bundle, use default slotflags.");
     }
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flags->SetLockScreenVisblenessEnabled(false);
-    flags->SetBannerEnabled(false);
-    flags->SetLightScreenEnabled(false);
-    flags->SetStatusIconEnabled(true);
+
+    auto configSlotReminderMode =
+        DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
+    if (isSpecifiedSlot) {
+        slot->SetReminderMode(configSlotReminderMode & slotFlags & slot->GetReminderMode());
+    } else {
+        slot->SetReminderMode(configSlotReminderMode & slotFlags);
+    }
+
+    std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
+    ANS_LOGD("The reminder mode of %{public}d is %{public}d in %{public}s",
+        slot->GetType(), slot->GetReminderMode(), bundleName.c_str());
 }
 
-void AdvancedNotificationService::SetNotificationFlagsForLiveView(std::shared_ptr<NotificationFlags> &flags)
-{
-    if (flags == nullptr) {
-        ANS_LOGE("The flags is nullptr.");
-        return;
-    }
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetLockScreenVisblenessEnabled(true);
-    flags->SetBannerEnabled(false);
-    flags->SetLightScreenEnabled(true);
-    flags->SetStatusIconEnabled(true);
-}
-
-void AdvancedNotificationService::SetNotificationFlagsForOther(std::shared_ptr<NotificationFlags> &flags)
-{
-    if (flags == nullptr) {
-        ANS_LOGE("The flags is nullptr.");
-        return;
-    }
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flags->SetLockScreenVisblenessEnabled(false);
-    flags->SetBannerEnabled(false);
-    flags->SetLightScreenEnabled(false);
-    flags->SetStatusIconEnabled(false);
-}
-
-void AdvancedNotificationService::SetNotificationFlagsForCustomService(std::shared_ptr<NotificationFlags> &flags)
-{
-    if (flags == nullptr) {
-        ANS_LOGE("The flags is nullptr.");
-        return;
-    }
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetLockScreenVisblenessEnabled(false);
-    flags->SetBannerEnabled(false);
-    flags->SetLightScreenEnabled(false);
-    flags->SetStatusIconEnabled(true);
-}
-
-void AdvancedNotificationService::SetNotificationFlagsForEmergencyInformation(std::shared_ptr<NotificationFlags> &flags)
-{
-    if (flags == nullptr) {
-        ANS_LOGE("The flags is nullptr.");
-        return;
-    }
-    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetLockScreenVisblenessEnabled(true);
-    flags->SetBannerEnabled(true);
-    flags->SetLightScreenEnabled(true);
-    flags->SetStatusIconEnabled(true);
-}
-
-void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request)
+void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request,
+    const sptr<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     NotificationConstant::SlotType type = request->GetSlotType();
     auto flags = std::make_shared<NotificationFlags>();
 
-    switch (type) {
-        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
-            SetNotificationFlagsForSocialCommunication(flags);
-            break;
-        case NotificationConstant::SlotType::SERVICE_REMINDER:
-            SetNotificationFlagsForServiceReminder(flags);
-            break;
-        case NotificationConstant::SlotType::CONTENT_INFORMATION:
-            SetNotificationFlagsForContentInformation(flags);
-            break;
-        case NotificationConstant::SlotType::LIVE_VIEW:
-            SetNotificationFlagsForLiveView(flags);
-            break;
-        case NotificationConstant::SlotType::OTHER:
-            SetNotificationFlagsForOther(flags);
-            break;
-        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
-            SetNotificationFlagsForCustomService(flags);
-            break;
-        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
-            SetNotificationFlagsForEmergencyInformation(flags);
-            break;
-        default:
-            break;
+    sptr<NotificationSlot> slot;
+    NotificationConstant::SlotType slotType = request->GetSlotType();
+    ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
+    if (slot == nullptr) {
+        slot = new (std::nothrow) NotificationSlot(slotType);
+        if (slot == nullptr) {
+            ANS_LOGE("Failed to create NotificationSlot instance");
+            return;
+        }
+        GenerateSlotReminderMode(slot, bundleOption);
     }
+
+    auto slotReminderMode = slot->GetReminderMode();
+    if ((slotReminderMode & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
+        flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    }
+
+    if ((slotReminderMode & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
+        flags->SetLockScreenVisblenessEnabled(true);
+    }
+
+    if ((slotReminderMode & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
+        flags->SetBannerEnabled(true);
+    }
+
+    if ((slotReminderMode & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
+        flags->SetLightScreenEnabled(true);
+    }
+
+    if ((slotReminderMode & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
+        flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    }
+
+    if ((slotReminderMode & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
+        flags->SetStatusIconEnabled(true);
+    }
+
     request->SetFlags(flags);
+    ANS_LOGD("The reminder flags of %{public}s is %{public}d",
+        request->GetBaseKey("").c_str(), flags->GetReminderFlags());
+    DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(
@@ -709,14 +712,24 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
 ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     ANS_LOGD("Called.");
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem) {
-        return ERR_ANS_NOT_SYSTEM_SERVICE;
+    if (key == RING_TRUST_PKG_KEY) {
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (!isSubsystem) {
+            return ERR_ANS_NOT_SYSTEM_SERVICE;
+        }
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (key == RING_TRUST_PKG_KEY) {
+        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            return ERR_ANS_PERMISSION_DENIED;
+        }
+        std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
+        soundPermissionInfo_->needUpdateCache_ = true;
     }
 
     ErrCode result = ERR_OK;

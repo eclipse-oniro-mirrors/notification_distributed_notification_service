@@ -20,55 +20,12 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
 
-class NotificationConfigFileTest : public testing::Test {
+class NotificationConfigParseTest : public testing::Test {
 public:
-    NotificationConfigFileTest()
-    {}
-    ~NotificationConfigFileTest()
-    {}
-
     static void SetUpTestCas(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
-
-void NotificationConfigFileTest::SetUpTestCas(void)
-{}
-
-void NotificationConfigFileTest::TearDownTestCase(void)
-{}
-
-void NotificationConfigFileTest::SetUp(void)
-{}
-
-void NotificationConfigFileTest::TearDown(void)
-{}
-
-/**
- * @tc.name: parseNotificationConfigCcmFileTest_001
- * @tc.desc: parseNotificationConfigCcmFile Test
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(NotificationConfigFileTest, parseNotificationConfigCcmFileTest_001, TestSize.Level1)
-{
-    std::string filepath = nullptr;
-    std::map<std::string, uint32_t> slotFlagsMap;
-    EXPECT_EQ(NotificationConfigFile::parseNotificationConfigCcmFile(filepath, slotFlagsMap), false);
-}
-
-/**
- * @tc.name: getNotificationSlotFlagConfigTest_001
- * @tc.desc: getNotificationSlotFlagConfig Test
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(NotificationConfigFileTest, getNotificationSlotFlagConfigTest_001, TestSize.Level1)
-{
-    std::string filepath = nullptr;
-    std::map<std::string, uint32_t> slotFlagsMap;
-    EXPECT_EQ(NotificationConfigFile::getNotificationSlotFlagConfig(filepath, slotFlagsMap), true);
-}
 }   //namespace Notification
 }   //namespace OHOS

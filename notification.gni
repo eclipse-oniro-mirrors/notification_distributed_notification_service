@@ -55,6 +55,9 @@ declare_args() {
   player_framework = true
   ans_hitrace_usage = true
   notification_ext_feature_summary = false
+  notification_smart_reminder_supported = true
+  ans_config_policy_enable = true
+  screenlock_mgr_enable = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
@@ -79,6 +82,16 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.hiviewdfx_hitrace)) {
     ans_hitrace_usage = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.customization_config_policy)) {
+    ans_config_policy_enable = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.theme_screenlock_mgr)) {
+    screenlock_mgr_enable = false
   }
 
   print("hisysevent_usage = " + "$hisysevent_usage")

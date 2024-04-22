@@ -15,6 +15,7 @@
 
 #include "notification_subscriber.h"
 
+#include "notification_constant.h"
 #include "hitrace_meter_adapter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -24,10 +25,68 @@ namespace Notification {
 NotificationSubscriber::NotificationSubscriber()
 {
     impl_ = new (std::nothrow) SubscriberImpl(*this);
+    deviceType_ = NotificationConstant::CURRENT_DEVICE_TYPE;
 };
 
 NotificationSubscriber::~NotificationSubscriber()
 {}
+
+void NotificationSubscriber::SetDeviceType(const std::string &deviceType)
+{
+    deviceType_ = deviceType;
+}
+
+std::string NotificationSubscriber::GetDeviceType() const
+{
+    return deviceType_;
+}
+
+bool NotificationSubscriber::ProcessSyncDecision(
+    const std::string &deviceType, std::shared_ptr<Notification> &notification) const
+{
+    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGD("No need to consume cause invalid reqeuest.");
+        return false;
+    }
+    auto flagsMap = request->GetDeviceFlags();
+    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+        return true;
+    }
+    auto flagIter = flagsMap->find(deviceType);
+    if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+        std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
+        tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
+        tempFlags->SetVibrationEnabled(
+            DowngradeReminder(tempFlags->IsVibrationEnabled(), flagIter->second->IsVibrationEnabled()));
+        tempFlags->SetLockScreenVisblenessEnabled(
+            tempFlags->IsLockScreenVisblenessEnabled() && flagIter->second->IsLockScreenVisblenessEnabled());
+        tempFlags->SetBannerEnabled(
+            tempFlags->IsBannerEnabled() && flagIter->second->IsBannerEnabled());
+        tempFlags->SetLightScreenEnabled(
+            tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
+        request->SetFlags(tempFlags);
+        return true;
+    }
+    if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
+        return true;
+    }
+    ANS_LOGD("No need to consume cause cannot find deviceFlags. deviceType: %{public}s.", deviceType.c_str());
+    return false;
+}
+
+NotificationConstant::FlagStatus NotificationSubscriber::DowngradeReminder(
+    const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const
+{
+    if (judgeFlags == NotificationConstant::FlagStatus::NONE || oldFlags == NotificationConstant::FlagStatus::NONE) {
+        return NotificationConstant::FlagStatus::NONE;
+    }
+    if (judgeFlags > oldFlags) {
+        return judgeFlags;
+    } else {
+        return oldFlags;
+    }
+}
 
 const sptr<NotificationSubscriber::SubscriberImpl> NotificationSubscriber::GetImpl() const
 {
@@ -63,8 +122,12 @@ void NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    if (!subscriber_.ProcessSyncDecision(subscriber_.GetDeviceType(), sharedNotification)) {
+        return;
+    }
     subscriber_.OnConsumed(
-        std::make_shared<Notification>(*notification), std::make_shared<NotificationSortingMap>(*notificationMap));
+        sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications,

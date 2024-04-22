@@ -125,6 +125,7 @@ namespace Notification {
         // push_callback_interface
         ON_CHECK_NOTIFICATION,
         ON_RESPONSE,
+        ON_UPDATE_STATUS,
         SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION,
         TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION,
         SUBSCRIBE_NOTIFICATION_SELF,
@@ -141,6 +142,7 @@ namespace Notification {
         ADD_DO_NOTDISTURB_PROFILES,
         REMOVE_DO_NOT_DISTURB_PROFILES,
         SET_TARGET_DEVICE_STATUS,
+        REGISTER_SWING_CALLBACK,
     };
 }
 }

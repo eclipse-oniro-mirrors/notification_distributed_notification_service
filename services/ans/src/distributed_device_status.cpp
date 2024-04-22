@@ -21,13 +21,13 @@ DistributedDeviceStatus::DistributedDeviceStatus() = default;
 
 DistributedDeviceStatus::~DistributedDeviceStatus() = default;
 
-ErrCode DistributedDeviceStatus::setDeviceStatus(const std::string &deviceType, const uint32_t status)
+ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, const uint32_t status)
 {
     deviceStatus_.EnsureInsert(deviceType, status);
     return ERR_OK;
 }
 
-uint32_t DistributedDeviceStatus::getDeviceStatus(const std::string &deviceType)
+uint32_t DistributedDeviceStatus::GetDeviceStatus(const std::string &deviceType)
 {
     return deviceStatus_.ReadVal(deviceType);
 }

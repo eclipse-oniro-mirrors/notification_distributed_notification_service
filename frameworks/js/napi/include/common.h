@@ -32,6 +32,7 @@ using namespace OHOS::Notification;
 constexpr int32_t STR_MAX_SIZE = 200;
 constexpr int32_t LONG_STR_MAX_SIZE = 1024;
 constexpr uint8_t OPERATION_MAX_TYPE = 3;
+constexpr int32_t LONG_LONG_STR_MAX_SIZE = 4096;
 constexpr int8_t NO_ERROR = 0;
 constexpr int8_t ERROR = -1;
 constexpr uint8_t PARAM0 = 0;
@@ -791,6 +792,17 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationAppMessageId(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the sound of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationSound(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
@@ -1697,6 +1709,8 @@ public:
         const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent);
     static napi_value SetLockScreenPicture(
         const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
+    static napi_value SetAgentBundle(const napi_env &env,
+        const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

@@ -19,6 +19,8 @@
 
 namespace OHOS {
 namespace Notification {
+std::map<std::string, NotificationContent::Type> NotificationContent::convertStrToContentType_;
+
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationNormalContent> &normalContent)
 {
     if (!normalContent) {
@@ -327,6 +329,29 @@ bool NotificationContent::ConvertJsonToContent(NotificationContent *target, cons
     target->content_ = std::shared_ptr<NotificationBasicContent>(pBasicContent);
 
     return true;
+}
+
+bool NotificationContent::GetContentTypeByString(
+    const std::string &strContentType, NotificationContent::Type &contentType)
+{
+    if (convertStrToContentType_.size() <= 0) {
+        convertStrToContentType_[CONTENT_TYPE_NONE] = NotificationContent::Type::NONE;
+        convertStrToContentType_[CONTENT_TYPE_BASIC_TEXT] = NotificationContent::Type::BASIC_TEXT;
+        convertStrToContentType_[CONTENT_TYPE_CONVERSATION] = NotificationContent::Type::CONVERSATION;
+        convertStrToContentType_[CONTENT_TYPE_LONG_TEXT] = NotificationContent::Type::LONG_TEXT;
+        convertStrToContentType_[CONTENT_TYPE_MEDIA] = NotificationContent::Type::MEDIA;
+        convertStrToContentType_[CONTENT_TYPE_MULTILINE] = NotificationContent::Type::MULTILINE;
+        convertStrToContentType_[CONTENT_TYPE_PICTURE] = NotificationContent::Type::PICTURE;
+        convertStrToContentType_[CONTENT_TYPE_LOCAL_LIVE_VIEW] = NotificationContent::Type::LOCAL_LIVE_VIEW;
+        convertStrToContentType_[CONTENT_TYPE_LIVE_VIEW] = NotificationContent::Type::LIVE_VIEW;
+    }
+    auto iterContentType = convertStrToContentType_.find(strContentType);
+    if (iterContentType != convertStrToContentType_.end()) {
+        contentType = iterContentType->second;
+        return true;
+    }
+    ANS_LOGE("GetContentTypeByString failed as Invalid strContentType.");
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS

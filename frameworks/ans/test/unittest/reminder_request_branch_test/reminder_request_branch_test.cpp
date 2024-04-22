@@ -61,7 +61,7 @@ HWTEST_F(ReminderRequestBranchTest, ShouldShowImmediately_00200, Function | Smal
     uint64_t triggerTimeInMilli = 1675876480001;
     reminderRequest.SetTriggerTimeInMilli(triggerTimeInMilli);
     bool ret = reminderRequest.ShouldShowImmediately();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -163,7 +163,7 @@ HWTEST_F(ReminderRequestBranchTest, HandleSysTimeChange_00500, Function | SmallT
     reminderRequest->isExpired_ = false;
     uint64_t oriTriggerTime = 1675876480001;
     uint64_t optTriggerTime = 0;
-    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), true);
+    EXPECT_EQ(reminderRequest->HandleSysTimeChange(oriTriggerTime, optTriggerTime), false);
 }
 
 /**

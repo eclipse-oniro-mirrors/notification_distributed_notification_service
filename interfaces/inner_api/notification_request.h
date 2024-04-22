@@ -1151,6 +1151,20 @@ public:
      */
     std::shared_ptr<NotificationFlags> GetFlags() const;
 
+     /**
+     * @brief Sets the flags of this notification and device.
+     *
+     * @param flags Indicates the flags of this notification and device.
+     */
+    void SetDeviceFlags(const std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> &mapFlags);
+
+    /**
+     * @brief Obtains the flags of the notification and device.
+     *
+     * @return Returns the flags of the notification and device.
+     */
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> GetDeviceFlags() const;
+
     /**
      * @brief Sets the userId of the notification receiver.
      *
@@ -1245,6 +1259,20 @@ public:
     std::shared_ptr<NotificationBundleOption> GetBundleOption() const;
 
     /**
+     * @brief Sets the agentBundle of this notification.
+     *
+     * @param bundleOption Indicates the agentBundle of this notification.
+     */
+    void SetAgentBundle(const std::shared_ptr<NotificationBundleOption> &agentBundle);
+
+    /**
+     * @brief Obtains the agentBundle of the notification.
+     *
+     * @return Returns the agentBundle of the notification.
+     */
+    std::shared_ptr<NotificationBundleOption> GetAgentBundle() const;
+
+    /**
      * @brief Set notification appMessageId value.
      *
      * @param appMessageId the value of appMessageId.
@@ -1257,6 +1285,20 @@ public:
      * @return Return the value of appMessageId.
      */
     std::string GetAppMessageId() const;
+
+    /**
+     * @brief Set notification sound value.
+     *
+     * @param sound the value of sound.
+     */
+    void SetSound(const std::string &sound);
+
+    /**
+     * @brief Get notification sound value.
+     *
+     * @return Return the value of sound.
+     */
+    std::string GetSound() const;
 
     /**
      * @brief Generate notification request unique key.
@@ -1338,6 +1380,7 @@ private:
     static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
     static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static bool ConvertJsonToAgentBundle(NotificationRequest *target, const nlohmann::json &jsonObject);
     static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
 
 private:
@@ -1371,6 +1414,7 @@ private:
     std::string sortingKey_ {};
     std::string classification_ {};
     std::string appMessageId_ {};
+    std::string sound_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};
@@ -1413,7 +1457,9 @@ private:
     std::shared_ptr<NotificationTemplate> notificationTemplate_ {};
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
     std::shared_ptr<NotificationBundleOption> notificationBundleOption_ {};
+    std::shared_ptr<NotificationBundleOption> agentBundle_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

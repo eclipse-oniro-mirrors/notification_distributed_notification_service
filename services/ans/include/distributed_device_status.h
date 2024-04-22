@@ -16,23 +16,32 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_DISTRIBUTED_DEVICE_STATUS_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_DISTRIBUTED_DEVICE_STATUS_H
 
+#include <cstdint>
+#include <singleton.h>
+#include <string>
+
 #include "errors.h"
 #include "ans_log_wrapper.h"
-#include <cstdint>
-#include <string>
 #include "safe_map.h"
 
 namespace OHOS {
 namespace Notification {
-class DistributedDeviceStatus {
+class DistributedDeviceStatus : public DelayedSingleton<DistributedDeviceStatus> {
 public:
     DistributedDeviceStatus();
     ~DistributedDeviceStatus();
-    ErrCode setDeviceStatus(const std::string &deviceType, const uint32_t status);
+    ErrCode SetDeviceStatus(const std::string &deviceType, const uint32_t status);
 
-    uint32_t getDeviceStatus(const std::string &deviceType);
+    uint32_t GetDeviceStatus(const std::string &deviceType);
 private:
     SafeMap<std::string, uint32_t> deviceStatus_;
+
+public:
+    static constexpr int32_t STATUS_SIZE = 4;
+    static constexpr int32_t USING_FLAG = 0;
+    static constexpr int32_t LOCK_FLAG = 1;
+    static constexpr int32_t OWNER_FLAG = 2;
+    static constexpr int32_t DISTURB_MODE_FLAG = 3;
 };
 }  // namespace Notification
 }  // namespace OHOS

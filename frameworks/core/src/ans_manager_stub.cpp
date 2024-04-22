@@ -319,6 +319,11 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS,
             std::bind(&AnsManagerStub::HandleSetTargetDeviceStatus, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+        {NotificationInterfaceCode::REGISTER_SWING_CALLBACK,
+            std::bind(&AnsManagerStub::HandleRegisterSwingCallback, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+#endif
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -2358,5 +2363,23 @@ ErrCode AnsManagerStub::HandleSetTargetDeviceStatus(MessageParcel &data, Message
     }
     return ERR_OK;
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+ErrCode AnsManagerStub::HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> swingCallBack = data.ReadRemoteObject();
+    if (swingCallBack == nullptr) {
+        ANS_LOGE("fail: read SwingCallBack failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = RegisterSwingCallback(swingCallBack);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

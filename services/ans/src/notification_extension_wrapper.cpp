@@ -18,6 +18,8 @@
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
+const int32_t ACTIVE_DELETE = 0;
+const int32_t PASSITIVE_DELETE = 1;
 
 ExtensionWrapper::ExtensionWrapper() = default;
 ExtensionWrapper::~ExtensionWrapper() = default;
@@ -49,13 +51,14 @@ void ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::str
     syncAdditionConfig_(key, value);
 }
 
-void ExtensionWrapper::UpdateByCancel(std::vector<std::string>& hashCodes)
+void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason)
 {
     if (updateByCancel_ == nullptr) {
         ANS_LOGE("updateUnifiedGroupByCancel wrapper symbol failed");
         return;
     }
-    updateByCancel_(hashCodes);
+    int32_t deleteType = convertToDelType(deleteReason);
+    updateByCancel_(notifications, deleteReason);
 }
 
 ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &request)
@@ -65,5 +68,24 @@ ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &r
         return 0;
     }
     return getUnifiedGroupInfo_(request);
+}
+
+int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
+{
+    int32_t delType = ACTIVE_DELETE;
+    switch (deleteReason) {
+        case NotificationConstant::APP_CANCEL_ALL_REASON_DELETE:
+        case NotificationConstant::PACKAGE_CHANGED_REASON_DELETE:
+        case NotificationConstant::USER_REMOVED_REASON_DELETE:
+        case NotificationConstant::DISABLE_SLOT_REASON_DELETE:
+        case NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE:
+            delType = PASSITIVE_DELETE;
+            break;
+        default:
+            delType = ACTIVE_DELETE;
+    }
+
+    ANS_LOGD("convertToDelType from delete reason %d to delete type %d", deleteReason, delType);
+    return delType;
 }
 } // namespace OHOS::Notification

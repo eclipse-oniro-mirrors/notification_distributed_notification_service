@@ -58,11 +58,22 @@ const std::shared_ptr<Media::PixelMap> NotificationCapsule::GetIcon() const
     return icon_;
 }
 
+void NotificationCapsule::SetContent(const std::string &content)
+{
+    content_ = content;
+}
+
+std::string NotificationCapsule::GetContent() const
+{
+    return content_;
+}
+
 std::string NotificationCapsule::Dump()
 {
     return "Capsule{ "
             "title = " + title_ +
             ", backgroundColor = " + backgroundColor_ +
+            ", content = " + content_ +
             ", icon = " + (icon_ ? "not null" : "null") +
             " }";
 }
@@ -71,6 +82,7 @@ bool NotificationCapsule::ToJson(nlohmann::json &jsonObject) const
 {
     jsonObject["title"] = title_;
     jsonObject["backgroundColor"] = backgroundColor_;
+    jsonObject["content"] = content_;
     jsonObject["icon"] = AnsImageUtil::PackImage(icon_);
 
     return true;
@@ -98,6 +110,10 @@ NotificationCapsule *NotificationCapsule::FromJson(const nlohmann::json &jsonObj
         capsule->backgroundColor_ = jsonObject.at("backgroundColor").get<std::string>();
     }
 
+    if (jsonObject.find("content") != jsonEnd && jsonObject.at("content").is_string()) {
+        capsule->content_ = jsonObject.at("content").get<std::string>();
+    }
+
     if (jsonObject.find("icon") != jsonEnd && jsonObject.at("icon").is_string()) {
         auto pmStr             = jsonObject.at("icon").get<std::string>();
         capsule->icon_ = AnsImageUtil::UnPackImage(pmStr);
@@ -115,6 +131,11 @@ bool NotificationCapsule::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteString(backgroundColor_)) {
         ANS_LOGE("Failed to write backgroundColor");
+        return false;
+    }
+
+    if (!parcel.WriteString(content_)) {
+        ANS_LOGE("Failed to write content");
         return false;
     }
 

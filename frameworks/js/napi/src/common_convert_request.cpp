@@ -346,6 +346,18 @@ napi_value Common::SetNotificationRequestByCustom(
         napi_set_named_property(env, result, "notificationFlags", flagsResult);
     }
 
+    // readonly agentBundle?: agentBundle
+    std::shared_ptr<NotificationBundleOption> agentBundle = request->GetAgentBundle();
+    if (agentBundle) {
+        napi_value agentBundleResult = nullptr;
+        napi_create_object(env, &agentBundleResult);
+        if (!SetAgentBundle(env, agentBundle, agentBundleResult)) {
+            ANS_LOGE("SetAgentBundle call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "agentBundle", agentBundleResult);
+    }
+
     return NapiGetBoolean(env, true);
 }
 
@@ -578,6 +590,10 @@ napi_value Common::GetNotificationRequestByString(
     }
     // appMessageId?: string
     if (GetNotificationAppMessageId(env, value, request) == nullptr) {
+        return nullptr;
+    }
+    // sound?: string
+    if (GetNotificationSound(env, value, request) == nullptr) {
         return nullptr;
     }
     return NapiGetNull(env);
@@ -1278,6 +1294,26 @@ napi_value Common::GetNotificationAppMessageId(
 
     std::string appMessageId = AppExecFwk::UnwrapStringFromJS(env, appMessageIdValue);
     request.SetAppMessageId(appMessageId);
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationSound(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, value, "sound", &hasProperty));
+    if (!hasProperty) {
+        return NapiGetNull(env);
+    }
+
+    auto soundValue = AppExecFwk::GetPropertyValueByPropertyName(env, value, "sound", napi_string);
+    if (soundValue == nullptr) {
+        ANS_LOGE("Wrong argument type. String sound expected.");
+        return nullptr;
+    }
+
+    std::string sound = AppExecFwk::UnwrapStringFromJS(env, soundValue);
+    request.SetSound(sound);
     return NapiGetNull(env);
 }
 

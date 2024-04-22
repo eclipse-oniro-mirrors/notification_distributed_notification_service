@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_ADVANCED_NOTIFICATION_SERVICE_H
 
 #include <ctime>
+#include <set>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -44,6 +45,9 @@
 #include "system_event_observer.h"
 #include "notification_subscriber_manager.h"
 #include "distributed_device_status.h"
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+#include "reminder_swing_decision_center.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -351,6 +355,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption) override;
+
+    ErrCode RemoveAllNotificationsForDisable(const sptr<NotificationBundleOption> &bundleOption);
 
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
 
@@ -774,6 +780,13 @@ public:
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
+     * @brief Obtains the event of user removed.
+     *
+     * @param userId Indicates the user.
+     */
+    void OnUserRemoved(const int32_t &userId);
+
+    /**
      * @brief Set whether to sync notifications to devices that do not have the app installed.
      *
      * @param userId Indicates the specific user.
@@ -987,44 +1000,10 @@ public:
     ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName);
 
     /**
-     * @brief Set the notification flags for social communication.
-     */
-    void SetNotificationFlagsForSocialCommunication(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for service reminder.
-     */
-    void SetNotificationFlagsForServiceReminder(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for content information.
-     */
-    void SetNotificationFlagsForContentInformation(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for live view.
-     */
-    void SetNotificationFlagsForLiveView(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for other.
-     */
-    void SetNotificationFlagsForOther(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for custom service.
-     */
-    void SetNotificationFlagsForCustomService(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
-     * @brief Set the notification flags for emergency information.
-     */
-    void SetNotificationFlagsForEmergencyInformation(std::shared_ptr<NotificationFlags> &flags);
-
-    /**
      * @brief Set the notification flags by soltType.
      */
-    void SetRequestBySlotType(const sptr<NotificationRequest> &request);
+    void SetRequestBySlotType(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption);
 
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
@@ -1052,6 +1031,26 @@ public:
      */
     bool InitPublishProcess();
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    /**
+     * @brief Register Swing Callback.
+     *
+     * @param swingCallback SwingCallBack.
+     * @return Returns register swing Callback result.
+     */
+    ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
+
+    /**
+     * @brief screen lock event callback.
+     */
+    void OnScreenLock();
+
+    /**
+     * @brief screen unlock event callback.
+     */
+    void OnScreenUnlock();
+#endif
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1066,6 +1065,13 @@ private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
         size_t recentCount = 16;
+    };
+
+    struct SoundPermissionInfo {
+        std::set<std::string> bundleName_;
+        std::atomic<bool> needUpdateCache_ = true;
+        bool allPackage_ = false;
+        std::mutex dbMutex_;
     };
 
     AdvancedNotificationService();
@@ -1235,6 +1241,14 @@ private:
     static ErrCode SetLockScreenPictureToDb(const sptr<NotificationRequest> &request);
     static ErrCode GetLockScreenPictureFromDb(NotificationRequest *request);
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason);
+    ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
+    ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
+    ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request, std::string bundleName);
+    void GenerateSlotReminderMode(
+        const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot = false);
+    static void CloseAlert(const std::shared_ptr<NotificationRecord> &record);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
@@ -1262,11 +1276,11 @@ private:
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;
 #endif
+    std::shared_ptr<SoundPermissionInfo> soundPermissionInfo_ = nullptr;
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
-    OHOS::Notification::DistributedDeviceStatus DistributedDeviceStatus_;
 };
 
 /**

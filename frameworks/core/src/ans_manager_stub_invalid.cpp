@@ -613,5 +613,13 @@ ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, con
     ANS_LOGE("SetTargetDeviceStatus called!");
     return ERR_INVALID_OPERATION;
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+ErrCode AnsManagerStub::RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback)
+{
+    ANS_LOGE("RegisterSwingCallback called!");
+    return ERR_INVALID_OPERATION;
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

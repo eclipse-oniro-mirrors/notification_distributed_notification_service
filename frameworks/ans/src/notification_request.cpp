@@ -760,10 +760,13 @@ std::string NotificationRequest::Dump()
             ", userInputHistory = " + (!userInputHistory_.empty() ? userInputHistory_.at(0) : "empty") +
             ", distributedOptions = " + distributedOptions_.Dump() +
             ", notificationFlags = " + (notificationFlags_ ? "not null" : "null") +
+            ", notificationFlagsOfDevices = " + (notificationFlagsOfDevices_ ? "not null" : "null") +
             ", notificationBundleOption = " + (notificationBundleOption_ != nullptr ? "not null" : "null") +
+            ", agentBundle = " + (agentBundle_ != nullptr ? "not null" : "null") +
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
-            std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) + " }";
+            std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
+            ", sound = " + sound_ + " }";
 }
 
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
@@ -1016,6 +1019,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteString(appMessageId_)) {
         ANS_LOGE("Failed to write appMessageId");
+        return false;
+    }
+
+    if (!parcel.WriteString(sound_)) {
+        ANS_LOGE("Failed to write sound");
         return false;
     }
 
@@ -1295,6 +1303,29 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    valid = notificationFlagsOfDevices_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write notification device flags cause invalid sptr");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteInt32(static_cast<int32_t>(notificationFlagsOfDevices_->size()))) {
+            ANS_LOGE("Failed to write notification devices flags size");
+            return false;
+        }
+        for (auto deviceFlag : *notificationFlagsOfDevices_) {
+            if (!parcel.WriteString(deviceFlag.first)) {
+                ANS_LOGE("Failed to write notification devices flags key");
+                return false;
+            }
+            if (!parcel.WriteParcelable(deviceFlag.second.get())) {
+                ANS_LOGE("Failed to write notification devices flags value");
+                return false;
+            }
+        }
+    }
+
     valid = unifiedGroupInfo_ ? true : false;
     if (!parcel.WriteBool(valid)) {
         ANS_LOGE("Failed to write unifiedGroupInfo for the notification");
@@ -1317,6 +1348,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     if (valid) {
         if (!parcel.WriteParcelable(notificationBundleOption_.get())) {
             ANS_LOGE("Failed to write notification bundleOption");
+            return false;
+        }
+    }
+
+    valid = agentBundle_ != nullptr ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write agentBundle for the notification");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(agentBundle_.get())) {
+            ANS_LOGE("Failed to write notification agentBundle");
             return false;
         }
     }
@@ -1411,6 +1455,11 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     if (!parcel.ReadString(appMessageId_)) {
         ANS_LOGE("Failed to read appMessageId");
+        return false;
+    }
+
+    if (!parcel.ReadString(sound_)) {
+        ANS_LOGE("Failed to read sound");
         return false;
     }
 
@@ -1575,6 +1624,18 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
+        notificationFlagsOfDevices_ = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+        int32_t mapSize = parcel.ReadInt32();
+        for (int32_t seq = 0; seq < mapSize; seq++) {
+            std::string deviceType = parcel.ReadString();
+            std::shared_ptr<NotificationFlags> notificationFlags =
+                std::shared_ptr<NotificationFlags>(parcel.ReadParcelable<NotificationFlags>());
+            (*notificationFlagsOfDevices_)[deviceType] = notificationFlags;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
         unifiedGroupInfo_ =
             std::shared_ptr<NotificationUnifiedGroupInfo>(parcel.ReadParcelable<NotificationUnifiedGroupInfo>());
         if (!unifiedGroupInfo_) {
@@ -1589,6 +1650,16 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
             std::shared_ptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
         if (!notificationBundleOption_) {
             ANS_LOGE("Failed to read notificationBundleOption");
+            return false;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
+        agentBundle_ =
+            std::shared_ptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
+        if (!agentBundle_) {
+            ANS_LOGE("Failed to read agentBundle");
             return false;
         }
     }
@@ -1628,6 +1699,17 @@ std::shared_ptr<NotificationFlags> NotificationRequest::GetFlags() const
     return notificationFlags_;
 }
 
+void NotificationRequest::SetDeviceFlags(
+    const std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> &mapFlags)
+{
+    notificationFlagsOfDevices_ = mapFlags;
+}
+
+std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> NotificationRequest::GetDeviceFlags() const
+{
+    return notificationFlagsOfDevices_;
+}
+
 
 void NotificationRequest::SetBundleOption(const std::shared_ptr<NotificationBundleOption> &bundleOption)
 {
@@ -1637,6 +1719,16 @@ void NotificationRequest::SetBundleOption(const std::shared_ptr<NotificationBund
 std::shared_ptr<NotificationBundleOption> NotificationRequest::GetBundleOption() const
 {
     return notificationBundleOption_;
+}
+
+void NotificationRequest::SetAgentBundle(const std::shared_ptr<NotificationBundleOption> &agentBundle)
+{
+    agentBundle_ = agentBundle;
+}
+
+std::shared_ptr<NotificationBundleOption> NotificationRequest::GetAgentBundle() const
+{
+    return agentBundle_;
 }
 
 void NotificationRequest::SetReceiverUserId(int32_t userId)
@@ -1694,6 +1786,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->sortingKey_ = other.sortingKey_;
     this->classification_ = other.classification_;
     this->appMessageId_ = other.appMessageId_;
+    this->sound_ = other.sound_;
 
     this->groupAlertType_ = other.groupAlertType_;
     this->visiblenessType_ = other.visiblenessType_;
@@ -1734,7 +1827,9 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
+    this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->notificationBundleOption_ = other.notificationBundleOption_;
+    this->agentBundle_ = other.agentBundle_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
 }
 
@@ -1801,6 +1896,15 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
             return false;
         }
         jsonObject["notificationBundleOption"] = bundleOptionObj;
+    }
+
+    if (agentBundle_ != nullptr) {
+        nlohmann::json bundleOptionObj;
+        if (!NotificationJsonConverter::ConvertToJson(agentBundle_.get(), bundleOptionObj)) {
+            ANS_LOGE("Cannot convert agentBundle to JSON.");
+            return false;
+        }
+        jsonObject["agentBundle"] = bundleOptionObj;
     }
 
     return true;
@@ -2153,6 +2257,32 @@ bool NotificationRequest::ConvertJsonToNotificationBundleOption(
     return true;
 }
 
+bool NotificationRequest::ConvertJsonToAgentBundle(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    if (target == nullptr) {
+        ANS_LOGE("Invalid input parameter.");
+        return false;
+    }
+
+    const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("agentBundle") != jsonEnd) {
+        auto bundleOptionObj = jsonObject.at("agentBundle");
+        if (!bundleOptionObj.is_null()) {
+            auto *pBundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(bundleOptionObj);
+            if (pBundleOption == nullptr) {
+                ANS_LOGE("Failed to parse agentBundle!");
+                return false;
+            }
+
+            target->agentBundle_ = std::shared_ptr<NotificationBundleOption>(pBundleOption);
+        }
+    }
+
+    return true;
+}
+
 bool NotificationRequest::IsCommonLiveView() const
 {
     return (slotType_ == NotificationConstant::SlotType::LIVE_VIEW) &&
@@ -2273,7 +2403,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     if (oldIsOnlyLocalUpdate!= newLiveViewContent->GetIsOnlyLocalUpdate()) {
         newLiveViewContent->SetIsOnlyLocalUpdate(oldIsOnlyLocalUpdate);
     }
-    
+
     auto newPicture = newLiveViewContent->GetPicture();
     auto oldPicture = oldLiveViewContent->GetPicture();
     bool isSet = false;
@@ -2434,6 +2564,16 @@ void NotificationRequest::SetAppMessageId(const std::string &appMessageId)
 std::string NotificationRequest::GetAppMessageId() const
 {
     return appMessageId_;
+}
+
+void NotificationRequest::SetSound(const std::string &sound)
+{
+    sound_ = sound;
+}
+
+std::string NotificationRequest::GetSound() const
+{
+    return sound_;
 }
 
 std::string NotificationRequest::GenerateUniqueKey()
