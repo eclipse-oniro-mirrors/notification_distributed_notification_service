@@ -29,6 +29,7 @@
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "hitrace_meter_adapter.h"
+#include "notification_unified_group_Info.h"
 #include "os_account_manager.h"
 #include "distributed_screen_status_manager.h"
 #include "notification_extension_wrapper.h"
@@ -1729,6 +1730,31 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     return result;
 }
 
+void AdvancedNotificationService::UpdateUnifiedGroupInfo(std::string &key,
+    std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
+{
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([=]() {
+        for (const auto& item : notificationList_) {
+            if (item->notification->GetKey() == key) {
+                ANS_LOGD("update group info matched key %s", key.c_str());
+                item->notification->GetNotificationRequestPoint()->SetUnifiedGroupInfo(groupInfo);
+
+                CloseAlert(item);
+
+                UpdateRecentNotification(item->notification, false, 0);
+                sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+                NotificationSubscriberManager::GetInstance()->NotifyConsumed(item->notification, sortingMap);
+                break;
+            }
+        }
+    });
+}
+
 ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1743,10 +1769,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     if (result != ERR_OK) {
         return result;
     }
-
-#ifdef ENABLE_ANS_EXT_WRAPPER
-    EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
-#endif
 
     // SA not support sound
     if (!request->GetSound().empty()) {
@@ -1775,6 +1797,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return result;
     }
     SetRequestBySlotType(record->request, record->bundleOption);
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
+#endif
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
         if (!record->bundleOption->GetBundleName().empty()) {

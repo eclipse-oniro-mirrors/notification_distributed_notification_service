@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include <dlfcn.h>
+#include <string>
 
+#include "advanced_notification_service.h"
 #include "notification_extension_wrapper.h"
 
 namespace OHOS::Notification {
@@ -35,10 +37,16 @@ void ExtensionWrapper::InitExtentionWrapper()
     syncAdditionConfig_ = (SYNC_ADDITION_CONFIG)dlsym(extensionWrapperHandle_, "SyncAdditionConfig");
     getUnifiedGroupInfo_ = (GET_UNIFIED_GROUP_INFO)dlsym(extensionWrapperHandle_, "GetUnifiedGroupInfo");
     updateByCancel_ = (UPDATE_BY_CANCEL)dlsym(extensionWrapperHandle_, "UpdateByCancel");
-    if (syncAdditionConfig_ == nullptr || getUnifiedGroupInfo_ == nullptr || updateByCancel_ == nullptr) {
+    initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
+    if (syncAdditionConfig_ == nullptr
+        || getUnifiedGroupInfo_ == nullptr
+        || updateByCancel_ == nullptr
+        || initSummary_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
+
+    initSummary_();
     ANS_LOGD("extension wrapper init success");
 }
 
@@ -69,6 +77,19 @@ ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &r
     }
     return getUnifiedGroupInfo_(request);
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void UpdateUnifiedGroupInfo(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
+{
+    AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
+}
+
+#ifdef __cplusplus
+}
+#endif
 
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 {
