@@ -1638,15 +1638,9 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
+ErrCode AdvancedNotificationService::SetRequestBundleInfo(const sptr<NotificationRequest> &request,
     int32_t uid, std::string &bundle)
 {
-    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-    if (bundleManager == nullptr) {
-        ANS_LOGE("failed to get bundleManager!");
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    bundle = bundleManager->GetBundleNameByUid(uid);
     if (!bundle.empty()) {
         if (request->GetCreatorBundleName().empty()) {
             request->SetCreatorBundleName(bundle);
@@ -1661,6 +1655,31 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
         if (!request->GetOwnerBundleName().empty()) {
             bundle = request->GetOwnerBundleName();
         }
+    }
+
+    std::shared_ptr<NotificationBundleOption> agentBundle =
+        std::make_shared<NotificationBundleOption>(bundle, uid);
+    if (agentBundle == nullptr) {
+        ANS_LOGE("Failed to create agentBundle instance");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    request->SetAgentBundle(agentBundle);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
+    int32_t uid, std::string &bundle)
+{
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("failed to get bundleManager!");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    bundle = bundleManager->GetBundleNameByUid(uid);
+
+    ErrCode result = SetRequestBundleInfo(request, uid, bundle);
+    if (result != ERR_OK) {
+        return result;
     }
 
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
@@ -1679,7 +1698,7 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    ErrCode result = CheckPictureSize(request);
+    result = CheckPictureSize(request);
     if (result != ERR_OK) {
         ANS_LOGE("Failed to check picture size");
         return result;
