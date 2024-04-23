@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "smart_reminder_center.h"
 
 #include "ans_log_wrapper.h"
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-#include "distributed_preferences.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
-#endif
 #include "notification_local_live_view_content.h"
 #include "notification_preferences.h"
 #include "screenlock_manager.h"
@@ -366,3 +364,4 @@ void SmartReminderCenter::GetDeviceStatusByType(
 }
 }  // namespace Notification
 }  // namespace OHOS
+#endif

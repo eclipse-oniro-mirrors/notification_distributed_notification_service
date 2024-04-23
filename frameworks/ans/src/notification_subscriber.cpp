@@ -41,6 +41,7 @@ std::string NotificationSubscriber::GetDeviceType() const
     return deviceType_;
 }
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 bool NotificationSubscriber::ProcessSyncDecision(
     const std::string &deviceType, std::shared_ptr<Notification> &notification) const
 {
@@ -87,6 +88,7 @@ NotificationConstant::FlagStatus NotificationSubscriber::DowngradeReminder(
         return oldFlags;
     }
 }
+#endif
 
 const sptr<NotificationSubscriber::SubscriberImpl> NotificationSubscriber::GetImpl() const
 {
@@ -123,9 +125,11 @@ void NotificationSubscriber::SubscriberImpl::OnConsumed(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     if (!subscriber_.ProcessSyncDecision(subscriber_.GetDeviceType(), sharedNotification)) {
         return;
     }
+#endif
     subscriber_.OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
 }

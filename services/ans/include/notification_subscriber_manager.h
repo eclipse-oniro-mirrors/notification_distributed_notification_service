@@ -134,7 +134,9 @@ public:
 
     std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();
+#endif
 
 private:
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
