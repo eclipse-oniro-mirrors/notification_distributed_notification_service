@@ -105,7 +105,7 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
     // Asynchronous function call
     napi_create_async_work(env,
         nullptr, resourceName, [](napi_env env, void *data) {
-            ANS_LOGE("Napi add do not disturb profiles work excute.");
+            ANS_LOGD("Napi add do not disturb profiles work excute.");
             AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
             if (asynccallbackinfo) {
@@ -114,7 +114,7 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGE("Napi add do not disturb profiles work complete.");
+            ANS_LOGD("Napi add do not disturb profiles work complete.");
             AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
             if (asynccallbackinfo) {
