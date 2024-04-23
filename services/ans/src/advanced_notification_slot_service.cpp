@@ -712,11 +712,8 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
 ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     ANS_LOGD("Called.");
-    if (key == RING_TRUST_PKG_KEY) {
-        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-        if (!isSubsystem) {
-            return ERR_ANS_NOT_SYSTEM_SERVICE;
-        }
+    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
@@ -725,9 +722,6 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     }
 
     if (key == RING_TRUST_PKG_KEY) {
-        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            return ERR_ANS_PERMISSION_DENIED;
-        }
         std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
         soundPermissionInfo_->needUpdateCache_ = true;
     }
