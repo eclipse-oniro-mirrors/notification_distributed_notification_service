@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_affected.h"
 
 #include "distributed_device_status.h"
@@ -103,4 +104,5 @@ bool ReminderAffected::ValidStatus(const nlohmann::json &root, std::string &stat
 }
 }  // namespace Notification
 }  // namespace OHOS
+#endif
 

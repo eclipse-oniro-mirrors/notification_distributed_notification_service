@@ -28,7 +28,9 @@
 #include "common_event_support.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "smart_reminder_center.h"
+#endif
 
 #include "advanced_notification_inline.cpp"
 
@@ -561,7 +563,9 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     request->SetFlags(flags);
     ANS_LOGD("The reminder flags of %{public}s is %{public}d",
         request->GetBaseKey("").c_str(), flags->GetReminderFlags());
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
+#endif
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(

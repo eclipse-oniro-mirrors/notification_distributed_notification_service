@@ -435,6 +435,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     }
 }
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
 {
     // Ignore the impact of the bundleName and userId for smart reminder switch now.
@@ -445,6 +446,7 @@ bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
     }
     return false;
 }
+#endif
 
 void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record)
