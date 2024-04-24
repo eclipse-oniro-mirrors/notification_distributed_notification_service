@@ -4486,7 +4486,7 @@ HWTEST_F(AdvancedNotificationServiceTest, StartArchiveTimer_00001, Function | Sm
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->StartArchiveTimer(record);
-    EXPECT_EQ(request->GetAutoDeletedTime(), NotificationConstant::NO_DELAY_DELETE_TIME);
+    EXPECT_EQ(request->GetAutoDeletedTime(), (int64_t)NotificationConstant::NO_DELAY_DELETE_TIME);
 }
 
 /**
