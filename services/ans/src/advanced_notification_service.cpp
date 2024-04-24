@@ -1961,7 +1961,7 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
         }
     }
 
-    if (soundPermissionInfo_->allPackage_ && soundPermissionInfo_->bundleName_.count(bundleName) == 0) {
+    if (!soundPermissionInfo_->allPackage_ && soundPermissionInfo_->bundleName_.count(bundleName) == 0) {
         request->SetSound("");
     }
     return ERR_OK;
