@@ -159,6 +159,7 @@ bool NotificationCapsule::ReadFromParcel(Parcel &parcel)
 {
     title_ = parcel.ReadString();
     backgroundColor_ = parcel.ReadString();
+    content_ = parcel.ReadString();
 
     bool valid = parcel.ReadBool();
     if (valid) {
