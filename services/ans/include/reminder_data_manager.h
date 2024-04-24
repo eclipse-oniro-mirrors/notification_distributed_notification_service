@@ -66,6 +66,37 @@ public:
      */
     ErrCode CancelReminder(const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption);
 
+    sptr<ReminderRequest> CheckExcludeDateParam(const int32_t reminderId,
+        const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date,
+        const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DelExcludeDates(const int32_t reminderId, const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetExcludeDates(const int32_t reminderId, const sptr<NotificationBundleOption> &bundleOption,
+        std::vector<uint64_t>& dates);
+
     /**
      * @brief Close the target reminder which is showing on panel.
      *        This is manul operation by user: 1.Click close button of the reminder, 2.remove reminder notification.

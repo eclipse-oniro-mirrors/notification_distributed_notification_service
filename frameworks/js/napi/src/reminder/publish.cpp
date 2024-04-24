@@ -31,6 +31,8 @@ static const int32_t CANCEL_PARAM_LEN = 2;
 static const int32_t CANCEL_ALL_PARAM_LEN = 1;
 static const int32_t GET_VALID_PARAM_LEN = 1;
 static const int32_t ADD_SLOT_PARAM_LEN = 2;
+static constexpr int32_t ADD_EXCLUDE_DATE_PARAM_LEN = 2;
+static constexpr int32_t DEL_EXCLUDE_DATE_PARAM_LEN = 1;
 
 struct AsyncCallbackInfo {
     explicit AsyncCallbackInfo(napi_env napiEnv) : env(napiEnv) {}
@@ -51,16 +53,19 @@ struct AsyncCallbackInfo {
     napi_ref callback = nullptr;
     napi_value result = nullptr;
     int32_t reminderId = -1;
+    uint64_t excludeDate = 0;
     bool isThrow = false;
     NotificationNapi::NotificationConstant::SlotType inType
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
     std::shared_ptr<ReminderRequest> reminder = nullptr;
     std::vector<sptr<ReminderRequest>> validReminders;
+    std::vector<uint64_t> excludeDates;
     CallbackPromiseInfo info;
 };
 
 struct Parameters {
     int32_t reminderId = -1;
+    uint64_t excludeDate = 0;
     int32_t errCode = ERR_OK;
     NotificationNapi::NotificationConstant::SlotType inType
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
@@ -1138,6 +1143,282 @@ napi_value AddSlotMgr(napi_env env, napi_callback_info info)
 napi_value AddSlot(napi_env env, napi_callback_info info)
 {
     return AddSlotInner(env, info, false);
+}
+
+napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
+    AsyncCallbackInfo &asyncCallbackInfo)
+{
+    ANSR_LOGI("ParseAddExcludeDateParameter");
+    size_t argc = ADD_EXCLUDE_DATE_PARAM_LEN;
+    napi_value argv[ADD_EXCLUDE_DATE_PARAM_LEN] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    if (argc < ADD_EXCLUDE_DATE_PARAM_LEN) {
+        ANSR_LOGW("Wrong number of arguments");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+
+    // argv[0]: reminder id
+    int32_t reminderId = -1;
+    if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
+        ANSR_LOGW("Parse reminder id failed.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    if (reminderId < 0) {
+        ANSR_LOGW("Param reminder id is illegal.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    params.reminderId = reminderId;
+
+    // argv[1]: exclude date
+    double date = 0.0;
+    if (!ReminderCommon::GetDate(env, argv[1], nullptr, date)) {
+        ANSR_LOGW("Parse exclude date failed.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    if (date < 0.0) {
+        ANSR_LOGW("Param exclude date is illegal.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    params.excludeDate = static_cast<uint64_t>(date);
+    return NotificationNapi::Common::NapiGetNull(env);
+}
+
+napi_value AddExcludeDate(napi_env env, napi_callback_info info)
+{
+    ANSR_LOGD("Call AddExcludeDate");
+
+    AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
+    if (!asynccallbackinfo) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+    // param
+    Parameters params;
+    if (ParseAddExcludeDateParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
+    }
+
+    // promise
+    napi_value promise = nullptr;
+    SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->reminderId = params.reminderId;
+    asynccallbackinfo->excludeDate = params.excludeDate;
+    asynccallbackinfo->isThrow = true;
+
+    // resource name
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "addExcludeDate", NAPI_AUTO_LENGTH, &resourceName);
+
+    // create and queue async work
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANSR_LOGI("AddExcludeDate napi_create_async_work start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = ReminderHelper::AddExcludeDate(asynccallbackinfo->reminderId,
+                    asynccallbackinfo->excludeDate);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANSR_LOGI("AddExcludeDate napi_create_async_work complete start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+            ReminderCommon::ReturnCallbackPromise(
+                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
+            ANSR_LOGI("AddExcludeDate napi_create_async_work complete end");
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    callbackPtr.release();
+
+    if (asynccallbackinfo->info.isCallback) {
+        return NotificationNapi::Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+    return napi_value();
+}
+
+napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
+    AsyncCallbackInfo &asyncCallbackInfo)
+{
+    ANSR_LOGI("ParseReminderIdParameter");
+    size_t argc = DEL_EXCLUDE_DATE_PARAM_LEN;
+    napi_value argv[DEL_EXCLUDE_DATE_PARAM_LEN] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    if (argc < DEL_EXCLUDE_DATE_PARAM_LEN) {
+        ANSR_LOGW("Wrong number of arguments");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+
+    // argv[0]: reminder id
+    int32_t reminderId = -1;
+    if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
+        ANSR_LOGW("Parse reminder id failed.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    if (reminderId < 0) {
+        ANSR_LOGW("Param reminder id is illegal.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    params.reminderId = reminderId;
+    return NotificationNapi::Common::NapiGetNull(env);
+}
+
+napi_value DelExcludeDates(napi_env env, napi_callback_info info)
+{
+    ANSR_LOGD("Call DelExcludeDates");
+
+    AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
+    if (!asynccallbackinfo) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+    // param
+    Parameters params;
+    if (ParseReminderIdParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
+    }
+
+    // promise
+    napi_value promise = nullptr;
+    SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->reminderId = params.reminderId;
+    asynccallbackinfo->isThrow = true;
+
+    // resource name
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "deleteExcludeDates", NAPI_AUTO_LENGTH, &resourceName);
+
+    // create and queue async work
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANSR_LOGI("DelExcludeDates napi_create_async_work start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = ReminderHelper::DelExcludeDates(asynccallbackinfo->reminderId);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANSR_LOGI("DelExcludeDates napi_create_async_work complete start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+            ReminderCommon::ReturnCallbackPromise(
+                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
+            ANSR_LOGI("DelExcludeDates napi_create_async_work complete end");
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    callbackPtr.release();
+
+    if (asynccallbackinfo->info.isCallback) {
+        return NotificationNapi::Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+    return napi_value();
+}
+
+void GetExcludeDatesInner(napi_env env, const std::vector<uint64_t>& dates, napi_value& arr)
+{
+    int32_t count = 0;
+    napi_create_array(env, &arr);
+    for (auto date : dates) {
+        napi_value result = nullptr;
+        napi_create_date(env, static_cast<double>(date), &result);
+        napi_set_element(env, arr, count, result);
+        count++;
+    }
+    ANSR_LOGI("GetExcludeDates count = %{public}d", count);
+}
+
+napi_value GetExcludeDates(napi_env env, napi_callback_info info)
+{
+    ANSR_LOGD("Call GetExcludeDates");
+
+    AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
+    if (!asynccallbackinfo) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+    // param
+    Parameters params;
+    if (ParseReminderIdParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
+    }
+
+    // promise
+    napi_value promise = nullptr;
+    SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->reminderId = params.reminderId;
+    asynccallbackinfo->isThrow = true;
+
+    // resource name
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getExcludeDates", NAPI_AUTO_LENGTH, &resourceName);
+
+    // create and queue async work
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANSR_LOGI("GetExcludeDates napi_create_async_work start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = ReminderHelper::GetExcludeDates(asynccallbackinfo->reminderId,
+                    asynccallbackinfo->excludeDates);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANSR_LOGI("GetExcludeDates napi_create_async_work complete start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+            if (asynccallbackinfo) {
+                if (asynccallbackinfo->info.errorCode != ERR_OK) {
+                    asynccallbackinfo->result = NotificationNapi::Common::NapiGetNull(env);
+                } else {
+                    GetExcludeDatesInner(env, asynccallbackinfo->excludeDates, asynccallbackinfo->result);
+                }
+                
+                ReminderCommon::ReturnCallbackPromise(
+                    env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
+            }
+            ANSR_LOGI("GetExcludeDates napi_create_async_work complete end");
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    callbackPtr.release();
+
+    if (asynccallbackinfo->info.isCallback) {
+        return NotificationNapi::Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+    return napi_value();
 }
 }
 }

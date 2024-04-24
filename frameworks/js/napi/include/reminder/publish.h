@@ -126,6 +126,33 @@ napi_value PublishReminderMgr(napi_env env, napi_callback_info info);
  * @return opaque pointer that is used to represent a JavaScript value.
  */
 napi_value AddSlotMgr(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Add exclude date.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value.
+ */
+napi_value AddExcludeDate(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Del exclude dates.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value.
+ */
+napi_value DelExcludeDates(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Get exclude dates.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value.
+ */
+napi_value GetExcludeDates(napi_env env, napi_callback_info info);
 }  // namespace ReminderAgentNapi
 }  // namespace OHOS
 

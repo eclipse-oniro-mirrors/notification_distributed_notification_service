@@ -59,5 +59,22 @@ ErrCode ReminderHelper::RemoveNotificationSlot(const NotificationConstant::SlotT
     return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationSlot(slotType);
 }
 
+ErrCode ReminderHelper::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+{
+    ANSR_LOGI("AddExcludeDate start");
+    return DelayedSingleton<AnsNotification>::GetInstance()->AddExcludeDate(reminderId, date);
+}
+
+ErrCode ReminderHelper::DelExcludeDates(const int32_t reminderId)
+{
+    ANSR_LOGI("DelExcludeDates start");
+    return DelayedSingleton<AnsNotification>::GetInstance()->DelExcludeDates(reminderId);
+}
+
+ErrCode ReminderHelper::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
+{
+    ANSR_LOGI("GetExcludeDates start");
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetExcludeDates(reminderId, dates);
+}
 }
 }

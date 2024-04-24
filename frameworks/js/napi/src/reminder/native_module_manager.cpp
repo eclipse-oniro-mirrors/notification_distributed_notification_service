@@ -34,6 +34,9 @@ napi_value ReminderAgentManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("publishReminder", PublishReminderMgr),
         DECLARE_NAPI_FUNCTION("addNotificationSlot", AddSlotMgr),
         DECLARE_NAPI_FUNCTION("removeNotificationSlot", NotificationNapi::NapiRemoveSlot),
+        DECLARE_NAPI_FUNCTION("addExcludeDate", AddExcludeDate),
+        DECLARE_NAPI_FUNCTION("deleteExcludeDates", DelExcludeDates),
+        DECLARE_NAPI_FUNCTION("getExcludeDates", GetExcludeDates),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

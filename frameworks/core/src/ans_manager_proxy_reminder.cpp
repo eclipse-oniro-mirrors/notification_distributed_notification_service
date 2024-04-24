@@ -93,7 +93,7 @@ ErrCode AnsManagerProxy::CancelReminder(const int32_t reminderId)
         return ERR_ANS_TRANSACT_FAILED;
     }
     if (!reply.ReadInt32(result)) {
-        ANSR_LOGE("[PublishReminder] fail: read result failed.");
+        ANSR_LOGE("[CancelReminder] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
@@ -116,7 +116,7 @@ ErrCode AnsManagerProxy::CancelAllReminders()
         return ERR_ANS_TRANSACT_FAILED;
     }
     if (!reply.ReadInt32(result)) {
-        ANSR_LOGE("[PublishReminder] fail: read result failed.");
+        ANSR_LOGE("[CancelAllReminders] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
@@ -153,7 +153,107 @@ ErrCode AnsManagerProxy::GetValidReminders(std::vector<sptr<ReminderRequest>> &r
         ANSR_LOGD("[GetValidReminders], size=%{public}zu", reminders.size());
     }
     if (!reply.ReadInt32(result)) {
-        ANSR_LOGE("[PublishReminder] fail: read result failed.");
+        ANSR_LOGE("[GetValidReminders] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerProxy::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+{
+    ANSR_LOGI("[AddExcludeDate]");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANSR_LOGE("[AddExcludeDate] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(reminderId)) {
+        ANSR_LOGE("[AddExcludeDate] fail: write reminder id failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteUint64(date)) {
+        ANSR_LOGE("[AddExcludeDate] fail: write exclude date failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ADD_EXCLUDE_DATE_REMINDER, option, data, reply);
+    if (result != ERR_OK) {
+        ANSR_LOGE("[AddExcludeDate] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANSR_LOGE("[AddExcludeDate] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerProxy::DelExcludeDates(const int32_t reminderId)
+{
+    ANSR_LOGI("[DelExcludeDates]");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANSR_LOGE("[DelExcludeDates] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(reminderId)) {
+        ANSR_LOGE("[DelExcludeDates] fail: write reminder id failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DEL_EXCLUDE_DATES_REMINDER, option, data, reply);
+    if (result != ERR_OK) {
+        ANSR_LOGE("[DelExcludeDates] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANSR_LOGE("[DelExcludeDates] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerProxy::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
+{
+    ANSR_LOGI("[GetExcludeDates]");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANSR_LOGE("[GetExcludeDates] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(reminderId)) {
+        ANSR_LOGE("[GetExcludeDates] fail: write reminder id failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_EXCLUDE_DATES_REMINDER, option, data, reply);
+    if (result != ERR_OK) {
+        ANSR_LOGE("[GetExcludeDates] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    uint8_t count = 0;
+    if (!reply.ReadUint8(count)) {
+        ANSR_LOGE("[GetExcludeDates] fail: read exclude date count failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    ANSR_LOGD("[GetExcludeDates] count=%{public}hhu", count);
+    dates.clear();
+    for (uint8_t i = 0; i < count; i++) {
+        uint64_t date = 0;
+        if (!reply.ReadUint64(date)) {
+            ANSR_LOGE("[GetExcludeDates] fail: read exclude date");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+        dates.push_back(date);
+    }
+    if (!reply.ReadInt32(result)) {
+        ANSR_LOGE("[GetExcludeDates] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;

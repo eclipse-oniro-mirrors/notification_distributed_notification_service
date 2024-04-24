@@ -1821,7 +1821,6 @@ int32_t ReminderRequest::GetCTime(const TimeTransferType &type, int32_t actualTi
 
 int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundleName)
 {
-    AppExecFwk::ApplicationInfo info;
     sptr<ISystemAbilityManager> systemAbilityManager
         = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
@@ -1838,9 +1837,9 @@ int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundle
         ANSR_LOGE("Bundle mgr proxy is nullptr");
         return -1;
     }
-    bundleMgr->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, info);
-    ANSR_LOGD("uid=%{public}d", info.uid);
-    return static_cast<int32_t>(info.uid);
+    int32_t uid = bundleMgr->GetUidByBundleName(bundleName, userId);
+    ANSR_LOGD("uid=%{public}d", uid);
+    return uid;
 }
 
 int32_t ReminderRequest::GetUserId(const int32_t &uid)
@@ -1894,7 +1893,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values, bool oldVersion)
 {
     values.PutInt(ReminderBaseTable::REMINDER_ID, reminder->GetReminderId());
-    values.PutString(ReminderBaseTable::PACKAGE_NAME, bundleOption->GetBundleName());
+    values.PutString(ReminderBaseTable::PACKAGE_NAME, reminder->GetBundleName());
     values.PutInt(ReminderBaseTable::USER_ID, reminder->GetUserId());
     values.PutInt(ReminderBaseTable::UID, reminder->GetUid());
     values.PutString(ReminderBaseTable::SYSTEM_APP, reminder->IsSystemApp() ? "true" : "false");

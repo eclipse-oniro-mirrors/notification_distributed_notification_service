@@ -46,6 +46,11 @@ namespace OHOS {
         uint8_t type = *data % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         Notification::ReminderHelper::RemoveNotificationSlot(slotType);
+        uint64_t excludeDate = static_cast<uint64_t>(reminderId);
+        Notification::ReminderHelper::AddExcludeDate(reminderId, excludeDate);
+        Notification::ReminderHelper::DelExcludeDates(reminderId);
+        std::vector<uint64_t> dates;
+        Notification::ReminderHelper::GetExcludeDates(reminderId, dates);
         return Notification::ReminderHelper::CancelAllReminders();
     }
 }

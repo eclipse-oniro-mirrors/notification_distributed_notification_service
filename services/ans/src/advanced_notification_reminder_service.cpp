@@ -168,6 +168,63 @@ ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<Reminder
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+{
+    ANSR_LOGI("Add Exclude Date");
+    if (!CheckReminderPermission()) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    auto rdm = ReminderDataManager::GetInstance();
+    if (rdm == nullptr) {
+        return ERR_NO_INIT;
+    }
+    return rdm->AddExcludeDate(reminderId, date, bundleOption);
+}
+
+ErrCode AdvancedNotificationService::DelExcludeDates(const int32_t reminderId)
+{
+    ANSR_LOGI("Del Exclude Dates");
+    if (!CheckReminderPermission()) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    auto rdm = ReminderDataManager::GetInstance();
+    if (rdm == nullptr) {
+        return ERR_NO_INIT;
+    }
+    return rdm->DelExcludeDates(reminderId, bundleOption);
+}
+
+ErrCode AdvancedNotificationService::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
+{
+    ANSR_LOGI("Get Exclude Dates");
+    if (!CheckReminderPermission()) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    auto rdm = ReminderDataManager::GetInstance();
+    if (rdm == nullptr) {
+        return ERR_NO_INIT;
+    }
+    return rdm->GetExcludeDates(reminderId, bundleOption, dates);
+}
+
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 {

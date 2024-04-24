@@ -97,6 +97,32 @@ public:
      */
     static ErrCode RemoveNotificationSlot(const NotificationConstant::SlotType &slotType);
 
+    /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date);
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode DelExcludeDates(const int32_t reminderId);
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates);
+
 private:
     static bool CheckPermission();
 };

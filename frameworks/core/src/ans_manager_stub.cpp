@@ -324,6 +324,15 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
             std::bind(&AnsManagerStub::HandleRegisterSwingCallback, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3)},
 #endif
+        {NotificationInterfaceCode::ADD_EXCLUDE_DATE_REMINDER,
+            std::bind(&AnsManagerStub::HandleAddExcludeDate, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::DEL_EXCLUDE_DATES_REMINDER,
+            std::bind(&AnsManagerStub::HandleDelExcludeDates, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
+        {NotificationInterfaceCode::GET_EXCLUDE_DATES_REMINDER,
+            std::bind(&AnsManagerStub::HandleGetExcludeDates, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
 };
 
 AnsManagerStub::AnsManagerStub()
@@ -1772,6 +1781,75 @@ ErrCode AnsManagerStub::HandleGetValidReminders(MessageParcel &data, MessageParc
         }
         if (!reply.WriteParcelable(reminder)) {
             ANSR_LOGW("Write reminder parcelable failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleAddExcludeDate(MessageParcel &data, MessageParcel &reply)
+{
+    ANSR_LOGI("HandleAddExcludeDate");
+    int32_t reminderId = -1;
+    if (!data.ReadInt32(reminderId)) {
+        ANSR_LOGE("Read reminder id failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    uint64_t date = 0;
+    if (!data.ReadUint64(date)) {
+        ANSR_LOGE("Read exclude date failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = AddExcludeDate(reminderId, date);
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleDelExcludeDates(MessageParcel &data, MessageParcel &reply)
+{
+    ANSR_LOGI("HandleDelExcludeDates");
+    int32_t reminderId = -1;
+    if (!data.ReadInt32(reminderId)) {
+        ANSR_LOGE("Read reminder id failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = DelExcludeDates(reminderId);
+    if (!reply.WriteInt32(result)) {
+        ANSR_LOGE("Write back result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleGetExcludeDates(MessageParcel &data, MessageParcel &reply)
+{
+    ANSR_LOGI("HandleGetExcludeDates");
+    int32_t reminderId = -1;
+    if (!data.ReadInt32(reminderId)) {
+        ANSR_LOGE("Read reminder id failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::vector<uint64_t> dates;
+    ErrCode result = GetExcludeDates(reminderId, dates);
+    ANSR_LOGD("Write back size=%{public}zu", dates.size());
+    if (!reply.WriteUint8(static_cast<uint8_t>(dates.size()))) {
+        ANSR_LOGE("Write back exclude date count failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (const auto date : dates) {
+        if (!reply.WriteUint64(date)) {
+            ANSR_LOGW("Write exclude date failed");
             return ERR_ANS_PARCELABLE_FAILED;
         }
     }

@@ -115,6 +115,11 @@ namespace OHOS {
         std::vector<sptr<Notification::ReminderRequest>> reminders;
         advancedNotificationService.GetValidReminders(reminders);
         advancedNotificationService.CancelAllReminders();
+        uint64_t excludeDate = static_cast<uint64_t>(GetU32Data(data));
+        advancedNotificationService.AddExcludeDate(reminderId, excludeDate);
+        advancedNotificationService.DelExcludeDates(reminderId);
+        std::vector<uint64_t> excludeDates;
+        advancedNotificationService.GetExcludeDates(reminderId, excludeDates);
         bool support = *data % ENABLE;
         advancedNotificationService.IsSupportTemplate(stringData, support);
         advancedNotificationService.IsSpecialUserAllowedNotify(userId, allowed);

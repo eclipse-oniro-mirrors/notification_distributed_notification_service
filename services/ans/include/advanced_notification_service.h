@@ -709,6 +709,32 @@ public:
     ErrCode CancelAllReminders() override;
 
     /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override;
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DelExcludeDates(const int32_t reminderId) override;
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override;
+
+    /**
      * @brief Checks whether this device is support template.
      *
      * @param templateName Identifies the template name for searching as a condition.

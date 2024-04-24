@@ -4833,5 +4833,43 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00002, Function 
     EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 #endif
+
+/**
+ * @tc.number    : AddExcludeDate_00001
+ * @tc.name      : Test AddExcludeDate
+ * @tc.desc      : Test AddExcludeDate function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AddExcludeDate_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 10;
+    uint64_t time = 124325;
+    EXPECT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_NO_INIT);
+}
+
+/**
+ * @tc.number    : DelExcludeDates_00002
+ * @tc.name      : Test DelExcludeDates
+ * @tc.desc      : Test DelExcludeDates function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, DelExcludeDates_00002, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 10;
+    EXPECT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_NO_INIT);
+}
+
+/**
+ * @tc.number    : GetExcludeDates_00001
+ * @tc.name      : Test GetExcludeDates
+ * @tc.desc      : Test GetExcludeDates function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetExcludeDates_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 10;
+    std::vector<uint64_t> times;
+    EXPECT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_NO_INIT);
+}
 }  // namespace Notification
 }  // namespace OHOS

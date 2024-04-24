@@ -464,6 +464,24 @@ ErrCode AnsManagerStub::CancelAllReminders()
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+{
+    ANS_LOGE("AnsManagerStub::AddExcludeDate called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::DelExcludeDates(const int32_t reminderId)
+{
+    ANS_LOGE("AnsManagerStub::DelExcludeDates called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
+{
+    ANS_LOGE("AnsManagerStub::GetExcludeDates called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::IsSupportTemplate(const std::string &templateName, bool &support)
 {
     ANS_LOGE("AnsManagerStub::IsSupportTemplate called!");

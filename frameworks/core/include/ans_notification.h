@@ -802,6 +802,32 @@ public:
     ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &validReminders);
 
     /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date);
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DelExcludeDates(const int32_t reminderId);
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates);
+
+    /**
      * @brief Checks whether this application has permission to publish notifications under the user.
      *
      * @param userId Indicates the userId of the application.
