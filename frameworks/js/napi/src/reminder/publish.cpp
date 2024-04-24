@@ -1354,8 +1354,6 @@ void GetExcludeDatesInner(napi_env env, const std::vector<uint64_t>& dates, napi
 
 napi_value GetExcludeDates(napi_env env, napi_callback_info info)
 {
-    ANSR_LOGD("Call GetExcludeDates");
-
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
         ANSR_LOGE("Low memory.");
@@ -1380,9 +1378,7 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
     napi_create_string_latin1(env, "getExcludeDates", NAPI_AUTO_LENGTH, &resourceName);
 
     // create and queue async work
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             ANSR_LOGI("GetExcludeDates napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
@@ -1408,8 +1404,7 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
             }
             ANSR_LOGI("GetExcludeDates napi_create_async_work complete end");
         },
-        (void *)asynccallbackinfo,
-        &asynccallbackinfo->asyncWork);
+        (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
     callbackPtr.release();
 
@@ -1418,7 +1413,6 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
-    return napi_value();
 }
 }
 }

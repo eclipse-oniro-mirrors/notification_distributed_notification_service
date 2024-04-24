@@ -2915,6 +2915,16 @@ HWTEST_F(AnsManagerStubTest, HandleAddExcludeDate01, Function | SmallTest | Leve
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+
+    int32_t reminderId = 5;
+    data.WriteInt32(reminderId);
+    ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+
+    uint64_t date = 1587648774000;
+    data.WriteUint64(date);
+    ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -2934,6 +2944,11 @@ HWTEST_F(AnsManagerStubTest, HandleDelExcludeDates01, Function | SmallTest | Lev
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+
+    int32_t reminderId = 5;
+    data.WriteInt32(reminderId);
+    ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -2953,6 +2968,11 @@ HWTEST_F(AnsManagerStubTest, HandleGetExcludeDates01, Function | SmallTest | Lev
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+
+    int32_t reminderId = 5;
+    data.WriteInt32(reminderId);
+    ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 

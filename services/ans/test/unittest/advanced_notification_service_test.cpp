@@ -4844,7 +4844,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AddExcludeDate_00001, Function | Small
 {
     int32_t reminderId = 10;
     uint64_t time = 124325;
+    EXPECT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_REMINDER_PERMISSION_DENIED);
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    MockIsNonBundleName(true);
+    EXPECT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_ANS_INVALID_BUNDLE);
+    MockIsNonBundleName(false);
     EXPECT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_NO_INIT);
+    MockIsVerfyPermisson(false);
 }
 
 /**
@@ -4856,7 +4862,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AddExcludeDate_00001, Function | Small
 HWTEST_F(AdvancedNotificationServiceTest, DelExcludeDates_00002, Function | SmallTest | Level1)
 {
     int32_t reminderId = 10;
+    EXPECT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_REMINDER_PERMISSION_DENIED);
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    MockIsNonBundleName(true);
+    EXPECT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_ANS_INVALID_BUNDLE);
+    MockIsNonBundleName(false);
     EXPECT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_NO_INIT);
+    MockIsVerfyPermisson(false);
 }
 
 /**
@@ -4869,7 +4881,13 @@ HWTEST_F(AdvancedNotificationServiceTest, GetExcludeDates_00001, Function | Smal
 {
     int32_t reminderId = 10;
     std::vector<uint64_t> times;
+    EXPECT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_REMINDER_PERMISSION_DENIED);
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    MockIsNonBundleName(true);
+    EXPECT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_ANS_INVALID_BUNDLE);
+    MockIsNonBundleName(false);
     EXPECT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_NO_INIT);
+    MockIsVerfyPermisson(false);
 }
 }  // namespace Notification
 }  // namespace OHOS

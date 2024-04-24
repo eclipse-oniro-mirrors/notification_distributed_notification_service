@@ -80,7 +80,10 @@ void ReminderRequestCalendar::AddExcludeDate(const uint64_t date)
     dateTime.tm_min = 0;
     dateTime.tm_sec = 0;
     const time_t target = mktime(&dateTime);
-
+    if (target == -1) {
+        ANSR_LOGW("error exclude date");
+        return;
+    }
     excludeDates_.insert(ReminderRequest::GetDurationSinceEpochInMilli(target));
 }
 
@@ -92,7 +95,7 @@ void ReminderRequestCalendar::DelExcludeDates()
 std::vector<uint64_t> ReminderRequestCalendar::GetExcludeDates() const
 {
     std::vector<uint64_t> excludeDates;
-    for(auto date : excludeDates_) {
+    for (auto date : excludeDates_) {
         excludeDates.push_back(date);
     }
     return excludeDates;
@@ -107,6 +110,10 @@ bool ReminderRequestCalendar::IsInExcludeDate() const
     dateTime.tm_min = 0;
     dateTime.tm_sec = 0;
     const time_t target = mktime(&dateTime);
+    if (target == -1) {
+        ANSR_LOGW("error start date time");
+        return false;
+    }
     uint64_t notificationTime = ReminderRequest::GetDurationSinceEpochInMilli(target);
     if (excludeDates_.find(notificationTime) != excludeDates_.end()) {
         ANSR_LOGI("Reminder[%{public}d] trigger time is in exclude date", GetReminderId());

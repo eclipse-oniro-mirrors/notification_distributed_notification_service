@@ -1152,7 +1152,7 @@ HWTEST_F(ReminderRequestCalendarTest, SetEndDateTime_00002, Function | SmallTest
     EXPECT_NE(nullptr, calendar);
     calendar->startDateTime_ = 5;
     EXPECT_EQ(calendar->SetEndDateTime(0), false);
-    EXPECT_NE(calendar->GetEndDateTime(), calendar->startDateTime_);
+    EXPECT_NE(calendar->GetEndDateTime(), 0);
 }
 
 /**

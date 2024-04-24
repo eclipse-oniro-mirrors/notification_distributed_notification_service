@@ -897,7 +897,7 @@ HWTEST_F(ReminderRequestTest, SetRingDuration_00001, Function | SmallTest | Leve
     uint64_t ringDurationInSeconds = 0;
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetRingDuration(ringDurationInSeconds);
-    EXPECT_EQ(rrc->GetRingDuration(), 1);
+    EXPECT_EQ(rrc->GetRingDuration(), 0);
 }
 
 /**

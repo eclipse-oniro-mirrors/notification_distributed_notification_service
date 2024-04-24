@@ -679,5 +679,60 @@ HWTEST_F(ReminderDataManagerTest, OnLanguageChanged_0001, Level1)
     manager->OnLanguageChanged();
     EXPECT_TRUE(reminder->actionButtonMap_[type].title == "this is title");
 }
+
+/**
+ * @tc.name: ExcludeDate
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I97Q9Q
+ */
+HWTEST_F(ReminderDataManagerTest, ExcludeDate_0001, Level1)
+{
+    std::vector<uint64_t> dates;
+    auto result = manager->CheckExcludeDateParam(1, nullptr);
+    EXPECT_TRUE(result == nullptr);
+
+    auto ret = manager->AddExcludeDate(1, 100, nullptr);
+    EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
+
+    ret = manager->DelExcludeDates(1, nullptr);
+    EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
+
+    ret = manager->GetExcludeDates(1, nullptr, dates);
+    EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
+
+    sptr<ReminderRequest> reminder = new ReminderRequestCalendar(10);
+    reminder->InitCreatorBundleName("test1");
+    reminder->InitUserId(-1);
+    reminder->reminderId_ = 100;
+    manager->reminderVector_.push_back(reminder);
+    sptr<NotificationBundleOption> option = new NotificationBundleOption("test", -1);
+    result = manager->CheckExcludeDateParam(100, option);
+    EXPECT_TRUE(result == nullptr);
+
+    reminder->InitCreatorBundleName("test");
+    reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
+    result = manager->CheckExcludeDateParam(100, option);
+    EXPECT_TRUE(result == nullptr);
+
+    reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
+    result = manager->CheckExcludeDateParam(100, option);
+    EXPECT_TRUE(result == nullptr);
+
+    reminder->repeatDaysOfWeek_ = 1;
+    result = manager->CheckExcludeDateParam(100, option);
+    EXPECT_TRUE(result != nullptr);
+
+    ret = manager->AddExcludeDate(100, 100, nullptr);
+    EXPECT_TRUE(ret == ERR_OK);
+
+    ret = manager->DelExcludeDates(100, nullptr);
+    EXPECT_TRUE(ret == ERR_OK);
+
+    ret = manager->GetExcludeDates(100, nullptr, dates);
+    EXPECT_TRUE(ret == ERR_OK);
+
+    manager->reminderVector_.clear();
+}
 }  // namespace Notification
 }  // namespace OHOS
