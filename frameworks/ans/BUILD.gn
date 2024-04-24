@@ -139,13 +139,14 @@ ohos_shared_library("ans_innerkits") {
     "hicollie:libhicollie",
     "hilog:libhilog",
     "i18n:intl_util",
-    "image_framework:image_native",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "image_framework:image_native" ]
 
   if (is_double_framework) {
     cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]
