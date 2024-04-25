@@ -971,6 +971,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteUint32(publishDelayTime_)) {
+        ANS_LOGE("Failed to write publish delay time");
+        return false;
+    }
+
     // write std::string
     if (!parcel.WriteString(settingsText_)) {
         ANS_LOGE("Failed to write settings text");
@@ -1255,6 +1260,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(isUpdateByOwnerAllowed_)) {
+        ANS_LOGE("Failed to write isUpdateByOwnerAllowed_");
+        return false;
+    }
+
     if (!parcel.WriteUint64(messageUsers_.size())) {
         ANS_LOGE("Failed to write the size of messageUsers");
         return false;
@@ -1407,6 +1417,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     ownerUserId_ = parcel.ReadInt32();
     receiverUserId_ = parcel.ReadInt32();
     notificationControlFlags_ = parcel.ReadUint32();
+    publishDelayTime_ = parcel.ReadUint32();
 
     if (!parcel.ReadString(settingsText_)) {
         ANS_LOGE("Failed to read settings text");
@@ -1576,6 +1587,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     }
 
     isCoverActionButtons_ = parcel.ReadBool();
+    isUpdateByOwnerAllowed_ = parcel.ReadBool();
 
     vsize = parcel.ReadUint64();
     vsize = (vsize < NotificationRequest::MAX_MESSAGE_USERS) ? vsize : NotificationRequest::MAX_MESSAGE_USERS;
@@ -1774,6 +1786,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
+    this->isUpdateByOwnerAllowed_ = other.isUpdateByOwnerAllowed_;
 
     this->slotType_ = other.slotType_;
     this->settingsText_ = other.settingsText_;
@@ -1831,6 +1844,8 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->agentBundle_ = other.agentBundle_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
+
+    this->publishDelayTime_ = other.publishDelayTime_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -2289,6 +2304,12 @@ bool NotificationRequest::IsCommonLiveView() const
         (notificationContentType_ == NotificationContent::Type::LIVE_VIEW);
 }
 
+bool NotificationRequest::IsSystemLiveView() const
+{
+    return (slotType_ == NotificationConstant::SlotType::LIVE_VIEW) &&
+        (notificationContentType_ == NotificationContent::Type::LOCAL_LIVE_VIEW);
+}
+
 ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRequest) const
 {
     auto content = notificationContent_->GetNotificationContent();
@@ -2615,5 +2636,24 @@ ErrCode NotificationRequest::CheckLockScreenPictureSizeForLiveView(std::shared_p
     return ERR_OK;
 }
 
+void NotificationRequest::SetPublishDelayTime(uint32_t delayTime)
+{
+    publishDelayTime_ = delayTime;
+}
+
+uint32_t NotificationRequest::GetPublishDelayTime() const
+{
+    return publishDelayTime_;
+}
+
+void NotificationRequest::SetUpdateByOwnerAllowed(bool isUpdateByOwnerAllowed)
+{
+    isUpdateByOwnerAllowed_ = isUpdateByOwnerAllowed;
+}
+
+bool NotificationRequest::IsUpdateByOwnerAllowed() const
+{
+    return isUpdateByOwnerAllowed_;
+}
 }  // namespace Notification
 }  // namespace OHOS
