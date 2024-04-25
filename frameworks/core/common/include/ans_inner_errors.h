@@ -100,6 +100,8 @@ enum ReminderErrorCode : uint32_t {
     ERR_REMINDER_NUMBER_OVERLOAD,
     ERR_REMINDER_NOT_EXIST,
     ERR_REMINDER_PACKAGE_NOT_EXIST,
+    ERR_REMINDER_CALLER_TOKEN_INVALID,
+    ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED,
 };
 
 static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
@@ -108,7 +110,9 @@ static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
     { ERR_REMINDER_NOTIFICATION_NOT_ENABLE, "BussinessError 1700001: Notification not enable." },
     { ERR_REMINDER_NUMBER_OVERLOAD, "BussinessError 1700002: The number of reminders exceeds the limit." },
     { ERR_REMINDER_NOT_EXIST, "BussinessError 1700003: The reminder not exist." },
-    { ERR_REMINDER_PACKAGE_NOT_EXIST, "BussinessError 1700004: The package name not exist." }
+    { ERR_REMINDER_PACKAGE_NOT_EXIST, "BussinessError 1700004: The package name not exist." },
+    { ERR_REMINDER_CALLER_TOKEN_INVALID, "BussinessError 1700005: The caller token invalid." },
+    { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "BussinessError 1700006: The data share permission denied." }
 };
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.

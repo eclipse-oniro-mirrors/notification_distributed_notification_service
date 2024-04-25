@@ -86,11 +86,11 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
     uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
     if (callerTokenId == 0) {
         ANSR_LOGE("pushlish failed, callerTokenId is 0");
-        return ERR_REMINDER_INVALID_PARAM;
+        return ERR_REMINDER_CALLER_TOKEN_INVALID;
     }
 
     if (!IsActionButtonDataShareValid(reminder, callerTokenId)) {
-        return ERR_REMINDER_INVALID_PARAM;
+        return ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED;
     }
 
     if (CheckReminderLimitExceededLocked(bundleOption, reminder)) {
@@ -2007,15 +2007,15 @@ bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderReques
 {
     auto actionButtonMap = reminder->GetActionButtons();
     for (auto it = actionButtonMap.begin(); it != actionButtonMap.end(); ++it) {
-        ReminderRequest::ActionButtonInfo buttonInfo = it->second;
+        ReminderRequest::ActionButtonInfo& buttonInfo = it->second;
         if (buttonInfo.dataShareUpdate->uri.empty()) {
             continue;
         }
         Uri uri(buttonInfo.dataShareUpdate->uri);
-        if (DataShare::DataSharePermission::VerifyPermission(callerTokenId, uri, false) != DataShare::E_OK) {
-            ANSR_LOGE("publish failed, DataSharePermission::VerifyPermission return error,"
-                " callerTokenId is %{public}d, uri is %{public}s",
-                callerTokenId, buttonInfo.dataShareUpdate->uri.c_str());
+        auto ret = DataShare::DataSharePermission::VerifyPermission(callerTokenId, uri, false);
+        if (ret != DataShare::E_OK) {
+            ANSR_LOGE("publish failed, DataSharePermission::VerifyPermission return error[%{public}d],",
+                static_cast<int32_t>(ret));
             return false;
         }
     }

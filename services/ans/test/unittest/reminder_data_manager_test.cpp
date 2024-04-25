@@ -671,11 +671,11 @@ HWTEST_F(ReminderDataManagerTest, CheckPulishReminder_0001, Level1)
     sptr<NotificationBundleOption> option = new NotificationBundleOption();
     IPCSkeleton::SetCallingTokenID(0);
     ErrCode ret = manager->PublishReminder(reminder, option);
-    EXPECT_EQ(ret, ERR_REMINDER_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_REMINDER_CALLER_TOKEN_INVALID);
 
     IPCSkeleton::SetCallingTokenID(1);
     ret = manager->PublishReminder(reminder, option);
-    EXPECT_NE(ret, ERR_REMINDER_INVALID_PARAM);
+    EXPECT_NE(ret, ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED);
 }
 
 /**
