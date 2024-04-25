@@ -17,6 +17,7 @@
 #include <string>
 #include <unistd.h>
 #include "notification_local_live_view_button.h"
+#include "ans_image_util.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -157,6 +158,20 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00002, Function | SmallTe
 }
 
 /**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLocalLiveViewButton>();
+    nlohmann::json jsonObject = nlohmann::json{{"names", {"test"}}, {"icons", {1, "testIcons"}}};
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Marshalling_00002
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC
@@ -222,6 +237,25 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00002, Function | Sm
 
     auto newButton = button->Unmarshalling(parcel);
     EXPECT_NE(newButton, nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling_00003
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    std::shared_ptr<Media::PixelMap> icon = std::make_shared<Media::PixelMap>();
+    button->addSingleButtonName("test");
+    button->addSingleButtonIcon(icon);
+    button->Marshalling(parcel);
+    
+    auto newButton = button->Unmarshalling(parcel);
+    EXPECT_EQ(newButton, nullptr);
 }
 
 /**

@@ -123,13 +123,12 @@ HWTEST_F(NotificationSortingTest, Dump_00001, Function | SmallTest | Level1)
     rrc->SetVisiblenessOverride(visibleness);
     rrc->SetDisplayBadge(isDisplayBadge);
     rrc->SetHiddenNotification(isHiddenNotification);
-    std::string ret = "NotificationSorting{ key = Key, ranking = 20, "
-    "importance = 10, visiblenessOverride = 30, isDisplayBadge = false, "
-    "isHiddenNotification = true, groupKeyOverride = GroupKeyOverride, "
-    "slot = NotificationSlot{ id = OTHER, name = OTHER, description = , "
-    "type = 3, level = 1, isBypassDnd = false, visibleness = 3, sound = , "
-    "isLightEnabled = false, lightColor = 0, isVibrate = false, "
-    "vibration = , isShowBadge = true, enabled = true, slotFlags = 0 } }";
+    std::string ret = "NotificationSorting{ key = Key, ranking = 20, importance = 10, "
+    "visiblenessOverride = 30, isDisplayBadge = false, isHiddenNotification = true, "
+    "groupKeyOverride = GroupKeyOverride, slot = NotificationSlot{ id = OTHER, name "
+    "= OTHER, description = , type = 3, level = 1, isBypassDnd = false, visibleness = "
+    "3, sound = , isLightEnabled = false, lightColor = 0, isVibrate = false, vibration "
+    "= , isShowBadge = true, enabled = true, slotFlags = 0, remindMode = 0 } }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 }

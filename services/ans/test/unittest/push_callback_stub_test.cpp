@@ -16,6 +16,7 @@
 #include <functional>
 #include <gtest/gtest.h>
 
+#include "ans_inner_errors.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
@@ -110,6 +111,97 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00600, Function | SmallTest 
     std::string notificationData = "this is notificationData";
     int ret = pushCallBackProxy.OnCheckNotification(notificationData, nullptr);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.number    : ConvertPushCheckCodeToErrCode_00100
+ * @tc.name      : ConvertPushCheckCodeToErrCode_00100
+ * @tc.desc      : Test ConvertPushCheckCodeToErrCode function
+ */
+HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00100, Function | SmallTest | Level1)
+{
+    int pushCheckCode = 0;
+    TestPushCallBackStub testPushCallBackStub;
+    ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : ConvertPushCheckCodeToErrCode_00200
+ * @tc.name      : ConvertPushCheckCodeToErrCode_00200
+ * @tc.desc      : Test ConvertPushCheckCodeToErrCode function
+ */
+HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00200, Function | SmallTest | Level1)
+{
+    int pushCheckCode = 1;
+    TestPushCallBackStub testPushCallBackStub;
+    ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
+    EXPECT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+}
+
+/**
+ * @tc.number    : ConvertPushCheckCodeToErrCode_00300
+ * @tc.name      : ConvertPushCheckCodeToErrCode_00300
+ * @tc.desc      : Test ConvertPushCheckCodeToErrCode function
+ */
+HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00300, Function | SmallTest | Level1)
+{
+    int pushCheckCode = 2;
+    TestPushCallBackStub testPushCallBackStub;
+    ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
+    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE);
+}
+
+/**
+ * @tc.number    : ConvertPushCheckCodeToErrCode_00400
+ * @tc.name      : ConvertPushCheckCodeToErrCode_00400
+ * @tc.desc      : Test ConvertPushCheckCodeToErrCode function
+ */
+HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00400, Function | SmallTest | Level1)
+{
+    int pushCheckCode = 3;
+    TestPushCallBackStub testPushCallBackStub;
+    ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
+    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
+}
+
+/**
+ * @tc.number    : ConvertPushCheckCodeToErrCode_00500
+ * @tc.name      : ConvertPushCheckCodeToErrCode_00500
+ * @tc.desc      : Test ConvertPushCheckCodeToErrCode function
+ */
+HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00500, Function | SmallTest | Level1)
+{
+    int pushCheckCode = 4;
+    TestPushCallBackStub testPushCallBackStub;
+    ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
+    EXPECT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+}
+
+/**
+ * @tc.number    : ConvertPushCheckCodeToErrCode_00600
+ * @tc.name      : ConvertPushCheckCodeToErrCode_00600
+ * @tc.desc      : Test ConvertPushCheckCodeToErrCode function
+ */
+HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00600, Function | SmallTest | Level1)
+{
+    int pushCheckCode = 5;
+    TestPushCallBackStub testPushCallBackStub;
+    ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
+    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID);
+}
+
+/**
+ * @tc.number    : ConvertPushCheckCodeToErrCode_00700
+ * @tc.name      : ConvertPushCheckCodeToErrCode_00700
+ * @tc.desc      : Test ConvertPushCheckCodeToErrCode function
+ */
+HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00700, Function | SmallTest | Level1)
+{
+    int pushCheckCode = -1;
+    TestPushCallBackStub testPushCallBackStub;
+    ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
+    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
 }
 }  // namespace Notification
 }  // namespace OHOS
