@@ -441,6 +441,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_017, Level1)
 {
+    IPCSkeleton::SetCallingTokenID(1);
     sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(10);
     sptr<ReminderRequest> reminder2 = new ReminderRequestTimer(10);
     sptr<ReminderRequest> reminder3 = new ReminderRequestTimer(10);
