@@ -1215,6 +1215,8 @@ napi_value AddExcludeDate(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "addExcludeDate", NAPI_AUTO_LENGTH, &resourceName);
 
+    bool isCallback = asynccallbackinfo->info.isCallback;
+
     // create and queue async work
     napi_create_async_work(env,
         nullptr,
@@ -1241,11 +1243,7 @@ napi_value AddExcludeDate(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
     callbackPtr.release();
 
-    if (asynccallbackinfo->info.isCallback) {
-        return NotificationNapi::Common::NapiGetNull(env);
-    } else {
-        return promise;
-    }
+    return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
 }
 
 napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_info &info, Parameters &params)
@@ -1303,6 +1301,8 @@ napi_value DelExcludeDates(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "deleteExcludeDates", NAPI_AUTO_LENGTH, &resourceName);
 
+    bool isCallback = asynccallbackinfo->info.isCallback;
+
     // create and queue async work
     napi_create_async_work(env,
         nullptr,
@@ -1328,11 +1328,7 @@ napi_value DelExcludeDates(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
     callbackPtr.release();
 
-    if (asynccallbackinfo->info.isCallback) {
-        return NotificationNapi::Common::NapiGetNull(env);
-    } else {
-        return promise;
-    }
+    return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
 }
 
 void GetExcludeDatesInner(napi_env env, const std::vector<uint64_t>& dates, napi_value& arr)
@@ -1372,6 +1368,8 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
     // resource name
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getExcludeDates", NAPI_AUTO_LENGTH, &resourceName);
+    
+    bool isCallback = asynccallbackinfo->info.isCallback;
 
     // create and queue async work
     napi_create_async_work(env, nullptr, resourceName,
@@ -1404,11 +1402,7 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
     callbackPtr.release();
 
-    if (asynccallbackinfo->info.isCallback) {
-        return NotificationNapi::Common::NapiGetNull(env);
-    } else {
-        return promise;
-    }
+    return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
 }
 }
 }
