@@ -30,6 +30,7 @@
 #include "reminder_request.h"
 #include "reminder_request_calendar.h"
 #include "ability_manager_client.h"
+#include "mock_ipc_skeleton.h"
 #undef private
 #undef protected
 
@@ -656,6 +657,25 @@ HWTEST_F(ReminderDataManagerTest, CheckIsSameAppTest_001, Level1)
 
     reminder->InitCreatorBundleName("test1");
     EXPECT_FALSE(manager->CheckIsSameApp(reminder, option));
+}
+
+/**
+ * @tc.name: CheckPulishReminder
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I97Q9Q
+ */
+HWTEST_F(ReminderDataManagerTest, CheckPulishReminder_0001, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    sptr<NotificationBundleOption> option = new NotificationBundleOption();
+    IPCSkeleton::SetCallingTokenID(0);
+    ErrCode ret = manager->PublishReminder(reminder, option);
+    EXPECT_EQ(ret, ERR_REMINDER_INVALID_PARAM);
+
+    IPCSkeleton::SetCallingTokenID(1);
+    ret = manager->PublishReminder(reminder, option);
+    EXPECT_NE(ret, ERR_REMINDER_INVALID_PARAM);
 }
 
 /**

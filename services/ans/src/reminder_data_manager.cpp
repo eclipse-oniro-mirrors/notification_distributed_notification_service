@@ -38,6 +38,8 @@
 #include "datashare_predicates_object.h"
 #include "datashare_value_object.h"
 #include "datashare_helper.h"
+#include "data_share_permission.h"
+#include "datashare_errno.h"
 #include "datashare_template.h"
 #include "system_ability_definition.h"
 #include "app_mgr_constants.h"
@@ -81,6 +83,16 @@ ReminderDataManager::~ReminderDataManager() = default;
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
+    if (callerTokenId == 0) {
+        ANSR_LOGE("pushlish failed, callerTokenId is 0");
+        return ERR_REMINDER_INVALID_PARAM;
+    }
+
+    if (!IsActionButtonDataShareValid(reminder, callerTokenId)) {
+        return ERR_REMINDER_INVALID_PARAM;
+    }
+
     if (CheckReminderLimitExceededLocked(bundleOption, reminder)) {
         return ERR_REMINDER_NUMBER_OVERLOAD;
     }
@@ -1988,6 +2000,26 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
         }
         break;
     }
+}
+
+bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderRequest>& reminder,
+    const uint32_t callerTokenId)
+{
+    auto actionButtonMap = reminder->GetActionButtons();
+    for (auto it = actionButtonMap.begin(); it != actionButtonMap.end(); ++it) {
+        ReminderRequest::ActionButtonInfo buttonInfo = it->second;
+        if (buttonInfo.dataShareUpdate->uri.empty()) {
+            continue;
+        }
+        Uri uri(buttonInfo.dataShareUpdate->uri);
+        if (DataShare::DataSharePermission::VerifyPermission(callerTokenId, uri, false) != DataShare::E_OK) {
+            ANSR_LOGE("publish failed, DataSharePermission::VerifyPermission return error,"
+                " callerTokenId is %{public}d, uri is %{public}s",
+                callerTokenId, buttonInfo.dataShareUpdate->uri.c_str());
+            return false;
+        }
+    }
+    return true;
 }
 }
 }
