@@ -688,17 +688,19 @@ HWTEST_F(ReminderDataManagerTest, OnLanguageChanged_0001, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ExcludeDate_0001, Level1)
 {
+    manager->reminderVector_.clear();
+
     std::vector<uint64_t> dates;
-    auto result = manager->CheckExcludeDateParam(1, nullptr);
+    auto result = manager->CheckExcludeDateParam(9999, nullptr);
     EXPECT_TRUE(result == nullptr);
 
-    auto ret = manager->AddExcludeDate(1, 100, nullptr);
+    auto ret = manager->AddExcludeDate(9999, 100, nullptr);
     EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
 
-    ret = manager->DelExcludeDates(1, nullptr);
+    ret = manager->DelExcludeDates(9999, nullptr);
     EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
 
-    ret = manager->GetExcludeDates(1, nullptr, dates);
+    ret = manager->GetExcludeDates(9999, nullptr, dates);
     EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
 
     sptr<ReminderRequest> reminder = new ReminderRequestCalendar(10);
