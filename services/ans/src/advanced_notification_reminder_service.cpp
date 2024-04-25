@@ -178,10 +178,12 @@ ErrCode AdvancedNotificationService::AddExcludeDate(const int32_t reminderId, co
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANSR_LOGW("Generate bundle option failed!");
         return ERR_ANS_INVALID_BUNDLE;
     }
     auto rdm = ReminderDataManager::GetInstance();
     if (rdm == nullptr) {
+        ANSR_LOGW("Reminder data manager not init!");
         return ERR_NO_INIT;
     }
     return rdm->AddExcludeDate(reminderId, date, bundleOption);
@@ -197,10 +199,12 @@ ErrCode AdvancedNotificationService::DelExcludeDates(const int32_t reminderId)
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANSR_LOGW("Generate bundle option failed!");
         return ERR_ANS_INVALID_BUNDLE;
     }
     auto rdm = ReminderDataManager::GetInstance();
     if (rdm == nullptr) {
+        ANSR_LOGW("Reminder data manager not init!");
         return ERR_NO_INIT;
     }
     return rdm->DelExcludeDates(reminderId, bundleOption);
@@ -216,10 +220,12 @@ ErrCode AdvancedNotificationService::GetExcludeDates(const int32_t reminderId, s
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        ANSR_LOGW("Generate bundle option failed!");
         return ERR_ANS_INVALID_BUNDLE;
     }
     auto rdm = ReminderDataManager::GetInstance();
     if (rdm == nullptr) {
+        ANSR_LOGW("Reminder data manager not init!");
         return ERR_NO_INIT;
     }
     return rdm->GetExcludeDates(reminderId, bundleOption, dates);

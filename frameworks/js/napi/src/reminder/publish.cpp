@@ -1145,8 +1145,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
     return AddSlotInner(env, info, false);
 }
 
-napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
-    AsyncCallbackInfo &asyncCallbackInfo)
+napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback_info &info, Parameters &params)
 {
     ANSR_LOGI("ParseAddExcludeDateParameter");
     size_t argc = ADD_EXCLUDE_DATE_PARAM_LEN;
@@ -1201,7 +1200,7 @@ napi_value AddExcludeDate(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseAddExcludeDateParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseAddExcludeDateParameter(env, info, params) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
     }
 
@@ -1247,11 +1246,9 @@ napi_value AddExcludeDate(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
-    return napi_value();
 }
 
-napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
-    AsyncCallbackInfo &asyncCallbackInfo)
+napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_info &info, Parameters &params)
 {
     ANSR_LOGI("ParseReminderIdParameter");
     size_t argc = DEL_EXCLUDE_DATE_PARAM_LEN;
@@ -1292,7 +1289,7 @@ napi_value DelExcludeDates(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseReminderIdParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseReminderIdParameter(env, info, params) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
     }
 
@@ -1336,7 +1333,6 @@ napi_value DelExcludeDates(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
-    return napi_value();
 }
 
 void GetExcludeDatesInner(napi_env env, const std::vector<uint64_t>& dates, napi_value& arr)
@@ -1363,7 +1359,7 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
 
     // param
     Parameters params;
-    if (ParseReminderIdParameter(env, info, params, *asynccallbackinfo) == nullptr) {
+    if (ParseReminderIdParameter(env, info, params) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
     }
 
