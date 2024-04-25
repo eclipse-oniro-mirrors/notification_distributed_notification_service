@@ -2345,6 +2345,11 @@ bool NotificationRequest::IsSystemLiveView() const
         (notificationContentType_ == NotificationContent::Type::LOCAL_LIVE_VIEW);
 }
 
+bool NotificationRequest::IsLiveView() const
+{
+    return IsCommonLiveView() || IsSystemLiveView();
+}
+
 ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRequest) const
 {
     auto content = notificationContent_->GetNotificationContent();
@@ -2480,14 +2485,18 @@ std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
     const char *keySpliter = "_";
 
     std::stringstream stream;
+    int32_t flag = 0;
+    if (isLiveViewForceControl_ && IsLiveView()) {
+        flag = 1;
+    }
     if (IsAgentNotification()) {
         stream << deviceId << keySpliter << ownerUserId_ << keySpliter <<
             ownerUid_ << keySpliter << ownerBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+            label_ << keySpliter << notificationId_ << keySpliter << flag;
     } else {
         stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
             creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+            label_ << keySpliter << notificationId_ << keySpliter << flag;
     }
     return stream.str();
 }
@@ -2498,6 +2507,12 @@ std::string NotificationRequest::GetKey()
     const char *keySpliter = "_";
     stream << REQUEST_STORAGE_KEY_PREFIX << keySpliter << GetBaseKey("");
     return stream.str();
+}
+
+
+void NotificationRequest::SetLiveViewForceControl(bool forceControl)
+{
+    isLiveViewForceControl_ = forceControl;
 }
 
 bool NotificationRequest::CheckImageOverSizeForPixelMap(

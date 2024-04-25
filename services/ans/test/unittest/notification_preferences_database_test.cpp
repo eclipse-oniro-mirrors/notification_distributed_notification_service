@@ -809,6 +809,23 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01300, Fun
 }
 
 /**
+ * @tc.number    : ParseSlotFromDisturbeDB_01400
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01400, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_isForceControl";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
+}
+
+/**
  * @tc.name      : PutHasPoppedDialog_00100
  * @tc.number    :
  * @tc.desc      : Put bundle total badge nums into disturbe DB, return is true.

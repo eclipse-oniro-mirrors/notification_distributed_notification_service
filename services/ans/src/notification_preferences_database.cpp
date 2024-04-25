@@ -215,6 +215,11 @@ const static std::string KEY_SLOT_AUTHORIZED_STATUS = "authorizedStatus";
 const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
 
 /**
+ * Indicates that disturbe key which slot is forceControl.
+ */
+const static std::string KEY_SLOT_FORCE_CONTROL = "isForceControl";
+
+/**
  * Indicates that reminder mode of slot.
  */
 const static std::string KEY_REMINDER_MODE = "reminderMode";
@@ -298,6 +303,11 @@ const std::map<std::string,
         {
             KEY_REMINDER_MODE,
             std::bind(&NotificationPreferencesDatabase::ParseSlotReminderMode, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3),
+        },
+        {
+            KEY_SLOT_FORCE_CONTROL,
+            std::bind(&NotificationPreferencesDatabase::ParseSlotForceControl, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3),
         },
 };
@@ -1097,6 +1107,8 @@ void NotificationPreferencesDatabase::GenerateSlotEntry(const std::string &bundl
         std::to_string(slot->GetAuthHintCnt()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_REMINDER_MODE),
         std::to_string(slot->GetReminderMode()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_SLOT_FORCE_CONTROL),
+        std::to_string(slot->GetForceControl()), values);
 }
 
 void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
@@ -1473,6 +1485,14 @@ void NotificationPreferencesDatabase::ParseSlotReminderMode(
     ANS_LOGD("ParseSlotReminderMode slot reminder mode is %{public}s.", value.c_str());
     int32_t reminderMode = static_cast<int32_t>(StringToInt(value));
     slot->SetReminderMode(reminderMode);
+}
+
+void NotificationPreferencesDatabase::ParseSlotForceControl(
+    sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotForceControl slot isForceControl is %{public}s.", value.c_str());
+    bool isForceControl = static_cast<bool>(StringToInt(value));
+    slot->SetForceControl(isForceControl);
 }
 
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
