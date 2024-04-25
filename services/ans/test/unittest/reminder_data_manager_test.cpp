@@ -723,13 +723,13 @@ HWTEST_F(ReminderDataManagerTest, ExcludeDate_0001, Level1)
     result = manager->CheckExcludeDateParam(100, option);
     EXPECT_TRUE(result != nullptr);
 
-    ret = manager->AddExcludeDate(100, 100, nullptr);
+    ret = manager->AddExcludeDate(100, 100, option);
     EXPECT_TRUE(ret == ERR_OK);
 
-    ret = manager->DelExcludeDates(100, nullptr);
+    ret = manager->DelExcludeDates(100, option);
     EXPECT_TRUE(ret == ERR_OK);
 
-    ret = manager->GetExcludeDates(100, nullptr, dates);
+    ret = manager->GetExcludeDates(100, option, dates);
     EXPECT_TRUE(ret == ERR_OK);
 
     manager->reminderVector_.clear();
