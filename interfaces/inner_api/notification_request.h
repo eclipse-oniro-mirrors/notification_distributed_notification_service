@@ -1185,6 +1185,8 @@ public:
 
     bool IsCommonLiveView() const;
 
+    bool IsSystemLiveView() const;
+
     /**
      * @brief Checks whether the image size exceeds the limit in content.
      *
@@ -1321,6 +1323,34 @@ public:
      */
     std::shared_ptr<NotificationUnifiedGroupInfo> GetUnifiedGroupInfo() const;
 
+    /**
+     * @brief Sets the delay time of this notification.
+     *
+     * @param delayTime Indicates the delay time of this notification.
+     */
+    void SetPublishDelayTime(uint32_t delayTime);
+
+    /**
+     * @brief Obtains the delay time of the notification.
+     *
+     * @return Returns the delay time of the notification.
+     */
+    uint32_t GetPublishDelayTime() const;
+
+    /**
+     * @brief Set notification isUpdateByOwnerAllowed value.
+     *
+     * @param isUpdateByOwnerAllowed Indicates the isUpdateByOwnerAllowed value of this notification.
+     */
+    void SetUpdateByOwnerAllowed(bool isUpdateByOwnerAllowed);
+
+    /**
+     * @brief Obtains the value of isUpdateByOwnerAllowed.
+     *
+     * @return Returns the isUpdateByOwnerAllowed value of the notification.
+     */
+    bool IsUpdateByOwnerAllowed() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1438,6 +1468,7 @@ private:
     bool isAgent_ {false};
     bool isRemoveAllowed_ {true};
     bool isCoverActionButtons_ {false};
+    bool isUpdateByOwnerAllowed_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};
@@ -1460,6 +1491,8 @@ private:
     std::shared_ptr<NotificationBundleOption> agentBundle_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
+
+    uint32_t publishDelayTime_ {0};
 };
 }  // namespace Notification
 }  // namespace OHOS
