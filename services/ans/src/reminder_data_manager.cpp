@@ -1468,7 +1468,7 @@ void ReminderDataManager::InitServiceHandler()
     ANSR_LOGD("InitServiceHandler suceeded.");
 }
 
-void ReminderDataManager::InitStartExtensionAbility(std::vector<sptr<ReminderRequest>> reissueReminder)
+void ReminderDataManager::InitStartExtensionAbility(std::vector<sptr<ReminderRequest>>& reissueReminder)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
