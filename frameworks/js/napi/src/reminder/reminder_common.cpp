@@ -722,6 +722,31 @@ bool ReminderCommon::GetObject(const napi_env &env, const napi_value &value,
     return true;
 }
 
+bool ReminderCommon::GetDate(const napi_env& env, const napi_value& value,
+    const char* propertyName, double& date)
+{
+    napi_value propertyValue = nullptr;
+    if (propertyName == nullptr) {
+        propertyValue = value;
+    } else {
+        bool hasProperty = false;
+        NAPI_CALL_BASE(env, napi_has_named_property(env, value, propertyName, &hasProperty), false);
+        if (!hasProperty) {
+            ANSR_LOGE("");
+            return false;
+        }
+        napi_get_named_property(env, value, propertyName, &propertyValue);
+    }
+    bool isDate = false;
+    napi_is_date(env, propertyValue, &isDate);
+    if (!isDate) {
+        ANSR_LOGE("Wrong argument type. Date expected.");
+        return false;
+    }
+    napi_get_date_value(env, propertyValue, &date);
+    return true;
+}
+
 napi_value ReminderCommon::CreateReminderTimer(
     const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
 {

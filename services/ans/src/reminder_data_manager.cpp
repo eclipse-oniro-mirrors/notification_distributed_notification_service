@@ -128,6 +128,73 @@ ErrCode ReminderDataManager::CancelAllReminders(const std::string &packageName, 
     return ERR_OK;
 }
 
+sptr<ReminderRequest> ReminderDataManager::CheckExcludeDateParam(const int32_t reminderId,
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    if (reminder == nullptr) {
+        ANSR_LOGW("Check reminder failed, not find the reminder");
+        return nullptr;
+    }
+    if (!CheckIsSameApp(reminder, bundleOption)) {
+        ANSR_LOGW("Check reminder failed, due to not match");
+        return nullptr;
+    }
+    if (reminder->GetReminderType() != ReminderRequest::ReminderType::CALENDAR
+        || !reminder->IsRepeat()) {
+        ANSR_LOGW("Check reminder failed, due to type not match or not repeat");
+        return nullptr;
+    }
+    return reminder;
+}
+
+ErrCode ReminderDataManager::AddExcludeDate(const int32_t reminderId, const uint64_t date,
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, bundleOption);
+    if (reminder == nullptr) {
+        return ERR_REMINDER_NOT_EXIST;
+    }
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+        calendar->AddExcludeDate(date);
+        store_->UpdateOrInsert(reminder, bundleOption);
+    }
+    return ERR_OK;
+}
+
+ErrCode ReminderDataManager::DelExcludeDates(const int32_t reminderId,
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, bundleOption);
+    if (reminder == nullptr) {
+        return ERR_REMINDER_NOT_EXIST;
+    }
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+        calendar->DelExcludeDates();
+        store_->UpdateOrInsert(reminder, bundleOption);
+    }
+    return ERR_OK;
+}
+
+ErrCode ReminderDataManager::GetExcludeDates(const int32_t reminderId,
+    const sptr<NotificationBundleOption> &bundleOption, std::vector<uint64_t>& dates)
+{
+    sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, bundleOption);
+    if (reminder == nullptr) {
+        return ERR_REMINDER_NOT_EXIST;
+    }
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+        dates = calendar->GetExcludeDates();
+    }
+    return ERR_OK;
+}
+
 void ReminderDataManager::GetValidReminders(
     const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<ReminderRequest>> &reminders)
 {
@@ -961,6 +1028,10 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
             continue;
         }
         ReminderDataManager::AsyncStartExtensionAbility((*it), CONNECT_EXTENSION_MAX_RETRY_TIMES);
+        if ((*it)->CheckExcludeDate()) {
+            ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
+            continue;
+        }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
             playSoundReminder = (*it);
             isAlerting = true;

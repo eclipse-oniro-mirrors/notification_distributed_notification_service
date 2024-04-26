@@ -23,20 +23,9 @@
 
 namespace OHOS {
 namespace Notification {
-const uint8_t ReminderRequestCalendar::MAX_MONTHS_OF_YEAR = 12;
-const uint8_t ReminderRequestCalendar::MAX_DAYS_OF_MONTH = 31;
-const uint64_t ReminderRequestCalendar::DELAY_REMINDER = 3000;
-const uint8_t ReminderRequestCalendar::JANUARY = 1;
-const uint8_t ReminderRequestCalendar::DECEMBER = 12;
 const uint8_t ReminderRequestCalendar::DEFAULT_SNOOZE_TIMES = 3;
 
 const uint8_t ReminderRequestCalendar::DAY_ARRAY[12]    = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-const uint8_t ReminderRequestCalendar::FEBRUARY         = 2;
-const uint8_t ReminderRequestCalendar::LEAP_MONTH       = 29;
-const uint8_t ReminderRequestCalendar::NON_LEAP_MONTH   = 28;
-const uint16_t ReminderRequestCalendar::SOLAR_YEAR      = 400;
-const uint8_t ReminderRequestCalendar::LEAP_PARAM_MIN   = 4;
-const uint8_t ReminderRequestCalendar::LEAP_PARAM_MAX   = 100;
 
 ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime, const std::vector<uint8_t> &repeatMonths,
     const std::vector<uint8_t> &repeatDays, const std::vector<uint8_t> &daysOfWeek)
@@ -74,11 +63,63 @@ ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &
     durationTime_ = other.durationTime_;
     startDateTime_ = other.startDateTime_;
     endDateTime_ = other.endDateTime_;
+    excludeDates_ = other.excludeDates_;
 }
 
 void ReminderRequestCalendar::SetRRuleWantAgentInfo(const std::shared_ptr<WantAgentInfo> &wantAgentInfo)
 {
     rruleWantAgentInfo_ = wantAgentInfo;
+}
+
+void ReminderRequestCalendar::AddExcludeDate(const uint64_t date)
+{
+    time_t t = static_cast<time_t>(date / MILLI_SECONDS);
+    struct tm dateTime;
+    (void)localtime_r(&t, &dateTime);
+    dateTime.tm_hour = 0;
+    dateTime.tm_min = 0;
+    dateTime.tm_sec = 0;
+    const time_t target = mktime(&dateTime);
+    if (target == -1) {
+        ANSR_LOGW("error exclude date");
+        return;
+    }
+    excludeDates_.insert(ReminderRequest::GetDurationSinceEpochInMilli(target));
+}
+
+void ReminderRequestCalendar::DelExcludeDates()
+{
+    excludeDates_.clear();
+}
+
+std::vector<uint64_t> ReminderRequestCalendar::GetExcludeDates() const
+{
+    std::vector<uint64_t> excludeDates;
+    for (auto date : excludeDates_) {
+        excludeDates.push_back(date);
+    }
+    return excludeDates;
+}
+
+bool ReminderRequestCalendar::IsInExcludeDate() const
+{
+    time_t t = static_cast<time_t>(startDateTime_ / MILLI_SECONDS);
+    struct tm dateTime;
+    (void)localtime_r(&t, &dateTime);
+    dateTime.tm_hour = 0;
+    dateTime.tm_min = 0;
+    dateTime.tm_sec = 0;
+    const time_t target = mktime(&dateTime);
+    if (target == -1) {
+        ANSR_LOGW("error start date time");
+        return false;
+    }
+    uint64_t notificationTime = ReminderRequest::GetDurationSinceEpochInMilli(target);
+    if (excludeDates_.find(notificationTime) != excludeDates_.end()) {
+        ANSR_LOGI("Reminder[%{public}d] trigger time is in exclude date", GetReminderId());
+        return true;
+    }
+    return false;
 }
 
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequestCalendar::GetRRuleWantAgentInfo()
@@ -91,7 +132,7 @@ bool ReminderRequestCalendar::InitTriggerTime()
     uint64_t nextTriggerTime = INVALID_LONG_LONG_VALUE;
     uint64_t nowInMilli = GetNowInstantMilli();
     if ((startDateTime_ <= nowInMilli) && (nowInMilli <= endDateTime_)) {
-        nextTriggerTime = nowInMilli + DELAY_REMINDER;
+        nextTriggerTime = nowInMilli + DEFAULT_DELAY_TIME;
     } else if (startDateTime_ > nowInMilli) {
         nextTriggerTime = startDateTime_;
     } else if (endDateTime_ < nowInMilli && IsRepeatReminder()) {
@@ -176,6 +217,9 @@ uint8_t ReminderRequestCalendar::GetNextDay(
 
 bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t now)
 {
+    if (IsInExcludeDate()) {
+        return false;
+    }
     if (now <= endDateTime_ && now >= startDateTime_) {
         return true;
     }
@@ -199,6 +243,27 @@ bool ReminderRequestCalendar::OnDateTimeChange()
         SetTriggerTimeInMilli(triggerTime);
         return false;
     }
+}
+
+bool ReminderRequestCalendar::IsRepeat() const
+{
+    return (repeatMonth_ > 0 && repeatDay_ > 0) || (repeatDaysOfWeek_ > 0);
+}
+
+bool ReminderRequestCalendar::CheckExcludeDate()
+{
+    if (!IsRepeat()) {
+        // not repeat reminder
+        return false;
+    }
+
+    if (IsInExcludeDate()) {
+        // in exclude date
+        uint64_t triggerTime = GetNextTriggerTime();
+        SetTriggerTimeInMilli(triggerTime);
+        return true;
+    }
+    return false;
 }
 
 uint64_t ReminderRequestCalendar::GetNextTriggerTime()
@@ -639,6 +704,7 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
 
     std::string excludeDates;
     ReminderStore::GetStringVal(resultSet, ReminderCalendarTable::EXCLUDE_DATES, excludeDates);
+    DeserializationExcludeDates(excludeDates);
 }
 
 void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
@@ -653,6 +719,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     uint8_t repeatDaysOfWeek = 0;
     uint64_t endDateTime = 0;
     std::string rruleWantAgent;
+    std::string excludeDates;
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         if (calendar != nullptr) {
@@ -665,6 +732,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
             repeatDaysOfWeek = calendar->GetRepeatDaysOfWeek();
             endDateTime = calendar->GetEndDateTime();
             rruleWantAgent = calendar->SerializationRRule();
+            excludeDates = calendar->SerializationExcludeDates();
         }
     }
     values.PutInt(ReminderCalendarTable::REMINDER_ID, reminder->GetReminderId());
@@ -677,7 +745,7 @@ void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &re
     values.PutInt(ReminderCalendarTable::REPEAT_MONTHS, repeatMonth);
     values.PutInt(ReminderCalendarTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
     values.PutString(ReminderCalendarTable::RRULE_WANT_AGENT, rruleWantAgent);
-    values.PutString(ReminderCalendarTable::EXCLUDE_DATES, "");  // next
+    values.PutString(ReminderCalendarTable::EXCLUDE_DATES, excludeDates);
 }
 
 void ReminderRequestCalendar::SetDateTime(const uint64_t time)
@@ -739,6 +807,18 @@ std::string ReminderRequestCalendar::SerializationRRule()
     return str;
 }
 
+std::string ReminderRequestCalendar::SerializationExcludeDates()
+{
+    constexpr int32_t INDENT = -1;
+    nlohmann::json root;
+    root["excludeDates"] = nlohmann::json::array();
+    for (auto date : excludeDates_) {
+        root["excludeDates"].push_back(date);
+    }
+    std::string str = root.dump(INDENT, ' ', false, nlohmann::json::error_handler_t::replace);
+    return str;
+}
+
 void ReminderRequestCalendar::DeserializationRRule(const std::string& str)
 {
     if (str.empty()) {
@@ -763,6 +843,30 @@ void ReminderRequestCalendar::DeserializationRRule(const std::string& str)
     rruleWantAgentInfo_->pkgName = root["pkgName"].get<std::string>();
     rruleWantAgentInfo_->abilityName = root["abilityName"].get<std::string>();
     rruleWantAgentInfo_->uri = root["uri"].get<std::string>();
+}
+
+void ReminderRequestCalendar::DeserializationExcludeDates(const std::string& str)
+{
+    if (str.empty()) {
+        return;
+    }
+    if (!nlohmann::json::accept(str)) {
+        return;
+    }
+    nlohmann::json root = nlohmann::json::parse(str, nullptr, false);
+    if (root.is_discarded()) {
+        return;
+    }
+
+    if (!root.contains("excludeDates") || !root["excludeDates"].is_array()) {
+        return;
+    }
+    excludeDates_.clear();
+    for (auto date : root["excludeDates"]) {
+        if (date.is_number()) {
+            excludeDates_.insert(date.get<uint64_t>());
+        }
+    }
 }
 }
 }

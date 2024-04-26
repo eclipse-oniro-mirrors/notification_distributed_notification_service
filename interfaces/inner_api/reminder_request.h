@@ -752,6 +752,22 @@ public:
     virtual bool UpdateNextReminder();
     virtual bool SetNextTriggerTime();
 
+    /**
+     * @brief Check reminder request is repeat
+     */
+    virtual bool IsRepeat() const
+    {
+        return false;
+    }
+
+    /**
+     * @brief Check reminder request is in exclude date
+     */
+    virtual bool CheckExcludeDate()
+    {
+        return false;
+    }
+
     std::string GetWantAgentStr();
     std::string GetMaxWantAgentStr();
 

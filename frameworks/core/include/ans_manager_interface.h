@@ -662,6 +662,32 @@ public:
     virtual ErrCode CancelAllReminders() = 0;
 
     /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) = 0;
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode DelExcludeDates(const int32_t reminderId) = 0;
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) = 0;
+
+    /**
      * @brief Checks whether this device is support template.
      *
      * @param templateName Identifies the template name for searching as a condition.

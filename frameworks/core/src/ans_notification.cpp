@@ -1144,6 +1144,33 @@ ErrCode AnsNotification::GetValidReminders(std::vector<sptr<ReminderRequest>> &v
     return ansManagerProxy_->GetValidReminders(validReminders);
 }
 
+ErrCode AnsNotification::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->AddExcludeDate(reminderId, date);
+}
+
+ErrCode AnsNotification::DelExcludeDates(const int32_t reminderId)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->DelExcludeDates(reminderId);
+}
+
+ErrCode AnsNotification::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->GetExcludeDates(reminderId, dates);
+}
+
 bool AnsNotification::GetAnsManagerProxy()
 {
     if (!ansManagerProxy_) {

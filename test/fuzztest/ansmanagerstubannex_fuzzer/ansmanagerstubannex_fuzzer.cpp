@@ -56,6 +56,9 @@ namespace OHOS {
         ansManagerStub.HandleCancelReminder(datas, reply);
         ansManagerStub.HandleCancelAllReminders(datas, reply);
         ansManagerStub.HandleGetValidReminders(datas, reply);
+        ansManagerStub.HandleAddExcludeDate(datas, reply);
+        ansManagerStub.HandleDelExcludeDates(datas, reply);
+        ansManagerStub.HandleGetExcludeDates(datas, reply);
         ansManagerStub.HandleIsSupportTemplate(datas, reply);
         ansManagerStub.HandleIsSpecialUserAllowedNotifyByUser(datas, reply);
         ansManagerStub.HandleSetNotificationsEnabledByUser(datas, reply);

@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "reminder_request_calendar.h"
+#include "reminder_table.h"
 #undef private
 #undef protected
 
@@ -1004,6 +1005,31 @@ HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00002, Function | S
 }
 
 /**
+ * @tc.name: CheckCalenderIsExpired_00003
+ * @tc.desc: Test CheckCalenderIsExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckCalenderIsExpired_00003, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+
+    calendar->AddExcludeDate(static_cast<uint64_t>(now) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    EXPECT_EQ(calendar->IsInExcludeDate(), true);
+    EXPECT_EQ(calendar->CheckCalenderIsExpired(static_cast<uint64_t>(now) * 1000), false);
+}
+
+/**
  * @tc.name: OnDateTimeChange_00001
  * @tc.desc: Test OnDateTimeChange parameters.
  * @tc.type: FUNC
@@ -1110,6 +1136,7 @@ HWTEST_F(ReminderRequestCalendarTest, SetEndDateTime_00001, Function | SmallTest
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
     EXPECT_EQ(calendar->SetEndDateTime(0), false);
+    EXPECT_NE(calendar->GetEndDateTime(), 0);
 }
 
 /**
@@ -1125,6 +1152,7 @@ HWTEST_F(ReminderRequestCalendarTest, SetEndDateTime_00002, Function | SmallTest
     EXPECT_NE(nullptr, calendar);
     calendar->startDateTime_ = 5;
     EXPECT_EQ(calendar->SetEndDateTime(0), false);
+    EXPECT_NE(calendar->GetEndDateTime(), 0);
 }
 
 /**
@@ -1143,8 +1171,29 @@ HWTEST_F(ReminderRequestCalendarTest, SerializationRRule_00001, Function | Small
 }
 
 /**
- * @tc.name: SetDateTime_00001
- * @tc.desc: Test SetDateTime parameters.
+ * @tc.name: SerializationRRule_00002
+ * @tc.desc: Test SerializationRRule parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderRequestCalendarTest, SerializationRRule_00002, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    calendar->rruleWantAgentInfo_ = std::make_shared<ReminderRequest::WantAgentInfo>();
+    calendar->rruleWantAgentInfo_->pkgName = "com.example.myapplication";
+    calendar->rruleWantAgentInfo_->abilityName = "MainAbility";
+    calendar->rruleWantAgentInfo_->uri = "test";
+    std::string result = calendar->SerializationRRule();
+    EXPECT_NE(result.find("com.example.myapplication"), std::string::npos);
+    EXPECT_NE(result.find("MainAbility"), std::string::npos);
+    EXPECT_NE(result.find("test"), std::string::npos);
+}
+
+/**
+ * @tc.name: DeserializationRRule_00001
+ * @tc.desc: Test DeserializationRRule parameters.
  * @tc.type: FUNC
  * @tc.require: issueI92BU9
  */
@@ -1193,6 +1242,274 @@ HWTEST_F(ReminderRequestCalendarTest, DeserializationRRule_00001, Function | Sma
     EXPECT_EQ(calendar->rruleWantAgentInfo_->pkgName, "com.example.myapplication");
     EXPECT_EQ(calendar->rruleWantAgentInfo_->abilityName, "MainAbility");
     EXPECT_EQ(calendar->rruleWantAgentInfo_->uri, "uri");
+}
+
+/**
+ * @tc.name: ExcludeDate_00001
+ * @tc.desc: Test InitTriggerTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderRequestCalendarTest, ExcludeDate_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+
+    calendar->AddExcludeDate(static_cast<uint64_t>(now) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    calendar->AddExcludeDate(static_cast<uint64_t>(now) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    calendar->AddExcludeDate((static_cast<uint64_t>(now) + 24 * 60 * 60) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 2);
+
+    auto dates = calendar->GetExcludeDates();
+    EXPECT_EQ(dates.size(), 2);
+
+    calendar->DelExcludeDates();
+    EXPECT_EQ(calendar->excludeDates_.size(), 0);
+    dates = calendar->GetExcludeDates();
+    EXPECT_EQ(dates.size(), 0);
+}
+
+/**
+ * @tc.name: IsInExcludeDate_00002
+ * @tc.desc: Test IsInExcludeDate.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderRequestCalendarTest, IsInExcludeDate_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+
+    calendar->AddExcludeDate(static_cast<uint64_t>(now) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    EXPECT_EQ(calendar->IsInExcludeDate(), true);
+
+    calendar->DelExcludeDates();
+    calendar->AddExcludeDate((static_cast<uint64_t>(now) + 24 * 60 * 60) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+    EXPECT_EQ(calendar->IsInExcludeDate(), false);
+}
+
+/**
+ * @tc.name: IsRepeat_00001
+ * @tc.desc: Test IsRepeat parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderRequestCalendarTest, IsRepeat_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+
+    {
+        std::vector<uint8_t> repeatMonths;
+        std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek;
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        EXPECT_NE(nullptr, calendar);
+        EXPECT_EQ(calendar->IsRepeat(), false);
+    }
+
+    {
+        std::vector<uint8_t> repeatMonths{ 1 };
+        std::vector<uint8_t> repeatDays{ 1 };
+        std::vector<uint8_t> daysOfWeek;
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        EXPECT_NE(nullptr, calendar);
+        EXPECT_EQ(calendar->IsRepeat(), true);
+    }
+
+    {
+        std::vector<uint8_t> repeatMonths{ 1 };
+        std::vector<uint8_t> repeatDays{ 1 };
+        std::vector<uint8_t> daysOfWeek;
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        EXPECT_NE(nullptr, calendar);
+        EXPECT_EQ(calendar->IsRepeat(), true);
+    }
+
+    {
+        std::vector<uint8_t> repeatMonths;
+        std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek{ 1 };
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        EXPECT_NE(nullptr, calendar);
+        EXPECT_EQ(calendar->IsRepeat(), true);
+    }
+}
+
+/**
+ * @tc.name: CheckExcludeDate_00001
+ * @tc.desc: Test CheckExcludeDate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckExcludeDate_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+
+    {
+        std::vector<uint8_t> repeatMonths;
+        std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek;
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        EXPECT_NE(nullptr, calendar);
+        EXPECT_EQ(calendar->IsRepeat(), false);
+        EXPECT_EQ(calendar->CheckExcludeDate(), false);
+    }
+
+    {
+        std::vector<uint8_t> repeatMonths;
+        std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek{ 1, 2, 3, 4, 5, 6, 7};
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        EXPECT_NE(nullptr, calendar);
+        EXPECT_EQ(calendar->IsRepeat(), true);
+        EXPECT_EQ(calendar->CheckExcludeDate(), false);
+    }
+
+    {
+        std::vector<uint8_t> repeatMonths;
+        std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek{ 1, 2, 3, 4, 5, 6, 7};
+        auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        calendar->AddExcludeDate(static_cast<uint64_t>(now) * 1000);
+        EXPECT_NE(nullptr, calendar);
+        EXPECT_EQ(calendar->IsRepeat(), true);
+        EXPECT_EQ(calendar->CheckExcludeDate(), true);
+    }
+}
+
+/**
+ * @tc.name: SerializationExcludeDates_00001
+ * @tc.desc: Test SerializationExcludeDates parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderRequestCalendarTest, SerializationExcludeDates_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+
+    std::string str = calendar->SerializationExcludeDates();
+    EXPECT_NE(str.find("[]"), std::string::npos);
+
+    calendar->AddExcludeDate(static_cast<uint64_t>(now) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    uint64_t date = *calendar->excludeDates_.begin();
+    str = calendar->SerializationExcludeDates();
+    EXPECT_NE(str.find(std::to_string(date)), std::string::npos);
+}
+
+/**
+ * @tc.name: DeserializationExcludeDates_00001
+ * @tc.desc: Test DeserializationExcludeDates parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderRequestCalendarTest, DeserializationExcludeDates_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+
+    calendar->AddExcludeDate(static_cast<uint64_t>(now) * 1000);
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    calendar->DeserializationExcludeDates("");
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    calendar->DeserializationExcludeDates("saeawefs");
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    calendar->DeserializationExcludeDates(R"({"pkgName":"com.example.myapplication"})");
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    calendar->DeserializationExcludeDates(R"({"excludeDates":"com.example.myapplication"})");
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+
+    calendar->DeserializationExcludeDates(R"({"excludeDates":[]})");
+    EXPECT_EQ(calendar->excludeDates_.size(), 0);
+
+    calendar->DeserializationExcludeDates(R"({"excludeDates":["a"]})");
+    EXPECT_EQ(calendar->excludeDates_.size(), 0);
+
+    calendar->DeserializationExcludeDates(R"({"excludeDates":["a", 1713110400000]})");
+    EXPECT_EQ(calendar->excludeDates_.size(), 1);
+    EXPECT_NE(calendar->excludeDates_.find(1713110400000), calendar->excludeDates_.end());
+
+    calendar->DeserializationExcludeDates(R"({"excludeDates":[1713196800000, 1713110400000]})");
+    EXPECT_EQ(calendar->excludeDates_.size(), 2);
+    EXPECT_NE(calendar->excludeDates_.find(1713196800000), calendar->excludeDates_.end());
+}
+
+/**
+ * @tc.name: AppendValuesBucket_00001
+ * @tc.desc: Test AppendValuesBucket parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderRequestCalendarTest, AppendValuesBucket_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+    calendar->reminderId_ = 100;
+
+    NativeRdb::ValuesBucket bucket;
+    NativeRdb::ValueObject object;
+    ReminderRequestCalendar::AppendValuesBucket(calendar, nullptr, bucket);
+    bucket.GetObject(ReminderCalendarTable::REMINDER_ID, object);
+    int32_t result {0};
+    object.GetInt(result);
+    EXPECT_EQ(result, 100);
 }
 }
 }

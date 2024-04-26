@@ -117,5 +117,49 @@ HWTEST_F(ReminderHelperTest, RemoveNotificationSlot_00001, Function | SmallTest 
     ErrCode ret = reminderHelper.RemoveNotificationSlot(slotType);
     EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
+
+/**
+ * @tc.name: AddExcludeDate_00001
+ * @tc.desc: Test AddExcludeDate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderHelperTest, AddExcludeDate_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 1;
+    uint64_t date = 1713196800000;
+    ReminderHelper reminderHelper;
+    ErrCode ret = reminderHelper.AddExcludeDate(reminderId, date);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: DelExcludeDates_00001
+ * @tc.desc: Test DelExcludeDates parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderHelperTest, DelExcludeDates_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 1;
+    ReminderHelper reminderHelper;
+    ErrCode ret = reminderHelper.DelExcludeDates(reminderId);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: GetExcludeDates_00001
+ * @tc.desc: Test GetExcludeDates parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderHelperTest, GetExcludeDates_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 1;
+    std::vector<uint64_t> dates;
+    ReminderHelper reminderHelper;
+    ErrCode ret = reminderHelper.GetExcludeDates(reminderId, dates);
+    EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
 }
 }
