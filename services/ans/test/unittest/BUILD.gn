@@ -189,6 +189,14 @@ ohos_unittest("ans_unit_test") {
 }
 
 ohos_unittest("notification_service_test") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   include_dirs = [
     ".",

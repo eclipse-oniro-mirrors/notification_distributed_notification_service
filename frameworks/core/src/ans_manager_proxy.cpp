@@ -41,13 +41,6 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notification->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
-        notification->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW &&
-        !isSubscribedLocalLiveView) {
-        ANS_LOGE("[publish] fail: not subscribe local-live-view.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     MessageParcel data;
     if (notification->IsCommonLiveView()) {
         if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {

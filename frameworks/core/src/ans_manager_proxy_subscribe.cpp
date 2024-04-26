@@ -154,9 +154,6 @@ ErrCode AnsManagerProxy::SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiv
         ANS_LOGE("[Subscribe] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    if (result == ERR_OK) {
-        isSubscribedLocalLiveView.store(true);
-    }
     return result;
 }
 

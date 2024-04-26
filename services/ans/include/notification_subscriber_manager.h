@@ -164,6 +164,8 @@ private:
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
+    bool IsSubscribedBysubscriber(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
 
 private:
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

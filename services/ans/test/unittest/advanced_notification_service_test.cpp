@@ -3857,7 +3857,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00017,
     record->request = request;
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
-    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_OK);
+    int32_t uid = 0;
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid), ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00017 test end";
 }
 
@@ -3871,7 +3872,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00018,
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test start";
     std::string bundleName = "testBundle";
-    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    int32_t uid = 0;
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid),
+        ERR_ANS_NOTIFICATION_NOT_EXISTS);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test end";
 }
 
@@ -3900,7 +3903,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019,
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
-    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_ANS_INVALID_PARAM);
+    int32_t uid = 0;
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid), ERR_ANS_INVALID_PARAM);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test end";
 }
 /**

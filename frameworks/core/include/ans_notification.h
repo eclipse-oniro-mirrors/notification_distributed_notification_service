@@ -481,7 +481,7 @@ public:
      */
     ErrCode GetNotificationSlotsForBundle(
         const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots);
-    
+
     /**
      * @brief Obtains notification slot belonging to the specified bundle.
      *
@@ -1081,6 +1081,9 @@ private:
      * @return Returns true if the MediaContent can be published; returns false otherwise.
      */
     bool CanPublishLiveViewContent(const NotificationRequest &request) const;
+
+    bool IsValidTemplate(const NotificationRequest &request) const;
+    bool IsValidDelayTime(const NotificationRequest &request) const;
 
 private:
     std::mutex mutex_;

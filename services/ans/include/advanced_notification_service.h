@@ -870,8 +870,8 @@ public:
         int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
-    ErrCode PublishPreparedNotification(
-        const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode PublishPreparedNotification(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner = false);
 
     /**
      * @brief Dump current running status for debuging.
@@ -997,7 +997,12 @@ public:
     /**
      * @brief Remove Local Live Notifications
      */
-    ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName);
+    ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName, const int32_t uid);
+
+    /**
+     * @brief Remove Local Live Notifications created by sa.
+     */
+    ErrCode RemoveSystemLiveViewNotificationsOfSa(int32_t uid);
 
     /**
      * @brief Set the notification flags by soltType.
@@ -1086,7 +1091,9 @@ private:
     void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
+    void AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
+    void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption, const std::string &label,
         int32_t notificationId, sptr<Notification> &notification, bool isCancel = false);
@@ -1094,7 +1101,11 @@ private:
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
         const int32_t &userId, sptr<Notification> &notification);
+    void RemoveFromDelayedNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
+    std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
+    std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
+        const int32_t ownerUid, const int32_t notificationId);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);
     void SortNotificationList();
@@ -1204,7 +1215,7 @@ private:
     static int32_t GetNotificationRequestFromDb(const std::string &key, NotificationRequestDb &requestDb);
     static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests);
     static int32_t DeleteNotificationRequestFromDb(const std::string &key);
-    void CancelAutoDeleteTimer(uint64_t timerId);
+    void CancelTimer(uint64_t timerId);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
@@ -1233,7 +1244,8 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
-    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
+    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
+        bool isSystemApp, bool isUpdateByOwner);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);
@@ -1254,6 +1266,14 @@ private:
     void GenerateSlotReminderMode(
         const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot = false);
     static void CloseAlert(const std::shared_ptr<NotificationRecord> &record);
+    bool IsUpdateSystemLiveviewByOwner(const sptr<NotificationRequest> &request);
+    bool IsSaCreateSystemLiveViewAsBundle(const std::shared_ptr<NotificationRecord> &record, int32_t ipcUid);
+    ErrCode SaPublishSystemLiveViewAsBundle(const std::shared_ptr<NotificationRecord> &record);
+    bool IsNotificationExistsInDelayList(const std::string &key);
+    uint64_t StartDelayPublishTimer(const int32_t ownerUid, const int32_t notificationId, const uint32_t delayTime);
+    ErrCode StartPublishDelayedNotification(const std::shared_ptr<NotificationRecord> &record);
+    void StartPublishDelayedNotificationTimeOut(const int32_t ownerUid, const int32_t notificationId);
+    void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
@@ -1286,6 +1306,8 @@ private:
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
+    std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
+    std::mutex delayNotificationMutext_;
 };
 
 /**

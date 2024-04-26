@@ -355,7 +355,7 @@ public:
     ErrCode GetSlotByBundle(
         const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
         sptr<NotificationSlot> &slot) override;
-    
+
     /**
      * @brief Update slots according to bundle.
      *
@@ -840,7 +840,7 @@ public:
      */
     ErrCode IsDistributedEnabledByBundle(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, bool &enabled) override;
-    
+
     /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
@@ -941,9 +941,6 @@ private:
     static inline BrokerDelegator<AnsManagerProxy> delegator_;
 
     ErrCode ReadReminders(uint8_t &count, MessageParcel &reply, std::vector<sptr<ReminderRequest>> &reminders);
-
-private:
-    std::atomic<bool> isSubscribedLocalLiveView = false;
 };
 }  // namespace Notification
 }  // namespace OHOS
