@@ -766,7 +766,8 @@ std::string NotificationRequest::Dump()
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
-            ", sound = " + sound_ + " }";
+            ", sound = " + sound_ + ", unifiedGroupInfo_ = " +
+            (unifiedGroupInfo_ ? "null" : unifiedGroupInfo_->Dump())+ " }";
 }
 
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const

@@ -358,6 +358,18 @@ napi_value Common::SetNotificationRequestByCustom(
         napi_set_named_property(env, result, "agentBundle", agentBundleResult);
     }
 
+    // unifiedGroupInfo?: unifiedGroupInfo
+    std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo = request->GetUnifiedGroupInfo();
+    if (groupInfo) {
+        napi_value groupInfoResult = nullptr;
+        napi_create_object(env, &groupInfoResult);
+        if (!SetNotificationUnifiedGroupInfo(env, groupInfo, groupInfoResult)) {
+            ANS_LOGE("SetNotificationUnifiedGroupInfo call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "unifiedGroupInfo", groupInfoResult);
+    }
+
     return NapiGetBoolean(env, true);
 }
 
