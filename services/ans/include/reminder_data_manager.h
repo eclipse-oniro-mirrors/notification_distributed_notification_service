@@ -140,7 +140,7 @@ public:
 
     void InitUserId();
 
-    void InitStartExtensionAbility();
+    void InitStartExtensionAbility((std::vector<sptr<ReminderRequest>> reissueReminder);
     /**
      * @brief Register configuration observer, the listening system language is changed.
      */
