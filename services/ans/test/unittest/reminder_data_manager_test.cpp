@@ -770,7 +770,7 @@ HWTEST_F(ReminderDataManagerTest, InitStartExtensionAbility_0001, Level1)
     ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRePtr());
     uint64_t not = calendar->GetNowInstantMilli();
     calendar->SetDateTime(now-50000);
-    calendar->SetEndDateTime(not+50000);
+    calendar->SetEndDateTime(now+50000);
     manager->reminderVector_.push_back(reminder);
     manager->Init(true);
     EXPECT_TRUE(!manager->reminderVector_.empty());
