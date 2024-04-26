@@ -231,6 +231,50 @@ HWTEST_F(NotificationConversationalContentTest, ToJson_00002, Function | SmallTe
 }
 
 /**
+ * @tc.name: ToJson_00003
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConversationalContentTest, ToJson_00003, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    nlohmann::json jsonObject = nlohmann::json{
+        {"processName", "process6"}, {"APL", 1},
+        {"version", 2}, {"tokenId", 685266937},
+        {"tokenAttr", 0},
+        {"dcaps", {"AT_CAP", "ST_CAP"}}};
+    auto rrc = std::make_shared<NotificationConversationalContent>(messageUser);
+    MessageUser sender;
+    std::shared_ptr<NotificationConversationalMessage> messagePtr =
+        std::make_shared<NotificationConversationalMessage>("testMessage", 0, sender);
+    EXPECT_NE(messagePtr, nullptr);
+    rrc->AddConversationalMessage(messagePtr);
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrc->ToJson(jsonObject), true);
+}
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConversationalContentTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    nlohmann::json jsonObject = nlohmann::json{
+        {"processName", "process6"}, {"APL", 1},
+        {"version", 2}, {"tokenId", 685266937},
+        {"tokenAttr", 0},
+        {"dcaps", {"AT_CAP", "ST_CAP"}}};
+    auto rrc = std::make_shared<NotificationConversationalContent>(messageUser);
+    std::shared_ptr<NotificationConversationalMessage> messagePtr = nullptr;
+    rrc->AddConversationalMessage(messagePtr);
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
+
+/**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump.
  * @tc.type: FUNC

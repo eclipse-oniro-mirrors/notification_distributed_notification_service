@@ -301,27 +301,27 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     std::string deviceId = "DeviceId";
     sptr<NotificationRequest> request = new NotificationRequest();
     auto rrc = std::make_shared<Notification>(deviceId, request);
-    std::string ret = "Notification{ key = DeviceId_-1_0___0, ledLightColor = 0, "
+    std::string ret =  "Notification{ key = DeviceId_-1_0___0, ledLightColor = 0, "
     "lockscreenVisbleness = 0, remindType = -1, isRemoveAllowed = true, sourceType = 0, "
-    "deviceId = DeviceId, request = NotificationRequest{ notificationId = 0, "
-    "slotType = 3, createTime = 0, deliveryTime = 0, autoDeletedTime = -1, settingsText = , "
+    "deviceId = DeviceId, request = NotificationRequest{ notificationId = 0, slotType = 3, "
+    "createTime = 0, deliveryTime = 0, autoDeletedTime = -1, settingsText = , "
     "creatorBundleName = , creatorPid = 0, creatorUid = 0, ownerBundleName = , "
     "ownerUid = 0, groupName = , statusBarText = , label = , shortcutId = , "
     "sortingKey = , groupAlertType = 0, color = 0, badgeNumber = 0, visiblenessType = 0, "
     "progressValue = 0, progressMax = 0, badgeStyle = 0, classification = , "
-    "notificationContentType = 0, notificationControlFlags = 0, showDeliveryTime = false, tapDismissed = true, "
-    "colorEnabled = false, alertOneTime = false, showStopwatch = false, isCountdown = false, "
-    "inProgress = false, groupOverview = false, isRemoveAllowed = true, progressIndeterminate = false, "
-    "unremovable = false, floatingIcon = false, onlyLocal = false, permitted = true, "
-    "isAgent = false, removalWantAgent = null, maxScreenWantAgent = null, additionalParams = null, "
-    "littleIcon = null, bigIcon = null, overlayIcon = null, notificationContent = null, "
-    "notificationTemplate = null, actionButtons = empty, messageUsers = empty, "
-    "userInputHistory = empty, distributedOptions = NotificationDistributedOptions"
-    "{ isDistributed = true, devicesSupportDisplay = [], devicesSupportOperate = [] }, "
-    "notificationFlags = null, notificationBundleOption = null, "
-    "creatorUserId = -1, ownerUserId = -1, receiverUserId = -1, "
-    "updateDeadLine = 0, finishDeadLine = 0 }, postTime = 0, sound = nullptr, vibrationStyle = [], "
-    "updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
+    "notificationContentType = 0, notificationControlFlags = 0, showDeliveryTime = false, "
+    "tapDismissed = true, colorEnabled = false, alertOneTime = false, showStopwatch = false, "
+    "isCountdown = false, inProgress = false, groupOverview = false, isRemoveAllowed = true, "
+    "progressIndeterminate = false, unremovable = false, floatingIcon = false, onlyLocal = false, "
+    "permitted = true, isAgent = false, removalWantAgent = null, maxScreenWantAgent = null, "
+    "additionalParams = null, littleIcon = null, bigIcon = null, overlayIcon = null, "
+    "notificationContent = null, notificationTemplate = null, actionButtons = empty, "
+    "messageUsers = empty, userInputHistory = empty, distributedOptions = "
+    "NotificationDistributedOptions{ isDistributed = true, devicesSupportDisplay = [], "
+    "devicesSupportOperate = [] }, notificationFlags = null, notificationFlagsOfDevices = null, "
+    "notificationBundleOption = null, agentBundle = null, creatorUserId = -1, ownerUserId = -1, "
+    "receiverUserId = -1, updateDeadLine = 0, finishDeadLine = 0, sound =  }, postTime = 0, "
+    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
@@ -369,6 +369,7 @@ HWTEST_F(NotificationTest, Unmarshalling_001, Function | SmallTest | Level1)
     sptr<NotificationRequest> request = new NotificationRequest();
     std::shared_ptr<Notification> result =
     std::make_shared<Notification>(deviceId, request);
+    result->Marshalling(parcel);
 
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {
@@ -390,6 +391,7 @@ HWTEST_F(NotificationTest, ReadFromParcel_00001, Function | SmallTest | Level1)
     std::string deviceId = "DeviceId";
     sptr<NotificationRequest> request = new NotificationRequest();
     auto rrc = std::make_shared<Notification>(deviceId, request);
+    rrc->Marshalling(parcel);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
 }
 

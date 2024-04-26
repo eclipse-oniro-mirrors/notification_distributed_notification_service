@@ -107,6 +107,7 @@ HWTEST_F(NotificationSubscribeInfoTest, Unmarshalling_001, Function | SmallTest 
     NotificationSubscribeInfo subscribeInfo;
     std::shared_ptr<NotificationSubscribeInfo> result =
     std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    result->Marshalling(parcel);
 
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {
@@ -127,6 +128,7 @@ HWTEST_F(NotificationSubscribeInfoTest, ReadFromParcel_00001, Function | SmallTe
     Parcel parcel;
     NotificationSubscribeInfo subscribeInfo;
     auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->Marshalling(parcel);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
 }
 

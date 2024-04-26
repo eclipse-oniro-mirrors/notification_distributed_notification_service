@@ -1152,6 +1152,42 @@ HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0008, Level1)
     auto result = notificationRequest.CheckImageSizeForContent();
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: SetUpdateDeadLine_0001
+ * @tc.desc: Check SetUpdateDeadLine operator
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetUpdateDeadLine_0001, Level1)
+{
+    auto multiLineContent = std::make_shared<NotificationMultiLineContent>();
+    auto content = std::make_shared<NotificationContent>(multiLineContent);
+
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetContent(content);
+
+    //override the constructor operator
+    NotificationRequest newNotificationRequest = notificationRequest;
+    int updateDeadLine = 1;
+    newNotificationRequest.SetUpdateDeadLine(updateDeadLine);
+    EXPECT_EQ(newNotificationRequest.GetUpdateDeadLine(), 1);
+}
+
+/**
+ * @tc.name: SetArchiveDeadLine_0001
+ * @tc.desc: Check SetArchiveDeadLine operator
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetArchiveDeadLine_0001, Level1)
+{
+    int archiveDeadLine = 1;
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetArchiveDeadLine(archiveDeadLine);
+    EXPECT_EQ(notificationRequest.GetArchiveDeadLine(), 1);
+}
 } // namespace Notification
 } // namespace OHOS
-

@@ -105,5 +105,35 @@ HWTEST_F(NotificationButtonOptionTest, Unmarshalling_00001, Function | SmallTest
     }
     EXPECT_EQ(unmarshalling, true);
 }
+
+/**
+ * @tc.name: ToJson_00001
+ * @tc.desc: Test ToJson.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationButtonOptionTest, ToJson_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationButtonOption>();
+    nlohmann::json jsonObject;
+    jsonObject["buttonName"] = "testButtonName";
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_EQ(rrc->ToJson(jsonObject), true);
+}
+
+/**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationButtonOptionTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationButtonOption>();
+    nlohmann::json jsonObject;
+    jsonObject["buttonName"] = "testButtonName";
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
+}
 }
 }
