@@ -611,6 +611,12 @@ private:
 
     std::string GetFullPath(const std::string& path);
 
+    /**
+     * @brief Check action button data share permission
+    */
+    bool IsActionButtonDataShareValid(const sptr<ReminderRequest>& reminder,
+        const uint32_t callerTokenId);
+
    /**
     * Single instance.
     */

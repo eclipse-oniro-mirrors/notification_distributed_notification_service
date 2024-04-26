@@ -127,6 +127,7 @@ ohos_shared_library("libans") {
     "config_policy:configpolicy_util",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
+    "data_share:datashare_permission",
     "device_manager:devicemanagersdk",
     "ffrt:libffrt",
     "i18n:intl_util",
