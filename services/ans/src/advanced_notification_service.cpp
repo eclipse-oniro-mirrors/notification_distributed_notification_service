@@ -62,6 +62,7 @@
 #include "notification_config_parse.h"
 #include "want_params_wrapper.h"
 #include "reminder_swing_decision_center.h"
+#include "notification_extension_wrapper.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -216,6 +217,9 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
 
     FillActionButtons(request);
 
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
+#endif
     return result;
 }
 
