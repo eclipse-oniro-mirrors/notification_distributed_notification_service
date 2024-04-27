@@ -36,7 +36,7 @@ BasePublishProcess::BasePublishProcess()
     supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_CES_CHECK_SA_PERMISSION, "false");
 }
 
-ErrCode BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request)
+ErrCode BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
     if (!request->IsRemoveAllowed()) {
         if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {

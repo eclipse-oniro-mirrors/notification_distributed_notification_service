@@ -31,6 +31,7 @@
 #include "notification_extension_wrapper.h"
 #include "os_account_manager.h"
 #include "remote_death_recipient.h"
+#include "advanced_notification_service.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_swing_decision_center.h"
 #endif
@@ -42,6 +43,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     bool subscribedAll {false};
     int32_t userId {SUBSCRIBE_USER_INIT};
     std::string deviceType {CURRENT_DEVICE_TYPE};
+    int32_t subscriberUid {DEFAULT_UID};
 };
 
 NotificationSubscriberManager::NotificationSubscriberManager()
@@ -270,11 +272,13 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
         ANS_LOGE("ffrt enter!");
         std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
+            auto subscriberUid = record->subscriberUid;
             ANS_LOGW("subscriber removed.");
             subscriberRecordList_.remove(record);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
             UpdateCrossDeviceNotificationStatus();
 #endif
+            AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(record->subscriberUid);
         }
     }));
     notificationSubQueue_->wait(handler);
@@ -331,6 +335,7 @@ void NotificationSubscriberManager::AddRecordInfo(
         if (!subscribeInfo->GetDeviceType().empty()) {
             record->deviceType = subscribeInfo->GetDeviceType();
         }
+        record->subscriberUid = subscribeInfo->GetSubscriberUid();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -416,20 +421,11 @@ void NotificationSubscriberManager::NotifyConsumedInner(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
-    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-    int32_t sendUserId = notification->GetUserId();
 
     for (auto record : subscriberRecordList_) {
-        auto BundleNames = notification->GetBundleName();
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
-            __FUNCTION__, record->userId, BundleNames.c_str(), record->deviceType.c_str());
-        auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
-        if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-            ((record->userId == sendUserId) ||
-            (record->userId == SUBSCRIBE_USER_ALL) ||
-            (record->userId == recvUserId) ||
-            IsSystemUser(record->userId) ||  // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId))) {
+            __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
+        if (IsSubscribedBysubscriber(record, notification)) {
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }
@@ -464,16 +460,7 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
         if (notification == nullptr) {
             continue;
         }
-        auto bundleName = notification->GetBundleName();
-        auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleName);
-        int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-        int32_t sendUserId = notification->GetUserId();
-        if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-            ((record->userId == sendUserId) ||
-            (record->userId == SUBSCRIBE_USER_ALL) ||
-            (record->userId == recvUserId) ||
-            IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId))) {
+        if (IsSubscribedBysubscriber(record, notification)) {
             currNotifications.emplace_back(notification);
         }
     }
@@ -498,18 +485,9 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         liveViewContent->FillPictureMarshallingMap();
     }
 
-    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-    int32_t sendUserId = notification->GetUserId();
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
-        auto BundleNames = notification->GetBundleName();
-        auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
-        if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-            ((record->userId == sendUserId) ||
-            (record->userId == SUBSCRIBE_USER_ALL) ||
-            (record->userId == recvUserId) ||
-            IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId))) {
+        if (IsSubscribedBysubscriber(record, notification)) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
         }
     }
@@ -517,6 +495,34 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     if (isCommonLiveView && liveViewContent != nullptr) {
         liveViewContent->ClearPictureMarshallingMap();
     }
+}
+
+bool NotificationSubscriberManager::IsSubscribedBysubscriber(
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
+{
+    auto BundleNames = notification->GetBundleName();
+    auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
+    bool isSubscribedTheNotification = record->subscribedAll || (iter != record->bundleList_.end()) ||
+        (notification->GetNotificationRequest().GetCreatorUid() == record->subscriberUid);
+    if (!isSubscribedTheNotification) {
+        return false;
+    }
+
+    if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId)) {
+        return true;
+    }
+
+    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
+    int32_t sendUserId = notification->GetUserId();
+    if (record->userId == sendUserId || record->userId == recvUserId) {
+        return true;
+    }
+
+    if (IsSystemUser(sendUserId)) {
+        return true;
+    }
+
+    return false;
 }
 
 void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
@@ -536,16 +542,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             if (notification == nullptr) {
                 continue;
             }
-            auto bundleName = notification->GetBundleName();
-            auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleName);
-            int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-            int32_t sendUserId = notification->GetUserId();
-            if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-                ((record->userId == sendUserId) ||
-                (record->userId == SUBSCRIBE_USER_ALL) ||
-                (record->userId == recvUserId) ||
-                IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-                IsSystemUser(sendUserId))) {
+            if (IsSubscribedBysubscriber(record, notification)) {
                 currNotifications.emplace_back(notification);
             }
         }

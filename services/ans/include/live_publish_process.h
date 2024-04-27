@@ -23,17 +23,17 @@ namespace Notification {
 class LivePublishProcess final : public BasePublishProcess {
 public:
     static std::shared_ptr<LivePublishProcess> GetInstance();
-    ErrCode PublishPreWork(const sptr<NotificationRequest> &request) override;
+    ErrCode PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed) override;
     ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) override;
-    void EraseLiveViewSubsciber(const std::string &bundleName);
+    void EraseLiveViewSubsciber(int32_t uid);
     void AddLiveViewSubscriber();
 
 private:
-    bool CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request);
-    bool CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request);
-    bool GetLiveViewSubscribeState(const std::string &bundleName);
+    bool CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
+    bool CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
+    bool GetLiveViewSubscribeState(int32_t uid);
 
-    std::set<std::string> localLiveViewSubscribedList_;
+    std::set<int32_t> localLiveViewSubscribedList_;
     std::mutex liveViewMutext_;
     static std::shared_ptr<LivePublishProcess> instance_;
     static std::mutex instanceMutex_;

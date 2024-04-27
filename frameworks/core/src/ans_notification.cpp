@@ -33,6 +33,10 @@ namespace Notification {
 namespace {
 const int32_t MAX_RETRY_TIME = 30;
 const int32_t SLEEP_TIME = 1000;
+const uint32_t MAX_PUBLISH_DELAY_TIME = 5;
+const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
+const std::string DOWNLOAD_TITLE = "title";
+const std::string DOWNLOAD_FILENAME = "fileName";
 }
 ErrCode AnsNotification::AddNotificationSlot(const NotificationSlot &slot)
 {
@@ -174,6 +178,10 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!IsValidTemplate(request) || !IsValidDelayTime(request)) {
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -1665,6 +1673,30 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
     }
 
     return ansManagerProxy_->SetTargetDeviceStatus(deviceType, status);
+}
+
+
+bool AnsNotification::IsValidTemplate(const NotificationRequest &request) const
+{
+    if (request.GetTemplate() == nullptr) {
+        return true;
+    }
+
+    std::string name = request.GetTemplate()->GetTemplateName();
+    if (strcmp(name.c_str(), DOWNLOAD_TEMPLATE_NAME.c_str()) == 0) {
+        std::shared_ptr<AAFwk::WantParams> data = request.GetTemplate()->GetTemplateData();
+        if (data ==nullptr || !data->HasParam(DOWNLOAD_FILENAME) || !data->HasParam(DOWNLOAD_TITLE)) {
+            ANS_LOGE("No required parameters.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool AnsNotification::IsValidDelayTime(const NotificationRequest &request)  const
+{
+    return request.GetPublishDelayTime() <= MAX_PUBLISH_DELAY_TIME;
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

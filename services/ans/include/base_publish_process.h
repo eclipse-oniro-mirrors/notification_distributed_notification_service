@@ -24,7 +24,7 @@ class BasePublishProcess {
 public:
     BasePublishProcess();
     ~BasePublishProcess() = default;
-    virtual ErrCode PublishPreWork(const sptr<NotificationRequest> &request);
+    virtual ErrCode PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
     virtual ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) = 0;
     bool CheckPermission(const std::string &permission);
     ErrCode CommonPublishCheck(const sptr<NotificationRequest> &request);

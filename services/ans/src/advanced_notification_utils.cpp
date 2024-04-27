@@ -1723,7 +1723,7 @@ uint64_t AdvancedNotificationService::StartAutoDelete(const std::string &key, in
     return timerId;
 }
 
-void AdvancedNotificationService::CancelAutoDeleteTimer(uint64_t timerId)
+void AdvancedNotificationService::CancelTimer(uint64_t timerId)
 {
     ANS_LOGD("Enter");
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {

@@ -120,6 +120,8 @@ HWTEST_F(AnsPublishServiceTest, Publish_00001, Function | SmallTest | Level1)
     auto localLiveContent = std::make_shared<NotificationLocalLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(localLiveContent);
     request->SetContent(content);
+    request->SetCreatorUid(1);
+    request->SetOwnerUid(1);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);

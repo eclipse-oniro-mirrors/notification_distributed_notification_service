@@ -102,6 +102,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
         }
 
         sptrInfo->AddAppName(bundle);
+        sptrInfo->SetSubscriberUid(uid);
 
         errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, sptrInfo);
         if (errCode != ERR_OK) {
@@ -109,6 +110,9 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
         }
     } while (0);
 
+    if (errCode == ERR_OK) {
+        LivePublishProcess::GetInstance()->AddLiveViewSubscriber();
+    }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
     return errCode;
 }

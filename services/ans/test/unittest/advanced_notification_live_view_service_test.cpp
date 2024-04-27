@@ -250,5 +250,64 @@ HWTEST_F(AnsLiveViewServiceTest, SetLockScreenPictureToDb_001, Function | SmallT
     EXPECT_EQ(ret, (int)ERR_OK);
 }
 
+/**
+ * @tc.name: IsSaCreateSystemLiveViewAsBundle_001
+ * @tc.desc: Test IsSaCreateSystemLiveViewAsBundle
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, IsSaCreateSystemLiveViewAsBundle_001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+    int creatorUid = 1;
+    request->SetCreatorUid(creatorUid);
+    int ownerUid = 2;
+    request->SetOwnerUid(ownerUid);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", creatorUid);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    bool flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(record, creatorUid);
+    EXPECT_EQ(flag, true);
+}
+
+/**
+ * @tc.name: IsSaCreateSystemLiveViewAsBundle_002
+ * @tc.desc: Test IsSaCreateSystemLiveViewAsBundle return false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, IsSaCreateSystemLiveViewAsBundle_002, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+    int creatorUid = 1;
+    request->SetCreatorUid(creatorUid);
+    int ownerUid = 2;
+    request->SetOwnerUid(ownerUid);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    bool flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(nullptr, creatorUid);
+    EXPECT_EQ(flag, false);
+
+    flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(record, creatorUid);
+    EXPECT_EQ(flag, false);
+
+    record->notification->GetNotificationRequest().SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(record, creatorUid);
+    EXPECT_EQ(flag, false);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -33,6 +33,7 @@ NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribe
 {
     appNames_ = subscribeInfo.GetAppNames();
     deviceType_ = subscribeInfo.GetDeviceType();
+    subscriberUid_ = subscribeInfo.GetSubscriberUid();
 }
 
 void NotificationSubscribeInfo::AddAppName(const std::string appName)
@@ -122,6 +123,16 @@ std::string NotificationSubscribeInfo::Dump()
             "appNames = [" + appNames + "]" +
             "deviceType = " + deviceType_ +
             " }";
+}
+
+void NotificationSubscribeInfo::SetSubscriberUid(const int32_t uid)
+{
+    subscriberUid_ = uid;
+}
+
+int32_t NotificationSubscribeInfo::GetSubscriberUid() const
+{
+    return subscriberUid_;
 }
 }  // namespace Notification
 }  // namespace OHOS

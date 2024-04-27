@@ -25,6 +25,9 @@
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "image_source.h"
+#include "time_service_client.h"
+#include "notification_timer_info.h"
+#include "advanced_notification_inline.cpp"
 #include <memory>
 
 namespace OHOS {
@@ -411,6 +414,189 @@ ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequ
     request->GetContent()->GetNotificationContent()->SetLockScreenPicture(picture);
 
     return ERR_OK;
+}
+
+void AdvancedNotificationService::UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record)
+{
+    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    auto iter = delayNotificationList_.begin();
+    while (iter != delayNotificationList_.end()) {
+        if ((*iter).first->notification->GetKey() == record->notification->GetKey()) {
+            CancelTimer((*iter).second);
+            (*iter).first = record;
+            auto request = record->notification->GetNotificationRequest();
+            (*iter).second = StartDelayPublishTimer(request.GetOwnerUid(),
+                request.GetNotificationId(), request.GetPublishDelayTime());
+            break;
+        }
+        iter++;
+    }
+}
+
+void AdvancedNotificationService::AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record)
+{
+    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    auto request = record->notification->GetNotificationRequest();
+    auto timerId = StartDelayPublishTimer(
+        request.GetOwnerUid(), request.GetNotificationId(), request.GetPublishDelayTime());
+    delayNotificationList_.emplace_back(std::make_pair(record, timerId));
+}
+
+ErrCode AdvancedNotificationService::SaPublishSystemLiveViewAsBundle(const std::shared_ptr<NotificationRecord> &record)
+{
+    uint32_t delayTime = record->notification->GetNotificationRequest().GetPublishDelayTime();
+    if (delayTime == 0) {
+        return StartPublishDelayedNotification(record);
+    }
+
+    if (IsNotificationExistsInDelayList(record->notification->GetKey())) {
+        UpdateInDelayNotificationList(record);
+        return ERR_OK;
+    }
+
+    AddToDelayNotificationList(record);
+    return ERR_OK;
+}
+
+bool AdvancedNotificationService::IsNotificationExistsInDelayList(const std::string &key)
+{
+    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    for (auto delayNotification : delayNotificationList_) {
+        if (delayNotification.first->notification->GetKey() == key) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+uint64_t AdvancedNotificationService::StartDelayPublishTimer(
+    const int32_t ownerUid, const int32_t notificationId, const uint32_t delayTime)
+{
+    ANS_LOGD("Enter");
+
+    auto timeoutFunc = [this, ownerUid, notificationId] {
+        StartPublishDelayedNotificationTimeOut(ownerUid, notificationId);
+    };
+    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
+    notificationTimerInfo->SetCallbackInfo(timeoutFunc);
+
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        return NotificationConstant::INVALID_TIMER_ID;
+    }
+
+    uint64_t timerId = timer->CreateTimer(notificationTimerInfo);
+    int64_t delayPublishPoint = GetCurrentTime() + delayTime * NotificationConstant::SECOND_TO_MS;
+    timer->StartTimer(timerId, delayPublishPoint);
+    return timerId;
+}
+
+void AdvancedNotificationService::StartPublishDelayedNotificationTimeOut(
+    const int32_t ownerUid, const int32_t notificationId)
+{
+    auto record = GetFromDelayedNotificationList(ownerUid, notificationId);
+    if (record == nullptr) {
+        ANS_LOGE("Failed to get delayed notification from list.");
+        return;
+    }
+
+    int ret = StartPublishDelayedNotification(record);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Failed to StartPublishDelayedNotification, ret is %{public}d", ret);
+        return;
+    }
+}
+
+ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::shared_ptr<NotificationRecord> &record)
+{
+    RemoveFromDelayedNotificationList(record->notification->GetKey());
+    ErrCode result = AssignToNotificationList(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to assign notification list");
+        return result;
+    }
+
+    UpdateRecentNotification(record->notification, false, 0);
+    NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
+    if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
+        StartAutoDelete(record->notification->GetKey(),
+            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+    }
+
+    return ERR_OK;
+}
+
+bool AdvancedNotificationService::IsUpdateSystemLiveviewByOwner(const sptr<NotificationRequest> &request)
+{
+    if (!request->IsSystemLiveView()) {
+        return false;
+    }
+
+    auto ownerUid = IPCSkeleton::GetCallingUid();
+    auto oldRecord = GetFromDelayedNotificationList(ownerUid, request->GetNotificationId());
+    if (oldRecord != nullptr) {
+        return true;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return false;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        oldRecord = GetFromNotificationList(ownerUid, request->GetNotificationId());
+    });
+    notificationSvrQueue_->wait(handler);
+
+    return oldRecord != nullptr;
+}
+
+bool AdvancedNotificationService::IsSaCreateSystemLiveViewAsBundle(
+    const std::shared_ptr<NotificationRecord> &record, int32_t ipcUid)
+{
+    if (record == nullptr) {
+        ANS_LOGE("Invalid record.");
+        return false;
+    }
+
+    auto request = record->notification->GetNotificationRequest();
+    if (!request.IsSystemLiveView()) {
+        return false;
+    }
+
+    if (request.GetCreatorUid() == ipcUid &&
+        request.GetCreatorUid() != request.GetOwnerUid() &&
+        !IsNotificationExists(record->notification->GetKey())) {
+        return true;
+    }
+
+    return false;
+}
+
+void AdvancedNotificationService::UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record)
+{
+    auto creatorUid = record->notification->GetNotificationRequest().GetCreatorUid();
+    auto notificationId =  record->notification->GetNotificationRequest().GetNotificationId();
+    auto oldRecord = GetFromDelayedNotificationList(creatorUid, notificationId);
+    if (oldRecord == nullptr) {
+        oldRecord = GetFromNotificationList(creatorUid, notificationId);
+    }
+
+    if (oldRecord == nullptr) {
+        return;
+    }
+
+    auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
+    record->request = oldRecord->request;
+    record->request->SetTemplate(downloadTemplate);
+    record->notification = new (std::nothrow) Notification(record->request);
+    record->bundleOption = oldRecord->bundleOption;
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create notification.");
+        return;
+    }
 }
 }
 }

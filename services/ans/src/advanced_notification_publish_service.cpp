@@ -93,7 +93,8 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_NO_MEMORY;
     }
 
-    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request);
+    bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
+    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (result != ERR_OK) {
         ANSR_LOGE("Failed to process request, result is %{public}d", result);
         return result;
@@ -127,7 +128,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         if (result != ERR_OK) {
             break;
         }
-        result = PublishPreparedNotification(request, bundleOption);
+        result = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
         if (result != ERR_OK) {
             break;
         }
@@ -1032,10 +1033,11 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
     return result;
 }
 
-ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std::string& bundleName)
+ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
+    const std::string& bundleName, const int32_t uid)
 {
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(bundleName);
+    LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue is nullptr");
         return ERR_ANS_INVALID_PARAM;
@@ -1051,6 +1053,37 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(const std
             return;
         }
         result = RemoveNotificationFromRecordList(recordList);
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32_t uid)
+{
+    LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
+    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    for (auto iter = delayNotificationList_.begin(); iter != delayNotificationList_.end();) {
+        if ((*iter).first->notification->GetNotificationRequest().GetCreatorUid() == uid &&
+            (*iter).first->notification->GetNotificationRequest().IsInProgress()) {
+            CancelTimer((*iter).second);
+            iter = delayNotificationList_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        std::vector<std::shared_ptr<NotificationRecord>> recordList;
+        for (auto item : notificationList_) {
+            if (item->notification->GetNotificationRequest().GetCreatorUid() == uid &&
+                item->notification->GetNotificationRequest().IsInProgress()) {
+                recordList.emplace_back(item);
+            }
+        }
+        if (!recordList.empty()) {
+            result = RemoveNotificationFromRecordList(recordList);
+        }
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1801,7 +1834,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([this, &record]() {
+    auto ipcUid = IPCSkeleton::GetCallingUid();
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
         if (!record->bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record);
             if (ret != ERR_OK) {
@@ -1810,6 +1844,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         }
 
         ChangeNotificationByControlFlags(record);
+        if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid)) {
+            result = SaPublishSystemLiveViewAsBundle(record);
+            return;
+        }
 
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
@@ -1821,12 +1859,15 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
     });
     notificationSvrQueue_->wait(handler);
+    if (result != ERR_OK) {
+        return result;
+    }
 
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
         StartAutoDelete(record->notification->GetKey(),
             record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
     }
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber)
