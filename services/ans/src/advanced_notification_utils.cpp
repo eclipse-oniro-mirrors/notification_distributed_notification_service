@@ -1823,11 +1823,6 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
     }
 
     if (bundleOption->GetUid() > 0) {
-        // uid of bundleOption was set by user, need to check validity.
-        if (uid != bundleOption->GetUid()) {
-            ANS_LOGE("Bundle name and uid not consistent, invalid parameter.");
-            return ERR_ANS_INVALID_BUNDLE;
-        }
         return ERR_OK;
     }
 
