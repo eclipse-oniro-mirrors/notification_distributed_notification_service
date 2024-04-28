@@ -1109,6 +1109,13 @@ private:
         std::mutex dbMutex_;
     };
 
+    enum UploadStatus {
+        CREATE,
+        FIRST_UPDATE_TIME_OUT,
+        CONTINUOUS_UPDATE_TIME_OUT,
+        END
+    };
+
     AdvancedNotificationService();
 
     void StartFilters();
@@ -1210,6 +1217,8 @@ private:
     void SendEnableNotificationSlotHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
     void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
+    void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, UploadStatus uploadStatus);
+
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);

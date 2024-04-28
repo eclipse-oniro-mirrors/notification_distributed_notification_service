@@ -30,6 +30,7 @@ const std::string EVENT_PARAM_SLOT_TYPE = "SLOT_TYPE";
 const std::string EVENT_PARAM_NOTIFICATION_ID = "NOTIFICATION_ID";
 const std::string EVENT_PARAM_NOTIFICATION_LABEL = "NOTIFICATION_LABEL";
 const std::string EVENT_PARAM_CONTENT_TYPE = "CONTENT_TYPE";
+const std::string EVENT_PARAM_OPERATE_FLAG = "OPERATE_FLAG";
 } // namespace
 
 void EventReport::SendHiSysEvent(const std::string &eventName, const EventInfo &eventInfo)
@@ -83,6 +84,9 @@ std::unordered_map<std::string, void (*)(const EventInfo& eventInfo)> EventRepor
     }},
     {REMOVE, [](const EventInfo& eventInfo) {
         InnerSendRemoveEvent(eventInfo);
+    }},
+    {STATIC_LIVE_VIEW_UPLOAD, [](const EventInfo& eventInfo) {
+        InnerSendLiveviewUploadEvent(eventInfo);
     }},
 };
 
@@ -184,6 +188,17 @@ void EventReport::InnerSendEnableNotificationSlotEvent(const EventInfo &eventInf
         EVENT_PARAM_UID, eventInfo.uid,
         EVENT_PARAM_SLOT_TYPE, eventInfo.slotType,
         EVENT_PARAM_ENABLE, eventInfo.enable);
+}
+
+void EventReport::InnerSendLiveviewUploadEvent(const EventInfo &eventInfo)
+{
+    InnerEventWrite(
+        STATIC_LIVE_VIEW_UPLOAD,
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_PARAM_NOTIFICATION_ID, eventInfo.notificationId,
+        EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_PARAM_CONTENT_TYPE, eventInfo.contentType,
+        EVENT_PARAM_OPERATE_FLAG, eventInfo.operateFlag);
 }
 
 void EventReport::InnerSendPublishEvent(const EventInfo &eventInfo)
