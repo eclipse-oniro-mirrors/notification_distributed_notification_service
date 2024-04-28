@@ -1956,9 +1956,8 @@ std::string NotificationPreferencesDatabase::GenerateBundleLablel(const std::str
 bool NotificationPreferencesDatabase::SetSmartReminderEnabled(const std::string deviceType, const bool &enabled)
 {
     ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
-    int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Current user acquisition failed");
         return false;
@@ -1973,9 +1972,8 @@ bool NotificationPreferencesDatabase::SetSmartReminderEnabled(const std::string 
 bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string deviceType, bool &enabled)
 {
     ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
-    int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Current user acquisition failed");
         return false;
