@@ -473,9 +473,14 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
 {
     std::vector<sptr<NotificationSlot>> slots;
     ErrCode ret = NotificationPreferences::GetInstance().GetNotificationAllSlots(bundle, slots);
-    if (ret != ERR_OK || slots.empty()) {
+    if (ret != ERR_OK) {
         ANS_LOGE("Failed to get slots by bundle, ret is %{public}d.", ret);
         return ret;
+    }
+
+    if (slots.empty()) {
+        ANS_LOGW("The bundle has no slots.");
+        return ERR_OK;
     }
 
     for (auto slot : slots) {

@@ -237,6 +237,8 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
 
 ErrCode AnsNotification::CancelAllNotifications()
 {
+    ANS_LOGI("CancelAllNotifications called.");
+
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;

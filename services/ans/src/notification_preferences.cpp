@@ -59,7 +59,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
         }
     }
 
-    ANS_LOGE("ffrt: add slot to db!");
+    ANS_LOGD("ffrt: add slot to db!");
     if (result == ERR_OK &&
         (!preferncesDB_->PutSlotsToDisturbeDB(bundleOption->GetBundleName(), bundleOption->GetUid(), slots))) {
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
