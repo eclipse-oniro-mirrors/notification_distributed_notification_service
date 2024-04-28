@@ -521,7 +521,7 @@ uint32_t NotificationSlot::GetDefaultReminderMode() const
             reminderMode = 0;
             break;
         case NotificationConstant::SlotType::LIVE_VIEW:
-            reminderMode = SOUND_OPNE + LOCKSCREEN_OPNE + VIBRATION_OPNE + STATUSBAR_ICON_OPNE;
+            reminderMode = SOUND_OPNE + LOCKSCREEN_OPNE + VIBRATION_OPNE + STATUSBAR_ICON_OPNE + LIGHTSCREEN_OPNE;
             break;
         case NotificationConstant::SlotType::CUSTOMER_SERVICE:
             reminderMode = SOUND_OPNE + VIBRATION_OPNE + STATUSBAR_ICON_OPNE;
