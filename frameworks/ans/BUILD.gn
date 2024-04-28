@@ -28,10 +28,7 @@ config("ans_innerkits_public_config") {
     "${core_path}/include",
     "//third_party/json/single_include",
   ]
-  configs = [
-    "${ability_runtime_inner_api_path}/wantagent:wantagent_innerkits_public_config",
-    "${multimedia_path}/interfaces/innerkits:image_external_config",
-  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
 }
 
 ohos_shared_library("ans_innerkits") {
@@ -131,7 +128,6 @@ ohos_shared_library("ans_innerkits") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
-    "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -146,7 +142,10 @@ ohos_shared_library("ans_innerkits") {
     "time_service:time_client",
   ]
 
-  public_external_deps = [ "image_framework:image_native" ]
+  public_external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "image_framework:image_native",
+  ]
 
   if (is_double_framework) {
     cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]

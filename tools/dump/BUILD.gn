@@ -48,10 +48,7 @@ ohos_executable("anm") {
 
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
-  configs = [
-    "${frameworks_module_ans_path}:ans_innerkits_public_config",
-    "${ability_runtime_inner_api_path}/wantagent:wantagent_innerkits_public_config",
-  ]
+  configs = [ "${frameworks_module_ans_path}:ans_innerkits_public_config" ]
 
   defines = []
   if (distributed_notification_supported) {
