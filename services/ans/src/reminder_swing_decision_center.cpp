@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Notification {
 using namespace std;
 mutex ReminderSwingDecisionCenter::swingMutex_;
-sptr<ISwingCallBack> ReminderSwingDecisionCenter::swingCallback_;
+sptr<ISwingCallBack> ReminderSwingDecisionCenter::swingCallback_ = nullptr;
 
 ReminderSwingDecisionCenter::ReminderSwingDecisionCenter()
 {
@@ -113,7 +113,6 @@ void ReminderSwingDecisionCenter::UpdateCrossDeviceNotificationStatus(bool isEna
 {
     isCrossDeviceNotificationEnable_ = isEnable;
     ANS_LOGD("UpdateCrossDeviceNotificationStatus %{public}d", isEnable);
-    SwingExecuteDecision(false);
 }
 
 void ReminderSwingDecisionCenter::OnSmartReminderStatusChanged()
@@ -130,11 +129,13 @@ void ReminderSwingDecisionCenter::DisableSwingStatus()
     if (!swingCallback_) {
         return;
     }
+    ANS_LOGD("DisableSwingStatus");
     swingCallback_->OnUpdateStatus(false, NONE_UNLOCK_TRIGGER);
 }
 
 void ReminderSwingDecisionCenter::SwingExecuteDecision(bool isScreenUnlockTrigger)
 {
+    ANS_LOGD("SwingExecuteDecision");
     if (!isSupportSwingSmartRemind_) {
         ANS_LOGI("is not SupportSwingSmartRemind");
         return;
@@ -202,15 +203,19 @@ void ReminderSwingDecisionCenter::OnUpdateDeviceStatus()
 void ReminderSwingDecisionCenter::OnScreenLock()
 {
     ANS_LOGI("OnScreenLock");
-    isScreenUnlock_ = false;
-    SwingExecuteDecision(true);
+    if (isScreenUnlock_) {
+        isScreenUnlock_ = false;
+        SwingExecuteDecision(true);
+    }
 }
 
 void ReminderSwingDecisionCenter::OnScreenUnlock()
 {
     ANS_LOGI("OnScreenUnlock");
-    isScreenUnlock_ = true;
-    SwingExecuteDecision(true);
+    if (!isScreenUnlock_) {
+        isScreenUnlock_ = true;
+        SwingExecuteDecision(true);
+    }
 }
 
 void SwingCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)

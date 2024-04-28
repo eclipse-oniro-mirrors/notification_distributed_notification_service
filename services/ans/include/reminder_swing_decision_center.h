@@ -57,10 +57,10 @@ private:
     static mutex swingMutex_;
     string enableSwingDeviceType_;
     string enableSwingDeviceStatus_;
-    bool isCrossDeviceNotificationEnable_;
-    bool isSupportSwingSmartRemind_;
-    bool isSwingExecuting_;
-    bool isScreenUnlock_;
+    bool isCrossDeviceNotificationEnable_ = false;
+    bool isSupportSwingSmartRemind_ = false;
+    bool isSwingExecuting_ = false;
+    bool isScreenUnlock_ = false;
     sptr<IRemoteObject::DeathRecipient> swingRecipient_ = nullptr;
 
     constexpr static inline const char* AFFTECED_BY = "affectedBy";
