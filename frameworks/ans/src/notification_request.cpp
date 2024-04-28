@@ -767,7 +767,7 @@ std::string NotificationRequest::Dump()
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
             ", sound = " + sound_ + ", unifiedGroupInfo_ = " +
-            (unifiedGroupInfo_ ? "null" : unifiedGroupInfo_->Dump())+ " }";
+            (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
 }
 
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
