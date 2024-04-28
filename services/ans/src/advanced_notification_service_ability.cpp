@@ -38,7 +38,7 @@ void AdvancedNotificationServiceAbility::OnStart()
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
 #else
-    ANS_LOGD("not enabled ans_ext");
+    ANS_LOGD("Not enabled ans_ext");
 #endif
 
     service_ = AdvancedNotificationService::GetInstance();

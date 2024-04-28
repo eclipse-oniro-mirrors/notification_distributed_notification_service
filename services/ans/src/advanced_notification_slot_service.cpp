@@ -33,9 +33,13 @@
 #endif
 
 #include "advanced_notification_inline.cpp"
+#include "notification_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
+namespace {
+    constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
+}
 const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
 {
@@ -728,6 +732,14 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     if (key == RING_TRUST_PKG_KEY) {
         std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
         soundPermissionInfo_->needUpdateCache_ = true;
+    }
+
+    bool isSyncConfig = strcmp(key.c_str(), KEY_NAME) == 0;
+    if (isSyncConfig) {
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    ANS_LOGD("Extention invoke --> SyncAdditionConfig ");
+    EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
+#endif
     }
 
     ErrCode result = ERR_OK;
