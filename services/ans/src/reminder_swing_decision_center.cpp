@@ -172,16 +172,16 @@ void ReminderSwingDecisionCenter::SwingExecuteDecision(bool isScreenUnlockTrigge
     bool isSwingCrossDeviceStatusStatified = IsStatifySwingCrossDeviceStatus();
     if (isScreenUnlock_ && isSwingCrossDeviceStatusStatified) {
         if (!isSwingExecuting_) {
-            swingCallback_->OnUpdateStatus(true, triggerMode);
             isSwingExecuting_ = true;
+            swingCallback_->OnUpdateStatus(true, triggerMode);
             ANS_LOGI("swing OnUpdateStatus enable triggerMode %{public}d", triggerMode);
         } else {
             ANS_LOGD("isSwingExecuting_ %{public}d", isSwingExecuting_);
         }
     } else {
         if (isSwingExecuting_) {
-            swingCallback_->OnUpdateStatus(false, triggerMode);
             isSwingExecuting_ = false;
+            swingCallback_->OnUpdateStatus(false, triggerMode);
             ANS_LOGI("swing OnUpdateStatus disable triggerMode %{public}d", triggerMode);
         } else {
             ANS_LOGD("isScreenUnlock_  %{public}d  isSwingCrossDeviceStatusStatified %{public}d ",
@@ -198,9 +198,14 @@ bool ReminderSwingDecisionCenter::IsStatifySwingCrossDeviceStatus()
     return isSatisfied;
 }
 
-void ReminderSwingDecisionCenter::OnUpdateDeviceStatus()
+void ReminderSwingDecisionCenter::OnUpdateDeviceStatus(const std::string &deviceType)
 {
-    SwingExecuteDecision(false);
+    if (deviceType.empty() || enableSwingDeviceType_.empty()) {
+        return;
+    }
+    if (deviceType.compare(enableSwingDeviceType_) == 0) {
+        SwingExecuteDecision(false);
+    }
 }
 
 void ReminderSwingDecisionCenter::OnScreenLock()

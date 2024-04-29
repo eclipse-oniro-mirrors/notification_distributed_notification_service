@@ -46,7 +46,7 @@ public:
     string GetSwingDeviceType();
     void OnScreenLock();
     void OnScreenUnlock();
-    void OnUpdateDeviceStatus();
+    void OnUpdateDeviceStatus(const std::string &deviceType);
     void OnSmartReminderStatusChanged();
     void SwingExecuteDecision(bool isScreenUnlockTrigger = false);
 private:
