@@ -34,7 +34,8 @@ public:
     typedef void (*SYNC_ADDITION_CONFIG)(const std::string& key, const std::string& value);
     typedef void (*UPDATE_BY_CANCEL)(const std::vector<sptr<Notification>>& notifications, int deleteType);
     typedef ErrCode (*GET_UNIFIED_GROUP_INFO)(const sptr<NotificationRequest> &request);
-    typedef void (*INIT_SUMMARY)();
+    typedef void (*UPDATE_GROUP_INFO)(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
+    typedef void (*INIT_SUMMARY)(UPDATE_GROUP_INFO func);
 
     void SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);

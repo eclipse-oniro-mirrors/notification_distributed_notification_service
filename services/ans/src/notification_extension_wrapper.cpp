@@ -26,6 +26,20 @@ const int32_t PASSITIVE_DELETE = 1;
 ExtensionWrapper::ExtensionWrapper() = default;
 ExtensionWrapper::~ExtensionWrapper() = default;
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void UpdateUnifiedGroupInfo(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
+{
+    AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 void ExtensionWrapper::InitExtentionWrapper()
 {
     extensionWrapperHandle_ = dlopen(EXTENTION_WRAPPER_PATH.c_str(), RTLD_NOW);
@@ -46,7 +60,7 @@ void ExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
-    initSummary_();
+    initSummary_(UpdateUnifiedGroupInfo);
     ANS_LOGD("extension wrapper init success");
 }
 
@@ -77,19 +91,6 @@ ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &r
     }
     return getUnifiedGroupInfo_(request);
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void UpdateUnifiedGroupInfo(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
-{
-    AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
-}
-
-#ifdef __cplusplus
-}
-#endif
 
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 {
