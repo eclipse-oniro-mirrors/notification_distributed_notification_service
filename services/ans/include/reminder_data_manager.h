@@ -148,6 +148,8 @@ public:
 
     void OnUserRemove(const int32_t& userId);
 
+    void OnServiceStart();
+
     void OnUserSwitch(const int32_t& userId);
 
     /**

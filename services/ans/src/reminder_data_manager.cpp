@@ -382,6 +382,13 @@ void ReminderDataManager::OnUserRemove(const int32_t& userId)
     CancelAllReminders(userId);
 }
 
+void ReminderDataManager::OnServiceStart()
+{
+    std::vector<sptr<ReminderRequest>> immediatelyShowReminders;
+    GetImmediatelyShowRemindersLocked(immediatelyShowReminders);
+    ANSR_LOGD("immediatelyShowReminders size=%{public}zu", immediatelyShowReminders.size());
+}
+
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
 {
     ANSR_LOGD("Switch user id from %{private}d to %{private}d", currentUserId_, userId);
