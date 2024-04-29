@@ -110,6 +110,9 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         result = this->AddSubscriberInner(subscriber, subInfo);
     }));
     notificationSubQueue_->wait(handler);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ReminderSwingDecisionCenter::GetInstance().SwingExecuteDecision();
+#endif
     return result;
 }
 
@@ -133,6 +136,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationSubQueue_->wait(handler);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ReminderSwingDecisionCenter::GetInstance().SwingExecuteDecision();
+#endif
     return result;
 }
 
@@ -282,6 +288,9 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
         }
     }));
     notificationSubQueue_->wait(handler);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ReminderSwingDecisionCenter::GetInstance().SwingExecuteDecision();
+#endif
 }
 
 std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSubscriberManager::FindSubscriberRecord(

@@ -48,6 +48,7 @@ ErrCode ReminderSwingDecisionCenter::RegisterSwingCallback(const sptr<IRemoteObj
         return ERR_NO_INIT;
     }
     swingCallback->AddDeathRecipient(swingRecipient_);
+    lock_guard<mutex> lock(swingMutex_);
     swingCallback_ = iface_cast<ISwingCallBack>(swingCallback);
     ANS_LOGI("RegisterSwingCallback OK");
     return ERR_OK;
@@ -62,6 +63,7 @@ void ReminderSwingDecisionCenter::ResetSwingCallbackProxy()
         return;
     }
     swingCallback_->AsObject()->RemoveDeathRecipient(swingRecipient_);
+    swingCallback_ = nullptr;
 }
 
 void ReminderSwingDecisionCenter::GetCcmSwingRemind()
@@ -126,7 +128,8 @@ void ReminderSwingDecisionCenter::DisableSwingStatus()
         return;
     }
     isSwingExecuting_ = false;
-    if (!swingCallback_) {
+    lock_guard<mutex> lock(swingMutex_);
+    if (swingCallback_ == nullptr) {
         return;
     }
     ANS_LOGD("DisableSwingStatus");
@@ -159,8 +162,8 @@ void ReminderSwingDecisionCenter::SwingExecuteDecision(bool isScreenUnlockTrigge
         DisableSwingStatus();
         return;
     }
-
-    if (!swingCallback_) {
+    lock_guard<mutex> lock(swingMutex_);
+    if (swingCallback_ == nullptr) {
         ANS_LOGI("swingCallback_ is null");
         return;
     }
