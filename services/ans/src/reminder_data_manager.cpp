@@ -1422,7 +1422,9 @@ void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
     if (isFromBootComplete) {
-        InitStartExtensionAbility();
+        std::vector<sptr<ReminderRequest>> reissueReminder;
+        InitStartExtensionAbility(reissueReminder);
+        HandleImmediatelyShow(reissueReminder, false);
     }
     if (IsReminderAgentReady()) {
         return;
@@ -1466,14 +1468,19 @@ void ReminderDataManager::InitServiceHandler()
     ANSR_LOGD("InitServiceHandler suceeded.");
 }
 
-void ReminderDataManager::InitStartExtensionAbility()
+void ReminderDataManager::InitStartExtensionAbility(std::vector<sptr<ReminderRequest>>& reissueReminder)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         ReminderDataManager::AsyncStartExtensionAbility(*it, CONNECT_EXTENSION_MAX_RETRY_TIMES);
+        if ((*it)->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+            if ((*it)->OnDateTimeChange()) {
+                reissueReminder.push_back(*it);
+                ANSR_LOGD("Reissue reminder success");
+            }
+        }
     }
 }
-
 void ReminderDataManager::InitUserId()
 {
     std::vector<int32_t> activeUserId;
