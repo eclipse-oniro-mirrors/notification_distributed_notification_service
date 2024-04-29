@@ -48,9 +48,9 @@ public:
     void OnScreenUnlock();
     void OnUpdateDeviceStatus();
     void OnSmartReminderStatusChanged();
+    void SwingExecuteDecision(bool isScreenUnlockTrigger = false);
 private:
     void GetCcmSwingRemind();
-    void SwingExecuteDecision(bool isScreenUnlockTrigger = false);
     bool IsStatifySwingCrossDeviceStatus();
     void DisableSwingStatus();
 private:
