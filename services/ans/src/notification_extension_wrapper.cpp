@@ -17,6 +17,7 @@
 
 #include "advanced_notification_service.h"
 #include "notification_extension_wrapper.h"
+#include "notification_preferences.h"
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
@@ -60,6 +61,10 @@ void ExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
+    std::string configKey = NotificationPreferences::GetInstance().GetAdditionalConfig();
+    if (!configKey.empty()) {
+        syncAdditionConfig_("AGGREGATE_CONFIG", configKey);
+    }
     initSummary_(UpdateUnifiedGroupInfo);
     ANS_LOGD("extension wrapper init success");
 }
