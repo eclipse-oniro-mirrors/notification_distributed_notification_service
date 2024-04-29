@@ -293,6 +293,13 @@ public:
     bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
     /**
+     * @brief Querying Aggregation Configuration Values
+     *
+     * @return Configured value
+     */
+    std::string GetAdditionalConfig();
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
