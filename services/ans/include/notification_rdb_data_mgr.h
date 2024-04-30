@@ -16,8 +16,10 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_RDB_DATA_MGR_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_RDB_DATA_MGR_H
 
+#include <mutex>
 #include <vector>
 #include <string>
+#include <map>
 #include <unordered_map>
 #include "notification_constant.h"
 #include "rdb_errno.h"
@@ -74,64 +76,76 @@ public:
      * @param key The data Key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t InsertData(const std::string &key, const std::string &value);
+    int32_t InsertData(const std::string &key, const std::string &value, const int32_t &userId);
 
     /**
      * @brief Insert data in DB.
      * @param key The data Key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t InsertData(const std::string &key, const std::vector<uint8_t> &value);
+    int32_t InsertData(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId);
 
     /**
      * @brief Insert batch data in DB.
      * @param key The data Key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t InsertBatchData(const std::unordered_map<std::string, std::string> &values);
+    int32_t InsertBatchData(const std::unordered_map<std::string, std::string> &values, const int32_t &userId);
 
     /**
      * @brief Delete data in DB.
      * @param key The data Key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t DeleteData(const std::string &key);
+    int32_t DeleteData(const std::string &key, const int32_t &userId);
 
     /**
      * @brief Delete batch data in DB.
      * @param key The data Key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t DeleteBathchData(const std::vector<std::string> &keys);
+    int32_t DeleteBathchData(const std::vector<std::string> &keys, const int32_t &userId);
 
     /**
      * @brief Query data in DB.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t QueryData(const std::string &key, std::string &value);
+    int32_t QueryData(const std::string &key, std::string &value, const int32_t &userId);
 
     /**
      * @brief Query data in DB.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t QueryData(const std::string &key, std::vector<uint8_t> &value);
+    int32_t QueryData(const std::string &key, std::vector<uint8_t> &value, const int32_t &userId);
 
     /**
      * @brief Query data begin whith key in DB.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t QueryDataBeginWithKey(const std::string &key, std::unordered_map<std::string, std::string> &values);
+    int32_t QueryDataBeginWithKey(const std::string &key, std::unordered_map<std::string, std::string> &values,
+        const int32_t &userId);
 
     /**
      * @brief Query all data in DB.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t QueryAllData(std::unordered_map<std::string, std::string> &values);
+    int32_t QueryAllData(std::unordered_map<std::string, std::string> &values, const int32_t &userId);
+
+private:
+    std::string GetUserTableName(const int32_t &userId);
+    int32_t DeleteData(const std::string tableName, const std::string key, int32_t &rowId);
+    int32_t QueryData(const std::string tableName, const std::string key, std::string &value);
+    int32_t QueryData(const std::string tableName, const std::string key, std::vector<uint8_t> &value);
+    int32_t QueryDataBeginWithKey(const std::string tableName, const std::string key,
+        std::unordered_map<std::string, std::string> &values);
+    int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
 
 private:
     NotificationRdbConfig notificationRdbConfig_;
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
     mutable std::mutex rdbStorePtrMutex_;
+    std::map<int32_t, bool> userTableInit_;
+    mutable std::mutex userTableMutex_;
 };
 } // namespace Notification
 } // namespace OHOS

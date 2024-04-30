@@ -27,6 +27,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "hitrace_meter_adapter.h"
+#include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "smart_reminder_center.h"
@@ -746,11 +747,13 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
 #endif
     }
+    int32_t activeUserId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(activeUserId);
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().SetKvToDb(key, value);
+        result = NotificationPreferences::GetInstance().SetKvToDb(key, value, activeUserId);
     }));
     notificationSvrQueue_->wait(handler);
 

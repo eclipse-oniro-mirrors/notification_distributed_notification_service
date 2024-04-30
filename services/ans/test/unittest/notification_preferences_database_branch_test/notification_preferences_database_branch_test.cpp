@@ -290,7 +290,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0150
     // test GetValueFromDisturbeDB function
     std::string key = "<key>";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->GetValueFromDisturbeDB(key, [&](std::string &value) {});
+    preferncesDB_->GetValueFromDisturbeDB(key, -1, [&](std::string &value) {});
 }
 
 /**
@@ -307,7 +307,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0160
     // test GetValueFromDisturbeDB function
     std::string key = "<key>";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->GetValueFromDisturbeDB(key, [&](std::string &value) {});
+    preferncesDB_->GetValueFromDisturbeDB(key, -1, [&](std::string &value) {});
 }
 
 /**
@@ -322,7 +322,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0170
     // test GetValueFromDisturbeDB function
     std::string key = "<key>";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->GetValueFromDisturbeDB(key, [&](const int32_t &status, std::string &value) {});
+    preferncesDB_->GetValueFromDisturbeDB(key, -1, [&](const int32_t &status, std::string &value) {});
 }
 
 /**
@@ -409,7 +409,8 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0230
     MockInit(false);
     // test RemoveBundleFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey), false);
+    const int32_t uid = -1;
+    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, uid), false);
 }
 
 /**
@@ -425,7 +426,8 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0240
     MockQueryDataBeginWithKey(false);
     // test RemoveBundleFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey), false);
+    const int32_t uid = -1;
+    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, uid), false);
 }
 
 /**
@@ -443,7 +445,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0250
     MockDeleteBathchData(false);
     // test RemoveBundleFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey), false);
+    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -458,7 +460,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0260
     // test RemoveSlotFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationConstant::SlotType type = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type), false);
+    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
 }
 
 /**
@@ -475,7 +477,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0270
     // test RemoveSlotFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationConstant::SlotType type = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type), false);
+    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
 }
 
 /**
@@ -494,7 +496,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0280
     // test RemoveSlotFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationConstant::SlotType type = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type), false);
+    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
 }
 
 /**
@@ -508,7 +510,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0290
     MockInit(false);
     // test RemoveAllSlotsFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey), false);
+    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -524,7 +526,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0300
     MockQueryDataBeginWithKey(false);
     // test RemoveAllSlotsFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey), false);
+    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -731,7 +733,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0430
     NotificationPreferencesInfo info;
     std::unordered_map<std::string, std::string> values;
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseBundleFromDistureDB(info, values);
+    preferncesDB_->ParseBundleFromDistureDB(info, values, -1);
 }
 
 /**
@@ -941,9 +943,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
 {
     MockInit(true);
     MockInsertData(false);
-    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test")), NativeRdb::E_ERROR);
+    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test"), -1), NativeRdb::E_ERROR);
     MockInsertData(true);
-    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test")), NativeRdb::E_OK);
+    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test"), -1), NativeRdb::E_OK);
 }
 
 /**
@@ -956,9 +958,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     MockInit(true);
     MockQueryData(false);
     string value;
-    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value), NativeRdb::E_ERROR);
+    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
     MockQueryData(true);
-    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value), NativeRdb::E_ERROR);
+    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -971,9 +973,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     MockInit(true);
     MockQueryDataBeginWithKey(false);
     std::unordered_map<std::string, std::string> value;
-    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value), NativeRdb::E_ERROR);
+    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
     MockQueryDataBeginWithKey(true);
-    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value), NativeRdb::E_OK);
+    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value, -1), NativeRdb::E_OK);
 }
 
 /**
@@ -986,9 +988,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     MockInit(true);
     MockDeleteData(false);
     std::unordered_map<std::string, std::string> value;
-    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test")), NativeRdb::E_ERROR);
+    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_ERROR);
     MockDeleteData(true);
-    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test")), NativeRdb::E_OK);
+    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_OK);
 }
 
 /**

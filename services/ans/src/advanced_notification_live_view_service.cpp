@@ -25,6 +25,7 @@
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "image_source.h"
+#include "os_account_manager_helper.h"
 #include "time_service_client.h"
 #include "notification_timer_info.h"
 #include "advanced_notification_inline.cpp"
@@ -229,7 +230,8 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         return ERR_ANS_TASK_ERR;
     }
 
-    auto result = NotificationPreferences::GetInstance().SetKvToDb(request->GetKey(), jsonObject.dump());
+    auto result = NotificationPreferences::GetInstance().SetKvToDb(
+        request->GetKey(), jsonObject.dump(), request->GetReceiverUserId());
     if (result != ERR_OK) {
         ANS_LOGE(
             "Set notification request failed, bundle name %{public}s, id %{public}d, key %{public}s, ret %{public}d.",
@@ -249,7 +251,9 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
     const std::string &key, NotificationRequestDb &requestDb)
 {
     std::string value;
-    int32_t result = NotificationPreferences::GetInstance().GetKvFromDb(key, value);
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    int32_t result = NotificationPreferences::GetInstance().GetKvFromDb(key, value, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Get notification request failed, key %{public}s.", key.c_str());
         return result;
@@ -277,8 +281,10 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
 int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests)
 {
     std::unordered_map<std::string, std::string> dbRecords;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     int32_t result =
-        NotificationPreferences::GetInstance().GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords);
+        NotificationPreferences::GetInstance().GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Get batch notification request failed.");
         return result;
@@ -308,14 +314,16 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
 
 int32_t AdvancedNotificationService::DeleteNotificationRequestFromDb(const std::string &key)
 {
-    auto result = NotificationPreferences::GetInstance().DeleteKvFromDb(key);
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    auto result = NotificationPreferences::GetInstance().DeleteKvFromDb(key, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Delete notification request failed, key %{public}s.", key.c_str());
         return result;
     }
 
     std::string lockScreenPictureKey = LOCK_SCREEN_PICTURE_TAG + key;
-    result = NotificationPreferences::GetInstance().DeleteKvFromDb(lockScreenPictureKey);
+    result = NotificationPreferences::GetInstance().DeleteKvFromDb(lockScreenPictureKey, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Delete notification lock screen picture failed, key %{public}s.", lockScreenPictureKey.c_str());
         return result;
@@ -376,7 +384,7 @@ ErrCode AdvancedNotificationService::SetLockScreenPictureToDb(const sptr<Notific
     std::vector<uint8_t> pixelsVec(pixels, pixels + size);
 
     std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
-    auto res = NotificationPreferences::GetInstance().SetByteToDb(key, pixelsVec);
+    auto res = NotificationPreferences::GetInstance().SetByteToDb(key, pixelsVec, request->GetReceiverUserId());
     if (res != ERR_OK) {
         ANS_LOGE("Failed to set lock screen picture to db, res is %{public}d.", res);
         return res;
@@ -389,7 +397,7 @@ ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequ
 {
     std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
     std::vector<uint8_t> pixelsVec;
-    uint32_t res = NotificationPreferences::GetInstance().GetByteFromDb(key, pixelsVec);
+    uint32_t res = NotificationPreferences::GetInstance().GetByteFromDb(key, pixelsVec, request->GetReceiverUserId());
     if (res != ERR_OK) {
         ANS_LOGE("Failed to get lock screen picture from db, res is %{public}d.", res);
         return res;

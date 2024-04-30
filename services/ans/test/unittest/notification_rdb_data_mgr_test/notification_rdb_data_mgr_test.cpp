@@ -413,7 +413,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00600
     notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
     std::string value = "<value>";
-    EXPECT_EQ(notificationDataMgr->InsertData(key, value), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->InsertData(key, value, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -429,7 +429,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00700
     notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::string key = "<key>";
     std::string value = "<value>";
-    EXPECT_EQ(notificationDataMgr->InsertData(key, value), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->InsertData(key, value, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -444,7 +444,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00800
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     notificationDataMgr->rdbStore_ = nullptr;
     std::unordered_map<std::string, std::string> values;
-    EXPECT_EQ(notificationDataMgr->InsertBatchData(values), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->InsertBatchData(values, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -466,7 +466,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00900
         { "-a", "-a" },
         { "-e", "-e" },
     };
-    EXPECT_EQ(notificationDataMgr->InsertBatchData(values), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->InsertBatchData(values, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -481,7 +481,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01000
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
-    EXPECT_EQ(notificationDataMgr->DeleteData(key), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->DeleteData(key, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -496,7 +496,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01100
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::string key = "<key>";
-    EXPECT_EQ(notificationDataMgr->DeleteData(key), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->DeleteData(key, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -511,7 +511,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01200
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     notificationDataMgr->rdbStore_ = nullptr;
     std::vector<std::string> keys;
-    EXPECT_EQ(notificationDataMgr->DeleteBathchData(keys), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->DeleteBathchData(keys, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -528,7 +528,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01300
     std::vector<std::string> keys;
     std::string key = "<key>";
     keys.emplace_back(key);
-    EXPECT_EQ(notificationDataMgr->DeleteBathchData(keys), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->DeleteBathchData(keys, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -544,7 +544,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01400
     notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
     std::string value = "<value>";
-    EXPECT_EQ(notificationDataMgr->QueryData(key, value), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryData(key, value, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -561,7 +561,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01500
     std::string key = "<key>";
     std::string value = "<value>";
     g_mockQueryRet = true;
-    EXPECT_EQ(notificationDataMgr->QueryData(key, value), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryData(key, value, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -581,7 +581,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01600
     MockHasBlock(true);
     MockGoToFirstRow(true);
     MockGetString(false);
-    EXPECT_EQ(notificationDataMgr->QueryData(key, value), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryData(key, value, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -597,7 +597,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01700
     notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
     std::unordered_map<std::string, std::string> values;
-    EXPECT_EQ(notificationDataMgr->QueryDataBeginWithKey(key, values), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryDataBeginWithKey(key, values, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -614,7 +614,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01800
     g_mockQueryRet = true;
     std::string key = "<key>";
     std::unordered_map<std::string, std::string> values;
-    EXPECT_EQ(notificationDataMgr->QueryDataBeginWithKey(key, values), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryDataBeginWithKey(key, values, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -634,7 +634,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01900
     MockGetString(false);
     std::string key = "<key>";
     std::unordered_map<std::string, std::string> values;
-    EXPECT_EQ(notificationDataMgr->QueryDataBeginWithKey(key, values), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryDataBeginWithKey(key, values, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -649,7 +649,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02000
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     notificationDataMgr->rdbStore_ = nullptr;
     std::unordered_map<std::string, std::string> datas;
-    EXPECT_EQ(notificationDataMgr->QueryAllData(datas), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -665,7 +665,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02100
     notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     g_mockQueryRet = true;
     std::unordered_map<std::string, std::string> datas;
-    EXPECT_EQ(notificationDataMgr->QueryAllData(datas), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -683,7 +683,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02200
     MockHasBlock(true);
     MockGoToFirstRow(false);
     std::unordered_map<std::string, std::string> datas;
-    EXPECT_EQ(notificationDataMgr->QueryAllData(datas), NativeRdb::E_EMPTY_VALUES_BUCKET);
+    EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_EMPTY_VALUES_BUCKET);
 }
 
 /**
@@ -702,7 +702,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02300
     MockGoToFirstRow(true);
     MockGetString(false);
     std::unordered_map<std::string, std::string> datas;
-    EXPECT_EQ(notificationDataMgr->QueryAllData(datas), NativeRdb::E_ERROR);
+    EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -721,7 +721,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02400
     MockGoToFirstRow(true);
     MockGetString(true);
     std::unordered_map<std::string, std::string> datas;
-    EXPECT_EQ(notificationDataMgr->QueryAllData(datas), NativeRdb::E_OK);
+    EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS
