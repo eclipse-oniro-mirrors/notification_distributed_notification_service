@@ -2170,7 +2170,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 
     int ret = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status_);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    ReminderSwingDecisionCenter::GetInstance().OnUpdateDeviceStatus();
+    ReminderSwingDecisionCenter::GetInstance().OnUpdateDeviceStatus(deviceType);
 #endif
     ANS_LOGI("%{public}s device status update with %{public}u",
         deviceType.c_str(), DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType));
