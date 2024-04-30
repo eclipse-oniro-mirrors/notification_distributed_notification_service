@@ -61,14 +61,16 @@ static char g_enableErrorInformation[] =
 "error: option 'e' requires a value.\nusage: anm setting [<options>]\noptions list:\n"
 "  --help, -h                   help menu\n"
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
-" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
+" -d <device:status> set device status, eg: -d device:1\n";
 
 static char g_enableBundleNameNull[] =
 "error: setting information error\n"
 "usage: anm setting [<options>]\n"
 "options list:\n  --help, -h                   help menu\n"
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
-" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
+" -d <device:status> set device status, eg: -d device:1\n";
 
 static char g_enableObjectNull[] =
 "error: object is null\n"
@@ -76,7 +78,8 @@ static char g_enableObjectNull[] =
 "usage: anm setting [<options>]\n"
 "options list:\n  --help, -h                   help menu\n"
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
-" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
+" -d <device:status> set device status, eg: -d device:1\n";
 
 static char g_unknownOption[] =
 "error: unknown option.\n"
@@ -94,7 +97,8 @@ static char g_dumpActiveCount[] =
 "options list:\n"
 "  --help, -h                   help menu\n"
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
-" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n";
+" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
+" -d <device:status> set device status, eg: -d device:1\n";
 
 static char g_helpMsg[] =
 "error: unknown option.\n"
