@@ -1091,6 +1091,7 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
         ANSR_LOGD("StartExtensionAbilty failed, reminder times: %{public}d", times);
         ffrt::task_attr taskAttr;
         taskAttr.delay(CONNECT_EXTENSION_INTERVAL);
+        auto callback = [reminder, times]() { ReminderDataManager::AsyncStartExtensionAbility(reminder, times); };
         serviceQueue_->submit_h(callback, taskAttr);
     }
 }
