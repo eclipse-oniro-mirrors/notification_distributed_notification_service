@@ -259,7 +259,7 @@ private:
         ALERTING_TIMER
     };
 
-    static std::shared_ptr<AppExecFwk::EventHandler> serviceHandler_;
+    static std::shared_ptr<ffrt::queue> serviceQueue_;
     /**
      * Add default slot to the reminder if no slot set by user.
      *
