@@ -1017,6 +1017,15 @@ void ReminderCommon::HandleErrCode(const napi_env &env, int32_t errCode)
     napi_throw_error(env, std::to_string(errCode).c_str(), errCodeMsg.c_str());
 }
 
+void ReminderCommon::HandleErrCode(const napi_env &env, int32_t errCode, int32_t msgCode)
+{
+    if (errCode == ERR_OK) {
+        return;
+    }
+    std::string errCodeMsg = parameterErrorCodeMsgMap[msgCode];
+    napi_throw_error(env, std::to_string(errCode).c_str(), errCodeMsg.c_str());
+}
+
 std::string ReminderCommon::FindErrMsg(const napi_env &env, const int32_t errCode)
 {
     auto findMsg = reminderErrCodeMsgMap.find(errCode);

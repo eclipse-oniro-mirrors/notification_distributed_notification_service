@@ -114,6 +114,19 @@ static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
     { ERR_REMINDER_CALLER_TOKEN_INVALID, "BussinessError 1700005: The caller token invalid." },
     { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "BussinessError 1700006: The data share permission denied." }
 };
+
+enum ParameterErrorCode : uint32_t {
+    MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED,
+    INCORRECT_PARAMETER_TYPES,
+    PARAMETER_VERIFICATION_FAILED,
+};
+
+static std::map<uint32_t, std::string> parameterErrorCodeMsgMap = {
+    { MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED, "Mandatory parameter are left unspecified." },
+    { INCORRECT_PARAMETER_TYPES, "Incorrect parameter types." },
+    { PARAMETER_VERIFICATION_FAILED, "Parameter verification failed." }
+};
+
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
 const uint32_t ERROR_NOT_SYSTEM_APP    = 202;          // Not system application to call the interface.
