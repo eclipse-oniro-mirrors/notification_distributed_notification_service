@@ -91,7 +91,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00100, Fu
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     sleep(SLEEP_TIME);
 
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
     EXPECT_NE(nullptr, spSlot);
     GTEST_LOG_(INFO) << "after get slot dump slot information:" << spSlot->Dump();
@@ -136,7 +136,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00200, Fu
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     sleep(SLEEP_TIME);
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
 
     EXPECT_NE(nullptr, spSlot);
@@ -182,7 +182,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00300, Fu
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     sleep(SLEEP_TIME);
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::CONTENT_INFORMATION, spSlot));
 
     EXPECT_NE(nullptr, spSlot);
@@ -227,7 +227,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00400, Fu
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     sleep(SLEEP_TIME);
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 
     EXPECT_NE(nullptr, spSlot);
@@ -274,7 +274,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00500, Fu
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     sleep(SLEEP_TIME);
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 
     EXPECT_NE(nullptr, spSlot);
@@ -390,7 +390,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     sleep(SLEEP_TIME);
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
     EXPECT_NE(spSlot, nullptr);
     EXPECT_EQ(spSlot->GetEnable(), true);
@@ -421,7 +421,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
     EXPECT_EQ(enable, true);
 
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
     EXPECT_NE(spSlot, nullptr);
     EXPECT_EQ(spSlot->GetEnable(), true);
@@ -444,7 +444,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, false);
 
-    sptr<NotificationSlot> spSlot;
+    sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
     EXPECT_NE(spSlot, nullptr);
     EXPECT_EQ(spSlot->GetEnable(), false);
