@@ -1921,7 +1921,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13600,
     std::string bundle = "Bundle";
     int32_t userId = 2;
     std::vector<std::string> dumpInfo;
-    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, dumpInfo), (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, 0, dumpInfo), (int)ERR_OK);
 }
 
 /**
@@ -1935,7 +1935,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13700,
     std::string bundle = "Bundle";
     int32_t userId = 3;
     std::vector<std::string> dumpInfo;
-    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, dumpInfo), (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, 0, dumpInfo), (int)ERR_OK);
 }
 
 /**
@@ -2088,7 +2088,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300,
     std::string bundle = "Bundle";
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
-    EXPECT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -2758,7 +2758,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18100,
     int32_t userId = -1;
     std::vector<std::string> dumpInfo;
 
-    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
 
     GTEST_LOG_(INFO) << "ActiveNotificationDump_1000 test end";
 }
@@ -2777,7 +2777,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18200,
     int32_t userId = -1;
     std::vector<std::string> dumpInfo;
 
-    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
 
     GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test end";
 }
@@ -2796,7 +2796,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18300,
     int32_t userId = -1;
     std::vector<std::string> dumpInfo;
 
-    EXPECT_EQ(advancedNotificationService_->DistributedNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->DistributedNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
 
     GTEST_LOG_(INFO) << "DistributedNotificationDump_1000 test end";
 }

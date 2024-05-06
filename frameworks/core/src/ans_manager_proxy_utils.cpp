@@ -51,7 +51,7 @@ ErrCode AnsManagerProxy::InnerTransact(NotificationInterfaceCode code,
 }
 
 ErrCode AnsManagerProxy::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -68,6 +68,10 @@ ErrCode AnsManagerProxy::ShellDump(const std::string &cmd, const std::string &bu
     }
     if (!data.WriteInt32(userId)) {
         ANS_LOGE("[ShellDump] fail: write dump userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(recvUserId)) {
+        ANS_LOGE("[ShellDump] fail: write dump recvUserId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     MessageParcel reply;

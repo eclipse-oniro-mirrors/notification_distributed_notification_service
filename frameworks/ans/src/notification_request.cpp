@@ -15,6 +15,7 @@
 
 #include "notification_request.h"
 
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_image_util.h"
 #include "ans_log_wrapper.h"
@@ -1751,6 +1752,9 @@ void NotificationRequest::SetReceiverUserId(int32_t userId)
 
 int32_t NotificationRequest::GetReceiverUserId() const
 {
+    if (receiverUserId_ == SUBSCRIBE_USER_INIT) {
+        return creatorUserId_;
+    }
     return receiverUserId_;
 }
 

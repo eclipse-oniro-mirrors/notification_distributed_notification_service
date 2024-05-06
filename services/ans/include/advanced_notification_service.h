@@ -908,7 +908,7 @@ public:
      * @param dumpInfo Indicates the container containing datas.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo) override;
 
     /**
@@ -1154,10 +1154,12 @@ private:
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
     void ExtendDumpForFlags(std::shared_ptr<NotificationFlags>, std::stringstream &stream);
-    ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
-    ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, std::vector<std::string> &dumpInfo);
+    ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
+        std::vector<std::string> &dumpInfo);
+    ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
+        std::vector<std::string> &dumpInfo);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    ErrCode DistributedNotificationDump(const std::string& bundle, int32_t userId,
+    ErrCode DistributedNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
 #endif
     ErrCode SetRecentNotificationCount(const std::string arg);

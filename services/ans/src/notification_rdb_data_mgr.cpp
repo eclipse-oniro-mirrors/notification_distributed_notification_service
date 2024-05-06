@@ -389,7 +389,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s", 
+        ANS_LOGE("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }

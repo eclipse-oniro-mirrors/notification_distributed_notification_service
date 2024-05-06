@@ -915,10 +915,11 @@ public:
      * @param cmd Indicates the specified dump command.
      * @param bundle Indicates the specified bundle name.
      * @param userId Indicates the specified userId.
+     * @param recvUserId Indicates the specified receiver userId.
      * @param dumpInfo Indicates the container containing datas.
      * @return Returns check result.
      */
-    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
 
     /**

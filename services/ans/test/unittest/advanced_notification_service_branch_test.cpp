@@ -1010,7 +1010,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_271000, Function | SmallTest | Level1)
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
     EXPECT_EQ(advancedNotificationService_->ShellDump(
-        cmd, bundle, userId, dumpInfo), (int)ERR_ANS_PERMISSION_DENIED);
+        cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

@@ -1677,8 +1677,13 @@ ErrCode AnsManagerStub::HandleShellDump(MessageParcel &data, MessageParcel &repl
         ANS_LOGE("[HandleShellDump] fail: read userId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    int32_t recvUserId;
+    if (!data.ReadInt32(recvUserId)) {
+        ANS_LOGE("[HandleShellDump] fail: read recvUserId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     std::vector<std::string> notificationsInfo;
-    ErrCode result = ShellDump(cmd, bundle, userId, notificationsInfo);
+    ErrCode result = ShellDump(cmd, bundle, userId, recvUserId, notificationsInfo);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleGetRecentNotificationsInfo] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;

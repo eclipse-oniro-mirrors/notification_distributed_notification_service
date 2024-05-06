@@ -4327,7 +4327,7 @@ HWTEST_F(AnsManagerStubTest, ShellDump01, Function | SmallTest | Level1)
     int32_t userId = 5;
     std::vector<std::string> dumpInfo;
 
-    ErrCode result = ansManagerStub_->ShellDump(cmd, bundle, userId, dumpInfo);
+    ErrCode result = ansManagerStub_->ShellDump(cmd, bundle, userId, 0, dumpInfo);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

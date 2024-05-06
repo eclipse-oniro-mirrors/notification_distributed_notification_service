@@ -312,7 +312,7 @@ HWTEST_F(AnsUtilsTest, RecentNotificationDump_00001, Function | SmallTest | Leve
     advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification);
 
     std::vector<std::string> dumpInfo;
-    int ret = advancedNotificationService_->RecentNotificationDump("test", 1, dumpInfo);
+    int ret = advancedNotificationService_->RecentNotificationDump("test", 1, 1, dumpInfo);
     EXPECT_EQ(ret, (int)ERR_OK);
     EXPECT_EQ(dumpInfo.size(), 1);
 }

@@ -184,6 +184,22 @@ HWTEST_F(NotificationRequestTest, NotificationSetReceiverUserId_0100, Level1)
 }
 
 /**
+ * @tc.name: NotificationSetReceiverUserId_0200
+ * @tc.desc: GetReceiverUserId return creator userId
+ * @tc.type: FUNC
+ * @tc.require: issueI5RW70
+ */
+HWTEST_F(NotificationRequestTest, NotificationSetReceiverUserId_0200, Level1)
+{
+    int32_t myNotificationId = 10;
+    int32_t creatorUserId = 5;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetCreatorUserId(creatorUserId);
+    auto result = notificationRequest.GetReceiverUserId();
+    EXPECT_EQ(result, creatorUserId);
+}
+
+/**
  * @tc.name: AddActionButton_0100
  * @tc.desc: AddActionButton
  * @tc.type: FUNC
