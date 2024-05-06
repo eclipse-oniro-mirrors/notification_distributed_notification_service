@@ -1793,9 +1793,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     int32_t uid = request->GetCreatorUid();
-    if (request->IsAgentNotification()) {
-        uid = request->GetOwnerUid();
-    }
     if (uid <= 0) {
         ANS_LOGE("CreatorUid[%{public}d] error", uid);
         return ERR_ANS_INVALID_UID;
