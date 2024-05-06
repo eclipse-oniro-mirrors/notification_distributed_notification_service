@@ -2050,8 +2050,10 @@ std::string NotificationPreferencesDatabase::GetAdditionalConfig()
         ANS_LOGE("RdbStore is nullptr.");
         return "";
     }
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     std::string configValue = "";
-    int32_t result = rdbDataManager_->QueryData("AGGREGATE_CONFIG", configValue);
+    int32_t result = rdbDataManager_->QueryData("AGGREGATE_CONFIG", configValue, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Query additional config failed.");
         return "";
