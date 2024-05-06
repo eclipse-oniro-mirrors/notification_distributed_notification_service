@@ -1024,5 +1024,13 @@ bool NotificationPreferences::IsAgentRelationship(const std::string &agentBundle
 
     return preferncesDB_->IsAgentRelationship(agentBundleName, sourceBundleName);
 }
+
+std::string NotificationPreferences::GetAdditionalConfig()
+{
+    if (preferncesDB_ == nullptr) {
+        return "";
+    }
+    return preferncesDB_->GetAdditionalConfig();
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -2043,5 +2043,21 @@ bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string d
     });
     return result;
 }
+
+std::string NotificationPreferencesDatabase::GetAdditionalConfig()
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return "";
+    }
+    std::string configValue = "";
+    int32_t result = rdbDataManager_->QueryData("AGGREGATE_CONFIG", configValue);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Query additional config failed.");
+        return "";
+    }
+    ANS_LOGD("The additional config key is :%{public}s.", configValue.c_str());
+    return configValue;
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -140,7 +140,7 @@ public:
 
     void InitUserId();
 
-    void InitStartExtensionAbility();
+    void InitStartExtensionAbility(std::vector<sptr<ReminderRequest>>& reissueReminder);
     /**
      * @brief Register configuration observer, the listening system language is changed.
      */
@@ -670,18 +670,18 @@ private:
     /**
      * This timer is used to control the ringDuration of the alerting reminder.
      */
-    uint64_t timerIdAlerting_ {0};
+    std::atomic<uint64_t> timerIdAlerting_ {0};
 
     /**
      * Indicates the active reminder that timing is taking effect.
      */
-    int32_t activeReminderId_ = -1;
+    std::atomic<int32_t> activeReminderId_ = -1;
     sptr<ReminderRequest> activeReminder_ = nullptr;
 
     /**
      * Indicates the reminder which is playing sound or vibration.
      */
-    int32_t alertingReminderId_ = -1;
+    std::atomic<int32_t> alertingReminderId_ = -1;
     sptr<ReminderRequest> alertingReminder_ = nullptr;
 #ifdef PLAYER_FRAMEWORK_ENABLE
     std::shared_ptr<Media::Player> soundPlayer_ = nullptr;

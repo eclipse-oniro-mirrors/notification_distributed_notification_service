@@ -129,6 +129,13 @@ public:
     bool IsSmartReminderEnabled(const std::string deviceType, bool &enabled);
 
     /**
+     * @brief Querying Aggregation Configuration Values
+     *
+     * @return Configured value
+     */
+    std::string GetAdditionalConfig();
+
+    /**
      * @brief Put enable notification into disturbe DB.
      *
      * @param userId Indicates user.

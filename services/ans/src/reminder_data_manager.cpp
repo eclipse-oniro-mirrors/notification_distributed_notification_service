@@ -107,6 +107,7 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
 ErrCode ReminderDataManager::CancelReminder(
     const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption)
 {
+    ANSR_LOGI("cancel reminder id: %{public}d", reminderId);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, bundleOption->GetBundleName());
     if (reminder == nullptr) {
         ANSR_LOGW("Cancel reminder, not find the reminder");
@@ -239,7 +240,7 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
     if (activeReminderId_ != -1 && IsMatched(activeReminder_, packageName, userId)) {
         activeReminder_->OnStop();
         StopTimer(TimerType::TRIGGER_TIMER);
-        ANSR_LOGD("Stop active reminder, reminderId=%{public}d", activeReminderId_);
+        ANSR_LOGD("Stop active reminder, reminderId=%{public}d", activeReminderId_.load());
     }
     for (auto vit = reminderVector_.begin(); vit != reminderVector_.end();) {
         int32_t reminderId = (*vit)->GetReminderId();
@@ -407,6 +408,7 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
     int32_t uid = bundleOption->GetUid();
     ANSR_LOGD("OnProcessDiedLocked, bundleName=%{public}s, uid=%{public}d", bundleName.c_str(), uid);
     std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+    std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
         int32_t reminderId = (*it)->GetReminderId();
         auto mit = notificationBundleOptionMap_.find(reminderId);
@@ -698,6 +700,7 @@ bool ReminderDataManager::CheckUpdateConditions(const sptr<ReminderRequest> &rem
 void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminder,
     const ReminderRequest::ActionButtonType &actionButtonType)
 {
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     auto actionButtonMap = reminder->GetActionButtons();
     if (!CheckUpdateConditions(reminder, actionButtonType, actionButtonMap)) {
         return;
@@ -1002,9 +1005,9 @@ void ReminderDataManager::SetActiveReminder(const sptr<ReminderRequest> &reminde
     } else {
         activeReminderId_ = reminder->GetReminderId();
         activeReminder_ = reminder;
-        ANSR_LOGD("Set activeReminder with id=%{public}d", activeReminderId_);
+        ANSR_LOGD("Set activeReminder with id=%{public}d", activeReminderId_.load());
     }
-    ANSR_LOGD("Set activeReminderId=%{public}d", activeReminderId_);
+    ANSR_LOGD("Set activeReminderId=%{public}d", activeReminderId_.load());
 }
 
 void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &reminder)
@@ -1015,9 +1018,9 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
     } else {
         alertingReminderId_ = reminder->GetReminderId();
         alertingReminder_ = reminder;
-        ANSR_LOGD("Set alertingReminder with id=%{public}d", alertingReminderId_);
+        ANSR_LOGD("Set alertingReminder with id=%{public}d", alertingReminderId_.load());
     }
-    ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_);
+    ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
 }
 
 void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder)
@@ -1188,7 +1191,7 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
     ANSR_LOGI("Snooze the reminder request, %{public}s", reminder->Dump().c_str());
     int32_t reminderId = reminder->GetReminderId();
     if (activeReminderId_ == reminderId) {
-        ANSR_LOGD("Cancel active reminder, id=%{public}d", activeReminderId_);
+        ANSR_LOGD("Cancel active reminder, id=%{public}d", activeReminderId_.load());
         activeReminder_->OnStop();
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
@@ -1422,7 +1425,9 @@ void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
     if (isFromBootComplete) {
-        InitStartExtensionAbility();
+        std::vector<sptr<ReminderRequest>> reissueReminder;
+        InitStartExtensionAbility(reissueReminder);
+        HandleImmediatelyShow(reissueReminder, false);
     }
     if (IsReminderAgentReady()) {
         return;
@@ -1466,14 +1471,19 @@ void ReminderDataManager::InitServiceHandler()
     ANSR_LOGD("InitServiceHandler suceeded.");
 }
 
-void ReminderDataManager::InitStartExtensionAbility()
+void ReminderDataManager::InitStartExtensionAbility(std::vector<sptr<ReminderRequest>>& reissueReminder)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         ReminderDataManager::AsyncStartExtensionAbility(*it, CONNECT_EXTENSION_MAX_RETRY_TIMES);
+        if ((*it)->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+            if ((*it)->OnDateTimeChange()) {
+                reissueReminder.push_back(*it);
+                ANSR_LOGD("Reissue reminder success");
+            }
+        }
     }
 }
-
 void ReminderDataManager::InitUserId()
 {
     std::vector<int32_t> activeUserId;
@@ -1693,7 +1703,7 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
     }
     if ((alertingReminderId_ == -1) || (reminder->GetReminderId() != alertingReminderId_)) {
         ANSR_LOGE("Stop sound and vibration failed as alertingReminder is illegal, alertingReminderId_=" \
-            "%{public}d, tarReminderId=%{public}d", alertingReminderId_, reminder->GetReminderId());
+            "%{public}d, tarReminderId=%{public}d", alertingReminderId_.load(), reminder->GetReminderId());
         return;
     }
     ANSR_LOGD("Stop sound and vibration, reminderId=%{public}d", reminder->GetReminderId());
@@ -1828,7 +1838,7 @@ uint64_t ReminderDataManager::HandleAlertingTimeInner(const sptr<ReminderRequest
         + static_cast<uint64_t>(reminderRequest->GetRingDuration() * ReminderRequest::MILLI_SECONDS);
     timerIdAlerting_ = timer->CreateTimer(REMINDER_DATA_MANAGER->CreateTimerInfo(type, reminderRequest));
     timer->StartTimer(timerIdAlerting_, triggerTime);
-    ANSR_LOGD("Start timing (alerting time out), timerId=%{public}" PRIu64 "", timerIdAlerting_);
+    ANSR_LOGD("Start timing (alerting time out), timerId=%{public}" PRIu64 "", timerIdAlerting_.load());
     return triggerTime;
 }
 

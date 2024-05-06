@@ -775,17 +775,7 @@ bool ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
 
 uint64_t ReminderRequestCalendar::GetDateTime()
 {
-    struct tm dateTime;
-    dateTime.tm_year = GetCTime(TimeTransferType::YEAR, year_);
-    dateTime.tm_mon = GetCTime(TimeTransferType::MONTH, month_);
-    dateTime.tm_mday = static_cast<int>(day_);
-    dateTime.tm_hour = static_cast<int>(hour_);
-    dateTime.tm_min = static_cast<int>(minute_);
-    dateTime.tm_sec = static_cast<int>(second_);
-    dateTime.tm_isdst = -1;
-
-    time_t time = mktime(&dateTime);
-    return GetDurationSinceEpochInMilli(time);
+    return startDateTime_;
 }
 
 uint64_t ReminderRequestCalendar::GetEndDateTime()

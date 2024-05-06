@@ -757,5 +757,24 @@ HWTEST_F(ReminderDataManagerTest, ExcludeDate_0001, Level1)
 
     manager->reminderVector_.clear();
 }
+
+/**
+ * @tc.name: InitStartExtensionAbility
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, InitStartExtensionAbility_0001, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestCalendar(10);
+    reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
+    ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+    uint64_t now = calendar->GetNowInstantMilli();
+    calendar->SetDateTime(now-50000);
+    calendar->SetEndDateTime(now+50000);
+    manager->reminderVector_.push_back(calendar);
+    manager->Init(true);
+    EXPECT_TRUE(!manager->reminderVector_.empty());
+}
 }  // namespace Notification
 }  // namespace OHOS
