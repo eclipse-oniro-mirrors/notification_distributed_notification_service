@@ -77,7 +77,7 @@ std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
-std::shared_ptr<AppExecFwk::EventHandler> ReminderDataManager::serviceHandler_;
+std::shared_ptr<ffrt::queue> ReminderDataManager::serviceQueue_ = nullptr;
 ReminderDataManager::~ReminderDataManager() = default;
 
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
@@ -1090,10 +1090,12 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
 {
     times--;
     bool ret = ReminderDataManager::StartExtensionAbility(reminder);
-    if (!ret && times > 0 && serviceHandler_ != nullptr) {
+    if (!ret && times > 0 && serviceQueue_ != nullptr) {
         ANSR_LOGD("StartExtensionAbilty failed, reminder times: %{public}d", times);
+        ffrt::task_attr taskAttr;
+        taskAttr.delay(CONNECT_EXTENSION_INTERVAL);
         auto callback = [reminder, times]() { ReminderDataManager::AsyncStartExtensionAbility(reminder, times); };
-        serviceHandler_->PostTask(callback, CONNECT_EXTENSION_INTERVAL);
+        serviceQueue_->submit(callback, taskAttr);
     }
 }
 
@@ -1461,12 +1463,11 @@ void ReminderDataManager::Init(bool isFromBootComplete)
 void ReminderDataManager::InitServiceHandler()
 {
     ANSR_LOGD("InitServiceHandler started");
-    if (serviceHandler_ != nullptr) {
+    if (serviceQueue_ != nullptr) {
         ANSR_LOGD("InitServiceHandler already init.");
         return;
     }
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("ReminderDataManager");
-    serviceHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    serviceQueue_ = std::make_shared<ffrt::queue>("ReminderService");
 
     ANSR_LOGD("InitServiceHandler suceeded.");
 }
