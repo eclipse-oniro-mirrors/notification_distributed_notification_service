@@ -1330,7 +1330,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00400, Function | S
  */
 HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
 {
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
     ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption, deviceType, true);
@@ -1344,7 +1344,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0100, TestSi
  */
 HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
 {
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("", 1));
     std::string deviceType = "testDeviceType";
 
     ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption,
@@ -1359,7 +1359,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSi
  */
 HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
 {
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
@@ -1374,7 +1374,7 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0100, TestSiz
  */
 HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
 {
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
