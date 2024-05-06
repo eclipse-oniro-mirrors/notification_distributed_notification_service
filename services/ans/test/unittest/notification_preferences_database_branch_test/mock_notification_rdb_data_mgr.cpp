@@ -104,7 +104,8 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values, const int32_t &userId)
+int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values,
+    const int32_t &userId)
 {
     if (g_mockInsertBatchDataRet == false) {
         return NativeRdb::E_ERROR;

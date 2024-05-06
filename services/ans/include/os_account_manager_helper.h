@@ -13,12 +13,16 @@
  * limitations under the License.
  */
 
-#include "base/notification/common_event_service/services/include/os_account_manager_helper.h"
+#ifndef BASE_NOTIFICATION_OS_ACCOUNT_MANAGER_HELPER_H
+#define BASE_NOTIFICATION_OS_ACCOUNT_MANAGER_HELPER_H
+
+#include "errors.h"
+#include "singleton.h"
+
 namespace OHOS {
 namespace Notification {
 class OsAccountManagerHelper : public DelayedSingleton<OsAccountManagerHelper> {
 public:
-    DISALLOW_COPY_AND_MOVE(OsAccountManagerHelper);
     
     OsAccountManagerHelper() = default;
     ~OsAccountManagerHelper() = default;
@@ -46,5 +50,6 @@ public:
      */
     ErrCode GetCurrentCallingUserId(int32_t &id);
 };
-}
-}
+} // namespace OHOS
+} // namespace Notification
+#endif  // BASE_NOTIFICATION_OS_ACCOUNT_MANAGER_HELPER_H

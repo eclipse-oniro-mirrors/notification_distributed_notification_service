@@ -1102,8 +1102,8 @@ void NotificationPreferencesDatabase::GenerateSlotEntry(const std::string &bundl
         std::to_string(slot->GetReminderMode()), values);
 }
 
-void NotificationPreferencesDatabase::ParseBundleFromDistureDB(
-    NotificationPreferencesInfo &info, const std::unordered_map<std::string, std::string> &values, const int32_t &userId)
+void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
+    const std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     if (!CheckRdbStore()) {
         ANS_LOGE("RdbStore is nullptr.");

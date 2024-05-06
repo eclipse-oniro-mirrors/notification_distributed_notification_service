@@ -168,7 +168,8 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId)
+int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value,
+    const int32_t &userId)
 {
     std::string tableName = GetUserTableName(userId);
     std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
@@ -342,7 +343,8 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s", tableName.c_str(), key.c_str());
+        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
+            tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetBlob(NOTIFICATION_VALUE_INDEX, value);
@@ -387,7 +389,8 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s", tableName.c_str(), key.c_str());
+        ANS_LOGE("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s", 
+            tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
