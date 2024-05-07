@@ -1887,9 +1887,7 @@ bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &age
         return false;
     }
     std::string agentShip = "";
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
-    int32_t result = rdbDataManager_->QueryData("PROXY_PKG", agentShip, userId);
+    int32_t result = rdbDataManager_->QueryData("PROXY_PKG", agentShip);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Query agent relationships failed.");
         return false;
@@ -2050,10 +2048,8 @@ std::string NotificationPreferencesDatabase::GetAdditionalConfig()
         ANS_LOGE("RdbStore is nullptr.");
         return "";
     }
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     std::string configValue = "";
-    int32_t result = rdbDataManager_->QueryData("AGGREGATE_CONFIG", configValue, userId);
+    int32_t result = rdbDataManager_->QueryData("AGGREGATE_CONFIG", configValue);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Query additional config failed.");
         return "";

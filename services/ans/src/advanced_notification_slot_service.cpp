@@ -747,13 +747,10 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
 #endif
     }
-    int32_t activeUserId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(activeUserId);
-
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().SetKvToDb(key, value, activeUserId);
+        result = NotificationPreferences::GetInstance().SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
     notificationSvrQueue_->wait(handler);
 
