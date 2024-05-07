@@ -97,7 +97,6 @@ int32_t NotificationDataMgr::Init()
             return NativeRdb::E_OK;
         }
     }
-
     NativeRdb::RdbStoreConfig rdbStoreConfig(
             notificationRdbConfig_.dbPath + notificationRdbConfig_.dbName,
             NativeRdb::StorageMode::MODE_DISK,
@@ -107,7 +106,10 @@ int32_t NotificationDataMgr::Init()
             notificationRdbConfig_.syncMode);
     rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
-
+    {
+        std::lock_guard<std::mutex> lock(userTableMutex_);
+        userTableInit_.clear();
+    }
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         int32_t ret = NativeRdb::E_OK;
@@ -133,10 +135,6 @@ int32_t NotificationDataMgr::Destroy()
         }
 
         rdbStore_ = nullptr;
-    }
-    {
-        std::lock_guard<std::mutex> lock(userTableMutex_);
-        userTableInit_.clear();
     }
     int32_t ret = NativeRdb::RdbHelper::DeleteRdbStore(notificationRdbConfig_.dbPath + notificationRdbConfig_.dbName);
     if (ret != NativeRdb::E_OK) {
@@ -499,6 +497,7 @@ std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
             ret = rdbStore_->ExecuteSql(createTableSql);
         }
         if (ret == NativeRdb::E_OK) {
+            userTableInit_.insert(userId);
             userTableInit_.insert(userId);
             ANS_LOGD("createTable %{public}s succeed", tableName.c_str());
             return tableName;
