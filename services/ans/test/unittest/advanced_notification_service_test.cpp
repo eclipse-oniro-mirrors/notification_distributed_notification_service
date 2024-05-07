@@ -4050,7 +4050,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0001, Function |
     EXPECT_NE(advancedNotificationService_->notificationList_.size(), 0);
 
     advancedNotificationService_->notificationList_.clear();
-    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey());
+    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey(), 0);
     EXPECT_EQ(result, ERR_OK);
 
     GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0001 test end";
@@ -4085,7 +4085,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0002, Function |
     advancedNotificationService_->RecoverLiveViewFromDb();
     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 
-    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey());
+    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey(), 0);
     EXPECT_EQ(result, ERR_OK);
 
     GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0002 test end";

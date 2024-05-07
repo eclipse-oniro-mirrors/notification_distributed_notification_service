@@ -47,7 +47,7 @@ const struct option LONG_OPTIONS[] = {
 #endif
     {"bundle", required_argument, nullptr, 'b'},
     {"user-id", required_argument, nullptr, 'u'},
-    {"reciver", required_argument, nullptr, 'r'},
+    {"receiver", required_argument, nullptr, 'r'},
 };
 constexpr char HELP_MSG[] =
     "usage: anm <command> [<options>]\n"
@@ -66,7 +66,7 @@ constexpr char DUMP_HELP_MSG[] =
     "  --recent,  -R                 list recent notifications\n"
     "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
     "  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
-    "  --reciver, -r  <userId>       dump the info filter by the specified reciever userId\n";
+    "  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 constexpr char SETTING_SHORT_OPTIONS[] = "c:e:d:";
 const struct option SETTING_LONG_OPTIONS[] = {

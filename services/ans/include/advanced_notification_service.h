@@ -1251,7 +1251,7 @@ private:
     static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
     static int32_t GetNotificationRequestFromDb(const std::string &key, NotificationRequestDb &requestDb);
     static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests);
-    static int32_t DeleteNotificationRequestFromDb(const std::string &key);
+    static int32_t DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId);
     void CancelTimer(uint64_t timerId);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);

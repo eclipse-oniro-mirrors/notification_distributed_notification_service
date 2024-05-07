@@ -134,7 +134,10 @@ int32_t NotificationDataMgr::Destroy()
 
         rdbStore_ = nullptr;
     }
-
+    {
+        std::lock_guard<std::mutex> lock(userTableMutex_);
+        userTableInit_.clear();
+    }
     int32_t ret = NativeRdb::RdbHelper::DeleteRdbStore(notificationRdbConfig_.dbPath + notificationRdbConfig_.dbName);
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("failed to destroy db store");
@@ -483,9 +486,9 @@ std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
     std::stringstream stream;
     stream << notificationRdbConfig_.tableName << keySpliter << userId;
     std::string tableName = stream.str();
-    if (!userTableInit_[userId]) {
+    if (userTableInit_.find(userId) == userTableInit_.end()) {
         std::lock_guard<std::mutex> lock(userTableMutex_);
-        if (userTableInit_[userId]) {
+        if (userTableInit_.find(userId) != userTableInit_.end()) {
             return tableName;
         }
         int ret = NativeRdb::E_OK;
@@ -496,7 +499,7 @@ std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
             ret = rdbStore_->ExecuteSql(createTableSql);
         }
         if (ret == NativeRdb::E_OK) {
-            userTableInit_[userId] = true;
+            userTableInit_.insert(userId);
             ANS_LOGD("createTable %{public}s succeed", tableName.c_str());
             return tableName;
         }

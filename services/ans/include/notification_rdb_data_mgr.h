@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_RDB_DATA_MGR_H
 
 #include <mutex>
+#include <set>
 #include <vector>
 #include <string>
 #include <map>
@@ -144,7 +145,7 @@ private:
     NotificationRdbConfig notificationRdbConfig_;
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
     mutable std::mutex rdbStorePtrMutex_;
-    std::map<int32_t, bool> userTableInit_;
+    std::set<int32_t> userTableInit_;
     mutable std::mutex userTableMutex_;
 };
 } // namespace Notification

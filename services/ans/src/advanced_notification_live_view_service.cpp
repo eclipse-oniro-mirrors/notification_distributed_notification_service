@@ -47,7 +47,8 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
     for (const auto &requestObj : requestsdb) {
         ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
         if (!IsLiveViewCanRecover(requestObj.request)) {
-            if (DeleteNotificationRequestFromDb(requestObj.request->GetKey()) != ERR_OK) {
+            int32_t userId = requestObj.request->GetReceiverUserId();
+            if (DeleteNotificationRequestFromDb(requestObj.request->GetKey(), userId) != ERR_OK) {
                 ANS_LOGE("Delete notification failed.");
             }
             continue;
@@ -131,8 +132,8 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
     if ((record->request == nullptr) || !(record->request->IsCommonLiveView())) {
         return;
     }
-
-    if (DeleteNotificationRequestFromDb(record->request->GetKey()) != ERR_OK) {
+    int32_t userId = record->request->GetReceiverUserId();
+    if (DeleteNotificationRequestFromDb(record->request->GetKey(), userId) != ERR_OK) {
         ANS_LOGE("Live View cancel, delete notification failed.");
     }
 
@@ -299,7 +300,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
         auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
         if (bundleOption == nullptr) {
             ANS_LOGE("Parse json string to bundle option failed.");
-            (void)DeleteNotificationRequestFromDb(request->GetKey());
+            (void)DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
             continue;
         }
 
@@ -312,10 +313,8 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
     return ERR_OK;
 }
 
-int32_t AdvancedNotificationService::DeleteNotificationRequestFromDb(const std::string &key)
+int32_t AdvancedNotificationService::DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId)
 {
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     auto result = NotificationPreferences::GetInstance().DeleteKvFromDb(key, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Delete notification request failed, key %{public}s.", key.c_str());
