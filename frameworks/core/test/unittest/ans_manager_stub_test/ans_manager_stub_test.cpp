@@ -2596,6 +2596,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
     data.WriteString(cmd);
     data.WriteString(bundle);
     data.WriteInt32(userId);
+    data.WriteInt32(userId);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);

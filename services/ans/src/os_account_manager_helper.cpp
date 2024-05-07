@@ -29,6 +29,17 @@ ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &id)
     return AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), id);
 }
 
+ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
+{
+    std::vector<int> activeUserId;
+    int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+    if (activeUserId.size() > 0) {
+        id = activeUserId[0];
+        return ret;
+    }
+    return ret;
+}
+
 OsAccountManagerHelper &OsAccountManagerHelper::GetInstance()
 {
     return DelayedRefSingleton<OsAccountManagerHelper>::GetInstance();

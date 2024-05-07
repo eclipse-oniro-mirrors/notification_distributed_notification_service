@@ -25,10 +25,10 @@ namespace OHOS {
 namespace Notification {
 class OsAccountManagerHelperTest : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestSuite() {};
+    static void TearDownTestSuite() {};
+    void SetUp() override {};
+    void TearDown() override {};
 };
 
 /**
@@ -54,5 +54,15 @@ HWTEST_F(OsAccountManagerHelperTest, GetOsAccountLocalIdFromUid_00100, Function 
     EXPECT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId));
 }
 
+/**
+ * @tc.number    : GetCurrentActiveUserId_00100
+ * @tc.name      : GetCurrentActiveUserId_00100
+ * @tc.desc      : test GetCurrentActiveUserId function
+ */
+HWTEST_F(OsAccountManagerHelperTest, GetCurrentActiveUserId_00100, Function | SmallTest | Level1)
+{
+    int32_t userId = -1;
+    EXPECT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId));
+}
 }
 }

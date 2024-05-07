@@ -154,7 +154,7 @@ private:
     NotificationRdbConfig notificationRdbConfig_;
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
     mutable std::mutex rdbStorePtrMutex_;
-    std::set<int><int32_t, bool> userTableInit_;
+    std::set<int> userTableInit_;
     mutable std::mutex userTableMutex_;
 };
 } // namespace Notification

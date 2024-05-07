@@ -283,7 +283,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
 {
     std::unordered_map<std::string, std::string> dbRecords;
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     int32_t result =
         NotificationPreferences::GetInstance().GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords, userId);
     if (result != ERR_OK) {

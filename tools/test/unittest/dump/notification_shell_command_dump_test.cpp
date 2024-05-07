@@ -36,7 +36,8 @@ static char g_dumpHelpMsg[] =
 "  --active,  -A                 list all active notifications\n"
 "  --recent,  -R                 list recent notifications\n"
 "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+"  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 static char g_dumpActiveBound[] =
 "error: option 'b' requires a value.\n"
@@ -45,7 +46,8 @@ static char g_dumpActiveBound[] =
 "  --active,  -A                 list all active notifications\n"
 "  --recent,  -R                 list recent notifications\n"
 "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+"  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 static char g_dumpActiveUser[] =
 "error: option 'u' requires a value.\n"
@@ -55,7 +57,8 @@ static char g_dumpActiveUser[] =
 "  --active,  -A                 list all active notifications\n"
 "  --recent,  -R                 list recent notifications\n"
 "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+"  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 static char g_enableErrorInformation[] =
 "error: option 'e' requires a value.\nusage: anm setting [<options>]\noptions list:\n"
@@ -89,7 +92,8 @@ static char g_unknownOption[] =
 "  --active,  -A                 list all active notifications\n"
 "  --recent,  -R                 list recent notifications\n"
 "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+"  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 static char g_dumpActiveCount[] =
 "error: option 'c' requires a value.\n"
@@ -109,13 +113,15 @@ static char g_helpMsg[] =
 "  --recent,  -R                 list recent notifications\n"
 "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
 "  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+"  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n"
 "usage: anm dump [<options>]\n"
 "options list:\n"
 "  --help, -h                   help menu\n"
 "  --active,  -A                 list all active notifications\n"
 "  --recent,  -R                 list recent notifications\n"
 "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-"  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+"  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+"  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 static char g_bundleName[] = "example";
 static char g_commandActive[] = "active";

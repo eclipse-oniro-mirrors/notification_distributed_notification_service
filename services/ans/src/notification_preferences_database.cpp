@@ -891,15 +891,12 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
     }
     std::unordered_map<std::string, std::string> datas;
     const std::string ANS_BUNDLE_BEGIN = "ans_bundle_";
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-
-    for (auto iter : activeUserId) {
-        int32_t errCode = rdbDataManager_->QueryDataBeginWithKey(ANS_BUNDLE_BEGIN, datas, iter);
-        if (errCode != NativeRdb::E_OK) {
-            ANS_LOGE("Query data begin with ans_bundle_ from db error");
-            return false;
-        }
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    int32_t errCode = rdbDataManager_->QueryDataBeginWithKey(ANS_BUNDLE_BEGIN, datas, userId);
+    if (errCode != NativeRdb::E_OK) {
+        ANS_LOGE("Query data begin with ans_bundle_ from db error");
+        return false;
     }
     return HandleDataBaseMap(datas, bundleOption);
 }

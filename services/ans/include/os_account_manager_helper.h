@@ -36,7 +36,7 @@ public:
      * Gets operating system account local ID from uid.
      *
      * @param uid Indicates the uid.
-     * @param ids Indicates the account ID.
+     * @param id Indicates the account ID.
      * @return Returns result code.
      */
     ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
@@ -44,11 +44,18 @@ public:
     /**
      * Gets operating system account local ID from current calling.
      *
-     * @param uid Indicates the uid.
-     * @param ids Indicates the account ID.
+     * @param id Indicates the current calling account ID.
      * @return Returns result code.
      */
     ErrCode GetCurrentCallingUserId(int32_t &id);
+
+    /**
+     * Gets operating system account local ID from current active.
+     *
+     * @param id Indicates the current active account ID.
+     * @return Returns result code.
+     */
+    ErrCode GetCurrentActiveUserId(int32_t &id);
 };
 } // namespace OHOS
 } // namespace Notification
