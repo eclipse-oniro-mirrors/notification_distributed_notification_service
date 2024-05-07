@@ -107,10 +107,6 @@ int32_t NotificationDataMgr::Init()
     rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
     {
-        std::lock_guard<std::mutex> lock(userTableMutex_);
-        userTableInit_.clear();
-    }
-    {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         int32_t ret = NativeRdb::E_OK;
         rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(rdbStoreConfig, notificationRdbConfig_.version,
@@ -127,6 +123,8 @@ int32_t NotificationDataMgr::Init()
 int32_t NotificationDataMgr::Destroy()
 {
     ANS_LOGD("Destory rdbStore");
+    std::lock_guard<std::mutex> lock(userTableMutex_);
+    userTableInit_.clear();
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
@@ -497,7 +495,6 @@ std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
             ret = rdbStore_->ExecuteSql(createTableSql);
         }
         if (ret == NativeRdb::E_OK) {
-            userTableInit_.insert(userId);
             userTableInit_.insert(userId);
             ANS_LOGD("createTable %{public}s succeed", tableName.c_str());
             return tableName;
