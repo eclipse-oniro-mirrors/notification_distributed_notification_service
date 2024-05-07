@@ -490,6 +490,9 @@ std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
         int ret = NativeRdb::E_OK;
         {
             std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+            if (rdbStore_ == nullptr) {
+                return notificationRdbConfig_.tableName;
+            }
             std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + tableName
                 + " (KEY TEXT NOT NULL PRIMARY KEY, VALUE TEXT NOT NULL);";
             ret = rdbStore_->ExecuteSql(createTableSql);
