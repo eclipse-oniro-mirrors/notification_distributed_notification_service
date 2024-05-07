@@ -388,8 +388,6 @@ void ReminderDataManager::OnServiceStart()
     std::vector<sptr<ReminderRequest>> immediatelyShowReminders;
     GetImmediatelyShowRemindersLocked(immediatelyShowReminders);
     ANSR_LOGD("immediatelyShowReminders size=%{public}zu", immediatelyShowReminders.size());
-    HandleImmediatelyShow(immediatelyShowReminders, false);
-    StartRecentReminder();
 }
 
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
@@ -1430,6 +1428,7 @@ void ReminderDataManager::Init(bool isFromBootComplete)
         std::vector<sptr<ReminderRequest>> reissueReminder;
         InitStartExtensionAbility(reissueReminder);
         HandleImmediatelyShow(reissueReminder, false);
+        StartRecentReminder();
     }
     if (IsReminderAgentReady()) {
         return;
