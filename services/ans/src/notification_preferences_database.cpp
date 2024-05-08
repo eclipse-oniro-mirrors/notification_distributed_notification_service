@@ -1918,11 +1918,11 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
         ANS_LOGE("Bundle name is null.");
         return false;
     }
-    int32_t callingUserId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(callingUserId);
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
 
     std::string key = GenerateBundleLablel(bundleInfo, deviceType);
-    int32_t result = PutDataToDB(key, enabled, callingUserId);
+    int32_t result = PutDataToDB(key, enabled, userId);
     ANS_LOGD("result[%{public}d]", result);
     return (result == NativeRdb::E_OK);
 }

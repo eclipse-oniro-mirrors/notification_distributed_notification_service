@@ -4032,6 +4032,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0001, Function |
     request->SetCreatorUid(0);
     request->SetCreatorUserId(1);
     request->SetLabel("test");
+    request->SetReceiverUserId(100);
 
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
