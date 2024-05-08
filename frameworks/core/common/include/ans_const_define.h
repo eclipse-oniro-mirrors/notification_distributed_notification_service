@@ -61,6 +61,7 @@ const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};
 const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_template/external.json");
 const std::string CURRENT_DEVICE_TYPE = "current";
 const std::string RING_TRUST_PKG_KEY = "RING_TRUSTLIST_PKG";
+const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr NotificationConstant::DistributedReminderPolicy DEFAULT_DISTRIBUTED_REMINDER_POLICY =
