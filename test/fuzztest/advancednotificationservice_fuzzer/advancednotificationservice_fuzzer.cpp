@@ -131,7 +131,7 @@ namespace OHOS {
         advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
-        advancedNotificationService.ShellDump(stringData, stringData, userId, dumpInfo);
+        advancedNotificationService.ShellDump(stringData, stringData, userId, userId, dumpInfo);
         advancedNotificationService.SetSyncNotificationEnabledWithoutApp(userId, enabled);
         advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = static_cast<int32_t>(GetU32Data(data));

@@ -202,7 +202,7 @@ namespace OHOS {
         ansManagerStub.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         ansManagerStub.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
-        ansManagerStub.ShellDump(stringData, stringData, userId, dumpInfo);
+        ansManagerStub.ShellDump(stringData, stringData, userId, userId, dumpInfo);
         ansManagerStub.SetSyncNotificationEnabledWithoutApp(userId, enabled);
         ansManagerStub.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         return true;

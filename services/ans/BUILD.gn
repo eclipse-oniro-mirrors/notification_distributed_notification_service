@@ -77,6 +77,7 @@ ohos_shared_library("libans") {
     "src/notification_smart_reminder/smart_reminder_center.cpp",
     "src/notification_subscriber_manager.cpp",
     "src/notification_timer_info.cpp",
+    "src/os_account_manager_helper.cpp",
     "src/permission_filter.cpp",
     "src/reminder_config_change_observer.cpp",
     "src/reminder_data_manager.cpp",

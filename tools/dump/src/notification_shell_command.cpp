@@ -18,9 +18,11 @@
 #include <getopt.h>
 #include <iostream>
 
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "nativetoken_kit.h"
 #include "notification_bundle_option.h"
+#include "out/rk3568/obj/third_party/musl/intermidiates/linux/musl_src_ported/include/unistd.h"
 #include "token_setproc.h"
 #include "singleton.h"
 
@@ -31,7 +33,7 @@ constexpr char COMMAND_ACTIVE[] = "active";
 constexpr char COMMAND_RECENT[] = "recent";
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr char COMMAND_DISTRIBUTED[] = "distributed";
-constexpr char SHORT_OPTIONS[] = "hARDb:u:";
+constexpr char SHORT_OPTIONS[] = "hARDb:u:r:";
 #else
 constexpr char SHORT_OPTIONS[] = "hARb:u:";
 #endif
@@ -45,6 +47,7 @@ const struct option LONG_OPTIONS[] = {
 #endif
     {"bundle", required_argument, nullptr, 'b'},
     {"user-id", required_argument, nullptr, 'u'},
+    {"receiver", required_argument, nullptr, 'r'},
 };
 constexpr char HELP_MSG[] =
     "usage: anm <command> [<options>]\n"
@@ -62,7 +65,8 @@ constexpr char DUMP_HELP_MSG[] =
     "  --active,  -A                 list all active notifications\n"
     "  --recent,  -R                 list recent notifications\n"
     "  --bundle,  -b  <name>         dump the info filter by the specified bundle name\n"
-    "  --user-id, -u  <userId>       dump the info filter by the specified userId\n";
+    "  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
+    "  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 constexpr char SETTING_SHORT_OPTIONS[] = "c:e:d:";
 const struct option SETTING_LONG_OPTIONS[] = {
@@ -154,7 +158,8 @@ ErrCode NotificationShellCommand::RunAsDumpCommand()
     std::string cmd;
     std::string bundle;
     int32_t userId = SUBSCRIBE_USER_INIT;
-    SetDumpCmdInfo(cmd, bundle, userId, ret);
+    int32_t recvUserId = SUBSCRIBE_USER_INIT;
+    SetDumpCmdInfo(cmd, bundle, userId, ret, recvUserId);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -165,7 +170,7 @@ ErrCode NotificationShellCommand::RunAsDumpCommand()
         return ERR_INVALID_VALUE;
     }
 
-    ret = RunDumpCmd(cmd, bundle, userId, infos);
+    ret = RunDumpCmd(cmd, bundle, userId, recvUserId, infos);
     int index = 0;
     for (const auto &info : infos) {
         resultReceiver_.append("No." + std::to_string(++index) + "\n");
@@ -175,10 +180,10 @@ ErrCode NotificationShellCommand::RunAsDumpCommand()
 }
 
 ErrCode NotificationShellCommand::RunDumpCmd(const std::string& cmd, const std::string& bundle,
-    int32_t userId, std::vector<std::string> &infos)
+    int32_t userId, int32_t recvUserId, std::vector<std::string> &infos)
 {
     if (ans_ != nullptr) {
-        ErrCode ret = ans_->ShellDump(cmd, bundle, userId, infos);
+        ErrCode ret = ans_->ShellDump(cmd, bundle, userId, recvUserId, infos);
         if (strncmp(cmd.c_str(), COMMAND_SET_RECENT_COUNT, strlen(COMMAND_SET_RECENT_COUNT)) == 0) {
             if (ret == ERR_OK) {
                 resultReceiver_.append("set recent count success\n");
@@ -193,7 +198,8 @@ ErrCode NotificationShellCommand::RunDumpCmd(const std::string& cmd, const std::
     return ERR_ANS_SERVICE_NOT_CONNECTED;
 }
 
-void NotificationShellCommand::SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId, ErrCode &ret)
+void NotificationShellCommand::SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId,
+    ErrCode &ret, int32_t &recvUserId)
 {
     int option = -1;
     bool hasOption = false;
@@ -226,6 +232,9 @@ void NotificationShellCommand::SetDumpCmdInfo(std::string &cmd, std::string &bun
             case 'u':
                 userId = atoi(optarg);
                 break;
+            case 'r':
+                recvUserId = atoi(optarg);
+                break;
             default:
                 resultReceiver_.append(DUMP_HELP_MSG);
                 break;
@@ -245,6 +254,9 @@ void NotificationShellCommand::CheckDumpOpt()
             break;
         case 'u':
             resultReceiver_.append("error: option 'u' requires a value.\n");
+            break;
+        case 'r':
+            resultReceiver_.append("error: option 'r' requires a value.\n");
             break;
         default:
             resultReceiver_.append("error: unknown option.\n");
@@ -282,7 +294,7 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
         std::vector<std::string> infos;
         std::string cmd = COMMAND_SET_RECENT_COUNT;
         cmd.append(" ").append(std::string(optarg));
-        return RunDumpCmd(cmd, "", SUBSCRIBE_USER_INIT, infos);
+        return RunDumpCmd(cmd, "", SUBSCRIBE_USER_INIT, SUBSCRIBE_USER_INIT, infos);
     }
     if (option == 'e') {
         return RunSetEnableCmd();

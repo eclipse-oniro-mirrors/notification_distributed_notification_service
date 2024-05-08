@@ -233,6 +233,14 @@ int32_t Notification::GetUserId() const
     return request_->GetCreatorUserId();
 }
 
+int32_t Notification::GetRecvUserId() const
+{
+    if (request_ == nullptr) {
+        return 0;
+    }
+    return request_->GetReceiverUserId();
+}
+
 bool Notification::MarshallingBool(Parcel &parcel) const
 {
     if (!parcel.WriteBool(enableLight_)) {

@@ -539,7 +539,7 @@ ErrCode AnsManagerStub::GetEnabledForBundleSlotSelf(const NotificationConstant::
 }
 
 ErrCode AnsManagerStub::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     ANS_LOGE("AnsManagerStub::ShellDump called!");
     return ERR_INVALID_OPERATION;

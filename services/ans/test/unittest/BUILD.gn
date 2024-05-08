@@ -668,6 +668,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "${services_path}/ans/src/common/notification_config_parse.cpp",
     "${services_path}/ans/src/notification_preferences_database.cpp",
     "${services_path}/ans/src/notification_preferences_info.cpp",
+    "${services_path}/ans/src/os_account_manager_helper.cpp",
     "notification_preferences_database_branch_test/mock_notification_rdb_data_mgr.cpp",
     "notification_preferences_database_branch_test/notification_preferences_database_branch_test.cpp",
   ]
@@ -851,6 +852,53 @@ ohos_unittest("notification_config_parse_test") {
   ]
 }
 
+ohos_unittest("os_account_manager_helper_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/ans/include",
+    "${services_path}/ans/test/unittest/mock/include",
+  ]
+
+  sources = [ "os_account_manager_helper_test.cpp" ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "player_framework:media_client",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "time_service:time_client",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -865,6 +913,7 @@ group("unittest") {
     ":notification_rdb_data_mgr_test",
     ":notification_service_test",
     ":notification_subscriber_manager_branch_test",
+    ":os_account_manager_helper_test",
     ":push_callback_stub_test",
     ":reminder_unit_test",
   ]

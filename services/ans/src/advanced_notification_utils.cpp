@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "access_token_helper.h"
@@ -359,7 +360,7 @@ void AdvancedNotificationService::ExtendDumpForFlags(
 }
 
 ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::stringstream stream;
@@ -368,6 +369,9 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
             continue;
         }
         if (userId != SUBSCRIBE_USER_INIT && userId != record->notification->GetUserId()) {
+            continue;
+        }
+        if (recvUserId != SUBSCRIBE_USER_INIT && recvUserId != record->notification->GetRecvUserId()) {
             continue;
         }
         if (!bundle.empty() && bundle != record->notification->GetBundleName()) {
@@ -389,6 +393,7 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
         } else {
             stream << "\tOwnerUid: " << record->request->GetCreatorUid() << "\n";
         }
+        stream << "\tReceiverUserId: " << record->request->GetReceiverUserId() << "\n";
         stream << "\tDeliveryTime = " << TimeToString(record->request->GetDeliveryTime()) << "\n";
         stream << "\tNotification:\n";
         stream << "\t\tId: " << record->notification->GetId() << "\n";
@@ -402,7 +407,7 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
 }
 
 ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::stringstream stream;
@@ -412,6 +417,9 @@ ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& b
         }
         const auto &notificationRequest = recentNotification->notification->GetNotificationRequest();
         if (userId != SUBSCRIBE_USER_INIT && userId != notificationRequest.GetOwnerUserId()) {
+            continue;
+        }
+        if (recvUserId != SUBSCRIBE_USER_INIT && recvUserId != recentNotification->notification->GetRecvUserId()) {
             continue;
         }
         if (!bundle.empty() && bundle != recentNotification->notification->GetBundleName()) {
@@ -427,6 +435,7 @@ ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& b
         } else {
             stream << "\tOwnerUid: " << notificationRequest.GetCreatorUid() << "\n";
         }
+        stream << "\tReceiverUserId: " << notificationRequest.GetReceiverUserId() << "\n";
         stream << "\tDeliveryTime = " << TimeToString(notificationRequest.GetDeliveryTime()) << "\n";
         if (!recentNotification->isActive) {
             stream << "\tDeleteTime: " << TimeToString(recentNotification->deleteTime) << "\n";
@@ -444,7 +453,7 @@ ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& b
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 ErrCode AdvancedNotificationService::DistributedNotificationDump(const std::string& bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::stringstream stream;
@@ -453,6 +462,9 @@ ErrCode AdvancedNotificationService::DistributedNotificationDump(const std::stri
             continue;
         }
         if (userId != SUBSCRIBE_USER_INIT && userId != record->notification->GetUserId()) {
+            continue;
+        }
+        if (recvUserId != SUBSCRIBE_USER_INIT && recvUserId != record->notification->GetRecvUserId()) {
             continue;
         }
         if (!bundle.empty() && bundle != record->notification->GetBundleName()) {
@@ -471,6 +483,7 @@ ErrCode AdvancedNotificationService::DistributedNotificationDump(const std::stri
         } else {
             stream << "\tOwnerUid: " << record->request->GetCreatorUid() << "\n";
         }
+        stream << "\tReceiverUserId: " << record->request->GetReceiverUserId() << "\n";
         stream << "\tDeliveryTime = " << TimeToString(record->request->GetDeliveryTime()) << "\n";
         stream << "\tNotification:\n";
         stream << "\t\tId: " << record->notification->GetId() << "\n";
@@ -1456,7 +1469,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
 }
 
 ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1474,12 +1487,12 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (cmd == ACTIVE_NOTIFICATION_OPTION) {
-            result = ActiveNotificationDump(bundle, userId, dumpInfo);
+            result = ActiveNotificationDump(bundle, userId, recvUserId, dumpInfo);
         } else if (cmd == RECENT_NOTIFICATION_OPTION) {
-            result = RecentNotificationDump(bundle, userId, dumpInfo);
+            result = RecentNotificationDump(bundle, userId, recvUserId, dumpInfo);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         } else if (cmd == DISTRIBUTED_NOTIFICATION_OPTION) {
-            result = DistributedNotificationDump(bundle, userId, dumpInfo);
+            result = DistributedNotificationDump(bundle, userId, recvUserId, dumpInfo);
 #endif
         } else if (cmd.substr(0, cmd.find_first_of(" ", 0)) == SET_RECENT_COUNT_OPTION) {
             result = SetRecentNotificationCount(cmd.substr(cmd.find_first_of(" ", 0) + 1));
@@ -1520,7 +1533,7 @@ void AdvancedNotificationService::GetDumpInfo(const std::vector<std::u16string> 
     if (cmdValue == HELP_NOTIFICATION_OPTION) {
         result = HIDUMPER_HELP_MSG;
     }
-    ShellDump(cmdValue, "", SUBSCRIBE_USER_INIT, dumpInfo);
+    ShellDump(cmdValue, "", SUBSCRIBE_USER_INIT, SUBSCRIBE_USER_INIT, dumpInfo);
     if (dumpInfo.empty()) {
         result.append("no notification\n");
         return;

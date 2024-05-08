@@ -24,6 +24,7 @@
 #include "hitrace_meter_adapter.h"
 #include "nlohmann/json.hpp"
 #include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -102,7 +103,8 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     result = CheckSlotForRemoveSlot(bundleOption, slotType, preferencesInfo);
-    if (result == ERR_OK && (!preferncesDB_->RemoveSlotFromDisturbeDB(GenerateBundleKey(bundleOption), slotType))) {
+    if (result == ERR_OK &&
+        (!preferncesDB_->RemoveSlotFromDisturbeDB(GenerateBundleKey(bundleOption), slotType, bundleOption->GetUid()))) {
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
@@ -125,7 +127,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     if (preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
         bundleInfo.RemoveAllSlots();
         preferencesInfo.SetBundleInfo(bundleInfo);
-        if (!preferncesDB_->RemoveAllSlotsFromDisturbeDB(GenerateBundleKey(bundleOption))) {
+        if (!preferncesDB_->RemoveAllSlotsFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         }
     } else {
@@ -151,7 +153,7 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
     ErrCode result = ERR_OK;
     if (preferencesInfo.IsExsitBundleInfo(bundleOption)) {
         preferencesInfo.RemoveBundleInfo(bundleOption);
-        if (!preferncesDB_->RemoveBundleFromDisturbeDB(GenerateBundleKey(bundleOption))) {
+        if (!preferncesDB_->RemoveBundleFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         }
     } else {
@@ -929,7 +931,7 @@ void NotificationPreferences::RemoveEnabledDbByBundle(const sptr<NotificationBun
     ANS_LOGE("%{public}s", __FUNCTION__);
     if (preferncesDB_ != nullptr && bundleOption != nullptr) {
         std::lock_guard<std::mutex> lock(preferenceMutex_);
-        preferncesDB_->RemoveEnabledDbByBundleName(bundleOption->GetBundleName());
+        preferncesDB_->RemoveEnabledDbByBundleName(bundleOption->GetBundleName(), bundleOption->GetUid());
     }
 }
 
@@ -937,7 +939,9 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::string value = "";
-    if (GetKvFromDb("RING_TRUSTLIST_PKG", value) != ERR_OK) {
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    if (GetKvFromDb("RING_TRUSTLIST_PKG", value, userId) != ERR_OK) {
         ANS_LOGD("Get bundle sound permission failed.");
         return false;
     }
@@ -959,56 +963,56 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
 }
 
 int32_t NotificationPreferences::SetKvToDb(
-    const std::string &key, const std::string &value)
+    const std::string &key, const std::string &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    return preferncesDB_->SetKvToDb(key, value);
+    return preferncesDB_->SetKvToDb(key, value, userId);
 }
 
 int32_t NotificationPreferences::SetByteToDb(
-    const std::string &key, const std::vector<uint8_t> &value)
+    const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    return preferncesDB_->SetByteToDb(key, value);
+    return preferncesDB_->SetByteToDb(key, value, userId);
 }
 
 int32_t NotificationPreferences::GetKvFromDb(
-    const std::string &key, std::string &value)
+    const std::string &key, std::string &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    return preferncesDB_->GetKvFromDb(key, value);
+    return preferncesDB_->GetKvFromDb(key, value, userId);
 }
 
 int32_t NotificationPreferences::GetByteFromDb(
-    const std::string &key, std::vector<uint8_t> &value)
+    const std::string &key, std::vector<uint8_t> &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    return preferncesDB_->GetByteFromDb(key, value);
+    return preferncesDB_->GetByteFromDb(key, value, userId);
 }
 
 int32_t NotificationPreferences::GetBatchKvsFromDb(
-    const std::string &key, std::unordered_map<std::string, std::string> &values)
+    const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    return preferncesDB_->GetBatchKvsFromDb(key, values);
+    return preferncesDB_->GetBatchKvsFromDb(key, values, userId);
 }
 
-int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key)
+int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    return preferncesDB_->DeleteKvFromDb(key);
+    return preferncesDB_->DeleteKvFromDb(key, userId);
 }
 
 bool NotificationPreferences::IsAgentRelationship(const std::string &agentBundleName,

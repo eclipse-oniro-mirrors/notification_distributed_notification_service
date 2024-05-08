@@ -15,6 +15,8 @@
 #include "notification_rdb_data_mgr.h"
 
 #include "ans_log_wrapper.h"
+#include <sstream>
+#include <string>
 
 namespace OHOS {
 namespace Notification {
@@ -95,7 +97,6 @@ int32_t NotificationDataMgr::Init()
             return NativeRdb::E_OK;
         }
     }
-
     NativeRdb::RdbStoreConfig rdbStoreConfig(
             notificationRdbConfig_.dbPath + notificationRdbConfig_.dbName,
             NativeRdb::StorageMode::MODE_DISK,
@@ -105,7 +106,6 @@ int32_t NotificationDataMgr::Init()
             notificationRdbConfig_.syncMode);
     rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
-
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         int32_t ret = NativeRdb::E_OK;
@@ -123,6 +123,8 @@ int32_t NotificationDataMgr::Init()
 int32_t NotificationDataMgr::Destroy()
 {
     ANS_LOGD("Destory rdbStore");
+    std::lock_guard<std::mutex> lock(userTableMutex_);
+    userTableInit_.clear();
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
@@ -132,7 +134,6 @@ int32_t NotificationDataMgr::Destroy()
 
         rdbStore_ = nullptr;
     }
-
     int32_t ret = NativeRdb::RdbHelper::DeleteRdbStore(notificationRdbConfig_.dbPath + notificationRdbConfig_.dbName);
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("failed to destroy db store");
@@ -142,10 +143,11 @@ int32_t NotificationDataMgr::Destroy()
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value)
+int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value, const int32_t &userId)
 {
     ANS_LOGD("InsertData start");
     {
+        std::string tableName = GetUserTableName(userId);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
@@ -155,8 +157,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
         NativeRdb::ValuesBucket valuesBucket;
         valuesBucket.PutString(NOTIFICATION_KEY, key);
         valuesBucket.PutString(NOTIFICATION_VALUE, value);
-        int32_t ret = rdbStore_->InsertWithConflictResolution(
-            rowId, notificationRdbConfig_.tableName, valuesBucket,
+        int32_t ret = rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
             NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Insert operation failed, result: %{public}d, key=%{public}s.", ret, key.c_str());
@@ -166,8 +167,10 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value)
+int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value,
+    const int32_t &userId)
 {
+    std::string tableName = GetUserTableName(userId);
     std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
@@ -177,8 +180,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vecto
     NativeRdb::ValuesBucket valuesBucket;
     valuesBucket.PutString(NOTIFICATION_KEY, key);
     valuesBucket.PutBlob(NOTIFICATION_VALUE, value);
-    int32_t ret = rdbStore_->InsertWithConflictResolution(
-        rowId, notificationRdbConfig_.tableName, valuesBucket,
+    int32_t ret = rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
         NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("Insert operation failed, result: %{public}d, key=%{public}s.", ret, key.c_str());
@@ -187,10 +189,12 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vecto
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values)
+int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values,
+    const int32_t &userId)
 {
     ANS_LOGD("InsertBatchData start");
     {
+        std::string tableName = GetUserTableName(userId);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
@@ -201,8 +205,7 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
             NativeRdb::ValuesBucket valuesBucket;
             valuesBucket.PutString(NOTIFICATION_KEY, value.first);
             valuesBucket.PutString(NOTIFICATION_VALUE, value.second);
-            int32_t ret = rdbStore_->InsertWithConflictResolution(
-                rowId, notificationRdbConfig_.tableName, valuesBucket,
+            int32_t ret = rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
                 NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
             if (ret != NativeRdb::E_OK) {
                 ANS_LOGE("Insert batch operation failed, result: %{public}d.", ret);
@@ -213,9 +216,10 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteData(const std::string &key)
+int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &userId)
 {
     ANS_LOGD("DeleteData start");
+    std::string tableName = GetUserTableName(userId);
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
@@ -223,97 +227,128 @@ int32_t NotificationDataMgr::DeleteData(const std::string &key)
             return NativeRdb::E_ERROR;
         }
         int32_t rowId = -1;
-        NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
-        absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
-        int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
-        if (ret != NativeRdb::E_OK) {
-            ANS_LOGE("Delete operation failed, result: %{public}d, key=%{public}s.",
-                ret, key.c_str());
-            return NativeRdb::E_ERROR;
+        int32_t ret = DeleteData(tableName, key, rowId);
+        if (ret != NativeRdb::E_OK || rowId == 0) {
+            return DeleteData(notificationRdbConfig_.tableName, key, rowId);
         }
     }
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &keys)
+int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::string key, int32_t &rowId)
+{
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
+    int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("Delete operation failed from %{public}s, result: %{public}d, key=%{public}s.",
+            tableName.c_str(), ret, key.c_str());
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &keys, const int32_t &userId)
 {
     ANS_LOGD("Delete Bathch Data start");
     {
+        std::string tableName = GetUserTableName(userId);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
         for (auto key : keys) {
-            NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
             int32_t rowId = -1;
-            absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
-            int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
-            if (ret != NativeRdb::E_OK) {
-                ANS_LOGE("Delete Batch operation failed, result: %{public}d, key=%{public}s.",
-                    ret, key.c_str());
-                return NativeRdb::E_ERROR;
+            int32_t ret = DeleteData(tableName, key, rowId);
+            if (ret != NativeRdb::E_OK || rowId == 0) {
+                ret = DeleteData(notificationRdbConfig_.tableName, key, rowId);
+                if (ret != NativeRdb::E_OK) {
+                    return NativeRdb::E_ERROR;
+                }
             }
         }
     }
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value)
+int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value, const int32_t &userId)
 {
     ANS_LOGD("QueryData start");
     {
+        std::string tableName = GetUserTableName(userId);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
-        NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
-        absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
-        auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
-        if (absSharedResultSet == nullptr) {
-            ANS_LOGD("absSharedResultSet failed");
-            return NativeRdb::E_ERROR;
+        int32_t ret = QueryData(tableName, key, value);
+        if (ret != NativeRdb::E_OK || value.empty()) {
+            return QueryData(notificationRdbConfig_.tableName, key, value);
         }
-
-        int32_t ret = absSharedResultSet->GoToFirstRow();
-        if (ret != NativeRdb::E_OK) {
-            ANS_LOGE("GoToFirstRow failed.It is empty!, key=%{public}s", key.c_str());
-            return NativeRdb::E_EMPTY_VALUES_BUCKET;
-        }
-        ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, value);
-        if (ret != NativeRdb::E_OK) {
-            ANS_LOGE("GetString value failed");
-            return NativeRdb::E_ERROR;
-        }
-        absSharedResultSet->Close();
     }
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryData(const std::string &key, std::vector<uint8_t> &value)
+int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::string key, std::string &value)
 {
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("notification rdb is null");
-        return NativeRdb::E_ERROR;
-    }
-    NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
-        ANS_LOGD("absSharedResultSet failed");
+        ANS_LOGD("absSharedResultSet failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed.It is empty!, key=%{public}s", key.c_str());
+        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
+            tableName.c_str(), key.c_str());
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, value);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
+        return NativeRdb::E_ERROR;
+    }
+    absSharedResultSet->Close();
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::QueryData(const std::string &key, std::vector<uint8_t> &value, const int32_t &userId)
+{
+    std::string tableName = GetUserTableName(userId);
+    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("notification rdb is null");
+        return NativeRdb::E_ERROR;
+    }
+    int32_t ret = QueryData(tableName, key, value);
+    if (ret != NativeRdb::E_OK || value.empty()) {
+        return QueryData(notificationRdbConfig_.tableName, key, value);
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::string key, std::vector<uint8_t> &value)
+{
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
+    auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    if (absSharedResultSet == nullptr) {
+        ANS_LOGD("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
+            tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetBlob(NOTIFICATION_VALUE_INDEX, value);
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GetString value failed");
+        ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
     absSharedResultSet->Close();
@@ -322,94 +357,155 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::vector<uint8
 }
 
 int32_t NotificationDataMgr::QueryDataBeginWithKey(
-    const std::string &key, std::unordered_map<std::string, std::string> &values)
+    const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     ANS_LOGD("QueryData BeginWithKey start");
     {
+        std::string tableName = GetUserTableName(userId);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
-        NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
-        absRdbPredicates.BeginsWith(NOTIFICATION_KEY, key);
-        auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
-        if (absSharedResultSet == nullptr) {
-            ANS_LOGE("absSharedResultSet failed");
+        int32_t ret = QueryDataBeginWithKey(tableName, key, values);
+        if (ret != NativeRdb::E_OK || values.empty()) {
+            return QueryDataBeginWithKey(notificationRdbConfig_.tableName, key, values);
+        }
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::QueryDataBeginWithKey(
+    const std::string tableName, const std::string key, std::unordered_map<std::string, std::string> &values)
+{
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    absRdbPredicates.BeginsWith(NOTIFICATION_KEY, key);
+    auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    if (absSharedResultSet == nullptr) {
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
+            tableName.c_str(), key.c_str());
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+
+    do {
+        std::string resultKey;
+        ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("Failed to GetString key from %{public}s table.", tableName.c_str());
             return NativeRdb::E_ERROR;
         }
 
-        int32_t ret = absSharedResultSet->GoToFirstRow();
+        std::string resultValue;
+        ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
         if (ret != NativeRdb::E_OK) {
-            ANS_LOGE("GoToFirstRow failed.It is empty!, key=%{public}s", key.c_str());
-            return NativeRdb::E_EMPTY_VALUES_BUCKET;
+            ANS_LOGE("GetString value failed from %{public}s table", tableName.c_str());
+            return NativeRdb::E_ERROR;
         }
 
-        do {
-            std::string resultKey;
-            ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
-            if (ret != NativeRdb::E_OK) {
-                ANS_LOGE("Failed to GetString key.");
-                return NativeRdb::E_ERROR;
-            }
-
-            std::string resultValue;
-            ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
-            if (ret != NativeRdb::E_OK) {
-                ANS_LOGE("GetString value failed");
-                return NativeRdb::E_ERROR;
-            }
-
-            values.emplace(resultKey, resultValue);
-        } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
-        absSharedResultSet->Close();
-    }
+        values.emplace(resultKey, resultValue);
+    } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
+    absSharedResultSet->Close();
 
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &datas)
+int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &datas, const int32_t &userId)
 {
     ANS_LOGD("QueryAllData start");
     {
+        std::string tableName = GetUserTableName(userId);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
-        NativeRdb::AbsRdbPredicates absRdbPredicates(notificationRdbConfig_.tableName);
-        auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
-        if (absSharedResultSet == nullptr) {
-            ANS_LOGE("absSharedResultSet failed");
+        int32_t ret = QueryAllData(tableName, datas);
+        if (ret != NativeRdb::E_OK) {
+            return ret;
+        }
+        return QueryAllData(notificationRdbConfig_.tableName, datas);
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::QueryAllData(
+    const std::string tableName, std::unordered_map<std::string, std::string> &datas)
+{
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    if (absSharedResultSet == nullptr) {
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+
+    do {
+        std::string resultKey;
+        ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("GetString key failed from %{public}s table.", tableName.c_str());
             return NativeRdb::E_ERROR;
         }
 
-        int32_t ret = absSharedResultSet->GoToFirstRow();
+        std::string resultValue;
+        ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
         if (ret != NativeRdb::E_OK) {
-            ANS_LOGE("GoToFirstRow failed. It is empty!");
-            return NativeRdb::E_EMPTY_VALUES_BUCKET;
+            ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
+            return NativeRdb::E_ERROR;
         }
 
-        do {
-            std::string resultKey;
-            ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
-            if (ret != NativeRdb::E_OK) {
-                ANS_LOGE("GetString key failed");
-                return NativeRdb::E_ERROR;
-            }
+        datas.emplace(resultKey, resultValue);
+    } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
+    absSharedResultSet->Close();
 
-            std::string resultValue;
-            ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
-            if (ret != NativeRdb::E_OK) {
-                ANS_LOGE("GetString value failed");
-                return NativeRdb::E_ERROR;
-            }
-
-            datas.emplace(resultKey, resultValue);
-        } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
-        absSharedResultSet->Close();
-    }
     return NativeRdb::E_OK;
+}
+
+std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
+{
+    if (userId == -1) {
+        return notificationRdbConfig_.tableName;
+    }
+
+    const char *keySpliter = "_";
+    std::stringstream stream;
+    stream << notificationRdbConfig_.tableName << keySpliter << userId;
+    std::string tableName = stream.str();
+    if (userTableInit_.find(userId) == userTableInit_.end()) {
+        std::lock_guard<std::mutex> lock(userTableMutex_);
+        if (userTableInit_.find(userId) != userTableInit_.end()) {
+            return tableName;
+        }
+        int ret = NativeRdb::E_OK;
+        {
+            std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+            if (rdbStore_ == nullptr) {
+                return notificationRdbConfig_.tableName;
+            }
+            std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + tableName
+                + " (KEY TEXT NOT NULL PRIMARY KEY, VALUE TEXT NOT NULL);";
+            ret = rdbStore_->ExecuteSql(createTableSql);
+        }
+        if (ret == NativeRdb::E_OK) {
+            userTableInit_.insert(userId);
+            ANS_LOGD("createTable %{public}s succeed", tableName.c_str());
+            return tableName;
+        }
+        ANS_LOGW("createTable %{public}s failed, code: %{code}d", tableName.c_str(), ret);
+        return notificationRdbConfig_.tableName;
+    }
+    return tableName;
 }
 }
 }

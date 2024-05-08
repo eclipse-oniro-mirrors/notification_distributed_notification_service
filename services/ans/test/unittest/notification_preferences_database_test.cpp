@@ -299,8 +299,9 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00100, 
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
+    const int32_t uid = -1;
     EXPECT_TRUE(preferncesDB_->PutTotalBadgeNums(bundleInfo, 0));
-    EXPECT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(bundleName_));
+    EXPECT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(bundleName_, uid));
 }
 
 /**
@@ -310,7 +311,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00100, 
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00200, Function | SmallTest | Level1)
 {
-    EXPECT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(std::string()));
+    const int32_t uid = -1;
+    EXPECT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(std::string(), uid));
 }
 
 /**
@@ -326,7 +328,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSlotFromDisturbeDB_00100, Fu
     EXPECT_TRUE(preferncesDB_->PutSlotsToDisturbeDB(bundleName_, bundleUid_, slots));
     EXPECT_TRUE(preferncesDB_->RemoveSlotFromDisturbeDB(
         bundleName_ + std::to_string(bundleUid_),
-        OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION));
+        OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION, -1));
 }
 
 /**
@@ -337,7 +339,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSlotFromDisturbeDB_00100, Fu
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSlotFromDisturbeDB_00200, Function | SmallTest | Level1)
 {
     EXPECT_FALSE(preferncesDB_->RemoveSlotFromDisturbeDB(
-        std::string(), OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION));
+        std::string(), OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION, -1));
 }
 
 /**
@@ -422,7 +424,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00100, Function | SmallTest | Level1)
 {
     std::string bundleKey = "BundleKey";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey), true);
+    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), true);
 }
 
 /**
@@ -599,7 +601,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00100, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_id";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -616,7 +618,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00200, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_name";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -633,7 +635,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00300, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_description";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -650,7 +652,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00400, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_level";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -667,7 +669,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00500, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_showBadge";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -684,7 +686,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00600, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_enableLight";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -701,7 +703,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00700, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_enableVibration";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -718,7 +720,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00800, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_ledLightColor";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -735,7 +737,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_00900, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_lockscreenVisibleness";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -752,7 +754,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01000, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_sound";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -769,7 +771,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01100, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_vibrationSytle";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -786,7 +788,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01200, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_enableBypassDnd";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -803,7 +805,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01300, Fun
     entry.first = "ans_bundle_bundleKey_slot_type_1_enabled";
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
-    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
 }
 
 /**
@@ -855,7 +857,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDoNotDisturbDate_00500, Functio
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00200, Function | SmallTest | Level1)
 {
     std::string bundleKey = "";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey), false);
+    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -1059,7 +1061,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDoNotDisturbProfiles_0100, Test
     profiles.emplace_back(profile);
     preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
     std::string key;
-    auto res = preferncesDB_->GetDoNotDisturbProfiles(key, profile);
+    auto res = preferncesDB_->GetDoNotDisturbProfiles(key, profile, -1);
     EXPECT_EQ(res, false);
 }
 

@@ -2596,6 +2596,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
     data.WriteString(cmd);
     data.WriteString(bundle);
     data.WriteInt32(userId);
+    data.WriteInt32(userId);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
@@ -4327,7 +4328,7 @@ HWTEST_F(AnsManagerStubTest, ShellDump01, Function | SmallTest | Level1)
     int32_t userId = 5;
     std::vector<std::string> dumpInfo;
 
-    ErrCode result = ansManagerStub_->ShellDump(cmd, bundle, userId, dumpInfo);
+    ErrCode result = ansManagerStub_->ShellDump(cmd, bundle, userId, 0, dumpInfo);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 
