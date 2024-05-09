@@ -22,7 +22,6 @@
 #include "ans_inner_errors.h"
 #include "nativetoken_kit.h"
 #include "notification_bundle_option.h"
-#include "out/rk3568/obj/third_party/musl/intermidiates/linux/musl_src_ported/include/unistd.h"
 #include "token_setproc.h"
 #include "singleton.h"
 
