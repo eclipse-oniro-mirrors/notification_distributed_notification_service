@@ -54,6 +54,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < 1) {
         ANS_LOGW("Wrong number of arguments.");
+        std::string msg = "Mandatory parameters are left unspecified.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -61,6 +63,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGW("Argument type error. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -195,6 +199,8 @@ napi_value GetStringProperty(
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGW("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
@@ -217,6 +223,8 @@ napi_value GetObjectProperty(
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGW("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     return Common::NapiGetNull(env);
@@ -231,6 +239,8 @@ napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc == 0) {
         ANS_LOGW("Wrong number of arguments.");
+        std::string msg = "Mandatory parameters are left unspecified.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -239,6 +249,8 @@ napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGW("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -367,6 +379,8 @@ napi_value ParsePublishAsBundleParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < 1) {
         ANS_LOGW("Wrong number of arguments");
+        std::string msg = "Mandatory parameters are left unspecified.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     // argv[0] : NotificationRequest / bundleOption
@@ -374,6 +388,8 @@ napi_value ParsePublishAsBundleParameters(
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGW("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -386,6 +402,8 @@ napi_value ParsePublishAsBundleParameters(
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
+            std::string msg = "Parameter verification failed.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         params.request.SetOwnerBundleName(option.GetBundleName());
@@ -397,6 +415,8 @@ napi_value ParsePublishAsBundleParameters(
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean && valuetype != napi_object) {
         ANS_LOGW("Error argument type. String number boolean object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be string or number or boolean.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
@@ -425,6 +445,8 @@ napi_value ParsePublishAsBundleParameters(
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGW("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         int32_t userId = 0;
