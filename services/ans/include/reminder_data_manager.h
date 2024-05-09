@@ -215,6 +215,11 @@ public:
     void HandleCustomButtonClick(const OHOS::EventFwk::Want &want);
 
     /**
+     * Handle click notification, no button.
+     */
+    void ClickReminder(const OHOS::EventFwk::Want &want);
+
+    /**
      * @brief Terminate the alerting reminder.
      *
      * 1. Stop sound and vibrate.
