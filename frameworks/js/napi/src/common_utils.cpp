@@ -94,11 +94,39 @@ napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
     return error;
 }
 
+napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType, std::string &msg)
+{
+    ANS_LOGI("enter, errorCode[%{public}d]", errCode);
+    napi_value error = Common::NapiGetNull(env);
+    if (errCode == ERR_OK && newType) {
+        return error;
+    }
+
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+
+    auto iter = ERROR_CODE_MESSAGE.find(errCode);
+    std::string errMsg = iter != ERROR_CODE_MESSAGE.end() ? iter->second : "";
+    napi_value message = nullptr;
+    napi_create_string_utf8(env, errMsg.append(" ").append(msg).c_str(), NAPI_AUTO_LENGTH, &message);
+
+    napi_create_error(env, nullptr, message, &error);
+    napi_set_named_property(env, error, "code", code);
+    return error;
+}
+
 void Common::NapiThrow(napi_env env, int32_t errCode)
 {
     ANS_LOGD("enter");
 
     napi_throw(env, CreateErrorValue(env, errCode, true));
+}
+
+void Common::NapiThrow(napi_env env, int32_t errCode, std::string &msg)
+{
+    ANS_LOGD("enter");
+
+    napi_throw(env, CreateErrorValue(env, errCode, true, msg));
 }
 
 napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
@@ -219,6 +247,8 @@ napi_value Common::ParseParaOnlyCallback(const napi_env &env, const napi_callbac
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < ONLY_CALLBACK_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments");
+        std::string msg = "Mandatory parameters are left unspecified";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 

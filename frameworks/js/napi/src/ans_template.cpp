@@ -29,6 +29,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < IS_TEMPLATE_MAX_PARA - 1) {
         ANS_LOGE("Wrong number of arguments");
+        std::string msg = "Mandatory parameters are left unspecified.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -37,6 +39,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_typeof(env, argv[0], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
         ANS_LOGE("Wrong argument type. String number boolean expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be string or number or boolean.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (valuetype == napi_string) {
