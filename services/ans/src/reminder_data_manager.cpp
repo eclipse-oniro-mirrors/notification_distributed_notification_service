@@ -1939,7 +1939,7 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
         ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
         return;
     }
-    CloseReminder(reminder, cancelNotification);
+    CloseReminder(reminder, true);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
