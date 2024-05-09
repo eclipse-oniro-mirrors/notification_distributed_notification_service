@@ -62,6 +62,10 @@ napi_value Common::SetNotificationRequestByString(
     napi_create_string_utf8(env, request->GetCreatorBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "creatorBundleName", value);
 
+    // readonly sound?: string
+    napi_create_string_utf8(env, request->GetSound().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "sound", value);
+
     return NapiGetBoolean(env, true);
 }
 
