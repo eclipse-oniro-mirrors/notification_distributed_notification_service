@@ -2054,7 +2054,7 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
     CheckDoNotDisturbProfile(record);
 
     if (isUpdateByOwner) {
-        UpdateRecordByOwner(record);
+        UpdateRecordByOwner(record, isSystemApp);
         RemoveFromDelayedNotificationList(record->notification->GetKey());
     }
 
