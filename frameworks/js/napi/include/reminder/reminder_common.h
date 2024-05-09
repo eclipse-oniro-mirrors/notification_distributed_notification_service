@@ -121,8 +121,6 @@ public:
         const char* propertyName, double& date);
 
     static void HandleErrCode(const napi_env &env, int32_t errCode);
-    
-    static void HandleErrCode(const napi_env &env, int32_t errCode, int32_t msgCode);
 
     static void ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info,
         const napi_value &result, bool isThrow = false);
