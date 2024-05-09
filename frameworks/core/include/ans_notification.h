@@ -357,7 +357,8 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber);
+    ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
+        const bool isNative = true);
 
     /**
      * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only

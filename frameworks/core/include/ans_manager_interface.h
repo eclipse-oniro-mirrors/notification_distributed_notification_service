@@ -468,7 +468,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) = 0;
+        const sptr<NotificationSubscribeInfo> &info, const bool isNative) = 0;
 
     /**
      * @brief Unsubscribes notifications.

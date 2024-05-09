@@ -110,35 +110,40 @@ ErrCode AnsManagerProxy::SubscribeSelf(const sptr<AnsSubscriberInterface> &subsc
 }
 
 ErrCode AnsManagerProxy::SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-    const sptr<NotificationSubscribeInfo> &info)
+    const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
     if (subscriber == nullptr) {
-        ANS_LOGE("[Subscribe] fail: subscriber is empty.");
+        ANS_LOGE("[SubscribeLocalLiveView] fail: subscriber is empty.");
         return ERR_ANS_INVALID_PARAM;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[Subscribe] fail: write interface token failed.");
+        ANS_LOGE("[SubscribeLocalLiveView] fail: write interface token failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     bool ret = data.WriteRemoteObject(subscriber->AsObject());
     if (!ret) {
-        ANS_LOGE("[Subscribe] fail: write subscriber failed.");
+        ANS_LOGE("[SubscribeLocalLiveView] fail: write subscriber failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (!data.WriteBool(info != nullptr)) {
-        ANS_LOGE("[Subscribe] fail: write isSubcribeInfo failed");
+        ANS_LOGE("[SubscribeLocalLiveView] fail: write isSubcribeInfo failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (info != nullptr) {
         if (!data.WriteParcelable(info)) {
-            ANS_LOGE("[Subscribe] fail: write subcribeInfo failed");
+            ANS_LOGE("[SubscribeLocalLiveView] fail: write subcribeInfo failed");
             return ERR_ANS_PARCELABLE_FAILED;
         }
+    }
+
+    if (!data.WriteBool(isNative)) {
+        ANS_LOGE("[SubscribeLocalLiveView] fail: write isNative failed");
+        return ERR_ANS_PARCELABLE_FAILED;
     }
 
     MessageParcel reply;

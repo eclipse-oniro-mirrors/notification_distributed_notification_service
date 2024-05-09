@@ -652,7 +652,7 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     ret = advancedNotificationService_->SetBadgeNumber(1);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr);
+    ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr, true);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 

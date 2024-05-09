@@ -1955,18 +1955,21 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 }
 
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("%{public}s, isNative: %{public}d", __FUNCTION__, isNative);
 
     ErrCode errCode = ERR_OK;
     do {
-        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-        if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-            ANS_LOGE("Client is not a system app or subsystem.");
-            errCode = ERR_ANS_NON_SYSTEM_APP;
-            break;
+        if (!isNative) {
+            bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+            if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+                ANS_LOGE("Client is not a system app or subsystem.");
+                errCode = ERR_ANS_NON_SYSTEM_APP;
+                break;
+            }
         }
 
         if (subscriber == nullptr) {

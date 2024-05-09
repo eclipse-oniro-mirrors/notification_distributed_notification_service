@@ -190,9 +190,10 @@ ErrCode NotificationHelper::SubscribeNotificationSelf(const NotificationSubscrib
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(subscriber);
 }
 
-ErrCode NotificationHelper::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber)
+ErrCode NotificationHelper::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
+    const bool isNative)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(subscriber);
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(subscriber, isNative);
 }
 
 ErrCode NotificationHelper::SubscribeNotification(

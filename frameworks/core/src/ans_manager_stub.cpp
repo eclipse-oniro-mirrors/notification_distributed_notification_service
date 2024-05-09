@@ -1415,7 +1415,14 @@ ErrCode AnsManagerStub::HandleSubscribeLocalLiveView(MessageParcel &data, Messag
         }
     }
 
-    ErrCode result = SubscribeLocalLiveView(iface_cast<AnsSubscriberLocalLiveViewInterface>(subscriber), info);
+    bool isNative = false;
+    if (!data.ReadBool(isNative)) {
+        ANS_LOGE("[HandleSubscribeLocalLiveView] fail: read isNative failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SubscribeLocalLiveView(
+        iface_cast<AnsSubscriberLocalLiveViewInterface>(subscriber), info, isNative);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSubscribeLocalLiveView] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
