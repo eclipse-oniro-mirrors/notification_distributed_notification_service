@@ -67,7 +67,7 @@ const std::string ReminderRequest::REMINDER_EVENT_ALARM_ALERT = "ohos.event.noti
 const std::string ReminderRequest::REMINDER_EVENT_CLOSE_ALERT = "ohos.event.notification.reminder.CLOSE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT = "ohos.event.notification.reminder.SNOOZE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT = "ohos.event.notification.reminder.COSTUM_ALERT";
-const std::string ReminderReqeust::REMINDER_EVENT_CLICK_ALERT = "ohos.event.notification.reminder.CLICK_ALERT";
+const std::string ReminderRequest::REMINDER_EVENT_CLICK_ALERT = "ohos.event.notification.reminder.CLICK_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT = "ohos.event.notification.reminder.ALERT_TIMEOUT";
 const std::string ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION =
     "ohos.event.notification.reminder.REMOVE_NOTIFICATION";
@@ -1598,7 +1598,8 @@ void ReminderRequest::AddRemovalWantAgent()
     notificationRequest_->SetRemovalWantAgent(wantAgent);
 }
 
-std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWantAgent(AppExecFwk::ElementName &element) const
+std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWantAgent(
+    AppExecFwk::ElementName &element) const
 {
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
