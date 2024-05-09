@@ -1041,13 +1041,9 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
     const sptr<NotificationBundleOption> &bundleOption)
 {
     std::vector<std::string> keys;
-    if (bundleOption == nullptr) {
-        ANS_LOGE("Invalid bundleOption.");
-        return keys;
-    }
 
     for (auto record : notificationList_) {
-        if ((record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) &&
+        if ((bundleOption != nullptr) && (record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) &&
             (record->bundleOption->GetUid() != bundleOption->GetUid())) {
             continue;
         }

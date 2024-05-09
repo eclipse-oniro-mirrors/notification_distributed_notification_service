@@ -63,9 +63,8 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
     bool isHap = !AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID()) &&
         !AccessTokenHelper::IsSystemApp();
     if (isUpdateByOwnerAllowed && isHap) {
-        if (request->GetTemplate() == nullptr ||
-            strcmp(request->GetTemplate()->GetTemplateName().c_str(), DOWNLOAD_TEMPLATE_NAME.c_str()) != 0) {
-            ANS_LOGE("Owner must has downloadtemplate to update.");
+        if (request->GetTemplate() == nullptr) {
+            ANS_LOGE("Owner must has template to update.");
             return ERR_ANS_INVALID_PARAM;
         }
     }
