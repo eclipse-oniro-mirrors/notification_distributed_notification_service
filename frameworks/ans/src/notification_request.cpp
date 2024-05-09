@@ -2525,7 +2525,7 @@ ErrCode NotificationRequest::CheckImageSizeForLiveView(std::shared_ptr<Notificat
             return ERR_ANS_INVALID_PARAM;
         }
         if (pixelMapRecord.second.size() > MAX_LIVE_VIEW_ICON_NUM) {
-            ANS_LOGE("Picture key exist, but picture content is empty.");
+            ANS_LOGE("Picture key exist, but picture content count exceeds limit.");
             return ERR_ANS_INVALID_PARAM;
         }
         for (const auto &pixelMap : pixelMapRecord.second) {

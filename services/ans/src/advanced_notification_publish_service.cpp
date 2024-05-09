@@ -1793,6 +1793,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     int32_t uid = request->GetCreatorUid();
+    if (request->IsAgentNotification()) {
+        uid = request->GetOwnerUid();
+    }
     if (uid <= 0) {
         ANS_LOGE("CreatorUid[%{public}d] error", uid);
         return ERR_ANS_INVALID_UID;
@@ -1809,7 +1812,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
-    record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (request->IsAgentNotification()) {
+        record->bundleOption = new (std::nothrow) NotificationBundleOption("", request->GetCreatorUid());
+    } else {
+        record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    }
+
     if (record->bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
