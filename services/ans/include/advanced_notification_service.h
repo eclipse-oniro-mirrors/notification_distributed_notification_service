@@ -1308,7 +1308,7 @@ private:
     uint64_t StartDelayPublishTimer(const int32_t ownerUid, const int32_t notificationId, const uint32_t delayTime);
     ErrCode StartPublishDelayedNotification(const std::shared_ptr<NotificationRecord> &record);
     void StartPublishDelayedNotificationTimeOut(const int32_t ownerUid, const int32_t notificationId);
-    void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record);
+    void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
