@@ -1930,6 +1930,43 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     }
 }
 
+void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
+{
+    int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
+    ANSR_LOGI("click reminder[%{public}d] start", reminderId);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    if (reminder == nullptr) {
+        ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
+        return;
+    }
+    CloseReminder(reminder, cancelNotification);
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    StartRecentReminder();
+
+    auto wantInfo = reminder->GetWantAgentInfo();
+    if (wantInfo == nullptr || (wantInfo->pkgName.empty() && wantInfo->abilityName.empty())) {
+        ANSR_LOGW("want info is nullptr or no pkg name");
+        return;
+    }
+    AAFwk::Want abilityWant;
+    AppExecFwk::ElementName element("", wantInfo->pkgName, wantInfo->abilityName);
+    abilityWant.SetElement(element);
+    abilityWant.SetUri(wantInfo->uri);
+    abilityWant.SetParams(wantInfo->parameters);
+
+    auto client = AppExecFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        ANSR_LOGE("start ability failed, due to ability mgr client is nullptr.");
+        return;
+    }
+    int32_t result = client->StartAbility(abilityWant);
+    if (result != 0) {
+        ANSR_LOGE("Start ability failed, result = %{public}d", result);
+        return;
+    }
+}
+
 std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundleResMgr(
     const AppExecFwk::BundleInfo &bundleInfo)
 {
