@@ -32,7 +32,7 @@ constexpr uint32_t MAX_UPDATE_NUM_PERSECOND = 20;
 constexpr size_t MAX_SLOT_NUM = 5;
 constexpr uint32_t MAX_ICON_SIZE = 100 * 1024;
 constexpr uint32_t MAX_PICTURE_SIZE = 2 * 1024 * 1024;
-constexpr uint32_t MAX_LIVE_VIEW_ICON_NUM = 5;
+constexpr uint32_t MAX_LIVE_VIEW_ICON_NUM = 6;
 constexpr bool SUPPORT_DO_NOT_DISTRUB = true;
 constexpr uint32_t SYSTEM_SERVICE_UID = 1000;
 constexpr uint32_t MAX_CONVERSATIONAL_NUM = 10000;
@@ -61,6 +61,7 @@ const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};
 const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_template/external.json");
 const std::string CURRENT_DEVICE_TYPE = "current";
 const std::string RING_TRUST_PKG_KEY = "RING_TRUSTLIST_PKG";
+const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr NotificationConstant::DistributedReminderPolicy DEFAULT_DISTRIBUTED_REMINDER_POLICY =

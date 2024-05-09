@@ -487,7 +487,7 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
-            return NativeRdb::E_ERROR;;
+            return NativeRdb::E_ERROR;
         }
         std::string dropTableSql = "DROP TABLE IF EXISTS" + tableName;
         ret = rdbStore_->ExecuteSql(dropTableSql);

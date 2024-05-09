@@ -1812,7 +1812,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
-    record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (request->IsAgentNotification()) {
+        record->bundleOption = new (std::nothrow) NotificationBundleOption("", request->GetCreatorUid());
+    } else {
+        record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    }
+
     if (record->bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
@@ -2021,8 +2026,9 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
         ANS_LOGE("no permission");
         return ERR_ANS_PERMISSION_DENIED;
     }
-
+    ANS_LOGE("no permission111");
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    ANS_LOGE("no permission1222");
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }

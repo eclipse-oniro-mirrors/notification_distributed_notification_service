@@ -18,6 +18,7 @@
 #include "access_token_helper.h"
 #include "advanced_notification_service.h"
 #include "ans_log_wrapper.h"
+#include "ans_const_define.h"
 #include "ipc_skeleton.h"
 #include "notification_content.h"
 #include "notification_live_view_content.h"
@@ -62,6 +63,15 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
     if (request->GetReceiverUserId() >= 0) {
         if (OsAccountManagerHelper::GetInstance().CheckUserExists(request->GetReceiverUserId())) {
             return ERROR_USER_NOT_EXIST;
+        }
+    }
+
+    bool isHap = !AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID()) &&
+        !AccessTokenHelper::IsSystemApp();
+    if (isUpdateByOwnerAllowed && isHap) {
+        if (request->GetTemplate() == nullptr) {
+            ANS_LOGE("Owner must has template to update.");
+            return ERR_ANS_INVALID_PARAM;
         }
     }
     return ERR_OK;

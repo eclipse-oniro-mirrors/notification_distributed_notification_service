@@ -582,7 +582,8 @@ bool AdvancedNotificationService::IsSaCreateSystemLiveViewAsBundle(
     return false;
 }
 
-void AdvancedNotificationService::UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record)
+void AdvancedNotificationService::UpdateRecordByOwner(
+    const std::shared_ptr<NotificationRecord> &record, bool isSystemApp)
 {
     auto creatorUid = record->notification->GetNotificationRequest().GetCreatorUid();
     auto notificationId =  record->notification->GetNotificationRequest().GetNotificationId();
@@ -596,8 +597,13 @@ void AdvancedNotificationService::UpdateRecordByOwner(const std::shared_ptr<Noti
     }
 
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
+    auto content = record->notification->GetNotificationRequest().GetContent();
     record->request = oldRecord->request;
-    record->request->SetTemplate(downloadTemplate);
+    if (isSystemApp) {
+        record->request->SetContent(content);
+    } else {
+        record->request->SetTemplate(downloadTemplate);
+    }
     record->notification = new (std::nothrow) Notification(record->request);
     record->bundleOption = oldRecord->bundleOption;
     if (record->notification == nullptr) {

@@ -34,7 +34,6 @@ namespace {
 const int32_t MAX_RETRY_TIME = 30;
 const int32_t SLEEP_TIME = 1000;
 const uint32_t MAX_PUBLISH_DELAY_TIME = 5;
-const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
 const std::string DOWNLOAD_TITLE = "title";
 const std::string DOWNLOAD_FILENAME = "fileName";
 }

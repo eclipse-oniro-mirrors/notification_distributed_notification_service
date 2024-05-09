@@ -1687,7 +1687,6 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundle = bundleManager->GetBundleNameByUid(uid);
-
     ErrCode result = SetRequestBundleInfo(request, uid, bundle);
     if (result != ERR_OK) {
         return result;
@@ -1714,7 +1713,8 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
         ANS_LOGE("Failed to check picture size");
         return result;
     }
-    ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid, userId, bundle.c_str());
+    ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid,
+        userId, bundle.c_str());
     return ERR_OK;
 }
 

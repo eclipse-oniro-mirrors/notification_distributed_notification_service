@@ -33,7 +33,7 @@ namespace {
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_PERMISSION_DENIED, "Permission denied"},
     {ERROR_NOT_SYSTEM_APP, "The application isn't system application"},
-    {ERROR_PARAM_INVALID, "Parameter verification failed"},
+    {ERROR_PARAM_INVALID, "Invalid parameter"},
     {ERROR_SYSTEM_CAP_ERROR, "SystemCapability not found"},
     {ERROR_INTERNAL_ERROR, "Internal error"},
     {ERROR_IPC_ERROR, "Marshalling or unmarshalling error"},
