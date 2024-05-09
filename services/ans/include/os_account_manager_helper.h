@@ -56,6 +56,14 @@ public:
      * @return Returns result code.
      */
     ErrCode GetCurrentActiveUserId(int32_t &id);
+
+    /**
+     * Check the userId whether exists in OsAccount service.
+     *
+     * @param userId Indicates the current active account ID.
+     * @return Returns result.
+     */
+    bool CheckUserExists(const int32_t &userId);
 };
 } // namespace OHOS
 } // namespace Notification

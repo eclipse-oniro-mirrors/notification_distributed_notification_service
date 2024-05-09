@@ -15,6 +15,7 @@
 #include "notification_rdb_data_mgr.h"
 
 #include "ans_log_wrapper.h"
+#include "rdb_errno.h"
 #include <sstream>
 #include <string>
 
@@ -368,8 +369,10 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
             return NativeRdb::E_ERROR;
         }
         int32_t ret = QueryDataBeginWithKey(tableName, key, values);
-        if (ret != NativeRdb::E_OK || values.empty()) {
-            return QueryDataBeginWithKey(notificationRdbConfig_.tableName, key, values);
+        int32_t ret2 = QueryDataBeginWithKey(notificationRdbConfig_.tableName, key, values);
+        if (ret != NativeRdb::E_OK && ret2 != NativeRdb::E_OK) {
+            ANS_LOGE("Query data begin with key failed.");
+            return NativeRdb::E_ERROR;
         }
     }
     return NativeRdb::E_OK;
@@ -426,10 +429,11 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
             return NativeRdb::E_ERROR;
         }
         int32_t ret = QueryAllData(tableName, datas);
-        if (ret != NativeRdb::E_OK) {
-            return ret;
+        int32_t ret2 = QueryAllData(notificationRdbConfig_.tableName, datas);
+        if (ret != NativeRdb::E_OK && ret2 != NativeRdb::E_OK) {
+            ANS_LOGE("Query data begin with key failed.");
+            return NativeRdb::E_ERROR;
         }
-        return QueryAllData(notificationRdbConfig_.tableName, datas);
     }
     return NativeRdb::E_OK;
 }
@@ -470,6 +474,30 @@ int32_t NotificationDataMgr::QueryAllData(
     absSharedResultSet->Close();
 
     return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
+{
+    const char *keySpliter = "_";
+    std::stringstream stream;
+    stream << notificationRdbConfig_.tableName << keySpliter << userId;
+    std::string tableName = stream.str();
+    std::lock_guard<std::mutex> lock(userTableMutex_);
+    int32_t ret = NativeRdb::E_OK;
+    {
+        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            return NativeRdb::E_ERROR;;
+        }
+        std::string dropTableSql = "DROP TABLE IF EXISTS" + tableName;
+        ret = rdbStore_->ExecuteSql(dropTableSql);
+    }
+    if (ret == NativeRdb::E_OK) {
+        userTableInit_.erase(userId);
+        ANS_LOGD("drop Table %{public}s succeed", tableName.c_str());
+        return ret;
+    }
+    return ret;
 }
 
 std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)

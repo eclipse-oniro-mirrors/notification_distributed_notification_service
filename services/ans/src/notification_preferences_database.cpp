@@ -1876,6 +1876,21 @@ int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key, 
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::DropUserTable(const int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->DropUserTable(userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Delete table failed, result %{public}d.", result);
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
 bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &agentBundleName,
     const std::string &sourceBundleName)
 {

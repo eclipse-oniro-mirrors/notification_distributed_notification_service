@@ -64,5 +64,27 @@ HWTEST_F(OsAccountManagerHelperTest, GetCurrentActiveUserId_00100, Function | Sm
     int32_t userId = -1;
     EXPECT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId));
 }
+
+/**
+ * @tc.number    : CheckUserExists_00100
+ * @tc.name      : CheckUserExists_00100
+ * @tc.desc      : test CheckUserExists function
+ */
+HWTEST_F(OsAccountManagerHelperTest, CheckUserExists_00100, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    EXPECT_EQ(true, OsAccountManagerHelper::GetInstance().CheckUserExists(userId));
+}
+
+/**
+ * @tc.number    : CheckUserExists_00200
+ * @tc.name      : CheckUserExists_00200
+ * @tc.desc      : test CheckUserExists function
+ */
+HWTEST_F(OsAccountManagerHelperTest, CheckUserExists_00200, Function | SmallTest | Level1)
+{
+    int32_t userId = 1099;
+    EXPECT_EQ(false, OsAccountManagerHelper::GetInstance().CheckUserExists(userId));
+}
 }
 }

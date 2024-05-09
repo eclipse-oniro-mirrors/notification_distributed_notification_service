@@ -21,6 +21,7 @@
 #include "ipc_skeleton.h"
 #include "notification_content.h"
 #include "notification_live_view_content.h"
+#include "os_account_manager_helper.h"
 
 #include "../advanced_notification_inline.cpp"
 
@@ -56,6 +57,11 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
     if (!request->IsRemoveAllowed()) {
         if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
+        }
+    }
+    if (request->GetReceiverUserId() >= 0) {
+        if (OsAccountManagerHelper::GetInstance().CheckUserExists(request->GetReceiverUserId())) {
+            return ERROR_USER_NOT_EXIST;
         }
     }
     return ERR_OK;

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "rdb_errno.h"
 #define private public
 #include <gtest/gtest.h>
 
@@ -722,6 +723,33 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02400
     MockGetString(true);
     std::unordered_map<std::string, std::string> datas;
     EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : RdbStoreDataCallBack_02400
+ * @tc.number    :
+ * @tc.desc      : test DropTable function and DropTable == NativeRdb::E_OK
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02500, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
+    EXPECT_EQ(notificationDataMgr->DropUserTable(-1), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : RdbStoreDataCallBack_02400
+ * @tc.number    :
+ * @tc.desc      : test DropTable function and DropTable == NativeRdb::E_ERROR
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02600, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    EXPECT_EQ(notificationDataMgr->DropUserTable(-1), NativeRdb::E_ERROR);
 }
 }  // namespace Notification
 }  // namespace OHOS
