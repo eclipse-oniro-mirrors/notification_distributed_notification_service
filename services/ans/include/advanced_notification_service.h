@@ -1297,7 +1297,8 @@ private:
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason);
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
-    ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
+        const sptr<NotificationBundleOption> &bundleOption);
     ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
     ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request, std::string bundleName);
     void GenerateSlotReminderMode(

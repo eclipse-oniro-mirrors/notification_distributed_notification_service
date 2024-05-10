@@ -603,6 +603,9 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         record->request->SetContent(content);
     } else {
         record->request->SetTemplate(downloadTemplate);
+        auto data = downloadTemplate->GetTemplateData();
+        AAFwk::WantParamWrapper wrapper(*data);
+        ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
     }
     record->notification = new (std::nothrow) Notification(record->request);
     record->bundleOption = oldRecord->bundleOption;

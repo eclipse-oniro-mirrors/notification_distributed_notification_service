@@ -543,7 +543,7 @@ ErrCode AdvancedNotificationService::FillNotificationRecord(
     SetNotificationRemindType(record->notification, true);
 
     record->bundleOption = requestdbObj.bundleOption;
-    ErrCode ret = AssignValidNotificationSlot(record);
+    ErrCode ret = AssignValidNotificationSlot(record, record->bundleOption);
     if (ret != ERR_OK) {
         ANS_LOGE("Assign valid notification slot failed!");
         return ret;
@@ -1043,8 +1043,7 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
     std::vector<std::string> keys;
 
     for (auto record : notificationList_) {
-        if ((bundleOption != nullptr) && (record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) &&
-            (record->bundleOption->GetUid() != bundleOption->GetUid())) {
+        if ((bundleOption != nullptr) && (record->bundleOption->GetUid() != bundleOption->GetUid())) {
             continue;
         }
         keys.push_back(record->notification->GetKey());
@@ -2036,7 +2035,7 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
 ErrCode AdvancedNotificationService::AddRecordToMemory(
     const std::shared_ptr<NotificationRecord> &record, bool isSystemApp, bool isUpdateByOwner)
 {
-    auto result = AssignValidNotificationSlot(record);
+    auto result = AssignValidNotificationSlot(record, record->bundleOption);
     if (result != ERR_OK) {
         ANS_LOGE("Can not assign valid slot!");
         return result;

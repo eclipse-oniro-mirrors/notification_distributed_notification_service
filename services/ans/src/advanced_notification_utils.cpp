@@ -984,7 +984,7 @@ void AdvancedNotificationService::OnDistributedPublish(
         record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
-        ErrCode result = AssignValidNotificationSlot(record);
+        ErrCode result = AssignValidNotificationSlot(record, bundleOption);
         if (result != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
             return;
@@ -1058,7 +1058,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
         record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
-        ErrCode result = AssignValidNotificationSlot(record);
+        ErrCode result = AssignValidNotificationSlot(record, bundleOption);
         if (result != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
             return;
