@@ -31,6 +31,8 @@
 #include "ans_dialog_host_client.h"
 #include "mock_push_callback_stub.h"
 
+extern void MockIsOsAccountExists(bool exists);
+
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
@@ -122,6 +124,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00001, Function | SmallTest | Level1)
     request->SetContent(content);
     request->SetCreatorUid(1);
     request->SetOwnerUid(1);
+    MockIsOsAccountExists(true);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);

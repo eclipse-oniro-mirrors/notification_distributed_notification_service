@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ans_ut_constant.h"
 #include "rdb_errno.h"
 #define private public
 #include <gtest/gtest.h>
@@ -27,6 +28,7 @@
 
 namespace {
     bool g_mockQueryRet = true;
+    bool g_mockExecuteSql = true;
 }
 
 extern void MockHasBlock(bool mockRet);
@@ -132,6 +134,9 @@ class RdbStoreTest : public RdbStore {
         virtual int ExecuteSql(
             const std::string &sql, const std::vector<ValueObject> &bindArgs = std::vector<ValueObject>())
         {
+            if (g_mockExecuteSql) {
+                return NativeRdb::E_OK;
+            }
             return NativeRdb::E_ERROR;
         };
         virtual int ExecuteAndGetLong(int64_t &outValue, const std::string &sql,
@@ -730,7 +735,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02400
  * @tc.number    :
  * @tc.desc      : test DropTable function and DropTable == NativeRdb::E_OK
  */
-HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02500, Function | SmallTest | Level1)
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoWreDataCallBack_02500, Function | SmallTest | Level1)
 {
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
@@ -749,6 +754,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02600
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    g_mockExecuteSql = false;
     EXPECT_EQ(notificationDataMgr->DropUserTable(-1), NativeRdb::E_ERROR);
 }
 }  // namespace Notification

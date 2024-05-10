@@ -46,6 +46,8 @@
 #include "want_params.h"
 #include "bundle_manager_helper.h"
 
+extern void MockIsOsAccountExists(bool mockRet);
+
 using namespace testing::ext;
 using namespace OHOS::Media;
 
@@ -88,7 +90,7 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     advancedNotificationService_->CancelAll();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-
+    MockIsOsAccountExists(true);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -238,7 +240,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00200,
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
-    req->SetCreatorUid(1);
+    req->SetCreatorUid(100);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);
