@@ -1963,7 +1963,6 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
     int32_t result = client->StartAbility(abilityWant);
     if (result != 0) {
         ANSR_LOGE("Start ability failed, result = %{public}d", result);
-        return;
     }
 }
 
