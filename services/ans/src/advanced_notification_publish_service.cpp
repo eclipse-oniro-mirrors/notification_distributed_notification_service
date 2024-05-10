@@ -1817,8 +1817,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     } else {
         record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     }
-
-    if (record->bundleOption == nullptr) {
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
@@ -1837,15 +1837,15 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     if (result != ERR_OK) {
         return result;
     }
-    SetRequestBySlotType(record->request, record->bundleOption);
+    SetRequestBySlotType(record->request, bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
     auto ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        if (!record->bundleOption->GetBundleName().empty()) {
-            ErrCode ret = AssignValidNotificationSlot(record);
+        if (!bundleOption->GetBundleName().empty()) {
+            ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
                 ANS_LOGE("Can not assign valid slot!");
             }

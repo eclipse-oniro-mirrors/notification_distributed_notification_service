@@ -444,11 +444,12 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     return result;
 }
 
-ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record)
+ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
+    const sptr<NotificationBundleOption> &bundleOption)
 {
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
-    ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(record->bundleOption, slotType, slot);
+    ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
     if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
         (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
         slot = new (std::nothrow) NotificationSlot(slotType);
@@ -457,10 +458,10 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
             return ERR_NO_MEMORY;
         }
 
-        GenerateSlotReminderMode(slot, record->bundleOption);
+        GenerateSlotReminderMode(slot, bundleOption);
         std::vector<sptr<NotificationSlot>> slots;
         slots.push_back(slot);
-        result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
+        result = NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, slots);
     }
     if (result == ERR_OK) {
         if (slot != nullptr && slot->GetEnable()) {
