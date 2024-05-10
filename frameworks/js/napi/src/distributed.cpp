@@ -14,6 +14,7 @@
  */
 
 #include "distributed.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {

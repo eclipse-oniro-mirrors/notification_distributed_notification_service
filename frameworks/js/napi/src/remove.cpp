@@ -15,6 +15,7 @@
 
 #include <optional>
 #include "remove.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {

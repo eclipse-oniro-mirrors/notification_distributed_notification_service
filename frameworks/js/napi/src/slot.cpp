@@ -16,6 +16,7 @@
 #include "slot.h"
 #include "common.h"
 #include "napi_common_util.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {

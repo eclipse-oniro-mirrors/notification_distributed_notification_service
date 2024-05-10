@@ -1692,6 +1692,16 @@ public:
     static napi_value CreateErrorValue(napi_env env, int32_t errCode, bool newType);
 
     /**
+         * @brief Create a napi value with specified error object for callback
+         *
+         * @param env Indicates the environment that the API is invoked under
+         * @param errCode Indicates specified err code
+         * @param msg Indicates specified msg
+         * @return Returns a napi value with specified error object for callback
+         */
+    static napi_value CreateErrorValue(napi_env env, int32_t errCode, std::string &msg);
+    
+    /**
      * @brief Sets a js object by specified BadgeNumberCallbackData object
      *
      * @param env Indicates the environment that the API is invoked under

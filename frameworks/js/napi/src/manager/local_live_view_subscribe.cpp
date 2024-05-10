@@ -15,7 +15,7 @@
 
 #include "local_live_view_subscribe.h"
 #include "notification_button_option.h"
-
+#include "ans_inner_errors.h"
 #include <mutex>
 #include <uv.h>
 
@@ -206,6 +206,8 @@ napi_value GetNotificationSubscriber(
         NAPI_CALL(env, napi_typeof(env, onResponse, &valuetype));
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be function.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, onResponse, 1, &result);

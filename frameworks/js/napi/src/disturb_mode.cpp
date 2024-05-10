@@ -14,6 +14,7 @@
  */
 
 #include "disturb_mode.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {
