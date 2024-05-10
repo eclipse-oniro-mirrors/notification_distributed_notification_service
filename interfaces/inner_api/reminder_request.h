@@ -894,6 +894,11 @@ public:
     static const std::string REMINDER_EVENT_CUSTOM_ALERT;
 
     /**
+     * @biref Close the reminder when click the notification, not button.
+     */
+    static const std::string REMINDER_EVENT_CLICK_ALERT;
+
+    /**
      * @brief Used to control ring duration.
      */
     static const std::string REMINDER_EVENT_ALERT_TIMEOUT;
@@ -962,8 +967,8 @@ protected:
 private:
     void AddActionButtons(const bool includeSnooze);
     void AddRemovalWantAgent();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element,
-        bool isWantAgent) const;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element) const;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateMaxWantAgent(AppExecFwk::ElementName &element) const;
     std::string GetButtonInfo() const;
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;

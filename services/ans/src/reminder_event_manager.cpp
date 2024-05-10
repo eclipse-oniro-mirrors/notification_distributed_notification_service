@@ -42,6 +42,7 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
     CommonEventSubscribeInfo customSubscriberInfo(customMatchingSkills);
     customSubscriberInfo.SetPermission("ohos.permission.GRANT_SENSITIVE_PERMISSIONS");
     customSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
@@ -139,6 +140,10 @@ void ReminderEventManager::ReminderEventCustomSubscriber::OnReceiveEvent(const E
     }
     if (action == ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION) {
         reminderDataManager_->CloseReminder(want, false);
+        return;
+    }
+    if (action == ReminderRequest::REMINDER_EVENT_CLICK_ALERT) {
+        reminderDataManager_->ClickReminder(want);
         return;
     }
 }

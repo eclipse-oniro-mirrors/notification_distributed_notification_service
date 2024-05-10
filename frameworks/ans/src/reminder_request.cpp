@@ -67,6 +67,7 @@ const std::string ReminderRequest::REMINDER_EVENT_ALARM_ALERT = "ohos.event.noti
 const std::string ReminderRequest::REMINDER_EVENT_CLOSE_ALERT = "ohos.event.notification.reminder.CLOSE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT = "ohos.event.notification.reminder.SNOOZE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT = "ohos.event.notification.reminder.COSTUM_ALERT";
+const std::string ReminderRequest::REMINDER_EVENT_CLICK_ALERT = "ohos.event.notification.reminder.CLICK_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT = "ohos.event.notification.reminder.ALERT_TIMEOUT";
 const std::string ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION =
     "ohos.event.notification.reminder.REMOVE_NOTIFICATION";
@@ -1598,17 +1599,37 @@ void ReminderRequest::AddRemovalWantAgent()
 }
 
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWantAgent(
-    AppExecFwk::ElementName &element, bool isWantAgent) const
+    AppExecFwk::ElementName &element) const
+{
+    int32_t requestCode = 10;
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
+    flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
+    auto want = std::make_shared<OHOS::AAFwk::Want>();
+    want->SetAction(REMINDER_EVENT_CLICK_ALERT);
+    want->SetParam(PARAM_REMINDER_ID, reminderId_);
+    std::vector<std::shared_ptr<AAFwk::Want>> wants;
+    wants.push_back(want);
+    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
+        requestCode,
+        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
+        flags,
+        wants,
+        nullptr
+    );
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    auto wantAgent = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, userId_);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return wantAgent;
+}
+
+std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateMaxWantAgent(
+    AppExecFwk::ElementName &element) const
 {
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetElement(element);
-    if (isWantAgent) {
-        want->SetUri(wantAgentInfo_->uri);
-        want->SetParams(wantAgentInfo_->parameters);
-    }
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
@@ -1626,13 +1647,13 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWan
 
 void ReminderRequest::SetMaxScreenWantAgent(AppExecFwk::ElementName &element)
 {
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element, false);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateMaxWantAgent(element);
     notificationRequest_->SetMaxScreenWantAgent(wantAgent);
 }
 
 void ReminderRequest::SetWantAgent(AppExecFwk::ElementName &element)
 {
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element, true);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element);
     notificationRequest_->SetWantAgent(wantAgent);
 }
 
