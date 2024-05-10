@@ -18,6 +18,7 @@
 #include "ans_const_define.h"
 #include "js_native_api_types.h"
 #include "want_agent_helper.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {

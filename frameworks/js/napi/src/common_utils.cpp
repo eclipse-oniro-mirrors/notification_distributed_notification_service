@@ -94,11 +94,11 @@ napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
     return error;
 }
 
-napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType, std::string &msg)
+napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, std::string &msg)
 {
     ANS_LOGI("enter, errorCode[%{public}d]", errCode);
     napi_value error = Common::NapiGetNull(env);
-    if (errCode == ERR_OK && newType) {
+    if (errCode == ERR_OK) {
         return error;
     }
 
@@ -126,7 +126,7 @@ void Common::NapiThrow(napi_env env, int32_t errCode, std::string &msg)
 {
     ANS_LOGD("enter");
 
-    napi_throw(env, CreateErrorValue(env, errCode, true, msg));
+    napi_throw(env, CreateErrorValue(env, errCode, msg));
 }
 
 napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
