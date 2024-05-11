@@ -240,7 +240,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00200,
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
-    req->SetCreatorUid(100);
+    req->SetCreatorUid(1);
     std::string label = "publish's label";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     EXPECT_NE(normalContent, nullptr);

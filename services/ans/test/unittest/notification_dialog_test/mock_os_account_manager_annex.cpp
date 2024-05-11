@@ -75,7 +75,7 @@ namespace OHOS {
 namespace AccountSA {
 ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
 {
-    if (g_mockQueryActiveOsAccountIdsRet) {
+    if (!g_mockQueryActiveOsAccountIdsRet) {
         return ERR_INVALID_OPERATION;
     }
     ids.emplace_back(g_mockId);
