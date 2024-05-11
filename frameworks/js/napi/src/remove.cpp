@@ -138,8 +138,7 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
     if (argc < REMOVE_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return false;
     }
     bool isArray = false;
@@ -184,8 +183,7 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], bundleandKeyInfo.option);
         if (retValue == nullptr) {
             ANS_LOGW("GetBundleOption failed.");
-            std::string msg = "Parameter verification failed.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         params.bundleAndKeyInfo = bundleandKeyInfo;
@@ -221,8 +219,7 @@ napi_value ParseParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < REMOVE_GROUP_BY_BUNDLE_MIN_PARA) {
         ANS_LOGW("Error number of arguments.");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -237,8 +234,7 @@ napi_value ParseParameters(
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        std::string msg = "Parameter verification failed.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 

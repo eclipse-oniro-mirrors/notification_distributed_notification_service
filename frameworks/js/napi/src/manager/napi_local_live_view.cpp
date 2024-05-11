@@ -119,8 +119,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc != TRIGGER_PARA) {
         ANS_LOGE("Wrong number of arguments");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -130,8 +129,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], asynccallbackinfo->bundleOption);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed");
-        std::string msg = "Parameter verification failed.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -151,8 +149,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     retValue = Common::GetButtonOption(env, argv[PARAM2], asynccallbackinfo->buttonOption);
     if (retValue == nullptr) {
         ANS_LOGE("GetButtonOption failed");
-        std::string msg = "Parameter verification failed.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
     return Common::NapiGetNull(env);

@@ -35,8 +35,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGW("Wrong number of arguments");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -56,8 +55,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], paras.option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
-            std::string msg = "Parameter verification failed.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         paras.hasOption = true;
@@ -126,8 +124,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < CANCEL_GROUP_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg); 
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -362,8 +359,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGW("Wrong number of arguments");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -382,8 +378,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], paras.option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
-            std::string msg = "Parameter verification failed.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         paras.hasOption = true;
