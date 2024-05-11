@@ -177,8 +177,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_BADGE_NUMBER_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
-        std::string msg = "Mandatory parameters are left unspecified";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -304,8 +303,7 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackSetBadgeNumber *asyncCallbackInfo =
         new (std::nothrow) AsyncCallbackSetBadgeNumber {.env = env, .asyncWork = nullptr, .params = params};
     if (asyncCallbackInfo == nullptr) {
-        std::string msg = "Mandatory parameters are left unspecified";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return Common::NapiGetUndefined(env);
     }
     napi_value promise = nullptr;

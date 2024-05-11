@@ -55,8 +55,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < 1) {
         ANS_LOGW("Wrong number of arguments.");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -240,8 +239,7 @@ napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc == 0) {
         ANS_LOGW("Wrong number of arguments.");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -380,8 +378,7 @@ napi_value ParsePublishAsBundleParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < 1) {
         ANS_LOGW("Wrong number of arguments");
-        std::string msg = "Mandatory parameters are left unspecified.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     // argv[0] : NotificationRequest / bundleOption
@@ -403,8 +400,7 @@ napi_value ParsePublishAsBundleParameters(
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
-            std::string msg = "Parameter verification failed.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         params.request.SetOwnerBundleName(option.GetBundleName());

@@ -35,8 +35,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_DISTRIBUTED_ENABLE_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
-        std::string msg = "Mandatory parameters are left unspecified";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -52,8 +51,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        std::string msg = "Parameter verification failed.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -70,8 +68,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
     if (std::strlen(str) == 0) {
         ANS_LOGE("Property deviceType is empty");
-        std::string msg = "Mandatory parameters are left unspecified";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     params.deviceType = str;
@@ -183,8 +180,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_SMART_REMINDER_ENABLE_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
-        std::string msg = "Mandatory parameters are left unspecified";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -202,8 +198,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen);
     if (std::strlen(str) == 0) {
         ANS_LOGE("Property deviceType is empty");
-        std::string msg = "Mandatory parameters are left unspecified";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     params.deviceType = str;
