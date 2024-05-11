@@ -30,6 +30,7 @@
 extern void MockGetUserId(bool mockRet);
 extern void MockGetBundleName(bool mockRet);
 extern void MockGetNotificationSlotRet(bool mockRet);
+extern void MockQueryActiveOsAccountIds(bool mockRet, uint8_t mockCase);
 
 using namespace OHOS::Security::AccessToken;
 using namespace testing::ext;
@@ -670,6 +671,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     std::string deviceId = "<deviceId>";
     bool enabled = true;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockQueryActiveOsAccountIds(false, 1);
 
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.SetNotificationsEnabledForAllBundles(deviceId, enabled),
@@ -719,6 +721,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     bool enabled = true;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockQueryActiveOsAccountIds(false, 1);
     AdvancedNotificationService advancedNotificationService;
     EXPECT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
@@ -764,6 +767,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03400, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    MockQueryActiveOsAccountIds(false, 1);
     bool allowed = true;
 
     int32_t uid = 2;
@@ -951,6 +955,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04500, Function | SmallTest | Level1)
 {
     sptr<NotificationDoNotDisturbDate> date = nullptr;
+    MockQueryActiveOsAccountIds(false, 1);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;
@@ -980,6 +985,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04700, Function | SmallTest | Level1)
 {
     sptr<NotificationDoNotDisturbDate> date = nullptr;
+    MockQueryActiveOsAccountIds(false, 1);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     AdvancedNotificationService advancedNotificationService;

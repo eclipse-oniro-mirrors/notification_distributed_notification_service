@@ -20,6 +20,7 @@
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
 #include "ans_permission_def.h"
+#include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
 #include "parameters.h"
 
@@ -41,6 +42,11 @@ ErrCode BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
     if (!request->IsRemoveAllowed()) {
         if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
+        }
+    }
+    if (request->GetReceiverUserId() >= 0) {
+        if (OsAccountManagerHelper::GetInstance().CheckUserExists(request->GetReceiverUserId())) {
+            return ERROR_USER_NOT_EXIST;
         }
     }
     return ERR_OK;

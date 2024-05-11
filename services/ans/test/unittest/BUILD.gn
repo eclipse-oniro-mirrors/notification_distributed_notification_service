@@ -122,6 +122,7 @@ ohos_unittest("ans_unit_test") {
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
     "mock/mock_swing_callback_stub.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_hisysevent_test.cpp",
     "notification_local_live_view_subscriber_manager_test.cpp",
     "notification_preferences_database_test.cpp",
@@ -533,10 +534,10 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
     "notification_subscriber_manager_branch_test/mock_notification.cpp",
     "notification_subscriber_manager_branch_test/mock_notification_preferences.cpp",
-    "notification_subscriber_manager_branch_test/mock_os_account_manager.cpp",
     "notification_subscriber_manager_branch_test/notification_subscriber_manager_branch_test.cpp",
   ]
 

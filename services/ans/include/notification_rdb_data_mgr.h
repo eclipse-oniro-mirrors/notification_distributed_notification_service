@@ -141,6 +141,13 @@ public:
      */
     int32_t QueryAllData(std::unordered_map<std::string, std::string> &values, const int32_t &userId = -1);
 
+    /**
+     * @brief Delete the special user-table in DB.
+     * @param userId Optional, Indicate which table to delete.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t DropUserTable(const int32_t userId);
+
 private:
     std::string GetUserTableName(const int32_t &userId);
     int32_t DeleteData(const std::string tableName, const std::string key, int32_t &rowId);

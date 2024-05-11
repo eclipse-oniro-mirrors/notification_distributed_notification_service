@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "rdb_errno.h"
 #define private public
 #include <gtest/gtest.h>
 
@@ -29,6 +30,7 @@ extern void MockInsertBatchData(bool mockRet);
 extern void MockQueryDataBeginWithKey(bool mockRet);
 extern void MockDeleteBathchData(bool mockRet);
 extern void MockDeleteData(bool mockRet);
+extern void MockDropTable(bool mockRet);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -991,6 +993,30 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_ERROR);
     MockDeleteData(true);
     EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : DropUserTable_00100
+ * @tc.number    :
+ * @tc.desc      : Test DropUserTable
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, DropUserTable_00100, Function | SmallTest | Level1)
+{
+    MockInit(true);
+    MockDropTable(true);
+    EXPECT_EQ(preferncesDB_->DropUserTable(-1), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : DropUserTable_00200
+ * @tc.number    :
+ * @tc.desc      : Test DropUserTable
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, DropUserTable_00200, Function | SmallTest | Level1)
+{
+    MockInit(true);
+    MockDropTable(false);
+    EXPECT_EQ(preferncesDB_->DropUserTable(-1), NativeRdb::E_ERROR);
 }
 
 /**

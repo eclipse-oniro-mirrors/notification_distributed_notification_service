@@ -20,6 +20,7 @@ int32_t g_mockId = 100; // default id when there is no os_account part
 bool g_mockQueryActiveOsAccountIdsRet = true;
 bool g_mockGetOsAccountLocalIdFromUidRet = true;
 int32_t g_mockIdForGetOsAccountLocalIdFromUid = 100;
+bool g_mockOsAccountExists = true;
 }
 
 void MockQueryActiveOsAccountIds(bool mockRet, uint8_t mockCase)
@@ -37,12 +38,18 @@ void MockQueryActiveOsAccountIds(bool mockRet, uint8_t mockCase)
     }
 }
 
+void MockIsOsAccountExists(bool mockRet)
+{
+    g_mockOsAccountExists = mockRet;
+}
+
 void ResetAccountMock()
 {
     g_mockId = 100; // 100 mockId
     g_mockQueryActiveOsAccountIdsRet = true;
     g_mockGetOsAccountLocalIdFromUidRet = true;
     g_mockIdForGetOsAccountLocalIdFromUid = 100;
+    g_mockOsAccountExists = true;
 }
 
 void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
@@ -66,16 +73,25 @@ void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
 
 namespace OHOS {
 namespace AccountSA {
-ErrCode AccountSA::OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
 {
+    if (!g_mockQueryActiveOsAccountIdsRet) {
+        return ERR_INVALID_OPERATION;
+    }
     ids.emplace_back(g_mockId);
-    return g_mockQueryActiveOsAccountIdsRet ? ERR_OK : ERR_INVALID_OPERATION;
+    return ERR_OK;
 }
 
-ErrCode AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
+ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
 {
     id = g_mockIdForGetOsAccountLocalIdFromUid;
     return g_mockGetOsAccountLocalIdFromUidRet ? ERR_OK : ERR_INVALID_OPERATION;
+}
+
+ErrCode OsAccountManager::IsOsAccountExists(const int id, bool &isOsAccountExists)
+{
+    isOsAccountExists = g_mockOsAccountExists;
+    return ERR_OK;
 }
 }  // namespace EventFwk
 }  // namespace OHOS

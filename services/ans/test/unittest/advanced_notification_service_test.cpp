@@ -46,6 +46,8 @@
 #include "want_params.h"
 #include "bundle_manager_helper.h"
 
+extern void MockIsOsAccountExists(bool mockRet);
+
 using namespace testing::ext;
 using namespace OHOS::Media;
 
@@ -88,7 +90,7 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     advancedNotificationService_->CancelAll();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-
+    MockIsOsAccountExists(true);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 

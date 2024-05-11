@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "notification_rdb_data_mgr.h"
+#include "rdb_errno.h"
 
 namespace {
     bool g_mockInitRet = true;
@@ -23,6 +24,7 @@ namespace {
     bool g_mockDeleteBathchDataRet = true;
     bool g_mockDeleteDataRet = true;
     bool g_mockQueryAllData = true;
+    bool g_mockDropTable = true;
 }
 
 void MockInit(bool mockRet)
@@ -65,6 +67,10 @@ void MockQueryAllData(bool mockRet)
     g_mockQueryAllData = mockRet;
 }
 
+void MockDropTable(bool mockRet)
+{
+    g_mockDropTable = mockRet;
+}
 namespace OHOS {
 namespace Notification {
 NotificationDataMgr::NotificationDataMgr(const NotificationRdbConfig &notificationRdbConfig)
@@ -141,6 +147,14 @@ int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &u
 int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     if (g_mockQueryAllData == false) {
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
+{
+    if (g_mockDropTable == false) {
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;

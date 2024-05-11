@@ -40,6 +40,13 @@ ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
     return ret;
 }
 
+bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
+{
+    bool isAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
+    return isAccountExists;
+}
+
 OsAccountManagerHelper &OsAccountManagerHelper::GetInstance()
 {
     return DelayedRefSingleton<OsAccountManagerHelper>::GetInstance();
