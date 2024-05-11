@@ -38,8 +38,7 @@ public:
     std::string GetFocusModeProfileUri() const;
 
 private:
-    void CreateDataShareHelper();
-    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_ = nullptr;
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
 };
 } // namespace Notification
 } // namespace OHOS

@@ -39,31 +39,30 @@ AdvancedDatashareHelper::AdvancedDatashareHelper()
     CreateDataShareHelper();
 }
 
-void AdvancedDatashareHelper::CreateDataShareHelper()
+std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateDataShareHelper()
 {
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         ANS_LOGE("The sa manager is nullptr.");
-        return;
     }
     sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     if (remoteObj == nullptr) {
         ANS_LOGE("The remoteObj is nullptr.");
-        return;
     }
-    dataShareHelper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATA_EXT_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATA_EXT_URI);
 }
 
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
 {
-    if (dataShareHelper_ == nullptr) {
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return false;
     }
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> columns;
     predicates.EqualTo(ADVANCED_DATA_COLUMN_KEYWORD, key);
-    auto result = dataShareHelper_->Query(uri, predicates, columns);
+    auto result = dataShareHelper->Query(uri, predicates, columns);
     if (result == nullptr) {
         ANS_LOGE("Query error, result is null.");
         return false;
@@ -71,6 +70,7 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
     if (result->GoToFirstRow() != DataShare::E_OK) {
         ANS_LOGE("Query failed, go to first row error.");
         result->Close();
+        dataShareHelper->Release();
         return false;
     }
     int32_t columnIndex;
@@ -78,6 +78,7 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
     result->GetString(columnIndex, value);
     result->Close();
     ANS_LOGD("Query success, value[%{public}s]", value.c_str());
+    dataShareHelper->Release();
     return true;
 }
 
