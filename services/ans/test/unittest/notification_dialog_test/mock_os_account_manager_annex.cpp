@@ -73,19 +73,22 @@ void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
 
 namespace OHOS {
 namespace AccountSA {
-ErrCode AccountSA::OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
 {
+    if (g_mockQueryActiveOsAccountIdsRet) {
+        return ERR_INVALID_OPERATION;
+    }
     ids.emplace_back(g_mockId);
-    return g_mockQueryActiveOsAccountIdsRet ? ERR_OK : ERR_INVALID_OPERATION;
+    return ERR_OK;
 }
 
-ErrCode AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
+ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
 {
     id = g_mockIdForGetOsAccountLocalIdFromUid;
     return g_mockGetOsAccountLocalIdFromUidRet ? ERR_OK : ERR_INVALID_OPERATION;
 }
 
-ErrCode AccountSA::OsAccountManager::IsOsAccountExists(const int id, bool &isOsAccountExists)
+ErrCode OsAccountManager::IsOsAccountExists(const int id, bool &isOsAccountExists)
 {
     isOsAccountExists = g_mockOsAccountExists;
     return ERR_OK;
