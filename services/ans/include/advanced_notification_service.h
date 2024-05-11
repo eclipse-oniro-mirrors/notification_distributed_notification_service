@@ -359,6 +359,8 @@ public:
     ErrCode RemoveAllNotificationsForDisable(const sptr<NotificationBundleOption> &bundleOption);
 
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
+  
+    ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
     ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot);

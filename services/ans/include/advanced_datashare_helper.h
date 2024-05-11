@@ -36,6 +36,7 @@ public:
     bool Query(Uri &uri, const std::string &key, std::string &value);
     std::string GetFocusModeEnableUri() const;
     std::string GetFocusModeProfileUri() const;
+    std::string GetUnifiedGroupEnableUri() const;
 
 private:
     void CreateDataShareHelper();

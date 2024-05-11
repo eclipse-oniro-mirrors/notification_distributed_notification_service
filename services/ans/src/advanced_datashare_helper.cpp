@@ -29,8 +29,11 @@ namespace {
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr const char *USER_SETTINGS_DATA_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_";
+constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
 constexpr const char *FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
 constexpr const char *FOCUS_MODE_PROFILE_URI = "?Proxy=true&key=focus_mode_profile";
+constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
 } // namespace
@@ -101,6 +104,16 @@ std::string AdvancedDatashareHelper::GetFocusModeProfileUri() const
         userId = std::to_string(accountIds[0]);
     }
     return USER_SETTINGS_DATA_URI + userId + FOCUS_MODE_PROFILE_URI;
+}
+std::string AdvancedDatashareHelper::GetUnifiedGroupEnableUri() const
+{
+    std::vector<int32_t> accountIds;
+    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountIds);
+    std::string userId = "100";
+    if (!accountIds.empty()) {
+        userId = std::to_string(accountIds[0]);
+    }
+    return USER_SETTINGS_DATA_SECURE_URI + userId + UNIFIED_GROUP_ENABLE_URI;
 }
 } // namespace Notification
 } // namespace OHOS

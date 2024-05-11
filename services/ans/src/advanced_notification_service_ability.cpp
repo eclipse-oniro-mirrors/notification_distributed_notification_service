@@ -35,12 +35,6 @@ void AdvancedNotificationServiceAbility::OnStart()
         return;
     }
 
-#ifdef ENABLE_ANS_EXT_WRAPPER
-    EXTENTION_WRAPPER->InitExtentionWrapper();
-#else
-    ANS_LOGD("Not enabled ans_ext");
-#endif
-
     service_ = AdvancedNotificationService::GetInstance();
     if (!Publish(service_)) {
         return;
@@ -48,6 +42,11 @@ void AdvancedNotificationServiceAbility::OnStart()
     service_->CreateDialogManager();
     service_->InitPublishProcess();
     reminderAgent_ = ReminderDataManager::InitInstance(service_);
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->InitExtentionWrapper();
+#else
+    ANS_LOGD("Not enabled ans_ext");
+#endif
 }
 
 void AdvancedNotificationServiceAbility::OnStop()

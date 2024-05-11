@@ -18,12 +18,15 @@
 #include "advanced_notification_service.h"
 #include "notification_extension_wrapper.h"
 #include "notification_preferences.h"
+#include "advanced_datashare_observer.h"
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
 const int32_t ACTIVE_DELETE = 0;
 const int32_t PASSITIVE_DELETE = 1;
-
+static constexpr const char *SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/"
+    "USER_SETTINGSDATA_SECURE_100?Proxy=true&key=unified_group_enable";
 ExtensionWrapper::ExtensionWrapper() = default;
 ExtensionWrapper::~ExtensionWrapper() = default;
 
@@ -52,6 +55,7 @@ void ExtensionWrapper::InitExtentionWrapper()
     syncAdditionConfig_ = (SYNC_ADDITION_CONFIG)dlsym(extensionWrapperHandle_, "SyncAdditionConfig");
     getUnifiedGroupInfo_ = (GET_UNIFIED_GROUP_INFO)dlsym(extensionWrapperHandle_, "GetUnifiedGroupInfo");
     updateByCancel_ = (UPDATE_BY_CANCEL)dlsym(extensionWrapperHandle_, "UpdateByCancel");
+    setLocalSwitch_ = (SET_LOCAL_SWITCH)dlsym(extensionWrapperHandle_, "SetlocalSwitch");
     initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
     if (syncAdditionConfig_ == nullptr
         || getUnifiedGroupInfo_ == nullptr
@@ -60,6 +64,10 @@ void ExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
+    RegisterDataSettingObserver();
+    string enable = "";
+    AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
+    SetlocalSwitch(enable);
 
     std::string configKey = NotificationPreferences::GetInstance().GetAdditionalConfig();
     if (!configKey.empty()) {
@@ -67,6 +75,32 @@ void ExtensionWrapper::InitExtentionWrapper()
     }
     initSummary_(UpdateUnifiedGroupInfo);
     ANS_LOGD("extension wrapper init success");
+}
+
+void ExtensionWrapper::SetlocalSwitch(std::string &enable)
+{
+    if (setLocalSwitch_ == nullptr) {
+        ANS_LOGE("SetlocalSwitch wrapper symbol failed");
+        return;
+    }
+    bool status = (enable == "true" ? true : false);
+    setLocalSwitch_(status);
+}
+
+void ExtensionWrapper::RegisterDataSettingObserver()
+{
+    ANS_LOGI("fengyunfei ExtensionWrapper::RegisterDataSettingObserver enter");
+    if (aggregationRoamingObserver_ == nullptr) {
+        aggregationRoamingObserver_ = new (std::nothrow) AdvancedAggregationDataRoamingObserver();
+    }
+
+    if (aggregationRoamingObserver_ == nullptr) {
+        ANS_LOGI("aggregationRoamingObserver_ is null");
+        return;
+    }
+    
+    Uri dataEnableUri(SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI);
+    AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(dataEnableUri, aggregationRoamingObserver_);
 }
 
 void ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::string& value)

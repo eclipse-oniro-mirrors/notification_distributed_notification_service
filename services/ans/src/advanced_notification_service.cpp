@@ -90,6 +90,7 @@ const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check
 const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
 const std::string CONTACTS_BUNDLE_NAME = "com.ohos.contacts";
 const std::string DO_NOT_DISTURB_MODE = "1";
+constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
@@ -1034,6 +1035,23 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
 
 ErrCode AdvancedNotificationService::HasNotificationPolicyAccessPermission(bool &granted)
 {
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetUnifiedGroupInfoFromDb(std::string &enable)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("The data share helper is nullptr.");
+        return -1;
+    }
+    Uri enableUri(datashareHelper->GetUnifiedGroupEnableUri());
+    bool ret = datashareHelper->Query(enableUri, KEY_UNIFIED_GROUP_ENABLE, enable);
+    if (!ret) {
+        ANS_LOGE("Query focus mode enable fail.");
+        return -1;
+    }
+
     return ERR_OK;
 }
 

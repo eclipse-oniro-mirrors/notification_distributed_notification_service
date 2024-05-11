@@ -24,6 +24,7 @@
 #include "notification_request.h"
 #include "notification_unified_group_Info.h"
 #include "singleton.h"
+#include "advanced_aggregation_data_roaming_observer.h"
 
 namespace OHOS::Notification {
 class ExtensionWrapper final {
@@ -36,10 +37,13 @@ public:
     typedef ErrCode (*GET_UNIFIED_GROUP_INFO)(const sptr<NotificationRequest> &request);
     typedef void (*UPDATE_GROUP_INFO)(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
     typedef void (*INIT_SUMMARY)(UPDATE_GROUP_INFO func);
+    typedef void (*SET_LOCAL_SWITCH)(bool status);
 
     void SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
     ErrCode GetUnifiedGroupInfo(const sptr<NotificationRequest> &request);
+    void RegisterDataSettingObserver();
+    void SetlocalSwitch(std::string &enable);
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -49,6 +53,8 @@ private:
     UPDATE_BY_CANCEL updateByCancel_ = nullptr;
     GET_UNIFIED_GROUP_INFO getUnifiedGroupInfo_ = nullptr;
     INIT_SUMMARY initSummary_ = nullptr;
+    SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
+    sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
 };
 
 #define EXTENTION_WRAPPER ::OHOS::DelayedSingleton<ExtensionWrapper>::GetInstance()
