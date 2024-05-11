@@ -219,7 +219,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
     ret = advancedNotificationService_->GetSlotByType(slotType, slot);
     EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(1, slot->GetAuthorizedStatus());
+    EXPECT_EQ(0, slot->GetAuthorizedStatus());
     EXPECT_EQ(2, slot->GetAuthHintCnt());
 }
 
@@ -382,6 +382,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00002, Function | Smal
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true);
     EXPECT_EQ(ret, (int)ERR_OK);
 
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ret, (int)ERR_OK);
 }
@@ -402,6 +403,8 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
 
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), false);
     EXPECT_EQ(ret, (int)ERR_OK);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
 
     auto bundle = advancedNotificationService_->GenerateBundleOption();
     NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, true);
