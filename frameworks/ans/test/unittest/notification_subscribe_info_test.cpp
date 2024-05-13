@@ -157,13 +157,16 @@ HWTEST_F(NotificationSubscribeInfoTest, Dump_00001, Function | SmallTest | Level
 {
     std::string deviceType = "test";
     std::string appName = "AppName";
+    int32_t userId = 100;
     NotificationSubscribeInfo subscribeInfo;
     auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
     rrc->AddDeviceType(deviceType);
     rrc->AddAppName(appName);
+    rrc->AddAppUserId(userId);
     std::string res = "NotificationSubscribeInfo{ "
             "appNames = [" + appName + ", ]" +
             "deviceType = " + deviceType +
+            "userId = " + std::to_string(userId) +
             " }";
     EXPECT_EQ(res, rrc->Dump());
 }

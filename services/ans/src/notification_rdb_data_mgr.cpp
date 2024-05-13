@@ -149,7 +149,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
 {
     ANS_LOGD("InsertData start");
     {
-        std::string tableName = GetUserTableName(userId);
+        std::string tableName = GetUserTableName(userId, true);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
@@ -172,7 +172,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
 int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value,
     const int32_t &userId)
 {
-    std::string tableName = GetUserTableName(userId);
+    std::string tableName = GetUserTableName(userId, true);
     std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
@@ -196,7 +196,7 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
 {
     ANS_LOGD("InsertBatchData start");
     {
-        std::string tableName = GetUserTableName(userId);
+        std::string tableName = GetUserTableName(userId, true);
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
@@ -395,7 +395,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
+        ANS_LOGD("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
@@ -457,7 +457,7 @@ int32_t NotificationDataMgr::QueryAllData(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
+        ANS_LOGD("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
@@ -496,7 +496,7 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
         if (rdbStore_ == nullptr) {
             return NativeRdb::E_ERROR;
         }
-        std::string dropTableSql = "DROP TABLE IF EXISTS" + tableName;
+        std::string dropTableSql = "DROP TABLE IF EXISTS " + tableName;
         ret = rdbStore_->ExecuteSql(dropTableSql);
     }
     if (ret == NativeRdb::E_OK) {
@@ -507,7 +507,7 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
     return ret;
 }
 
-std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
+std::string NotificationDataMgr::GetUserTableName(const int32_t &userId, bool createTable)
 {
     if (!OsAccountManagerHelper::IsSystemAccount(userId)) {
         return notificationRdbConfig_.tableName;
@@ -521,6 +521,10 @@ std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
         std::lock_guard<std::mutex> lock(userTableMutex_);
         if (userTableInit_.find(userId) != userTableInit_.end()) {
             return tableName;
+        }
+        if (!createTable) {
+            ANS_LOGD("Do not need create user table.");
+            return notificationRdbConfig_.tableName;
         }
         int ret = NativeRdb::E_OK;
         {

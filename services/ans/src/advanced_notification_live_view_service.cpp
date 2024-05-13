@@ -282,13 +282,19 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
 int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests)
 {
     std::unordered_map<std::string, std::string> dbRecords;
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
-    int32_t result =
-        NotificationPreferences::GetInstance().GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords, userId);
-    if (result != ERR_OK) {
-        ANS_LOGE("Get batch notification request failed.");
-        return result;
+    std::vector<int32_t> userIds;
+    int32_t ret = OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(userIds);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get all os account failed.");
+        return ret;
+    }
+    for (const int32_t userId : userIds) {
+        int32_t result =
+            NotificationPreferences::GetInstance().GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords, userId);
+        if (result != ERR_OK) {
+            ANS_LOGE("Get batch notification request failed.");
+            return result;
+        }
     }
     for (const auto &iter : dbRecords) {
         auto jsonObject = nlohmann::json::parse(iter.second);

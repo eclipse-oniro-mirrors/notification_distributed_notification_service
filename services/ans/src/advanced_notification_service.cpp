@@ -33,6 +33,7 @@
 #include "errors.h"
 #include "notification_extension_wrapper.h"
 #include "notification_record.h"
+#include "os_account_manager_helper.h"
 #ifdef DEVICE_USAGE_STATISTICS_ENABLE
 #include "bundle_active_client.h"
 #endif
@@ -51,7 +52,7 @@
 #include "notification_slot_filter.h"
 #include "notification_subscriber_manager.h"
 #include "notification_local_live_view_subscriber_manager.h"
-#include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "parameters.h"
 #include "permission_filter.h"
 #include "push_callback_proxy.h"
@@ -143,14 +144,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_GET_ACTIVE_USER_FAILED;
             }
             if (request->GetOwnerUid() == DEFAULT_UID) {
-                int32_t userId = 0;
                 GetActiveUserId(userId);
                 uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), userId);
             } else {
                 uid = request->GetOwnerUid();
             }
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
-            request->SetOwnerUserId(userId);
         }
         request->SetOwnerUid(uid);
         // set agentBundle
@@ -200,16 +198,25 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
         request->SetOwnerBundleName(bundle);
     }
-    request->SetCreatorBundleName(bundle);
-
+    
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
     request->SetCreatorPid(pid);
+    if (request->GetOwnerUid() == DEFAULT_UID) {
+        request->SetOwnerUid(uid);
+    }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
     request->SetCreatorUserId(userId);
+    request->SetCreatorBundleName(bundle);
+    if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
+        int32_t ownerUserId = SUBSCRIBE_USER_INIT;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+        request->SetOwnerUserId(ownerUserId);
+    }
+
     ErrCode result = CheckPictureSize(request);
 
     if (request->GetDeliveryTime() <= 0) {
@@ -291,7 +298,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 
     std::function<void()> recoverFunc = std::bind(&AdvancedNotificationService::RecoverLiveViewFromDb, this);
     notificationSvrQueue_->submit(recoverFunc);
-
+    
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::OnBundleRemoved, this, std::placeholders::_1),
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED

@@ -276,11 +276,6 @@ private:
         const std::pair<std::string, std::string> &entry, const int32_t &userId);
     void ParseBundlePropertyFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &bundleKey, const std::pair<std::string, std::string> &entry);
-    void ParseDoNotDisturbType(NotificationPreferencesInfo &info);
-    void ParseDoNotDisturbBeginDate(NotificationPreferencesInfo &info);
-    void ParseDoNotDisturbEndDate(NotificationPreferencesInfo &info);
-    void ParseEnableAllNotification(NotificationPreferencesInfo &info);
-    void ParseGetDoNotDisturbProfile(NotificationPreferencesInfo &info);
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;

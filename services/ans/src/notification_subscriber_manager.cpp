@@ -29,7 +29,7 @@
 #include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
-#include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "remote_death_recipient.h"
 #include "advanced_notification_service.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -90,14 +90,10 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
 
     if (subInfo->GetAppUserId() == SUBSCRIBE_USER_INIT) {
         int32_t userId = SUBSCRIBE_USER_INIT;
-        int32_t callingUid = IPCSkeleton::GetCallingUid();
-        ErrCode ret = OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
+        ErrCode ret = OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
         if (ret != ERR_OK) {
-            ANS_LOGD("Get userId failed, callingUid = <%{public}d>", callingUid);
-            return ERR_ANS_INVALID_PARAM;
+            return ret;
         }
-
-        ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> userId = <%{public}d>", callingUid, userId);
         subInfo->AddAppUserId(userId);
     }
 

@@ -13,32 +13,67 @@
  * limitations under the License.
  */
 #include "ans_log_wrapper.h"
-
-#include "os_account_manager_helper.h"
+#include "ans_inner_errors.h"
 #include "errors.h"
-#include "os_account_constants.h"
 #include "ipc_skeleton.h"
+#include "os_account_manager_helper.h"
+#include "os_account_constants.h"
+#include "os_account_info.h"
 #include "os_account_manager.h"
+#include <vector>
 
 namespace OHOS {
 namespace Notification {
 ErrCode OsAccountManagerHelper::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
 {
-    return AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, id);
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, id);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Failed to call OsAccountManager::GetOsAccountLocalIdFromUid, code is %{public}d", ret);
+    }
+    return ret;
 }
 
 ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &id)
 {
-    return AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), id);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, id);
+    if (ret != ERR_OK) {
+        ANS_LOGD("Get userId failed, callingUid = <%{public}d>", callingUid);
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> userId = <%{public}d>", callingUid, id);
+    return ERR_OK;
 }
 
 ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
 {
     std::vector<int> activeUserId;
-    int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+    int32_t ret = GetAllActiveOsAccount(activeUserId);
     if (activeUserId.size() > 0) {
         id = activeUserId[0];
+    }
+    return ret;
+}
+
+ErrCode OsAccountManagerHelper::GetAllOsAccount(std::vector<int32_t> &userIds)
+{
+    std::vector<AccountSA::OsAccountInfo> accounts;
+    int32_t ret = OHOS::AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Failed to call OsAccountManager::QueryAllCreatedOsAccounts, code is %{public}d", ret);
         return ret;
+    }
+    for (auto item : accounts) {
+        userIds.emplace_back(item.GetLocalId());
+    }
+    return ret;
+}
+
+ErrCode OsAccountManagerHelper::GetAllActiveOsAccount(std::vector<int32_t> &userIds)
+{
+    int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Failed to call OsAccountManager::QueryActiveOsAccountIds, code is %{public}d", ret);
     }
     return ret;
 }
@@ -48,7 +83,7 @@ bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
     bool isAccountExists = false;
     int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to call AccountSA::IsOsAccountExists, code is %{public}d", ret);
+        ANS_LOGE("Failed to call OsAccountManager::IsOsAccountExists, code is %{public}d", ret);
     }
     return isAccountExists;
 }
@@ -57,7 +92,6 @@ OsAccountManagerHelper &OsAccountManagerHelper::GetInstance()
 {
     return DelayedRefSingleton<OsAccountManagerHelper>::GetInstance();
 }
-
 
 bool OsAccountManagerHelper::IsSystemAccount(int32_t userId)
 {

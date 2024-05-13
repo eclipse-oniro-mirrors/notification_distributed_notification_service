@@ -1064,6 +1064,11 @@ public:
      */
     bool InitPublishProcess();
 
+    /**
+    * @brief Recover LiveView from DB.
+    */
+    void RecoverLiveViewFromDb();
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
      * @brief Register Swing Callback.
@@ -1246,7 +1251,6 @@ private:
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
-    void RecoverLiveViewFromDb();
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
