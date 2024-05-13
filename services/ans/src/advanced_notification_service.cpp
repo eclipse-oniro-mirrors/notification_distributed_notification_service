@@ -346,6 +346,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
 {
     ErrCode result = ERR_OK;
     if (!IsNotificationExists(record->notification->GetKey())) {
+        record->request->SetCreateTime(GetCurrentTime());
         result = PublishFlowControl(record);
     } else {
         if (record->request->IsAlertOneTime()) {

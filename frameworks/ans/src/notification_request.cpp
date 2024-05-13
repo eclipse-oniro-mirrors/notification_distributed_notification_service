@@ -474,6 +474,11 @@ int64_t NotificationRequest::GetCreateTime() const
     return createTime_;
 }
 
+void NotificationRequest::SetCreateTime(int64_t createTime)
+{
+    createTime_ = createTime;
+}
+
 bool NotificationRequest::IsShowStopwatch() const
 {
     return showStopwatch_;
