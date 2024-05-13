@@ -15,7 +15,9 @@
 
 #include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
+#include "os_account_info.h"
 #include "os_account_manager.h"
+#include <vector>
 
 namespace OHOS {
 namespace Notification {
@@ -35,7 +37,16 @@ ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
     if (activeUserId.size() > 0) {
         id = activeUserId[0];
-        return ret;
+    }
+    return ret;
+}
+
+ErrCode OsAccountManagerHelper::GetAllOsAccount(std::vector<int32_t> &userIds)
+{
+    std::vector<AccountSA::OsAccountInfo> accounts;
+    int32_t ret = OHOS::AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
+    for (auto item : accounts) {
+        userIds.emplace_back(item.GetLocalId());
     }
     return ret;
 }
