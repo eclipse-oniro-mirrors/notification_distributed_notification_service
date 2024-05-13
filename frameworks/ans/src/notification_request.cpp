@@ -1583,7 +1583,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     auto vsize = parcel.ReadUint64();
     vsize = (vsize < NotificationRequest::MAX_ACTION_BUTTONS) ? vsize : NotificationRequest::MAX_ACTION_BUTTONS;
     for (uint64_t it = 0; it < vsize; ++it) {
-        auto member = parcel.ReadParcelable<NotificationActionButton>();
+        auto member = std::shared_ptr<NotificationActionButton>(parcel.ReadParcelable<NotificationActionButton>());
         if (member == nullptr) {
             actionButtons_.clear();
             ANS_LOGE("Failed to read actionButton");
