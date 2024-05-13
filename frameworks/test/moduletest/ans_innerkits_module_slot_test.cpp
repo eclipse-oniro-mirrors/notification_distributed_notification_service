@@ -34,6 +34,7 @@ using namespace OHOS::Security::AccessToken;
 namespace OHOS {
 namespace Notification {
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
+extern void MockIsSystemApp(bool isSystemApp);
 
 const int32_t SLEEP_TIME = 1;
 static sptr<ISystemAbilityManager> systemAbilityManager =
@@ -68,6 +69,7 @@ void AnsInnerKitsModuleSlotTest::TearDownTestCase()
 void AnsInnerKitsModuleSlotTest::SetUp()
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
     NotificationHelper::RemoveAllSlots();
 }
 
