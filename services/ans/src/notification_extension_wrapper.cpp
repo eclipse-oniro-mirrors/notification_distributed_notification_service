@@ -119,7 +119,7 @@ void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& not
         return;
     }
     int32_t deleteType = convertToDelType(deleteReason);
-    updateByCancel_(notifications, deleteReason);
+    updateByCancel_(notifications, deleteType);
 }
 
 ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &request)

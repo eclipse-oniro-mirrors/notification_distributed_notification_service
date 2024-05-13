@@ -734,6 +734,13 @@ public:
     int64_t GetCreateTime() const;
 
     /**
+     * @brief Sets the time to create a notification.
+     *
+     * @param createTime Indicates the time in milliseconds.
+     */
+    void SetCreateTime(int64_t createTime);
+
+    /**
      * @brief Checks whether the notification creation time is displayed as a stopwatch.
      *
      * @return Returns true if the time is displayed as a stopwatch; returns false otherwise.
