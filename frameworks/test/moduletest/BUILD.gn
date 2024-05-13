@@ -192,6 +192,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
   sources = [
     "ans_innerkits_module_slot_test.cpp",
     "mock/distributed_kv_data_manager.cpp",
+    "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",

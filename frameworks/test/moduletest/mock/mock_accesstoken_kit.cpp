@@ -14,7 +14,22 @@
  */
 
 #include "accesstoken_kit.h"
+#include "ans_log_wrapper.h"
+#include "ipc_skeleton.h"
 
+using namespace OHOS::Security::AccessToken;
+namespace OHOS {
+namespace Notification {
+namespace {
+ATokenTypeEnum g_mockGetTokenTypeFlagRet = ATokenTypeEnum::TOKEN_INVALID;
+}
+
+void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
+{
+    g_mockGetTokenTypeFlagRet = mockRet;
+}
+}
+}
 namespace OHOS {
 namespace Security {
 namespace AccessToken {
@@ -25,7 +40,7 @@ int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& 
 
 ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
 {
-    return TOKEN_HAP;
+    return Notification::g_mockGetTokenTypeFlagRet;
 }
 } // namespace AccessToken
 } // namespace Security
