@@ -1276,19 +1276,19 @@ bool AnsNotification::CanPublishLiveViewContent(const NotificationRequest &reque
 ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 {
     auto littleIcon = request.GetLittleIcon();
-    if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
+    if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_ENLARGE_SIZE)) {
         ANS_LOGE("The size of little icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
     auto bigIcon = request.GetBigIcon();
-    if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
+    if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_ENLARGE_SIZE)) {
         ANS_LOGE("The size of big icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
     auto overlayIcon = request.GetOverlayIcon();
-    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
+    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_ENLARGE_SIZE)) {
         ANS_LOGE("The size of overlay icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
