@@ -93,6 +93,8 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_NO_MEMORY;
     }
 
+    request->SetCreateTime(GetCurrentTime());
+
     bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
     ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (result != ERR_OK) {
