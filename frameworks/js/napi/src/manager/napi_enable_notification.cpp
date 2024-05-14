@@ -362,6 +362,8 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
             params.hasCallerToken = true;
         } else {
             ANS_LOGE("Only support stage mode");
+            std::string msg = "Incorrect parameter types.Only support stage mode.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
     } else {

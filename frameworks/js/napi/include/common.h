@@ -1692,6 +1692,16 @@ public:
     static napi_value CreateErrorValue(napi_env env, int32_t errCode, bool newType);
 
     /**
+         * @brief Create a napi value with specified error object for callback
+         *
+         * @param env Indicates the environment that the API is invoked under
+         * @param errCode Indicates specified err code
+         * @param msg Indicates specified msg
+         * @return Returns a napi value with specified error object for callback
+         */
+    static napi_value CreateErrorValue(napi_env env, int32_t errCode, std::string &msg);
+    
+    /**
      * @brief Sets a js object by specified BadgeNumberCallbackData object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1714,6 +1724,7 @@ public:
         const napi_env &env, const napi_value &value, NotificationRequest &request);
     static bool IsValidRemoveReason(int32_t reasonType);
     static void NapiThrow(napi_env env, int32_t errCode);
+    static void NapiThrow(napi_env env, int32_t errCode, std::string &msg);
     static int32_t ErrorToExternal(uint32_t errCode);
     static void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result);
     static napi_value GetLockScreenPicture(

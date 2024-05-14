@@ -15,7 +15,7 @@
 
 #include "local_live_view_subscribe.h"
 #include "notification_button_option.h"
-
+#include "ans_inner_errors.h"
 #include <mutex>
 #include <uv.h>
 
@@ -206,6 +206,8 @@ napi_value GetNotificationSubscriber(
         NAPI_CALL(env, napi_typeof(env, onResponse, &valuetype));
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be function.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, onResponse, 1, &result);
@@ -266,6 +268,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGE("Wrong number of arguments");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -275,6 +278,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type for arg0. LocalLiveViewButton object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be LocalLiveViewButton.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -282,6 +287,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (!HasNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo)) {
         if (GetNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo) == nullptr) {
             ANS_LOGE("LocalLiveViewButton parse failed");
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             if (subscriberInstancesInfo.subscriber) {
                 delete subscriberInstancesInfo.subscriber;
                 subscriberInstancesInfo.subscriber = nullptr;
@@ -290,6 +296,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
         }
         if (!AddSubscriberInstancesInfo(env, subscriberInstancesInfo)) {
             ANS_LOGE("AddSubscriberInstancesInfo add failed");
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             if (subscriberInstancesInfo.subscriber) {
                 delete subscriberInstancesInfo.subscriber;
                 subscriberInstancesInfo.subscriber = nullptr;
