@@ -229,6 +229,13 @@ public:
     int32_t GetUserId() const;
 
     /**
+     * @brief Obtains the UserId of the notification receiver.
+     *
+     * @return Returns the UserId of the notification receiver.
+     */
+    int32_t GetRecvUserId() const;
+
+    /**
      * @brief Dumps a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -312,7 +319,7 @@ private:
     void ReadFromParcelInt32(Parcel &parcel);
     void ReadFromParcelInt64(Parcel &parcel);
     void ReadFromParcelUint64(Parcel &parcel);
-    void ReadFromParcelParcelable(Parcel &parcel);
+    bool ReadFromParcelParcelable(Parcel &parcel);
     bool MarshallingBool(Parcel &parcel) const;
     bool MarshallingString(Parcel &parcel) const;
     bool MarshallingInt32(Parcel &parcel) const;

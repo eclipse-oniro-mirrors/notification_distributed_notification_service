@@ -357,7 +357,8 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber);
+    ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
+        const bool isNative = true);
 
     /**
      * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only
@@ -481,7 +482,7 @@ public:
      */
     ErrCode GetNotificationSlotsForBundle(
         const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots);
-    
+
     /**
      * @brief Obtains notification slot belonging to the specified bundle.
      *
@@ -802,6 +803,32 @@ public:
     ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &validReminders);
 
     /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date);
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DelExcludeDates(const int32_t reminderId);
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates);
+
+    /**
      * @brief Checks whether this application has permission to publish notifications under the user.
      *
      * @param userId Indicates the userId of the application.
@@ -889,10 +916,11 @@ public:
      * @param cmd Indicates the specified dump command.
      * @param bundle Indicates the specified bundle name.
      * @param userId Indicates the specified userId.
+     * @param recvUserId Indicates the specified receiver userId.
      * @param dumpInfo Indicates the container containing datas.
      * @return Returns check result.
      */
-    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
 
     /**
@@ -1081,6 +1109,9 @@ private:
      * @return Returns true if the MediaContent can be published; returns false otherwise.
      */
     bool CanPublishLiveViewContent(const NotificationRequest &request) const;
+
+    bool IsValidTemplate(const NotificationRequest &request) const;
+    bool IsValidDelayTime(const NotificationRequest &request) const;
 
 private:
     std::mutex mutex_;

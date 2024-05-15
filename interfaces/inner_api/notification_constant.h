@@ -182,11 +182,31 @@ public:
      * Indicates that a notification is deleted because the application cancels all notifications.
      */
     static const int32_t APP_CANCEL_ALL_REASON_DELETE = 9;
+    
+    /**
+     * Indicates that a notification is deleted because this user is removed.
+     */
+    static const int32_t USER_REMOVED_REASON_DELETE = 10;
+
+    /**
+     * Indicates that a notification is deleted because of flow control.
+     */
+    static const int32_t FLOW_CONTROL_REASON_DELETE = 11;
+
+    /**
+     * Indicates that a notification is deleted because enable state is changed.
+     */
+    static const int32_t DISABLE_SLOT_REASON_DELETE = 12;
+
+    /**
+     * Indicates that a notification is deleted because enable state is changed.
+     */
+    static const int32_t DISABLE_NOTIFICATION_REASON_DELETE = 13;
 
     /**
      * Indicates that a notification is deleted for other reasons.
      */
-    static const int32_t APP_CANCEL_REASON_OTHER = 10;
+    static const int32_t APP_CANCEL_REASON_OTHER = 100;
 
     /**
      * The key indicates input source.

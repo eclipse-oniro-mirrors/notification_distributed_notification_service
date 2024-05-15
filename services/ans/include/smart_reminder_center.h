@@ -15,11 +15,13 @@
 
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_SMART_REMINDER_CENTER_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_SMART_REMINDER_CENTER_H
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 
 #include <bitset>
 #include <cstring>
 #include <map>
 #include <memory>
+#include <set>
 #include <singleton.h>
 
 #include "advanced_notification_service.h"
@@ -44,6 +46,7 @@ public:
     ~SmartReminderCenter() = default;
 
     void ReminderDecisionProcess(const sptr<NotificationRequest> &request) const;
+    bool CompareStatus(const string &status, const bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
 
 private:
     void GetMultiDeviceReminder();
@@ -64,17 +67,19 @@ private:
         const string &deviceType,
         const map<string, vector<shared_ptr<ReminderAffected>>> &reminderFilterDevice,
         const sptr<NotificationRequest> &request,
+        set<string> &validDevices,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;
-    void HandleAffectedReminder(
+    bool HandleAffectedReminder(
         const string &deviceType,
         const shared_ptr<ReminderAffected> &reminderAffected,
+        const set<string> &validDevices,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;
-    bool CompareStatus(const string &status, const bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
     void GetReminderAffecteds(
         const map<string, vector<shared_ptr<ReminderAffected>>> &reminderFilterDevice,
         const sptr<NotificationRequest> &request,
         vector<shared_ptr<ReminderAffected>> &reminderAffecteds) const;
     void GetDeviceStatusByType(const string &deviceType, bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
+    bool IsNeedSynergy(const string &deviceType, const string &ownerBundleName) const;
 
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;
@@ -92,3 +97,4 @@ private:
 }  // namespace OHOS
 
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_SMART_REMINDER_CENTER_H
+#endif

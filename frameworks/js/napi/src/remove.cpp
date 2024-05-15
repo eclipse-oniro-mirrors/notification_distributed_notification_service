@@ -15,6 +15,7 @@
 
 #include <optional>
 #include "remove.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -137,6 +138,7 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
     if (argc < REMOVE_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return false;
     }
     bool isArray = false;
@@ -146,6 +148,8 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
     if ((valueType != napi_string) && (valueType != napi_object) &&
         (valueType != napi_number) && (valueType != napi_boolean) && !isArray) {
         ANS_LOGW("Wrong argument type. String or object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object or string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     if ((valueType == napi_string) || (valueType == napi_number) || (valueType == napi_boolean) || isArray) {
@@ -179,6 +183,7 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], bundleandKeyInfo.option);
         if (retValue == nullptr) {
             ANS_LOGW("GetBundleOption failed.");
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         params.bundleAndKeyInfo = bundleandKeyInfo;
@@ -214,6 +219,7 @@ napi_value ParseParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < REMOVE_GROUP_BY_BUNDLE_MIN_PARA) {
         ANS_LOGW("Error number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -221,11 +227,14 @@ napi_value ParseParameters(
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGW("Valuetype is not object.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -233,6 +242,8 @@ napi_value ParseParameters(
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
         ANS_LOGW("Error argument type. String number boolean anticipate.");
+        std::string msg = "Incorrect parameter types.The type of param must be string or number or boolean.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (valuetype == napi_string) {

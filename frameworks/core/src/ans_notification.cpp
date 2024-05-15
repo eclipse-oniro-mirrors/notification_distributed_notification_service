@@ -33,6 +33,9 @@ namespace Notification {
 namespace {
 const int32_t MAX_RETRY_TIME = 30;
 const int32_t SLEEP_TIME = 1000;
+const uint32_t MAX_PUBLISH_DELAY_TIME = 5;
+const std::string DOWNLOAD_TITLE = "title";
+const std::string DOWNLOAD_FILENAME = "fileName";
 }
 ErrCode AnsNotification::AddNotificationSlot(const NotificationSlot &slot)
 {
@@ -177,6 +180,10 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (!IsValidTemplate(request) || !IsValidDelayTime(request)) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     if (!CanPublishMediaContent(request)) {
         ANS_LOGE("Refuse to publish the notification because the series numbers actions not match those assigned to "
                  "added action buttons.");
@@ -229,6 +236,8 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
 
 ErrCode AnsNotification::CancelAllNotifications()
 {
+    ANS_LOGI("CancelAllNotifications called.");
+
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -460,7 +469,8 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber 
     return ansManagerProxy_->SubscribeSelf(subscriberSptr);
 }
 
-ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber)
+ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
+    const bool isNative)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (!GetAnsManagerProxy()) {
@@ -473,7 +483,7 @@ ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLo
         ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->SubscribeLocalLiveView(subscriberSptr, nullptr);
+    return ansManagerProxy_->SubscribeLocalLiveView(subscriberSptr, nullptr, isNative);
 }
 
 ErrCode AnsNotification::SubscribeNotification(
@@ -1144,6 +1154,33 @@ ErrCode AnsNotification::GetValidReminders(std::vector<sptr<ReminderRequest>> &v
     return ansManagerProxy_->GetValidReminders(validReminders);
 }
 
+ErrCode AnsNotification::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->AddExcludeDate(reminderId, date);
+}
+
+ErrCode AnsNotification::DelExcludeDates(const int32_t reminderId)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->DelExcludeDates(reminderId);
+}
+
+ErrCode AnsNotification::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
+{
+    if (!GetAnsManagerProxy()) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return ansManagerProxy_->GetExcludeDates(reminderId, dates);
+}
+
 bool AnsNotification::GetAnsManagerProxy()
 {
     if (!ansManagerProxy_) {
@@ -1239,19 +1276,19 @@ bool AnsNotification::CanPublishLiveViewContent(const NotificationRequest &reque
 ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 {
     auto littleIcon = request.GetLittleIcon();
-    if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
+    if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_ENLARGE_SIZE)) {
         ANS_LOGE("The size of little icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
     auto bigIcon = request.GetBigIcon();
-    if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
+    if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_ENLARGE_SIZE)) {
         ANS_LOGE("The size of big icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
     auto overlayIcon = request.GetOverlayIcon();
-    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
+    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_ENLARGE_SIZE)) {
         ANS_LOGE("The size of overlay icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
@@ -1446,14 +1483,14 @@ ErrCode AnsNotification::GetEnabledForBundleSlotSelf(const NotificationConstant:
 }
 
 ErrCode AnsNotification::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     if (!GetAnsManagerProxy()) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->ShellDump(cmd, bundle, userId, dumpInfo);
+    return ansManagerProxy_->ShellDump(cmd, bundle, userId, recvUserId, dumpInfo);
 }
 
 ErrCode AnsNotification::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
@@ -1638,6 +1675,30 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
     }
 
     return ansManagerProxy_->SetTargetDeviceStatus(deviceType, status);
+}
+
+
+bool AnsNotification::IsValidTemplate(const NotificationRequest &request) const
+{
+    if (request.GetTemplate() == nullptr) {
+        return true;
+    }
+
+    std::string name = request.GetTemplate()->GetTemplateName();
+    if (strcmp(name.c_str(), DOWNLOAD_TEMPLATE_NAME.c_str()) == 0) {
+        std::shared_ptr<AAFwk::WantParams> data = request.GetTemplate()->GetTemplateData();
+        if (data ==nullptr || !data->HasParam(DOWNLOAD_FILENAME) || !data->HasParam(DOWNLOAD_TITLE)) {
+            ANS_LOGE("No required parameters.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool AnsNotification::IsValidDelayTime(const NotificationRequest &request)  const
+{
+    return request.GetPublishDelayTime() <= MAX_PUBLISH_DELAY_TIME;
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

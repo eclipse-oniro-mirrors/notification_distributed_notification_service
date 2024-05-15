@@ -242,6 +242,7 @@ bool NotificationFlags::GetReminderFlagsByString(
     reminderFlags->SetLightScreenEnabled(static_cast<bool>(strReminderFlags[LIGHT_SCREEN_ENABLED_SEQ] - '0'));
     reminderFlags->SetVibrationEnabled(
         static_cast<NotificationConstant::FlagStatus>(strReminderFlags[VIBRATION_ENABLED_SEQ] - '0'));
+    reminderFlags->SetStatusIconEnabled(static_cast<bool>(strReminderFlags[ICON_ENABLED_SEQ] - '0'));
     return true;
 }
 

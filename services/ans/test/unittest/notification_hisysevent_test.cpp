@@ -367,7 +367,7 @@ HWTEST_F(NotificationHisyseventTest, SendCancelSysEvent_0100, Level1)
     Parcel p;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.ReadFromParcel(p);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendCancelSysEvent_0100 end";
 }

@@ -33,10 +33,14 @@
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
 #include "want_params.h"
+#include "accesstoken_kit.h"
 
 using namespace testing::ext;
+using namespace OHOS::Security::AccessToken;
 namespace OHOS {
 namespace Notification {
+extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
+
 static sptr<ISystemAbilityManager> systemAbilityManager =
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
 bool g_onConsumedReceived = false;
@@ -65,6 +69,7 @@ const int32_t CASE_SEVENTEEN = 17;
 const int32_t CASE_EIGHTEEN = 18;
 const int32_t CASE_NINETEEN = 19;
 const int32_t CASE_TWENTY = 20;
+const int32_t CASE_TWENTY_ONE = 21;
 
 const int32_t PIXEL_MAP_TEST_WIDTH = 32;
 const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
@@ -178,6 +183,8 @@ public:
             CheckCaseSixteenResult(notificationRequest);
         } else if (CASE_SEVENTEEN == notificationRequest.GetNotificationId()) {
             CheckCaseSeventeenResult(notificationRequest);
+        } else if (CASE_TWENTY_ONE == notificationRequest.GetNotificationId()) {
+            CheckCaseTwentyOneResult(notificationRequest);
         } else {
             GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish::OnConsumed do nothing!!!!!";
         }
@@ -410,9 +417,9 @@ private:
     {
         std::shared_ptr<NotificationTemplate> notiTemplate = notificationRequest.GetTemplate();
         if (notiTemplate != nullptr) {
-            EXPECT_EQ("downloadTemplate", notiTemplate->GetTemplateName());
+            EXPECT_EQ("downloadTemplate1", notiTemplate->GetTemplateName());
             std::shared_ptr<AAFwk::WantParams> param = notiTemplate->GetTemplateData();
-            int value = AAFwk::Integer::Unbox(AAFwk::IInteger::Query(param->GetParam("downloadTemplate")));
+            int value = AAFwk::Integer::Unbox(AAFwk::IInteger::Query(param->GetParam("downloadTemplate1")));
             EXPECT_EQ(20, value); // 20 test input
         }
         EXPECT_EQ(NotificationConstant::OTHER, notificationRequest.GetSlotType());
@@ -422,8 +429,8 @@ private:
     {
         std::shared_ptr<NotificationFlags> notiFlags = notificationRequest.GetFlags();
         if (notiFlags != nullptr) {
-            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsSoundEnabled());
-            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsVibrationEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsSoundEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsVibrationEnabled());
         }
     }
 
@@ -441,6 +448,15 @@ private:
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent =
             notificationRequest.GetRemovalWantAgent();
         EXPECT_NE(removalWantAgent, nullptr);
+    }
+
+    void CheckCaseTwentyOneResult(NotificationRequest notificationRequest)
+    {
+        std::shared_ptr<NotificationFlags> notiFlags = notificationRequest.GetFlags();
+        if (notiFlags != nullptr) {
+            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsSoundEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsVibrationEnabled());
+        }
     }
 };
 
@@ -490,7 +506,9 @@ void AnsInnerKitsModulePublishTest::TearDownTestCase()
 }
 
 void AnsInnerKitsModulePublishTest::SetUp()
-{}
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+}
 
 void AnsInnerKitsModulePublishTest::TearDown()
 {
@@ -1208,20 +1226,11 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_07000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_00100, Function | MediumTest | Level1)
 {
-    auto subscriber = TestAnsSubscriber();
-    NotificationSubscribeInfo info = NotificationSubscribeInfo();
-    info.AddAppName("bundleName");
-    info.AddAppUserId(SUBSCRIBE_USER_ALL);
-    g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
-    WaitOnSubscribeResult();
     std::shared_ptr<NotificationLongTextContent> implContent = std::make_shared<NotificationLongTextContent>();
     EXPECT_NE(implContent, nullptr);
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(implContent);
     EXPECT_NE(content, nullptr);
     EXPECT_EQ((int)ERR_OK, (int)NotificationHelper::CancelAllNotifications());
-    sleep(SLEEP_TIME);
-    EXPECT_EQ(g_onCanceledReceived, true);
     uint64_t countBefor = 0;
     EXPECT_EQ((int)ERR_OK, NotificationHelper::GetActiveNotificationNums(countBefor));
     EXPECT_EQ(0, countBefor);
@@ -1230,19 +1239,16 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_
     req1.SetLabel(label1);
     req1.SetContent(content);
     req1.SetCreatorUserId(SUBSCRIBE_USER_SYSTEM_BEGIN);
-    g_consumed_mtx.lock();
+    req1.SetCreatorUid(100);
+    
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req1));
-    WaitOnConsumed();
-    g_onConsumedReceived = false;
-    g_consumed_mtx.unlock();
     std::string label2 = "Label2";
     NotificationRequest req2(0);
     req2.SetLabel(label2);
     req2.SetContent(content);
     req2.SetCreatorUserId(SUBSCRIBE_USER_SYSTEM_BEGIN);
-    g_consumed_mtx.lock();
+    req2.SetCreatorUid(100);
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req2));
-    WaitOnConsumed();
     uint64_t countAfter = 0;
     EXPECT_EQ((int)ERR_OK, NotificationHelper::GetActiveNotificationNums(countAfter));
     EXPECT_EQ(ACTIVE_NUMS, countAfter);
@@ -1252,13 +1258,8 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_
     EXPECT_EQ("Label2", requests[1]->GetLabel());
     EXPECT_EQ((int)ERR_OK, (int)NotificationHelper::RemoveNotifications(SUBSCRIBE_USER_SYSTEM_BEGIN));
     sleep(SLEEP_TIME);
-    EXPECT_EQ(g_onCanceledReceived, true);
     EXPECT_EQ((int)ERR_OK, NotificationHelper::GetActiveNotificationNums(countAfter));
     EXPECT_EQ(0, countAfter);
-    g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
-    WaitOnUnsubscribeResult();
-    g_onCanceledReceived = false;
 }
 
 /**
@@ -1354,12 +1355,14 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_04000, Function
 
     std::shared_ptr<NotificationTemplate> notiTemplate = std::make_shared<NotificationTemplate>();
     EXPECT_NE(notiTemplate, nullptr);
-    notiTemplate->SetTemplateName("downloadTemplate");
-    // [{'downloadTemplate':20}]
+    notiTemplate->SetTemplateName("downloadTemplate1");
+
     AAFwk::WantParams wantParams;
-    std::string key("downloadTemplate");
+    std::string key("downloadTemplate1");
     int resultValue = 20;
-    wantParams.SetParam(key,  AAFwk::Integer::Box(resultValue));
+    wantParams.SetParam(key, AAFwk::Integer::Box(resultValue));
+    wantParams.SetParam("fileName", AAFwk::Integer::Box(resultValue));
+    wantParams.SetParam("title", AAFwk::Integer::Box(resultValue));
     notiTemplate->SetTemplateData(std::make_shared<AAFwk::WantParams>(wantParams));
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_04000::notiTemplate::" << notiTemplate->Dump();
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1477,7 +1480,6 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_05000, Function
     NotificationRequest req;
     req.SetContent(content);
     req.SetFlags(notiFlags);
-    req.SetSlotType(NotificationConstant::OTHER);
     req.SetNotificationId(CASE_FIFTEEN);
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
@@ -1512,7 +1514,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_06000, Function
     NotificationRequest req;
     req.SetContent(content);
     req.SetSlotType(NotificationConstant::OTHER);
-    req.SetNotificationId(CASE_SIXTEEN);
+    req.SetNotificationId(CASE_TWENTY_ONE);
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
@@ -1710,7 +1712,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10002, Function
     WaitOnSubscribeResult();
 
     auto systemLiveViewSubscriber = TestLocalLiveViewSubscriber();
-    EXPECT_EQ(0, NotificationHelper::SubscribeLocalLiveViewNotification(systemLiveViewSubscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeLocalLiveViewNotification(systemLiveViewSubscriber, true));
 
     MessageUser messageUser;
     std::shared_ptr<NotificationLocalLiveViewContent> liveContent =

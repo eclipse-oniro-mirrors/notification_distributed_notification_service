@@ -118,6 +118,10 @@ public:
 
     std::string GetDeviceType() const;
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    bool ProcessSyncDecision(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
+#endif
+
 private:
     class SubscriberImpl final : public AnsSubscriberStub {
     public:
@@ -177,6 +181,10 @@ private:
 
 private:
     const sptr<SubscriberImpl> GetImpl() const;
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    NotificationConstant::FlagStatus DowngradeReminder(
+        const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const;
+#endif
 
 private:
     sptr<SubscriberImpl> impl_ = nullptr;

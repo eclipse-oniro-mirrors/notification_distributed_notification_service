@@ -93,6 +93,7 @@ class ReminderStoreDataCallBack : public NativeRdb::RdbOpenCallback {
 public:
     int32_t OnCreate(NativeRdb::RdbStore& store) override;
     int32_t OnUpgrade(NativeRdb::RdbStore& store, int32_t oldVersion, int32_t newVersion) override;
+    int32_t OnDowngrade(NativeRdb::RdbStore& store, int32_t currentVersion, int32_t targetVersion) override;
 
 private:
     int32_t CreateTable(NativeRdb::RdbStore& store);

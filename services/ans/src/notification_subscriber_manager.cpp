@@ -28,9 +28,13 @@
 #include "notification_flags.h"
 #include "notification_constant.h"
 #include "notification_config_parse.h"
+#include "notification_extension_wrapper.h"
 #include "os_account_manager.h"
 #include "remote_death_recipient.h"
-
+#include "advanced_notification_service.h"
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+#include "reminder_swing_decision_center.h"
+#endif
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
@@ -39,6 +43,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     bool subscribedAll {false};
     int32_t userId {SUBSCRIBE_USER_INIT};
     std::string deviceType {CURRENT_DEVICE_TYPE};
+    int32_t subscriberUid {DEFAULT_UID};
 };
 
 NotificationSubscriberManager::NotificationSubscriberManager()
@@ -105,6 +110,9 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         result = this->AddSubscriberInner(subscriber, subInfo);
     }));
     notificationSubQueue_->wait(handler);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ReminderSwingDecisionCenter::GetInstance().SwingExecuteDecision();
+#endif
     return result;
 }
 
@@ -128,6 +136,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationSubQueue_->wait(handler);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ReminderSwingDecisionCenter::GetInstance().SwingExecuteDecision();
+#endif
     return result;
 }
 
@@ -170,6 +181,12 @@ void NotificationSubscriberManager::NotifyCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    std::vector<sptr<Notification>> notifications;
+    notifications.emplace_back(notification);
+    EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
+#endif
+
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
@@ -184,6 +201,10 @@ void NotificationSubscriberManager::BatchNotifyCanceled(const std::vector<sptr<N
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
+#endif
+
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGD("queue is nullptr");
         return;
@@ -257,11 +278,19 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
         ANS_LOGE("ffrt enter!");
         std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
+            auto subscriberUid = record->subscriberUid;
             ANS_LOGW("subscriber removed.");
             subscriberRecordList_.remove(record);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+            UpdateCrossDeviceNotificationStatus();
+#endif
+            AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(record->subscriberUid);
         }
     }));
     notificationSubQueue_->wait(handler);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    ReminderSwingDecisionCenter::GetInstance().SwingExecuteDecision();
+#endif
 }
 
 std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSubscriberManager::FindSubscriberRecord(
@@ -315,6 +344,7 @@ void NotificationSubscriberManager::AddRecordInfo(
         if (!subscribeInfo->GetDeviceType().empty()) {
             record->deviceType = subscribeInfo->GetDeviceType();
         }
+        record->subscriberUid = subscribeInfo->GetSubscriberUid();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -358,6 +388,9 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     }
 
     AddRecordInfo(record, subscribeInfo);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    UpdateCrossDeviceNotificationStatus();
+#endif
     if (onSubscriberAddCallback_ != nullptr) {
         onSubscriberAddCallback_(record);
     }
@@ -382,7 +415,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
         record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
 
         subscriberRecordList_.remove(record);
-
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+        UpdateCrossDeviceNotificationStatus();
+#endif
         record->subscriber->OnDisconnected();
         ANS_LOGI("subscriber is disconnected.");
     }
@@ -395,26 +430,17 @@ void NotificationSubscriberManager::NotifyConsumedInner(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
-    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-    int32_t sendUserId = notification->GetUserId();
 
     for (auto record : subscriberRecordList_) {
-        auto BundleNames = notification->GetBundleName();
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
-            __FUNCTION__, record->userId, BundleNames.c_str(), record->deviceType.c_str());
-        auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
-        if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-            ((record->userId == sendUserId) ||
-            (record->userId == SUBSCRIBE_USER_ALL) ||
-            (record->userId == recvUserId) ||
-            IsSystemUser(record->userId) ||  // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId)) &&
-            ProcessSyncDecision(record->deviceType, notification)) {
+            __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
+        if (IsSubscribedBysubscriber(record, notification)) {
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }
 }
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
 {
     // Ignore the impact of the bundleName and userId for smart reminder switch now.
@@ -425,55 +451,7 @@ bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
     }
     return false;
 }
-
-bool NotificationSubscriberManager::ProcessSyncDecision(
-    const std::string &deviceType, const sptr<Notification> &notification) const
-{
-    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
-    if (request == nullptr) {
-        ANS_LOGD("No need to consume cause invalid reqeuest.");
-        return false;
-    }
-    if (request->GetDeviceFlags() == nullptr) {
-        return true;
-    }
-    auto flagsMap = request->GetDeviceFlags();
-    auto flagIter = flagsMap->find(deviceType);
-    if (flagIter != flagsMap->end()) {
-        std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
-        tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
-        tempFlags->SetVibrationEnabled(
-            DowngradeReminder(tempFlags->IsVibrationEnabled(), flagIter->second->IsVibrationEnabled()));
-        tempFlags->SetLockScreenVisblenessEnabled(
-            tempFlags->IsLockScreenVisblenessEnabled() && flagIter->second->IsLockScreenVisblenessEnabled());
-        tempFlags->SetBannerEnabled(
-            tempFlags->IsBannerEnabled() && flagIter->second->IsBannerEnabled());
-        tempFlags->SetLightScreenEnabled(
-            tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
-        request->SetFlags(tempFlags);
-        request->GetDeviceFlags().reset();
-        return true;
-    }
-    if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
-        request->GetDeviceFlags().reset();
-        return true;
-    }
-    ANS_LOGD("No need to consume cause cannot find deviceFlags. deviceType: %{public}s.", deviceType.c_str());
-    return false;
-}
-
-NotificationConstant::FlagStatus NotificationSubscriberManager::DowngradeReminder(
-    const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const
-{
-    if (judgeFlags == NotificationConstant::FlagStatus::NONE || oldFlags == NotificationConstant::FlagStatus::NONE) {
-        return NotificationConstant::FlagStatus::NONE;
-    }
-    if (judgeFlags > oldFlags) {
-        return judgeFlags;
-    } else {
-        return oldFlags;
-    }
-}
+#endif
 
 void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record)
@@ -491,17 +469,7 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
         if (notification == nullptr) {
             continue;
         }
-        auto bundleName = notification->GetBundleName();
-        auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleName);
-        int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-        int32_t sendUserId = notification->GetUserId();
-        if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-            ((record->userId == sendUserId) ||
-            (record->userId == SUBSCRIBE_USER_ALL) ||
-            (record->userId == recvUserId) ||
-            IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId)) &&
-            ProcessSyncDecision(record->deviceType, notification)) {
+        if (IsSubscribedBysubscriber(record, notification)) {
             currNotifications.emplace_back(notification);
         }
     }
@@ -526,18 +494,9 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         liveViewContent->FillPictureMarshallingMap();
     }
 
-    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-    int32_t sendUserId = notification->GetUserId();
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
-        auto BundleNames = notification->GetBundleName();
-        auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
-        if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-            ((record->userId == sendUserId) ||
-            (record->userId == SUBSCRIBE_USER_ALL) ||
-            (record->userId == recvUserId) ||
-            IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-            IsSystemUser(sendUserId))) {
+        if (IsSubscribedBysubscriber(record, notification)) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
         }
     }
@@ -545,6 +504,34 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     if (isCommonLiveView && liveViewContent != nullptr) {
         liveViewContent->ClearPictureMarshallingMap();
     }
+}
+
+bool NotificationSubscriberManager::IsSubscribedBysubscriber(
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
+{
+    auto BundleNames = notification->GetBundleName();
+    auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
+    bool isSubscribedTheNotification = record->subscribedAll || (iter != record->bundleList_.end()) ||
+        (notification->GetNotificationRequest().GetCreatorUid() == record->subscriberUid);
+    if (!isSubscribedTheNotification) {
+        return false;
+    }
+
+    if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId)) {
+        return true;
+    }
+
+    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
+    int32_t sendUserId = notification->GetUserId();
+    if (record->userId == sendUserId || record->userId == recvUserId) {
+        return true;
+    }
+
+    if (IsSystemUser(sendUserId)) {
+        return true;
+    }
+
+    return false;
 }
 
 void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
@@ -564,16 +551,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             if (notification == nullptr) {
                 continue;
             }
-            auto bundleName = notification->GetBundleName();
-            auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleName);
-            int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
-            int32_t sendUserId = notification->GetUserId();
-            if (!record->subscribedAll == (iter != record->bundleList_.end()) &&
-                ((record->userId == sendUserId) ||
-                (record->userId == SUBSCRIBE_USER_ALL) ||
-                (record->userId == recvUserId) ||
-                IsSystemUser(record->userId) ||   // Delete this, When the systemui subscribe carry the user ID.
-                IsSystemUser(sendUserId))) {
+            if (IsSubscribedBysubscriber(record, notification)) {
                 currNotifications.emplace_back(notification);
             }
         }
@@ -652,6 +630,27 @@ void NotificationSubscriberManager::UnRegisterOnSubscriberAddCallback()
 {
     onSubscriberAddCallback_ = nullptr;
 }
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+void NotificationSubscriberManager::UpdateCrossDeviceNotificationStatus()
+{
+    bool isEnable = false;
+    std::string deviceType = ReminderSwingDecisionCenter::GetInstance().GetSwingDeviceType();
+    if (deviceType.empty()) {
+        ANS_LOGE("GetIsEnableSwingEffectedRemind deviceType is empty");
+        return;
+    }
+
+    for (auto record : subscriberRecordList_) {
+        if (record->deviceType.compare(deviceType) == 0) {
+            isEnable = true;
+            break;
+        }
+    }
+
+    ReminderSwingDecisionCenter::GetInstance().UpdateCrossDeviceNotificationStatus(isEnable);
+}
+#endif
 
 using SubscriberRecordPtr = std::shared_ptr<NotificationSubscriberManager::SubscriberRecord>;
 std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecords()

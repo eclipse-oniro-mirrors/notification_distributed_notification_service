@@ -93,6 +93,9 @@ namespace OHOS {
         ansManagerStub.HandleCancelReminder(datas, reply);
         ansManagerStub.HandleCancelAllReminders(datas, reply);
         ansManagerStub.HandleGetValidReminders(datas, reply);
+        ansManagerStub.HandleAddExcludeDate(datas, reply);
+        ansManagerStub.HandleDelExcludeDates(datas, reply);
+        ansManagerStub.HandleGetExcludeDates(datas, reply);
         ansManagerStub.HandleIsSupportTemplate(datas, reply);
         ansManagerStub.HandleIsSpecialUserAllowedNotifyByUser(datas, reply);
         ansManagerStub.HandleSetNotificationsEnabledByUser(datas, reply);
@@ -183,6 +186,11 @@ namespace OHOS {
         std::vector<sptr<Notification::ReminderRequest>> reminders;
         ansManagerStub.GetValidReminders(reminders);
         ansManagerStub.CancelAllReminders();
+        uint64_t excludeDate = static_cast<uint64_t>(GetU32Data(data));
+        ansManagerStub.AddExcludeDate(reminderId, excludeDate);
+        ansManagerStub.DelExcludeDates(reminderId);
+        std::vector<uint64_t> excludeDates;
+        ansManagerStub.GetExcludeDates(reminderId, excludeDates);
         bool support = *data % ENABLE;
         ansManagerStub.IsSupportTemplate(stringData, support);
         ansManagerStub.IsSpecialUserAllowedNotify(userId, allowed);
@@ -194,7 +202,7 @@ namespace OHOS {
         ansManagerStub.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         ansManagerStub.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
-        ansManagerStub.ShellDump(stringData, stringData, userId, dumpInfo);
+        ansManagerStub.ShellDump(stringData, stringData, userId, userId, dumpInfo);
         ansManagerStub.SetSyncNotificationEnabledWithoutApp(userId, enabled);
         ansManagerStub.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         return true;

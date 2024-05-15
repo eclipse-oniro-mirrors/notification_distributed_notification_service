@@ -45,8 +45,8 @@ private:
 
     ErrCode RunHelp();
     void CheckDumpOpt();
-    void SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId, ErrCode &ret);
-    ErrCode RunDumpCmd(const std::string& cmd, const std::string& bundle, int32_t userId,
+    void SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId, ErrCode &ret, int32_t &recvUserId);
+    ErrCode RunDumpCmd(const std::string& cmd, const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &infos);
     ErrCode RunSetEnableCmd();
     ErrCode RunSetDeviceStatusCmd();

@@ -379,7 +379,8 @@ public:
      *                   For details, see {NotificationSubscriber}.
      * @return Returns subscribe notification result.
      */
-    static ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber);
+    static ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
+        const bool isNative = true);
 
     /**
      * @brief Unsubscribes from all notifications. This method can be called only by applications with required

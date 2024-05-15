@@ -117,6 +117,9 @@ public:
     static bool GetObject(const napi_env &env, const napi_value &value,
         const char* propertyName, napi_value& propertyVal);
 
+    static bool GetDate(const napi_env& env, const napi_value& value,
+        const char* propertyName, double& date);
+
     static void HandleErrCode(const napi_env &env, int32_t errCode);
 
     static void ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info,

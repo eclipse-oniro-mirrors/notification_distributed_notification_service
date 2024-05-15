@@ -46,6 +46,8 @@
 #include "want_params.h"
 #include "bundle_manager_helper.h"
 
+extern void MockIsOsAccountExists(bool mockRet);
+
 using namespace testing::ext;
 using namespace OHOS::Media;
 
@@ -88,7 +90,7 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     advancedNotificationService_->CancelAll();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-
+    MockIsOsAccountExists(true);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -1698,6 +1700,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
+    
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_INVALID_UID);
     SleepForFC();
 
@@ -1921,7 +1925,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13600,
     std::string bundle = "Bundle";
     int32_t userId = 2;
     std::vector<std::string> dumpInfo;
-    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, dumpInfo), (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, 0, dumpInfo), (int)ERR_OK);
 }
 
 /**
@@ -1935,7 +1939,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13700,
     std::string bundle = "Bundle";
     int32_t userId = 3;
     std::vector<std::string> dumpInfo;
-    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, dumpInfo), (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, 0, dumpInfo), (int)ERR_OK);
 }
 
 /**
@@ -2088,7 +2092,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300,
     std::string bundle = "Bundle";
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
-    EXPECT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -2758,7 +2762,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18100,
     int32_t userId = -1;
     std::vector<std::string> dumpInfo;
 
-    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
 
     GTEST_LOG_(INFO) << "ActiveNotificationDump_1000 test end";
 }
@@ -2777,7 +2781,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18200,
     int32_t userId = -1;
     std::vector<std::string> dumpInfo;
 
-    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
 
     GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test end";
 }
@@ -2796,7 +2800,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18300,
     int32_t userId = -1;
     std::vector<std::string> dumpInfo;
 
-    EXPECT_EQ(advancedNotificationService_->DistributedNotificationDump(bundle, userId, dumpInfo), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->DistributedNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
 
     GTEST_LOG_(INFO) << "DistributedNotificationDump_1000 test end";
 }
@@ -3857,7 +3861,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00017,
     record->request = request;
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
-    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_OK);
+    int32_t uid = 0;
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid), ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00017 test end";
 }
 
@@ -3871,7 +3876,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00018,
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test start";
     std::string bundleName = "testBundle";
-    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    int32_t uid = 0;
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid),
+        ERR_ANS_NOTIFICATION_NOT_EXISTS);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test end";
 }
 
@@ -3900,7 +3907,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019,
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
-    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName), ERR_ANS_INVALID_PARAM);
+    int32_t uid = 0;
+    EXPECT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid), ERR_ANS_INVALID_PARAM);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test end";
 }
 /**
@@ -4028,6 +4036,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0001, Function |
     request->SetCreatorUid(0);
     request->SetCreatorUserId(1);
     request->SetLabel("test");
+    request->SetReceiverUserId(100);
 
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
@@ -4046,7 +4055,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0001, Function |
     EXPECT_NE(advancedNotificationService_->notificationList_.size(), 0);
 
     advancedNotificationService_->notificationList_.clear();
-    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey());
+    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey(), 0);
     EXPECT_EQ(result, ERR_OK);
 
     GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0001 test end";
@@ -4081,7 +4090,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0002, Function |
     advancedNotificationService_->RecoverLiveViewFromDb();
     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 
-    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey());
+    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey(), 0);
     EXPECT_EQ(result, ERR_OK);
 
     GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0002 test end";
@@ -4103,6 +4112,9 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0001, Function | S
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
     EXPECT_EQ(advancedNotificationService_->IsNeedPushCheck(request), true);
 
     GTEST_LOG_(INFO) << "IsNeedPushCheckTest_0001 test end";
@@ -4456,6 +4468,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00001, Functi
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
     request->SetSlotType(slotType);
     request->SetNotificationId(1);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
@@ -4480,7 +4495,7 @@ HWTEST_F(AdvancedNotificationServiceTest, StartArchiveTimer_00001, Function | Sm
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->StartArchiveTimer(record);
-    EXPECT_EQ(request->GetAutoDeletedTime(), NotificationConstant::NO_DELAY_DELETE_TIME);
+    EXPECT_EQ(request->GetAutoDeletedTime(), 0);
 }
 
 /**
@@ -4827,5 +4842,61 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00002, Function 
     EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 #endif
+
+/**
+ * @tc.number    : AddExcludeDate_00001
+ * @tc.name      : Test AddExcludeDate
+ * @tc.desc      : Test AddExcludeDate function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AddExcludeDate_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 10;
+    uint64_t time = 124325;
+    EXPECT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_REMINDER_PERMISSION_DENIED);
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    MockIsNonBundleName(true);
+    EXPECT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_ANS_INVALID_BUNDLE);
+    MockIsNonBundleName(false);
+    EXPECT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_NO_INIT);
+    MockIsVerfyPermisson(false);
+}
+
+/**
+ * @tc.number    : DelExcludeDates_00002
+ * @tc.name      : Test DelExcludeDates
+ * @tc.desc      : Test DelExcludeDates function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, DelExcludeDates_00002, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 10;
+    EXPECT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_REMINDER_PERMISSION_DENIED);
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    MockIsNonBundleName(true);
+    EXPECT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_ANS_INVALID_BUNDLE);
+    MockIsNonBundleName(false);
+    EXPECT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_NO_INIT);
+    MockIsVerfyPermisson(false);
+}
+
+/**
+ * @tc.number    : GetExcludeDates_00001
+ * @tc.name      : Test GetExcludeDates
+ * @tc.desc      : Test GetExcludeDates function when the result is ERR_NO_INIT
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetExcludeDates_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 10;
+    std::vector<uint64_t> times;
+    EXPECT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_REMINDER_PERMISSION_DENIED);
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    MockIsNonBundleName(true);
+    EXPECT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_ANS_INVALID_BUNDLE);
+    MockIsNonBundleName(false);
+    EXPECT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_NO_INIT);
+    MockIsVerfyPermisson(false);
+}
 }  // namespace Notification
 }  // namespace OHOS

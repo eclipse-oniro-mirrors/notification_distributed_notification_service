@@ -109,6 +109,20 @@ public:
      */
     std::string Dump();
 
+    /**
+     * @brief Adds subscriber uid.
+     *
+     * @param appNames Indicates the uid of subscriber.
+     **/
+    void SetSubscriberUid(const int32_t uid);
+
+    /**
+     * @brief Obtains the uid of subscriber.
+     *
+     * @return Returns the uid of subscriber.
+     **/
+    int32_t GetSubscriberUid() const;
+
 private:
     bool ReadFromParcel(Parcel &parcel);
 
@@ -116,6 +130,7 @@ private:
     std::vector<std::string> appNames_ {};
     int32_t userId_ {-1};
     std::string deviceType_;
+    int32_t subscriberUid_ {-1};
 };
 }  // namespace Notification
 }  // namespace OHOS

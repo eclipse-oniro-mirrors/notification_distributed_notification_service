@@ -456,7 +456,7 @@ public:
 
     virtual ErrCode SubscribeLocalLiveView(
         const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) override;
+        const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
     /**
      * @brief Unsubscribes notifications.
@@ -653,6 +653,32 @@ public:
     virtual ErrCode CancelAllReminders() override;
 
     /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override;
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode DelExcludeDates(const int32_t reminderId) override;
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override;
+
+    /**
      * @brief Checks whether this device is support template.
      *
      * @param templateName Identifies the template name for searching as a condition.
@@ -723,7 +749,7 @@ public:
      * @param dumpInfo Indicates the container containing datas.
      * @return Returns check result.
      */
-    virtual ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    virtual ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo) override;
 
     /**
@@ -960,6 +986,9 @@ private:
     ErrCode HandleCancelReminder(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetValidReminders(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAllReminders(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleAddExcludeDate(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleDelExcludeDates(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetExcludeDates(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSupportTemplate(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSpecialUserAllowedNotifyByUser(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledByUser(MessageParcel &data, MessageParcel &reply);

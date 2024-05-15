@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_affected.h"
 
 #include "distributed_device_status.h"
@@ -25,11 +26,11 @@ bool ReminderAffected::FromJson(const nlohmann::json &root)
         ANS_LOGE("ReminderAffected fromJson failed as root is null.");
         return false;
     }
-    ValidStatus(root[STATUS], status_);
-    ValidAndGetAffectedBy(
-        root[AFFECTED_BY], affectedBy_);
 
-    if (!root[NotificationConfigParse::CFG_KEY_REMINDER_FLAGS].is_null() &&
+    ValidStatus(root, status_);
+    ValidAndGetAffectedBy(root, affectedBy_);
+    if (root.find(NotificationConfigParse::CFG_KEY_REMINDER_FLAGS) != root.end() &&
+        !root[NotificationConfigParse::CFG_KEY_REMINDER_FLAGS].is_null() &&
         root[NotificationConfigParse::CFG_KEY_REMINDER_FLAGS].is_string() &&
         NotificationFlags::GetReminderFlagsByString(
             root[NotificationConfigParse::CFG_KEY_REMINDER_FLAGS].get<std::string>(), reminderFlags_)) {
@@ -39,21 +40,28 @@ bool ReminderAffected::FromJson(const nlohmann::json &root)
 }
 
 bool ReminderAffected::ValidAndGetAffectedBy(
-    const nlohmann::json &affectedBysJson, std::vector<std::pair<std::string, std::string>> &affectedBy)
+    const nlohmann::json &root, std::vector<std::pair<std::string, std::string>> &affectedBy)
 {
-    if (affectedBysJson.is_null() || !affectedBysJson.is_array() || affectedBysJson.empty()) {
+    if (root.is_null() || root.find(AFFECTED_BY) == root.end()) {
         return false;
     }
-
+    nlohmann::json affectedBysJson = root[AFFECTED_BY];
+    if (!affectedBysJson.is_array() || affectedBysJson.empty()) {
+        return false;
+    }
     for (auto affectedByJson : affectedBysJson) {
         std::string status;
-        if (affectedByJson.is_null() ||
-            !affectedByJson.is_object() ||
-            affectedByJson[DEVICE_TYPE].is_null() ||
-            !affectedByJson[DEVICE_TYPE].is_string() ||
-            !ValidStatus(affectedByJson[STATUS], status)) {
+        if (affectedByJson.is_null() || !affectedByJson.is_object()) {
             continue;
         }
+
+        if (affectedByJson.find(DEVICE_TYPE) == affectedByJson.end() ||
+            affectedByJson[DEVICE_TYPE].is_null() ||
+            !affectedByJson[DEVICE_TYPE].is_string() ||
+            !ValidStatus(affectedByJson, status)) {
+            continue;
+        }
+
         if (status.size() <= 0) {
             continue;
         }
@@ -67,11 +75,16 @@ bool ReminderAffected::ValidAndGetAffectedBy(
 
 bool ReminderAffected::ValidStatus(const nlohmann::json &root, std::string &status)
 {
-    if (root.is_null() || !root.is_string()) {
+    if (root.is_null() || root.find(STATUS) == root.end()) {
         ANS_LOGD("ValidStatus failed as status json is empty.");
         return false;
     }
-    std::string strStatus = root.get<std::string>();
+    nlohmann::json statusJson = root[STATUS];
+    if (!statusJson.is_string()) {
+        ANS_LOGD("ValidStatus failed as status json is not string.");
+        return false;
+    }
+    std::string strStatus = statusJson.get<std::string>();
     if (strStatus.size() <= 0) {
         return true;
     }
@@ -91,4 +104,5 @@ bool ReminderAffected::ValidStatus(const nlohmann::json &root, std::string &stat
 }
 }  // namespace Notification
 }  // namespace OHOS
+#endif
 

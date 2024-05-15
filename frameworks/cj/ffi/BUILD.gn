@@ -68,8 +68,6 @@ ohos_shared_library("cj_notification_manager_ffi") {
     defines += [ "WINDOWS_PLATFORM" ]
   }
 
-  relative_install_dir = "platformsdk"
-
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

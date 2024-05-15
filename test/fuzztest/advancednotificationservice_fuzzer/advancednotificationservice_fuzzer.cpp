@@ -115,6 +115,11 @@ namespace OHOS {
         std::vector<sptr<Notification::ReminderRequest>> reminders;
         advancedNotificationService.GetValidReminders(reminders);
         advancedNotificationService.CancelAllReminders();
+        uint64_t excludeDate = static_cast<uint64_t>(GetU32Data(data));
+        advancedNotificationService.AddExcludeDate(reminderId, excludeDate);
+        advancedNotificationService.DelExcludeDates(reminderId);
+        std::vector<uint64_t> excludeDates;
+        advancedNotificationService.GetExcludeDates(reminderId, excludeDates);
         bool support = *data % ENABLE;
         advancedNotificationService.IsSupportTemplate(stringData, support);
         advancedNotificationService.IsSpecialUserAllowedNotify(userId, allowed);
@@ -126,7 +131,7 @@ namespace OHOS {
         advancedNotificationService.SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
-        advancedNotificationService.ShellDump(stringData, stringData, userId, dumpInfo);
+        advancedNotificationService.ShellDump(stringData, stringData, userId, userId, dumpInfo);
         advancedNotificationService.SetSyncNotificationEnabledWithoutApp(userId, enabled);
         advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = static_cast<int32_t>(GetU32Data(data));

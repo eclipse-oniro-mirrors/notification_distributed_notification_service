@@ -66,6 +66,37 @@ public:
      */
     ErrCode CancelReminder(const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption);
 
+    sptr<ReminderRequest> CheckExcludeDateParam(const int32_t reminderId,
+        const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date,
+        const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DelExcludeDates(const int32_t reminderId, const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetExcludeDates(const int32_t reminderId, const sptr<NotificationBundleOption> &bundleOption,
+        std::vector<uint64_t>& dates);
+
     /**
      * @brief Close the target reminder which is showing on panel.
      *        This is manul operation by user: 1.Click close button of the reminder, 2.remove reminder notification.
@@ -109,7 +140,7 @@ public:
 
     void InitUserId();
 
-    void InitStartExtensionAbility();
+    void InitStartExtensionAbility(std::vector<sptr<ReminderRequest>>& reissueReminder);
     /**
      * @brief Register configuration observer, the listening system language is changed.
      */
@@ -184,6 +215,11 @@ public:
     void HandleCustomButtonClick(const OHOS::EventFwk::Want &want);
 
     /**
+     * Handle click notification, no button.
+     */
+    void ClickReminder(const OHOS::EventFwk::Want &want);
+
+    /**
      * @brief Terminate the alerting reminder.
      *
      * 1. Stop sound and vibrate.
@@ -228,7 +264,7 @@ private:
         ALERTING_TIMER
     };
 
-    static std::shared_ptr<AppExecFwk::EventHandler> serviceHandler_;
+    static std::shared_ptr<ffrt::queue> serviceQueue_;
     /**
      * Add default slot to the reminder if no slot set by user.
      *
@@ -578,6 +614,14 @@ private:
     void CheckNeedNotifyStatus(const sptr<ReminderRequest> &reminder,
         const ReminderRequest::ActionButtonType buttonType);
 
+    std::string GetFullPath(const std::string& path);
+
+    /**
+     * @brief Check action button data share permission
+    */
+    bool IsActionButtonDataShareValid(const sptr<ReminderRequest>& reminder,
+        const uint32_t callerTokenId);
+
    /**
     * Single instance.
     */
@@ -631,18 +675,18 @@ private:
     /**
      * This timer is used to control the ringDuration of the alerting reminder.
      */
-    uint64_t timerIdAlerting_ {0};
+    std::atomic<uint64_t> timerIdAlerting_ {0};
 
     /**
      * Indicates the active reminder that timing is taking effect.
      */
-    int32_t activeReminderId_ = -1;
+    std::atomic<int32_t> activeReminderId_ = -1;
     sptr<ReminderRequest> activeReminder_ = nullptr;
 
     /**
      * Indicates the reminder which is playing sound or vibration.
      */
-    int32_t alertingReminderId_ = -1;
+    std::atomic<int32_t> alertingReminderId_ = -1;
     sptr<ReminderRequest> alertingReminder_ = nullptr;
 #ifdef PLAYER_FRAMEWORK_ENABLE
     std::shared_ptr<Media::Player> soundPlayer_ = nullptr;

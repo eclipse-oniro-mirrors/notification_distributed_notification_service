@@ -27,6 +27,7 @@
 
 namespace OHOS {
 namespace Notification {
+const static int MAX_SLOT_FLAGS = 0b111111;
 ErrCode AnsManagerProxy::AddSlotByType(NotificationConstant::SlotType slotType)
 {
     MessageParcel data;
@@ -562,6 +563,11 @@ ErrCode AnsManagerProxy::SetSlotFlagsAsBundle(const sptr<NotificationBundleOptio
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (slotFlags > MAX_SLOT_FLAGS) {
+        ANS_LOGE("[SetSlotFlagsAsBundle] fail: Invalid slotFlags.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
         ANS_LOGE("[SetSlotFlagsAsBundle] fail: write interface token failed.");
@@ -572,9 +578,9 @@ ErrCode AnsManagerProxy::SetSlotFlagsAsBundle(const sptr<NotificationBundleOptio
         ANS_LOGE("[SetSlotFlagsAsBundle] fail:: write bundleoption failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    
-    // got the LSB 5 bits as slotflags;
-    uint32_t validSlotFlag = 0x001f&slotFlags;
+
+    // got the LSB 6 bits as slotflags;
+    uint32_t validSlotFlag = MAX_SLOT_FLAGS & slotFlags;
     if (!data.WriteInt32(validSlotFlag)) {
         ANS_LOGE("[SetSlotFlagsAsBundle] fail: write slots failed");
         return ERR_ANS_PARCELABLE_FAILED;

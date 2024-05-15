@@ -129,6 +129,13 @@ public:
     bool IsSmartReminderEnabled(const std::string deviceType, bool &enabled);
 
     /**
+     * @brief Querying Aggregation Configuration Values
+     *
+     * @return Configured value
+     */
+    std::string GetAdditionalConfig();
+
+    /**
      * @brief Put enable notification into disturbe DB.
      *
      * @param userId Indicates user.
@@ -167,18 +174,21 @@ public:
      * @brief Delete bundle data from disturbe DB.
      *
      * @param bundleKey Indicates the bundle key.
+     * @param bundleId Indicates to bundle uid.
      * @return Return true on success, false on failure.
      */
-    bool RemoveBundleFromDisturbeDB(const std::string &bundleKey);
+    bool RemoveBundleFromDisturbeDB(const std::string &bundleKey, const int32_t &bundleUid);
 
     /**
      * @brief Delete slot from disturbe DB.
      *
      * @param bundleKey Indicates to which a bundle.
      * @param type Indicates to slot type.
+     * @param bundleId Indicates to bundle uid.
      * @return Return true on success, false on failure.
      */
-    bool RemoveSlotFromDisturbeDB(const std::string &bundleKey, const NotificationConstant::SlotType &type);
+    bool RemoveSlotFromDisturbeDB(const std::string &bundleKey, const NotificationConstant::SlotType &type,
+        const int32_t &bundleUid);
 
     /**
      * @brief Obtains allow notification application list.
@@ -192,9 +202,10 @@ public:
      * @brief Delete all slots in the of bundle from disturbe DB.
      *
      * @param bundleKey Indicates to which a bundle.
+     * @param bundleUid Indicates to the bundle uid.
      * @return Return true on success, false on failure.
      */
-    bool RemoveAllSlotsFromDisturbeDB(const std::string &bundleKey);
+    bool RemoveAllSlotsFromDisturbeDB(const std::string &bundleKey, const int32_t &bundleUid);
 
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -210,14 +221,17 @@ public:
     bool AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     bool RemoveDoNotDisturbProfiles(
         int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    bool GetDoNotDisturbProfiles(const std::string &key, sptr<NotificationDoNotDisturbProfile> &profile);
-    bool RemoveEnabledDbByBundleName(std::string bundleName);
-    int32_t SetKvToDb(const std::string &key, const std::string &value);
-    int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value);
-    int32_t GetKvFromDb(const std::string &key, std::string &value);
-    int32_t GetByteFromDb(const std::string &key, std::vector<uint8_t> &value);
-    int32_t GetBatchKvsFromDb(const std::string &key, std::unordered_map<std::string, std::string> &values);
-    int32_t DeleteKvFromDb(const std::string &key);
+    bool GetDoNotDisturbProfiles(
+        const std::string &key, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t &userId);
+    bool RemoveEnabledDbByBundleName(std::string bundleName, const int32_t &bundleUid);
+    int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId);
+    int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId);
+    int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId);
+    int32_t GetByteFromDb(const std::string &key, std::vector<uint8_t> &value, const int32_t &userId);
+    int32_t GetBatchKvsFromDb(
+        const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId);
+    int32_t DeleteKvFromDb(const std::string &key, const int32_t &userId);
+    int32_t DropUserTable(const int32_t userId);
 private:
     bool CheckRdbStore();
 
@@ -227,14 +241,15 @@ private:
     int32_t PutBundlePropertyToDisturbeDB(
         const std::string &bundleKey, const BundleType &type, const T &t);
     template <typename T>
-    int32_t PutDataToDB(const std::string &key, const T &t);
+    int32_t PutDataToDB(const std::string &key, const T &t, const int32_t &userId);
     bool PutBundleToDisturbeDB(
         const std::string &bundleKey, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     bool HandleDataBaseMap(
         const std::unordered_map<std::string, std::string> &datas, std::vector<NotificationBundleOption> &bundleOption);
 
-    void GetValueFromDisturbeDB(const std::string &key, std::function<void(std::string &)> function);
-    void GetValueFromDisturbeDB(const std::string &key,
+    void GetValueFromDisturbeDB(const std::string &key, const int &userId,
+        std::function<void(std::string &)> function);
+    void GetValueFromDisturbeDB(const std::string &key, const int &userId,
         std::function<void(int32_t &, std::string &)> function);
 
     bool SlotToEntry(const std::string &bundleName, const int32_t &bundleUid, const sptr<NotificationSlot> &slot,
@@ -255,10 +270,10 @@ private:
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
 
-    void ParseBundleFromDistureDB(
-        NotificationPreferencesInfo &info, const std::unordered_map<std::string, std::string> &entries);
+    void ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
+        const std::unordered_map<std::string, std::string> &entries, const int32_t &userId);
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
-        const std::pair<std::string, std::string> &entry);
+        const std::pair<std::string, std::string> &entry, const int32_t &userId);
     void ParseBundlePropertyFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &bundleKey, const std::pair<std::string, std::string> &entry);
     void ParseDoNotDisturbType(NotificationPreferencesInfo &info);
@@ -276,8 +291,8 @@ private:
     void ParseBundlePoppedDialog(
         NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleUid(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
-    void ParseSlot(
-        const std::string &findString, sptr<NotificationSlot> &slot, const std::pair<std::string, std::string> &entry);
+    void ParseSlot(const std::string &findString, sptr<NotificationSlot> &slot,
+        const std::pair<std::string, std::string> &entry, const int32_t &userId);
     void ParseSlotDescription(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotLevel(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotShowBadge(sptr<NotificationSlot> &slot, const std::string &value) const;
@@ -292,6 +307,7 @@ private:
     void ParseSlotFlags(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotAuthorizedStatus(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotAuthHitnCnt(sptr<NotificationSlot> &slot, const std::string &value) const;
+    void ParseSlotReminderMode(sptr<NotificationSlot> &slot, const std::string &value) const;
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,

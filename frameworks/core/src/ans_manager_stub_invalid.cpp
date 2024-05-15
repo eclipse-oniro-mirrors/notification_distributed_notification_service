@@ -318,7 +318,7 @@ ErrCode AnsManagerStub::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscr
 }
 
 ErrCode AnsManagerStub::SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-    const sptr<NotificationSubscribeInfo> &info)
+    const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
     ANS_LOGE("AnsManagerStub::SubscribeLocalLiveView called!");
     return ERR_INVALID_OPERATION;
@@ -464,6 +464,24 @@ ErrCode AnsManagerStub::CancelAllReminders()
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+{
+    ANS_LOGE("AnsManagerStub::AddExcludeDate called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::DelExcludeDates(const int32_t reminderId)
+{
+    ANS_LOGE("AnsManagerStub::DelExcludeDates called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
+{
+    ANS_LOGE("AnsManagerStub::GetExcludeDates called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::IsSupportTemplate(const std::string &templateName, bool &support)
 {
     ANS_LOGE("AnsManagerStub::IsSupportTemplate called!");
@@ -521,7 +539,7 @@ ErrCode AnsManagerStub::GetEnabledForBundleSlotSelf(const NotificationConstant::
 }
 
 ErrCode AnsManagerStub::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     ANS_LOGE("AnsManagerStub::ShellDump called!");
     return ERR_INVALID_OPERATION;

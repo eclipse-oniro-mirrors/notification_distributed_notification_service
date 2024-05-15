@@ -280,7 +280,7 @@ public:
     }
 
     ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) override
+        const sptr<NotificationSubscribeInfo> &info, const bool isNatives) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -402,6 +402,21 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode DelExcludeDates(const int32_t reminderId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode IsSupportTemplate(const std::string &templateName, bool &support) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -449,7 +464,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo) override
     {
         return ERR_ANS_INVALID_PARAM;

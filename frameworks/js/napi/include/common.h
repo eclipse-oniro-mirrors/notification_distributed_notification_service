@@ -32,6 +32,7 @@ using namespace OHOS::Notification;
 constexpr int32_t STR_MAX_SIZE = 200;
 constexpr int32_t LONG_STR_MAX_SIZE = 1024;
 constexpr uint8_t OPERATION_MAX_TYPE = 3;
+constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
 constexpr int8_t NO_ERROR = 0;
 constexpr int8_t ERROR = -1;
 constexpr uint8_t PARAM0 = 0;
@@ -791,6 +792,17 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationAppMessageId(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the sound of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationSound(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
@@ -1627,6 +1639,17 @@ public:
         const napi_env &env, const std::shared_ptr<NotificationFlags> &flags, napi_value &result);
 
     /**
+     * @brief Sets a js object by specified NotificationUnifiedGroupInfo object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param flags Indicates a NotificationUnifiedGroupInfo object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationUnifiedGroupInfo(
+        const napi_env &env, const std::shared_ptr<NotificationUnifiedGroupInfo> &info, napi_value &result);
+
+    /**
      * @brief Gets the number of badge of NotificationRequest object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1669,6 +1692,16 @@ public:
     static napi_value CreateErrorValue(napi_env env, int32_t errCode, bool newType);
 
     /**
+         * @brief Create a napi value with specified error object for callback
+         *
+         * @param env Indicates the environment that the API is invoked under
+         * @param errCode Indicates specified err code
+         * @param msg Indicates specified msg
+         * @return Returns a napi value with specified error object for callback
+         */
+    static napi_value CreateErrorValue(napi_env env, int32_t errCode, std::string &msg);
+    
+    /**
      * @brief Sets a js object by specified BadgeNumberCallbackData object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1691,12 +1724,15 @@ public:
         const napi_env &env, const napi_value &value, NotificationRequest &request);
     static bool IsValidRemoveReason(int32_t reasonType);
     static void NapiThrow(napi_env env, int32_t errCode);
+    static void NapiThrow(napi_env env, int32_t errCode, std::string &msg);
     static int32_t ErrorToExternal(uint32_t errCode);
     static void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result);
     static napi_value GetLockScreenPicture(
         const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent);
     static napi_value SetLockScreenPicture(
         const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
+    static napi_value SetAgentBundle(const napi_env &env,
+        const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

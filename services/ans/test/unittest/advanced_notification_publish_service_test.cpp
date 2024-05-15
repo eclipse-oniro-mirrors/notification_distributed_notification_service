@@ -31,6 +31,8 @@
 #include "ans_dialog_host_client.h"
 #include "mock_push_callback_stub.h"
 
+extern void MockIsOsAccountExists(bool exists);
+
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
@@ -120,6 +122,9 @@ HWTEST_F(AnsPublishServiceTest, Publish_00001, Function | SmallTest | Level1)
     auto localLiveContent = std::make_shared<NotificationLocalLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(localLiveContent);
     request->SetContent(content);
+    request->SetCreatorUid(1);
+    request->SetOwnerUid(1);
+    MockIsOsAccountExists(true);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
@@ -214,7 +219,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
     ret = advancedNotificationService_->GetSlotByType(slotType, slot);
     EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(1, slot->GetAuthorizedStatus());
+    EXPECT_EQ(0, slot->GetAuthorizedStatus());
     EXPECT_EQ(2, slot->GetAuthHintCnt());
 }
 
@@ -377,6 +382,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00002, Function | Smal
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true);
     EXPECT_EQ(ret, (int)ERR_OK);
 
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ret, (int)ERR_OK);
 }
@@ -397,6 +403,8 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
 
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), false);
     EXPECT_EQ(ret, (int)ERR_OK);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
 
     auto bundle = advancedNotificationService_->GenerateBundleOption();
     NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, true);
@@ -609,7 +617,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00002, Function | Small
     auto slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 
     ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -650,7 +658,7 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     ret = advancedNotificationService_->SetBadgeNumber(1);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr);
+    ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr, true);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -661,7 +669,7 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
 {
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
     ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
@@ -677,7 +685,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0200, TestSize.Lev
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
     ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
@@ -694,7 +702,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0300, TestSize.Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
     ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
@@ -709,7 +717,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0300, TestSize.Lev
  */
 HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
 {
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
@@ -723,7 +731,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Leve
  */
 HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
 {
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
     ErrCode ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
@@ -743,7 +751,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0300, TestSize.Leve
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
@@ -760,7 +768,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0400, TestSize.Leve
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    auto bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);

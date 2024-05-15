@@ -544,12 +544,13 @@ bool ReminderCommon::GenReminderIntInner(
     // ringDuration
     int64_t propVal = 0;
     if (GetInt64(env, value, ReminderAgentNapi::RING_DURATION, propVal)) {
-        if (propVal < 0) {
-            reminder->SetRingDuration(0);
-        } else {
-            uint64_t ringDuration = static_cast<uint64_t>(propVal);
-            reminder->SetRingDuration(ringDuration);
+        if (propVal < 0 || propVal > static_cast<int64_t>(
+            ReminderRequest::MAX_RING_DURATION / ReminderRequest::MILLI_SECONDS)) {
+            ANSR_LOGE("ring duration value is error!");
+            return false;
         }
+        uint64_t ringDuration = static_cast<uint64_t>(propVal);
+        reminder->SetRingDuration(ringDuration);
     }
 
     // timeInterval
@@ -718,6 +719,31 @@ bool ReminderCommon::GetObject(const napi_env &env, const napi_value &value,
         ANSR_LOGW("Wrong argument type:%{public}s. object expected.", propertyName);
         return false;
     }
+    return true;
+}
+
+bool ReminderCommon::GetDate(const napi_env& env, const napi_value& value,
+    const char* propertyName, double& date)
+{
+    napi_value propertyValue = nullptr;
+    if (propertyName == nullptr) {
+        propertyValue = value;
+    } else {
+        bool hasProperty = false;
+        NAPI_CALL_BASE(env, napi_has_named_property(env, value, propertyName, &hasProperty), false);
+        if (!hasProperty) {
+            ANSR_LOGE("");
+            return false;
+        }
+        napi_get_named_property(env, value, propertyName, &propertyValue);
+    }
+    bool isDate = false;
+    napi_is_date(env, propertyValue, &isDate);
+    if (!isDate) {
+        ANSR_LOGE("Wrong argument type. Date expected.");
+        return false;
+    }
+    napi_get_date_value(env, propertyValue, &date);
     return true;
 }
 

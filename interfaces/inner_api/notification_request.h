@@ -734,6 +734,13 @@ public:
     int64_t GetCreateTime() const;
 
     /**
+     * @brief Sets the time to create a notification.
+     *
+     * @param createTime Indicates the time in milliseconds.
+     */
+    void SetCreateTime(int64_t createTime);
+
+    /**
      * @brief Checks whether the notification creation time is displayed as a stopwatch.
      *
      * @return Returns true if the time is displayed as a stopwatch; returns false otherwise.
@@ -1185,6 +1192,8 @@ public:
 
     bool IsCommonLiveView() const;
 
+    bool IsSystemLiveView() const;
+
     /**
      * @brief Checks whether the image size exceeds the limit in content.
      *
@@ -1259,6 +1268,20 @@ public:
     std::shared_ptr<NotificationBundleOption> GetBundleOption() const;
 
     /**
+     * @brief Sets the agentBundle of this notification.
+     *
+     * @param bundleOption Indicates the agentBundle of this notification.
+     */
+    void SetAgentBundle(const std::shared_ptr<NotificationBundleOption> &agentBundle);
+
+    /**
+     * @brief Obtains the agentBundle of the notification.
+     *
+     * @return Returns the agentBundle of the notification.
+     */
+    std::shared_ptr<NotificationBundleOption> GetAgentBundle() const;
+
+    /**
      * @brief Set notification appMessageId value.
      *
      * @param appMessageId the value of appMessageId.
@@ -1271,6 +1294,20 @@ public:
      * @return Return the value of appMessageId.
      */
     std::string GetAppMessageId() const;
+
+    /**
+     * @brief Set notification sound value.
+     *
+     * @param sound the value of sound.
+     */
+    void SetSound(const std::string &sound);
+
+    /**
+     * @brief Get notification sound value.
+     *
+     * @return Return the value of sound.
+     */
+    std::string GetSound() const;
 
     /**
      * @brief Generate notification request unique key.
@@ -1292,6 +1329,34 @@ public:
      * @return Returns the unifiedGroupInfo of the notification.
      */
     std::shared_ptr<NotificationUnifiedGroupInfo> GetUnifiedGroupInfo() const;
+
+    /**
+     * @brief Sets the delay time of this notification.
+     *
+     * @param delayTime Indicates the delay time of this notification.
+     */
+    void SetPublishDelayTime(uint32_t delayTime);
+
+    /**
+     * @brief Obtains the delay time of the notification.
+     *
+     * @return Returns the delay time of the notification.
+     */
+    uint32_t GetPublishDelayTime() const;
+
+    /**
+     * @brief Set notification isUpdateByOwnerAllowed value.
+     *
+     * @param isUpdateByOwnerAllowed Indicates the isUpdateByOwnerAllowed value of this notification.
+     */
+    void SetUpdateByOwnerAllowed(bool isUpdateByOwnerAllowed);
+
+    /**
+     * @brief Obtains the value of isUpdateByOwnerAllowed.
+     *
+     * @return Returns the isUpdateByOwnerAllowed value of the notification.
+     */
+    bool IsUpdateByOwnerAllowed() const;
 
 private:
     /**
@@ -1352,6 +1417,7 @@ private:
     static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
     static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static bool ConvertJsonToAgentBundle(NotificationRequest *target, const nlohmann::json &jsonObject);
     static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
 
 private:
@@ -1385,6 +1451,7 @@ private:
     std::string sortingKey_ {};
     std::string classification_ {};
     std::string appMessageId_ {};
+    std::string sound_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};
@@ -1408,6 +1475,7 @@ private:
     bool isAgent_ {false};
     bool isRemoveAllowed_ {true};
     bool isCoverActionButtons_ {false};
+    bool isUpdateByOwnerAllowed_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};
@@ -1427,8 +1495,11 @@ private:
     std::shared_ptr<NotificationTemplate> notificationTemplate_ {};
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
     std::shared_ptr<NotificationBundleOption> notificationBundleOption_ {};
+    std::shared_ptr<NotificationBundleOption> agentBundle_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
+
+    uint32_t publishDelayTime_ {0};
 };
 }  // namespace Notification
 }  // namespace OHOS

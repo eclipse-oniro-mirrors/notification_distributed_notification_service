@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_TIMER_INFO_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_TIMER_INFO_H
+
 #include "advanced_notification_service.h"
 #include "itimer_info.h"
 #include <functional>
@@ -54,3 +57,4 @@ private:
 };
 } // namespace OHOS
 } // namespace Notification
+#endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_TIMER_INFO_H

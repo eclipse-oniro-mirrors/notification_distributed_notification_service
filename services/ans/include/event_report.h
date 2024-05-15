@@ -40,6 +40,7 @@ constexpr char ENABLE_NOTIFICATION_SLOT[] = "ENABLE_NOTIFICATION_SLOT";
 constexpr char PUBLISH[] = "PUBLISH";
 constexpr char CANCEL[] = "CANCEL";
 constexpr char REMOVE[] = "REMOVE";
+constexpr char STATIC_LIVE_VIEW_UPLOAD[] = "STATIC_LIVE_VIEW_UPLOAD";
 } // namespace
 
 struct EventInfo {
@@ -53,6 +54,7 @@ struct EventInfo {
     bool enable = false;
     std::string bundleName;
     std::string notificationLabel;
+    int32_t operateFlag;
 };
 
 class EventReport {
@@ -84,6 +86,7 @@ private:
     static void InnerSendPublishEvent(const EventInfo &eventInfo);
     static void InnerSendCancelEvent(const EventInfo &eventInfo);
     static void InnerSendRemoveEvent(const EventInfo &eventInfo);
+    static void InnerSendLiveviewUploadEvent(const EventInfo &eventInfo);
 
     template<typename... Types>
     static void InnerEventWrite(const std::string &eventName,

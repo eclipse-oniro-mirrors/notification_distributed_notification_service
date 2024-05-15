@@ -67,6 +67,7 @@ const std::string ReminderRequest::REMINDER_EVENT_ALARM_ALERT = "ohos.event.noti
 const std::string ReminderRequest::REMINDER_EVENT_CLOSE_ALERT = "ohos.event.notification.reminder.CLOSE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT = "ohos.event.notification.reminder.SNOOZE_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT = "ohos.event.notification.reminder.COSTUM_ALERT";
+const std::string ReminderRequest::REMINDER_EVENT_CLICK_ALERT = "ohos.event.notification.reminder.CLICK_ALERT";
 const std::string ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT = "ohos.event.notification.reminder.ALERT_TIMEOUT";
 const std::string ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION =
     "ohos.event.notification.reminder.REMOVE_NOTIFICATION";
@@ -927,12 +928,8 @@ void ReminderRequest::SetReminderTimeInMilli(const uint64_t reminderTimeInMilli)
 
 ReminderRequest& ReminderRequest::SetRingDuration(const uint64_t ringDurationInSeconds)
 {
-    if ((ringDurationInSeconds == 0) || (ringDurationInSeconds > (UINT64_MAX / MILLI_SECONDS))) {
-        ANSR_LOGW("setRingDuration, replace to set (1s), for the given is out of legal range");
-        ringDurationInMilli_ = MILLI_SECONDS;
-    } else {
-        ringDurationInMilli_ = ringDurationInSeconds * MILLI_SECONDS;
-    }
+    uint64_t ringDuration = ringDurationInSeconds * MILLI_SECONDS;
+    ringDurationInMilli_ = std::min(ringDuration, MAX_RING_DURATION);
     return *this;
 }
 
@@ -1602,17 +1599,37 @@ void ReminderRequest::AddRemovalWantAgent()
 }
 
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWantAgent(
-    AppExecFwk::ElementName &element, bool isWantAgent) const
+    AppExecFwk::ElementName &element) const
+{
+    int32_t requestCode = 10;
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
+    flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
+    auto want = std::make_shared<OHOS::AAFwk::Want>();
+    want->SetAction(REMINDER_EVENT_CLICK_ALERT);
+    want->SetParam(PARAM_REMINDER_ID, reminderId_);
+    std::vector<std::shared_ptr<AAFwk::Want>> wants;
+    wants.push_back(want);
+    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
+        requestCode,
+        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
+        flags,
+        wants,
+        nullptr
+    );
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    auto wantAgent = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, userId_);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return wantAgent;
+}
+
+std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateMaxWantAgent(
+    AppExecFwk::ElementName &element) const
 {
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetElement(element);
-    if (isWantAgent) {
-        want->SetUri(wantAgentInfo_->uri);
-        want->SetParams(wantAgentInfo_->parameters);
-    }
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
@@ -1630,13 +1647,13 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWan
 
 void ReminderRequest::SetMaxScreenWantAgent(AppExecFwk::ElementName &element)
 {
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element, false);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateMaxWantAgent(element);
     notificationRequest_->SetMaxScreenWantAgent(wantAgent);
 }
 
 void ReminderRequest::SetWantAgent(AppExecFwk::ElementName &element)
 {
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element, true);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element);
     notificationRequest_->SetWantAgent(wantAgent);
 }
 
@@ -1825,7 +1842,6 @@ int32_t ReminderRequest::GetCTime(const TimeTransferType &type, int32_t actualTi
 
 int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundleName)
 {
-    AppExecFwk::ApplicationInfo info;
     sptr<ISystemAbilityManager> systemAbilityManager
         = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
@@ -1842,9 +1858,9 @@ int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundle
         ANSR_LOGE("Bundle mgr proxy is nullptr");
         return -1;
     }
-    bundleMgr->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, info);
-    ANSR_LOGD("uid=%{public}d", info.uid);
-    return static_cast<int32_t>(info.uid);
+    int32_t uid = bundleMgr->GetUidByBundleName(bundleName, userId);
+    ANSR_LOGD("uid=%{public}d", uid);
+    return uid;
 }
 
 int32_t ReminderRequest::GetUserId(const int32_t &uid)
@@ -1898,7 +1914,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values, bool oldVersion)
 {
     values.PutInt(ReminderBaseTable::REMINDER_ID, reminder->GetReminderId());
-    values.PutString(ReminderBaseTable::PACKAGE_NAME, bundleOption->GetBundleName());
+    values.PutString(ReminderBaseTable::PACKAGE_NAME, reminder->GetBundleName());
     values.PutInt(ReminderBaseTable::USER_ID, reminder->GetUserId());
     values.PutInt(ReminderBaseTable::UID, reminder->GetUid());
     values.PutString(ReminderBaseTable::SYSTEM_APP, reminder->IsSystemApp() ? "true" : "false");

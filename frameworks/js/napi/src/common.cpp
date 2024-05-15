@@ -204,6 +204,10 @@ napi_value Common::SetNotificationSlot(const napi_env &env, const NotificationSl
     napi_create_int32(env, slot.GetAuthorizedStatus(), &value);
     napi_set_named_property(env, result, "authorizedStatus", value);
 
+    // reminderMode?: number
+    napi_create_int32(env, slot.GetReminderMode(), &value);
+    napi_set_named_property(env, result, "reminderMode", value);
+
     return NapiGetBoolean(env, true);
 }
 
@@ -1338,6 +1342,68 @@ napi_value Common::SetNotificationFlags(
     uint32_t reminderFlags = flags->GetReminderFlags();
     napi_create_uint32(env, reminderFlags, &value);
     napi_set_named_property(env, result, "reminderFlags", value);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetAgentBundle(
+    const napi_env &env, const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result)
+{
+    ANS_LOGD("enter");
+
+    if (agentBundle == nullptr) {
+        ANS_LOGE("agentBundle is null");
+        return NapiGetBoolean(env, false);
+    }
+
+    // bundle: string
+    napi_value bundleNapi = nullptr;
+    napi_create_string_utf8(env, agentBundle->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
+
+    // uid: uid_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, agentBundle->GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
+
+    return result;
+}
+
+napi_value Common::SetNotificationUnifiedGroupInfo(
+    const napi_env &env, const std::shared_ptr<NotificationUnifiedGroupInfo> &info, napi_value &result)
+{
+    ANS_LOGD("enter");
+
+    if (info == nullptr) {
+        ANS_LOGE("info is null");
+        return NapiGetBoolean(env, false);
+    }
+
+    napi_value value = nullptr;
+
+    // title?: string
+    napi_create_string_utf8(env, info->GetTitle().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "title", value);
+
+    // key?: string
+    napi_create_string_utf8(env, info->GetKey().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "key", value);
+
+    // content?: string
+    napi_create_string_utf8(env, info->GetContent().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "content", value);
+
+    // sceneName?: string
+    napi_create_string_utf8(env, info->GetSceneName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "sceneName", value);
+
+    // extraInfo?: {[key:string] : any}
+    std::shared_ptr<AAFwk::WantParams> extraInfoData = info->GetExtraInfo();
+    if (extraInfoData) {
+        napi_value extraInfo = nullptr;
+        extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *extraInfoData);
+        napi_set_named_property(env, result, "extraInfo", extraInfo);
+    }
 
     return NapiGetBoolean(env, true);
 }

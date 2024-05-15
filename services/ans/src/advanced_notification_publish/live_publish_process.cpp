@@ -18,9 +18,11 @@
 #include "access_token_helper.h"
 #include "advanced_notification_service.h"
 #include "ans_log_wrapper.h"
+#include "ans_const_define.h"
 #include "ipc_skeleton.h"
 #include "notification_content.h"
 #include "notification_live_view_content.h"
+#include "os_account_manager_helper.h"
 
 #include "../advanced_notification_inline.cpp"
 
@@ -43,19 +45,33 @@ std::shared_ptr<LivePublishProcess> LivePublishProcess::GetInstance()
     return instance_;
 }
 
-ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request)
+ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
-    if (!CheckLocalLiveViewAllowed(request)) {
+    if (!CheckLocalLiveViewAllowed(request, isUpdateByOwnerAllowed)) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckLocalLiveViewSubscribed(request)) {
+    if (!CheckLocalLiveViewSubscribed(request, isUpdateByOwnerAllowed)) {
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (!request->IsRemoveAllowed()) {
         if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
+        }
+    }
+    if (request->GetReceiverUserId() >= 0) {
+        if (OsAccountManagerHelper::GetInstance().CheckUserExists(request->GetReceiverUserId())) {
+            return ERROR_USER_NOT_EXIST;
+        }
+    }
+
+    bool isHap = !AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID()) &&
+        !AccessTokenHelper::IsSystemApp();
+    if (isUpdateByOwnerAllowed && isHap) {
+        if (request->GetTemplate() == nullptr) {
+            ANS_LOGE("Owner must has template to update.");
+            return ERR_ANS_INVALID_PARAM;
         }
     }
     return ERR_OK;
@@ -81,19 +97,18 @@ ErrCode LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequ
     return ERR_OK;
 }
 
-bool LivePublishProcess::CheckLocalLiveViewSubscribed(const sptr<NotificationRequest> &request)
+bool LivePublishProcess::CheckLocalLiveViewSubscribed(
+    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
-    if (request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW &&
-        !GetLiveViewSubscribeState(GetClientBundleName())) {
-        ANS_LOGE("Not subscribe local live view.");
-        return false;
+    if (request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW) {
+        return GetLiveViewSubscribeState(IPCSkeleton::GetCallingUid()) || isUpdateByOwnerAllowed;
     }
     if (request->IsCommonLiveView()) {
         std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
         liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
             request->GetContent()->GetNotificationContent());
         if (liveViewContent != nullptr && liveViewContent->GetIsOnlyLocalUpdate() &&
-            !GetLiveViewSubscribeState(GetClientBundleName())) {
+            !GetLiveViewSubscribeState(IPCSkeleton::GetCallingUid())) {
             ANS_LOGE("Not subscribe common live view.");
             return false;
         }
@@ -101,13 +116,14 @@ bool LivePublishProcess::CheckLocalLiveViewSubscribed(const sptr<NotificationReq
     return true;
 }
 
-bool LivePublishProcess::CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request)
+bool LivePublishProcess::CheckLocalLiveViewAllowed(
+    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
     if (request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW) {
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
             ANS_LOGE("Client is not a system app or subsystem");
-            return false;
+            return isUpdateByOwnerAllowed;
         } else {
             return true;
         }
@@ -117,21 +133,21 @@ bool LivePublishProcess::CheckLocalLiveViewAllowed(const sptr<NotificationReques
 
 void LivePublishProcess::AddLiveViewSubscriber()
 {
-    std::string bundleName = GetClientBundleName();
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     std::lock_guard<std::mutex> lock(liveViewMutext_);
-    localLiveViewSubscribedList_.emplace(bundleName);
+    localLiveViewSubscribedList_.emplace(callingUid);
 }
 
-void LivePublishProcess::EraseLiveViewSubsciber(const std::string &bundleName)
+void LivePublishProcess::EraseLiveViewSubsciber(int32_t uid)
 {
     std::lock_guard<std::mutex> lock(liveViewMutext_);
-    localLiveViewSubscribedList_.erase(bundleName);
+    localLiveViewSubscribedList_.erase(uid);
 }
 
-bool LivePublishProcess::GetLiveViewSubscribeState(const std::string &bundleName)
+bool LivePublishProcess::GetLiveViewSubscribeState(int32_t uid)
 {
     std::lock_guard<std::mutex> lock(liveViewMutext_);
-    if (localLiveViewSubscribedList_.find(bundleName) == localLiveViewSubscribedList_.end()) {
+    if (localLiveViewSubscribedList_.find(uid) == localLiveViewSubscribedList_.end()) {
         return false;
     }
     return true;

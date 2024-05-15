@@ -2596,6 +2596,7 @@ HWTEST_F(AnsManagerStubTest, HandleShellDump01, Function | SmallTest | Level1)
     data.WriteString(cmd);
     data.WriteString(bundle);
     data.WriteInt32(userId);
+    data.WriteInt32(userId);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
@@ -2897,6 +2898,63 @@ HWTEST_F(AnsManagerStubTest, HandleGetValidReminders01, Function | SmallTest | L
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HandleAddExcludeDate01
+ * @tc.desc: Test HandleAddExcludeDate result ERR_INVALID_OPERATION.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleAddExcludeDate01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ADD_EXCLUDE_DATE_REMINDER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleDelExcludeDates01
+ * @tc.desc: Test HandleDelExcludeDates result ERR_INVALID_OPERATION.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleDelExcludeDates01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DEL_EXCLUDE_DATES_REMINDER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleGetExcludeDates01
+ * @tc.desc: Test HandleGetExcludeDates result ERR_INVALID_OPERATION.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetExcludeDates01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_EXCLUDE_DATES_REMINDER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -4096,6 +4154,47 @@ HWTEST_F(AnsManagerStubTest, CancelAllReminders01, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: AddExcludeDate01
+ * @tc.desc: Test AddExcludeDate return.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(AnsManagerStubTest, AddExcludeDate01, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 5;
+    uint64_t date = 1713196800000;
+    ErrCode result = ansManagerStub_->AddExcludeDate(reminderId, date);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: DelExcludeDates01
+ * @tc.desc: Test DelExcludeDates return.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(AnsManagerStubTest, DelExcludeDates01, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 5;
+    ErrCode result = ansManagerStub_->DelExcludeDates(reminderId);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetExcludeDates01
+ * @tc.desc: Test GetExcludeDates return.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(AnsManagerStubTest, GetExcludeDates01, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 5;
+    std::vector<uint64_t> dates;
+    ErrCode result = ansManagerStub_->GetExcludeDates(reminderId, dates);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: IsSupportTemplate01
  * @tc.desc: Test IsSupportTemplate return.
  * @tc.type: FUNC
@@ -4229,7 +4328,7 @@ HWTEST_F(AnsManagerStubTest, ShellDump01, Function | SmallTest | Level1)
     int32_t userId = 5;
     std::vector<std::string> dumpInfo;
 
-    ErrCode result = ansManagerStub_->ShellDump(cmd, bundle, userId, dumpInfo);
+    ErrCode result = ansManagerStub_->ShellDump(cmd, bundle, userId, 0, dumpInfo);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

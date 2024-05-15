@@ -68,6 +68,11 @@ public:
 
     std::shared_ptr<ReminderRequest::WantAgentInfo> GetRRuleWantAgentInfo();
 
+    void AddExcludeDate(const uint64_t date);
+    void DelExcludeDates();
+    std::vector<uint64_t> GetExcludeDates() const;
+    bool IsInExcludeDate() const;
+
     inline uint16_t GetYear() const
     {
         return year_;
@@ -122,6 +127,16 @@ public:
     virtual bool OnDateTimeChange() override;
 
     /**
+     * @brief Check reminder request is repeat
+     */
+    bool IsRepeat() const override;
+
+    /**
+     * @brief Check reminder request is in exclude date
+     */
+    bool CheckExcludeDate() override;
+
+    /**
      * Marshal a reminder object into a Parcel.
      *
      * @param parcel Indicates the Parcel.
@@ -148,12 +163,14 @@ public:
     virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
     virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
 
-    static const uint8_t MAX_MONTHS_OF_YEAR;
-    static const uint8_t MAX_DAYS_OF_MONTH;
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
         const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
     bool SetEndDateTime(const uint64_t time);
+
+public:
+    static constexpr uint8_t MAX_MONTHS_OF_YEAR = 12;
+    static constexpr uint8_t MAX_DAYS_OF_MONTH = 31;
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
@@ -194,12 +211,11 @@ private:
     uint64_t GetEndDateTime();
 
     std::string SerializationRRule();
+    std::string SerializationExcludeDates();
     void DeserializationRRule(const std::string& str);
+    void DeserializationExcludeDates(const std::string& str);
 
-    static const uint8_t JANUARY;
-    static const uint8_t DECEMBER;
     static const uint8_t DEFAULT_SNOOZE_TIMES;
-    static const uint64_t DELAY_REMINDER;
 
     tm dateTime_ = {
         .tm_sec = 0,
@@ -228,15 +244,25 @@ private:
     uint64_t endDateTime_{0};
     uint64_t durationTime_{0};
 
+    std::set<uint64_t> excludeDates_;
+
     // repeat calendar
     std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
+    
+private:
     static const uint8_t DAY_ARRAY[12];
-    static const uint8_t FEBRUARY;
-    static const uint8_t LEAP_MONTH;
-    static const uint8_t NON_LEAP_MONTH;
-    static const uint16_t SOLAR_YEAR;
-    static const uint8_t LEAP_PARAM_MIN;
-    static const uint8_t LEAP_PARAM_MAX;
+    static constexpr uint8_t JANUARY = 1;
+    static constexpr uint8_t DECEMBER = 12;
+    // if startDateTime < now and now < endDateTime, triggerTime = now + DELAY
+    static constexpr uint64_t DEFAULT_DELAY_TIME = 3000;
+
+    // for check leap year
+    static constexpr uint8_t FEBRUARY = 2;
+    static constexpr uint8_t LEAP_MONTH = 29;
+    static constexpr uint8_t NON_LEAP_MONTH = 28;
+    static constexpr uint16_t SOLAR_YEAR = 400;
+    static constexpr uint8_t LEAP_PARAM_MIN = 4;
+    static constexpr uint8_t LEAP_PARAM_MAX = 100;
 };
 }
 }

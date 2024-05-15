@@ -134,7 +134,9 @@ public:
 
     std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
 
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();
+#endif
 
 private:
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
@@ -162,13 +164,13 @@ private:
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
+    bool IsSubscribedBysubscriber(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
 
 private:
-    bool ProcessSyncDecision(
-        const std::string &deviceType, const sptr<Notification> &notification) const;
-    NotificationConstant::FlagStatus DowngradeReminder(
-        const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const;
-
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    void UpdateCrossDeviceNotificationStatus();
+#endif
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};

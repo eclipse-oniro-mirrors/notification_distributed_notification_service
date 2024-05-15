@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "notification_rdb_data_mgr.h"
+#include "rdb_errno.h"
 
 namespace {
     bool g_mockInitRet = true;
@@ -23,6 +24,7 @@ namespace {
     bool g_mockDeleteBathchDataRet = true;
     bool g_mockDeleteDataRet = true;
     bool g_mockQueryAllData = true;
+    bool g_mockDropTable = true;
 }
 
 void MockInit(bool mockRet)
@@ -65,6 +67,10 @@ void MockQueryAllData(bool mockRet)
     g_mockQueryAllData = mockRet;
 }
 
+void MockDropTable(bool mockRet)
+{
+    g_mockDropTable = mockRet;
+}
 namespace OHOS {
 namespace Notification {
 NotificationDataMgr::NotificationDataMgr(const NotificationRdbConfig &notificationRdbConfig)
@@ -88,7 +94,7 @@ int32_t NotificationDataMgr::Destroy()
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value)
+int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value, const int32_t &userId)
 {
     if (g_mockQueryDataRet == false) {
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
@@ -96,7 +102,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &valu
     return NativeRdb::E_ERROR;
 }
 
-int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value)
+int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value, const int32_t &userId)
 {
     if (g_mockInsertDataRet == false) {
         return NativeRdb::E_ERROR;
@@ -104,7 +110,8 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values)
+int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values,
+    const int32_t &userId)
 {
     if (g_mockInsertBatchDataRet == false) {
         return NativeRdb::E_ERROR;
@@ -113,7 +120,7 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
 }
 
 int32_t NotificationDataMgr::QueryDataBeginWithKey(
-    const std::string &key, std::unordered_map<std::string, std::string> &values)
+    const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     if (g_mockQueryDataBeginWithKeyRet == false) {
         return NativeRdb::E_ERROR;
@@ -121,7 +128,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &keys)
+int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &keys, const int32_t &userId)
 {
     if (g_mockDeleteBathchDataRet == false) {
         return NativeRdb::E_ERROR;
@@ -129,7 +136,7 @@ int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &ke
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteData(const std::string &key)
+int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &userId)
 {
     if (g_mockDeleteDataRet == false) {
         return NativeRdb::E_ERROR;
@@ -137,9 +144,17 @@ int32_t NotificationDataMgr::DeleteData(const std::string &key)
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &values)
+int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     if (g_mockQueryAllData == false) {
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
+{
+    if (g_mockDropTable == false) {
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;

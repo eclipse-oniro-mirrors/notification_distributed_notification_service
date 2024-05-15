@@ -100,7 +100,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest02, Function | SmallTest | Le
     data.WriteInterfaceToken(AnsSubscriberStub::GetDescriptor());
 
 
-    uint32_t code = static_cast<uint32_t>(static_cast<int>(NotificationInterfaceCode::ON_BADGE_CHANGED) + 1);
+    uint32_t code = static_cast<uint32_t>(static_cast<int>(NotificationInterfaceCode::ON_BADGE_ENABLED_CHANGED) + 1);
 
     ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_TRUE(res != NO_ERROR);
@@ -238,7 +238,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedMap04, Function | SmallTest 
     data.WriteParcelable(notificationSortingMap);
 
     ErrCode res = stub_->HandleOnConsumedMap(data, reply);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -335,7 +335,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnConsumedListMap04, Function | SmallT
     data.WriteParcelable(notificationSortingMap);
 
     ErrCode res = stub_->HandleOnConsumedListMap(data, reply);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -429,7 +429,7 @@ HWTEST_F(AnsSubscriberStubUnitTest, HandleOnCanceledMap05, Function | SmallTest 
     data.WriteInt32(reason);
 
     ErrCode res = stub_->HandleOnCanceledMap(data, reply);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**

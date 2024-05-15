@@ -293,6 +293,13 @@ public:
     bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
     /**
+     * @brief Querying Aggregation Configuration Values
+     *
+     * @return Configured value
+     */
+    std::string GetAdditionalConfig();
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
@@ -342,16 +349,26 @@ public:
     ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, bool &enabled);
 
+    /**
+     * @brief Get the bundle name set for send the sound.
+     *
+     * @param allPackage Specifies whether to allow all bundle to publish notification with sound.
+     * @param bundleNames Indicates bundle name set, allow to publish notification with sound.
+     * @return true if get the permission; returns false otherwise.
+     */
+    bool GetBundleSoundPermission(bool &allPackage, std::set<std::string> &bundleNames);
+
     void InitSettingFromDisturbDB();
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
     void RemoveEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption);
-    int32_t SetKvToDb(const std::string &key, const std::string &value);
-    int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value);
-    int32_t GetKvFromDb(const std::string &key, std::string &value);
-    int32_t GetByteFromDb(const std::string &key, std::vector<uint8_t> &value);
-    int32_t GetBatchKvsFromDb(const std::string &key, std::unordered_map<std::string, std::string>  &values);
-    int32_t DeleteKvFromDb(const std::string &key);
+    int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId);
+    int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId);
+    int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId);
+    int32_t GetByteFromDb(const std::string &key, std::vector<uint8_t> &value, const int32_t &userId);
+    int32_t GetBatchKvsFromDb(
+        const std::string &key, std::unordered_map<std::string, std::string>  &values, const int32_t &userId);
+    int32_t DeleteKvFromDb(const std::string &key, const int &userId);
     ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     bool CheckDoNotDisturbProfileID(int32_t profileId);
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);

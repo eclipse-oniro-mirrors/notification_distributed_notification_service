@@ -355,7 +355,7 @@ public:
     ErrCode GetSlotByBundle(
         const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
         sptr<NotificationSlot> &slot) override;
-    
+
     /**
      * @brief Update slots according to bundle.
      *
@@ -457,7 +457,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) override;
+        const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
     /**
      * @brief Unsubscribes notifications.
@@ -660,6 +660,32 @@ public:
     ErrCode CancelAllReminders() override;
 
     /**
+     * @brief Add exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param date exclude date
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override;
+
+    /**
+     * @brief Clear exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DelExcludeDates(const int32_t reminderId) override;
+
+    /**
+     * @brief Get exclude date for reminder
+     *
+     * @param reminderId Identifies the reminders id.
+     * @param dates exclude dates
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override;
+
+    /**
      * @brief Checks Whether the specified users is allowed to publish notifications.
      *
      * @param userId Identifies the user's id.
@@ -721,7 +747,7 @@ public:
      * @param dumpInfo Indicates the container containing datas.
      * @return Returns check result.
      */
-    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo) override;
 
     /**
@@ -840,7 +866,7 @@ public:
      */
     ErrCode IsDistributedEnabledByBundle(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, bool &enabled) override;
-    
+
     /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
@@ -941,9 +967,6 @@ private:
     static inline BrokerDelegator<AnsManagerProxy> delegator_;
 
     ErrCode ReadReminders(uint8_t &count, MessageParcel &reply, std::vector<sptr<ReminderRequest>> &reminders);
-
-private:
-    std::atomic<bool> isSubscribedLocalLiveView = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

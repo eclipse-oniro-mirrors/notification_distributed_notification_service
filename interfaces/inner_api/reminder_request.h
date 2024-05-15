@@ -752,6 +752,22 @@ public:
     virtual bool UpdateNextReminder();
     virtual bool SetNextTriggerTime();
 
+    /**
+     * @brief Check reminder request is repeat
+     */
+    virtual bool IsRepeat() const
+    {
+        return false;
+    }
+
+    /**
+     * @brief Check reminder request is in exclude date
+     */
+    virtual bool CheckExcludeDate()
+    {
+        return false;
+    }
+
     std::string GetWantAgentStr();
     std::string GetMaxWantAgentStr();
 
@@ -878,6 +894,11 @@ public:
     static const std::string REMINDER_EVENT_CUSTOM_ALERT;
 
     /**
+     * @biref Close the reminder when click the notification, not button.
+     */
+    static const std::string REMINDER_EVENT_CLICK_ALERT;
+
+    /**
      * @brief Used to control ring duration.
      */
     static const std::string REMINDER_EVENT_ALERT_TIMEOUT;
@@ -907,6 +928,9 @@ public:
     static constexpr int32_t WANT_AGENT_FLAG = 0;
     // maxWantAgent flag
     static constexpr int32_t MAX_WANT_AGENT_FLAG = 1;
+
+    // max ring duration
+    static constexpr uint64_t MAX_RING_DURATION = 30 * 60 * 1000;  // 30 min
 
 protected:
     enum class DbRecoveryType : uint8_t {
@@ -943,8 +967,8 @@ protected:
 private:
     void AddActionButtons(const bool includeSnooze);
     void AddRemovalWantAgent();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element,
-        bool isWantAgent) const;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element) const;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateMaxWantAgent(AppExecFwk::ElementName &element) const;
     std::string GetButtonInfo() const;
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;

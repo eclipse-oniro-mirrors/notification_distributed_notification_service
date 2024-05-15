@@ -35,7 +35,7 @@ int32_t MockAnsManagerStub::GetUserId()
 }
 
 ErrCode MockAnsManagerStub::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
-    std::vector<std::string> &dumpInfo)
+    int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
     ANS_LOGE("enter");
     ErrCode result = ERR_ANS_NOT_ALLOWED;

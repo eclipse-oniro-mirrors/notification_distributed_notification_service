@@ -38,14 +38,9 @@ public:
     bool GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const;
     bool GetCurrentSlotReminder(
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
-    void GetDefaultCurrentSlotReminder(
-        std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
-
+    uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
 private:
-    void FillStatusIcon(
-        const NotificationConstant::SlotType &slotType, std::shared_ptr<NotificationFlags> &reminderFlags) const;
-
-    std::map<NotificationConstant::SlotType, std::string> defaultCurrentSlotReminder_;
+    std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
 
 public:

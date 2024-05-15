@@ -897,7 +897,7 @@ HWTEST_F(ReminderRequestTest, SetRingDuration_00001, Function | SmallTest | Leve
     uint64_t ringDurationInSeconds = 0;
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetRingDuration(ringDurationInSeconds);
-    EXPECT_EQ(rrc->GetRingDuration(), 1);
+    EXPECT_EQ(rrc->GetRingDuration(), 0);
 }
 
 /**
@@ -912,6 +912,20 @@ HWTEST_F(ReminderRequestTest, SetRingDuration_00002, Function | SmallTest | Leve
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetRingDuration(ringDurationInSeconds);
     EXPECT_EQ(rrc->GetRingDuration(), ringDurationInSeconds);
+}
+
+/**
+ * @tc.name: SetRingDuration_00003
+ * @tc.desc: Test SetRingDuration parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, SetRingDuration_00003, Function | SmallTest | Level1)
+{
+    uint64_t ringDurationInSeconds = 45 * 60;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetRingDuration(ringDurationInSeconds);
+    EXPECT_EQ(rrc->GetRingDuration(), ReminderRequest::MAX_RING_DURATION / ReminderRequest::MILLI_SECONDS);
 }
 
 /**
@@ -1300,7 +1314,7 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00001, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
-        reminderRequestChild->CreateWantAgent(element, false);
+        reminderRequestChild->CreateMaxWantAgent(element);
     EXPECT_EQ(WantAgent, nullptr);
 }
 
@@ -1316,7 +1330,7 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00002, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
-        reminderRequestChild->CreateWantAgent(element, true);
+        reminderRequestChild->CreateWantAgent(element);
     EXPECT_EQ(WantAgent, nullptr);
 }
 

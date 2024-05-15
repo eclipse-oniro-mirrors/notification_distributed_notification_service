@@ -35,6 +35,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_DISTRIBUTED_ENABLE_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -43,11 +44,14 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGW("Parameter type error. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -55,6 +59,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGW("Wrong argument type. Bool expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be boolean.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     char str[STR_MAX_SIZE] = {0};
@@ -62,6 +68,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
     if (std::strlen(str) == 0) {
         ANS_LOGE("Property deviceType is empty");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     params.deviceType = str;
@@ -71,6 +78,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGW("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be boolean.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, argv[PARAM2], &params.enable);
@@ -171,6 +180,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_SMART_REMINDER_ENABLE_MIN_PARA) {
         ANS_LOGW("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -179,6 +189,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGW("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     char str[STR_MAX_SIZE] = {0};
@@ -186,6 +198,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen);
     if (std::strlen(str) == 0) {
         ANS_LOGE("Property deviceType is empty");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     params.deviceType = str;
@@ -195,6 +208,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGW("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be boolean.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, argv[PARAM1], &params.enable);

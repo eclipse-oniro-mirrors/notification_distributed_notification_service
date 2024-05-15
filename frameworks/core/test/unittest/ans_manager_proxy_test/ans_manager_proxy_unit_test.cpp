@@ -2241,8 +2241,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0200, Function |
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetAllActiveNotifications(notifications);
-    EXPECT_EQ(ERR_OK, result);
-    EXPECT_EQ(1, notifications.size());
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(0, notifications.size());
 }
 /*
  * @tc.name: GetAllActiveNotificationsTest_0300
@@ -2371,8 +2371,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSpecialActiveNotificationsTest_0300, Functi
     std::vector<std::string> key{"0", "1"};
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetSpecialActiveNotifications(key, notifications);
-    EXPECT_EQ(ERR_OK, result);
-    EXPECT_EQ(1, notifications.size());
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(0, notifications.size());
 }
 /*
  * @tc.name: GetSpecialActiveNotificationsTest_0400
@@ -7467,7 +7467,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0100, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<std::string> dumpInfo;
-    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
+    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -7490,7 +7490,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0200, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<std::string> dumpInfo;
-    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
+    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
     EXPECT_EQ(ERR_OK, result);
     EXPECT_EQ(1, dumpInfo.size());
 }
@@ -7513,7 +7513,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0300, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> ansManagerProxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, ansManagerProxy);
     std::vector<std::string> dumpInfo;
-    int32_t result = ansManagerProxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
+    int32_t result = ansManagerProxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -7534,7 +7534,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0400, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<std::string> dumpInfo;
-    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
+    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -7556,7 +7556,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0500, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<std::string> dumpInfo;
-    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, dumpInfo);
+    int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 

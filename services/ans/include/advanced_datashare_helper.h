@@ -36,10 +36,10 @@ public:
     bool Query(Uri &uri, const std::string &key, std::string &value);
     std::string GetFocusModeEnableUri() const;
     std::string GetFocusModeProfileUri() const;
+    std::string GetUnifiedGroupEnableUri() const;
 
 private:
-    void CreateDataShareHelper();
-    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_ = nullptr;
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
 };
 } // namespace Notification
 } // namespace OHOS

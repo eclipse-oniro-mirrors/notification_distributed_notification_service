@@ -117,6 +117,10 @@ napi_value Common::SetCapsule(const napi_env &env, const NotificationCapsule &ca
     napi_create_string_utf8(env, capsule.GetBackgroundColor().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "backgroundColor", value);
 
+    // content: string
+    napi_create_string_utf8(env, capsule.GetContent().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "content", value);
+
     // icon?: image.PixelMap
     std::shared_ptr<Media::PixelMap> icon = capsule.GetIcon();
     if (icon) {
@@ -393,6 +397,20 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         capsule.SetBackgroundColor(str);
         ANS_LOGD("capsule backgroundColor = %{public}s", str);
     }
+
+    NAPI_CALL(env, napi_has_named_property(env, capsuleResult, "content", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, capsuleResult, "content", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+        capsule.SetContent(str);
+        ANS_LOGD("capsule content = %{public}s", str);
+    }
+
     NAPI_CALL(env, napi_has_named_property(env, capsuleResult, "icon", &hasProperty));
     if (hasProperty) {
         napi_get_named_property(env, capsuleResult, "icon", &result);
