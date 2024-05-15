@@ -45,6 +45,7 @@
 #include "app_mgr_constants.h"
 #include "iservice_registry.h"
 #include "config_policy_utils.h"
+#include "hitrace_meter_adapter.h"
 
 namespace OHOS {
 namespace Notification {
@@ -83,6 +84,7 @@ ReminderDataManager::~ReminderDataManager() = default;
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
     if (callerTokenId == 0) {
         ANSR_LOGE("pushlish failed, callerTokenId is 0");
@@ -107,6 +109,7 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
 ErrCode ReminderDataManager::CancelReminder(
     const int32_t &reminderId, const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("cancel reminder id: %{public}d", reminderId);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, bundleOption->GetBundleName());
     if (reminder == nullptr) {
@@ -135,6 +138,7 @@ ErrCode ReminderDataManager::CancelReminder(
 
 ErrCode ReminderDataManager::CancelAllReminders(const std::string &packageName, const int32_t &userId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGD("CancelAllReminders, userId=%{private}d, pkgName=%{public}s",
         userId, packageName.c_str());
     CancelRemindersImplLocked(packageName, userId);
@@ -164,6 +168,7 @@ sptr<ReminderRequest> ReminderDataManager::CheckExcludeDateParam(const int32_t r
 ErrCode ReminderDataManager::AddExcludeDate(const int32_t reminderId, const uint64_t date,
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, bundleOption);
     if (reminder == nullptr) {
         return ERR_REMINDER_NOT_EXIST;
@@ -180,6 +185,7 @@ ErrCode ReminderDataManager::AddExcludeDate(const int32_t reminderId, const uint
 ErrCode ReminderDataManager::DelExcludeDates(const int32_t reminderId,
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, bundleOption);
     if (reminder == nullptr) {
         return ERR_REMINDER_NOT_EXIST;
@@ -196,6 +202,7 @@ ErrCode ReminderDataManager::DelExcludeDates(const int32_t reminderId,
 ErrCode ReminderDataManager::GetExcludeDates(const int32_t reminderId,
     const sptr<NotificationBundleOption> &bundleOption, std::vector<uint64_t>& dates)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, bundleOption);
     if (reminder == nullptr) {
         return ERR_REMINDER_NOT_EXIST;
@@ -211,6 +218,7 @@ ErrCode ReminderDataManager::GetExcludeDates(const int32_t reminderId,
 void ReminderDataManager::GetValidReminders(
     const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<ReminderRequest>> &reminders)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         if ((*it)->IsExpired()) {
