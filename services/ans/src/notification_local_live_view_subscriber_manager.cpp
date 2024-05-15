@@ -259,10 +259,17 @@ void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner(
     ANS_LOGD("ffrt enter!");
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
 
-    int32_t sendUserId = notification->GetUid();
-    std::string bundleName = notification->GetBundleName();
-    ANS_LOGD("%{public}s notification->GetUserId <%{public}d>, bundlename <%{public}s>",
-        __FUNCTION__, notification->GetUid(), bundleName.c_str());
+    int32_t sendUserId;
+    std::string bundleName;
+    if (notification->GetNotificationRequestPoint()->GetAgentBundle() != nullptr) {
+        sendUserId = notification->GetNotificationRequestPoint()->GetAgentBundle()->GetUid();
+        bundleName = notification->GetNotificationRequestPoint()->GetAgentBundle()->GetBundleName();
+    } else {
+        sendUserId = notification->GetUid();
+        bundleName = notification->GetBundleName();
+    }
+    ANS_LOGD("%{public}s sendUserId <%{public}d>, bundlename <%{public}s>",
+        __FUNCTION__, sendUserId, bundleName.c_str());
 
     for (auto record : buttonRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>, bundlename <%{public}s>",

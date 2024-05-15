@@ -1118,12 +1118,22 @@ ErrCode AdvancedNotificationService::TriggerLocalLiveView(const sptr<Notificatio
         sptr<Notification> notification = nullptr;
 
         for (auto record : notificationList_) {
-            if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundle->GetUid()) &&
-                (record->notification->GetId() == notificationId)) {
-                notification = record->notification;
-                result = ERR_OK;
-                break;
+            if (record->request->GetAgentBundle() != nullptr) {
+                if ((record->request->GetAgentBundle()->GetBundleName() == bundle->GetBundleName()) &&
+                    (record->request->GetAgentBundle()->GetUid() == bundle->GetUid()) &&
+                    (record->notification->GetId() == notificationId)) {
+                    notification = record->notification;
+                    result = ERR_OK;
+                    break;
+                }
+            } else {
+                if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+                    (record->bundleOption->GetUid() == bundle->GetUid()) &&
+                    (record->notification->GetId() == notificationId)) {
+                    notification = record->notification;
+                    result = ERR_OK;
+                    break;
+                }
             }
         }
 
