@@ -42,9 +42,7 @@ void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName 
     ANS_LOGI("AbilityConnectionWrapperProxy::OnAbilityConnectDone result %{public}d", errCode);
     if (errCode != ERR_OK) {
         ANS_LOGD("send Request to SytemDialog fail");
-        //todo-xds 删除dialog
     }
-    
 }
 
 void SystemDialogConnectStb::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element,
@@ -52,6 +50,5 @@ void SystemDialogConnectStb::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
 {
     ANS_LOGI("on ability disconnected");
 }
-
-} 
+}
 }

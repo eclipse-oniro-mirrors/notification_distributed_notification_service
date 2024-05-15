@@ -66,7 +66,6 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
 
     AAFwk::Want want;
     
-    //黄区dialog
     std::string bundleName = "com.ohos.sceneboard";
     std::string abilityName = "com.ohos.sceneboard.systemdialog";
     want.SetElementName(bundleName, abilityName);
@@ -85,9 +84,9 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
 
-    auto result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want, connection_, nullptr,
-        DEFAULT_VALUE);
-    if(result != ERR_OK){
+    auto result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want,
+    connection_, nullptr, DEFAULT_VALUE);
+    if (result != ERR_OK) {
         ANS_LOGD("connect sceneboard systemdiaolog fail, result = %{public}d", result);
         bundleName = "com.ohos.systemui";
         abilityName = "com.ohos.systemui.dialog";
