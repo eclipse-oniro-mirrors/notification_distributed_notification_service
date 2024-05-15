@@ -45,7 +45,9 @@ ohos_shared_library("libans") {
 
   sources = [
     "src/access_token_helper.cpp",
+    "src/advanced_aggregation_data_roaming_observer.cpp",
     "src/advanced_datashare_helper.cpp",
+    "src/advanced_datashare_observer.cpp",
     "src/advanced_notification_event_service.cpp",
     "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
