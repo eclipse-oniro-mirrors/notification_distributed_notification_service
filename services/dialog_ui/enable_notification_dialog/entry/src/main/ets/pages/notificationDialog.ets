@@ -22,6 +22,7 @@ import fs from '@ohos.file.fs';
 import configPolicy from '@ohos.configPolicy';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
 import { Callback} from '@ohos.base';
+import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 
 const TAG = 'NotificationDialog_Service ';
 const permission: Record<string, Resource> = {
@@ -72,6 +73,7 @@ struct PermissionDialog {
   @State isBottomPopover: boolean = true;
   @Link @Watch('updateOnPageShow') isUpdate: number;
   dialog?: EnableNotificationDialog;
+  session?: UIExtensionContentSession;
   controller?: CustomDialogController;
 
   build() {
@@ -183,13 +185,13 @@ struct PermissionDialog {
   updateAvoidWindow(): void {
     let type = window.AvoidAreaType.TYPE_SYSTEM;
     try {
-      this.dialog?.window.on('avoidAreaChange', (data): void => {
+      this.dialog?.extensionWindow.on('avoidAreaChange', (data): void => {
         if (data.type == window.AvoidAreaType.TYPE_SYSTEM) {
           console.info(TAG, `avoidAreaChange: ${JSON.stringify(data)}`);
           this.naviHeight = data.area.bottomRect.height;
         }
       });
-      let avoidArea = this.dialog?.window.getWindowAvoidArea(type);
+      let avoidArea = this.dialog?.extensionWindow.getWindowAvoidArea(type);
       if (avoidArea != undefined){
         console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
         this.naviHeight = avoidArea.bottomRect.height;
@@ -253,15 +255,17 @@ struct PermissionDialog {
 
   async aboutToAppear(): Promise<void> {
     this.dialog = storage.get('dialog') as EnableNotificationDialog;
+    this.session = storage.get('session') as UIExtensionContentSession;
     this.updateAvoidWindow();
     try {
       await this.updateStatus();
     } catch (err) {
       console.error(TAG, `aboutToAppear error : + ${JSON.stringify(err)}`);
       await this.dialog?.destroyException();
+      await this.session?.terminateSelf();
     }
     if (display.isFoldable()) {
-      await this.registerFoldableCallback();
+      await this.registerFoldableCallback();  
     }
   }
 
@@ -285,7 +289,6 @@ struct PermissionDialog {
   }
 
   async aboutToDisappear(): Promise<void> {
-    await this.dialog?.destroyWindow();
   }
 
   async enableNotification(enabled: boolean): Promise<void> {
@@ -294,8 +297,9 @@ struct PermissionDialog {
       await this.dialog?.publishButtonClickedEvent(enabled);
     } catch (err) {
       console.error(TAG, `NotificationDialog enable error, code is ${err?.code}`);
+      await this.dialog?.destroyException();
     } finally {
-      await this.dialog?.destroy();
+      this.session?.terminateSelf();
     }
   }
 }

@@ -19,6 +19,12 @@ import extension from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
 import CommonEventManager from '@ohos.commonEventManager';
 import type Want from '@ohos.app.ability.Want';
+import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
+import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
+import uiExtensionHost from '@ohos.uiExtensionHost';
+import StartOptions from '@ohos.app.ability.StartOptions';
+
+
 
 const TAG = 'NotificationDialog_Service ';
 
@@ -55,12 +61,14 @@ export class EnableNotificationDialog {
   id: number;
   want: Want;
   window: window.Window;
+  extensionWindow:uiExtensionHost.UIExtensionHostWindowProxy;
   storage: LocalStorage;
 
   constructor(id: number, want: Want) {
     this.id = id;
     this.want = want;
     this.window = undefined;
+    this.extensionWindow = undefined;
   }
 
   async createWindow(windowType: window.WindowType, context, displayRect): Promise<void> {
@@ -106,6 +114,30 @@ export class EnableNotificationDialog {
     }
   }
 
+
+  async createUiExtensionWindow(session: UIExtensionContentSession): Promise<void> {
+    try {
+      let extensionWindow = session.getUIExtensionHostWindowProxy();
+      this.extensionWindow = extensionWindow;
+      let shouldHide = true;
+
+      this.storage = new LocalStorage({
+        'dialog': this,
+        'session': session
+      });
+      await session.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
+      try {
+        await extensionWindow.hideNonSecureWindows(shouldHide);
+      } catch (err) {
+        console.error(TAG, 'window hideNonSecureWindows failed!');
+      }
+      await session.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
+    } catch (err) {
+      console.error(TAG, 'window create failed!');
+      throw new Error('Failed to create window');
+    }
+  }
+
   async publishButtonClickedEvent(enabled: boolean): Promise<void> {
     CommonEventManager.publish(
       COMMON_EVENT_NAME,
@@ -118,15 +150,7 @@ export class EnableNotificationDialog {
   }
 
   async destroyException(): Promise<void> {
-    if (this.window !== undefined) {
-      emitter.emit(enableNotificationDialogDestroyedEvent, {
-        data: {
-          'id': this.id
-        }
-      });
-      await handleDialogQuitException(this.want);
-      await this.destroyWindow();
-    }
+    await handleDialogQuitException(this.want);
   }
 
   async destroy(): Promise<void> {
@@ -147,71 +171,43 @@ export class EnableNotificationDialog {
 };
 
 
-class NotificationDialogServiceExtensionAbility extends extension {
-  static MAX_DIALOG_NUM = 10;
 
-  dialogs: Array<EnableNotificationDialog> = [];
+class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
 
-  onCreate(want: Want): void {
-    console.info(TAG, `onCreate, want: ${JSON.stringify(want)}`);
+  onCreate() {
+    console.log(TAG, `UIExtAbility onCreate`);
     AppStorage.SetOrCreate('context', this.context);
-    emitter.on(enableNotificationDialogDestroyedEvent, (data) => {
-      let did = data.data.id;
-      this.dialogs = this.dialogs.filter((dialog: EnableNotificationDialog) => {
-        return dialog.id !== did;
-      });
-      console.info(TAG, `Dialog ${did} destroyed.`);
-      if (this.dialogs.length === 0) {
-        this.context.terminateSelf();
-        console.info(TAG, 'terminated');
-      }
-    });
+  
   }
 
-  async onRequest(want: Want, startId: number): Promise<void> {
-    console.log(TAG, `onRequest ${startId}`);
+  async onSessionCreate(want: Want, session: UIExtensionContentSession) {
+    console.log(TAG, `UIExtAbility onSessionCreate`);    
     try {
-      await this.removeExceededDialog();
-      let dialog = new EnableNotificationDialog(startId, want);
-      let winType = want.parameters.callerToken !== undefined ?
-        window.WindowType.TYPE_DIALOG : window.WindowType.TYPE_FLOAT;
-      let dis = display.getDefaultDisplaySync();
-      let navigationBarRect = {
-        left: 0,
-        top: 0,
-        width: dis.width,
-        height: dis.height
-      };
-      await dialog.createWindow(winType, this.context, navigationBarRect);
-      this.dialogs.push(dialog);
+      let dialog = new EnableNotificationDialog(1, want);
+      await dialog.createUiExtensionWindow(session);
     } catch (err) {
-      console.error(TAG, `Failed to handle request ${startId}.`);
+      console.error(TAG, `Failed to handle onSessionCreate`);
       await handleDialogQuitException(want);
     }
   }
 
-  onDestroy(): void {
-    console.info(TAG, 'onDestroy.');
-    CommonEventManager.publish(
-      COMMON_EVENT_NAME,
-      {
-        code: DialogStatus.DIALOG_SERVICE_DESTROYED
-      } as CommonEventManager.CommonEventPublishData,
-      () => { console.info(TAG, 'publish DIALOG_SERVICE_DESTROYED succeeded'); }
-    );
+  onForeground() {
+    console.log(TAG, `UIExtAbility onForeground`);
   }
 
-  private async removeExceededDialog(): Promise<void> {
-    if (this.dialogs.length >= NotificationDialogServiceExtensionAbility.MAX_DIALOG_NUM) {
-      // remove dialogs by creating time
-      let removed = this.dialogs.splice(0,
-        this.dialogs.length - NotificationDialogServiceExtensionAbility.MAX_DIALOG_NUM + 1);
-      for (let dialog of removed) {
-        await handleDialogQuitException(dialog.want);
-        await dialog.destroyWindow();
-      }
-    }
+  onBackground() {
+    console.log(TAG, `UIExtAbility onBackground`);
   }
-};
+
+  onSessionDestroy(session: UIExtensionContentSession) {
+    console.log(TAG, `UIExtAbility onSessionDestroy`);
+  }
+
+  onDestroy() {
+    console.info(TAG, 'UIExtAbility onDestroy.');
+    this.context.terminateSelf();
+  }
+}
+
 
 export default NotificationDialogServiceExtensionAbility;

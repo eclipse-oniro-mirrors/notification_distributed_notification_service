@@ -45,9 +45,7 @@ ohos_shared_library("libans") {
 
   sources = [
     "src/access_token_helper.cpp",
-    "src/advanced_aggregation_data_roaming_observer.cpp",
     "src/advanced_datashare_helper.cpp",
-    "src/advanced_datashare_observer.cpp",
     "src/advanced_notification_event_service.cpp",
     "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
@@ -87,6 +85,7 @@ ohos_shared_library("libans") {
     "src/reminder_swing_decision_center.cpp",
     "src/reminder_timer_info.cpp",
     "src/system_event_observer.cpp",
+    "src/system_dialog_connect_stb.cpp"
   ]
 
   configs = [ ":public_ans_config" ]
@@ -120,8 +119,8 @@ ohos_shared_library("libans") {
     "ability_base:configuration",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
-    "ability_runtime:dataobs_manager",
     "ability_runtime:wantagent_innerkits",
+    "ability_runtime:extension_manager",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
