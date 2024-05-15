@@ -76,15 +76,15 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
         return result;
     }
 
-    if (request->CheckImageOverSizeForPixelMap(request->GetLittleIcon(), MAX_ICON_SIZE)) {
+    if (request->CheckImageOverSizeForPixelMap(request->GetLittleIcon(), MAX_ICON_ENLARGE_SIZE)) {
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_SIZE)) {
+    if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_ENLARGE_SIZE)) {
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
+    if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_ENLARGE_SIZE)) {
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
