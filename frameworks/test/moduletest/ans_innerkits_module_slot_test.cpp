@@ -26,10 +26,15 @@
 #include "notification_helper.h"
 #include "remote_native_token.h"
 #include "system_ability_definition.h"
+#include "accesstoken_kit.h"
 
 using namespace testing::ext;
+using namespace OHOS::Security::AccessToken;
+
 namespace OHOS {
 namespace Notification {
+extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
+
 const int32_t SLEEP_TIME = 1;
 static sptr<ISystemAbilityManager> systemAbilityManager =
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -62,6 +67,7 @@ void AnsInnerKitsModuleSlotTest::TearDownTestCase()
 
 void AnsInnerKitsModuleSlotTest::SetUp()
 {
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     NotificationHelper::RemoveAllSlots();
 }
 

@@ -1700,6 +1700,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
+    
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_INVALID_UID);
     SleepForFC();
 
