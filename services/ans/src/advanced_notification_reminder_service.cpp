@@ -51,6 +51,7 @@ inline bool AdvancedNotificationService::CheckReminderPermission()
 
 ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &reminder)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Publish reminder");
     if (!reminder) {
         ANSR_LOGE("ReminderRequest object is nullptr");
@@ -107,6 +108,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
 
 ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Cancel Reminder");
     if (!CheckReminderPermission()) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
@@ -126,6 +128,7 @@ ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
 
 ErrCode AdvancedNotificationService::CancelAllReminders()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Cancel all reminders");
     if (!CheckReminderPermission()) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
@@ -148,6 +151,7 @@ ErrCode AdvancedNotificationService::CancelAllReminders()
 
 ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("GetValidReminders");
     if (!CheckReminderPermission()) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
@@ -170,6 +174,7 @@ ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<Reminder
 
 ErrCode AdvancedNotificationService::AddExcludeDate(const int32_t reminderId, const uint64_t date)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Add Exclude Date");
     if (!CheckReminderPermission()) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
@@ -191,6 +196,7 @@ ErrCode AdvancedNotificationService::AddExcludeDate(const int32_t reminderId, co
 
 ErrCode AdvancedNotificationService::DelExcludeDates(const int32_t reminderId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Del Exclude Dates");
     if (!CheckReminderPermission()) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
@@ -212,6 +218,7 @@ ErrCode AdvancedNotificationService::DelExcludeDates(const int32_t reminderId)
 
 ErrCode AdvancedNotificationService::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Get Exclude Dates");
     if (!CheckReminderPermission()) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
