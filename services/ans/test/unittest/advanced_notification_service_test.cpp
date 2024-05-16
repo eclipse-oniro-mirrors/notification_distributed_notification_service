@@ -76,7 +76,8 @@ private:
 
 sptr<AdvancedNotificationService> AdvancedNotificationServiceTest::advancedNotificationService_ = nullptr;
 
-void AdvancedNotificationServiceTest::SetUpTestCase() {
+void AdvancedNotificationServiceTest::SetUpTestCase()
+{
     MockIsOsAccountExists(true);
 }
 
