@@ -89,13 +89,13 @@ void ExtensionWrapper::SetlocalSwitch(std::string &enable)
 
 void ExtensionWrapper::RegisterDataSettingObserver()
 {
-    ANS_LOGI("fengyunfei ExtensionWrapper::RegisterDataSettingObserver enter");
+    ANS_LOGD("ExtensionWrapper::RegisterDataSettingObserver enter");
     if (aggregationRoamingObserver_ == nullptr) {
         aggregationRoamingObserver_ = new (std::nothrow) AdvancedAggregationDataRoamingObserver();
     }
 
     if (aggregationRoamingObserver_ == nullptr) {
-        ANS_LOGI("aggregationRoamingObserver_ is null");
+        ANS_LOGE("aggregationRoamingObserver_ is null");
         return;
     }
     
