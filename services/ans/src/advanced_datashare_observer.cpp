@@ -62,7 +62,7 @@ void AdvancedDatashareObserver::UnRegisterSettingsObserver(
 void AdvancedDatashareObserver::RegisterSettingsObserver(
     const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
 {
-    ANS_LOGI("fengyunfei AdvancedDatashareObserver::RegisterSettingsObserver enter");
+    ANS_LOGD("AdvancedDatashareObserver::RegisterSettingsObserver enter");
     std::shared_ptr<DataShare::DataShareHelper> settingHelper = CreateDataShareHelper();
     if (settingHelper == nullptr) {
         ANS_LOGE("Register settings observer by nullptr");
@@ -84,4 +84,4 @@ void AdvancedDatashareObserver::NotifyChange(const Uri &uri)
 }
 
 } // namespace Notification
-} // namespace OHOS
+} // namespace OHOS

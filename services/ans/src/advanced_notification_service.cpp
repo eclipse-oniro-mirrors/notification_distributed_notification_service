@@ -1049,7 +1049,7 @@ ErrCode AdvancedNotificationService::GetUnifiedGroupInfoFromDb(std::string &enab
     Uri enableUri(datashareHelper->GetUnifiedGroupEnableUri());
     bool ret = datashareHelper->Query(enableUri, KEY_UNIFIED_GROUP_ENABLE, enable);
     if (!ret) {
-        ANS_LOGE("Query focus mode enable fail.");
+        ANS_LOGE("Query smart aggregation switch failed.");
         return -1;
     }
 

@@ -1013,6 +1013,12 @@ public:
      * @return Returns set result.
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+
+    /**
+     * @brief clear notification when aggregate local switch close.
+     */
+    void ClearAllNotificationGroupInfo(std::string localSwitch);
+
     /**
      * @brief Reset pushcallback proxy
      */
@@ -1321,7 +1327,7 @@ private:
     static std::mutex pushMutex_;
     static std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> pushCallBacks_;
     static std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> checkRequests_;
-
+    bool aggregateLocalSwitch_ = false;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;

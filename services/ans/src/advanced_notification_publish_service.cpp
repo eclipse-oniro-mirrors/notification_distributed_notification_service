@@ -2197,5 +2197,24 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
         deviceType.c_str(), DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType));
     return ret;
 }
+
+void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string localSwitch)
+{
+    ANS_LOGD("ClearNotification enter.");
+    bool status = (localSwitch == "true");
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("ClearNotification Serial queue is invalid.");
+        return;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([=]() {
+        if (aggregateLocalSwitch_ && !status) {
+            for (const auto& item : notificationList_) {
+                item->notification->GetNotificationRequestPoint()->SetUnifiedGroupInfo(nullptr);
+            }
+        }
+        aggregateLocalSwitch_ = status;
+    });
+}
 }  // namespace Notification
 }  // namespace OHOS
