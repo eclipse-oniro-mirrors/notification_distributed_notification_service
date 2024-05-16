@@ -709,8 +709,6 @@ HWTEST_F(ReminderDataManagerTest, OnLanguageChanged_0001, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ExcludeDate_0001, Level1)
 {
-    manager->reminderVector_.clear();
-
     std::vector<uint64_t> dates;
     auto result = manager->CheckExcludeDateParam(9999, nullptr);
     EXPECT_TRUE(result == nullptr);
@@ -754,8 +752,6 @@ HWTEST_F(ReminderDataManagerTest, ExcludeDate_0001, Level1)
 
     ret = manager->GetExcludeDates(100, option, dates);
     EXPECT_TRUE(ret == ERR_OK);
-
-    manager->reminderVector_.clear();
 }
 
 /**
