@@ -76,7 +76,10 @@ private:
 
 sptr<AdvancedNotificationService> AdvancedNotificationServiceTest::advancedNotificationService_ = nullptr;
 
-void AdvancedNotificationServiceTest::SetUpTestCase() {}
+void AdvancedNotificationServiceTest::SetUpTestCase()
+{
+    MockIsOsAccountExists(true);
+}
 
 void AdvancedNotificationServiceTest::TearDownTestCase() {}
 
@@ -90,7 +93,6 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     advancedNotificationService_->CancelAll();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    MockIsOsAccountExists(true);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
