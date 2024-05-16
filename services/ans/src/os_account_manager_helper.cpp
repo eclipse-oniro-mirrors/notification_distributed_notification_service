@@ -14,6 +14,7 @@
  */
 
 #include "os_account_manager_helper.h"
+#include "os_account_constants.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager.h"
 
@@ -52,5 +53,10 @@ OsAccountManagerHelper &OsAccountManagerHelper::GetInstance()
     return DelayedRefSingleton<OsAccountManagerHelper>::GetInstance();
 }
 
+
+bool OsAccountManagerHelper::IsSystemAccount(int32_t userId)
+{
+    return userId >= AccountSA::Constants::START_USER_ID && userId <= AccountSA::Constants::MAX_USER_ID;
+}
 }
 }

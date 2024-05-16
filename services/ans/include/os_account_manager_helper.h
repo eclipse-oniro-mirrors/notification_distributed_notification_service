@@ -33,6 +33,11 @@ public:
     static OsAccountManagerHelper &GetInstance();
 
     /**
+    * @brief check is system account
+    */
+    static bool IsSystemAccount(int32_t userId);
+
+    /**
      * Gets operating system account local ID from uid.
      *
      * @param uid Indicates the uid.
