@@ -55,14 +55,15 @@ void SystemDialogConnectStb::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
     ANS_LOGI("on ability disconnected");
 }
 
-void SystemDialogConnectStb::SendCrashEvent(){
+void SystemDialogConnectStb::SendCrashEvent()
+{
     EventFwk::Want want;
     want.SetAction(DIALOG_CRASH_EVENT);
 
     EventFwk::CommonEventData commonData;
     commonData.SetWant(want);
     commonData.SetCode(DIALOG_CRASH_CODE);
-    nlohmann::json root = nlohmann::json::parse(commandStr_); 
+    nlohmann::json root = nlohmann::json::parse(commandStr_);
     std::string from = root["from"];
     commonData.SetData(from);
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
