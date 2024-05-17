@@ -1753,7 +1753,7 @@ void NotificationRequest::SetReceiverUserId(int32_t userId)
 int32_t NotificationRequest::GetReceiverUserId() const
 {
     if (receiverUserId_ == SUBSCRIBE_USER_INIT) {
-        return creatorUserId_;
+        return ownerUserId_;
     }
     return receiverUserId_;
 }
