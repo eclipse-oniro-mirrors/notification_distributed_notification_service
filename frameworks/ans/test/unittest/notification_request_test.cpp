@@ -192,11 +192,11 @@ HWTEST_F(NotificationRequestTest, NotificationSetReceiverUserId_0100, Level1)
 HWTEST_F(NotificationRequestTest, NotificationSetReceiverUserId_0200, Level1)
 {
     int32_t myNotificationId = 10;
-    int32_t creatorUserId = 5;
+    int32_t ownerUserId = 5;
     NotificationRequest notificationRequest(myNotificationId);
-    notificationRequest.SetCreatorUserId(creatorUserId);
+    notificationRequest.SetOwnerUserId(ownerUserId);
     auto result = notificationRequest.GetReceiverUserId();
-    EXPECT_EQ(result, creatorUserId);
+    EXPECT_EQ(result, ownerUserId);
 }
 
 /**
