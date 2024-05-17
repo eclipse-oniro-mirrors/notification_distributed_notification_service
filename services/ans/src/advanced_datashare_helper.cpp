@@ -47,10 +47,12 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateDataS
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         ANS_LOGE("The sa manager is nullptr.");
+        return nullptr;
     }
     sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     if (remoteObj == nullptr) {
         ANS_LOGE("The remoteObj is nullptr.");
+        return nullptr;
     }
     return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATA_EXT_URI);
 }
@@ -68,6 +70,7 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
     auto result = dataShareHelper->Query(uri, predicates, columns);
     if (result == nullptr) {
         ANS_LOGE("Query error, result is null.");
+        dataShareHelper->Release();
         return false;
     }
     if (result->GoToFirstRow() != DataShare::E_OK) {
