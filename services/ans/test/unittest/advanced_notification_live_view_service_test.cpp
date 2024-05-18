@@ -182,6 +182,7 @@ HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00002, Function | 
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(slotType);
     request->SetNotificationId(1);
+    request->SetReceiverUserId(100);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
