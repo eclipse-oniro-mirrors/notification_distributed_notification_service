@@ -503,7 +503,7 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
 
 std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
 {
-    if (OsAccountManagerHelper::IsSystemAccount(userId)) {
+    if (!OsAccountManagerHelper::IsSystemAccount(userId)) {
         return notificationRdbConfig_.tableName;
     }
 
