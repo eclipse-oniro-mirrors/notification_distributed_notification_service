@@ -224,6 +224,50 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: Publish_00005
+ * @tc.desc: Publish test receiver user and checkUserExists is true
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetNotificationId(1);
+    request->SetReceiverUserId(101);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    MockIsOsAccountExists(true);
+
+    auto ret = advancedNotificationService_->Publish(label, request);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: Publish_00006
+ * @tc.desc: Publish test receiver user and checkUserExists is false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00006, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetNotificationId(1);
+    request->SetReceiverUserId(101);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    MockIsOsAccountExists(false);
+
+    auto ret = advancedNotificationService_->Publish(label, request);
+    EXPECT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
+}
+
+/**
  * @tc.name: DeleteByBundle_00001
  * @tc.desc: Test DeleteByBundle
  * @tc.type: FUNC
