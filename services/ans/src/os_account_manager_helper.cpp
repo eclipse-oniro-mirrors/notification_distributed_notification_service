@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ans_log_wrapper.h"
 
 #include "os_account_manager_helper.h"
+#include "errors.h"
 #include "os_account_constants.h"
 #include "ipc_skeleton.h"
 #include "os_account_info.h"
@@ -55,7 +57,10 @@ ErrCode OsAccountManagerHelper::GetAllOsAccount(std::vector<int32_t> &userIds)
 bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
 {
     bool isAccountExists = false;
-    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
+    int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Failed to call AccountSA::IsOsAccountExists, code is %{public}d", ret);
+    }
     return isAccountExists;
 }
 
