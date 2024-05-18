@@ -21,9 +21,12 @@
 #include "bundle_manager_helper.h"
 #include "in_process_call_wrapper.h"
 #include "os_account_manager.h"
+#include "system_dialog_connect_stb.h"
+#include "extension_manager_client.h"
 
 namespace OHOS {
 namespace Notification {
+constexpr int32_t DEFAULT_VALUE = -1;
 int32_t NotificationDialog::GetActiveUserId()
 {
     std::vector<int32_t> activeUserId;
@@ -62,12 +65,38 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     }
 
     AAFwk::Want want;
-    want.SetElementName(serviceBundleName, serviceAbilityName);
-    want.SetParam("from", appBundleName);
-    if (callerToken != nullptr) {
-        want.SetParam("callerToken", callerToken);
+    
+    std::string bundleName = "com.ohos.sceneboard";
+    std::string abilityName = "com.ohos.sceneboard.systemdialog";
+    want.SetElementName(bundleName, abilityName);
+
+    nlohmann::json root;
+    std::string uiExtensionType = "sysDialog/common";
+    root["from"] = appBundleName;
+    root["ability.want.params.uiExtensionType"] = uiExtensionType;
+    std::string command  = root.dump();
+    
+    auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));
+    if (connection_ == nullptr) {
+        ANS_LOGD("new connection error.");
+        return ERR_NO_MEMORY;
     }
-    auto result = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want));
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+
+    auto result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want,
+    connection_, nullptr, DEFAULT_VALUE);
+    if (result != ERR_OK) {
+        ANS_LOGD("connect sceneboard systemdiaolog fail, result = %{public}d", result);
+        bundleName = "com.ohos.systemui";
+        abilityName = "com.ohos.systemui.dialog";
+        want.SetElementName(bundleName, abilityName);
+        result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want, connection_, nullptr,
+        DEFAULT_VALUE);
+    }
+
+    IPCSkeleton::SetCallingIdentity(identity);
+
     ANS_LOGD("End, result = %{public}d", result);
     return result;
 }

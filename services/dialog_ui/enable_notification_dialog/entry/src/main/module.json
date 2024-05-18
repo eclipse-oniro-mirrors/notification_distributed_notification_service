@@ -22,7 +22,8 @@
         "icon": "$media:icon",
         "label": "$string:NotificationServiceExtAbility_label",
         "visible": false,
-        "type": "service"
+        "exported":true,
+        "type": "sysDialog/common"
       }
     ],
     "requestPermissions": [

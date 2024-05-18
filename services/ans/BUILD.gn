@@ -86,6 +86,7 @@ ohos_shared_library("libans") {
     "src/reminder_event_manager.cpp",
     "src/reminder_swing_decision_center.cpp",
     "src/reminder_timer_info.cpp",
+    "src/system_dialog_connect_stb.cpp",
     "src/system_event_observer.cpp",
   ]
 
@@ -121,6 +122,7 @@ ohos_shared_library("libans") {
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "ability_runtime:dataobs_manager",
+    "ability_runtime:extension_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
