@@ -55,12 +55,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode Cancel(int notificationId, const std::string &label) override
+    ErrCode Cancel(int notificationId, const std::string &label, int32_t instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode CancelAll() override
+    ErrCode CancelAll(int32_t instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -118,7 +118,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications) override
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -331,7 +331,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode CancelGroup(const std::string &groupName) override
+    ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -480,7 +480,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetBadgeNumber(int32_t badgeNumber) override
+    ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

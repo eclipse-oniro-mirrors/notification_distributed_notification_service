@@ -34,8 +34,8 @@ namespace OHOS {
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
         advancedNotificationService.Publish(stringData, notification);
         int notificationId = static_cast<int>(GetU32Data(data));
-        advancedNotificationService.Cancel(notificationId, stringData);
-        advancedNotificationService.CancelAll();
+        advancedNotificationService.Cancel(notificationId, stringData, 0);
+        advancedNotificationService.CancelAll(0);
         int32_t userId = static_cast<int32_t>(GetU32Data(data));
         advancedNotificationService.CancelAsBundle(notificationId, stringData, userId);
         uint8_t type = *data % SLOT_TYPE_NUM;
@@ -52,7 +52,7 @@ namespace OHOS {
         uint64_t num = static_cast<uint64_t>(GetU32Data(data));
         advancedNotificationService.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
-        advancedNotificationService.GetActiveNotifications(notifications);
+        advancedNotificationService.GetActiveNotifications(notifications, 0);
         advancedNotificationService.GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
         advancedNotificationService.GetAllActiveNotifications(notificationss);
@@ -91,7 +91,7 @@ namespace OHOS {
         advancedNotificationService.IsAllowedNotify(allowed);
         advancedNotificationService.IsAllowedNotifySelf(allowed);
         advancedNotificationService.IsSpecialBundleAllowedNotify(bundleOption, allowed);
-        advancedNotificationService.CancelGroup(stringData);
+        advancedNotificationService.CancelGroup(stringData, 0);
         advancedNotificationService.RemoveGroupByBundle(bundleOption, stringData);
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
         advancedNotificationService.SetDoNotDisturbDate(date);
@@ -135,7 +135,7 @@ namespace OHOS {
         advancedNotificationService.SetSyncNotificationEnabledWithoutApp(userId, enabled);
         advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = static_cast<int32_t>(GetU32Data(data));
-        advancedNotificationService.SetBadgeNumber(badgeNum);
+        advancedNotificationService.SetBadgeNumber(badgeNum, 0);
         sptr<Notification::AnsDialogCallback> dialogCallback = NULL;
         sptr<IRemoteObject> callerToken = NULL;
         advancedNotificationService.RequestEnableNotification(stringData, dialogCallback, callerToken);

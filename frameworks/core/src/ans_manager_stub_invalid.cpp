@@ -32,13 +32,13 @@ ErrCode AnsManagerStub::Publish(const std::string &label, const sptr<Notificatio
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::Cancel(int notificationId, const std::string &label)
+ErrCode AnsManagerStub::Cancel(int notificationId, const std::string &label, int32_t instanceKey)
 {
     ANS_LOGE("AnsManagerStub::Cancel called!");
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::CancelAll()
+ErrCode AnsManagerStub::CancelAll(int32_t instanceKey)
 {
     ANS_LOGE("AnsManagerStub::CancelAll called!");
     return ERR_INVALID_OPERATION;
@@ -105,7 +105,8 @@ ErrCode AnsManagerStub::GetSlotNumAsBundle(const sptr<NotificationBundleOption> 
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications)
+ErrCode AnsManagerStub::GetActiveNotifications(
+    std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey)
 {
     ANS_LOGE("AnsManagerStub::GetActiveNotifications called!");
     return ERR_INVALID_OPERATION;
@@ -349,7 +350,7 @@ ErrCode AnsManagerStub::IsSpecialBundleAllowedNotify(const sptr<NotificationBund
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::CancelGroup(const std::string &groupName)
+ErrCode AnsManagerStub::CancelGroup(const std::string &groupName, int32_t instanceKey)
 {
     ANS_LOGE("AnsManagerStub::CancelGroup called!");
     return ERR_INVALID_OPERATION;
@@ -557,7 +558,7 @@ ErrCode AnsManagerStub::GetSyncNotificationEnabledWithoutApp(const int32_t userI
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber)
+ErrCode AnsManagerStub::SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey)
 {
     ANS_LOGE("AnsManagerStub::SetBadgeNumber called!");
     return ERR_INVALID_OPERATION;

@@ -109,8 +109,8 @@ namespace OHOS {
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
         ansManagerStub.Publish(stringData, notification);
         int notificationId = static_cast<int>(GetU32Data(data));
-        ansManagerStub.Cancel(notificationId, stringData);
-        ansManagerStub.CancelAll();
+        ansManagerStub.Cancel(notificationId, stringData, 0);
+        ansManagerStub.CancelAll(0);
         int32_t userId = static_cast<int32_t>(GetU32Data(data));
         ansManagerStub.CancelAsBundle(notificationId, stringData, userId);
         uint8_t type = *data % SLOT_TYPE_NUM;
@@ -127,7 +127,7 @@ namespace OHOS {
         uint64_t num = static_cast<uint64_t>(GetU32Data(data));
         ansManagerStub.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
-        ansManagerStub.GetActiveNotifications(notifications);
+        ansManagerStub.GetActiveNotifications(notifications, 0);
         ansManagerStub.GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
         ansManagerStub.GetAllActiveNotifications(notificationss);
@@ -163,7 +163,7 @@ namespace OHOS {
         bool allowed = *data % ENABLE;
         ansManagerStub.IsAllowedNotify(allowed);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allowed);
-        ansManagerStub.CancelGroup(stringData);
+        ansManagerStub.CancelGroup(stringData, 0);
         ansManagerStub.RemoveGroupByBundle(bundleOption, stringData);
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
         ansManagerStub.SetDoNotDisturbDate(date);

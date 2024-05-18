@@ -123,6 +123,10 @@ napi_value Common::SetNotificationRequestByNumber(
     napi_create_uint32(env, request->GetBadgeNumber(), &value);
     napi_set_named_property(env, result, "badgeNumber", value);
 
+    // readonly creatorInstanceKey?: number
+    napi_create_int32(env, request->GetCreatorInstanceKey(), &value);
+    napi_set_named_property(env, result, "creatorInstanceKey", value);
+
     return NapiGetBoolean(env, true);
 }
 

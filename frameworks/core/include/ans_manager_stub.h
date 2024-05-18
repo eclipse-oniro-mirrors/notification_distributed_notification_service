@@ -60,16 +60,18 @@ public:
      *
      * @param notificationId Indicates the ID of the notification to cancel.
      * @param label Indicates the label of the notification to cancel.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode Cancel(int32_t notificationId, const std::string &label) override;
+    virtual ErrCode Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey) override;
 
     /**
      * @brief Cancels all the published notifications.
      *
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode CancelAll() override;
+    virtual ErrCode CancelAll(int32_t instanceKey) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -174,7 +176,8 @@ public:
      * @param notifications Indicates active NotificationRequest objects of the current application.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications) override;
+    virtual ErrCode GetActiveNotifications(
+        std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) override;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -538,9 +541,10 @@ public:
      * @brief Cancel notifications according to group.
      *
      * @param groupName Indicates the group name.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode CancelGroup(const std::string &groupName) override;
+    virtual ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) override;
 
     /**
      * @brief Delete notifications according to bundle and group.
@@ -776,7 +780,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number result.
      */
-    virtual ErrCode SetBadgeNumber(int32_t badgeNumber) override;
+    virtual ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) override;
 
     /**
      * @brief Set badge number by bundle.

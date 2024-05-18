@@ -78,7 +78,7 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
     return result;
 }
 
-ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label)
+ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -93,6 +93,11 @@ ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label
 
     if (!data.WriteString(label)) {
         ANS_LOGE("[Cancel] fail: write label failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(instanceKey)) {
+        ANS_LOGE("[Cancel] fail: write instanceKey failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -112,11 +117,16 @@ ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label
     return result;
 }
 
-ErrCode AnsManagerProxy::CancelAll()
+ErrCode AnsManagerProxy::CancelAll(int32_t instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
         ANS_LOGE("[CancelAll] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(instanceKey)) {
+        ANS_LOGE("[CancelAll] fail: write instanceKey failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -250,11 +260,17 @@ ErrCode AnsManagerProxy::CancelAsBundle(
     return result;
 }
 
-ErrCode AnsManagerProxy::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications)
+ErrCode AnsManagerProxy::GetActiveNotifications(
+    std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
         ANS_LOGE("[GetActiveNotifications] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(instanceKey)) {
+        ANS_LOGE("[GetActiveNotifications] fail: write instanceKey failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1297,7 +1313,7 @@ ErrCode AnsManagerProxy::IsSpecialBundleAllowedNotify(const sptr<NotificationBun
     return result;
 }
 
-ErrCode AnsManagerProxy::CancelGroup(const std::string &groupName)
+ErrCode AnsManagerProxy::CancelGroup(const std::string &groupName, int32_t instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -1307,6 +1323,11 @@ ErrCode AnsManagerProxy::CancelGroup(const std::string &groupName)
 
     if (!data.WriteString(groupName)) {
         ANS_LOGE("[CancelGroup] fail: write groupName failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(instanceKey)) {
+        ANS_LOGE("[CancelGroup] fail: write instanceKey failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1828,7 +1849,7 @@ ErrCode AnsManagerProxy::GetSyncNotificationEnabledWithoutApp(const int32_t user
     return result;
 }
 
-ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
+ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -1837,7 +1858,12 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber)
     }
 
     if (!data.WriteInt32(badgeNumber)) {
-        ANS_LOGE("[SetBadgeNumber] fail:: write userId failed.");
+        ANS_LOGE("[SetBadgeNumber] fail:: write badgeNumber failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(instanceKey)) {
+        ANS_LOGE("[SetBadgeNumber] fail:: write instancekey failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

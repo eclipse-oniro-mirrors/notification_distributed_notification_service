@@ -156,9 +156,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_001, Function | SmallTest | Level1)
     EXPECT_EQ((int)g_advancedNotificationService->Subscribe(subscriber->GetImpl(), info), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req1), (int)ERR_OK);
-    EXPECT_EQ((int)g_advancedNotificationService->Cancel(1, label), (int)ERR_OK);
+    EXPECT_EQ((int)g_advancedNotificationService->Cancel(1, label, 0), (int)ERR_OK);
     EXPECT_TRUE(passed);
-    g_advancedNotificationService->CancelAll();
+    g_advancedNotificationService->CancelAll(0);
     EXPECT_EQ((int)g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
     passed = false;
 }
@@ -185,14 +185,14 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req1), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish("testLabel1", req2), (int)ERR_OK);
-    EXPECT_EQ((int)g_advancedNotificationService->GetActiveNotifications(notificationsReqs), (int)ERR_OK);
+    EXPECT_EQ((int)g_advancedNotificationService->GetActiveNotifications(notificationsReqs, 0), (int)ERR_OK);
     uint64_t num;
     g_advancedNotificationService->GetActiveNotificationNums(num);
     EXPECT_EQ(num, 3);
-    EXPECT_EQ((int)g_advancedNotificationService->Cancel(2, "testLabel1"), (int)ERR_OK);
+    EXPECT_EQ((int)g_advancedNotificationService->Cancel(2, "testLabel1", 0), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->GetAllActiveNotifications(notifications), (int)ERR_OK);
     EXPECT_EQ((int)notifications.size(), (int)2);
-    EXPECT_EQ((int)g_advancedNotificationService->CancelAll(), (int)ERR_OK);
+    EXPECT_EQ((int)g_advancedNotificationService->CancelAll(0), (int)ERR_OK);
 }
 
 /**
@@ -832,7 +832,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0035, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
-    g_advancedNotificationService->Cancel(0, label);
+    g_advancedNotificationService->Cancel(0, label, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
@@ -874,7 +874,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0036, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
-    g_advancedNotificationService->CancelAll();
+    g_advancedNotificationService->CancelAll(0);
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), subscriberInfo);
 }
@@ -2598,7 +2598,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0131, Function | SmallTest | Level1)
     subscriber->canceledCb_ = [](const std::shared_ptr<Notification> &request,
                                   const std::shared_ptr<NotificationSortingMap> &sortingMap,
                                   int deleteReason) { passed = true; };
-    g_advancedNotificationService->Cancel(1, "1");
+    g_advancedNotificationService->Cancel(1, "1", 0);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), nullptr);
     EXPECT_EQ(false, passed);
 }

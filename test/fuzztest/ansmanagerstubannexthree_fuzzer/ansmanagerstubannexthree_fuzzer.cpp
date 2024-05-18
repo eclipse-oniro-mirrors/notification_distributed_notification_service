@@ -49,7 +49,7 @@ namespace OHOS {
         ansManagerStub.IsAllowedNotify(allow);
         ansManagerStub.IsAllowedNotifySelf(allow);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allow);
-        ansManagerStub.CancelGroup(stringData);
+        ansManagerStub.CancelGroup(stringData, 0);
         ansManagerStub.RemoveGroupByBundle(bundleOption, stringData);
         ansManagerStub.DoesSupportDoNotDisturbMode(allow);
         ansManagerStub.IsDistributedEnabled(allow);

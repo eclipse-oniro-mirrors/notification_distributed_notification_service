@@ -83,7 +83,7 @@ void AnsBranchTest::SetUp()
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
-    advancedNotificationService_->CancelAll();
+    advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";

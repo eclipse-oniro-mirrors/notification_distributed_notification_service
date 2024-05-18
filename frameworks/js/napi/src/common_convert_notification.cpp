@@ -139,6 +139,10 @@ napi_value Common::SetNotification(
         napi_set_named_property(env, result, "creatorUserId", value);
     }
 
+    // readonly creatorInstanceKey?: number
+    napi_create_int32(env, notification->GetInstanceKey(), &value);
+    napi_set_named_property(env, result, "creatorInstanceKey", value);
+
     // readonly creatorPid?: number
     napi_create_int32(env, notification->GetPid(), &value);
     napi_set_named_property(env, result, "creatorPid", value);

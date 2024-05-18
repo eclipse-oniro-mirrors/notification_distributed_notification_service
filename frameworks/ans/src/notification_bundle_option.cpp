@@ -49,11 +49,22 @@ int32_t NotificationBundleOption::GetUid() const
     return uid_;
 }
 
+void NotificationBundleOption::SetInstanceKey(const int32_t key)
+{
+    instanceKey_ = key;
+}
+
+int32_t NotificationBundleOption::GetInstanceKey() const
+{
+    return instanceKey_;
+}
+
 std::string NotificationBundleOption::Dump()
 {
     return "NotificationBundleOption{ "
             "bundleName = " + bundleName_ +
             ", uid = " + std::to_string(uid_) +
+            ", instanceKey = " + std::to_string(instanceKey_) +
             " }";
 }
 
@@ -66,6 +77,11 @@ bool NotificationBundleOption::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(uid_)) {
         ANS_LOGE("Failed to write uid");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(instanceKey_)) {
+        ANS_LOGE("Failed to write instance key");
         return false;
     }
 
@@ -92,6 +108,8 @@ bool NotificationBundleOption::ReadFromParcel(Parcel &parcel)
 
     uid_ = parcel.ReadInt32();
 
+    instanceKey_ = parcel.ReadInt32();
+
     return true;
 }
 
@@ -99,6 +117,7 @@ bool NotificationBundleOption::ToJson(nlohmann::json &jsonObject) const
 {
     jsonObject["uid"] = uid_;
     jsonObject["bundleName"] = bundleName_;
+    jsonObject["instanceKey"] = instanceKey_;
     return true;
 }
 
@@ -116,12 +135,17 @@ NotificationBundleOption *NotificationBundleOption::FromJson(const nlohmann::jso
     }
 
     const auto &jsonEnd = jsonObject.cend();
+
     if (jsonObject.find("uid") != jsonEnd && jsonObject.at("uid").is_number_integer()) {
         pBundle->uid_ = jsonObject.at("uid").get<int32_t>();
     }
 
     if (jsonObject.find("bundleName") != jsonEnd && jsonObject.at("bundleName").is_string()) {
         pBundle->bundleName_ = jsonObject.at("bundleName").get<std::string>();
+    }
+
+    if (jsonObject.find("instanceKey") != jsonEnd && jsonObject.at("instanceKey").is_number_integer()) {
+        pBundle->instanceKey_ = jsonObject.at("instanceKey").get<int32_t>();
     }
 
     return pBundle;

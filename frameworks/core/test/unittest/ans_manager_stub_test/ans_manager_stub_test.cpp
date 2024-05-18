@@ -159,10 +159,12 @@ HWTEST_F(AnsManagerStubTest, HandleCancel01, Function | SmallTest | Level1)
     MessageOption option = {MessageOption::TF_SYNC};
 
     int32_t notificationId = 3;
+    int32_t instanceKey = 0;
     std::string label = "this is a notification label";
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(notificationId);
     data.WriteString(label);
+    data.WriteInt32(instanceKey);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);
@@ -223,7 +225,9 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAll01, Function | SmallTest | Level1)
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
+    int32_t instanceKey = 0;
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(instanceKey);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);
@@ -552,8 +556,10 @@ HWTEST_F(AnsManagerStubTest, HandleGetActiveNotifications01, Function | SmallTes
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
+    int32_t instanceKey = 0;
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-
+    data.WriteInt32(instanceKey);
+    
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);
 }
@@ -2251,9 +2257,11 @@ HWTEST_F(AnsManagerStubTest, HandleCancelGroup01, Function | SmallTest | Level1)
     MessageOption option = {MessageOption::TF_SYNC};
 
     std::string groupName = "this is groupName";
+    int32_t instanceKey = 0;
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(groupName);
+    data.WriteInt32(instanceKey);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
@@ -3921,7 +3929,7 @@ HWTEST_F(AnsManagerStubTest, CancelGroup01, Function | SmallTest | Level1)
 {
     std::string groupName = "this is groupName";
 
-    ErrCode result = ansManagerStub_->CancelGroup(groupName);
+    ErrCode result = ansManagerStub_->CancelGroup(groupName, 0);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
 

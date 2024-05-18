@@ -47,16 +47,18 @@ public:
      *
      * @param notificationId Indicates the ID of the notification to cancel.
      * @param label Indicates the label of the notification to cancel.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns cancel notification result.
      */
-    ErrCode Cancel(int32_t notificationId, const std::string &label) override;
+    ErrCode Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey) override;
 
     /**
      * @brief Cancels all the published notifications.
      *
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelAll() override;
+    ErrCode CancelAll(int32_t instanceKey) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -157,9 +159,10 @@ public:
      * @brief Obtains active notifications of the current application in the system.
      *
      * @param notifications Indicates active NotificationRequest objects of the current application.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications) override;
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) override;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -538,9 +541,10 @@ public:
      * @brief Cancel notifications according to group.
      *
      * @param groupName Indicates the group name.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelGroup(const std::string &groupName) override;
+    ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) override;
 
     /**
      * @brief Delete notifications according to bundle and group.
@@ -774,7 +778,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number result.
      */
-    ErrCode SetBadgeNumber(int32_t badgeNumber) override;
+    ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) override;
 
     /**
      * @brief Set badge number by bundle.

@@ -59,16 +59,18 @@ public:
      *
      * @param notificationId Indicates the ID of the notification to cancel.
      * @param label Indicates the label of the notification to cancel.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode Cancel(int notificationId, const std::string &label) = 0;
+    virtual ErrCode Cancel(int notificationId, const std::string &label, int32_t instanceKey) = 0;
 
     /**
      * @brief Cancels all the published notifications.
      *
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode CancelAll() = 0;
+    virtual ErrCode CancelAll(int32_t instanceKey) = 0;
 
     /**
      * @brief Cancels a published agent notification.
@@ -170,9 +172,11 @@ public:
      * @brief Obtains active notifications of the current application in the system.
      *
      * @param notifications Indicates active NotificationRequest objects of the current application.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications) = 0;
+    virtual ErrCode GetActiveNotifications(
+        std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) = 0;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -549,9 +553,10 @@ public:
      * @brief Cancel notifications according to group.
      *
      * @param groupName Indicates the group name.
+     * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode CancelGroup(const std::string &groupName) = 0;
+    virtual ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) = 0;
 
     /**
      * @brief Delete notifications according to bundle and group.
@@ -786,7 +791,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number result.
      */
-    virtual ErrCode SetBadgeNumber(int32_t badgeNumber) = 0;
+    virtual ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) = 0;
 
     /**
      * @brief Set badge number by bundle.
