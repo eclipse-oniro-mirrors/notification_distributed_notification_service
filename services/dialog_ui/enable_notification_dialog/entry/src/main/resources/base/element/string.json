@@ -30,7 +30,7 @@
     },
     {
       "name": "reason",
-      "value": "These may include banner notifications, lock screen notifications, notification sounds, and more. You can change this in Settings."
+      "value": "These may include lock screen notifications, notification sounds, and more. You can change this in Settings."
     },
     {
       "name": "ALLOW",

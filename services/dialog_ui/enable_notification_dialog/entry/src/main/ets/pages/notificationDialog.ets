@@ -85,14 +85,13 @@ struct PermissionDialog {
             Image(permission.icon)
               .width(Constants.DIALOG_ICON_WIDTH)
               .height(Constants.DIALOG_ICON_HEIGHT)
-              .fillColor($r('sys.color.ohos_id_color_text_primary'))
               .margin({
                 top: Constants.DIALOG_ICON_MARGIN_TOP
               })
             Scroll() {
               Column() {
                 Row() {
-                  Flex({ justifyContent: FlexAlign.Start }) {
+                  Flex({ justifyContent: FlexAlign.Center }) {
                     Text() {
                       Span($r('app.string.whether_to_allow'))
                       Span(this.appName)
@@ -101,10 +100,11 @@ struct PermissionDialog {
                     }
                     .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                    .fontWeight(FontWeight.Medium)
+                    .fontWeight(FontWeight.Bold)
                     .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
                     .margin({
                       top: Constants.DIALOG_REQ_MARGIN_TOP,
+                      bottom:Constants.DIALOG_REQ_MARGIN_BUTTOM,
                       left: Constants.DIALOG_REQ_MARGIN_LEFT,
                       right: Constants.DIALOG_REQ_MARGIN_RIGHT
                     })
@@ -116,7 +116,8 @@ struct PermissionDialog {
                       Span(permission.reason)
                     }
                     .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
-                    .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+                    .fontWeight(FontWeight.Regular)
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
                     .lineHeight(Constants.DIALOG_DESP_LINE_HEIGHT)
                     .margin({
                       top: Constants.DIALOG_DESP_MARGIN_TOP,
@@ -133,7 +134,7 @@ struct PermissionDialog {
               Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
                 Button($r('app.string.BAN'))
                   .onClick(async (): Promise<void> => {
-                    await this.enableNotification(false);
+                   await this.enableNotification(false);
                   })
                   .customizeButton()
                 Divider()
