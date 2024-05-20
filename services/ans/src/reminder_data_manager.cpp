@@ -1361,7 +1361,7 @@ void ReminderDataManager::HandleImmediatelyShow(
 {
     bool isAlerting = false;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
-        if (!isAlerting) {
+        if (((*it)->GetRingDuration() > 0) && !isAlerting) {
             ShowReminder((*it), true, false, isSysTimeChanged, true);
             isAlerting = true;
         } else {
