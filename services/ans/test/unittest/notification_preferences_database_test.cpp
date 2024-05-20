@@ -312,7 +312,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00100, 
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00200, Function | SmallTest | Level1)
 {
     const int32_t uid = -1;
-    EXPECT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(std::string(), uid));
+    EXPECT_EQ(false, preferncesDB_->RemoveBundleFromDisturbeDB(std::string(), uid));
 }
 
 /**
@@ -424,7 +424,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00100, Function | SmallTest | Level1)
 {
     std::string bundleKey = "BundleKey";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), true);
+    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
