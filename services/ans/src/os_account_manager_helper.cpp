@@ -12,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ans_log_wrapper.h"
 
 #include "os_account_manager_helper.h"
+#include "errors.h"
+#include "os_account_constants.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager.h"
 
@@ -43,7 +46,10 @@ ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
 bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
 {
     bool isAccountExists = false;
-    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
+    int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Failed to call AccountSA::IsOsAccountExists, code is %{public}d", ret);
+    }
     return isAccountExists;
 }
 
@@ -52,5 +58,10 @@ OsAccountManagerHelper &OsAccountManagerHelper::GetInstance()
     return DelayedRefSingleton<OsAccountManagerHelper>::GetInstance();
 }
 
+
+bool OsAccountManagerHelper::IsSystemAccount(int32_t userId)
+{
+    return userId >= AccountSA::Constants::START_USER_ID && userId <= AccountSA::Constants::MAX_USER_ID;
+}
 }
 }
