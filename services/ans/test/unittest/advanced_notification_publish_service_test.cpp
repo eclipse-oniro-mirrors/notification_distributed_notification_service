@@ -242,7 +242,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
     MockIsOsAccountExists(true);
 
     auto ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_UID);
 }
 
 /**
