@@ -544,7 +544,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0310
     BundleType type = BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -560,7 +560,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0320
     BundleType type = BundleType::BUNDLE_IMPORTANCE_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -576,7 +576,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0330
     BundleType type = BundleType::BUNDLE_SHOW_BADGE_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -592,7 +592,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0350
     BundleType type = BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -608,7 +608,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0360
     BundleType type = BundleType::BUNDLE_POPPED_DIALOG_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -624,7 +624,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0370
     BundleType type = BundleType::BUNDLE_NAME_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true), false);
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
