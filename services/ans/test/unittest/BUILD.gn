@@ -669,6 +669,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "${services_path}/ans/src/common/notification_config_parse.cpp",
     "${services_path}/ans/src/notification_preferences_database.cpp",
     "${services_path}/ans/src/notification_preferences_info.cpp",
+    "${services_path}/ans/src/os_account_manager_helper.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_preferences_database_branch_test/mock_notification_rdb_data_mgr.cpp",
     "notification_preferences_database_branch_test/notification_preferences_database_branch_test.cpp",
