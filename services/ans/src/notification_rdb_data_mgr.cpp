@@ -15,6 +15,7 @@
 #include "notification_rdb_data_mgr.h"
 
 #include "ans_log_wrapper.h"
+#include "os_account_manager_helper.h"
 #include "rdb_errno.h"
 #include <sstream>
 #include <string>
@@ -508,7 +509,7 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
 
 std::string NotificationDataMgr::GetUserTableName(const int32_t &userId)
 {
-    if (userId == -1) {
+    if (!OsAccountManagerHelper::IsSystemAccount(userId)) {
         return notificationRdbConfig_.tableName;
     }
 
