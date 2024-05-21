@@ -237,6 +237,10 @@ bool ReminderRequestCalendar::OnDateTimeChange()
         return false;
     }
     if (CheckCalenderIsExpired(now)) {
+        ANSR_LOGI("now: %{public}s, start: %{public}s, end: %{public}s",
+            GetDateTimeInfo(now / MILLI_SECONDS).c_str(),
+            GetDateTimeInfo(startDateTime_ / MILLI_SECONDS).c_str(),
+            GetDateTimeInfo(endDateTime_ / MILLI_SECONDS).c_str());
         return true;
     } else {
         uint64_t triggerTime = GetNextTriggerTime();
