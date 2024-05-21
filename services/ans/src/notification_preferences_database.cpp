@@ -450,8 +450,8 @@ bool NotificationPreferencesDatabase::PutShowBadge(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result =
-        PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SHOW_BADGE_TYPE, enable);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SHOW_BADGE_TYPE, enable,
+        bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -468,8 +468,8 @@ bool NotificationPreferencesDatabase::PutImportance(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result =
-        PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_IMPORTANCE_TYPE, importance);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_IMPORTANCE_TYPE, importance,
+        bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -485,8 +485,8 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
         return false;
     }
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result =
-        PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, totalBadgeNum);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, totalBadgeNum,
+        bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -504,8 +504,8 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result =
-        PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled,
+        bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -536,7 +536,8 @@ bool NotificationPreferencesDatabase::PutSlotFlags(NotificationPreferencesInfo::
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags,
+        bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -553,8 +554,8 @@ bool NotificationPreferencesDatabase::PutHasPoppedDialog(
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result =
-        PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped,
+        bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -781,11 +782,11 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    std::unordered_map<std::string, std::string> values;
     std::vector<int> activeUserId;
     OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
 
     for (auto iter : activeUserId) {
+        std::unordered_map<std::string, std::string> values;
         int32_t result = rdbDataManager_->QueryDataBeginWithKey(KEY_BUNDLE_LABEL, values, iter);
         if (result == NativeRdb::E_ERROR) {
             ANS_LOGE("Get Bundle Info failed.");
@@ -982,7 +983,7 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(
 
 template <typename T>
 int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
-    const std::string &bundleKey, const BundleType &type, const T &t)
+    const std::string &bundleKey, const BundleType &type, const T &t, const int32_t &bundleUid)
 {
     std::string keyStr;
     switch (type) {
@@ -1013,10 +1014,10 @@ int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
         ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    int32_t callingUserId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(callingUserId);
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
     std::string valueStr = std::to_string(t);
-    int32_t result = rdbDataManager_->InsertData(keyStr, valueStr, callingUserId);
+    int32_t result = rdbDataManager_->InsertData(keyStr, valueStr, userId);
     return result;
 }
 
@@ -1027,11 +1028,11 @@ bool NotificationPreferencesDatabase::PutBundleToDisturbeDB(
         ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    int32_t callingUserId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(callingUserId);
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
 
     ANS_LOGD("Key not fund, so create a bundle, bundle key is %{public}s.", bundleKey.c_str());
-    int32_t result = rdbDataManager_->InsertData(bundleKey, GenerateBundleLablel(bundleInfo), callingUserId);
+    int32_t result = rdbDataManager_->InsertData(bundleKey, GenerateBundleLablel(bundleInfo), userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Store bundle name to db is failed.");
         return false;

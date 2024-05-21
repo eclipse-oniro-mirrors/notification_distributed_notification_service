@@ -689,7 +689,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02200
     MockHasBlock(true);
     MockGoToFirstRow(false);
     std::unordered_map<std::string, std::string> datas;
-    EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), 27394048);
+    EXPECT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_EMPTY_VALUES_BUCKET);
 }
 
 /**
