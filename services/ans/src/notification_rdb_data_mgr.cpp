@@ -297,7 +297,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
-        ANS_LOGD("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
 
@@ -309,7 +309,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     }
     ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, value);
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GetString value failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
     absSharedResultSet->Close();
@@ -337,7 +337,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
-        ANS_LOGD("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
 
@@ -349,7 +349,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     }
     ret = absSharedResultSet->GetBlob(NOTIFICATION_VALUE_INDEX, value);
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GetString value failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
     absSharedResultSet->Close();
@@ -375,7 +375,6 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
                 ANS_LOGW("Query data begin with key failed. It is empty!");
                 return NativeRdb::E_EMPTY_VALUES_BUCKET;
             }
-            ANS_LOGE("Query data begin with key failed.");
             return NativeRdb::E_ERROR;
         }
     }
@@ -389,7 +388,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     absRdbPredicates.BeginsWith(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
-        ANS_LOGW("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
 
@@ -404,14 +403,14 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
         std::string resultKey;
         ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
         if (ret != NativeRdb::E_OK) {
-            ANS_LOGW("Failed to GetString key from %{public}s table.", tableName.c_str());
+            ANS_LOGE("Failed to GetString key from %{public}s table.", tableName.c_str());
             return NativeRdb::E_ERROR;
         }
 
         std::string resultValue;
         ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
         if (ret != NativeRdb::E_OK) {
-            ANS_LOGW("GetString value failed from %{public}s table", tableName.c_str());
+            ANS_LOGE("GetString value failed from %{public}s table", tableName.c_str());
             return NativeRdb::E_ERROR;
         }
 
@@ -439,7 +438,6 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
                 ANS_LOGW("Query data begin with key failed. It is empty!");
                 return NativeRdb::E_EMPTY_VALUES_BUCKET;
             }
-            ANS_LOGE("Query data begin with key failed.");
             return NativeRdb::E_ERROR;
         }
     }
@@ -452,7 +450,7 @@ int32_t NotificationDataMgr::QueryAllData(
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
-        ANS_LOGW("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
 
@@ -466,14 +464,14 @@ int32_t NotificationDataMgr::QueryAllData(
         std::string resultKey;
         ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
         if (ret != NativeRdb::E_OK) {
-            ANS_LOGW("GetString key failed from %{public}s table.", tableName.c_str());
+            ANS_LOGE("GetString key failed from %{public}s table.", tableName.c_str());
             return NativeRdb::E_ERROR;
         }
 
         std::string resultValue;
         ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
         if (ret != NativeRdb::E_OK) {
-            ANS_LOGW("GetString value failed from %{public}s table.", tableName.c_str());
+            ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
             return NativeRdb::E_ERROR;
         }
 

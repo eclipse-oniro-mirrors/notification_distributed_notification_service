@@ -782,11 +782,11 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    std::unordered_map<std::string, std::string> values;
     std::vector<int> activeUserId;
     OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
 
     for (auto iter : activeUserId) {
+        std::unordered_map<std::string, std::string> values;
         int32_t result = rdbDataManager_->QueryDataBeginWithKey(KEY_BUNDLE_LABEL, values, iter);
         if (result == NativeRdb::E_ERROR) {
             ANS_LOGE("Get Bundle Info failed.");
