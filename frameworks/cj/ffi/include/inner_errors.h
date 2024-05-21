@@ -116,16 +116,16 @@ const uint32_t ERROR_SYSTEM_CAP_ERROR  = 801;          // The specified SystemCa
 
 // Notification error code
 const int32_t ERROR_INTERNAL_ERROR               = 1600001;    // Internal error.
-const int32_t ERROR_IPC_ERROR                    = 1600002;    // marshalling or unmarshalling error.
-const int32_t ERROR_SERVICE_CONNECT_ERROR        = 1600003;    // Failed to connect service.
-const int32_t ERROR_NOTIFICATION_CLOSED          = 1600004;    // Notification is not enabled.
-const int32_t ERROR_SLOT_CLOSED                  = 1600005;    // Notification slot is not enabled.
-const int32_t ERROR_NOTIFICATION_UNREMOVABLE     = 1600006;    // Notification is not allowed to remove.
-const int32_t ERROR_NOTIFICATION_NOT_EXIST       = 1600007;    // The notification is not exist.
-const int32_t ERROR_USER_NOT_EXIST               = 1600008;    // The user is not exist.
-const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;    // Over max number notifications per second.
+const int32_t ERROR_IPC_ERROR                    = 1600002;    // Marshalling or unmarshalling error.
+const int32_t ERROR_SERVICE_CONNECT_ERROR        = 1600003;    // Failed to connect to the service.
+const int32_t ERROR_NOTIFICATION_CLOSED          = 1600004;    // Notification disabled.
+const int32_t ERROR_SLOT_CLOSED                  = 1600005;    // Notification slot disabled.
+const int32_t ERROR_NOTIFICATION_UNREMOVABLE     = 1600006;    // Notification deletion disabled.
+const int32_t ERROR_NOTIFICATION_NOT_EXIST       = 1600007;    // The notification does not exist.
+const int32_t ERROR_USER_NOT_EXIST               = 1600008;    // The user does not exist.
+const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;    // The notification sending frequency reaches the upper limit.
 const int32_t ERROR_DISTRIBUTED_OPERATION_FAILED = 1600010;    // Distributed operation failed.
-const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Read template config failed.
+const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Failed to read the template configuration.
 const int32_t ERROR_NO_MEMORY                    = 1600012;    // No memory space.
 const int32_t ERROR_DIALOG_IS_POPPING            = 1600013;    // Enable notification dialog is popping.
 const int32_t ERROR_NO_RIGHT                     = 1600014;    // No right.
