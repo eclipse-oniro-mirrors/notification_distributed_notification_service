@@ -239,7 +239,7 @@ private:
     bool PutBundlePropertyValueToDisturbeDB(const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     template <typename T>
     int32_t PutBundlePropertyToDisturbeDB(
-        const std::string &bundleKey, const BundleType &type, const T &t);
+        const std::string &bundleKey, const BundleType &type, const T &t, const int32_t &bundleUid);
     template <typename T>
     int32_t PutDataToDB(const std::string &key, const T &t, const int32_t &userId);
     bool PutBundleToDisturbeDB(

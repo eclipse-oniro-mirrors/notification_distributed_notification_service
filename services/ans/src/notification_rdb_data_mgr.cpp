@@ -243,7 +243,7 @@ int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("Delete operation failed from %{public}s, result: %{public}d, key=%{public}s.",
+        ANS_LOGW("Delete operation failed from %{public}s, result: %{public}d, key=%{public}s.",
             tableName.c_str(), ret, key.c_str());
         return NativeRdb::E_ERROR;
     }
@@ -298,13 +298,13 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
-        ANS_LOGD("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
+        ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
@@ -338,13 +338,13 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
-        ANS_LOGD("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
+        ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
@@ -372,7 +372,10 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
         int32_t ret = QueryDataBeginWithKey(tableName, key, values);
         int32_t ret2 = QueryDataBeginWithKey(notificationRdbConfig_.tableName, key, values);
         if (ret != NativeRdb::E_OK && ret2 != NativeRdb::E_OK) {
-            ANS_LOGE("Query data begin with key failed.");
+            if (ret == NativeRdb::E_EMPTY_VALUES_BUCKET && ret2 == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+                ANS_LOGW("Query data begin with key failed. It is empty!");
+                return NativeRdb::E_EMPTY_VALUES_BUCKET;
+            }
             return NativeRdb::E_ERROR;
         }
     }
@@ -392,7 +395,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
+        ANS_LOGW("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
@@ -432,7 +435,10 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
         int32_t ret = QueryAllData(tableName, datas);
         int32_t ret2 = QueryAllData(notificationRdbConfig_.tableName, datas);
         if (ret != NativeRdb::E_OK && ret2 != NativeRdb::E_OK) {
-            ANS_LOGE("Query data begin with key failed.");
+            if (ret == NativeRdb::E_EMPTY_VALUES_BUCKET && ret2 == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+                ANS_LOGW("Query data begin with key failed. It is empty!");
+                return NativeRdb::E_EMPTY_VALUES_BUCKET;
+            }
             return NativeRdb::E_ERROR;
         }
     }
@@ -451,7 +457,7 @@ int32_t NotificationDataMgr::QueryAllData(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
+        ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
