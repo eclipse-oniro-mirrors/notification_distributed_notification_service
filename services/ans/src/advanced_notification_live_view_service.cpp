@@ -542,7 +542,8 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
             record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
     }
 
-    StartUpdateTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES);
+    record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;
+    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES);
     
     return ERR_OK;
 }
@@ -611,6 +612,7 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();
     record->request = oldRecord->request;
+    uint64_t timerId = 0;
     if (isSystemApp) {
         record->request->SetContent(content);
     } else {
@@ -619,7 +621,7 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         AAFwk::WantParamWrapper wrapper(*data);
         ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
         
-        CancelTimer(record->notification->GetUpdateTimer());
+        CancelTimer(oldRecord->notification->GetFinishTimer());
         
         uint64_t process = 0;
         if (data->HasParam(PROGRESS_VALUE)) {
@@ -627,17 +629,21 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         }
 
         if (process == NotificationConstant::FINISH_PER) {
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES);
+            record->finish_status = UploadStatus::FINISH;
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES);
         } else {
-            StartUpdateTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES);
+            record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES);
         }
+        timerId = record->notification->GetFinishTimer();
     }
     record->notification = new (std::nothrow) Notification(record->request);
-    record->bundleOption = oldRecord->bundleOption;
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
         return;
     }
+    record->bundleOption = oldRecord->bundleOption;
+    record->notification->SetFinishTimer(timerId);
 }
 }
 }

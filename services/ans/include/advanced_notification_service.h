@@ -1233,7 +1233,7 @@ private:
     void SendEnableNotificationSlotHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
     void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
-    void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, UploadStatus uploadStatus);
+    void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, int32_t uploadStatus);
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);

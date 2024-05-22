@@ -32,6 +32,7 @@ struct NotificationRecord {
     sptr<NotificationRequest> request;
     sptr<Notification> notification;
     sptr<NotificationSlot> slot;
+    int32_t finish_status = -1;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     std::string deviceId;
     std::string bundleName;

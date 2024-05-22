@@ -1725,12 +1725,8 @@ uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Noti
 
     auto triggerFunc = [this, record, reason, deleteTimePoint] {
         TriggerAutoDelete(record->notification->GetKey(), reason);
-        if (GetCurrentTime() + NotificationConstant::TEN_MINUTES >= deleteTimePoint) {
-            SendLiveViewUploadHiSysEvent(record, UploadStatus::FIRST_UPDATE_TIME_OUT);
-        } else if (GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES >= deleteTimePoint) {
-            SendLiveViewUploadHiSysEvent(record, UploadStatus::CONTINUOUS_UPDATE_TIME_OUT);
-        } else if (GetCurrentTime() + NotificationConstant::THIRTY_MINUTES >= deleteTimePoint) {
-            SendLiveViewUploadHiSysEvent(record, UploadStatus::FINISH);
+        if (record->finish_status != NotificationConstant::DEFAULT_FINISH_STATUS) {
+            SendLiveViewUploadHiSysEvent(record, record->finish_status);
         }
     };
     std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();

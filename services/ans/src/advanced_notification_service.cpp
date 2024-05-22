@@ -897,7 +897,9 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
             record->request->FillMissingParameters((*iter)->request);
             FillLockScreenPicture(record->request, (*iter)->request);
             record->notification->SetUpdateTimer((*iter)->notification->GetUpdateTimer());
-            record->notification->SetFinishTimer((*iter)->notification->GetFinishTimer());
+            if (!record->request->IsSystemLiveView()) {
+                record->notification->SetFinishTimer((*iter)->notification->GetFinishTimer());
+            }
             *iter = record;
             break;
         }
@@ -1100,13 +1102,6 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             if (!isCancel && !record->notification->IsRemoveAllowed()) {
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
-            
-            if (IsSaCreateSystemLiveViewAsBundle(record,
-                record->notification->GetNotificationRequest().GetCreatorUid())) {
-                CancelTimer(record->notification->GetUpdateTimer());
-                SendLiveViewUploadHiSysEvent(record, UploadStatus::END);
-            }
-            
             notification = record->notification;
             // delete or delete all, call the function
             if (!isCancel) {
@@ -1115,6 +1110,10 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 
             ProcForDeleteLiveView(record);
             notificationList_.remove(record);
+            if (IsSaCreateSystemLiveViewAsBundle(record,
+                record->notification->GetNotificationRequest().GetCreatorUid())) {
+                SendLiveViewUploadHiSysEvent(record, UploadStatus::END);
+            }
             return ERR_OK;
         }
     }
