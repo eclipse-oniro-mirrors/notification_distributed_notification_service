@@ -216,6 +216,14 @@ public:
     static const int64_t HOUR_TO_MS = 3600000;
 
     static const int64_t SECOND_TO_MS = 1000;
+    
+    static const int64_t TEN_MINUTES = 600000;
+    
+    static const int64_t FIFTEEN_MINUTES = 900000;
+    
+    static const int64_t THIRTY_MINUTES = 1800000;
+    
+    static const int64_t FINISH_PER = 100;
 
     static const int64_t MAX_FINISH_TIME = 8 * HOUR_TO_MS;
 
