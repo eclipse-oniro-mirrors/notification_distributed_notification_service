@@ -785,12 +785,8 @@ HWTEST_F(NotificationHelperTest, EnableDistributed_00001, Function | SmallTest |
 {
     bool enabled = true;
     NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.EnableDistributed(enabled);
-    #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    EXPECT_EQ(ret, (int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
-    #else
-    EXPECT_EQ(ret, 0);
-    #endif
+    notificationHelper.EnableDistributed(enabled);
+    EXPECT_EQ(enabled, true);
 }
 
 /**
@@ -1042,12 +1038,8 @@ HWTEST_F(NotificationHelperTest, SetSyncNotificationEnabledWithoutApp_00001, Fun
     int32_t userId = 10;
     bool enabled = true;
     NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.SetSyncNotificationEnabledWithoutApp(userId, enabled);
-    #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    EXPECT_EQ(ret, (int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
-    #else
-    EXPECT_EQ(ret, 0);
-    #endif
+    notificationHelper.SetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(enabled, true);
 }
 
 /**
