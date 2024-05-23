@@ -265,9 +265,6 @@ struct PermissionDialog {
       await this.dialog?.destroyException();
       await this.session?.terminateSelf();
     }
-    if (display.isFoldable()) {
-      await this.registerFoldableCallback();  
-    }
   }
 
   async registerFoldableCallback(): Promise<void> {
