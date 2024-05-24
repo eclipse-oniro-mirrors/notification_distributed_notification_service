@@ -162,6 +162,7 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             id_ = "CUSTOMER_SERVICE";
             SetName("CUSTOMER_SERVICE");
             SetLockscreenVisibleness(NotificationConstant::VisiblenessType::SECRET);
+            SetSound(DEFAULT_NOTIFICATION_SOUND);
             SetEnableVibration(false);
             SetLevel(LEVEL_LOW);
             break;
