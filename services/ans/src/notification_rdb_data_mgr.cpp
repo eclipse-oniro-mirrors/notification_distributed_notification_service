@@ -395,7 +395,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
+        ANS_LOGD("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
@@ -457,7 +457,7 @@ int32_t NotificationDataMgr::QueryAllData(
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
+        ANS_LOGD("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
@@ -496,7 +496,7 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
         if (rdbStore_ == nullptr) {
             return NativeRdb::E_ERROR;
         }
-        std::string dropTableSql = "DROP TABLE IF EXISTS" + tableName;
+        std::string dropTableSql = "DROP TABLE IF EXISTS " + tableName;
         ret = rdbStore_->ExecuteSql(dropTableSql);
     }
     if (ret == NativeRdb::E_OK) {
