@@ -44,11 +44,6 @@ ErrCode BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
             request->SetRemoveAllowed(true);
         }
     }
-    if (OsAccountManagerHelper::IsSystemAccount(request->GetReceiverUserId())) {
-        if (!OsAccountManagerHelper::GetInstance().CheckUserExists(request->GetReceiverUserId())) {
-            return ERROR_USER_NOT_EXIST;
-        }
-    }
     return ERR_OK;
 }
 

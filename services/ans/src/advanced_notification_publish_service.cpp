@@ -101,7 +101,11 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         ANSR_LOGE("Failed to process request, result is %{public}d", result);
         return result;
     }
-
+    result = CheckUserIdParams(request->GetReceiverUserId());
+    if (result != ERR_OK) {
+        ANSR_LOGE("User is invalid");
+        return result;
+    }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (isSubsystem) {
         return PublishNotificationBySa(request);
@@ -256,6 +260,11 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
         !CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    int32_t errCode = CheckUserIdParams(userId);
+    if (errCode != ERR_OK) {
+        return errCode;
     }
 
     int32_t uid = -1;
