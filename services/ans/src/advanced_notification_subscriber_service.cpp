@@ -26,7 +26,7 @@
 
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
-#include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "hitrace_meter_adapter.h"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -63,7 +63,14 @@ ErrCode AdvancedNotificationService::Subscribe(
             errCode = ERR_ANS_PERMISSION_DENIED;
             break;
         }
-
+        
+        if (info) {
+            errCode = CheckUserIdParams(info->GetAppUserId());
+            if (errCode != ERR_OK) {
+                break;
+            }
+        }
+        
         errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, info);
         if (errCode != ERR_OK) {
             break;

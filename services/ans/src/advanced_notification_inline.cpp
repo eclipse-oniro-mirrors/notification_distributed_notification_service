@@ -25,7 +25,7 @@
 #include "errors.h"
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
-#include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "notification_preferences.h"
 
 
@@ -43,6 +43,16 @@ inline std::string GetClientBundleName()
     }
 
     return bundle;
+}
+
+inline int32_t CheckUserIdParams(const int userId)
+{
+    if (OsAccountManagerHelper::IsSystemAccount(userId)) {
+        if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+            return ERROR_USER_NOT_EXIST;
+        }
+    }
+    return ERR_OK;
 }
 
 inline int64_t ResetSeconds(int64_t date)
