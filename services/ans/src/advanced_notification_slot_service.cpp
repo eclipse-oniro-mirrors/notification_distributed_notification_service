@@ -744,8 +744,10 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     bool isSyncConfig = strcmp(key.c_str(), KEY_NAME) == 0;
     if (isSyncConfig) {
 #ifdef ENABLE_ANS_EXT_WRAPPER
-    ANS_LOGD("Extention invoke --> SyncAdditionConfig ");
-    EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
+    ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
+    if (sync_result != ERR_OK) {
+        return sync_result;
+    }
 #endif
     }
     ErrCode result = ERR_OK;

@@ -103,13 +103,13 @@ void ExtensionWrapper::RegisterDataSettingObserver()
     AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(dataEnableUri, aggregationRoamingObserver_);
 }
 
-void ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::string& value)
+ErrCode ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::string& value)
 {
     if (syncAdditionConfig_ == nullptr) {
         ANS_LOGE("syncAdditionConfig wrapper symbol failed");
-        return;
+        return 0;
     }
-    syncAdditionConfig_(key, value);
+    return syncAdditionConfig_(key, value);
 }
 
 void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason)
