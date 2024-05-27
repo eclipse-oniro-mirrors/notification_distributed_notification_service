@@ -178,7 +178,7 @@ bool ReminderRequest::CanShow() const
     if (nowInstantMilli == 0) {
         return false;
     }
-    if ((nowInstantMilli - GetReminderTimeInMilli()) < MIN_TIME_INTERVAL_IN_MILLI) {
+    if (nowInstantMilli < (GetReminderTimeInMilli() + MIN_TIME_INTERVAL_IN_MILLI)) {
         return false;
     }
     return true;
