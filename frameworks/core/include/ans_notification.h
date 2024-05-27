@@ -1076,7 +1076,7 @@ private:
      *
      * @return Returns true if succeed; returns false otherwise.
      */
-    bool GetAnsManagerProxy();
+    sptr<AnsManagerInterface> GetAnsManagerProxy();
 
     /**
      * @brief Checks if the MediaContent can be published.

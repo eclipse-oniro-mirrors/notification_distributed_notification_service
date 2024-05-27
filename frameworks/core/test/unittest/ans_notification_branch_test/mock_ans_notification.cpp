@@ -26,9 +26,12 @@ void MockGetAnsManagerProxy(bool mockRet)
 
 namespace OHOS {
 namespace Notification {
-bool AnsNotification::GetAnsManagerProxy()
+sptr<AnsManagerInterface> AnsNotification::GetAnsManagerProxy()
 {
-    return g_mockGetAnsManagerProxy;
+    if (g_mockGetAnsManagerProxy) {
+        return ansManagerProxy_;
+    }
+    return nullptr;
 }
 }  // namespace Notification
 }  // namespace OHOS
