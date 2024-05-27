@@ -46,7 +46,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelperTest_00100, Function 
     BundleManagerHelper bundleManagerHelper;
     MockGetSystemAbilityManager(false);
     int32_t uid = 1;
-    EXPECT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
+    ASSERT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
 }
 
 /**
@@ -59,7 +59,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00200, Function | Sm
     BundleManagerHelper bundleManagerHelper;
     MockGetSystemAbilityManager(true);
     int32_t uid = 1;
-    EXPECT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
+    ASSERT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
 }
 
 /**
@@ -72,7 +72,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00300, Function | Sm
     BundleManagerHelper bundleManagerHelper;
     MockGetSystemAbilityManager(false);
     int32_t uid = 1;
-    EXPECT_EQ(false, bundleManagerHelper.IsSystemApp(uid));
+    ASSERT_EQ(false, bundleManagerHelper.IsSystemApp(uid));
 }
 
 /**
@@ -85,7 +85,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00400, Function | Sm
     BundleManagerHelper bundleManagerHelper;
     MockGetSystemAbilityManager(true);
     int32_t uid = 1;
-    EXPECT_EQ(false, bundleManagerHelper.IsSystemApp(uid));
+    ASSERT_EQ(false, bundleManagerHelper.IsSystemApp(uid));
 }
 
 /**
@@ -101,7 +101,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00500, Function | Sm
     std::string bundle = "aa";
     int32_t userId = 1;
     AppExecFwk::BundleInfo bundleInfo;
-    EXPECT_EQ(false, bundleManagerHelper.GetBundleInfoByBundleName(bundle, userId, bundleInfo));
+    ASSERT_EQ(false, bundleManagerHelper.GetBundleInfoByBundleName(bundle, userId, bundleInfo));
 }
 
 /**
@@ -117,7 +117,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00600, Function | Sm
     std::string bundle = "aa";
     int32_t userId = 1;
     AppExecFwk::BundleInfo bundleInfo;
-    EXPECT_EQ(false, bundleManagerHelper.GetBundleInfoByBundleName(bundle, userId, bundleInfo));
+    ASSERT_EQ(false, bundleManagerHelper.GetBundleInfoByBundleName(bundle, userId, bundleInfo));
 }
 
 /**
@@ -129,7 +129,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00700, Function | Sm
 {
     BundleManagerHelper bundleManagerHelper;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-    EXPECT_EQ(false, bundleManagerHelper.CheckApiCompatibility(bundleOption));
+    ASSERT_EQ(false, bundleManagerHelper.CheckApiCompatibility(bundleOption));
 }
 
 /**
@@ -211,7 +211,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01300, Function | Sm
     MockGetSystemAbilityManager(true);
     std::string bundle = "aa";
     int32_t userId = 1;
-    EXPECT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
+    ASSERT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
 }
 
 /**
@@ -225,7 +225,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01400, Function | Sm
     MockGetSystemAbilityManager(false);
     std::string bundle = "aa";
     int32_t userId = 1;
-    EXPECT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
+    ASSERT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
 }
 
 /**
@@ -239,7 +239,7 @@ HWTEST_F(BundleManagerHelperBranchTest, GetBundleInfos_00001, Function | SmallTe
     AppExecFwk::BundleFlag flag = AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
 
-    EXPECT_EQ(false, bundleManagerHelper.GetBundleInfos(flag, bundleInfos, 1));
+    ASSERT_EQ(false, bundleManagerHelper.GetBundleInfos(flag, bundleInfos, 1));
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -115,16 +115,16 @@ HWTEST_F(AnsLiveViewServiceTest, ProcForDeleteLiveView_00001, Function | SmallTe
     AdvancedNotificationService::NotificationRequestDb requestDb =
         { .request = record->request, .bundleOption = bundle};
     auto ret = advancedNotificationService_->SetNotificationRequestToDb(requestDb);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     ret = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb);
-    EXPECT_EQ(requestsdb.size(), 1);
+    ASSERT_EQ(requestsdb.size(), 1);
 
     advancedNotificationService_->ProcForDeleteLiveView(record);
     requestsdb.clear();
     ret = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb);
-    EXPECT_EQ(requestsdb.size(), 0);
+    ASSERT_EQ(requestsdb.size(), 0);
 }
 
 /**
@@ -149,11 +149,11 @@ HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_00001, Function | Sm
     AdvancedNotificationService::NotificationRequestDb requestDb =
         { .request = request, .bundleOption = bundle};
     auto ret = advancedNotificationService_->SetNotificationRequestToDb(requestDb);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     ret = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb);
-    EXPECT_EQ(requestsdb.size(), 0);
+    ASSERT_EQ(requestsdb.size(), 0);
 }
 
 /**
@@ -190,11 +190,11 @@ HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00002, Function | 
     AdvancedNotificationService::NotificationRequestDb requestDb =
         { .request = request, .bundleOption = bundle};
     auto ret = advancedNotificationService_->SetNotificationRequestToDb(requestDb);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     AdvancedNotificationService::NotificationRequestDb requestdbTmp;
     ret = advancedNotificationService_->GetNotificationRequestFromDb(request->GetKey(), requestdbTmp);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -248,7 +248,7 @@ HWTEST_F(AnsLiveViewServiceTest, SetLockScreenPictureToDb_001, Function | SmallT
     request->SetContent(content);
 
     auto ret = advancedNotificationService_->SetLockScreenPictureToDb(request);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -274,7 +274,7 @@ HWTEST_F(AnsLiveViewServiceTest, IsSaCreateSystemLiveViewAsBundle_001, Function 
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     bool flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(record, creatorUid);
-    EXPECT_EQ(flag, true);
+    ASSERT_EQ(flag, true);
 }
 
 /**
@@ -300,15 +300,15 @@ HWTEST_F(AnsLiveViewServiceTest, IsSaCreateSystemLiveViewAsBundle_002, Function 
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
 
     bool flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(nullptr, creatorUid);
-    EXPECT_EQ(flag, false);
+    ASSERT_EQ(flag, false);
 
     flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(record, creatorUid);
-    EXPECT_EQ(flag, false);
+    ASSERT_EQ(flag, false);
 
     record->notification->GetNotificationRequest().SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(record, creatorUid);
-    EXPECT_EQ(flag, false);
+    ASSERT_EQ(flag, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

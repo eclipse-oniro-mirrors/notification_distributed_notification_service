@@ -59,7 +59,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0010
     // set CheckRdbStore is false
     MockInit(false);
     // test PutBundlePropertyToDisturbeDB function
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
 }
 
 /**
@@ -79,7 +79,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0020
     // set PutBundleToDisturbeDB is false
     MockInsertData(false);
     // test PutBundlePropertyToDisturbeDB function
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
 }
 
 /**
@@ -97,7 +97,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0030
     // set status is NativeRdb::E_ERROR
     MockQueryData(true);
     // test PutBundlePropertyToDisturbeDB function
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
 }
 
 /**
@@ -114,7 +114,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0040
     // test CheckBundle function
     std::string bundleName = "<bundleName>";
     int32_t bundleUid = 1;
-    EXPECT_EQ(preferncesDB_->CheckBundle(bundleName, bundleUid), false);
+    ASSERT_EQ(preferncesDB_->CheckBundle(bundleName, bundleUid), false);
 }
 
 /**
@@ -134,7 +134,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0050
     MockQueryData(true);
     // test PutShowBadge function
     bool enable = true;
-    EXPECT_EQ(preferncesDB_->PutShowBadge(bundleInfo, enable), false);
+    ASSERT_EQ(preferncesDB_->PutShowBadge(bundleInfo, enable), false);
 }
 
 /**
@@ -154,7 +154,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0060
     MockQueryData(true);
     // test PutImportance function
     int32_t importance = 1;
-    EXPECT_EQ(preferncesDB_->PutImportance(bundleInfo, importance), false);
+    ASSERT_EQ(preferncesDB_->PutImportance(bundleInfo, importance), false);
 }
 
 /**
@@ -174,7 +174,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0070
     MockQueryData(true);
     // test PutTotalBadgeNums function
     int32_t totalBadgeNum = 1;
-    EXPECT_EQ(preferncesDB_->PutTotalBadgeNums(bundleInfo, totalBadgeNum), false);
+    ASSERT_EQ(preferncesDB_->PutTotalBadgeNums(bundleInfo, totalBadgeNum), false);
 }
 
 /**
@@ -194,7 +194,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0090
     MockQueryData(true);
     // test PutNotificationsEnabledForBundle function
     bool enabled = true;
-    EXPECT_EQ(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, enabled), false);
+    ASSERT_EQ(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, enabled), false);
 }
 
 /**
@@ -209,7 +209,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0100
     // test PutNotificationsEnabled function
     int32_t userId = 1;
     bool enabled = true;
-    EXPECT_EQ(preferncesDB_->PutNotificationsEnabled(userId, enabled), false);
+    ASSERT_EQ(preferncesDB_->PutNotificationsEnabled(userId, enabled), false);
 }
 
 /**
@@ -226,7 +226,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0110
     // test PutNotificationsEnabled function
     int32_t userId = 1;
     bool enabled = true;
-    EXPECT_EQ(preferncesDB_->PutNotificationsEnabled(userId, enabled), false);
+    ASSERT_EQ(preferncesDB_->PutNotificationsEnabled(userId, enabled), false);
 }
 
 /**
@@ -245,7 +245,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0120
     MockQueryData(true);
     // test PutHasPoppedDialog function
     bool hasPopped = true;
-    EXPECT_EQ(preferncesDB_->PutHasPoppedDialog(bundleInfo, hasPopped), false);
+    ASSERT_EQ(preferncesDB_->PutHasPoppedDialog(bundleInfo, hasPopped), false);
 }
 
 /**
@@ -260,7 +260,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0130
     // test PutDoNotDisturbDate function
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
-    EXPECT_EQ(preferncesDB_->PutDoNotDisturbDate(userId, date), false);
+    ASSERT_EQ(preferncesDB_->PutDoNotDisturbDate(userId, date), false);
 }
 
 /**
@@ -277,7 +277,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0140
     // test PutDoNotDisturbDate function
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbDate> date = new NotificationDoNotDisturbDate();
-    EXPECT_EQ(preferncesDB_->PutDoNotDisturbDate(userId, date), false);
+    ASSERT_EQ(preferncesDB_->PutDoNotDisturbDate(userId, date), false);
 }
 
 /**
@@ -339,7 +339,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0180
     // test PutBundlePropertyValueToDisturbeDB function
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     ASSERT_NE(nullptr, preferncesDB_);
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo), false);
 }
 
 /**
@@ -355,7 +355,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0190
     MockInsertBatchData(false);
     // test PutBundlePropertyValueToDisturbeDB function
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo), false);
 }
 
 /**
@@ -369,7 +369,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0200
     MockInit(false);
     // test ParseFromDisturbeDB function
     NotificationPreferencesInfo info;
-    EXPECT_EQ(preferncesDB_->ParseFromDisturbeDB(info), false);
+    ASSERT_EQ(preferncesDB_->ParseFromDisturbeDB(info), false);
 }
 
 /**
@@ -385,7 +385,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0210
     MockQueryDataBeginWithKey(false);
     // test ParseFromDisturbeDB function
     NotificationPreferencesInfo info;
-    EXPECT_EQ(preferncesDB_->ParseFromDisturbeDB(info), false);
+    ASSERT_EQ(preferncesDB_->ParseFromDisturbeDB(info), false);
 }
 
 /**
@@ -397,7 +397,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0220
 {
     // set CheckRdbStore is false
     MockInit(false);
-    EXPECT_EQ(preferncesDB_->RemoveAllDataFromDisturbeDB(), false);
+    ASSERT_EQ(preferncesDB_->RemoveAllDataFromDisturbeDB(), false);
 }
 
 /**
@@ -412,7 +412,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0230
     // test RemoveBundleFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     const int32_t uid = -1;
-    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, uid), false);
+    ASSERT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, uid), false);
 }
 
 /**
@@ -429,7 +429,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0240
     // test RemoveBundleFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     const int32_t uid = -1;
-    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, uid), false);
+    ASSERT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, uid), false);
 }
 
 /**
@@ -447,7 +447,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0250
     MockDeleteBathchData(false);
     // test RemoveBundleFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, -1), false);
+    ASSERT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -462,7 +462,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0260
     // test RemoveSlotFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationConstant::SlotType type = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
+    ASSERT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
 }
 
 /**
@@ -479,7 +479,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0270
     // test RemoveSlotFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationConstant::SlotType type = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
+    ASSERT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
 }
 
 /**
@@ -498,7 +498,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0280
     // test RemoveSlotFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationConstant::SlotType type = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
+    ASSERT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleKey, type, -1), false);
 }
 
 /**
@@ -512,7 +512,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0290
     MockInit(false);
     // test RemoveAllSlotsFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
+    ASSERT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -528,7 +528,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0300
     MockQueryDataBeginWithKey(false);
     // test RemoveAllSlotsFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
+    ASSERT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -544,7 +544,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0310
     BundleType type = BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -560,7 +560,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0320
     BundleType type = BundleType::BUNDLE_IMPORTANCE_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -576,7 +576,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0330
     BundleType type = BundleType::BUNDLE_SHOW_BADGE_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -592,7 +592,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0350
     BundleType type = BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -608,7 +608,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0360
     BundleType type = BundleType::BUNDLE_POPPED_DIALOG_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -624,7 +624,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0370
     BundleType type = BundleType::BUNDLE_NAME_TYPE;
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
 }
 
 /**
@@ -641,7 +641,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0380
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    EXPECT_EQ(preferncesDB_->PutBundleToDisturbeDB(bundleKey, bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundleToDisturbeDB(bundleKey, bundleInfo), false);
 }
 
 /**
@@ -660,7 +660,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0390
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    EXPECT_EQ(preferncesDB_->PutBundleToDisturbeDB(bundleKey, bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundleToDisturbeDB(bundleKey, bundleInfo), false);
 }
 
 /**
@@ -675,7 +675,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0400
     // test PutBundlePropertyToDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    EXPECT_EQ(preferncesDB_->PutBundleToDisturbeDB(bundleKey, bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundleToDisturbeDB(bundleKey, bundleInfo), false);
 }
 
 /**
@@ -697,7 +697,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0410
     int32_t bundleUid = 1;
     sptr<NotificationSlot> slot = new NotificationSlot();
     std::unordered_map<std::string, std::string> values;
-    EXPECT_EQ(preferncesDB_->SlotToEntry(bundleName, bundleUid, slot, values), false);
+    ASSERT_EQ(preferncesDB_->SlotToEntry(bundleName, bundleUid, slot, values), false);
 }
 
 /**
@@ -720,7 +720,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0420
     sptr<NotificationSlot> slot = new NotificationSlot();
     std::vector<sptr<NotificationSlot>> slots;
     slots.emplace_back(slot);
-    EXPECT_EQ(preferncesDB_->PutSlotsToDisturbeDB(bundleName, bundleUid, slots), false);
+    ASSERT_EQ(preferncesDB_->PutSlotsToDisturbeDB(bundleName, bundleUid, slots), false);
 }
 
 /**
@@ -747,7 +747,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0440
 {
     std::string findString = "";
     std::string inputString = "";
-    EXPECT_EQ(preferncesDB_->FindLastString(findString, inputString), "");
+    ASSERT_EQ(preferncesDB_->FindLastString(findString, inputString), "");
 }
 
 /**
@@ -758,7 +758,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0440
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_04500, Function | SmallTest | Level1)
 {
     std::string str = "";
-    EXPECT_EQ(preferncesDB_->StringToInt(str), 0);
+    ASSERT_EQ(preferncesDB_->StringToInt(str), 0);
 }
 
 /**
@@ -769,7 +769,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0450
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_04600, Function | SmallTest | Level1)
 {
     std::string str = "";
-    EXPECT_EQ(preferncesDB_->StringToInt64(str), 0);
+    ASSERT_EQ(preferncesDB_->StringToInt64(str), 0);
 }
 
 /**
@@ -855,7 +855,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0510
     MockInit(false);
     // test RemoveNotificationEnable function
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveNotificationEnable(userId), false);
+    ASSERT_EQ(preferncesDB_->RemoveNotificationEnable(userId), false);
 }
 
 /**
@@ -871,7 +871,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0520
     MockDeleteData(false);
     // test RemoveNotificationEnable function
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveNotificationEnable(userId), false);
+    ASSERT_EQ(preferncesDB_->RemoveNotificationEnable(userId), false);
 }
 
 /**
@@ -885,7 +885,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0530
     MockInit(false);
     // test RemoveDoNotDisturbDate function
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), false);
+    ASSERT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), false);
 }
 
 /**
@@ -901,7 +901,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0540
     MockDeleteBathchData(false);
     // test RemoveDoNotDisturbDate function
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), false);
+    ASSERT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), false);
 }
 
 /**
@@ -916,7 +916,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0550
     // test RemoveAnsBundleDbInfo function
     std::string bundleName = "<bundleName>";
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, userId), false);
+    ASSERT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, userId), false);
 }
 
 /**
@@ -933,7 +933,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0560
     // test RemoveAnsBundleDbInfo function
     std::string bundleName = "<bundleName>";
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, userId), false);
+    ASSERT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, userId), false);
 }
 
 /**
@@ -945,9 +945,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
 {
     MockInit(true);
     MockInsertData(false);
-    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test"), -1), NativeRdb::E_ERROR);
+    ASSERT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test"), -1), NativeRdb::E_ERROR);
     MockInsertData(true);
-    EXPECT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test"), -1), NativeRdb::E_OK);
+    ASSERT_EQ(preferncesDB_->SetKvToDb(string("test"), string("test"), -1), NativeRdb::E_OK);
 }
 
 /**
@@ -960,9 +960,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     MockInit(true);
     MockQueryData(false);
     string value;
-    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
+    ASSERT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
     MockQueryData(true);
-    EXPECT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
+    ASSERT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -975,9 +975,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     MockInit(true);
     MockQueryDataBeginWithKey(false);
     std::unordered_map<std::string, std::string> value;
-    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
+    ASSERT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
     MockQueryDataBeginWithKey(true);
-    EXPECT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value, -1), NativeRdb::E_OK);
+    ASSERT_EQ(preferncesDB_->GetBatchKvsFromDb(string("test"), value, -1), NativeRdb::E_OK);
 }
 
 /**
@@ -990,9 +990,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
     MockInit(true);
     MockDeleteData(false);
     std::unordered_map<std::string, std::string> value;
-    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_ERROR);
+    ASSERT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_ERROR);
     MockDeleteData(true);
-    EXPECT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_OK);
+    ASSERT_EQ(preferncesDB_->DeleteKvFromDb(string("test"), -1), NativeRdb::E_OK);
 }
 
 /**
@@ -1004,7 +1004,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, DropUserTable_00100, Functio
 {
     MockInit(true);
     MockDropTable(true);
-    EXPECT_EQ(preferncesDB_->DropUserTable(-1), NativeRdb::E_OK);
+    ASSERT_EQ(preferncesDB_->DropUserTable(-1), NativeRdb::E_OK);
 }
 
 /**
@@ -1016,7 +1016,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, DropUserTable_00200, Functio
 {
     MockInit(true);
     MockDropTable(false);
-    EXPECT_EQ(preferncesDB_->DropUserTable(-1), NativeRdb::E_ERROR);
+    ASSERT_EQ(preferncesDB_->DropUserTable(-1), NativeRdb::E_ERROR);
 }
 
 /**
@@ -1027,7 +1027,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, DropUserTable_00200, Functio
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, PutSlotFlags_00100, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    EXPECT_EQ(preferncesDB_->PutSlotFlags(bundleInfo, 0), true);
+    ASSERT_EQ(preferncesDB_->PutSlotFlags(bundleInfo, 0), true);
 }
 }  // namespace Notification
 }  // namespace OHOS

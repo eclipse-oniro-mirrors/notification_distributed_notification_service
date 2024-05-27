@@ -140,7 +140,7 @@ void AnsBranchTest::TestAddSlot(NotificationConstant::SlotType type)
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(type);
     slots.push_back(slot);
-    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
 }
 
 /**
@@ -155,7 +155,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_221, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
     bool result = advancedNotificationService_->CheckPermission(permission);
-    EXPECT_EQ(result, false);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -175,8 +175,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_222000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
     std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
     bool result = advancedNotificationService_->CheckPermission(permission);
-    EXPECT_EQ(result, false);
-    EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(result, false);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -193,7 +193,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_223000, Function | SmallTest | Level1)
     req->SetIsAgentNotification(true);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
-    EXPECT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -205,7 +205,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_223000, Function | SmallTest | Level1)
 HWTEST_F(AnsBranchTest, AnsBranchTest_224000, Function | SmallTest | Level1)
 {
     std::string label = "publish's label";
-    EXPECT_EQ(advancedNotificationService_->Publish(label, nullptr), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, nullptr), ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -222,7 +222,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_225000, Function | SmallTest | Level1)
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(
+    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(
         notificationId, representativeBundle, userId), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -240,7 +240,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_226000, Function | SmallTest | Level1)
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    EXPECT_EQ(advancedNotificationService_->CancelAsBundle(
+    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(
         notificationId, representativeBundle, userId), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -260,7 +260,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_227000, Function | SmallTest | Level1)
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::OTHER);
     slots.push_back(slot0);
     slots.push_back(slot1);
-    EXPECT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -275,7 +275,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_228000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     const std::string key = "key";
-    EXPECT_EQ(advancedNotificationService_->Delete(
+    ASSERT_EQ(advancedNotificationService_->Delete(
         key, NotificationConstant::CANCEL_REASON_DELETE), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -290,7 +290,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_229000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    EXPECT_EQ(advancedNotificationService_->DeleteByBundle(
+    ASSERT_EQ(advancedNotificationService_->DeleteByBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID)), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -305,7 +305,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_230000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
-    EXPECT_EQ(advancedNotificationService_->DeleteByBundle(
+    ASSERT_EQ(advancedNotificationService_->DeleteByBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID)), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -320,7 +320,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_231000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    EXPECT_EQ(advancedNotificationService_->DeleteAll(), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->DeleteAll(), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -335,7 +335,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_232000, Function | SmallTest | Level1)
     MockIsSystemApp(false);
 
     std::vector<sptr<NotificationSlot>> slots;
-    EXPECT_EQ(advancedNotificationService_->GetSlotsByBundle(
+    ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -351,7 +351,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_233000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     std::vector<sptr<NotificationSlot>> slots;
-    EXPECT_EQ(advancedNotificationService_->GetSlotsByBundle(
+    ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -369,7 +369,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_234000, Function | SmallTest | Level1)
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::OTHER);
     slots.push_back(slot0);
-    EXPECT_EQ(advancedNotificationService_->UpdateSlots(
+    ASSERT_EQ(advancedNotificationService_->UpdateSlots(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -387,7 +387,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_235000, Function | SmallTest | Level1)
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot0 = new NotificationSlot(NotificationConstant::OTHER);
     slots.push_back(slot0);
-    EXPECT_EQ(advancedNotificationService_->UpdateSlots(
+    ASSERT_EQ(advancedNotificationService_->UpdateSlots(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -402,7 +402,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_236000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    EXPECT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(
+    ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), true), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -418,7 +418,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_237000, Function | SmallTest | Level1)
     MockIsSystemApp(false);
 
     bool allow = false;
-    EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
+    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -434,7 +434,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_238000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     bool allow = false;
-    EXPECT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
+    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -451,7 +451,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_239000, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -467,7 +467,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_240000, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -483,7 +483,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -498,7 +498,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_242000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     std::vector<sptr<Notification>> allNotifications;
-    EXPECT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -514,7 +514,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_243000, Function | SmallTest | Level1)
 
     std::vector<std::string> keys;
     std::vector<sptr<Notification>> specialActiveNotifications;
-    EXPECT_EQ(advancedNotificationService_->GetSpecialActiveNotifications(
+    ASSERT_EQ(advancedNotificationService_->GetSpecialActiveNotifications(
         keys, specialActiveNotifications), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -531,7 +531,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_244000, Function | SmallTest | Level1)
 
     std::vector<std::string> keys;
     std::vector<sptr<Notification>> specialActiveNotifications;
-    EXPECT_EQ(advancedNotificationService_->GetSpecialActiveNotifications(
+    ASSERT_EQ(advancedNotificationService_->GetSpecialActiveNotifications(
         keys, specialActiveNotifications), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -546,7 +546,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_245000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
-    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForAllBundles(
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForAllBundles(
         std::string(), true), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -561,7 +561,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_246000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForAllBundles(
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForAllBundles(
         std::string(), true), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -576,7 +576,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_247000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
         std::string(), new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false),
             ERR_ANS_PERMISSION_DENIED);
 }
@@ -593,7 +593,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_248000, Function | SmallTest | Level1)
     MockIsSystemApp(false);
 
     bool allowed = false;
-    EXPECT_EQ(advancedNotificationService_->IsAllowedNotify(allowed), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->IsAllowedNotify(allowed), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -608,7 +608,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_249000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     bool allowed = false;
-    EXPECT_EQ(advancedNotificationService_->IsAllowedNotify(allowed), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->IsAllowedNotify(allowed), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -625,7 +625,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_250000, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     sptr<NotificationBundleOption> targetBundle(nullptr);
     bundleOption->SetBundleName("test");
-    EXPECT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -640,7 +640,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_251000, Function | SmallTest | Level1)
     MockIsSystemApp(false);
 
     bool allowed = true;
-    EXPECT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
+    ASSERT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), allowed), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -656,7 +656,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_252000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     bool allowed = true;
-    EXPECT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
+    ASSERT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), allowed), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -673,7 +673,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_254000, Function | SmallTest | Level1)
 
     MockIsNonBundleName(true);
     bool allowed = true;
-    EXPECT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
+    ASSERT_EQ(advancedNotificationService_->IsSpecialBundleAllowedNotify(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), allowed), ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -693,7 +693,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_255000, Function | SmallTest | Level1)
     auto result = advancedNotificationService_->RemoveNotification(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
         notificationId, label, NotificationConstant::CANCEL_REASON_DELETE);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -708,7 +708,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_256000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    EXPECT_EQ(advancedNotificationService_->RemoveAllNotifications(bundleOption), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->RemoveAllNotifications(bundleOption), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -724,7 +724,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_257000, Function | SmallTest | Level1)
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     uint64_t num = 1;
-    EXPECT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -740,7 +740,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_258000, Function | SmallTest | Level1)
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     uint64_t num = 1;
-    EXPECT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetSlotNumAsBundle(bundleOption, num), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -757,7 +757,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_259000, Function | SmallTest | Level1)
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     std::string groupName = "group";
-    EXPECT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -774,8 +774,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_260000, Function | SmallTest | Level1)
 
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
-    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -792,8 +792,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_261000, Function | SmallTest | Level1)
 
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
-    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -808,7 +808,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_262000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
 
     bool doesSupport = true;
-    EXPECT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -823,7 +823,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_263000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     bool doesSupport = true;
-    EXPECT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -840,9 +840,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_264000, Function | SmallTest | Level1)
     bool enabled = true;
     sptr<NotificationBundleOption> bundleOption =
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    EXPECT_EQ(advancedNotificationService_->EnableDistributed(enabled), ERR_ANS_NON_SYSTEM_APP);
-    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
-    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->EnableDistributed(enabled), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -859,10 +859,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_284000, Function | SmallTest | Level1)
     bool enabled = true;
     sptr<NotificationBundleOption> bundleOption =
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    EXPECT_EQ(advancedNotificationService_->EnableDistributed(enabled), ERR_ANS_PERMISSION_DENIED);
-    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(
+    ASSERT_EQ(advancedNotificationService_->EnableDistributed(enabled), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->EnableDistributedByBundle(
         bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
-    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(
+    ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(
         bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -878,7 +878,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_265000, Function | SmallTest | Level1)
     MockIsSystemApp(false);
 
     NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
-    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -893,7 +893,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_266000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
-    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -910,9 +910,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_267000, Function | SmallTest | Level1)
     int32_t userId = 3;
     bool allowed = true;
     bool enable = true;
-    EXPECT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(
+    ASSERT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(
         userId, allowed), (int)ERR_ANS_PERMISSION_DENIED);
-    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(
         userId, enable), (int)ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -930,9 +930,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_267100, Function | SmallTest | Level1)
     int32_t userId = 3;
     bool allowed = true;
     bool enable = true;
-    EXPECT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(
+    ASSERT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(
         userId, allowed), (int)ERR_ANS_NON_SYSTEM_APP);
-    EXPECT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(
         userId, enable), (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -949,8 +949,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_268000, Function | SmallTest | Level1)
 
     int32_t userId = 3;
     sptr<NotificationDoNotDisturbDate> date = nullptr;
-    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
-    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -966,8 +966,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_269000, Function | SmallTest | Level1)
 
     int32_t userId = 3;
     sptr<NotificationDoNotDisturbDate> date = nullptr;
-    EXPECT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
-    EXPECT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -987,11 +987,11 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_270000, Function | SmallTest | Level1)
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
             NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled, false);
 
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
     auto result1 = advancedNotificationService_->GetEnabledForBundleSlot(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
             NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled);
-    EXPECT_EQ(result1, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result1, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1009,7 +1009,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_271000, Function | SmallTest | Level1)
     std::string bundle = "Bundle";
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
-    EXPECT_EQ(advancedNotificationService_->ShellDump(
+    ASSERT_EQ(advancedNotificationService_->ShellDump(
         cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -1026,9 +1026,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_272000, Function | SmallTest | Level1)
 
     int32_t userId = 3;
     bool enabled = true;
-    EXPECT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(
+    ASSERT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(
         userId, enabled), ERR_ANS_NON_SYSTEM_APP);
-    EXPECT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(
+    ASSERT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(
         userId, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -1045,9 +1045,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_273000, Function | SmallTest | Level1)
 
     int32_t userId = 3;
     bool enabled = true;
-    EXPECT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(
+    ASSERT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(
         userId, enabled), ERR_ANS_PERMISSION_DENIED);
-    EXPECT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(
+    ASSERT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(
         userId, enabled), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -1065,7 +1065,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_274000, Function | SmallTest | Level1)
     bool enabled = true;
     sptr<NotificationBundleOption> bundleOption =
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    EXPECT_EQ(advancedNotificationService_->EnableDistributedByBundle(
+    ASSERT_EQ(advancedNotificationService_->EnableDistributedByBundle(
         bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -1080,7 +1080,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_275000, Function | SmallTest | Level1)
     MockDistributedNotificationEnabled(false);
     MockIsNonBundleName(false);
     bool enabled = true;
-    EXPECT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1096,7 +1096,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
         TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     bool enabled = false;
-    EXPECT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
 }
 
 /**
@@ -1113,7 +1113,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_277000, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
         TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     std::shared_ptr<NotificationRecord> record = nullptr;
-    EXPECT_EQ(advancedNotificationService_->DoDistributedPublish(bundleOption, record), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->DoDistributedPublish(bundleOption, record), ERR_OK);
 }
 
 /**
@@ -1128,7 +1128,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
         TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     bool enabled = false;;
-    EXPECT_EQ(advancedNotificationService_->GetDistributedEnableInApplicationInfo(
+    ASSERT_EQ(advancedNotificationService_->GetDistributedEnableInApplicationInfo(
         bundleOption, enabled), ERR_ANS_INVALID_PARAM);
 }
 
@@ -1157,10 +1157,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279000, Function | SmallTest | Level1)
     using Status = NotificationLiveViewContent::LiveViewStatus;
     auto record = std::make_shared<NotificationRecord>();
     InitNotificationRecord(record, Status::LIVE_VIEW_CREATE);
-    EXPECT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
-    EXPECT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
+    ASSERT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
+    ASSERT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
     auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
-    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(result, ERR_OK);
     EXPECT_NE(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
     EXPECT_NE(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
 }
@@ -1179,10 +1179,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279001, Function | SmallTest | Level1)
     record->notification->SetUpdateTimer(2);
     record->notification->SetFinishTimer(3);
     auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
-    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(result, ERR_OK);
     /* finish timer not change, but update timer changed */
     EXPECT_NE(record->notification->GetUpdateTimer(), 2);
-    EXPECT_EQ(record->notification->GetFinishTimer(), 3);
+    ASSERT_EQ(record->notification->GetFinishTimer(), 3);
 }
 
 /**
@@ -1200,10 +1200,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279002, Function | SmallTest | Level1)
     record->notification->SetFinishTimer(3);
 
     auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
-    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(result, ERR_OK);
     /* finish timer not change, but update timer changed */
-    EXPECT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
-    EXPECT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
+    ASSERT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
+    ASSERT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
 }
 
 }  // namespace Notification

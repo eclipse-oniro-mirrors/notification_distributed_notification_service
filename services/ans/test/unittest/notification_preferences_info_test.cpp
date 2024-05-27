@@ -47,31 +47,31 @@ HWTEST_F(NotificationPreferencesInfoTest, GetSlotFlagsKeyFromType_00001, Functio
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     const char *res= bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     std::string resStr(res);
-    EXPECT_EQ(resStr, "Social_communication");
+    ASSERT_EQ(resStr, "Social_communication");
 
     res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::SERVICE_REMINDER);
     resStr = res;
-    EXPECT_EQ(resStr, "Service_reminder");
+    ASSERT_EQ(resStr, "Service_reminder");
 
     res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     resStr = res;
-    EXPECT_EQ(resStr, "Content_information");
+    ASSERT_EQ(resStr, "Content_information");
 
     res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::OTHER);
     resStr = res;
-    EXPECT_EQ(resStr, "Other");
+    ASSERT_EQ(resStr, "Other");
 
     res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::CUSTOM);
     resStr = res;
-    EXPECT_EQ(resStr, "Custom");
+    ASSERT_EQ(resStr, "Custom");
 
     res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::LIVE_VIEW);
     resStr = res;
-    EXPECT_EQ(resStr, "Live_view");
+    ASSERT_EQ(resStr, "Live_view");
 
     res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::CUSTOMER_SERVICE);
     resStr = res;
-    EXPECT_EQ(resStr, "Custom_service");
+    ASSERT_EQ(resStr, "Custom_service");
 }
 
 
@@ -87,7 +87,7 @@ HWTEST_F(NotificationPreferencesInfoTest, SetSlotFlagsForSlot_00001, Function | 
     bundleInfo.SetSlotFlags(1);
     bundleInfo.SetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     int res = bundleInfo.GetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    EXPECT_EQ(res, 0);
+    ASSERT_EQ(res, 0);
 }
 
 /**
@@ -102,7 +102,7 @@ HWTEST_F(NotificationPreferencesInfoTest, MakeDoNotDisturbProfileKey_0100, TestS
     int32_t profileId = 1;
     string profilekey = "1_1";
     auto res = preferencesInfo->MakeDoNotDisturbProfileKey(userId, profileId);
-    EXPECT_EQ(res, profilekey);
+    ASSERT_EQ(res, profilekey);
 }
 
 /**
@@ -122,7 +122,7 @@ HWTEST_F(NotificationPreferencesInfoTest, AddDoNotDisturbProfiles_0100, TestSize
     preferencesInfo->AddDoNotDisturbProfiles(userId, profiles);
 
     auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
-    EXPECT_EQ(res, true);
+    ASSERT_EQ(res, true);
 }
 
 /**
@@ -140,7 +140,7 @@ HWTEST_F(NotificationPreferencesInfoTest, RemoveDoNotDisturbProfiles_0100, TestS
     preferencesInfo->RemoveDoNotDisturbProfiles(userId, profiles);
     int32_t profileId = 1;
     auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
-    EXPECT_EQ(res, false);
+    ASSERT_EQ(res, false);
 }
 
 /**
@@ -159,7 +159,7 @@ HWTEST_F(NotificationPreferencesInfoTest, GetDoNotDisturbProfiles_0100, TestSize
     profiles.emplace_back(profile);
     preferencesInfo->AddDoNotDisturbProfiles(userId, profiles);
     auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
-    EXPECT_EQ(res, true);
+    ASSERT_EQ(res, true);
 }
 }
 }

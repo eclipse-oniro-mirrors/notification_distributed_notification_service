@@ -61,7 +61,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00100, Function | SmallTest 
 
     TestPushCallBackStub testPushCallBackStub;
     int ret = testPushCallBackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_INVALID_STATE);
+    ASSERT_EQ(ret, (int)ERR_INVALID_STATE);
 }
 
 /**
@@ -81,7 +81,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00300, Function | SmallTest 
 
     int ret = testPushCallBackStub.OnRemoteRequest(code, data, reply, option);
     int errcode = 305;
-    EXPECT_EQ(ret, errcode);
+    ASSERT_EQ(ret, errcode);
 }
 
 /**
@@ -95,7 +95,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00400, Function | SmallTest 
     PushCallBackProxy pushCallBackProxy(impl);
 
     int ret = pushCallBackProxy.OnCheckNotification("", nullptr);
-    EXPECT_EQ(ret, false);
+    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -110,7 +110,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00600, Function | SmallTest 
 
     std::string notificationData = "this is notificationData";
     int ret = pushCallBackProxy.OnCheckNotification(notificationData, nullptr);
-    EXPECT_EQ(ret, false);
+    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -123,7 +123,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00100, Function | S
     int pushCheckCode = 0;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -136,7 +136,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00200, Function | S
     int pushCheckCode = 1;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    EXPECT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
 }
 
 /**
@@ -149,7 +149,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00300, Function | S
     int pushCheckCode = 2;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE);
 }
 
 /**
@@ -162,7 +162,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00400, Function | S
     int pushCheckCode = 3;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
 }
 
 /**
@@ -175,7 +175,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00500, Function | S
     int pushCheckCode = 4;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    EXPECT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
 }
 
 /**
@@ -188,7 +188,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00600, Function | S
     int pushCheckCode = 5;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID);
+    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID);
 }
 
 /**
@@ -201,7 +201,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00700, Function | S
     int pushCheckCode = -1;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    EXPECT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
 }
 }  // namespace Notification
 }  // namespace OHOS

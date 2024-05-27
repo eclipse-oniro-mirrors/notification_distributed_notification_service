@@ -51,7 +51,7 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00100, Function 
     NotificationConstant::SlotType type = NotificationConstant::SlotType::CUSTOM;
     NotificationSlot notificationSlot(type);
     auto result = notificationSlot.Marshalling(p);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -69,7 +69,7 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00200, Function 
     NotificationConstant::SlotType type = NotificationConstant::SlotType::CUSTOM;
     NotificationSlot notificationSlot(type);
     auto result = notificationSlot.ReadFromParcel(p);
-    EXPECT_EQ(result, false);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -82,7 +82,7 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00300, Function 
     NotificationSlotFilter notificationSlotFilter;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     ErrCode result = notificationSlotFilter.OnPublish(record);
-    EXPECT_EQ(result, ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
+    ASSERT_EQ(result, ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
 
@@ -104,7 +104,7 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00400, Function 
     Parcel p;
     NotificationSubscribeInfo notificationSubscribeInfo;
     auto result = notificationSubscribeInfo.Marshalling(p);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

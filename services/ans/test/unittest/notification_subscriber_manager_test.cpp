@@ -116,8 +116,8 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
     // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     info->AddAppName("test_bundle");
-    EXPECT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, info), (int)ERR_OK);
-    EXPECT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, nullptr), (int)ERR_OK);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, info), (int)ERR_OK);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, nullptr), (int)ERR_OK);
 }
 
 /**
@@ -134,7 +134,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
 
     // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(notificationSubscriberManager_->AddSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -154,7 +154,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
     // Test RemoveSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     info->AddAppName("test_bundle");
-    EXPECT_EQ(notificationSubscriberManager_->RemoveSubscriber(subscriber_, info), (int)ERR_OK);
+    ASSERT_EQ(notificationSubscriberManager_->RemoveSubscriber(subscriber_, info), (int)ERR_OK);
 }
 
 /**
@@ -174,7 +174,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
 
     // Test RemoveSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(notificationSubscriberManager_->RemoveSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(notificationSubscriberManager_->RemoveSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -222,7 +222,7 @@ HWTEST_F(NotificationSubscriberManagerTest, UnRegisterOnSubscriberAddCallbackTes
     EXPECT_NE(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
 
     notificationSubscriberManager_->UnRegisterOnSubscriberAddCallback();
-    EXPECT_EQ(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
+    ASSERT_EQ(notificationSubscriberManager_->onSubscriberAddCallback_, nullptr);
 }
 
 /**

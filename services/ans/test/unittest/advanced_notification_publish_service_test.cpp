@@ -106,7 +106,7 @@ void AnsPublishServiceTest::RegisterPushCheck()
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    EXPECT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
 }
 /**
  * @tc.name: Publish_00001
@@ -129,7 +129,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00001, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -154,7 +154,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00002, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     auto ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 
@@ -178,14 +178,14 @@ HWTEST_F(AnsPublishServiceTest, Publish_00003, Function | SmallTest | Level1)
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
     ret = advancedNotificationService_->GetSlotByType(slotType, slot);
-    EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(1, slot->GetAuthorizedStatus());
-    EXPECT_EQ(1, slot->GetAuthHintCnt());
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(1, slot->GetAuthorizedStatus());
+    ASSERT_EQ(1, slot->GetAuthHintCnt());
 }
 
 /**
@@ -209,18 +209,18 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     auto ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     request->SetNotificationId(2);
     ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
     ret = advancedNotificationService_->GetSlotByType(slotType, slot);
-    EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(0, slot->GetAuthorizedStatus());
-    EXPECT_EQ(2, slot->GetAuthHintCnt());
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(0, slot->GetAuthorizedStatus());
+    ASSERT_EQ(2, slot->GetAuthHintCnt());
 }
 
 /**
@@ -246,7 +246,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
     MockIsVerfyPermisson(false);
 
     auto ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -268,7 +268,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00006, Function | SmallTest | Level1)
     MockIsOsAccountExists(false);
 
     auto ret = advancedNotificationService_->Publish(label, request);
-    EXPECT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
+    ASSERT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
 }
 
 /**
@@ -281,7 +281,7 @@ HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00001, Function | SmallTest | Lev
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
     auto ret = advancedNotificationService_->DeleteByBundle(bundleOption);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -295,7 +295,7 @@ HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00002, Function | SmallTest | Lev
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto ret = advancedNotificationService_->DeleteByBundle(bundle);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -309,8 +309,8 @@ HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00003, Function | SmallTest | Lev
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     TestAddNotification(1, bundle);
     auto ret = advancedNotificationService_->DeleteByBundle(bundle);
-    EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 }
 
 /**
@@ -323,7 +323,7 @@ HWTEST_F(AnsPublishServiceTest, DeleteAll_00001, Function | SmallTest | Level1)
 {
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto ret = advancedNotificationService_->DeleteAll();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -336,11 +336,11 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00001, Function | S
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 
     bool enabled = false;
     ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -354,11 +354,11 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00002, Function | S
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, true);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     bool enabled = false;
     ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -372,7 +372,7 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest 
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     bool enabled = false;
     auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -388,8 +388,8 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00002, Function | SmallTest 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(enabled, false);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(enabled, false);
 }
 
 /**
@@ -407,10 +407,10 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00001, Function | Smal
     sptr<IRemoteObject> callerToken = nullptr;
 
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), false);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
+    ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
 }
 
 /**
@@ -428,11 +428,11 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00002, Function | Smal
     sptr<IRemoteObject> callerToken = nullptr;
 
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -450,7 +450,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
     sptr<IRemoteObject> callerToken = nullptr;
 
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), false);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
 
@@ -458,11 +458,11 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
     NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, true);
 
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 
     NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -476,7 +476,7 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForAllBundles_00001, Func
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     bool enabled = false;
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles("", enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -491,7 +491,7 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00001, F
     bool enabled = false;
     std::string deviceId = "deviceId";
     auto ret = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -505,7 +505,7 @@ HWTEST_F(AnsPublishServiceTest, IsAllowedNotify_00001, Function | SmallTest | Le
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     bool allowed = false;
     auto ret = advancedNotificationService_->IsAllowedNotify(allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -519,7 +519,7 @@ HWTEST_F(AnsPublishServiceTest, IsAllowedNotifyForBundle_00001, Function | Small
     bool allowed = false;
     sptr<NotificationBundleOption> bundle = nullptr;
     auto ret = advancedNotificationService_->IsAllowedNotifyForBundle(bundle, allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -539,15 +539,15 @@ HWTEST_F(AnsPublishServiceTest, TriggerLocalLiveView_00001, Function | SmallTest
     MockIsVerfyPermisson(false);
 
     auto ret = advancedNotificationService_->TriggerLocalLiveView(bundle, notificationId, buttonOption);
-    EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     ret = advancedNotificationService_->TriggerLocalLiveView(bundle, notificationId, buttonOption);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->TriggerLocalLiveView(bundle, notificationId, buttonOption);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -564,7 +564,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotification_00001, Function | SmallTest |
     int notificationId = 1;
     auto ret = advancedNotificationService_->RemoveNotification(bundle, notificationId, label, 0);
 
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -580,17 +580,17 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotifications_00001, Function | SmallTest 
     std::vector<std::string> keys;
     int removeReason = 1;
     auto ret = advancedNotificationService_->RemoveNotifications(keys, removeReason);
-    EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->RemoveNotifications(keys, removeReason);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->RemoveNotifications(keys, removeReason);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -615,7 +615,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotifications_00002, Function | SmallTest 
     keys.emplace_back(record->notification->GetKey());
 
     ret = advancedNotificationService_->RemoveNotifications(keys, removeReason);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -631,16 +631,16 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00001, Function | Small
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = nullptr;
     auto ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -665,7 +665,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00002, Function | Small
     auto slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 
     ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -680,34 +680,34 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
 
     auto ret = advancedNotificationService_->CancelAll(0);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->Delete("", 1);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->CancelGroup("group", 0);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->RemoveGroupByBundle(bundle, "group");
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     bool allowed = false;
     ret = advancedNotificationService_->IsSpecialUserAllowedNotify(1, allowed);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetNotificationsEnabledByUser(1, false);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
     bool enabled = false;
     ret = advancedNotificationService_->GetEnabledForBundleSlot(bundle, slotType, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetBadgeNumber(1, 0);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr, true);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /*
@@ -721,7 +721,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0100, TestSize.Lev
     std::string deviceType = "testDeviceType";
 
     ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
-    EXPECT_EQ(res, ERR_OK);
+    ASSERT_EQ(res, ERR_OK);
 }
 
 /*
@@ -737,7 +737,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0200, TestSize.Lev
     std::string deviceType = "testDeviceType";
 
     ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
-    EXPECT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /*
@@ -754,7 +754,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0300, TestSize.Lev
     std::string deviceType = "testDeviceType";
 
     ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
-    EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(res, ERR_ANS_PERMISSION_DENIED);
 }
 
 
@@ -769,7 +769,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Leve
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
-    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(result, ERR_OK);
 }
 
 /**
@@ -783,11 +783,11 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Leve
     std::string deviceType = "testDeviceType";
 
     ErrCode ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
-    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(ret, ERR_OK);
     bool enable = false;
     ret = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
-    EXPECT_EQ(ret, ERR_OK);
-    EXPECT_EQ(enable, true);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(enable, true);
 }
 
 /**
@@ -803,7 +803,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0300, TestSize.Leve
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -820,7 +820,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0400, TestSize.Leve
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -838,7 +838,7 @@ HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00001, Function | SmallTest 
     request->SetContent(content);
 
     auto ret = advancedNotificationService_->DuplicateMsgControl(request);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -857,7 +857,7 @@ HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00002, Function | SmallTest 
         std::make_pair(std::chrono::system_clock::now(), uniqueKey));
 
     auto ret = advancedNotificationService_->DuplicateMsgControl(request);
-    EXPECT_EQ(ret, (int)ERR_ANS_DUPLICATE_MSG);
+    ASSERT_EQ(ret, (int)ERR_ANS_DUPLICATE_MSG);
 }
 
 /**
@@ -873,8 +873,8 @@ HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00003, Function | SmallTest 
     request->SetAppMessageId("test2");
 
     auto ret = advancedNotificationService_->DuplicateMsgControl(request);
-    EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
 }
 
 /**
@@ -891,7 +891,7 @@ HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00001, Function | SmallTest | Lev
     auto uniqueKey = request->GenerateUniqueKey();
 
     auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
-    EXPECT_EQ(ret, false);
+    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -910,7 +910,7 @@ HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00002, Function | SmallTest | Lev
         std::make_pair(std::chrono::system_clock::now(), uniqueKey));
 
     auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
-    EXPECT_EQ(ret, true);
+    ASSERT_EQ(ret, true);
 }
 
 /**
@@ -929,9 +929,9 @@ HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTe
         std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(24), uniqueKey));
 
     sleep(1);
-    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
     advancedNotificationService_->RemoveExpiredUniqueKey();
-    EXPECT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
 }
 
 /*
@@ -942,7 +942,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTe
 HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0100, TestSize.Level1)
 {
     ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
-    EXPECT_EQ(res, ERR_OK);
+    ASSERT_EQ(res, ERR_OK);
 }
 
 /*
@@ -956,7 +956,7 @@ HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0200, TestSize.Level1)
     MockIsSystemApp(false);
 
     ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
-    EXPECT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /*
@@ -971,7 +971,7 @@ HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0300, TestSize.Level1)
     MockIsVerfyPermisson(false);
 
     ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
-    EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(res, ERR_ANS_PERMISSION_DENIED);
 }
 
 
@@ -984,7 +984,7 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0100, TestSize.Level1)
 {
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
-    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(result, ERR_OK);
 }
 
 /**
@@ -995,11 +995,11 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0100, TestSize.Level1)
 HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0200, TestSize.Level1)
 {
     ErrCode ret = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
-    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_EQ(ret, ERR_OK);
     bool enable = false;
     ret = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType", enable);
-    EXPECT_EQ(ret, ERR_OK);
-    EXPECT_EQ(enable, true);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(enable, true);
 }
 
 /**
@@ -1013,7 +1013,7 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0300, TestSize.Level1)
     MockIsSystemApp(false);
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1028,7 +1028,7 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0400, TestSize.Level1)
     MockIsVerfyPermisson(false);
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1047,7 +1047,7 @@ HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00001, Function | Sm
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
 
     auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -1060,7 +1060,7 @@ HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00002, Function | Sm
 {
     std::shared_ptr<NotificationRecord> record= nullptr;
     auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1083,7 +1083,7 @@ HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00003, Function | Sm
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
 
     auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

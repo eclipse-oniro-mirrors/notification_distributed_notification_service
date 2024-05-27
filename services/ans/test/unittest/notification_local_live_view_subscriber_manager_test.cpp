@@ -94,7 +94,7 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
     NotificationLocalLiveViewSubscriberManagerTest_001, Function | SmallTest | Level1)
 {
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
+    ASSERT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
 }
 
 /**
@@ -106,8 +106,8 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
     NotificationLocalLiveViewSubscriberManagerTest_002, Function | SmallTest | Level1)
 {
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
-    EXPECT_EQ(notificationLocalLiveViewSubscriberManager_->
+    ASSERT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
+    ASSERT_EQ(notificationLocalLiveViewSubscriberManager_->
         RemoveLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
 }
 
@@ -120,7 +120,7 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
     NotificationLocalLiveViewSubscriberManagerTest_003, Function | SmallTest | Level1)
 {
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
+    ASSERT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
     sptr<NotificationButtonOption> buttonOption = new NotificationButtonOption();
     sptr<NotificationRequest> request = new NotificationRequest();
     sptr<Notification> notification = new Notification(request);
