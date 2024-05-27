@@ -47,11 +47,12 @@ ErrCode AnsNotification::AddNotificationSlot(const NotificationSlot &slot)
 
 ErrCode AnsNotification::AddSlotByType(const NotificationConstant::SlotType &slotType)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->AddSlotByType(slotType);
+    return proxy->AddSlotByType(slotType);
 }
 
 ErrCode AnsNotification::AddNotificationSlots(const std::vector<NotificationSlot> &slots)
@@ -60,7 +61,9 @@ ErrCode AnsNotification::AddNotificationSlots(const std::vector<NotificationSlot
         ANS_LOGE("Failed to add notification slots because input slots size is 0.");
         return ERR_ANS_INVALID_PARAM;
     }
-    if (!GetAnsManagerProxy()) {
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -75,44 +78,48 @@ ErrCode AnsNotification::AddNotificationSlots(const std::vector<NotificationSlot
         slotsSptr.emplace_back(slot);
     }
 
-    return ansManagerProxy_->AddSlots(slotsSptr);
+    return proxy->AddSlots(slotsSptr);
 }
 
 ErrCode AnsNotification::RemoveNotificationSlot(const NotificationConstant::SlotType &slotType)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->RemoveSlotByType(slotType);
+    return proxy->RemoveSlotByType(slotType);
 }
 
 ErrCode AnsNotification::RemoveAllSlots()
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->RemoveAllSlots();
+    return proxy->RemoveAllSlots();
 }
 
 ErrCode AnsNotification::GetNotificationSlot(
     const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetSlotByType(slotType, slot);
+    return proxy->GetSlotByType(slotType, slot);
 }
 
 ErrCode AnsNotification::GetNotificationSlots(std::vector<sptr<NotificationSlot>> &slots)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetSlots(slots);
+    return proxy->GetSlots(slots);
 }
 
 ErrCode AnsNotification::GetNotificationSlotNumAsBundle(const NotificationBundleOption &bundleOption, uint64_t &num)
@@ -122,13 +129,14 @@ ErrCode AnsNotification::GetNotificationSlotNumAsBundle(const NotificationBundle
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->GetSlotNumAsBundle(bo, num);
+    return proxy->GetSlotNumAsBundle(bo, num);
 }
 
 ErrCode AnsNotification::GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
@@ -139,13 +147,14 @@ ErrCode AnsNotification::GetNotificationSlotFlagsAsBundle(const NotificationBund
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->GetSlotFlagsAsBundle(bo, slotFlags);
+    return proxy->GetSlotFlagsAsBundle(bo, slotFlags);
 }
 
 ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
@@ -156,13 +165,14 @@ ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBund
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->SetSlotFlagsAsBundle(bo, slotFlags);
+    return proxy->SetSlotFlagsAsBundle(bo, slotFlags);
 }
 
 ErrCode AnsNotification::PublishNotification(const NotificationRequest &request)
@@ -202,7 +212,8 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
         return checkErr;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Failed to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -219,7 +230,7 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
     reqPtr->SetCreatorInstanceKey(instanceKey);
 
-    return ansManagerProxy_->Publish(label, reqPtr);
+    return proxy->Publish(label, reqPtr);
 }
 
 ErrCode AnsNotification::CancelNotification(int32_t notificationId)
@@ -230,82 +241,90 @@ ErrCode AnsNotification::CancelNotification(int32_t notificationId)
 ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t notificationId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
-    return ansManagerProxy_->Cancel(notificationId, label, instanceKey);
+    return proxy->Cancel(notificationId, label, instanceKey);
 }
 
 ErrCode AnsNotification::CancelAllNotifications()
 {
     ANS_LOGI("CancelAllNotifications called.");
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
-    return ansManagerProxy_->CancelAll(instanceKey);
+    return proxy->CancelAll(instanceKey);
 }
 
 ErrCode AnsNotification::CancelAsBundle(
     int32_t notificationId, const std::string &representativeBundle, int32_t userId)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->CancelAsBundle(notificationId, representativeBundle, userId);
+    return proxy->CancelAsBundle(notificationId, representativeBundle, userId);
 }
 
 ErrCode AnsNotification::CancelAsBundle(
     const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->CancelAsBundle(bo, notificationId);
+    return proxy->CancelAsBundle(bo, notificationId);
 }
 
 ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetActiveNotificationNums(num);
+    return proxy->GetActiveNotificationNums(num);
 }
 
 ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
-    return ansManagerProxy_->GetActiveNotifications(request, instanceKey);
+    return proxy->GetActiveNotifications(request, instanceKey);
 }
 
 ErrCode AnsNotification::SetNotificationAgent(const std::string &agent)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->SetNotificationAgent(agent);
+    return proxy->SetNotificationAgent(agent);
 }
 
 ErrCode AnsNotification::GetNotificationAgent(std::string &agent)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetNotificationAgent(agent);
+    return proxy->GetNotificationAgent(agent);
 }
 
 ErrCode AnsNotification::CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish)
@@ -315,11 +334,12 @@ ErrCode AnsNotification::CanPublishNotificationAsBundle(const std::string &repre
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->CanPublishAsBundle(representativeBundle, canPublish);
+    return proxy->CanPublishAsBundle(representativeBundle, canPublish);
 }
 
 ErrCode AnsNotification::PublishNotificationAsBundle(
@@ -352,7 +372,8 @@ ErrCode AnsNotification::PublishNotificationAsBundle(
         return checkErr;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -365,45 +386,49 @@ ErrCode AnsNotification::PublishNotificationAsBundle(
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
-    return ansManagerProxy_->PublishAsBundle(reqPtr, representativeBundle);
+    return proxy->PublishAsBundle(reqPtr, representativeBundle);
 }
 
 ErrCode AnsNotification::SetNotificationBadgeNum()
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     int32_t num = -1;
-    return ansManagerProxy_->SetNotificationBadgeNum(num);
+    return proxy->SetNotificationBadgeNum(num);
 }
 
 ErrCode AnsNotification::SetNotificationBadgeNum(int32_t num)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->SetNotificationBadgeNum(num);
+    return proxy->SetNotificationBadgeNum(num);
 }
 
 ErrCode AnsNotification::IsAllowedNotify(bool &allowed)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->IsAllowedNotify(allowed);
+    return proxy->IsAllowedNotify(allowed);
 }
 
 ErrCode AnsNotification::IsAllowedNotifySelf(bool &allowed)
 {
     ANS_LOGD("enter");
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->IsAllowedNotifySelf(allowed);
+    return proxy->IsAllowedNotifySelf(allowed);
 }
 
 ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId,
@@ -411,30 +436,33 @@ ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId,
     sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("enter");
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->RequestEnableNotification(deviceId, hostClient, callerToken);
+    return proxy->RequestEnableNotification(deviceId, hostClient, callerToken);
 }
 
 ErrCode AnsNotification::HasNotificationPolicyAccessPermission(bool &hasPermission)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->HasNotificationPolicyAccessPermission(hasPermission);
+    return proxy->HasNotificationPolicyAccessPermission(hasPermission);
 }
 
 ErrCode AnsNotification::GetBundleImportance(NotificationSlot::NotificationLevel &importance)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     int32_t importanceTemp;
-    ErrCode ret = ansManagerProxy_->GetBundleImportance(importanceTemp);
+    ErrCode ret = proxy->GetBundleImportance(importanceTemp);
     if ((NotificationSlot::LEVEL_NONE <= importanceTemp) && (importanceTemp <= NotificationSlot::LEVEL_HIGH)) {
         importance = static_cast<NotificationSlot::NotificationLevel>(importanceTemp);
     } else {
@@ -446,7 +474,8 @@ ErrCode AnsNotification::GetBundleImportance(NotificationSlot::NotificationLevel
 ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &subscriber)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -456,13 +485,14 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
         ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->Subscribe(subscriberSptr, nullptr);
+    return proxy->Subscribe(subscriberSptr, nullptr);
 }
 
 ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -472,14 +502,15 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber 
         ANS_LOGE("Failed to subscribeSelf with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->SubscribeSelf(subscriberSptr);
+    return proxy->SubscribeSelf(subscriberSptr);
 }
 
 ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
     const bool isNative)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -489,14 +520,15 @@ ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLo
         ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->SubscribeLocalLiveView(subscriberSptr, nullptr, isNative);
+    return proxy->SubscribeLocalLiveView(subscriberSptr, nullptr, isNative);
 }
 
 ErrCode AnsNotification::SubscribeNotification(
     const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Failed to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -513,13 +545,14 @@ ErrCode AnsNotification::SubscribeNotification(
         return ERR_ANS_INVALID_PARAM;
     }
     subscriberSptr->subscriber_.SetDeviceType(subscribeInfo.GetDeviceType());
-    return ansManagerProxy_->Subscribe(subscriberSptr, sptrInfo);
+    return proxy->Subscribe(subscriberSptr, sptrInfo);
 }
 
 ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscriber)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -529,14 +562,15 @@ ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscri
         ANS_LOGE("Failed to unsubscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->Unsubscribe(subscriberSptr, nullptr);
+    return proxy->Unsubscribe(subscriberSptr, nullptr);
 }
 
 ErrCode AnsNotification::UnSubscribeNotification(
     NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -552,7 +586,7 @@ ErrCode AnsNotification::UnSubscribeNotification(
         ANS_LOGE("Failed to unsubscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->Unsubscribe(subscriberSptr, sptrInfo);
+    return proxy->Unsubscribe(subscriberSptr, sptrInfo);
 }
 
 ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
@@ -565,14 +599,15 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     sptr<NotificationButtonOption> button(new (std::nothrow) NotificationButtonOption(buttonOption));
-    return ansManagerProxy_->TriggerLocalLiveView(bo, notificationId, button);
+    return proxy->TriggerLocalLiveView(bo, notificationId, button);
 }
 
 ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t removeReason)
@@ -583,11 +618,12 @@ ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t remo
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->Delete(key, removeReason);
+    return proxy->Delete(key, removeReason);
 }
 
 ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bundleOption,
@@ -599,13 +635,14 @@ ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bund
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->RemoveNotification(bo, notificationId, label, removeReason);
+    return proxy->RemoveNotification(bo, notificationId, label, removeReason);
 }
 
 ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &bundleOption)
@@ -615,13 +652,14 @@ ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy defeat.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->RemoveAllNotifications(bo);
+    return proxy->RemoveAllNotifications(bo);
 }
 
 ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason)
@@ -631,12 +669,13 @@ ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hash
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->RemoveNotifications(hashcodes, removeReason);
+    return proxy->RemoveNotifications(hashcodes, removeReason);
 }
 
 ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption)
@@ -646,22 +685,24 @@ ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOpt
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Defeated to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->DeleteByBundle(bo);
+    return proxy->DeleteByBundle(bo);
 }
 
 ErrCode AnsNotification::RemoveNotifications()
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->DeleteAll();
+    return proxy->DeleteAll();
 }
 
 ErrCode AnsNotification::GetNotificationSlotsForBundle(
@@ -672,13 +713,14 @@ ErrCode AnsNotification::GetNotificationSlotsForBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->GetSlotsByBundle(bo, slots);
+    return proxy->GetSlotsByBundle(bo, slots);
 }
 
 ErrCode AnsNotification::GetNotificationSlotForBundle(
@@ -690,13 +732,14 @@ ErrCode AnsNotification::GetNotificationSlotForBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->GetSlotByBundle(bo, slotType, slot);
+    return proxy->GetSlotByBundle(bo, slotType, slot);
 }
 
 ErrCode AnsNotification::UpdateNotificationSlots(
@@ -707,32 +750,35 @@ ErrCode AnsNotification::UpdateNotificationSlots(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy flop.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->UpdateSlots(bo, slots);
+    return proxy->UpdateSlots(bo, slots);
 }
 
 ErrCode AnsNotification::GetAllActiveNotifications(std::vector<sptr<Notification>> &notification)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetAllActiveNotifications(notification);
+    return proxy->GetAllActiveNotifications(notification);
 }
 
 ErrCode AnsNotification::GetAllActiveNotifications(
     const std::vector<std::string> key, std::vector<sptr<Notification>> &notification)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetSpecialActiveNotifications(key, notification);
+    return proxy->GetSpecialActiveNotifications(key, notification);
 }
 
 ErrCode AnsNotification::GetActiveNotificationByFilter(const LiveViewFilter &filter,
@@ -747,13 +793,14 @@ ErrCode AnsNotification::GetActiveNotificationByFilter(const LiveViewFilter &fil
         filter.bundle.GetBundleName().c_str(), filter.bundle.GetUid(), filter.notificationKey.id,
         filter.notificationKey.label.c_str());
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(filter.bundle));
-    return ansManagerProxy_->GetActiveNotificationByFilter(bo, filter.notificationKey.id, filter.notificationKey.label,
+    return proxy->GetActiveNotificationByFilter(bo, filter.notificationKey.id, filter.notificationKey.label,
         filter.extraInfoKeys, request);
 }
 
@@ -764,31 +811,34 @@ ErrCode AnsNotification::IsAllowedNotify(const NotificationBundleOption &bundleO
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->IsSpecialBundleAllowedNotify(bo, allowed);
+    return proxy->IsSpecialBundleAllowedNotify(bo, allowed);
 }
 
 ErrCode AnsNotification::SetNotificationsEnabledForAllBundles(const std::string &deviceId, bool enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
+    return proxy->SetNotificationsEnabledForAllBundles(deviceId, enabled);
 }
 
 ErrCode AnsNotification::SetNotificationsEnabledForDefaultBundle(const std::string &deviceId, bool enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->SetNotificationsEnabledForBundle(deviceId, enabled);
+    return proxy->SetNotificationsEnabledForBundle(deviceId, enabled);
 }
 
 ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
@@ -800,13 +850,14 @@ ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->SetNotificationsEnabledForSpecialBundle(deviceId, bo, enabled);
+    return proxy->SetNotificationsEnabledForSpecialBundle(deviceId, bo, enabled);
 }
 
 ErrCode AnsNotification::SetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool enabled)
@@ -816,13 +867,14 @@ ErrCode AnsNotification::SetShowBadgeEnabledForBundle(const NotificationBundleOp
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->SetShowBadgeEnabledForBundle(bo, enabled);
+    return proxy->SetShowBadgeEnabledForBundle(bo, enabled);
 }
 
 ErrCode AnsNotification::GetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool &enabled)
@@ -832,23 +884,25 @@ ErrCode AnsNotification::GetShowBadgeEnabledForBundle(const NotificationBundleOp
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->GetShowBadgeEnabledForBundle(bo, enabled);
+    return proxy->GetShowBadgeEnabledForBundle(bo, enabled);
 }
 
 ErrCode AnsNotification::GetShowBadgeEnabled(bool &enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->GetShowBadgeEnabled(enabled);
+    return proxy->GetShowBadgeEnabled(enabled);
 }
 
 ErrCode AnsNotification::CancelGroup(const std::string &groupName)
@@ -858,12 +912,13 @@ ErrCode AnsNotification::CancelGroup(const std::string &groupName)
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
-    return ansManagerProxy_->CancelGroup(groupName, instanceKey);
+    return proxy->CancelGroup(groupName, instanceKey);
 }
 
 ErrCode AnsNotification::RemoveGroupByBundle(
@@ -874,18 +929,20 @@ ErrCode AnsNotification::RemoveGroupByBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->RemoveGroupByBundle(bo, groupName);
+    return proxy->RemoveGroupByBundle(bo, groupName);
 }
 
 ErrCode AnsNotification::SetDoNotDisturbDate(const NotificationDoNotDisturbDate &doNotDisturbDate)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -897,18 +954,19 @@ ErrCode AnsNotification::SetDoNotDisturbDate(const NotificationDoNotDisturbDate 
     }
 
     sptr<NotificationDoNotDisturbDate> dndDate(dndDatePtr);
-    return ansManagerProxy_->SetDoNotDisturbDate(dndDate);
+    return proxy->SetDoNotDisturbDate(dndDate);
 }
 
 ErrCode AnsNotification::GetDoNotDisturbDate(NotificationDoNotDisturbDate &doNotDisturbDate)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationDoNotDisturbDate> dndDate = nullptr;
-    auto ret = ansManagerProxy_->GetDoNotDisturbDate(dndDate);
+    auto ret = proxy->GetDoNotDisturbDate(dndDate);
     if (ret != ERR_OK) {
         ANS_LOGE("GetDoNotDisturbDate failed.");
         return ret;
@@ -929,11 +987,12 @@ ErrCode AnsNotification::AddDoNotDisturbProfiles(const std::vector<sptr<Notifica
         ANS_LOGW("The profiles is empty.");
         return ERR_ANS_INVALID_PARAM;
     }
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGW("Get ans manager proxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->AddDoNotDisturbProfiles(profiles);
+    return proxy->AddDoNotDisturbProfiles(profiles);
 }
 
 ErrCode AnsNotification::RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
@@ -942,21 +1001,23 @@ ErrCode AnsNotification::RemoveDoNotDisturbProfiles(const std::vector<sptr<Notif
         ANS_LOGW("The profiles is empty.");
         return ERR_ANS_INVALID_PARAM;
     }
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGW("Get ans manager proxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->RemoveDoNotDisturbProfiles(profiles);
+    return proxy->RemoveDoNotDisturbProfiles(profiles);
 }
 
 ErrCode AnsNotification::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->DoesSupportDoNotDisturbMode(doesSupport);
+    return proxy->DoesSupportDoNotDisturbMode(doesSupport);
 }
 
 ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationRequest &request)
@@ -983,7 +1044,8 @@ ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationReq
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -998,79 +1060,86 @@ ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationReq
     if (IsNonDistributedNotificationType(sptrReq->GetNotificationType())) {
         sptrReq->SetDistributed(false);
     }
-    return ansManagerProxy_->PublishContinuousTaskNotification(sptrReq);
+    return proxy->PublishContinuousTaskNotification(sptrReq);
 }
 
 ErrCode AnsNotification::CancelContinuousTaskNotification(const std::string &label, int32_t notificationId)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->CancelContinuousTaskNotification(label, notificationId);
+    return proxy->CancelContinuousTaskNotification(label, notificationId);
 }
 
 ErrCode AnsNotification::IsDistributedEnabled(bool &enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->IsDistributedEnabled(enabled);
+    return proxy->IsDistributedEnabled(enabled);
 }
 
 ErrCode AnsNotification::EnableDistributed(const bool enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->EnableDistributed(enabled);
+    return proxy->EnableDistributed(enabled);
 }
 
 ErrCode AnsNotification::EnableDistributedByBundle(const NotificationBundleOption &bundleOption, const bool enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->EnableDistributedByBundle(bo, enabled);
+    return proxy->EnableDistributedByBundle(bo, enabled);
 }
 
 ErrCode AnsNotification::EnableDistributedSelf(const bool enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->EnableDistributedSelf(enabled);
+    return proxy->EnableDistributedSelf(enabled);
 }
 
 ErrCode AnsNotification::IsDistributedEnableByBundle(const NotificationBundleOption &bundleOption, bool &enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->IsDistributedEnableByBundle(bo, enabled);
+    return proxy->IsDistributedEnableByBundle(bo, enabled);
 }
 
 ErrCode AnsNotification::GetDeviceRemindType(NotificationConstant::RemindType &remindType)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->GetDeviceRemindType(remindType);
+    return proxy->GetDeviceRemindType(remindType);
 }
 
 void AnsNotification::ResetAnsManagerProxy()
@@ -1085,7 +1154,8 @@ void AnsNotification::Reconnect()
     ANS_LOGD("enter");
     for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
         // try to connect ans
-        if (!GetAnsManagerProxy()) {
+        sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
             // Sleep 1000 milliseconds before reconnect.
             std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
             ANS_LOGE("get ans proxy fail, try again.");
@@ -1124,102 +1194,108 @@ ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
             return ERR_ANS_INVALID_PARAM;
         }
     }
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    ErrCode code = ansManagerProxy_->PublishReminder(tarReminder);
+    ErrCode code = proxy->PublishReminder(tarReminder);
     reminder.SetReminderId(tarReminder->GetReminderId());
     return code;
 }
 
 ErrCode AnsNotification::CancelReminder(const int32_t reminderId)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->CancelReminder(reminderId);
+    return proxy->CancelReminder(reminderId);
 }
 
 ErrCode AnsNotification::CancelAllReminders()
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->CancelAllReminders();
+    return proxy->CancelAllReminders();
 }
 
 ErrCode AnsNotification::GetValidReminders(std::vector<sptr<ReminderRequest>> &validReminders)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetValidReminders(validReminders);
+    return proxy->GetValidReminders(validReminders);
 }
 
 ErrCode AnsNotification::AddExcludeDate(const int32_t reminderId, const uint64_t date)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->AddExcludeDate(reminderId, date);
+    return proxy->AddExcludeDate(reminderId, date);
 }
 
 ErrCode AnsNotification::DelExcludeDates(const int32_t reminderId)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->DelExcludeDates(reminderId);
+    return proxy->DelExcludeDates(reminderId);
 }
 
 ErrCode AnsNotification::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetExcludeDates(reminderId, dates);
+    return proxy->GetExcludeDates(reminderId, dates);
 }
 
-bool AnsNotification::GetAnsManagerProxy()
+sptr<AnsManagerInterface> AnsNotification::GetAnsManagerProxy()
 {
+    sptr<AnsManagerInterface> proxy = nullptr;
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!ansManagerProxy_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!ansManagerProxy_) {
-            sptr<ISystemAbilityManager> systemAbilityManager =
-                SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-            if (!systemAbilityManager) {
-                ANS_LOGE("Failed to get system ability mgr.");
-                return false;
-            }
+        sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (!systemAbilityManager) {
+            ANS_LOGE("Failed to get system ability mgr.");
+            return proxy;
+        }
 
-            sptr<IRemoteObject> remoteObject =
-                systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
-            if (!remoteObject) {
-                ANS_LOGE("Failed to get notification Manager.");
-                return false;
-            }
+        sptr<IRemoteObject> remoteObject =
+            systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+        if (!remoteObject) {
+            ANS_LOGE("Failed to get notification Manager.");
+            return proxy;
+        }
 
-            ansManagerProxy_ = iface_cast<AnsManagerInterface>(remoteObject);
-            if ((!ansManagerProxy_) || (!ansManagerProxy_->AsObject())) {
-                ANS_LOGE("Failed to get notification Manager's proxy");
-                return false;
-            }
+        ansManagerProxy_ = iface_cast<AnsManagerInterface>(remoteObject);
+        if ((!ansManagerProxy_) || (!ansManagerProxy_->AsObject())) {
+            ANS_LOGE("Failed to get notification Manager's proxy");
+            return proxy;
+        }
 
-            auto ansManagerDeathRecipient = DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
-            if (!ansManagerDeathRecipient->GetIsSubscribeSAManager()) {
-                ansManagerDeathRecipient->SubscribeSAManager();
-            }
+        auto ansManagerDeathRecipient = DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
+        if (!ansManagerDeathRecipient->GetIsSubscribeSAManager()) {
+            ansManagerDeathRecipient->SubscribeSAManager();
         }
     }
-
-    return true;
+    proxy = ansManagerProxy_;
+    return proxy;
 }
 
 bool AnsNotification::CanPublishMediaContent(const NotificationRequest &request) const
@@ -1333,12 +1409,13 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 
 ErrCode AnsNotification::IsSupportTemplate(const std::string &templateName, bool &support)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->IsSupportTemplate(templateName, support);
+    return proxy->IsSupportTemplate(templateName, support);
 }
 
 bool AnsNotification::IsNonDistributedNotificationType(const NotificationContent::Type &type)
@@ -1355,12 +1432,13 @@ ErrCode AnsNotification::IsAllowedNotify(const int32_t &userId, bool &allowed)
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->IsSpecialUserAllowedNotify(userId, allowed);
+    return proxy->IsSpecialUserAllowedNotify(userId, allowed);
 }
 
 ErrCode AnsNotification::SetNotificationsEnabledForAllBundles(const int32_t &userId, bool enabled)
@@ -1370,11 +1448,12 @@ ErrCode AnsNotification::SetNotificationsEnabledForAllBundles(const int32_t &use
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->SetNotificationsEnabledByUser(userId, enabled);
+    return proxy->SetNotificationsEnabledByUser(userId, enabled);
 }
 
 ErrCode AnsNotification::RemoveNotifications(const int32_t &userId)
@@ -1384,12 +1463,13 @@ ErrCode AnsNotification::RemoveNotifications(const int32_t &userId)
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->DeleteAllByUser(userId);
+    return proxy->DeleteAllByUser(userId);
 }
 
 ErrCode AnsNotification::SetDoNotDisturbDate(const int32_t &userId,
@@ -1400,7 +1480,8 @@ ErrCode AnsNotification::SetDoNotDisturbDate(const int32_t &userId,
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -1412,7 +1493,7 @@ ErrCode AnsNotification::SetDoNotDisturbDate(const int32_t &userId,
     }
 
     sptr<NotificationDoNotDisturbDate> dndDate(dndDatePtr);
-    return ansManagerProxy_->SetDoNotDisturbDate(dndDate);
+    return proxy->SetDoNotDisturbDate(dndDate);
 }
 
 ErrCode AnsNotification::GetDoNotDisturbDate(const int32_t &userId, NotificationDoNotDisturbDate &doNotDisturbDate)
@@ -1422,13 +1503,14 @@ ErrCode AnsNotification::GetDoNotDisturbDate(const int32_t &userId, Notification
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationDoNotDisturbDate> dndDate = nullptr;
-    auto ret = ansManagerProxy_->GetDoNotDisturbDate(dndDate);
+    auto ret = proxy->GetDoNotDisturbDate(dndDate);
     if (ret != ERR_OK) {
         ANS_LOGE("Get DoNotDisturbDate failed.");
         return ret;
@@ -1452,13 +1534,14 @@ ErrCode AnsNotification::SetEnabledForBundleSlot(const NotificationBundleOption 
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("SetEnabledForBundleSlot fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->SetEnabledForBundleSlot(bo, slotType, enabled, isForceControl);
+    return proxy->SetEnabledForBundleSlot(bo, slotType, enabled, isForceControl);
 }
 
 ErrCode AnsNotification::GetEnabledForBundleSlot(
@@ -1469,34 +1552,37 @@ ErrCode AnsNotification::GetEnabledForBundleSlot(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetEnabledForBundleSlot fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->GetEnabledForBundleSlot(bo, slotType, enabled);
+    return proxy->GetEnabledForBundleSlot(bo, slotType, enabled);
 }
 
 ErrCode AnsNotification::GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetEnabledForBundleSlotSelf fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->GetEnabledForBundleSlotSelf(slotType, enabled);
+    return proxy->GetEnabledForBundleSlotSelf(slotType, enabled);
 }
 
 ErrCode AnsNotification::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
     int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->ShellDump(cmd, bundle, userId, recvUserId, dumpInfo);
+    return proxy->ShellDump(cmd, bundle, userId, recvUserId, dumpInfo);
 }
 
 ErrCode AnsNotification::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
@@ -1506,12 +1592,13 @@ ErrCode AnsNotification::SetSyncNotificationEnabledWithoutApp(const int32_t user
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->SetSyncNotificationEnabledWithoutApp(userId, enabled);
+    return proxy->SetSyncNotificationEnabledWithoutApp(userId, enabled);
 }
 
 ErrCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled)
@@ -1521,22 +1608,24 @@ ErrCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32_t user
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
+    return proxy->GetSyncNotificationEnabledWithoutApp(userId, enabled);
 }
 
 ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("SetBadgeNumber fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
-    return ansManagerProxy_->SetBadgeNumber(badgeNumber, instanceKey);
+    return proxy->SetBadgeNumber(badgeNumber, instanceKey);
 }
 
 ErrCode AnsNotification::SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber)
@@ -1546,7 +1635,8 @@ ErrCode AnsNotification::SetBadgeNumberByBundle(const NotificationBundleOption &
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Unable to connect to ANS service.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -1556,37 +1646,40 @@ ErrCode AnsNotification::SetBadgeNumberByBundle(const NotificationBundleOption &
         ANS_LOGE("Unable to create new bundle info.");
         return ERR_ANS_NO_MEMORY;
     }
-    return ansManagerProxy_->SetBadgeNumberByBundle(bundleInfo, badgeNumber);
+    return proxy->SetBadgeNumberByBundle(bundleInfo, badgeNumber);
 }
 
 ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return ansManagerProxy_->GetAllNotificationEnabledBundles(bundleOption);
+    return proxy->GetAllNotificationEnabledBundles(bundleOption);
 }
 
 ErrCode AnsNotification::RegisterPushCallback(
     const sptr<IRemoteObject>& pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("RegisterPushCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->RegisterPushCallback(pushCallback, notificationCheckRequest);
+    return proxy->RegisterPushCallback(pushCallback, notificationCheckRequest);
 }
 
 ErrCode AnsNotification::UnregisterPushCallback()
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("UnregisterPushCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->UnregisterPushCallback();
+    return proxy->UnregisterPushCallback();
 }
 
 ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::string &value)
@@ -1595,12 +1688,13 @@ ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::st
         ANS_LOGE("Set package config fail: key is empty.");
         return ERR_ANS_INVALID_PARAM;
     }
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("Get ans manager proxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->SetAdditionConfig(key, value);
+    return proxy->SetAdditionConfig(key, value);
 }
 
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
@@ -1612,13 +1706,14 @@ ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleO
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("SetDistributedEnabledByBundleCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->SetDistributedEnabledByBundle(bo, deviceType, enabled);
+    return proxy->SetDistributedEnabledByBundle(bo, deviceType, enabled);
 }
 
 ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
@@ -1630,57 +1725,62 @@ ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOp
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("IsDistributedEnabledByBundleCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->IsDistributedEnabledByBundle(bo, deviceType, enabled);
+    return proxy->IsDistributedEnabledByBundle(bo, deviceType, enabled);
 }
 
 ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("enter");
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("UnregisterPushCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->SetSmartReminderEnabled(deviceType, enabled);
+    return proxy->SetSmartReminderEnabled(deviceType, enabled);
 }
 
 ErrCode AnsNotification::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
 {
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return ansManagerProxy_->CancelAsBundleWithAgent(bundle, id);
+    return proxy->CancelAsBundleWithAgent(bundle, id);
 }
 
 ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
 {
     ANS_LOGD("enter");
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("UnregisterPushCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->IsSmartReminderEnabled(deviceType, enabled);
+    return proxy->IsSmartReminderEnabled(deviceType, enabled);
 }
 
 ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
 {
     ANS_LOGD("enter");
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("UnregisterPushCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return ansManagerProxy_->SetTargetDeviceStatus(deviceType, status);
+    return proxy->SetTargetDeviceStatus(deviceType, status);
 }
 
 
@@ -1711,7 +1811,8 @@ bool AnsNotification::IsValidDelayTime(const NotificationRequest &request)  cons
 ErrCode AnsNotification::RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc)
 {
     ANS_LOGD("enter");
-    if (!GetAnsManagerProxy()) {
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
         ANS_LOGE("RegisterSwingCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
@@ -1720,7 +1821,7 @@ ErrCode AnsNotification::RegisterSwingCallback(const std::function<void(bool, in
         ANS_LOGE("RegisterSwingCallback swingCallBackStub_ == null");
         return ERR_ANS_INVALID_PARAM;
     }
-    return ansManagerProxy_->RegisterSwingCallback(swingCallBackStub_->AsObject());
+    return proxy->RegisterSwingCallback(swingCallBackStub_->AsObject());
 }
 #endif
 }  // namespace Notification
