@@ -1126,7 +1126,8 @@ private:
         CREATE,
         FIRST_UPDATE_TIME_OUT,
         CONTINUOUS_UPDATE_TIME_OUT,
-        END
+        END,
+        FINISH
     };
 
     AdvancedNotificationService();
@@ -1232,7 +1233,7 @@ private:
     void SendEnableNotificationSlotHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, ErrCode errCode);
     void SendFlowControlOccurHiSysEvent(const std::shared_ptr<NotificationRecord> &record);
-    void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, UploadStatus uploadStatus);
+    void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, int32_t uploadStatus);
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
@@ -1241,7 +1242,8 @@ private:
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
         sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
-    uint64_t StartAutoDelete(const std::string &key, int64_t deleteTimePoint, int32_t reason);
+    uint64_t StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
+        int64_t deleteTimePoint, int32_t reason);
     void TriggerAutoDelete(const std::string &hashCode, int32_t reason);
     void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);

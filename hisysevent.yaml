@@ -79,13 +79,6 @@ ENABLE_NOTIFICATION_SLOT:
   SLOT_TYPE: {type: INT32, desc: slot type}
   ENABLE: {type: BOOL, desc: enable state}
 
-STATIC_LIVE_VIEW_UPLOAD:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: publish download liveview state}
-  NOTIFICATION_ID: {type: INT32, desc: notification Id}
-  BUNDLE_NAME: {type: STRING, desc: bundle name}
-  CONTENT_TYPE: {type: INT32, desc: notification content type}
-  OPERATE_FLAG: {type: INT32, desc: download liveview operate flag}
-
 # statistic event
 PUBLISH:
   __BASE: {type: STATISTIC, level: MINOR, desc: publish notification}
@@ -113,3 +106,10 @@ ALARM_TRIGGER:
   PID: {type: INT32, desc: thread pid}
   UID: {type: INT32, desc: package uid}
   NAME: {type: STRING, desc: call package name}
+
+STATIC_LIVE_VIEW_UPLOAD:
+  __BASE: {type: STATISTIC, level: MINOR, desc: publish download liveview state}
+  NOTIFICATION_ID: {type: INT32, desc: notification Id}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  CONTENT_TYPE: {type: INT32, desc: notification content type}
+  OPERATE_FLAG: {type: INT32, desc: download liveview operate flag}

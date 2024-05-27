@@ -1718,11 +1718,17 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     return ERR_OK;
 }
 
-uint64_t AdvancedNotificationService::StartAutoDelete(const std::string &key, int64_t deleteTimePoint, int32_t reason)
+uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
+    int64_t deleteTimePoint, int32_t reason)
 {
     ANS_LOGD("Enter");
 
-    auto triggerFunc = [this, key, reason] { TriggerAutoDelete(key, reason); };
+    auto triggerFunc = [this, record, reason, deleteTimePoint] {
+        TriggerAutoDelete(record->notification->GetKey(), reason);
+        if (record->finish_status != NotificationConstant::DEFAULT_FINISH_STATUS) {
+            SendLiveViewUploadHiSysEvent(record, record->finish_status);
+        }
+    };
     std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
     notificationTimerInfo->SetCallbackInfo(triggerFunc);
 

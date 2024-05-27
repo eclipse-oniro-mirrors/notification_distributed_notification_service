@@ -194,7 +194,7 @@ void EventReport::InnerSendLiveviewUploadEvent(const EventInfo &eventInfo)
 {
     InnerEventWrite(
         STATIC_LIVE_VIEW_UPLOAD,
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
         EVENT_PARAM_NOTIFICATION_ID, eventInfo.notificationId,
         EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_PARAM_CONTENT_TYPE, eventInfo.contentType,

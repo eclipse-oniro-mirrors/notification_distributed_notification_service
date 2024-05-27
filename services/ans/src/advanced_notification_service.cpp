@@ -442,7 +442,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
 ErrCode AdvancedNotificationService::StartFinishTimer(
     const std::shared_ptr<NotificationRecord> &record, int64_t expiredTimePoint)
 {
-    uint64_t timerId = StartAutoDelete(record->notification->GetKey(),
+    uint64_t timerId = StartAutoDelete(record,
         expiredTimePoint, NotificationConstant::APP_CANCEL_REASON_OTHER);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
         ANS_LOGE("Start finish auto delete timer failed.");
@@ -473,7 +473,7 @@ void AdvancedNotificationService::CancelFinishTimer(const std::shared_ptr<Notifi
 ErrCode AdvancedNotificationService::StartUpdateTimer(
     const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint)
 {
-    uint64_t timerId = StartAutoDelete(record->notification->GetKey(),
+    uint64_t timerId = StartAutoDelete(record,
         expireTimePoint, NotificationConstant::APP_CANCEL_REASON_OTHER);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
         ANS_LOGE("Start update auto delete timer failed.");
@@ -513,7 +513,7 @@ void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<Notifi
     }
     int64_t maxExpiredTime = GetCurrentTime() +
         NotificationConstant::SECOND_TO_MS * deleteTime;
-    uint64_t timerId = StartAutoDelete(record->notification->GetKey(),
+    uint64_t timerId = StartAutoDelete(record,
         maxExpiredTime, NotificationConstant::APP_CANCEL_REASON_DELETE);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
         ANS_LOGE("Start archive auto delete timer failed.");
@@ -623,7 +623,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDelete(record->notification->GetKey(),
+        StartAutoDelete(record,
             record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
     }
     return result;
@@ -897,7 +897,9 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
             record->request->FillMissingParameters((*iter)->request);
             FillLockScreenPicture(record->request, (*iter)->request);
             record->notification->SetUpdateTimer((*iter)->notification->GetUpdateTimer());
-            record->notification->SetFinishTimer((*iter)->notification->GetFinishTimer());
+            if (!record->request->IsSystemLiveView()) {
+                record->notification->SetFinishTimer((*iter)->notification->GetFinishTimer());
+            }
             *iter = record;
             break;
         }
@@ -1108,6 +1110,10 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 
             ProcForDeleteLiveView(record);
             notificationList_.remove(record);
+            if (IsSaCreateSystemLiveViewAsBundle(record,
+                record->notification->GetNotificationRequest().GetCreatorUid())) {
+                SendLiveViewUploadHiSysEvent(record, UploadStatus::END);
+            }
             return ERR_OK;
         }
     }

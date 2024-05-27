@@ -15,6 +15,7 @@
 
 #include "advanced_notification_service.h"
 
+#include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <sstream>
@@ -182,7 +183,7 @@ void AdvancedNotificationService::SendFlowControlOccurHiSysEvent(const std::shar
 }
 
 void AdvancedNotificationService::SendLiveViewUploadHiSysEvent(
-    const std::shared_ptr<NotificationRecord> &record, UploadStatus uploadStatus)
+    const std::shared_ptr<NotificationRecord> &record, int32_t uploadStatus)
 {
     if (record == nullptr || record->request == nullptr ||
         uploadStatus < UploadStatus::CREATE || uploadStatus > UploadStatus::END) {
@@ -193,7 +194,7 @@ void AdvancedNotificationService::SendLiveViewUploadHiSysEvent(
     eventInfo.notificationId = record->request->GetNotificationId();
     eventInfo.bundleName = record->request->GetCreatorBundleName();
     eventInfo.contentType = static_cast<int32_t>(record->request->GetNotificationType());
-    eventInfo.operateFlag = static_cast<int32_t>(uploadStatus);
+    eventInfo.operateFlag = uploadStatus;
     EventReport::SendHiSysEvent(STATIC_LIVE_VIEW_UPLOAD, eventInfo);
 }
 }  // namespace Notification

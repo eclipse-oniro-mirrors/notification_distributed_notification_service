@@ -17,6 +17,7 @@
 
 #include "errors.h"
 #include "ans_inner_errors.h"
+#include "notification_constant.h"
 #include "notification_record.h"
 #include "notification_request.h"
 #include "want_params_wrapper.h"
@@ -29,11 +30,13 @@
 #include "time_service_client.h"
 #include "notification_timer_info.h"
 #include "advanced_notification_inline.cpp"
+#include <cstdint>
 #include <memory>
 
 namespace OHOS {
 namespace Notification {
 const std::string LOCK_SCREEN_PICTURE_TAG = "lock_screen_picture";
+const std::string PROGRESS_VALUE = "progressValue";
 void AdvancedNotificationService::RecoverLiveViewFromDb()
 {
     ANS_LOGI("Start recover live view from db.");
@@ -129,7 +132,8 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
 
 void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record)
 {
-    if ((record->request == nullptr) || !(record->request->IsCommonLiveView())) {
+    if ((record->request == nullptr) ||
+        (!(record->request->IsCommonLiveView()) && !(record->request->IsSystemLiveView()))) {
         return;
     }
     int32_t userId = record->request->GetReceiverUserId();
@@ -534,10 +538,13 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
     UpdateRecentNotification(record->notification, false, 0);
     NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
-        StartAutoDelete(record->notification->GetKey(),
+        StartAutoDelete(record,
             record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
     }
 
+    record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;
+    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES);
+    
     return ERR_OK;
 }
 
@@ -605,6 +612,7 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();
     record->request = oldRecord->request;
+    uint64_t timerId = 0;
     if (isSystemApp) {
         record->request->SetContent(content);
     } else {
@@ -612,13 +620,30 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         auto data = downloadTemplate->GetTemplateData();
         AAFwk::WantParamWrapper wrapper(*data);
         ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
+        
+        CancelTimer(oldRecord->notification->GetFinishTimer());
+        
+        uint64_t process = 0;
+        if (data->HasParam(PROGRESS_VALUE)) {
+            process = data->GetIntParam(PROGRESS_VALUE, 0);
+        }
+
+        if (process == NotificationConstant::FINISH_PER) {
+            record->finish_status = UploadStatus::FINISH;
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES);
+        } else {
+            record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES);
+        }
+        timerId = record->notification->GetFinishTimer();
     }
     record->notification = new (std::nothrow) Notification(record->request);
-    record->bundleOption = oldRecord->bundleOption;
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
         return;
     }
+    record->bundleOption = oldRecord->bundleOption;
+    record->notification->SetFinishTimer(timerId);
 }
 }
 }
