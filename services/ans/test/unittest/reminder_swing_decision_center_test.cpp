@@ -49,7 +49,7 @@ HWTEST_F(ReminderSwingDecisionCenterTest, RegisterSwingCallback_00001, Function 
 {
     sptr<IRemoteObject> swingCallback = nullptr;
     auto ret = reminderSwingDecisionCenter_.RegisterSwingCallback(swingCallback);
-    EXPECT_EQ(ret, (int)ERR_INVALID_VALUE);
+    ASSERT_EQ(ret, (int)ERR_INVALID_VALUE);
 }
 
 /**
@@ -63,7 +63,7 @@ HWTEST_F(ReminderSwingDecisionCenterTest, RegisterSwingCallback_00002, Function 
     EXPECT_NE(swingCallbackProxy, nullptr);
     sptr<IRemoteObject> swingCallback = swingCallbackProxy->AsObject();
     int ret = reminderSwingDecisionCenter_.RegisterSwingCallback(swingCallback);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 }   //namespace Notification
 }   //namespace OHOS

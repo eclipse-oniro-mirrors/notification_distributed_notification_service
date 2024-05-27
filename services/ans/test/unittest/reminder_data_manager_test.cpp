@@ -477,7 +477,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_018, Level1)
     std::string ringUri = "123";
     reminder->SetCustomRingUri(ringUri);
     std::string getRingUri = manager->GetCustomRingUri(reminder);
-    EXPECT_EQ(ringUri, getRingUri);
+    ASSERT_EQ(ringUri, getRingUri);
 }
 
 /**
@@ -672,7 +672,7 @@ HWTEST_F(ReminderDataManagerTest, CheckPulishReminder_0001, Level1)
     sptr<NotificationBundleOption> option = new NotificationBundleOption();
     IPCSkeleton::SetCallingTokenID(0);
     ErrCode ret = manager->PublishReminder(reminder, option);
-    EXPECT_EQ(ret, ERR_REMINDER_CALLER_TOKEN_INVALID);
+    ASSERT_EQ(ret, ERR_REMINDER_CALLER_TOKEN_INVALID);
 
     IPCSkeleton::SetCallingTokenID(1);
     ret = manager->PublishReminder(reminder, option);

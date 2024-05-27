@@ -48,7 +48,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00100, Function | Smal
 {
     pid_t callingUid = IPCSkeleton::GetCallingUid();
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-    EXPECT_EQ(bundleManager->GetBundleNameByUid(callingUid), "bundleName");
+    ASSERT_EQ(bundleManager->GetBundleNameByUid(callingUid), "bundleName");
 }
 
 /**
@@ -74,7 +74,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00300, Level1)
     sptr<NotificationBundleOption> bundleOption = nullptr;
     BundleManagerHelper bundleManagerHelper;
     bool result = bundleManagerHelper.CheckApiCompatibility(bundleOption);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -90,7 +90,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00301, Level1)
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
     BundleManagerHelper bundleManagerHelper;
     bool result = bundleManagerHelper.CheckApiCompatibility(bundleOption);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -106,7 +106,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00400, Level1)
     AppExecFwk::BundleInfo bundleInfo;
     BundleManagerHelper bundleManagerHelper;
     bool result = bundleManagerHelper.GetBundleInfoByBundleName(bundle, userId, bundleInfo);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -121,7 +121,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
     int32_t userId = 1;
     BundleManagerHelper bundleManagerHelper;
     int32_t result = bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId);
-    EXPECT_EQ(result, 1000);
+    ASSERT_EQ(result, 1000);
 }
 
 /**
@@ -136,7 +136,7 @@ HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00100, Level
     int32_t userId = 1;
     BundleManagerHelper bundleManagerHelper;
     bool result = bundleManagerHelper.GetDistributedNotificationEnabled(bundle, userId);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -154,7 +154,7 @@ HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00101, Level
     sptr<IRemoteObject> remoteObject;
     bundleManagerHelper->bundleMgr_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     bool result = bundleManagerHelper->GetDistributedNotificationEnabled(bundle, userId);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

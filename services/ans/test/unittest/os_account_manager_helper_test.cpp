@@ -39,7 +39,7 @@ public:
 HWTEST_F(OsAccountManagerHelperTest, GetCurrentCallingUserId_00100, Function | SmallTest | Level1)
 {
     int32_t userId = -1;
-    EXPECT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId));
+    ASSERT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId));
 }
 
 /**
@@ -51,7 +51,7 @@ HWTEST_F(OsAccountManagerHelperTest, GetOsAccountLocalIdFromUid_00100, Function 
 {
     int32_t userId = -1;
     const int uid = 0;
-    EXPECT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId));
+    ASSERT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId));
 }
 
 /**
@@ -62,7 +62,7 @@ HWTEST_F(OsAccountManagerHelperTest, GetOsAccountLocalIdFromUid_00100, Function 
 HWTEST_F(OsAccountManagerHelperTest, GetCurrentActiveUserId_00100, Function | SmallTest | Level1)
 {
     int32_t userId = -1;
-    EXPECT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId));
+    ASSERT_EQ(ERR_OK, OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId));
 }
 
 /**
@@ -73,7 +73,7 @@ HWTEST_F(OsAccountManagerHelperTest, GetCurrentActiveUserId_00100, Function | Sm
 HWTEST_F(OsAccountManagerHelperTest, CheckUserExists_00100, Function | SmallTest | Level1)
 {
     int32_t userId = 100;
-    EXPECT_EQ(true, OsAccountManagerHelper::GetInstance().CheckUserExists(userId));
+    ASSERT_EQ(true, OsAccountManagerHelper::GetInstance().CheckUserExists(userId));
 }
 
 /**
@@ -84,7 +84,7 @@ HWTEST_F(OsAccountManagerHelperTest, CheckUserExists_00100, Function | SmallTest
 HWTEST_F(OsAccountManagerHelperTest, CheckUserExists_00200, Function | SmallTest | Level1)
 {
     int32_t userId = 1099;
-    EXPECT_EQ(false, OsAccountManagerHelper::GetInstance().CheckUserExists(userId));
+    ASSERT_EQ(false, OsAccountManagerHelper::GetInstance().CheckUserExists(userId));
 }
 
 /**
@@ -95,7 +95,7 @@ HWTEST_F(OsAccountManagerHelperTest, CheckUserExists_00200, Function | SmallTest
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0100, Function | SmallTest | Level1)
 {
     int32_t userId = 100;
-    EXPECT_EQ(true, OsAccountManagerHelper::IsSystemAccount(userId));
+    ASSERT_EQ(true, OsAccountManagerHelper::IsSystemAccount(userId));
 }
 
 /**
@@ -106,7 +106,7 @@ HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0100, Function | SmallTest 
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0200, Function | SmallTest | Level1)
 {
     int32_t userId = 1100;
-    EXPECT_EQ(false, OsAccountManagerHelper::IsSystemAccount(userId));
+    ASSERT_EQ(false, OsAccountManagerHelper::IsSystemAccount(userId));
 }
 
 /**
@@ -117,7 +117,7 @@ HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0200, Function | SmallTest 
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0300, Function | SmallTest | Level1)
 {
     int32_t userId = 0;
-    EXPECT_EQ(false, OsAccountManagerHelper::IsSystemAccount(userId));
+    ASSERT_EQ(false, OsAccountManagerHelper::IsSystemAccount(userId));
 }
 
 /**
@@ -128,7 +128,7 @@ HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0300, Function | SmallTest 
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0400, Function | SmallTest | Level1)
 {
     int32_t userId = 1099;
-    EXPECT_EQ(true, OsAccountManagerHelper::IsSystemAccount(userId));
+    ASSERT_EQ(true, OsAccountManagerHelper::IsSystemAccount(userId));
 }
 }
 }

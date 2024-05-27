@@ -159,7 +159,7 @@ HWTEST_F(AnsUtilsTest, FillRequestByKeys_00001, Function | SmallTest | Level1)
     std::vector<std::string> keys = {"key1"};
     sptr<NotificationRequest> newRequest;
     ErrCode ret = advancedNotificationService_->FillRequestByKeys(oldRequest, keys, newRequest);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -176,11 +176,11 @@ HWTEST_F(AnsUtilsTest, IsAllowedGetNotificationByFilter_00001, Function | SmallT
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     int ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -196,11 +196,11 @@ HWTEST_F(AnsUtilsTest, IsAllowedGetNotificationByFilter_00002, Function | SmallT
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     int ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     record->bundleOption->SetBundleName("bundleName");
     ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -218,7 +218,7 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00001, Function | SmallTest
     sptr<NotificationRequest> newRequest;
     auto bundleOption = new NotificationBundleOption("test", 1);
     int notificationId = 1;
-    EXPECT_EQ(ans.GetActiveNotificationByFilter(bundleOption, notificationId, label, keys, newRequest),
+    ASSERT_EQ(ans.GetActiveNotificationByFilter(bundleOption, notificationId, label, keys, newRequest),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -235,7 +235,7 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00002, Function | SmallTest
     sptr<NotificationRequest> newRequest;
     sptr<NotificationBundleOption> bundle;
     int notificationId = 1;
-    EXPECT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(
         bundle, notificationId, label, keys, newRequest),
         (int)ERR_ANS_INVALID_BUNDLE);
 }
@@ -276,15 +276,15 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00003, Function | SmallTest
 
     std::vector<std::string> keys;
     sptr<NotificationRequest> newRequest;
-    EXPECT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
         notificationId, label, keys, newRequest), (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
-    EXPECT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
         notificationId, label, keys, newRequest), (int)ERR_OK);
 
     keys.emplace_back("test1");
-    EXPECT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
         notificationId, label, keys, newRequest), (int)ERR_OK);
 }
 
@@ -313,8 +313,8 @@ HWTEST_F(AnsUtilsTest, RecentNotificationDump_00001, Function | SmallTest | Leve
 
     std::vector<std::string> dumpInfo;
     int ret = advancedNotificationService_->RecentNotificationDump("test", 1, 1, dumpInfo);
-    EXPECT_EQ(ret, (int)ERR_OK);
-    EXPECT_EQ(dumpInfo.size(), 1);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(dumpInfo.size(), 1);
 }
 
 /**
@@ -332,10 +332,10 @@ HWTEST_F(AnsUtilsTest, GetLocalNotificationKeys_00001, Function | SmallTest | Le
     notificationId = 2;
     sptr<NotificationBundleOption> bundle2 = new NotificationBundleOption("test1", 2);
     TestAddNotification(notificationId, bundle2);
-    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     auto keys = advancedNotificationService_->GetLocalNotificationKeys(bundle2);
-    EXPECT_EQ(keys.size(), 1);
+    ASSERT_EQ(keys.size(), 1);
 #endif
 }
 
@@ -352,7 +352,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
     TestAddNotification(notificationId, bundle);
 
     advancedNotificationService_->OnBundleDataCleared(bundle);
-    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 }
 
 /**
@@ -368,7 +368,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
 //     TestAddNotification(notificationId, bundle);
 
 //     advancedNotificationService_->OnBundleDataCleared(bundle);
-//     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+//     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 // }
 
 /**
@@ -393,7 +393,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
 //     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
 //     AppExecFwk::BundleInfo bundleInfo;
 //     bool res = advancedNotificationService_->GetBundleInfoByNotificationBundleOption(bundle, bundleInfo);
-//     EXPECT_EQ(res, true);
+//     ASSERT_EQ(res, true);
 // }
 
 /**
@@ -407,11 +407,11 @@ HWTEST_F(AnsUtilsTest, OnBundleRemoved_00001, Function | SmallTest | Level1)
     int notificationId = 1;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     TestAddNotification(notificationId, bundle);
-    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     advancedNotificationService_->OnBundleRemoved(bundle);
     SleepForFC();
-    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 }
 
 /**
@@ -430,7 +430,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataAdd_00001, Function | SmallTest | Level1)
     SleepForFC();
     bool enable = false;
     NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundle, enable);
-    EXPECT_EQ(enable, false);
+    ASSERT_EQ(enable, false);
 }
 
 /**

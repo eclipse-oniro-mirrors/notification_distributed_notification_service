@@ -301,7 +301,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00100, 
     bundleInfo.SetBundleUid(bundleUid_);
     const int32_t uid = -1;
     EXPECT_TRUE(preferncesDB_->PutTotalBadgeNums(bundleInfo, 0));
-    EXPECT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(bundleName_, uid));
+    ASSERT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(bundleName_, uid));
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00100, 
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00200, Function | SmallTest | Level1)
 {
     const int32_t uid = -1;
-    EXPECT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(std::string(), uid));
+    ASSERT_EQ(true, preferncesDB_->RemoveBundleFromDisturbeDB(std::string(), uid));
 }
 
 /**
@@ -376,7 +376,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, CheckKvStore_00300, Function | Sma
 HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyValueToDisturbeDB_00100, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo info;
-    EXPECT_EQ(true, preferncesDB_->PutBundlePropertyValueToDisturbeDB(info));
+    ASSERT_EQ(true, preferncesDB_->PutBundlePropertyValueToDisturbeDB(info));
 }
 
 /**
@@ -398,7 +398,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00100, Function 
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, CheckBundle_00100, Function | SmallTest | Level1)
 {
-    EXPECT_EQ(true, preferncesDB_->CheckBundle(bundleName_, bundleUid_));
+    ASSERT_EQ(true, preferncesDB_->CheckBundle(bundleName_, bundleUid_));
 }
 
 /**
@@ -412,7 +412,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
 }
 
 /**
@@ -424,7 +424,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00100, Function | SmallTest | Level1)
 {
     std::string bundleKey = "BundleKey";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), true);
+    ASSERT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), true);
 }
 
 /**
@@ -436,7 +436,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00100
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveNotificationEnable_00100, Function | SmallTest | Level1)
 {
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveNotificationEnable(userId), true);
+    ASSERT_EQ(preferncesDB_->RemoveNotificationEnable(userId), true);
 }
 
 /**
@@ -448,7 +448,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveNotificationEnable_00100, Fu
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveDoNotDisturbDate_00100, Function | SmallTest | Level1)
 {
     int32_t userId = 1;
-    EXPECT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), true);
+    ASSERT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), true);
 }
 
 /**
@@ -845,7 +845,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutHasPoppedDialog_00200, Function
 HWTEST_F(NotificationPreferencesDatabaseTest, PutDoNotDisturbDate_00500, Function | SmallTest | Level1)
 {
     int32_t userId = 0;
-    EXPECT_EQ(preferncesDB_->PutDoNotDisturbDate(userId, nullptr), false);
+    ASSERT_EQ(preferncesDB_->PutDoNotDisturbDate(userId, nullptr), false);
 }
 
 /**
@@ -857,7 +857,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDoNotDisturbDate_00500, Functio
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00200, Function | SmallTest | Level1)
 {
     std::string bundleKey = "";
-    EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
+    ASSERT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
 }
 
 /**
@@ -869,7 +869,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00200
 HWTEST_F(NotificationPreferencesDatabaseTest, ChangeSlotToEntry_00200, Function | SmallTest | Level1)
 {
     std::unordered_map<std::string, std::string> values;
-    EXPECT_EQ(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, nullptr, values), false);
+    ASSERT_EQ(preferncesDB_->SlotToEntry(bundleName_, bundleUid_, nullptr, values), false);
 }
 
 /**
@@ -881,7 +881,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetSmartReminderEnabled_0100, Test
 {
     bool enable = true;
     bool ret = preferncesDB_->SetSmartReminderEnabled("testDeviceType1111", enable);
-    EXPECT_EQ(ret, true);
+    ASSERT_EQ(ret, true);
 }
 
 /**
@@ -893,7 +893,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestS
 {
     bool enable = true;
     bool result = preferncesDB_->IsSmartReminderEnabled("testDeviceType1111", enable);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -904,7 +904,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestS
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
-    EXPECT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+    ASSERT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
 }
 
 /**
@@ -917,7 +917,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAnsBundleDbInfo_00200, Funct
 {
     std::string bundleName = "bundleName";
     int32_t uid = 1;
-    EXPECT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, uid), true);
+    ASSERT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, uid), true);
 }
 
 /**
@@ -932,7 +932,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GenerateBundleLablel_0100, TestSiz
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "test";
     auto ret = preferncesDB_->GenerateBundleLablel(bundleInfo, deviceType);
-    EXPECT_EQ(ret, "enabledNotificationDistributed-name-1-test");
+    ASSERT_EQ(ret, "enabledNotificationDistributed-name-1-test");
 }
 
 /**
@@ -948,7 +948,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_010
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enable);
-    EXPECT_EQ(ret, true);
+    ASSERT_EQ(ret, true);
 }
 
 /**
@@ -964,7 +964,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_020
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enable);
-    EXPECT_EQ(ret, false);
+    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -980,7 +980,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_010
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -996,7 +996,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_020
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
-    EXPECT_EQ(result, false);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -1020,7 +1020,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, AddDoNotDisturbProfiles_0100, Test
     profiles.emplace_back(profile);
 
     auto res = preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, true);
+    ASSERT_EQ(res, true);
 }
 
 /**
@@ -1045,7 +1045,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveDoNotDisturbProfiles_0100, T
 
     preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
     auto res = preferncesDB_->RemoveDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, true);
+    ASSERT_EQ(res, true);
 }
 
 /**
@@ -1062,7 +1062,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDoNotDisturbProfiles_0100, Test
     preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
     std::string key;
     auto res = preferncesDB_->GetDoNotDisturbProfiles(key, profile, -1);
-    EXPECT_EQ(res, false);
+    ASSERT_EQ(res, false);
 }
 
 /**
@@ -1079,7 +1079,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDoNotDisturbProfile_0100, TestS
     sptr<NotificationDoNotDisturbProfile> profile;
     auto res = info.GetDoNotDisturbProfiles(profileId, userId, profile);
     auto infos = new (std::nothrow) NotificationPreferencesInfo();
-    EXPECT_EQ(res, false);
+    ASSERT_EQ(res, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

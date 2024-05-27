@@ -90,7 +90,7 @@ HWTEST_F(NotificationHisyseventTest, SendSubscriberErrorSysEvent_0100, Level1)
     sptr<NotificationRequest> request = nullptr;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.GetDeviceId();
-    EXPECT_EQ(result, deviceId);
+    ASSERT_EQ(result, deviceId);
 
     GTEST_LOG_(INFO) << "SendSubscriberErrorSysEvent_0100 end";
 }
@@ -119,7 +119,7 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationErrorSysEvent_0100, L
     pid_t myPid = notificationRequest.GetCreatorPid();
     notificationRequest.SetCreatorPid(myPid);
     auto result = notificationTest.GetPid();
-    EXPECT_EQ(result, myPid);
+    ASSERT_EQ(result, myPid);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationErrorSysEvent_0100 end";
 }
@@ -145,7 +145,7 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationSlotErrorSysEvent_010
     sptr<NotificationRequest> request = nullptr;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.IsUnremovable();
-    EXPECT_EQ(result, false);
+    ASSERT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationSlotErrorSysEvent_0100 end";
 }
@@ -171,7 +171,7 @@ HWTEST_F(NotificationHisyseventTest, SendPublishErrorSysEvent_0100, Level1)
     sptr<NotificationRequest> request = nullptr;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.IsGroup();
-    EXPECT_EQ(result, false);
+    ASSERT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendPublishErrorSysEvent_0100 end";
 }
@@ -195,7 +195,7 @@ HWTEST_F(NotificationHisyseventTest, SendFlowControlOccurSysEvent_0100, Level1)
     sptr<NotificationRequest> request = nullptr;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.IsFloatingIcon();
-    EXPECT_EQ(result, false);
+    ASSERT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendFlowControlOccurSysEvent_0100 end";
 }
@@ -234,7 +234,7 @@ HWTEST_F(NotificationHisyseventTest, SendSubscribeSysEvent_0100, Level1)
     Parcel p;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.MarshallingBool(p);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendSubscribeSysEvent_0100 end";
 }
@@ -264,7 +264,7 @@ HWTEST_F(NotificationHisyseventTest, SendUnSubscribeSysEvent_0100, Level1)
     Parcel p;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.MarshallingInt32(p);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendUnSubscribeSysEvent_0100 end";
 }
@@ -289,7 +289,7 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationSysEvent_0100, Level1
     Parcel p;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.MarshallingInt64(p);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationSysEvent_0100 end";
 }
@@ -315,7 +315,7 @@ HWTEST_F(NotificationHisyseventTest, SendEnableNotificationSlotSysEvent_0100, Le
     Parcel p;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.MarshallingParcelable(p);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendEnableNotificationSlotSysEvent_0100 end";
 }
@@ -341,7 +341,7 @@ HWTEST_F(NotificationHisyseventTest, SendPublishSysEvent_0100, Level1)
     Parcel p;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.Marshalling(p);
-    EXPECT_EQ(result, true);
+    ASSERT_EQ(result, true);
 
     GTEST_LOG_(INFO) << "SendPublishSysEvent_0100 end";
 }
@@ -367,7 +367,7 @@ HWTEST_F(NotificationHisyseventTest, SendCancelSysEvent_0100, Level1)
     Parcel p;
     Notification notificationTest(deviceId, request);
     auto result = notificationTest.ReadFromParcel(p);
-    EXPECT_EQ(result, false);
+    ASSERT_EQ(result, false);
 
     GTEST_LOG_(INFO) << "SendCancelSysEvent_0100 end";
 }
@@ -394,7 +394,7 @@ HWTEST_F(NotificationHisyseventTest, SendRemoveSysEvent_0100, Level1)
     Notification notificationTest(deviceId, request);
     notificationTest.SetVibrationStyle(style);
     auto result = notificationTest.GetVibrationStyle();
-    EXPECT_EQ(result, style);
+    ASSERT_EQ(result, style);
     EventReport::SendHiSysEvent("", eventInfo);
 
     GTEST_LOG_(INFO) << "SendRemoveSysEvent_0100 end";

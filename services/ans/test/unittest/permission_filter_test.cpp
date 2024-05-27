@@ -67,7 +67,7 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00100, Function | SmallTest 
     record->request->SetOwnerBundleName(TEST_DEFUALT_BUNDLE);
     record->notification = new Notification(record->request);
     record->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    // EXPECT_EQ(permissionFilter.OnPublish(record), ERR_OK);
+    // ASSERT_EQ(permissionFilter.OnPublish(record), ERR_OK);
 }
 
 /**
@@ -96,7 +96,7 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest 
     record->notification = new Notification(record->request);
     record->slot = slot;
 
-    EXPECT_EQ((int)permissionFilter.OnPublish(record), (int)ERR_ANS_NOT_ALLOWED);
+    ASSERT_EQ((int)permissionFilter.OnPublish(record), (int)ERR_ANS_NOT_ALLOWED);
 }
 }  // namespace Notification
 }  // namespace OHOS
