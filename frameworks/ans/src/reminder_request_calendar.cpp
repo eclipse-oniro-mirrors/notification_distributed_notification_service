@@ -270,7 +270,7 @@ bool ReminderRequestCalendar::CheckExcludeDate()
     return false;
 }
 
-bool ReminderRequestCalendar::CheckRRule()
+bool ReminderRequestCalendar::IsPullUpService()
 {
     if (rruleWantAgentInfo_ == nullptr) {
         return false;

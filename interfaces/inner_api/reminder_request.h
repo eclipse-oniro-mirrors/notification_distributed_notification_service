@@ -773,7 +773,7 @@ public:
      *
      * @return true if need pull up service extension
      */
-    virtual bool CheckRRule()
+    virtual bool IsPullUpService()
     {
         return false;
     }

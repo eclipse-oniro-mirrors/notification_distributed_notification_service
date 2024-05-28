@@ -139,7 +139,7 @@ public:
     /**
      * @brief Check rrule want agent, pull up service extension
      */
-    bool CheckRRule() override;
+    bool IsPullUpService() override;
 
     /**
      * Marshal a reminder object into a Parcel.

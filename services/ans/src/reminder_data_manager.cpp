@@ -1491,7 +1491,7 @@ void ReminderDataManager::CheckReminderTime(std::vector<sptr<ReminderRequest>>& 
             continue;
         }
 
-        if (reminder->CheckRRule()) {
+        if (reminder->IsPullUpService()) {
             extensionReminders.push_back(reminder);
         }
 
@@ -1754,7 +1754,7 @@ void ReminderDataManager::RefreshRemindersLocked(uint8_t type,
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        if ((*it)->CheckRRule()) {
+        if ((*it)->IsPullUpService()) {
             extensionReminders.push_back((*it));
         }
 

@@ -1513,22 +1513,22 @@ HWTEST_F(ReminderRequestCalendarTest, AppendValuesBucket_00001, Function | Small
 }
 
 /**
- * @tc.name: CheckRRule_00001
- * @tc.desc: Test CheckRRule parameters.
+ * @tc.name: IsPullUpService_00001
+ * @tc.desc: Test IsPullUpService parameters.
  * @tc.type: FUNC
  * @tc.require:I9BM6I
  */
-HWTEST_F(ReminderRequestCalendarTest, CheckRRule_00001, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestCalendarTest, IsPullUpService_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestCalendar>();
     rrc->startDateTime_ = 1675876470000;
-    EXPECT_EQ(rrc->CheckRRule(), false);
+    EXPECT_EQ(rrc->IsPullUpService(), false);
 
     rrc->rruleWantAgentInfo_ = std::make_shared<ReminderRequest::WantAgentInfo>();
-    EXPECT_EQ(rrc->CheckRRule(), true);
+    EXPECT_EQ(rrc->IsPullUpService(), true);
 
     rrc->startDateTime_ = 1874643293000;
-    EXPECT_EQ(rrc->CheckRRule(), false);
+    EXPECT_EQ(rrc->IsPullUpService(), false);
 }
 
 }
