@@ -770,9 +770,9 @@ public:
 
     /**
      * @brief Check rrule want agent, pull up service extension
-     * 
+     *
      * @return true if need pull up service extension
-    */
+     */
     virtual bool CheckRRule()
     {
         return false;
