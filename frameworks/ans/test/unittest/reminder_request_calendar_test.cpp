@@ -1511,5 +1511,25 @@ HWTEST_F(ReminderRequestCalendarTest, AppendValuesBucket_00001, Function | Small
     object.GetInt(result);
     EXPECT_EQ(result, 100);
 }
+
+/**
+ * @tc.name: CheckRRule_00001
+ * @tc.desc: Test CheckRRule parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, CheckRRule_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestCalendar>();
+    rrc->startDateTime_ = 1675876470000;
+    EXPECT_EQ(rrc->CheckRRule(), false);
+
+    rrc->rruleWantAgentInfo_ = std::make_shared<ReminderRequest::WantAgentInfo>();
+    EXPECT_EQ(rrc->CheckRRule(), true);
+
+    rrc->startDateTime_ = 1874643293000;
+    EXPECT_EQ(rrc->CheckRRule(), false);
+}
+
 }
 }

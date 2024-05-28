@@ -1750,7 +1750,7 @@ void ReminderDataManager::RemoveFromShowedReminders(const sptr<ReminderRequest> 
 }
 
 void ReminderDataManager::RefreshRemindersLocked(uint8_t type,
-    std::vector<sptr<ReminderRequest>>& immediatelyReminders, std::vector<sptr<ReminderRequest>>& extensionReminders);
+    std::vector<sptr<ReminderRequest>>& immediatelyReminders, std::vector<sptr<ReminderRequest>>& extensionReminders)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
