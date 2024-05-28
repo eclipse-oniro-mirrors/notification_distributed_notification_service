@@ -1077,7 +1077,7 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
     std::lock_guard<std::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
-        if (delayRequest.GetOwnerUid() == bundleOption->GetUid()) {
+        if (bundleOption != nullptr && delayRequest.GetOwnerUid() == bundleOption->GetUid()) {
             keys.push_back(delayNotification.first->notification->GetKey());
         }
     }
