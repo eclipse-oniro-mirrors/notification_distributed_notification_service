@@ -143,14 +143,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_GET_ACTIVE_USER_FAILED;
             }
             if (request->GetOwnerUid() == DEFAULT_UID) {
-                int32_t userId = 0;
                 GetActiveUserId(userId);
                 uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), userId);
             } else {
                 uid = request->GetOwnerUid();
             }
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
-            request->SetOwnerUserId(userId);
         }
         request->SetOwnerUid(uid);
         // set agentBundle
@@ -200,6 +197,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
         request->SetOwnerBundleName(bundle);
     }
+    
+    int32_t ownerUserId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+    request->SetOwnerUserId(ownerUserId);
+
     request->SetCreatorBundleName(bundle);
 
     int32_t uid = IPCSkeleton::GetCallingUid();
