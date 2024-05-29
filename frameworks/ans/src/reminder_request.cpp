@@ -237,6 +237,16 @@ void ReminderRequest::InitCreatorBundleName(const std::string &creatorBundleName
     creatorBundleName_ = creatorBundleName;
 }
 
+void ReminderRequest::InitCreatorUid(const int32_t creatorUid)
+{
+    creatorUid_ = creatorUid;
+}
+
+void ReminderRequest::InitAppIndex(const int32_t appIndex)
+{
+    appIndex_ = appIndex;
+}
+
 void ReminderRequest::InitReminderId()
 {
     std::lock_guard<std::mutex> lock(std::mutex);
@@ -584,6 +594,7 @@ void ReminderRequest::RecoverFromDbBase(const std::shared_ptr<NativeRdb::ResultS
     ReminderStore::GetStringVal(resultSet, ReminderBaseTable::GROUP_ID, groupId_);
     ReminderStore::GetStringVal(resultSet, ReminderBaseTable::CUSTOM_RING_URI, customRingUri_);
     ReminderStore::GetStringVal(resultSet, ReminderBaseTable::CREATOR_BUNDLE_NAME, creatorBundleName_);
+    ReminderStore::GetInt32Val(resultSet, ReminderBaseTable::CREATOR_UID, creatorUid_);
 }
 
 void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
@@ -874,6 +885,16 @@ std::map<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo> R
 std::string ReminderRequest::GetCreatorBundleName() const
 {
     return creatorBundleName_;
+}
+
+std::string ReminderRequest::GetCreatorUid() const
+{
+    return creatorUid_;
+}
+
+std::string ReminderRequest::GetAppIndex() const
+{
+    return appIndex_;
 }
 
 std::string ReminderRequest::GetContent() const
@@ -1949,6 +1970,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ReminderBaseTable::GROUP_ID, reminder->GetGroupId());
     values.PutString(ReminderBaseTable::CUSTOM_RING_URI, reminder->GetCustomRingUri());
     values.PutString(ReminderBaseTable::CREATOR_BUNDLE_NAME, reminder->GetCreatorBundleName());
+    values.PutInt(ReminderBaseTable::CREATOR_UID, reminder->GetCreatorUid());
 }
 
 int64_t ReminderRequest::GetNextDaysOfWeek(const time_t now, const time_t target) const

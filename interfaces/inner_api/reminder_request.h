@@ -321,6 +321,20 @@ public:
     std::string GetCreatorBundleName() const;
 
     /**
+     * @brief Obtains creator uid
+     *
+     * @return creator uid
+     */
+    std::string GetCreatorUid() const;
+
+    /**
+     * @brief Obtains app index
+     *
+     * @return app index
+     */
+    std::string GetAppIndex() const;
+
+    /**
      * @brief Obtains the configured content.
      *
      * @return content text.
@@ -456,6 +470,20 @@ public:
      * @param creatorBundleName Indicates the creator bundle name which the reminder belong to
      */
     void InitCreatorBundleName(const std::string &creatorBundleName);
+
+    /**
+     * @brief Inites reminder creator uid when publish reminder success.
+     *
+     * @param uid Indicates the creator uid which the reminder belong to
+     */
+    void InitCreatorUid(const int32_t creatorUid);
+
+    /**
+     * @brief Inites reminder app index when publish reminder success.
+     *
+     * @param appIndex Indicates the app index which the reminder belong to
+     */
+    void InitAppIndex(const int32_t appIndex);
 
     /**
      * @brief Inits reminder id when publish reminder success.
@@ -1053,6 +1081,8 @@ private:
     std::string customButtonUri_ {};
     std::string customRingUri_ {};
     std::string creatorBundleName_ {};
+    int32_t creatorUid_ {-1};
+    int32_t appIndex_ {0};
 
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.

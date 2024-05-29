@@ -53,9 +53,11 @@ public:
      *
      * @param packageName Indicates the package name.
      * @param userId Indicates the user id which the bundle belong to.
+     * @param uid Indicates the uid which the bundle belong to.
      * @return ERR_OK if success, else not.
      */
-    ErrCode CancelAllReminders(const std::string &packageName, const int32_t &userId);
+    ErrCode CancelAllReminders(const std::string& packageName, const int32_t userId,
+        const int32_t uid);
 
     /**
      * @brief Cancels the target reminder relative to the reminder id and bundle option.
@@ -459,9 +461,11 @@ private:
      * @param reminder Indicates the target reminder.
      * @param packageName Indicates the package name.
      * @param userId Indicates the user id.
+     * @param uid Indicates the uid.
      * @return true If the reminder is matched with the bundleOption or userId.
      */
-    bool IsMatched(const sptr<ReminderRequest> &reminder, const std::string &packageName, const int32_t &userId) const;
+    bool IsMatched(const sptr<ReminderRequest> &reminder, const std::string &packageName,
+        const int32_t &userId) const;
 
     /**
      * @brief Judges whether the reminder is matched with the packageName or groupId.

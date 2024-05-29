@@ -136,12 +136,13 @@ ErrCode ReminderDataManager::CancelReminder(
     return ERR_OK;
 }
 
-ErrCode ReminderDataManager::CancelAllReminders(const std::string &packageName, const int32_t &userId)
+ErrCode ReminderDataManager::CancelAllReminders(const std::string& packageName, const int32_t userId,
+    const int32_t uid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGD("CancelAllReminders, userId=%{private}d, pkgName=%{public}s",
         userId, packageName.c_str());
-    CancelRemindersImplLocked(packageName, userId);
+    CancelRemindersImplLocked(packageName, userId, uid);
     return ERR_OK;
 }
 
@@ -296,14 +297,9 @@ bool ReminderDataManager::IsMatchedForGroupIdAndPkgName(const sptr<ReminderReque
 }
 
 bool ReminderDataManager::IsMatched(const sptr<ReminderRequest> &reminder,
-    const std::string &packageName, const int32_t &userId) const
+    const std::string &packageName, const int32_t userId, const int32_t uid) const
 {
-    auto mit = notificationBundleOptionMap_.find(reminder->GetReminderId());
-    if (mit == notificationBundleOptionMap_.end()) {
-        ANS_LOGE("Failed to get bundle information. reminderId=%{public}d", reminder->GetReminderId());
-        return true;
-    }
-    if (ReminderRequest::GetUserId(mit->second->GetUid()) != userId) {
+    if (reminder->GetUserId() != userId) {
         return false;
     }
     if (packageName == ALL_PACKAGES) {
@@ -346,17 +342,12 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<Notificati
         return true;
     }
     int32_t count = 0;
-    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        if ((*it)->IsExpired()) {
+    for (const auto& eachReminder : reminderVector_) {
+        if (eachReminder->IsExpired()) {
             continue;
         }
-        auto mit = notificationBundleOptionMap_.find((*it)->GetReminderId());
-        if (mit == notificationBundleOptionMap_.end()) {
-            ANSR_LOGE("Error occur when get bundle option, reminderId=%{public}d", (*it)->GetReminderId());
-        } else {
-            if (IsBelongToSameApp(mit->second, bundleOption)) {
-                count++;
-            }
+        if (CheckIsSameApp(eachReminder, bundleOption)) {
+            count++;
         }
     }
     auto maxReminderNum = reminder->IsSystemApp() ? MAX_NUM_REMINDER_LIMIT_SYS_APP : MAX_NUM_REMINDER_LIMIT_APP;
@@ -1569,9 +1560,11 @@ bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder,
     const sptr<NotificationBundleOption> &other)
 {
     std::string bundleName = reminder->GetCreatorBundleName();
-    int32_t uid = ReminderRequest::GetUid(reminder->GetUserId(), bundleName);
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
-    return IsBelongToSameApp(bundleOption, other);
+    int32_t uid = reminder->GetCreatorUid();
+    if (uid == -1) {
+        uid = ReminderRequest::GetUid(reminder->GetUserId(), bundleName);
+    }
+    return bundleName == other->GetBundleName() && uid == other->GetUid();
 }
 
 bool ReminderDataManager::IsBelongToSameApp(const sptr<NotificationBundleOption> &bundleOption,

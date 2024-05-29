@@ -101,7 +101,7 @@ private:
     std::vector<sptr<ReminderRequest>> GetOldReminders(NativeRdb::RdbStore& store);
     void InsertNewReminders(NativeRdb::RdbStore& store, const std::vector<sptr<ReminderRequest>>& reminders);
     void AddRdbColum(NativeRdb::RdbStore& store, const std::string& tableName,
-        const std::string& columnName, const std::string& columnType);
+        const std::string& columnName, const std::string& columnType, const std::string& defValue);
 };
 };
 }  // namespace Notification
