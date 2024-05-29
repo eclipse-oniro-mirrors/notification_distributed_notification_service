@@ -242,11 +242,6 @@ void ReminderRequest::InitCreatorUid(const int32_t creatorUid)
     creatorUid_ = creatorUid;
 }
 
-void ReminderRequest::InitAppIndex(const int32_t appIndex)
-{
-    appIndex_ = appIndex;
-}
-
 void ReminderRequest::InitReminderId()
 {
     std::lock_guard<std::mutex> lock(std::mutex);
@@ -887,14 +882,9 @@ std::string ReminderRequest::GetCreatorBundleName() const
     return creatorBundleName_;
 }
 
-std::string ReminderRequest::GetCreatorUid() const
+int32_t ReminderRequest::GetCreatorUid() const
 {
     return creatorUid_;
-}
-
-std::string ReminderRequest::GetAppIndex() const
-{
-    return appIndex_;
 }
 
 std::string ReminderRequest::GetContent() const
@@ -1882,6 +1872,31 @@ int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundle
     int32_t uid = bundleMgr->GetUidByBundleName(bundleName, userId);
     ANSR_LOGD("uid=%{public}d", uid);
     return uid;
+}
+
+int32_t ReminderRequest::GetAppIndex(const int32_t uid)
+{
+    sptr<ISystemAbilityManager> systemAbilityManager
+        = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        ANSR_LOGE("Failed to get app index due to get systemAbilityManager is null.");
+        return 0;
+    }
+    sptr<IRemoteObject> remoteObject  = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        ANSR_LOGE("Fail to get bundle manager proxy");
+        return 0;
+    }
+    sptr<AppExecFwk::IBundleMgr> bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (bundleMgr == nullptr) {
+        ANSR_LOGE("Bundle mgr proxy is nullptr");
+        return 0;
+    }
+    std::string bundleName;
+    int32_t appIndex = 0;
+    bundleMgr->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    ANSR_LOGD("appIndex=%{public}d", appIndex);
+    return appIndex;
 }
 
 int32_t ReminderRequest::GetUserId(const int32_t &uid)

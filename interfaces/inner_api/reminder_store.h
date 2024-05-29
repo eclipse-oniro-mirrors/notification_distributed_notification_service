@@ -35,7 +35,7 @@ public:
 public:
     int32_t Init();
     int32_t Delete(const int32_t reminderId);
-    int32_t Delete(const std::string& pkg, const int32_t userId);
+    int32_t Delete(const std::string& pkg, const int32_t userId, const int32_t uid);
     int32_t DeleteUser(const int32_t userId);
     int32_t UpdateOrInsert(const sptr<ReminderRequest>& reminder, const sptr<NotificationBundleOption>& bundleOption);
     int32_t GetMaxId();

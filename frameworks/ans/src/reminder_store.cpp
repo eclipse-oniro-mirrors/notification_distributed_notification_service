@@ -72,7 +72,6 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V5:
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CREATOR_UID, "INT", "-1");
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::APP_INDEX, "INT", "0");
                 [[fallthrough]];
             default:
                 break;
@@ -339,15 +338,22 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
     return STATE_OK;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& pkg, const int32_t userId)
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& pkg, const int32_t userId,
+    const int32_t uid)
 {
     std::string assoConditon = "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderBaseTable::TABLE_NAME
         + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::PACKAGE_NAME + " = '" + pkg
-        + "' AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " + std::to_string(userId)
-        + ")";
+        + "' AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " + std::to_string(userId);
 
     std::string baseCondtion = ReminderBaseTable::PACKAGE_NAME + " = '" + pkg + "' AND "
         + ReminderBaseTable::USER_ID + " = " + std::to_string(userId);
+
+    if (uid != -1) {
+        assoConditon += " AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::UID
+            + " = " + std::to_string(uid);
+        baseCondtion += " AND " + ReminderBaseTable::UID + " = " + std::to_string(uid);
+    }
+    assoConditon += ")";
     return Delete(baseCondtion, assoConditon);
 }
 

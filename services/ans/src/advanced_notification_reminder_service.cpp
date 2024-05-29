@@ -146,7 +146,7 @@ ErrCode AdvancedNotificationService::CancelAllReminders()
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    return rdm->CancelAllReminders(bundleOption, userId);
+    return rdm->CancelAllReminders(bundleOption->GetBundleName(), userId, bundleOption->GetUid());
 }
 
 

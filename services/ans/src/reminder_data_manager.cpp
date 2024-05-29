@@ -221,18 +221,13 @@ void ReminderDataManager::GetValidReminders(
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        if ((*it)->IsExpired()) {
+    for (auto& eachReminder : reminderVector_) {
+        if (eachReminder->IsExpired()) {
             continue;
         }
-        int32_t reminderId = (*it)->GetReminderId();
-        auto mit = notificationBundleOptionMap_.find(reminderId);
-        if (mit == notificationBundleOptionMap_.end()) {
-            ANSR_LOGE("Get bundle option occur error, reminderId=%{public}d", reminderId);
-        } else {
-            if (IsBelongToSameApp(mit->second, bundleOption)) {
-                reminders.push_back(*it);
-            }
+
+        if (CheckIsSameApp(eachReminder, bundleOption)) {
+            reminders.push_back(eachReminder);
         }
     }
 }
@@ -240,13 +235,14 @@ void ReminderDataManager::GetValidReminders(
 void ReminderDataManager::CancelAllReminders(const int32_t &userId)
 {
     ANSR_LOGD("CancelAllReminders, userId=%{private}d", userId);
-    CancelRemindersImplLocked(ALL_PACKAGES, userId);
+    CancelRemindersImplLocked(ALL_PACKAGES, userId, -1);
 }
 
-void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageName, const int32_t &userId)
+void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageName, const int32_t userId,
+    const int32_t uid)
 {
     MUTEX.lock();
-    if (activeReminderId_ != -1 && IsMatched(activeReminder_, packageName, userId)) {
+    if (activeReminderId_ != -1 && IsMatched(activeReminder_, packageName, userId, uid)) {
         activeReminder_->OnStop();
         StopTimer(TimerType::TRIGGER_TIMER);
         ANSR_LOGD("Stop active reminder, reminderId=%{public}d", activeReminderId_.load());
@@ -259,7 +255,7 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
             ++vit;
             continue;
         }
-        if (IsMatched(*vit, packageName, userId)) {
+        if (IsMatched(*vit, packageName, userId, uid)) {
             if ((*vit)->IsAlerting()) {
                 StopAlertingReminder(*vit);
             }
@@ -276,7 +272,7 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
     if (packageName == ALL_PACKAGES) {
         store_->DeleteUser(userId);
     } else {
-        store_->Delete(packageName, userId);
+        store_->Delete(packageName, userId, uid);
     }
     MUTEX.unlock();
     StartRecentReminder();
@@ -305,7 +301,10 @@ bool ReminderDataManager::IsMatched(const sptr<ReminderRequest> &reminder,
     if (packageName == ALL_PACKAGES) {
         return true;
     }
-    if (mit->second->GetBundleName() == packageName) {
+    if (reminder->GetBundleName() == packageName) {
+        return true;
+    }
+    if (uid != -1 && reminder->GetUid() == uid) {
         return true;
     }
     return false;
@@ -1955,6 +1954,8 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
     abilityWant.SetElement(element);
     abilityWant.SetUri(wantInfo->uri);
     abilityWant.SetParams(wantInfo->parameters);
+    int32_t appIndex = ReminderRequest::GetAppIndex(reminder->GetUid());
+    abilityWant.SetParam("ohos.extra.param.key.appCloneIndex", appIndex);
 
     auto client = AppExecFwk::AbilityManagerClient::GetInstance();
     if (client == nullptr) {

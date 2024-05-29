@@ -281,7 +281,7 @@ private:
      */
     void AddToShowedReminders(const sptr<ReminderRequest> &reminder);
 
-    void CancelAllReminders(const int32_t &userId);
+    void CancelAllReminders(const int32_t userId);
 
     /**
      * @brief Check the update conditions.
@@ -343,7 +343,7 @@ private:
      * @param packageName Indicates the packageName need to cancel.
      * @param userId Indicates the userId to cancel.
      */
-    void CancelRemindersImplLocked(const std::string &packageName, const int32_t &userId);
+    void CancelRemindersImplLocked(const std::string &packageName, const int32_t userId, const int32_t uid);
 
     /**
      * @brief Close reminders with the same group id.
@@ -453,7 +453,7 @@ private:
      */
     bool IsBelongToSameApp(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &other) const;
-    bool CheckIsSameApp(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &other);
+    bool CheckIsSameApp(const sptr<ReminderRequest> &reminder, const sptr<NotificationBundleOption> &other) const;
 
     /**
      * @brief Judges whether the reminder is matched with the bundleOption or userId.
@@ -465,7 +465,7 @@ private:
      * @return true If the reminder is matched with the bundleOption or userId.
      */
     bool IsMatched(const sptr<ReminderRequest> &reminder, const std::string &packageName,
-        const int32_t &userId) const;
+        const int32_t userId, const int32_t uid) const;
 
     /**
      * @brief Judges whether the reminder is matched with the packageName or groupId.

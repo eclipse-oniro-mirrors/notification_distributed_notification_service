@@ -183,11 +183,6 @@ public:
      */
     static const std::string CREATOR_UID;
 
-    /*
-     * app index
-     */
-    static const std::string APP_INDEX;
-
 public:
     static void InitDbColumns();
 
