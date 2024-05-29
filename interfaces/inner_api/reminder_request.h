@@ -778,6 +778,15 @@ public:
         return false;
     }
 
+    /**
+     * @brief Check need notification reminder. due to system timer.
+     * When change system time to later, more than the trigger time, system timer must trigger.
+     */
+    virtual bool IsNeedNotification() const
+    {
+        return true;
+    }
+
     std::string GetWantAgentStr();
     std::string GetMaxWantAgentStr();
 

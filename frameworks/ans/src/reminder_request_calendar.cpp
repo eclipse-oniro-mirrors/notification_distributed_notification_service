@@ -288,6 +288,16 @@ bool ReminderRequestCalendar::IsPullUpService()
     return false;
 }
 
+bool ReminderRequestCalender::IsNeedNotification() const
+{
+    uint64_t now = GetNowInstantMilli();
+    if (now == 0) {
+        ANSR_LOGE("get now time failed");
+        return false;
+    }
+    return CheckCalenderIsExpired(now);
+}
+
 uint64_t ReminderRequestCalendar::GetNextTriggerTime()
 {
     uint64_t triggerTimeInMilli = INVALID_LONG_LONG_VALUE;
