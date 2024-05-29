@@ -270,6 +270,24 @@ bool ReminderRequestCalendar::CheckExcludeDate()
     return false;
 }
 
+bool ReminderRequestCalendar::IsPullUpService()
+{
+    if (rruleWantAgentInfo_ == nullptr) {
+        return false;
+    }
+
+    uint64_t now = GetNowInstantMilli();
+    if (now == 0) {
+        ANSR_LOGE("get now time failed");
+        return false;
+    }
+
+    if (now >= startDateTime_) {
+        return true;
+    }
+    return false;
+}
+
 uint64_t ReminderRequestCalendar::GetNextTriggerTime()
 {
     uint64_t triggerTimeInMilli = INVALID_LONG_LONG_VALUE;

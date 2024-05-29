@@ -140,7 +140,14 @@ public:
 
     void InitUserId();
 
-    void InitStartExtensionAbility(std::vector<sptr<ReminderRequest>>& reissueReminder);
+    /**
+     * @brief Check all reminders, Whether an immediate reminder is needed;
+     * whether a pull up service extension is required.
+     * Use when powering on and changing the system time.
+     */
+    void CheckReminderTime(std::vector<sptr<ReminderRequest>>& immediatelyReminders,
+        std::vector<sptr<ReminderRequest>>& extensionReminders);
+
     /**
      * @brief Register configuration observer, the listening system language is changed.
      */
@@ -422,6 +429,7 @@ private:
     sptr<ReminderRequest> GetRecentReminderLocked();
 
     void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged);
+    void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders);
 
     /**
      * @brief Refresh the reminder due to date/time or timeZone change by user.
@@ -498,7 +506,8 @@ private:
      * @param type Indicates it is date/time change or timeZone change.
      * @return reminders that need to show immediately.
      */
-    std::vector<sptr<ReminderRequest>> RefreshRemindersLocked(uint8_t type);
+    void RefreshRemindersLocked(uint8_t type, std::vector<sptr<ReminderRequest>>& immediatelyReminders,
+        std::vector<sptr<ReminderRequest>>& extensionReminders);
 
     /**
      * Removes the reminder.

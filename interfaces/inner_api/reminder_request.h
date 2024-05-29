@@ -768,6 +768,16 @@ public:
         return false;
     }
 
+    /**
+     * @brief Check rrule want agent, pull up service extension
+     *
+     * @return true if need pull up service extension
+     */
+    virtual bool IsPullUpService()
+    {
+        return false;
+    }
+
     std::string GetWantAgentStr();
     std::string GetMaxWantAgentStr();
 

@@ -838,11 +838,11 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
         activeReminder_->OnStop();
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
-    std::vector<sptr<ReminderRequest>> showImmediately = RefreshRemindersLocked(type);
-    if (!showImmediately.empty()) {
-        ANSR_LOGD("Refresh all reminders, show expired reminders immediately");
-        HandleImmediatelyShow(showImmediately, true);
-    }
+    std::vector<sptr<ReminderRequest>> showImmediately;
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    RefreshRemindersLocked(type, showImmediately, extensionReminders);
+    HandleImmediatelyShow(showImmediately, true);
+    HandleExtensionReminder(extensionReminders);
     StartRecentReminder();
 }
 
@@ -1077,16 +1077,10 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
             want.SetParam(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId());
             int32_t result = IN_PROCESS_CALL(
                 AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
-            if (result == ERR_OK) {
-                ANSR_LOGD("StartExtensionAbility success");
-                return true;
-            } else {
-                ANSR_LOGE("StartExtensionAbility failed");
+            if (result != ERR_OK) {
+                ANSR_LOGE("StartExtensionAbility failed[%{public}d]", result);
                 return false;
             }
-        } else {
-            ANSR_LOGE("StartExtensionAbility failed");
-            return true;
         }
     }
     return true;
@@ -1370,6 +1364,13 @@ void ReminderDataManager::HandleImmediatelyShow(
     }
 }
 
+void ReminderDataManager::HandleExtensionReminder(std::vector<sptr<ReminderRequest>>& extensionReminders)
+{
+    for (auto& reminder : extensionReminders) {
+        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES);
+    }
+}
+
 sptr<ReminderRequest> ReminderDataManager::HandleRefreshReminder(const uint8_t &type, sptr<ReminderRequest> &reminder)
 {
     reminder->SetReminderTimeInMilli(ReminderRequest::INVALID_LONG_LONG_VALUE);
@@ -1433,9 +1434,11 @@ void ReminderDataManager::Init(bool isFromBootComplete)
 {
     ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
     if (isFromBootComplete) {
-        std::vector<sptr<ReminderRequest>> reissueReminder;
-        InitStartExtensionAbility(reissueReminder);
-        HandleImmediatelyShow(reissueReminder, false);
+        std::vector<sptr<ReminderRequest>> immediatelyReminders;
+        std::vector<sptr<ReminderRequest>> extensionReminders;
+        CheckReminderTime(immediatelyReminders, extensionReminders);
+        HandleImmediatelyShow(immediatelyReminders, false);
+        HandleExtensionReminder(extensionReminders);
         StartRecentReminder();
     }
     if (IsReminderAgentReady()) {
@@ -1479,19 +1482,25 @@ void ReminderDataManager::InitServiceHandler()
     ANSR_LOGD("InitServiceHandler suceeded.");
 }
 
-void ReminderDataManager::InitStartExtensionAbility(std::vector<sptr<ReminderRequest>>& reissueReminder)
+void ReminderDataManager::CheckReminderTime(std::vector<sptr<ReminderRequest>>& immediatelyReminders,
+    std::vector<sptr<ReminderRequest>>& extensionReminders)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        ReminderDataManager::AsyncStartExtensionAbility(*it, CONNECT_EXTENSION_MAX_RETRY_TIMES);
-        if ((*it)->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
-            if ((*it)->OnDateTimeChange()) {
-                reissueReminder.push_back(*it);
-                ANSR_LOGD("Reissue reminder success");
-            }
+    for (auto reminder : reminderVector_) {
+        if (reminder->GetReminderType() != ReminderRequest::ReminderType::CALENDAR) {
+            continue;
+        }
+
+        if (reminder->IsPullUpService()) {
+            extensionReminders.push_back(reminder);
+        }
+
+        if (reminder->OnDateTimeChange()) {
+            immediatelyReminders.push_back(reminder);
         }
     }
 }
+
 void ReminderDataManager::InitUserId()
 {
     std::vector<int32_t> activeUserId;
@@ -1740,17 +1749,20 @@ void ReminderDataManager::RemoveFromShowedReminders(const sptr<ReminderRequest> 
     }
 }
 
-std::vector<sptr<ReminderRequest>> ReminderDataManager::RefreshRemindersLocked(uint8_t type)
+void ReminderDataManager::RefreshRemindersLocked(uint8_t type,
+    std::vector<sptr<ReminderRequest>>& immediatelyReminders, std::vector<sptr<ReminderRequest>>& extensionReminders)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    std::vector<sptr<ReminderRequest>> showImmediately;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        if ((*it)->IsPullUpService()) {
+            extensionReminders.push_back((*it));
+        }
+
         sptr<ReminderRequest> reminder = HandleRefreshReminder(type, (*it));
         if (reminder != nullptr) {
-            showImmediately.push_back(reminder);
+            immediatelyReminders.push_back(reminder);
         }
     }
-    return showImmediately;
 }
 
 void ReminderDataManager::RemoveReminderLocked(const int32_t &reminderId)

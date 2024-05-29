@@ -137,6 +137,11 @@ public:
     bool CheckExcludeDate() override;
 
     /**
+     * @brief Check rrule want agent, pull up service extension
+     */
+    bool IsPullUpService() override;
+
+    /**
      * Marshal a reminder object into a Parcel.
      *
      * @param parcel Indicates the Parcel.
