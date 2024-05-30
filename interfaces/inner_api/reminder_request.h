@@ -325,7 +325,7 @@ public:
      *
      * @return creator uid
      */
-    std::string GetCreatorUid() const;
+    int32_t GetCreatorUid() const;
 
     /**
      * @brief Obtains the configured content.

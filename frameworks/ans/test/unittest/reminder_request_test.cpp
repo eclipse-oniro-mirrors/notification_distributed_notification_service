@@ -2295,5 +2295,23 @@ HWTEST_F(ReminderRequestTest, RecoverActionButtonJsonMode_00003, Function | Smal
     rrc->RecoverActionButtonJsonMode(jsonValue);
     EXPECT_EQ(rrc->actionButtonMap_[type].dataShareUpdate->valuesBucket, "valuesBucket");
 }
+
+/**
+ * @tc.name: InitCreatorUid_00001
+ * @tc.desc: Test InitCreatorUid.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, InitCreatorUid_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->InitCreatorUid(100);
+    EXPECT_EQ(rrc->GetCreatorUid(), 100);
+
+    rrc->InitCreatorUid(-1);
+    EXPECT_EQ(rrc->GetCreatorUid(), -1);
+
+    EXPECT_EQ(ReminderRequest::GetAppIndex(20020152), 0);
+}
 }
 }

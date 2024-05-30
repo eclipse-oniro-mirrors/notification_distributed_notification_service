@@ -232,7 +232,7 @@ void ReminderDataManager::GetValidReminders(
     }
 }
 
-void ReminderDataManager::CancelAllReminders(const int32_t &userId)
+void ReminderDataManager::CancelAllReminders(const int32_t userId)
 {
     ANSR_LOGD("CancelAllReminders, userId=%{private}d", userId);
     CancelRemindersImplLocked(ALL_PACKAGES, userId, -1);
@@ -1556,7 +1556,7 @@ bool ReminderDataManager::IsReminderAgentReady() const
 }
 
 bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder,
-    const sptr<NotificationBundleOption> &other)
+    const sptr<NotificationBundleOption> &other) const
 {
     std::string bundleName = reminder->GetCreatorBundleName();
     int32_t uid = reminder->GetCreatorUid();
