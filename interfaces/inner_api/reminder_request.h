@@ -782,7 +782,7 @@ public:
      * @brief Check need notification reminder. due to system timer.
      * When change system time to later, more than the trigger time, system timer must trigger.
      */
-    virtual bool IsNeedNotification() const
+    virtual bool IsNeedNotification()
     {
         bool expected = false;
         return showed_.compare_exchange_strong(expected, true);

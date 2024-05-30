@@ -292,7 +292,7 @@ bool ReminderRequestCalendar::IsPullUpService()
     return false;
 }
 
-bool ReminderRequestCalender::IsNeedNotification() const
+bool ReminderRequestCalendar::IsNeedNotification()
 {
     bool expected = false;
     if (!showed_.compare_exchange_strong(expected, true)) {

@@ -145,7 +145,7 @@ public:
      * @brief Check need notification reminder. due to system timer.
      * When change system time to later, more than the trigger time, system timer must trigger.
      */
-    bool IsNeedNotification() const override;
+    bool IsNeedNotification() override;
 
     /**
      * Marshal a reminder object into a Parcel.
