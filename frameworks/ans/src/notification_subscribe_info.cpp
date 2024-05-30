@@ -83,6 +83,11 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write deviceType_");
         return false;
     }
+    // write userId_
+    if (!parcel.WriteInt32(userId_)) {
+        ANS_LOGE("Can't write userId_");
+        return false;
+    }
     return true;
 }
 
@@ -109,6 +114,11 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Can't read deviceType_");
         return false;
     }
+    //read userId_
+    if (!parcel.ReadInt32(userId_)) {
+        ANS_LOGE("Can't read userId_");
+        return false;
+    }
     return true;
 }
 
@@ -122,6 +132,7 @@ std::string NotificationSubscribeInfo::Dump()
     return "NotificationSubscribeInfo{ "
             "appNames = [" + appNames + "]" +
             "deviceType = " + deviceType_ +
+            "userId = " + std::to_string(userId_) +
             " }";
 }
 
