@@ -231,6 +231,10 @@ bool ReminderRequestCalendar::OnDateTimeChange()
     if (IsExpired()) {
         return false;
     }
+    bool expected = false;
+    if (!showed_.compare_exchange_strong(expected, true)) {
+        return false;
+    }
     uint64_t now = GetNowInstantMilli();
     if (now == 0) {
         ANSR_LOGE("get now time failed");
@@ -290,12 +294,19 @@ bool ReminderRequestCalendar::IsPullUpService()
 
 bool ReminderRequestCalender::IsNeedNotification() const
 {
+    bool expected = false;
+    if (!showed_.compare_exchange_strong(expected, true)) {
+        return false;
+    }
     uint64_t now = GetNowInstantMilli();
     if (now == 0) {
         ANSR_LOGE("get now time failed");
         return false;
     }
-    return CheckCalenderIsExpired(now);
+    if (now <= endDateTime_ && now >= startDateTime_) {
+        return true;
+    }
+    return false;
 }
 
 uint64_t ReminderRequestCalendar::GetNextTriggerTime()

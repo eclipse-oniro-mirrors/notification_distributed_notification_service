@@ -784,7 +784,8 @@ public:
      */
     virtual bool IsNeedNotification() const
     {
-        return true;
+        bool expected = false;
+        return showed_.compare_exchange_strong(expected, true);
     }
 
     std::string GetWantAgentStr();
@@ -968,6 +969,9 @@ protected:
         const std::string &columnName, const DbRecoveryType &columnType);
 
     uint8_t repeatDaysOfWeek_{0};
+
+    // reminder is showing
+    std::atomic<bool> showed_ {false};
 
     /**
      * Obtains the next triggerTime if it is a week repeat.
