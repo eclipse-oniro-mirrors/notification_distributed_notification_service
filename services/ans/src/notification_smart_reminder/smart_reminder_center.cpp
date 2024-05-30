@@ -23,6 +23,7 @@
 #include "notification_preferences.h"
 #include "os_account_manager.h"
 #include "screenlock_manager.h"
+#include "string_utils.h"
 
 namespace OHOS {
 namespace Notification {
@@ -93,8 +94,7 @@ void SmartReminderCenter::ParseReminderFilterDevice(const nlohmann::json &root, 
         NotificationConstant::SlotType slotType;
         if (reminderFilterDeviceJson.find(SLOT_TYPE) == reminderFilterDeviceJson.end() ||
             reminderFilterDeviceJson[SLOT_TYPE].is_null() ||
-            !reminderFilterDeviceJson[SLOT_TYPE].is_string() ||
-            !NotificationSlot::GetSlotTypeByString(reminderFilterDeviceJson[SLOT_TYPE].get<std::string>(), slotType)) {
+            !reminderFilterDeviceJson[SLOT_TYPE].is_string()) {
             continue;
         }
 
@@ -104,8 +104,18 @@ void SmartReminderCenter::ParseReminderFilterDevice(const nlohmann::json &root, 
             reminderFilterDeviceJson[REMINDER_FILTER_SLOT].empty()) {
             continue;
         }
-        ParseReminderFilterSlot(reminderFilterDeviceJson[REMINDER_FILTER_SLOT],
-            to_string(static_cast<int32_t>(slotType)), reminderFilterDevice);
+
+        std::string slotTypes = reminderFilterDeviceJson[SLOT_TYPE].get<std::string>();
+        std::vector<std::string> slotTypeVector;
+        StringUtils::Split(slotTypes, SPLIT_FLAG, slotTypeVector);
+        
+        for (std::string slotTypeStr : slotTypeVector) {
+            if(!NotificationSlot::GetSlotTypeByString(slotTypeStr, slotType)){
+                continue;
+            }
+            ParseReminderFilterSlot(reminderFilterDeviceJson[REMINDER_FILTER_SLOT],
+                to_string(static_cast<int32_t>(slotType)), reminderFilterDevice);
+        }   
     }
     if (reminderFilterDevice.size() > 0) {
         reminderMethods_[deviceType] = move(reminderFilterDevice);

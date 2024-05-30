@@ -454,6 +454,7 @@ public:
     constexpr static const char* CUSTOM_SERVICE = "Custom_service";
     constexpr static const char* OTHER = "Other";
     constexpr static const char* EMERGENCY_INFORMATION = "Emergency_information";
+    constexpr static const char* SPLIT_FLAG = "|";
 
 private:
     std::string id_ {};
