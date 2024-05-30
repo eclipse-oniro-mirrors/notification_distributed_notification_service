@@ -142,6 +142,12 @@ public:
     bool IsPullUpService() override;
 
     /**
+     * @brief Check need notification reminder. due to system timer.
+     * When change system time to later, more than the trigger time, system timer must trigger.
+     */
+    bool IsNeedNotification() override;
+
+    /**
      * Marshal a reminder object into a Parcel.
      *
      * @param parcel Indicates the Parcel.

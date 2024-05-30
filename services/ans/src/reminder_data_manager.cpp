@@ -1048,6 +1048,9 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
             continue;
         }
+        if (!(*it)->IsNeedNotification()) {
+            continue;
+        }
         ReminderDataManager::AsyncStartExtensionAbility((*it), CONNECT_EXTENSION_MAX_RETRY_TIMES);
         if ((*it)->CheckExcludeDate()) {
             ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
