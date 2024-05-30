@@ -92,6 +92,7 @@ private:
     constexpr static const char* REMINDER_FILTER_CONTENT = "reminderFilterContent";
     constexpr static const char* TYPE_CODE = "typeCode";
     constexpr static const char* REMINDER_FILTER_CODE = "reminderFilterCode";
+    constexpr static const char* SPLIT_FLAG = "|";
 };
 }  // namespace Notification
 }  // namespace OHOS
