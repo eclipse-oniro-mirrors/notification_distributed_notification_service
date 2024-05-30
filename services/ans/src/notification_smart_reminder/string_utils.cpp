@@ -21,18 +21,17 @@ namespace Notification {
 
 void StringUtils::Split(const std::string &str, const std::string &splitFlag, std::vector<std::string> &res)
 {
-    if (str.empty()){
+    if (str.empty()) {
         return;
-    }		
-	std::string strs = str + splitFlag;
-	size_t pos = strs.find(splitFlag);
-	while (pos != strs.npos)
-	{
-		std::string temp = strs.substr(0, pos);
-		res.push_back(temp);
-		strs = strs.substr(pos + 1, strs.size());
-		pos = strs.find(splitFlag);
-	}
+    }
+    std::string strs = str + splitFlag;
+    size_t pos = strs.find(splitFlag);
+    while (pos != strs.npos) {
+        std::string temp = strs.substr(0, pos);
+        res.push_back(temp);
+        strs = strs.substr(pos + 1, strs.size());
+        pos = strs.find(splitFlag);
+    }
 }
 
 }  // namespace Notification

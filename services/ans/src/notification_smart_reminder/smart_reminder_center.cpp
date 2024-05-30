@@ -110,12 +110,12 @@ void SmartReminderCenter::ParseReminderFilterDevice(const nlohmann::json &root, 
         StringUtils::Split(slotTypes, SPLIT_FLAG, slotTypeVector);
         
         for (std::string slotTypeStr : slotTypeVector) {
-            if(!NotificationSlot::GetSlotTypeByString(slotTypeStr, slotType)){
+            if (!NotificationSlot::GetSlotTypeByString(slotTypeStr, slotType)) {
                 continue;
             }
             ParseReminderFilterSlot(reminderFilterDeviceJson[REMINDER_FILTER_SLOT],
                 to_string(static_cast<int32_t>(slotType)), reminderFilterDevice);
-        }   
+        }
     }
     if (reminderFilterDevice.size() > 0) {
         reminderMethods_[deviceType] = move(reminderFilterDevice);

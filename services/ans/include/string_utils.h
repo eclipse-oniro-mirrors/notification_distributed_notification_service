@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include <string>
-#include <vector>
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_STRING_UTILS_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_STRING_UTILS_H
-
+#include <string>
+#include <vector>
 
 namespace OHOS {
 namespace Notification {
