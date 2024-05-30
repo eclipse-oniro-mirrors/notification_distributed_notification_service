@@ -27,6 +27,8 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+constexpr const char *SETTINGS_DATASHARE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 constexpr const char *USER_SETTINGS_DATA_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_";
 constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
@@ -54,7 +56,7 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateDataS
         ANS_LOGE("The remoteObj is nullptr.");
         return nullptr;
     }
-    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATA_EXT_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
 }
 
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
