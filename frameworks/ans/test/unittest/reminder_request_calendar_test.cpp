@@ -1540,20 +1540,18 @@ HWTEST_F(ReminderRequestCalendarTest, IsPullUpService_00001, Function | SmallTes
 HWTEST_F(ReminderRequestCalendarTest, IsNeedNotification_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestCalendar>();
-    showed_ = true;
+    rrc->showed_ = true;
     EXPECT_EQ(rrc->IsNeedNotification(), false);
 
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-
-    rrc->startDateTime_ = (now - 5 * 60) * 1000;
-    rrc->endDateTime_ = (now + 5 * 60) * 1000;
-    showed_ = false;
+    uint64_t now = rrc->GetNowInstantMilli();
+    rrc->startDateTime_ = now - 5 * 60 * 1000;
+    rrc->endDateTime_ = now + 5 * 60 * 1000;
+    rrc->showed_ = false;
     EXPECT_EQ(rrc->IsNeedNotification(), true);
 
-    rrc->startDateTime_ = (now + 10 * 60) * 1000;
-    rrc->endDateTime_ = (now + 20 * 60) * 1000;
-    showed_ = false;
+    rrc->startDateTime_ = now + 10 * 60 * 1000;
+    rrc->endDateTime_ = now + 20 * 60 * 1000;
+    rrc->showed_ = false;
     EXPECT_EQ(rrc->IsNeedNotification(), false);
 }
 }
