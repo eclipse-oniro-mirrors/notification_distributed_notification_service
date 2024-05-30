@@ -89,8 +89,8 @@ declare_args() {
     ans_config_policy_enable = false
   }
 
-  if (defined(global_parts_info) &&
-      !defined(global_parts_info.theme_screenlock_mgr)) {
+  if ((defined(global_parts_info) &&
+       !defined(global_parts_info.theme_screenlock_mgr)) || is_emulator) {
     screenlock_mgr_enable = false
     notification_smart_reminder_supported = false
   }
