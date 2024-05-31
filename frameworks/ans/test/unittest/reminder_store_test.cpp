@@ -294,7 +294,7 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
 HWTEST_F(ReminderStoreTest, Delete_00005, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
-    int64_t ret = reminderStore.Delete("com.example.simple", 100, 20020152);
+    int32_t ret = reminderStore.Delete("com.example.simple", 100, 20020152);
     EXPECT_EQ(ret, -1);
 
     ret = reminderStore.Delete("com.example.simple", 100, -1);

@@ -781,7 +781,7 @@ HWTEST_F(ReminderDataManagerTest, InitStartExtensionAbility_0001, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, CancelAllReminders_00001, Level1)
 {
-    int ret = manager->CancelAllReminders("", -1, -1);
+    int32_t ret = manager->CancelAllReminders("", -1, -1);
     EXPECT_TRUE(ret == ERR_OK);
 
     ret = manager->CancelAllReminders("com.example.simple", 100, 20020152);
@@ -827,12 +827,12 @@ HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, IsMatched_00001, Level1)
 {
-    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(50);
-    reminder1->InitCreatorBundleName("test_IsMatched");
-    reminder1->InitCreatorUid(98765);
-    reminder1->InitBundleName("test_IsMatched");
-    reminder1->InitUid(98765);
-    reminder1->InitUserId(100);
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(50);
+    reminder->InitCreatorBundleName("test_IsMatched");
+    reminder->InitCreatorUid(98765);
+    reminder->InitBundleName("test_IsMatched");
+    reminder->InitUid(98765);
+    reminder->InitUserId(100);
     bool ret = manager->IsMatched(reminder, "test_IsMatched", 101, 98765);
     EXPECT_EQ(ret, false);
     ret = manager->IsMatched(reminder, "allPackages", 100, 98765);
