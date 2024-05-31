@@ -14,7 +14,16 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
-cflags = []
+cflags = [
+  "-fno-math-errno",
+  "-fno-unroll-loops",
+  "-fmerge-all-constants",
+  "-fno-ident",
+  "-Oz",
+  "-flto",
+  "-ffunction-sections",
+  "-fdata-sections",
+]
 
 config("native_module_config") {
   visibility = [ ":*" ]
