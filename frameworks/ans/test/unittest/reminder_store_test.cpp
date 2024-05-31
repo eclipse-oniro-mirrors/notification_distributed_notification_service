@@ -103,7 +103,7 @@ HWTEST_F(ReminderStoreTest, Delete_00002, Function | SmallTest | Level1)
     std::string pkg = "pkg";
     int32_t userId = 1;
     ReminderStore reminderStore;
-    int32_t ret = reminderStore.Delete(pkg, userId);
+    int32_t ret = reminderStore.Delete(pkg, userId, -1);
     EXPECT_EQ(ret, -1);
 }
 
@@ -283,6 +283,22 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
     }
     NativeRdb::RdbHelper::ClearCache();
     NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+}
+
+/**
+ * @tc.name: Delete_00005
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, Delete_00005, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    int32_t ret = reminderStore.Delete("com.example.simple", 100, 20020152);
+    EXPECT_EQ(ret, -1);
+
+    ret = reminderStore.Delete("com.example.simple", 100, -1);
+    EXPECT_EQ(ret, -1);
 }
 }
 }

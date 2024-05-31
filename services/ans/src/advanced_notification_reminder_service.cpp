@@ -67,6 +67,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
     std::string bundle = GetClientBundleName();
     reminder->InitCreatorBundleName(bundle);
+    reminder->InitCreatorUid(IPCSkeleton::GetCallingUid());
     if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
         ANSR_LOGE("wantagent info is nullptr");
         return ERR_ANS_INVALID_PARAM;
@@ -145,7 +146,7 @@ ErrCode AdvancedNotificationService::CancelAllReminders()
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    return rdm->CancelAllReminders(bundleOption->GetBundleName(), userId);
+    return rdm->CancelAllReminders(bundleOption->GetBundleName(), userId, bundleOption->GetUid());
 }
 
 

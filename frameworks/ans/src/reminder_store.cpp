@@ -35,7 +35,8 @@ const int32_t REMINDER_RDB_VERSION_V1 = 1;
 const int32_t REMINDER_RDB_VERSION_V2 = 2;
 const int32_t REMINDER_RDB_VERSION_V3 = 3;
 const int32_t REMINDER_RDB_VERSION_V4 = 4;
-const int32_t REMINDER_RDB_VERSION = 5;
+const int32_t REMINDER_RDB_VERSION_V5 = 5;
+const int32_t REMINDER_RDB_VERSION = 6;
 }
 
 const int32_t ReminderStore::STATE_OK = 0;
@@ -56,18 +57,21 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
     if (oldVersion < newVersion && newVersion == REMINDER_RDB_VERSION) {
         switch (oldVersion) {
             case REMINDER_RDB_VERSION_V1:
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "groupId", "TEXT");
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "groupId", "TEXT", "''");
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V2:
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "custom_ring_uri", "TEXT");
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "snooze_slot_id", "INT");
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "custom_ring_uri", "TEXT", "''");
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "snooze_slot_id", "INT", "3");
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V3:
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "creator_bundle_name", "TEXT");
+                AddRdbColum(store, ReminderTable::TABLE_NAME, "creator_bundle_name", "TEXT", "''");
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V4:
                 CreateTable(store);
                 CopyData(store);
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V5:
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CREATOR_UID, "INT", "-1");
                 [[fallthrough]];
             default:
                 break;
@@ -247,15 +251,10 @@ void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::Rdb
 }
 
 void ReminderStore::ReminderStoreDataCallBack::AddRdbColum(NativeRdb::RdbStore& store, const std::string& tableName,
-    const std::string& columnName, const std::string& columnType)
+    const std::string& columnName, const std::string& columnType, const std::string& defValue)
 {
     std::string sqlStr = "";
-    if (columnType == "TEXT") {
-        sqlStr = "ALTER TABLE " + tableName + " ADD " + columnName + " " + columnType + " DEFAULT '';";
-    } else if (columnType == "INT") {
-        //3 is meaning others
-        sqlStr = "ALTER TABLE " + tableName + " ADD " + columnName + " " + columnType + " DEFAULT 3;";
-    }
+    sqlStr = "ALTER TABLE " + tableName + " ADD " + columnName + " " + columnType + " DEFAULT " + defValue + ";";
     ANSR_LOGD("AddRdbColum sqlStr = %{public}s", sqlStr.c_str());
     int errorCode = store.ExecuteSql(sqlStr);
     if (errorCode != NativeRdb::E_OK) {
@@ -339,15 +338,22 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
     return STATE_OK;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& pkg, const int32_t userId)
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& pkg, const int32_t userId,
+    const int32_t uid)
 {
     std::string assoConditon = "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderBaseTable::TABLE_NAME
         + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::PACKAGE_NAME + " = '" + pkg
-        + "' AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " + std::to_string(userId)
-        + ")";
+        + "' AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " + std::to_string(userId);
 
     std::string baseCondtion = ReminderBaseTable::PACKAGE_NAME + " = '" + pkg + "' AND "
         + ReminderBaseTable::USER_ID + " = " + std::to_string(userId);
+
+    if (uid != -1) {
+        assoConditon += " AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::UID
+            + " = " + std::to_string(uid);
+        baseCondtion += " AND " + ReminderBaseTable::UID + " = " + std::to_string(uid);
+    }
+    assoConditon += ")";
     return Delete(baseCondtion, assoConditon);
 }
 

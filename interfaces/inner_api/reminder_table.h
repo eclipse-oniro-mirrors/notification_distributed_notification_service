@@ -178,6 +178,11 @@ public:
      */
     static const std::string CREATOR_BUNDLE_NAME;
 
+    /*
+     * creator uid
+     */
+    static const std::string CREATOR_UID;
+
 public:
     static void InitDbColumns();
 

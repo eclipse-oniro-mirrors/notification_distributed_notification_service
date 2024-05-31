@@ -237,6 +237,11 @@ void ReminderRequest::InitCreatorBundleName(const std::string &creatorBundleName
     creatorBundleName_ = creatorBundleName;
 }
 
+void ReminderRequest::InitCreatorUid(const int32_t creatorUid)
+{
+    creatorUid_ = creatorUid;
+}
+
 void ReminderRequest::InitReminderId()
 {
     std::lock_guard<std::mutex> lock(std::mutex);
@@ -589,6 +594,7 @@ void ReminderRequest::RecoverFromDbBase(const std::shared_ptr<NativeRdb::ResultS
     ReminderStore::GetStringVal(resultSet, ReminderBaseTable::GROUP_ID, groupId_);
     ReminderStore::GetStringVal(resultSet, ReminderBaseTable::CUSTOM_RING_URI, customRingUri_);
     ReminderStore::GetStringVal(resultSet, ReminderBaseTable::CREATOR_BUNDLE_NAME, creatorBundleName_);
+    ReminderStore::GetInt32Val(resultSet, ReminderBaseTable::CREATOR_UID, creatorUid_);
 }
 
 void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
@@ -879,6 +885,11 @@ std::map<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo> R
 std::string ReminderRequest::GetCreatorBundleName() const
 {
     return creatorBundleName_;
+}
+
+int32_t ReminderRequest::GetCreatorUid() const
+{
+    return creatorUid_;
 }
 
 std::string ReminderRequest::GetContent() const
@@ -1868,6 +1879,32 @@ int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundle
     return uid;
 }
 
+int32_t ReminderRequest::GetAppIndex(const int32_t uid)
+{
+    const int32_t defaultAppIndex = 0;  // failed return main apps
+    sptr<ISystemAbilityManager> systemAbilityManager
+        = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        ANSR_LOGE("Failed to get app index due to get systemAbilityManager is null.");
+        return defaultAppIndex;
+    }
+    sptr<IRemoteObject> remoteObject  = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        ANSR_LOGE("Fail to get bundle manager proxy");
+        return defaultAppIndex;
+    }
+    sptr<AppExecFwk::IBundleMgr> bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (bundleMgr == nullptr) {
+        ANSR_LOGE("Bundle mgr proxy is nullptr");
+        return defaultAppIndex;
+    }
+    std::string bundleName;
+    int32_t appIndex = 0;
+    bundleMgr->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    ANSR_LOGD("appIndex=%{public}d", appIndex);
+    return appIndex;
+}
+
 int32_t ReminderRequest::GetUserId(const int32_t &uid)
 {
     int32_t userId = -1;
@@ -1954,6 +1991,7 @@ void ReminderRequest::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
     values.PutString(ReminderBaseTable::GROUP_ID, reminder->GetGroupId());
     values.PutString(ReminderBaseTable::CUSTOM_RING_URI, reminder->GetCustomRingUri());
     values.PutString(ReminderBaseTable::CREATOR_BUNDLE_NAME, reminder->GetCreatorBundleName());
+    values.PutInt(ReminderBaseTable::CREATOR_UID, reminder->GetCreatorUid());
 }
 
 int64_t ReminderRequest::GetNextDaysOfWeek(const time_t now, const time_t target) const

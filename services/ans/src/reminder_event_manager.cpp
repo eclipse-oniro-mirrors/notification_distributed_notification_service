@@ -192,7 +192,8 @@ void ReminderEventManager::ReminderEventSubscriber::HandlePackageRemove(const Ev
     OHOS::AppExecFwk::ElementName ele = want.GetElement();
     std::string bundleName = ele.GetBundleName();
     int32_t userId = want.GetIntParam(OHOS::AppExecFwk::Constants::USER_ID, -1);
-    reminderDataManager_->CancelAllReminders(bundleName, userId);
+    int32_t uid = want.GetIntParam(OHOS::AppExecFwk::Constants::UID, -1);
+    reminderDataManager_->CancelAllReminders(bundleName, userId, uid);
 }
 
 void ReminderEventManager::ReminderEventSubscriber::HandleProcessDied(const EventFwk::Want &want) const
