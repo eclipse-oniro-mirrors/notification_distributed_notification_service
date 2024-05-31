@@ -33,6 +33,7 @@ NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribe
 {
     appNames_ = subscribeInfo.GetAppNames();
     deviceType_ = subscribeInfo.GetDeviceType();
+    userId_ = subscribeInfo.GetAppUserId();
     subscriberUid_ = subscribeInfo.GetSubscriberUid();
 }
 
