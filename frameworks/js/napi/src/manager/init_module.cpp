@@ -119,6 +119,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", NapiIsSmartReminderEnabled),
         DECLARE_NAPI_FUNCTION("getSlotByBundle", NapiGetSlotByBundle),
         DECLARE_NAPI_FUNCTION("setAdditionalConfig", NapiSetAdditionConfig),
+        DECLARE_NAPI_FUNCTION("isNotificationEnabledSync", NapiIsNotificationEnabledSync),
 };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

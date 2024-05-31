@@ -466,5 +466,23 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
         return promise;
     }
 }
+
+napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    IsEnableParams params {};
+    if (ParseParameters(env, info, params) == nullptr) {
+        ANS_LOGD("ParseParameters is nullptr.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    int32_t errorCode = 0;
+    bool allowed = false;
+    errorCode = NotificationHelper::IsAllowedNotifySelf(allowed);
+    napi_value result = nullptr;
+    napi_get_boolean(env, allowed, &result);
+    return result;
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS
