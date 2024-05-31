@@ -70,9 +70,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_001, Level1)
     sptr<NotificationBundleOption> option = new NotificationBundleOption();
     manager->PublishReminder(reminder, option);
     manager->CancelReminder(-1, option);
-    manager->CancelAllReminders("", -1);
+    manager->CancelAllReminders("", -1, -1);
     manager->CancelAllReminders(-1);
-    manager->IsMatched(reminder, "", -1);
+    manager->IsMatched(reminder, "", -1, -1);
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -771,6 +771,80 @@ HWTEST_F(ReminderDataManagerTest, InitStartExtensionAbility_0001, Level1)
     manager->reminderVector_.push_back(calendar);
     manager->Init(true);
     EXPECT_TRUE(!manager->reminderVector_.empty());
+}
+
+/**
+ * @tc.name: CancelAllReminders_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, CancelAllReminders_00001, Level1)
+{
+    int ret = manager->CancelAllReminders("", -1, -1);
+    EXPECT_TRUE(ret == ERR_OK);
+
+    ret = manager->CancelAllReminders("com.example.simple", 100, 20020152);
+    EXPECT_TRUE(ret == ERR_OK);
+}
+
+/**
+ * @tc.name: GetVaildReminders_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
+{
+    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(static_cast<uint64_t>(50));
+    reminder1->InitCreatorBundleName("test_getvalid");
+    reminder1->InitCreatorUid(98765);
+    reminder1->InitBundleName("test_getvalid");
+    reminder1->InitUid(98765);
+    sptr<NotificationBundleOption> option1 = new NotificationBundleOption("test_getvalid", 98765);
+    manager->PublishReminder(reminder1, option1);
+    reminder1->SetExpired(false);
+
+    sptr<ReminderRequest> reminder2 = new ReminderRequestTimer(51);
+    reminder2->InitCreatorBundleName("test_getvalid");
+    reminder2->InitCreatorUid(98765);
+    reminder2->InitBundleName("test_getvalid");
+    reminder2->InitUid(98765);
+    reminder2->SetExpired(true);
+    sptr<NotificationBundleOption> option2 = new NotificationBundleOption("test_getvalid", 98765);
+    manager->PublishReminder(reminder2, option2);
+    
+    std::vector<sptr<ReminderRequest>> reminders;
+    manager->GetValidReminders(option2, reminders);
+    EXPECT_TRUE(reminders.size() == 1);
+}
+
+/**
+ * @tc.name: IsMatched_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, IsMatched_00001, Level1)
+{
+    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(50);
+    reminder1->InitCreatorBundleName("test_IsMatched");
+    reminder1->InitCreatorUid(98765);
+    reminder1->InitBundleName("test_IsMatched");
+    reminder1->InitUid(98765);
+    reminder1->InitUserId(100);
+    bool ret = manager->IsMatched(reminder, "test_IsMatched", 101, 98765);
+    EXPECT_EQ(ret, false);
+    ret = manager->IsMatched(reminder, "allPackages", 100, 98765);
+    EXPECT_EQ(ret, true);
+    ret = manager->IsMatched(reminder, "test_IsMatched2", 100, 98765);
+    EXPECT_EQ(ret, false);
+    ret = manager->IsMatched(reminder, "test_IsMatched", 100, -1);
+    EXPECT_EQ(ret, false);
+    ret = manager->IsMatched(reminder, "test_IsMatched", 100, 98766);
+    EXPECT_EQ(ret, false);
+    ret = manager->IsMatched(reminder, "test_IsMatched", 100, 98765);
+    EXPECT_EQ(ret, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -301,8 +301,8 @@ bool ReminderDataManager::IsMatched(const sptr<ReminderRequest> &reminder,
     if (packageName == ALL_PACKAGES) {
         return true;
     }
-    if (reminder->GetBundleName() == packageName) {
-        return true;
+    if (reminder->GetBundleName() != packageName) {
+        return false;
     }
     if (uid != -1 && reminder->GetUid() == uid) {
         return true;
