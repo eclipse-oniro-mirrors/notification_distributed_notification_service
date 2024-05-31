@@ -1876,21 +1876,22 @@ int32_t ReminderRequest::GetUid(const int32_t &userId, const std::string &bundle
 
 int32_t ReminderRequest::GetAppIndex(const int32_t uid)
 {
+    const int32_t defaultAppIndex = 0;  // failed return main apps
     sptr<ISystemAbilityManager> systemAbilityManager
         = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
         ANSR_LOGE("Failed to get app index due to get systemAbilityManager is null.");
-        return 0;
+        return defaultAppIndex;
     }
     sptr<IRemoteObject> remoteObject  = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (remoteObject == nullptr) {
         ANSR_LOGE("Fail to get bundle manager proxy");
-        return 0;
+        return defaultAppIndex;
     }
     sptr<AppExecFwk::IBundleMgr> bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     if (bundleMgr == nullptr) {
         ANSR_LOGE("Bundle mgr proxy is nullptr");
-        return 0;
+        return defaultAppIndex;
     }
     std::string bundleName;
     int32_t appIndex = 0;
