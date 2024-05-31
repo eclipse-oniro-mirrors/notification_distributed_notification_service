@@ -29,7 +29,16 @@ group("napi_notification") {
   ]
 }
 
-cflags = []
+cflags = [
+  "-fno-math-errno",
+  "-fno-unroll-loops",
+  "-fmerge-all-constants",
+  "-fno-ident",
+  "-Oz",
+  "-flto",
+  "-ffunction-sections",
+  "-fdata-sections",
+]
 
 config("native_module_config") {
   visibility = [ ":*" ]

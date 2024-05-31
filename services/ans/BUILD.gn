@@ -94,7 +94,16 @@ ohos_shared_library("libans") {
   configs = [ ":public_ans_config" ]
 
   defines = []
-  cflags = []
+  cflags = [
+    "-fno-math-errno",
+    "-fno-unroll-loops",
+    "-fmerge-all-constants",
+    "-fno-ident",
+    "-Oz",
+    "-flto",
+    "-ffunction-sections",
+    "-fdata-sections",
+  ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
