@@ -22,7 +22,7 @@
         "icon": "$media:icon",
         "label": "$string:NotificationServiceExtAbility_label",
         "visible": false,
-        "exported":true,
+        "exported":false,
         "type": "sysDialog/common"
       }
     ],
