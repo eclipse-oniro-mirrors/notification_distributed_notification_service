@@ -123,7 +123,8 @@ const int32_t ERROR_SLOT_CLOSED                  = 1600005;    // Notification s
 const int32_t ERROR_NOTIFICATION_UNREMOVABLE     = 1600006;    // Notification deletion disabled.
 const int32_t ERROR_NOTIFICATION_NOT_EXIST       = 1600007;    // The notification does not exist.
 const int32_t ERROR_USER_NOT_EXIST               = 1600008;    // The user does not exist.
-const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;    // The notification sending frequency reaches the upper limit.
+// The notification sending frequency reaches the upper limit.
+const int32_t ERROR_OVER_MAX_NUM_PER_SECOND      = 1600009;
 const int32_t ERROR_DISTRIBUTED_OPERATION_FAILED = 1600010;    // Distributed operation failed.
 const int32_t ERROR_READ_TEMPLATE_CONFIG_FAILED  = 1600011;    // Failed to read the template configuration.
 const int32_t ERROR_NO_MEMORY                    = 1600012;    // No memory space.
