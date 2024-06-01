@@ -772,25 +772,24 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
 bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreferencesInfo &info)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    ParseDoNotDisturbType(info);
-    ParseDoNotDisturbBeginDate(info);
-    ParseDoNotDisturbEndDate(info);
-    ParseEnableAllNotification(info);
-    ParseGetDoNotDisturbProfile(info);
-
     if (!CheckRdbStore()) {
         ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
     std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-
+    OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
     for (auto iter : activeUserId) {
+        GetDoNotDisturbType(info, iter);
+        GetDoNotDisturbBeginDate(info, iter);
+        GetDoNotDisturbEndDate(info, iter);
+        GetEnableAllNotification(info, iter);
+        GetDoNotDisturbProfile(info, iter);
+
         std::unordered_map<std::string, std::string> values;
         int32_t result = rdbDataManager_->QueryDataBeginWithKey(KEY_BUNDLE_LABEL, values, iter);
         if (result == NativeRdb::E_ERROR) {
             ANS_LOGE("Get Bundle Info failed.");
-            return false;
+            continue;
         }
         ParseBundleFromDistureDB(info, values, iter);
     }
@@ -1300,56 +1299,6 @@ std::string NotificationPreferencesDatabase::SubUniqueIdentifyFromString(
     }
 
     return slotType;
-}
-
-void NotificationPreferencesDatabase::ParseDoNotDisturbType(NotificationPreferencesInfo &info)
-{
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-
-    for (auto iter : activeUserId) {
-        NotificationPreferencesDatabase::GetDoNotDisturbType(info, iter);
-    }
-}
-
-void NotificationPreferencesDatabase::ParseDoNotDisturbBeginDate(NotificationPreferencesInfo &info)
-{
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-
-    for (auto iter : activeUserId) {
-        NotificationPreferencesDatabase::GetDoNotDisturbBeginDate(info, iter);
-    }
-}
-
-void NotificationPreferencesDatabase::ParseDoNotDisturbEndDate(NotificationPreferencesInfo &info)
-{
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-
-    for (auto iter : activeUserId) {
-        NotificationPreferencesDatabase::GetDoNotDisturbEndDate(info, iter);
-    }
-}
-
-void NotificationPreferencesDatabase::ParseEnableAllNotification(NotificationPreferencesInfo &info)
-{
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-
-    for (auto iter : activeUserId) {
-        NotificationPreferencesDatabase::GetEnableAllNotification(info, iter);
-    }
-}
-
-void NotificationPreferencesDatabase::ParseGetDoNotDisturbProfile(NotificationPreferencesInfo &info)
-{
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-
-    for (auto iter : activeUserId) {
-        NotificationPreferencesDatabase::GetDoNotDisturbProfile(info, iter);
-    }
 }
 
 void NotificationPreferencesDatabase::ParseBundleName(

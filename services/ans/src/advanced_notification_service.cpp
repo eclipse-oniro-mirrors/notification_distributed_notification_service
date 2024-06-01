@@ -293,7 +293,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 
     std::function<void()> recoverFunc = std::bind(&AdvancedNotificationService::RecoverLiveViewFromDb, this);
     notificationSvrQueue_->submit(recoverFunc);
-
+    
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::OnBundleRemoved, this, std::placeholders::_1),
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
