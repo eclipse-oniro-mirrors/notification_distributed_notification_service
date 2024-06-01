@@ -147,7 +147,7 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetName("CONTENT_INFORMATION");
             SetLockscreenVisibleness(NotificationConstant::VisiblenessType::SECRET);
             SetEnableVibration(false);
-            SetLevel(LEVEL_LOW);
+            SetLevel(LEVEL_MIN);
             break;
         case NotificationConstant::SlotType::LIVE_VIEW:
             id_ = "LIVE_VIEW";
