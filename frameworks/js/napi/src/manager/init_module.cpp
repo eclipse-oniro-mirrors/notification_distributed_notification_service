@@ -136,7 +136,6 @@ static napi_value Init(napi_env env, napi_value exports)
      */
     NotificationManagerInit(env, exports);
     ConstantInit(env, exports);
-    OHOS::Media::PixelMapNapi::Init(env, exports);
 
     return exports;
 }
