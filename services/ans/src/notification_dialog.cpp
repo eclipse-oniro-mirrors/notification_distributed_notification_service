@@ -58,12 +58,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
     auto appBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
-    auto topUid = NotificationDialog::GetUidByBundleName(appBundleName);
-    if (topUid != uid) {
-        ANS_LOGE("Current application isn't in foreground, top is %{private}s.", appBundleName.c_str());
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
+    
     AAFwk::Want want;
     
     std::string bundleName = "com.ohos.sceneboard";
