@@ -61,6 +61,12 @@ ErrCode OsAccountManagerHelper::GetAllOsAccount(std::vector<int32_t> &userIds)
     return ret;
 }
 
+ErrCode OsAccountManagerHelper::GetAllActiveOsAccount(std::vector<int32_t> &userIds)
+{
+    
+    return OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
+}
+
 bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
 {
     bool isAccountExists = false;

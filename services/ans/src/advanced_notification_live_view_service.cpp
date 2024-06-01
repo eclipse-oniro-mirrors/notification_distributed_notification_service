@@ -287,7 +287,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
 {
     std::unordered_map<std::string, std::string> dbRecords;
     std::vector<int32_t> userIds;
-    int32_t ret = OsAccountManagerHelper::GetInstance().GetAllOsAccount(userIds);
+    int32_t ret = OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(userIds);
     if (ret != ERR_OK) {
         ANS_LOGE("Get all os account failed.");
         return ret;
