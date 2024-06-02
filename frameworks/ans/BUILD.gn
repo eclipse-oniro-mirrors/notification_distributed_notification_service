@@ -14,17 +14,6 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
-cflags = [
-  "-fno-math-errno",
-  "-fno-unroll-loops",
-  "-fmerge-all-constants",
-  "-fno-ident",
-  "-Oz",
-  "-flto",
-  "-ffunction-sections",
-  "-fdata-sections",
-]
-
 group("ans_client") {
   deps = [ ":ans_innerkits" ]
 }
@@ -159,7 +148,7 @@ ohos_shared_library("ans_innerkits") {
   ]
 
   if (is_double_framework) {
-    cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
+    cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
 
   if (ans_hitrace_usage) {
