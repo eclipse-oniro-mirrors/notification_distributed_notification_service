@@ -33,6 +33,7 @@
 #include "errors.h"
 #include "notification_extension_wrapper.h"
 #include "notification_record.h"
+#include "os_account_manager_helper.h"
 #ifdef DEVICE_USAGE_STATISTICS_ENABLE
 #include "bundle_active_client.h"
 #endif
@@ -51,7 +52,7 @@
 #include "notification_slot_filter.h"
 #include "notification_subscriber_manager.h"
 #include "notification_local_live_view_subscriber_manager.h"
-#include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "parameters.h"
 #include "permission_filter.h"
 #include "push_callback_proxy.h"
@@ -115,6 +116,17 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         ANSR_LOGE("NotificationRequest object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
+
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    request->SetCreatorUid(uid);
+    request->SetOwnerUid(uid);
+    request->SetCreatorPid(pid);
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    request->SetCreatorUserId(userId);
+    request->SetOwnerUserId(userId);
 
     if (request->IsAgentNotification()) {
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -199,19 +211,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     }
     
     int32_t ownerUserId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
     request->SetOwnerUserId(ownerUserId);
 
     request->SetCreatorBundleName(bundle);
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    int32_t pid = IPCSkeleton::GetCallingPid();
-    request->SetCreatorUid(uid);
-    request->SetCreatorPid(pid);
-
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
-    request->SetCreatorUserId(userId);
     ErrCode result = CheckPictureSize(request);
 
     if (request->GetDeliveryTime() <= 0) {
