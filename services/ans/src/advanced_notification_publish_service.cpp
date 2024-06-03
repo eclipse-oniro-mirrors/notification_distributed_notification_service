@@ -1077,14 +1077,16 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
 ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32_t uid)
 {
     LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
-    for (auto iter = delayNotificationList_.begin(); iter != delayNotificationList_.end();) {
-        if ((*iter).first->notification->GetNotificationRequest().GetCreatorUid() == uid &&
-            (*iter).first->notification->GetNotificationRequest().IsInProgress()) {
-            CancelTimer((*iter).second);
-            iter = delayNotificationList_.erase(iter);
-        } else {
-            iter++;
+    {
+        std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+        for (auto iter = delayNotificationList_.begin(); iter != delayNotificationList_.end();) {
+            if ((*iter).first->notification->GetNotificationRequest().GetCreatorUid() == uid &&
+                (*iter).first->notification->GetNotificationRequest().IsInProgress()) {
+                CancelTimer((*iter).second);
+                iter = delayNotificationList_.erase(iter);
+            } else {
+                iter++;
+            }
         }
     }
 
