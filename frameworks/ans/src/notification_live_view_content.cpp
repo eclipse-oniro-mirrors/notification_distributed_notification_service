@@ -18,6 +18,7 @@
 #include "ans_image_util.h"
 #include "ans_log_wrapper.h"
 #include "want_params_wrapper.h"
+#include "ans_const_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -267,6 +268,10 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
     isOnlyLocalUpdate_ = parcel.ReadBool();
     
     uint64_t len = parcel.ReadUint64();
+    if (len > MAX_PARCELABLE_VECTOR_NUM) {
+        ANS_LOGE("Size exceeds the range.");
+        return false;
+    }
     for (uint64_t i = 0; i < len; i++) {
         auto key = parcel.ReadString();
         std::vector<std::string> strVec;
