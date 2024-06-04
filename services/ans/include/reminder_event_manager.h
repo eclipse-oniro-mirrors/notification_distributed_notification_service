@@ -74,7 +74,7 @@ public:
     ~ReminderNotificationSubscriber() override;
     void OnConnected() override;
     void OnDisconnected() override;
-    void OnCanceled(const std::shared_ptr<Notification> &request,
+void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override;
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override;

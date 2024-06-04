@@ -30,13 +30,15 @@
 using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
-static constexpr std::string LABEL_SPLITER = "_";
+static const std::string LABEL_SPLITER = "_";
 static constexpr uint32_t LABEL_SIZE = 3;
 static const std::string LABEL_PREFIX = "REMINDER";
 static const std::string LABEL_SUFFIX = "AGENT";
 static constexpr uint32_t LABEL_PREFIX_INDEX = 0;
 static constexpr uint32_t LABEL_SUFFIX_INDEX = 1;
 static constexpr uint32_t REMINDER_ID_INDEX = 2;
+std::shared_ptr<ReminderEventManager::ReminderNotificationSubscriber> ReminderEventManager::subscriber_
+    = nullptr;
 
 ReminderEventManager::ReminderEventManager(std::shared_ptr<ReminderDataManager> &reminderDataManager)
 {
@@ -319,27 +321,27 @@ void ReminderEventManager::ReminderNotificationSubscriber::OnCanceled(
     reminderDataManager_->HandleAutoDeleteReminder(reminderId);
 }
 
-void TaskNotificationSubscriber::OnConsumed(const std::shared_ptr<Notification> &notification,
+void ReminderEventManager::ReminderNotificationSubscriber::OnConsumed(const std::shared_ptr<Notification> &notification,
     const std::shared_ptr<NotificationSortingMap> &sortingMap) {}
 
-void TaskNotificationSubscriber::OnUpdate(
+void ReminderEventManager::ReminderNotificationSubscriber::OnUpdate(
     const std::shared_ptr<NotificationSortingMap> &sortingMap) {}
 
-void TaskNotificationSubscriber::OnDied() {}
+void ReminderEventManager::ReminderNotificationSubscriber::OnDied() {}
 
-void TaskNotificationSubscriber::OnDoNotDisturbDateChange(
+void ReminderEventManager::ReminderNotificationSubscriber::OnDoNotDisturbDateChange(
     const std::shared_ptr<NotificationDoNotDisturbDate> &date) {}
 
-void TaskNotificationSubscriber::OnEnabledNotificationChanged(
+void ReminderEventManager::ReminderNotificationSubscriber::OnEnabledNotificationChanged(
     const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) {}
 
-void TaskNotificationSubscriber::OnBadgeChanged(
+void ReminderEventManager::ReminderNotificationSubscriber::OnBadgeChanged(
     const std::shared_ptr<BadgeNumberCallbackData> &badgeData) {}
 
-void TaskNotificationSubscriber::OnBadgeEnabledChanged(
+void ReminderEventManager::ReminderNotificationSubscriber::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData) {}
 
-void TaskNotificationSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
+void ReminderEventManager::ReminderNotificationSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
     &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) {}
 }  // namespace OHOS
 }  // namespace Notification
