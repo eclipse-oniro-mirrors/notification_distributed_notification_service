@@ -21,6 +21,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "notification_preferences.h"
+#include "notification_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -42,6 +43,9 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    matchingSkills.AddEvent("usual.event.DATA_SHARE_READY");
+#endif
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -111,6 +115,10 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
                 callbacks_.onBundleDataCleared(bundleOption);
             }
         }
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    } else if (action == "usual.event.DATA_SHARE_READY") {
+        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+#endif
     } else {
         OnReceiveEventInner(data);
     }

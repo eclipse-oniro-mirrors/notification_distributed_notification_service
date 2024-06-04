@@ -55,10 +55,13 @@ public:
      */
     void NotifyChange(const Uri &uri);
 
+    bool CheckIfSettingsDataReady();
+
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     static sptr<AdvancedDatashareObserver> instance_;
     static std::mutex instanceMutex_;
+    bool isDataShareReady_ = false;
 };
 } // namespace Notification
 } // namespace OHOS
