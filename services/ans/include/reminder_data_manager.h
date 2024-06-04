@@ -229,6 +229,11 @@ public:
     void ClickReminder(const OHOS::EventFwk::Want &want);
 
     /**
+     * Handle auto delete time
+     */
+    void HandleAutoDeleteReminder(const int32_t reminderId);
+
+    /**
      * @brief Terminate the alerting reminder.
      *
      * 1. Stop sound and vibrate.

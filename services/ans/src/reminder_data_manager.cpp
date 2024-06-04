@@ -2155,5 +2155,33 @@ bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderReques
     }
     return true;
 }
+
+void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId)
+{
+    ANSR_LOGI("auto delete reminder[%{public}d] start", reminderId);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    if (reminder == nullptr) {
+        ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
+        return;
+    }
+
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    if (now < 0) {
+        return;
+    }
+    uint64_t nowMilli = ReminderRequest::GetDurationSinceEpochInMilli(now);
+    if (nowMilli == ReminderRequest::INVALID_LONG_LONG_VALUE) {
+        return;
+    }
+
+    if (static_cast<uint64_t>(reminder->GetAutoDeletedTime()) > nowMilli) {
+        return;
+    }
+    CloseReminder(reminder, true);
+    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    StartRecentReminder();
+}
 }
 }
