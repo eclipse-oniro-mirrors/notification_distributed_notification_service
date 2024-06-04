@@ -341,7 +341,8 @@ void ReminderEventManager::ReminderNotificationSubscriber::OnBadgeChanged(
 void ReminderEventManager::ReminderNotificationSubscriber::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData) {}
 
-void ReminderEventManager::ReminderNotificationSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
-    &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) {}
+void ReminderEventManager::ReminderNotificationSubscriber::OnBatchCanceled(
+    const std::vector<std::shared_ptr<Notification>> &requestList,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) {}
 }  // namespace OHOS
 }  // namespace Notification
