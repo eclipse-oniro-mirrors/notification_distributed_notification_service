@@ -25,6 +25,8 @@
 #include "notification_unified_group_Info.h"
 #include "singleton.h"
 #include "advanced_aggregation_data_roaming_observer.h"
+#include "system_ability_definition.h"
+#include "system_ability_status_change_stub.h"
 
 namespace OHOS::Notification {
 class ExtensionWrapper final {
@@ -44,6 +46,7 @@ public:
     ErrCode GetUnifiedGroupInfo(const sptr<NotificationRequest> &request);
     void RegisterDataSettingObserver();
     void SetlocalSwitch(std::string &enable);
+    void CheckIfSetlocalSwitch();
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -56,6 +59,12 @@ private:
     SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
     sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
 };
+class SubSystemAbilityListener : public SystemAbilityStatusChangeStub {
+public:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId);
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId);
+    static constexpr int32_t DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID = 1301;
+}; // SubSystemAbilityListener
 
 #define EXTENTION_WRAPPER ::OHOS::DelayedSingleton<ExtensionWrapper>::GetInstance()
 } // namespace OHOS::Notification

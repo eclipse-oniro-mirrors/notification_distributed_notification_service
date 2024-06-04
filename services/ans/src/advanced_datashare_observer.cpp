@@ -26,7 +26,11 @@
 namespace OHOS {
 namespace Notification {
 namespace {
+constexpr const char *SETTING_URI_PROXY =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+constexpr const int32_t E_OK = 0;
+constexpr const int32_t E_DATA_SHARE_NOT_READY = 1055;
 } // namespace
 
 AdvancedDatashareObserver::AdvancedDatashareObserver() = default;
@@ -81,6 +85,41 @@ void AdvancedDatashareObserver::NotifyChange(const Uri &uri)
     }
     settingHelper->NotifyChange(uri);
     settingHelper->Release();
+}
+
+bool AdvancedDatashareObserver::CheckIfSettingsDataReady()
+{
+    if (isDataShareReady_) {
+        return true;
+    }
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        ANS_LOGE("The sa manager is nullptr.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        ANS_LOGE("The remoteObj is nullptr.");
+        return false;
+    }
+    std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
+        DataShare::DataShareHelper::Create(remoteObj, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
+    ANS_LOGI("create data_share helper, ret=%{public}d", ret.first);
+    if (ret.first == E_OK) {
+        ANS_LOGE("create data_share helper success");
+        auto helper = ret.second;
+        if (helper != nullptr) {
+            bool releaseRet = helper->Release();
+            ANS_LOGI("release data_share helper, releaseRet=%{public}d", releaseRet);
+        }
+        isDataShareReady_ = true;
+        return true;
+    } else if (ret.first == E_DATA_SHARE_NOT_READY) {
+        ANS_LOGI("create data_share helper failed");
+        isDataShareReady_ = false;
+        return false;
+    }
+    return true;
 }
 
 } // namespace Notification

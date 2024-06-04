@@ -64,10 +64,10 @@ void ExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
-    RegisterDataSettingObserver();
-    string enable = "";
-    AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
-    SetlocalSwitch(enable);
+
+    if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
+        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+    }
 
     std::string configKey = NotificationPreferences::GetInstance().GetAdditionalConfig();
     if (!configKey.empty()) {
@@ -75,6 +75,18 @@ void ExtensionWrapper::InitExtentionWrapper()
     }
     initSummary_(UpdateUnifiedGroupInfo);
     ANS_LOGD("extension wrapper init success");
+}
+
+void ExtensionWrapper::CheckIfSetlocalSwitch()
+{
+    if (extensionWrapperHandle_ == nullptr) {
+        ANS_LOGE("CheckIfSetlocalSwitch extension wrapper symbol failed");
+        return;
+    }
+    RegisterDataSettingObserver();
+    std::string enable = "";
+    AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
+    SetlocalSwitch(enable);
 }
 
 void ExtensionWrapper::SetlocalSwitch(std::string &enable)
@@ -148,5 +160,22 @@ int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 
     ANS_LOGD("convertToDelType from delete reason %d to delete type %d", deleteReason, delType);
     return delType;
+}
+
+void SubSystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    if (systemAbilityId != DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
+        return;
+    }
+    if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
+        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+    }
+}
+
+void SubSystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    if (systemAbilityId != DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
+        return;
+    }
 }
 } // namespace OHOS::Notification
