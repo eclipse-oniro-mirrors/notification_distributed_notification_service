@@ -2165,17 +2165,15 @@ void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId)
         return;
     }
 
+    int64_t autoDeleteTime = reminder->GetAutoDeletedTime();
     time_t now;
     (void)time(&now);  // unit is seconds.
-    if (now < 0) {
+    if (now < 0 || autoDeleteTime <= 0) {
+        ANSR_LOGW("get now time failed or auto delete time error.");
         return;
     }
-    uint64_t nowMilli = ReminderRequest::GetDurationSinceEpochInMilli(now);
-    if (nowMilli == ReminderRequest::INVALID_LONG_LONG_VALUE) {
-        return;
-    }
-
-    if (static_cast<uint64_t>(reminder->GetAutoDeletedTime()) > nowMilli) {
+    if ((autoDeleteTime / ReminderRequest::MILLI_SECONDS) > now) {
+        ANSR_LOGW("auto delete time greater than now.");
         return;
     }
     CloseReminder(reminder, true);
