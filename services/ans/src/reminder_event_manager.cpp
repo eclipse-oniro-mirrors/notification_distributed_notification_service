@@ -317,8 +317,8 @@ void ReminderEventManager::ReminderNotificationSubscriber::OnCanceled(
     if (reminderDataManager_ == nullptr) {
         return;
     }
-
-    reminderDataManager_->HandleAutoDeleteReminder(reminderId);
+    int32_t uid = request.GetOwnerUid() == 0 ? request.GetCreatorUid() : request.GetOwnerUid();
+    reminderDataManager_->HandleAutoDeleteReminder(reminderId, uid);
 }
 
 void ReminderEventManager::ReminderNotificationSubscriber::OnConsumed(const std::shared_ptr<Notification> &notification,

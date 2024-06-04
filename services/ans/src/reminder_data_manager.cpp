@@ -2156,7 +2156,7 @@ bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderReques
     return true;
 }
 
-void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId)
+void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId, const int32_t uid)
 {
     ANSR_LOGI("auto delete reminder[%{public}d] start", reminderId);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
@@ -2164,7 +2164,10 @@ void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId)
         ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
         return;
     }
-
+    if (reminder->GetUid() != uid) {
+        ANSR_LOGW("reminder uid not match");
+        return;
+    }
     int64_t autoDeleteTime = reminder->GetAutoDeletedTime();
     time_t now;
     (void)time(&now);  // unit is seconds.
