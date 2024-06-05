@@ -857,7 +857,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderNotificationSubscriber_00001, Level1)
 {
     ReminderEventManager::ReminderNotificationSubscriber test(manager);
     sptr<NotificationRequest> notificationReq = new NotificationRequest();
-    std::shared_ptr<Notification> notification = new Notification(notificationReq);
+    std::shared_ptr<Notification> notification = std::make_shared<Notification>(notificationReq);
     test.OnCanceled(notification, nullptr, NotificationConstant::CANCEL_REASON_DELETE);
     SUCCEED();
 
