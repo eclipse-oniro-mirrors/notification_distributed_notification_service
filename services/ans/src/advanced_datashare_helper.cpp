@@ -27,6 +27,8 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+constexpr const char *SETTINGS_DATASHARE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 constexpr const char *USER_SETTINGS_DATA_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_";
 constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
@@ -42,7 +44,7 @@ AdvancedDatashareHelper::AdvancedDatashareHelper()
     CreateDataShareHelper();
 }
 
-void AdvancedDatashareHelper::CreateDataShareHelper()
+std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateDataShareHelper()
 {
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
@@ -54,26 +56,29 @@ void AdvancedDatashareHelper::CreateDataShareHelper()
         ANS_LOGE("The remoteObj is nullptr.");
         return;
     }
-    dataShareHelper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATA_EXT_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
 }
 
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
 {
-    if (dataShareHelper_ == nullptr) {
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return false;
     }
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> columns;
     predicates.EqualTo(ADVANCED_DATA_COLUMN_KEYWORD, key);
-    auto result = dataShareHelper_->Query(uri, predicates, columns);
+    auto result = dataShareHelper->Query(uri, predicates, columns);
     if (result == nullptr) {
         ANS_LOGE("Query error, result is null.");
+        dataShareHelper->Release();
         return false;
     }
     if (result->GoToFirstRow() != DataShare::E_OK) {
         ANS_LOGE("Query failed, go to first row error.");
         result->Close();
+        dataShareHelper->Release();
         return false;
     }
     int32_t columnIndex;
@@ -81,6 +86,7 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
     result->GetString(columnIndex, value);
     result->Close();
     ANS_LOGD("Query success, value[%{public}s]", value.c_str());
+    dataShareHelper->Release();
     return true;
 }
 
