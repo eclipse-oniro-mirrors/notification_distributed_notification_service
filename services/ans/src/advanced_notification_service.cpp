@@ -117,17 +117,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         return ERR_ANS_INVALID_PARAM;
     }
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    int32_t pid = IPCSkeleton::GetCallingPid();
-    request->SetCreatorUid(uid);
-    request->SetOwnerUid(uid);
-    request->SetCreatorPid(pid);
-
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
-    request->SetCreatorUserId(userId);
-    request->SetOwnerUserId(userId);
-
     if (request->IsAgentNotification()) {
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -210,11 +199,23 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         request->SetOwnerBundleName(bundle);
     }
     
-    int32_t ownerUserId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
-    request->SetOwnerUserId(ownerUserId);
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    request->SetCreatorUid(uid);
+    request->SetCreatorPid(pid);
+    if (request->GetOwnerUid() == DEFAULT_UID) {
+        request->SetOwnerUid(uid);
+    }
 
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(bundle);
+    if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
+        int32_t ownerUserId = SUBSCRIBE_USER_INIT;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+        request->SetOwnerUserId(ownerUserId);
+    }
 
     ErrCode result = CheckPictureSize(request);
 
