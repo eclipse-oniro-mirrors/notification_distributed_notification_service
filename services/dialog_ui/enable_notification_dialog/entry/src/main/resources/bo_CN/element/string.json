@@ -1,0 +1,32 @@
+{
+  "string": [
+    {
+      "name": "entry_desc",
+      "value": "description"
+    },
+    {
+      "name": "NotificationServiceExtAbility_desc",
+      "value": "NotificationDialog"
+    },
+    {
+      "name": "NotificationServiceExtAbility_label",
+      "value": "NotificationDialog"
+    },
+    {
+      "name": "reason",
+      "value": "འཕྲེད་བྱང་དང་སྒོ་ལྕགས་བརྙན་ཡོལ། དྲིལ་སྒྲ་སོགས་ཚུད་ཡོད། ༼སྒྲིག་འགོད་༽>༼བརྡ་ཐོ་དང་རྣམ་པའི་ཚན་བྱང་༽ལ་བསྐྱོད་ནས་གསར་སྒྱུར་བྱ་ཆོག"
+    },
+    {
+      "name": "ALLOW",
+      "value": "ཆོག་པ།"
+    },
+    {
+      "name": "BAN",
+      "value": "བཀག་འགོག"
+    },
+    {
+      "name": "group_label_notification",
+      "value": "༼%s༽ཡིས་བརྡ་ཐོ་གཏོང་ཆོག་གམ།"
+    }
+  ]
+}

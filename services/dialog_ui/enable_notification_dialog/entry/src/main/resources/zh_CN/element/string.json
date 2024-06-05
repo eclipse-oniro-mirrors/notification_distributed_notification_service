@@ -13,24 +13,8 @@
       "value": "NotificationDialog"
     },
     {
-      "name": "period",
-      "value": "。"
-    },
-    {
-      "name": "comma",
-      "value": "，"
-    },
-    {
-      "name": "whether_to_allow",
-      "value": "是否允许“"
-    },
-    {
-      "name": "quotes",
-      "value": "”"
-    },
-    {
       "name": "reason",
-      "value": "包括锁屏、铃声等。可前往“设置”>“通知和状态栏”更改。"
+      "value": "包括横幅、锁屏、铃声等。可前往“设置”>“通知和状态栏”更改。"
     },
     {
       "name": "ALLOW",
@@ -42,7 +26,7 @@
     },
     {
       "name": "group_label_notification",
-      "value": "发送通知？"
+      "value": "是否允许“%s”发送通知？"
     }
   ]
 }
