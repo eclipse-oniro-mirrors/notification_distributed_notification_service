@@ -19,6 +19,7 @@
 #include "common_event_subscriber.h"
 #include "reminder_data_manager.h"
 #include "system_ability_status_change_stub.h"
+#include "notification_subscriber.h"
 
 #include <memory>
 
@@ -66,6 +67,32 @@ public:
 private:
     std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
 };
+
+class ReminderNotificationSubscriber : public NotificationSubscriber {
+public:
+    explicit ReminderNotificationSubscriber(std::shared_ptr<ReminderDataManager> &reminderDataManager);
+    ~ReminderNotificationSubscriber() override;
+    void OnConnected() override;
+    void OnDisconnected() override;
+    void OnCanceled(const std::shared_ptr<Notification> &request,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override;
+    void OnConsumed(const std::shared_ptr<Notification> &request,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap) override;
+    void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override;
+    void OnDied() override;
+    void OnDoNotDisturbDateChange(
+        const std::shared_ptr<NotificationDoNotDisturbDate> &date) override;
+    void OnEnabledNotificationChanged(
+        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override;
+    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+    void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
+        const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
+private:
+    std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
+};
+
+    static std::shared_ptr<ReminderNotificationSubscriber> subscriber_;
 };
 }  // namespace OHOS
 }  // namespace Notification

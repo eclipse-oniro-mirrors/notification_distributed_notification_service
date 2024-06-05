@@ -24,10 +24,22 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "notification_helper.h"
+#include "string_ex.h"
 
 using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
+static const std::string LABEL_SPLITER = "_";
+static constexpr uint32_t LABEL_SIZE = 3;
+static const std::string LABEL_PREFIX = "REMINDER";
+static const std::string LABEL_SUFFIX = "AGENT";
+static constexpr uint32_t LABEL_PREFIX_INDEX = 0;
+static constexpr uint32_t LABEL_SUFFIX_INDEX = 1;
+static constexpr uint32_t REMINDER_ID_INDEX = 2;
+std::shared_ptr<ReminderEventManager::ReminderNotificationSubscriber> ReminderEventManager::subscriber_
+    = nullptr;
+
 ReminderEventManager::ReminderEventManager(std::shared_ptr<ReminderDataManager> &reminderDataManager)
 {
     init(reminderDataManager);
@@ -69,6 +81,11 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
         ANSR_LOGD("SubscribeCommonEvent fail");
     }
     IPCSkeleton::SetCallingIdentity(identity);
+
+    subscriber_ = std::make_shared<ReminderNotificationSubscriber>(reminderDataManager);
+    if (NotificationHelper::SubscribeNotification(*subscriber_) != ERR_OK) {
+        ANSR_LOGD("SubscribeNotification failed");
+    }
 
     sptr<SystemAbilityStatusChangeListener> statusChangeListener
         = new (std::nothrow) SystemAbilityStatusChangeListener(reminderDataManager);
@@ -260,5 +277,72 @@ void ReminderEventManager::SystemAbilityStatusChangeListener::OnRemoveSystemAbil
             break;
     }
 }
+
+ReminderEventManager::ReminderNotificationSubscriber::ReminderNotificationSubscriber(
+    std::shared_ptr<ReminderDataManager> &reminderDataManager)
+{
+    reminderDataManager_ = reminderDataManager;
+}
+
+ReminderEventManager::ReminderNotificationSubscriber::~ReminderNotificationSubscriber() {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnConnected() {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnDisconnected() {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnCanceled(
+    const std::shared_ptr<Notification> &notification,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason)
+{
+    if (deleteReason != NotificationConstant::APP_CANCEL_REASON_DELETE) {
+        return;
+    }
+    if (notification == nullptr) {
+        return;
+    }
+    NotificationRequest request = notification->GetNotificationRequest();
+    std::string label = request.GetLabel();
+    std::vector<std::string> labelSplits;
+    SplitStr(label, LABEL_SPLITER, labelSplits);
+    if (labelSplits.size() != LABEL_SIZE || labelSplits[LABEL_PREFIX_INDEX] != LABEL_PREFIX
+        || labelSplits[LABEL_SUFFIX_INDEX] != LABEL_SUFFIX) {
+        return;
+    }
+
+    int32_t reminderId = 0;
+    if (!StrToInt(labelSplits[REMINDER_ID_INDEX], reminderId)) {
+        return;
+    }
+
+    if (reminderDataManager_ == nullptr) {
+        return;
+    }
+    int32_t uid = request.GetOwnerUid() == 0 ? request.GetCreatorUid() : request.GetOwnerUid();
+    reminderDataManager_->HandleAutoDeleteReminder(reminderId, uid);
+}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnConsumed(const std::shared_ptr<Notification> &notification,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap) {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnUpdate(
+    const std::shared_ptr<NotificationSortingMap> &sortingMap) {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnDied() {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnDoNotDisturbDateChange(
+    const std::shared_ptr<NotificationDoNotDisturbDate> &date) {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnEnabledNotificationChanged(
+    const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnBadgeChanged(
+    const std::shared_ptr<BadgeNumberCallbackData> &badgeData) {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnBadgeEnabledChanged(
+    const sptr<EnabledNotificationCallbackData> &callbackData) {}
+
+void ReminderEventManager::ReminderNotificationSubscriber::OnBatchCanceled(
+    const std::vector<std::shared_ptr<Notification>> &requestList,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) {}
 }  // namespace OHOS
 }  // namespace Notification

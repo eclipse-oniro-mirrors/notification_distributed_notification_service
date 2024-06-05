@@ -1734,7 +1734,8 @@ void ReminderRequest::UpdateNotificationCommon(bool isSnooze)
     time_t now;
     (void)time(&now);  // unit is seconds.
     notificationRequest_->SetDeliveryTime(GetDurationSinceEpochInMilli(now));
-    notificationRequest_->SetLabel(NOTIFICATION_LABEL);
+    std::string label = NOTIFICATION_LABEL + "_" + std::to_string(reminderId_);
+    notificationRequest_->SetLabel(label);
     notificationRequest_->SetShowDeliveryTime(true);
     if (isSnooze) {
         if (snoozeSlotType_ == NotificationConstant::SlotType::OTHER) {

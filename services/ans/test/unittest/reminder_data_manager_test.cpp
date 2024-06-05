@@ -846,5 +846,47 @@ HWTEST_F(ReminderDataManagerTest, IsMatched_00001, Level1)
     ret = manager->IsMatched(reminder, "test_IsMatched", 100, 98765);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: ReminderNotificationSubscriber_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderNotificationSubscriber_00001, Level1)
+{
+    ReminderEventManager::ReminderNotificationSubscriber test(manager);
+    sptr<NotificationRequest> notificationReq = new NotificationRequest();
+    std::shared_ptr<Notification> notification = std::make_shared<Notification>(notificationReq);
+    test.OnCanceled(notification, nullptr, NotificationConstant::CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    test.OnCanceled(nullptr, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("TEST_1");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("TEST_NOTIFICATION_1");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("REMINDER_NOTIFICATION_1");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("REMINDER_AGENT_INFO");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("REMINDER_AGENT_0");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+}
 }  // namespace Notification
 }  // namespace OHOS
