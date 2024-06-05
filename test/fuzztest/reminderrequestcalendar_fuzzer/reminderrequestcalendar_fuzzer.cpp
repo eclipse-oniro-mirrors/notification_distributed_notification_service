@@ -34,9 +34,9 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         struct tm nowTime;
-        uint8_t months = *data % MONTHS;
-        uint8_t days = *data % DAYS;
-        uint8_t weeks = *data % WEEK;
+        uint8_t months = *data % MONTHS + 1;
+        uint8_t days = *data % DAYS + 1;
+        uint8_t weeks = *data % WEEK + 1;
         std::vector<uint8_t> repeatMonths;
         std::vector<uint8_t> repeatDays;
         std::vector<uint8_t> daysOfWeek;
