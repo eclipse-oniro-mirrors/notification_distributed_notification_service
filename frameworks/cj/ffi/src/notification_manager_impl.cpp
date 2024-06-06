@@ -16,7 +16,7 @@
 #include "notification_manager_impl.h"
 #include "inner_errors.h"
 #include "notification_enable.h"
-#include "cj_common_ffi.h"
+#include "pixel_map_impl.h"
 
 #include "notification_request.h"
 #include "notification_constant.h"
@@ -160,6 +160,14 @@ namespace CJSystemapi {
         }
         pictureContent->SetExpandedTitle(std::string(str));
         LOGI("picture::expandedTitle = %{public}s", str);
+
+        // picture: image.PixelMap
+        auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(contentResult->picture);
+        if (pixelMap == nullptr) {
+            LOGE("Invalid object pixelMap");
+            return false;
+        }
+        pictureContent->SetBigPicture(pixelMap->GetRealPixelMap());
 
         return true;
     }
@@ -399,6 +407,32 @@ namespace CJSystemapi {
         return true;
     }
 
+    static bool GetNotificationSmallIcon(int64_t smallIcon, NotificationRequest request)
+    {
+        if (smallIcon != -1) {
+            auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(smallIcon);
+            if (pixelMap == nullptr) {
+                LOGE("Invalid object pixelMap");
+                return false;
+            }
+            request.SetLittleIcon(pixelMap->GetRealPixelMap());
+        }
+        return true;
+    }
+
+    static bool GetNotificationLargeIcon(int64_t largeIcon, NotificationRequest request)
+    {
+        if (largeIcon != -1) {
+            auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(largeIcon);
+            if (pixelMap == nullptr) {
+                LOGE("Invalid object pixelMap");
+                return false;
+            }
+            request.SetBigIcon(pixelMap->GetRealPixelMap());
+        }
+        return true;
+    }
+
     static bool GetNotificationSupportDisplayDevices(
         CDistributedOptions* distributedOption,
         NotificationRequest request)
@@ -564,6 +598,14 @@ namespace CJSystemapi {
         if (!GetNotificationSlotType(cjRequest.notificationSlotType, request)) {
             return false;
         }
+        // smallIcon?: image.PixelMap
+        if (!GetNotificationSmallIcon(cjRequest.smallIcon, request)) {
+            return false;
+        }
+        // largeIcon?: image.PixelMap
+        if (!GetNotificationLargeIcon(cjRequest.largeIcon, request)) {
+            return false;
+        }
         // distributedOption?:DistributedOptions
         if (!GetNotificationRequestDistributedOptions(cjRequest.distributedOption, request)) {
             return false;
@@ -661,6 +703,23 @@ namespace CJSystemapi {
         IsEnableParams params {};
         std::string deviceId {""};
         sptr<AnsDialogHostClient> client = nullptr;
+        if (!AnsDialogHostClient::CreateIfNullptr(client)) {
+            LOGI("dialog is popping %{public}d.", ERR_ANS_DIALOG_IS_POPPING)
+            return ErrorToExternal(ERR_ANS_DIALOG_IS_POPPING);
+        }
+        int code = NotificationHelper::RequestEnableNotification(deviceId, client, params.callerToken);
+        LOGI("done, code is %{public}d.", code)
+        return ErrorToExternal(code);
+    }
+
+    int NotificationManagerImpl::RequestEnableNotificationWithContext(sptr<AbilityRuntime::CJAbilityContext> context)
+    {
+        IsEnableParams params {};
+        sptr<IRemoteObject> callerToken = context->GetToken();
+        params.callerToken = callerToken;
+        sptr<AnsDialogHostClient> client = nullptr;
+        params.hasCallerToken = true;
+        std::string deviceId {""};
         if (!AnsDialogHostClient::CreateIfNullptr(client)) {
             LOGI("dialog is popping %{public}d.", ERR_ANS_DIALOG_IS_POPPING)
             return ErrorToExternal(ERR_ANS_DIALOG_IS_POPPING);

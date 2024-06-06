@@ -17,6 +17,7 @@
 #define NOTIFICATION_MANAGER_IMPL_H
 
 #include "notification_utils.h"
+#include "ability_runtime/cj_ability_context.h"
 namespace OHOS {
 namespace CJSystemapi {
 class NotificationManagerImpl {
@@ -28,6 +29,7 @@ public:
     static RetDataBool IsNotificationEnabled();
     static int SetBadgeNumber(int32_t badgeNumber);
     static int RequestEnableNotification();
+    static int RequestEnableNotificationWithContext(sptr<AbilityRuntime::CJAbilityContext> context);
     static RetDataBool IsDistributedEnabled();
 };
 } // namespace CJSystemapi
