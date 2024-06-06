@@ -30,6 +30,7 @@ extern "C" {
     FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsNotificationEnabled();
     FFI_EXPORT int32_t FfiOHOSNotificationManagerSetBadgeNumber(int32_t badgeNumber);
     FFI_EXPORT int32_t FfiOHOSNotificationManagerRequestEnableNotification();
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerRequestEnableNotificationWithContext(int64_t id);
     FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsDistributedEnabled();
 }
 

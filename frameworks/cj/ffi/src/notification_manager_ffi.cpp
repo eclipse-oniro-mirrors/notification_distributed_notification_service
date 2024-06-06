@@ -88,6 +88,19 @@ int32_t FfiOHOSNotificationManagerRequestEnableNotification()
     return code;
 }
 
+int32_t FfiOHOSNotificationManagerRequestEnableNotificationWithContext(int64_t id)
+{
+    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotificationWithContext start");
+    auto context = FFIData::GetData<AbilityRuntime::CJAbilityContext>(id);
+    if (context == nullptr) {
+        LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotificationWithContext error");
+        return ERROR_PARAM_INVALID;
+    }
+    auto code = NotificationManagerImpl::RequestEnableNotificationWithContext(context);
+    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotificationWithContext success");
+    return code;
+}
+
 RetDataBool FfiOHOSNotificationManagerIsDistributedEnabled()
 {
     LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerIsDistributedEnabled start");

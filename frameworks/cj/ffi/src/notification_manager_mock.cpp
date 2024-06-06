@@ -23,5 +23,6 @@ FFI_EXPORT int FfiOHOSNotificationManagerAddSlot = 0;
 FFI_EXPORT int FfiOHOSNotificationManagerIsNotificationEnabled = 0;
 FFI_EXPORT int FfiOHOSNotificationManagerSetBadgeNumber = 0;
 FFI_EXPORT int FfiOHOSNotificationManagerRequestEnableNotification = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerRequestEnableNotificationWithContext = 0;
 FFI_EXPORT int FfiOHOSNotificationManagerIsDistributedEnabled = 0;
 }
