@@ -74,10 +74,6 @@ void ExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
-    if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
-    }
-
     std::string ctrlConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
     if (!ctrlConfig.empty()) {
         syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
@@ -177,22 +173,5 @@ int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 
     ANS_LOGD("convertToDelType from delete reason %d to delete type %d", deleteReason, delType);
     return delType;
-}
-
-void SubSystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
-{
-    if (systemAbilityId != DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
-        return;
-    }
-    if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
-    }
-}
-
-void SubSystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
-{
-    if (systemAbilityId != DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
-        return;
-    }
 }
 } // namespace OHOS::Notification

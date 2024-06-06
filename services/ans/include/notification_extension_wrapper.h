@@ -63,12 +63,6 @@ private:
     sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
     bool isRegisterDataSettingObserver = false;
 };
-class SubSystemAbilityListener : public SystemAbilityStatusChangeStub {
-public:
-    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId);
-    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId);
-    static constexpr int32_t DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID = 1301;
-}; // SubSystemAbilityListener
 
 #define EXTENTION_WRAPPER ::OHOS::DelayedSingleton<ExtensionWrapper>::GetInstance()
 } // namespace OHOS::Notification
