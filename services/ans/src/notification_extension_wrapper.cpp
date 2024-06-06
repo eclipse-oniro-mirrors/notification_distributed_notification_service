@@ -57,10 +57,12 @@ void ExtensionWrapper::InitExtentionWrapper()
     updateByCancel_ = (UPDATE_BY_CANCEL)dlsym(extensionWrapperHandle_, "UpdateByCancel");
     setLocalSwitch_ = (SET_LOCAL_SWITCH)dlsym(extensionWrapperHandle_, "SetlocalSwitch");
     initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
+    localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
     if (syncAdditionConfig_ == nullptr
         || getUnifiedGroupInfo_ == nullptr
         || updateByCancel_ == nullptr
-        || initSummary_ == nullptr) {
+        || initSummary_ == nullptr
+        || localControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
@@ -69,9 +71,14 @@ void ExtensionWrapper::InitExtentionWrapper()
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
     }
 
-    std::string configKey = NotificationPreferences::GetInstance().GetAdditionalConfig();
-    if (!configKey.empty()) {
-        syncAdditionConfig_("AGGREGATE_CONFIG", configKey);
+    std::string ctrlConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
+    if (!ctrlConfig.empty()) {
+        syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
+    }
+
+    std::string aggregateConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("AGGREGATE_CONFIG");
+    if (!aggregateConfig.empty()) {
+        syncAdditionConfig_("AGGREGATE_CONFIG", aggregateConfig);
     }
     initSummary_(UpdateUnifiedGroupInfo);
     ANS_LOGD("extension wrapper init success");

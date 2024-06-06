@@ -40,6 +40,7 @@ namespace OHOS {
 namespace Notification {
 namespace {
     constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
+    constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
 }
 const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
@@ -727,7 +728,7 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
 
 ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("SetAdditionConfig called (%{public}s, %{public}s).", key.c_str(), value.c_str());
     if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -742,7 +743,8 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         soundPermissionInfo_->needUpdateCache_ = true;
     }
 
-    bool isSyncConfig = strcmp(key.c_str(), KEY_NAME) == 0;
+    bool isSyncConfig = (strcmp(key.c_str(), KEY_NAME) == 0 ||
+        strcmp(key.c_str(), CTRL_LIST_KEY_NAME) == 0);
     if (isSyncConfig) {
 #ifdef ENABLE_ANS_EXT_WRAPPER
     ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);

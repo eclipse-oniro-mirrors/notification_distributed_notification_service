@@ -123,6 +123,13 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
+#ifdef ENABLE_ANS_EXT_WRAPPER
+        result = EXTENTION_WRAPPER->LocalControl(request);
+        if (result != ERR_OK) {
+            break;
+        }
+#endif
+
         result = CheckSoundPermission(request, bundleOption->GetBundleName());
         if (result != ERR_OK) {
             break;
