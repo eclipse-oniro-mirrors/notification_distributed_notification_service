@@ -94,6 +94,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
 #endif
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         NotificationPreferences::GetInstance().InitSettingFromDisturbDB();
+        AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();
         if (userId <= DEFAULT_USER_ID) {

@@ -149,7 +149,7 @@ public:
     int32_t DropUserTable(const int32_t userId);
 
 private:
-    std::string GetUserTableName(const int32_t &userId);
+    std::string GetUserTableName(const int32_t &userId, bool createTable = false);
     int32_t DeleteData(const std::string tableName, const std::string key, int32_t &rowId);
     int32_t QueryData(const std::string tableName, const std::string key, std::string &value);
     int32_t QueryData(const std::string tableName, const std::string key, std::vector<uint8_t> &value);

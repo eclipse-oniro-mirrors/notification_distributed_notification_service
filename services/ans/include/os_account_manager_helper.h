@@ -18,6 +18,7 @@
 
 #include "errors.h"
 #include "singleton.h"
+#include <vector>
 
 namespace OHOS {
 namespace Notification {
@@ -69,6 +70,22 @@ public:
      * @return Returns result.
      */
     bool CheckUserExists(const int32_t &userId);
+
+    /**
+     * Get All os account userIds.
+     *
+     * @param userIds Indicates the current created account ID.
+     * @return Returns result.
+     */
+    ErrCode GetAllOsAccount(std::vector<int32_t> &userIds);
+
+    /**
+     * Get All active account userIds.
+     *
+     * @param userIds Indicates the current active account ID.
+     * @return Returns result.
+     */
+    ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds);
 };
 } // namespace OHOS
 } // namespace Notification
