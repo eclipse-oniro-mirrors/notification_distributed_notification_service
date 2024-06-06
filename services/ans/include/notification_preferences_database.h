@@ -133,7 +133,7 @@ public:
      *
      * @return Configured value
      */
-    std::string GetAdditionalConfig();
+    std::string GetAdditionalConfig(const std::string &key);
 
     /**
      * @brief Put enable notification into disturbe DB.

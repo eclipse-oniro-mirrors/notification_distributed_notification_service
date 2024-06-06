@@ -297,7 +297,7 @@ public:
      *
      * @return Configured value
      */
-    std::string GetAdditionalConfig();
+    std::string GetAdditionalConfig(const std::string &key);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross

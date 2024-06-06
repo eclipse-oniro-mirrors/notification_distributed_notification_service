@@ -40,6 +40,7 @@ public:
     typedef void (*UPDATE_GROUP_INFO)(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
     typedef void (*INIT_SUMMARY)(UPDATE_GROUP_INFO func);
     typedef void (*SET_LOCAL_SWITCH)(bool status);
+    typedef int32_t (*LOCAL_CONTROL)(const sptr<NotificationRequest> &request);
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
@@ -47,6 +48,7 @@ public:
     void RegisterDataSettingObserver();
     void SetlocalSwitch(std::string &enable);
     void CheckIfSetlocalSwitch();
+    int32_t LocalControl(const sptr<NotificationRequest> &request);
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -57,6 +59,7 @@ private:
     GET_UNIFIED_GROUP_INFO getUnifiedGroupInfo_ = nullptr;
     INIT_SUMMARY initSummary_ = nullptr;
     SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
+    LOCAL_CONTROL localControl_ = nullptr;
     sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
 };
 class SubSystemAbilityListener : public SystemAbilityStatusChangeStub {
