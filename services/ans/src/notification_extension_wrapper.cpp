@@ -95,7 +95,7 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
         return;
     }
     if (!isRegisterDataSettingObserver) {
-        egisterDataSettingObserver();
+        RegisterDataSettingObserver();
         isRegisterDataSettingObserver = true;
     }
     std::string enable = "";
