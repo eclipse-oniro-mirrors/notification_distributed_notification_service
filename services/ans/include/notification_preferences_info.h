@@ -246,7 +246,7 @@ public:
      * set bundle info into preferences info.
      * @param info Indicates the bundle.
      */
-    void SetBundleInfo(const BundleInfo &info);
+    void SetBundleInfo(BundleInfo &info);
 
     /**
      * get bundle info from preferences info.
@@ -309,7 +309,7 @@ public:
     bool GetEnabledAllNotification(const int32_t &userId, bool &enable) const;
     void RemoveNotificationEnable(const int32_t userId);
     void RemoveDoNotDisturbDate(const int32_t userId);
-    void SetBundleInfoFromDb(const BundleInfo &info, std::string bundleKey);
+    void SetBundleInfoFromDb(BundleInfo &info, std::string bundleKey);
     std::string MakeDoNotDisturbProfileKey(int32_t userId, int32_t profileId);
     void AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
