@@ -111,15 +111,5 @@ std::string AdvancedDatashareHelper::GetFocusModeProfileUri() const
     }
     return USER_SETTINGS_DATA_URI + userId + FOCUS_MODE_PROFILE_URI;
 }
-std::string AdvancedDatashareHelper::GetUnifiedGroupEnableUri() const
-{
-    std::vector<int32_t> accountIds;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountIds);
-    std::string userId = "100";
-    if (!accountIds.empty()) {
-        userId = std::to_string(accountIds[0]);
-    }
-    return USER_SETTINGS_DATA_SECURE_URI + userId + UNIFIED_GROUP_ENABLE_URI;
-}
 } // namespace Notification
 } // namespace OHOS

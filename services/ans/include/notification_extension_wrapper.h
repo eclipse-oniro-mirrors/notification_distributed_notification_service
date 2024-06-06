@@ -61,6 +61,7 @@ private:
     SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
     LOCAL_CONTROL localControl_ = nullptr;
     sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
+    bool isRegisterDataSettingObserver = false;
 };
 class SubSystemAbilityListener : public SystemAbilityStatusChangeStub {
 public:

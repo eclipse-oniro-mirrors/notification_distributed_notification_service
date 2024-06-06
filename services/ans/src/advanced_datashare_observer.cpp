@@ -48,7 +48,7 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareObserver::CreateDat
         ANS_LOGE("The remoteObj is nullptr.");
         return nullptr;
     }
-    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATA_EXT_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
 }
 
 void AdvancedDatashareObserver::UnRegisterSettingsObserver(
@@ -60,7 +60,6 @@ void AdvancedDatashareObserver::UnRegisterSettingsObserver(
         return;
     }
     settingHelper->UnregisterObserver(uri, dataObserver);
-    settingHelper->Release();
 }
 
 void AdvancedDatashareObserver::RegisterSettingsObserver(
@@ -73,17 +72,6 @@ void AdvancedDatashareObserver::RegisterSettingsObserver(
         return;
     }
     settingHelper->RegisterObserver(uri, dataObserver);
-    settingHelper->Release();
-}
-
-void AdvancedDatashareObserver::NotifyChange(const Uri &uri)
-{
-    std::shared_ptr<DataShare::DataShareHelper> settingHelper = CreateDataShareHelper();
-    if (settingHelper == nullptr) {
-        ANS_LOGE("notify settings changed fail by nullptr");
-        return;
-    }
-    settingHelper->NotifyChange(uri);
     settingHelper->Release();
 }
 
@@ -106,19 +94,19 @@ bool AdvancedDatashareObserver::CheckIfSettingsDataReady()
         DataShare::DataShareHelper::Create(remoteObj, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
     ANS_LOGI("create data_share helper, ret=%{public}d", ret.first);
     if (ret.first == E_OK) {
-        ANS_LOGE("create data_share helper success");
+        ANS_LOGI("create data_share helper success");
         auto helper = ret.second;
         if (helper != nullptr) {
             bool releaseRet = helper->Release();
             ANS_LOGI("release data_share helper, releaseRet=%{public}d", releaseRet);
         }
         isDataShareReady_ = true;
-        return true;
+        return true;    
     } else if (ret.first == E_DATA_SHARE_NOT_READY) {
-        ANS_LOGI("create data_share helper failed");
         isDataShareReady_ = false;
         return false;
     }
+    ANS_LOGI("data_share unknown.");
     return true;
 }
 

@@ -19,6 +19,13 @@
 #include "notification_extension_wrapper.h"
 #include "notification_preferences.h"
 #include "advanced_datashare_observer.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
+ 
+#include "common_event_subscriber.h"
+#include "system_event_observer.h"
+#include "interface_system_event.h"
+#include "system_event_subscriber.h"
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
@@ -86,11 +93,15 @@ void ExtensionWrapper::InitExtentionWrapper()
 
 void ExtensionWrapper::CheckIfSetlocalSwitch()
 {
+    ANS_LOGD("CheckIfSetlocalSwitch enter");
     if (extensionWrapperHandle_ == nullptr) {
         ANS_LOGE("CheckIfSetlocalSwitch extension wrapper symbol failed");
         return;
     }
-    RegisterDataSettingObserver();
+    if (!isRegisterDataSettingObserver) {
+        egisterDataSettingObserver();
+        isRegisterDataSettingObserver = true;
+    }
     std::string enable = "";
     AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
     SetlocalSwitch(enable);
@@ -114,7 +125,6 @@ void ExtensionWrapper::RegisterDataSettingObserver()
     }
 
     if (aggregationRoamingObserver_ == nullptr) {
-        ANS_LOGE("aggregationRoamingObserver_ is null");
         return;
     }
     

@@ -72,6 +72,7 @@
 #endif
 
 #include "advanced_notification_inline.cpp"
+#include "advanced_datashare_helper_ext.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1055,7 +1056,7 @@ ErrCode AdvancedNotificationService::HasNotificationPolicyAccessPermission(bool 
 
 ErrCode AdvancedNotificationService::GetUnifiedGroupInfoFromDb(std::string &enable)
 {
-    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelperExt>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return -1;
