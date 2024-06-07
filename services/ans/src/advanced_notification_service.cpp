@@ -224,10 +224,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     }
 
     FillActionButtons(request);
-
-#ifdef ENABLE_ANS_EXT_WRAPPER
-    EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
-#endif
     return result;
 }
 
@@ -596,6 +592,11 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     if (result != ERR_OK) {
         return result;
     }
+
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
+#endif
+
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
