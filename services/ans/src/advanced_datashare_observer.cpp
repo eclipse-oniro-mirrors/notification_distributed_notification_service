@@ -29,7 +29,7 @@ namespace {
 constexpr const char *SETTING_URI_PROXY =
         "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 constexpr const char *SETTINGS_DATASHARE_URI =
-        "datashare:///com.ohos.settingsdata.DataAbility/entry/settingsdata/USER_SETTINGSDATA_SECURE_100?Proxy=true";
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_100?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr const int32_t E_OK = 0;
 constexpr const int32_t E_DATA_SHARE_NOT_READY = 1055;

@@ -24,6 +24,7 @@
 #include "access_token_helper.h"
 #include "accesstoken_kit.h"
 #include "advanced_datashare_helper.h"
+#include "advanced_datashare_helper_ext.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
