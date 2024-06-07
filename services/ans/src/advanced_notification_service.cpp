@@ -584,7 +584,12 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
-
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
+    if (ctrlResult != ERR_OK) {
+        return ctrlResult;
+    }
+#endif
     auto record = MakeNotificationRecord(request, bundleOption);
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);

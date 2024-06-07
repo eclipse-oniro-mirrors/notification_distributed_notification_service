@@ -150,6 +150,15 @@ ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &r
     return getUnifiedGroupInfo_(request);
 }
 
+int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
+{
+    if (localControl_ == nullptr) {
+        ANS_LOGE("LocalControl wrapper symbol failed");
+        return 0;
+    }
+    return localControl_(request);
+}
+
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 {
     int32_t delType = ACTIVE_DELETE;
