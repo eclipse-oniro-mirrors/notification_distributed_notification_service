@@ -93,10 +93,7 @@ struct PermissionDialog {
                 Row() {
                   Flex({ justifyContent: FlexAlign.Center }) {
                     Text() {
-                      Span($r('app.string.whether_to_allow'))
-                      Span(this.appName)
-                      Span($r('app.string.quotes'))
-                      Span(permission.label)
+                      Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
                     }
                     .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))

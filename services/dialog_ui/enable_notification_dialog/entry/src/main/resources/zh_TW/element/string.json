@@ -14,19 +14,19 @@
     },
     {
       "name": "reason",
-      "value": "These may include banner notifications, lock screen notifications, notification sounds, and more. You can change this in Settings."
+      "value": "包括橫幅、鎖定螢幕、鈴聲等。可以前往「設定」>「通知和狀態列」中變更。"
     },
     {
       "name": "ALLOW",
-      "value": "ALLOW"
+      "value": "允許"
     },
     {
       "name": "BAN",
-      "value": "DENY"
+      "value": "禁止"
     },
     {
       "name": "group_label_notification",
-      "value": "Allow %s to send you notifications?"
+      "value": "是否允許「%s」傳送通知？"
     }
   ]
 }
