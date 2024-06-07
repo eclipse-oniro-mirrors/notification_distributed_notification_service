@@ -103,7 +103,7 @@ bool AdvancedDatashareObserver::CheckIfSettingsDataReady()
             ANS_LOGI("release data_share helper, releaseRet=%{public}d", releaseRet);
         }
         isDataShareReady_ = true;
-        return true;    
+        return true;
     } else if (ret.first == E_DATA_SHARE_NOT_READY) {
         isDataShareReady_ = false;
         return false;

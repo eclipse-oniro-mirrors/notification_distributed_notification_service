@@ -64,7 +64,6 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
     ANS_LOGD("SubSystemAbilityListener::OnAddSystemAbility enter !");
     if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
         if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-
             if (isDatashaReready) {
                 return;
             }
