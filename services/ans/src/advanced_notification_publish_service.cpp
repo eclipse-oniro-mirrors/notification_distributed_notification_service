@@ -1799,7 +1799,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     return result;
 }
 
-void AdvancedNotificationService::UpdateUnifiedGroupInfo(std::string &key,
+void AdvancedNotificationService::UpdateUnifiedGroupInfo(const std::string &key,
     std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
 {
     if (notificationSvrQueue_ == nullptr) {
