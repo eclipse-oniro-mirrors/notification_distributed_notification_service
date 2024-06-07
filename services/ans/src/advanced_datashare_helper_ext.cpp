@@ -29,6 +29,8 @@ namespace {
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
+constexpr const char *SETTINGS_DATASHARE_URI =
+        "datashare:///com.ohos.settingsdata.DataAbility/entry/settingsdata/USER_SETTINGSDATA_SECURE_100?Proxy=true";
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
@@ -50,7 +52,7 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelperExt::CreateDa
         ANS_LOGE("The remoteObj is nullptr.");
         return nullptr;
     }
-    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATA_EXT_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
 }
 
 bool AdvancedDatashareHelperExt::Query(Uri &uri, const std::string &key, std::string &value)
