@@ -1103,7 +1103,7 @@ public:
     /**
      * @brief update unified group info.
      */
-    void UpdateUnifiedGroupInfo(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
+    void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

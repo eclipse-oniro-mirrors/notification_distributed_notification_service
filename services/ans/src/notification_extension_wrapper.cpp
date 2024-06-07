@@ -35,7 +35,7 @@ ExtensionWrapper::~ExtensionWrapper() = default;
 extern "C" {
 #endif
 
-void UpdateUnifiedGroupInfo(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
+void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
 {
     AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
 }

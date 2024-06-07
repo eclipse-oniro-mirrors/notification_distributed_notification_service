@@ -37,7 +37,7 @@ public:
     typedef ErrCode (*SYNC_ADDITION_CONFIG)(const std::string& key, const std::string& value);
     typedef void (*UPDATE_BY_CANCEL)(const std::vector<sptr<Notification>>& notifications, int deleteType);
     typedef ErrCode (*GET_UNIFIED_GROUP_INFO)(const sptr<NotificationRequest> &request);
-    typedef void (*UPDATE_GROUP_INFO)(std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
+    typedef void (*UPDATE_GROUP_INFO)(const std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
     typedef void (*INIT_SUMMARY)(UPDATE_GROUP_INFO func);
     typedef void (*SET_LOCAL_SWITCH)(bool status);
 
