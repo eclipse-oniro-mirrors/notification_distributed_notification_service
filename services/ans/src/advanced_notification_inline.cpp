@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "access_token_helper.h"
@@ -47,10 +48,9 @@ inline std::string GetClientBundleName()
 
 inline int32_t CheckUserIdParams(const int userId)
 {
-    if (OsAccountManagerHelper::IsSystemAccount(userId)) {
-        if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
-            return ERROR_USER_NOT_EXIST;
-        }
+    if (userId != SUBSCRIBE_USER_ALL && userId != SUBSCRIBE_USER_INIT
+        && !OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        return ERROR_USER_NOT_EXIST;
     }
     return ERR_OK;
 }
