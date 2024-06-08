@@ -26,6 +26,7 @@
 #include "bundle_manager_helper.h"
 #include "errors.h"
 #include "ipc_skeleton.h"
+#include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "os_account_manager.h"
 #include "notification_preferences.h"
@@ -586,7 +587,7 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-    auto bundleInstall = [bundleOption]() {
+    auto bundleInstall = [bundleOption, this]() {
         CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
         AppExecFwk::BundleInfo bundleInfo;
         if (!GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo)) {
@@ -600,7 +601,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
-
+            SetSlotFlagsTrustlistsAsBundle(bundleOption);
             errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
@@ -614,7 +615,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-    auto bundleUpdate = [bundleOption]() {
+    auto bundleUpdate = [bundleOption, this]() {
         CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
         AppExecFwk::BundleInfo bundleInfo;
         if (!GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo)) {
@@ -636,7 +637,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
-
+            SetSlotFlagsTrustlistsAsBundle(bundleOption);
             errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
@@ -1764,6 +1765,18 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
     notifications.clear();
 }
 
+void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (!bundleOption->GetBundleName().compare("com.ohos.mms") ||
+        !bundleOption->GetBundleName().compare("com.ohos.locationdialog")) {
+        ErrCode saveRef = NotificationPreferences::GetInstance().SetNotificationSlotFlagsForBundle(
+            bundleOption, 0b111111);
+        if (saveRef != ERR_OK) {
+            ANS_LOGE("Set slotflags error! code: %{public}d", saveRef);
+        }
+    }
+}
+
 void AdvancedNotificationService::InitNotificationEnableList()
 {
     auto task = [&]() {
@@ -1795,6 +1808,7 @@ void AdvancedNotificationService::InitNotificationEnableList()
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", saveRef);
             }
+            SetSlotFlagsTrustlistsAsBundle(bundleOption);
         }
     };
     notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(task) : task();

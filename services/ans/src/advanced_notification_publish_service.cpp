@@ -775,10 +775,16 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
 
     ErrCode result = ERR_OK;
     if (deviceId.empty()) {
+        bool notificationEnable = false;
+        ErrCode saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
+            bundleOption, notificationEnable);
         // Local device
         result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
         if (!enabled) {
             result = RemoveAllNotificationsForDisable(bundle);
+        }
+        if (saveRef != ERR_OK) {
+            SetSlotFlagsTrustlistsAsBundle(bundle);
         }
         if (result == ERR_OK) {
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);

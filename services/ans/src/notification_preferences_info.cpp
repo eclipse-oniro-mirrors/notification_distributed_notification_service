@@ -224,10 +224,6 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUid() const
 void NotificationPreferencesInfo::SetBundleInfo(BundleInfo &info)
 {
     std::string bundleKey = info.GetBundleName().append(std::to_string(info.GetBundleUid()));
-    if (!info.GetBundleName().compare("com.ohos.mms")) {
-        uint32_t flag_ = 63;
-        info.SetSlotFlags(flag_);
-    }
     infos_.insert_or_assign(bundleKey, info);
 }
 
@@ -373,10 +369,6 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbDate(const int32_t userId)
 
 void NotificationPreferencesInfo::SetBundleInfoFromDb(BundleInfo &info, std::string bundleKey)
 {
-    if (!info.GetBundleName().compare("com.ohos.mms")) {
-        uint32_t flag_ = 63;
-        info.SetSlotFlags(flag_);
-    }
     infos_.insert_or_assign(bundleKey, info);
 }
 }  // namespace Notification
