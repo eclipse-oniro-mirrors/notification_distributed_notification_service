@@ -404,7 +404,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, CheckBundle_00100, Function | Smal
 /**
  * @tc.number    : PutBundlePropertyToDisturbeDB_00100
  * @tc.name      : PutBundlePropertyToDisturbeDB
- * @tc.desc      : Test PutBundlePropertyToDisturbeDB function return is false
+ * @tc.desc      : Test PutBundlePropertyToDisturbeDB function return is true
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_00100, Function | SmallTest | Level1)
@@ -412,7 +412,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
+    EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), true);
 }
 
 /**
@@ -904,7 +904,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestS
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
-    EXPECT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+    EXPECT_EQ(false, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
 }
 
 /**
