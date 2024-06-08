@@ -24,6 +24,7 @@
 #include "access_token_helper.h"
 #include "accesstoken_kit.h"
 #include "advanced_datashare_helper.h"
+#include "advanced_datashare_helper_ext.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -72,6 +73,7 @@
 #endif
 
 #include "advanced_notification_inline.cpp"
+#include "advanced_datashare_helper_ext.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1061,7 +1063,7 @@ ErrCode AdvancedNotificationService::HasNotificationPolicyAccessPermission(bool 
 
 ErrCode AdvancedNotificationService::GetUnifiedGroupInfoFromDb(std::string &enable)
 {
-    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelperExt>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return -1;

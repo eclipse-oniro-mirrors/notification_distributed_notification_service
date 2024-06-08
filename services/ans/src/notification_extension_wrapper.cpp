@@ -19,6 +19,13 @@
 #include "notification_extension_wrapper.h"
 #include "notification_preferences.h"
 #include "advanced_datashare_observer.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
+ 
+#include "common_event_subscriber.h"
+#include "system_event_observer.h"
+#include "interface_system_event.h"
+#include "system_event_subscriber.h"
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
@@ -67,10 +74,6 @@ void ExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
-    if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
-    }
-
     std::string ctrlConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
     if (!ctrlConfig.empty()) {
         syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
@@ -86,11 +89,15 @@ void ExtensionWrapper::InitExtentionWrapper()
 
 void ExtensionWrapper::CheckIfSetlocalSwitch()
 {
+    ANS_LOGD("CheckIfSetlocalSwitch enter");
     if (extensionWrapperHandle_ == nullptr) {
         ANS_LOGE("CheckIfSetlocalSwitch extension wrapper symbol failed");
         return;
     }
-    RegisterDataSettingObserver();
+    if (!isRegisterDataSettingObserver) {
+        RegisterDataSettingObserver();
+        isRegisterDataSettingObserver = true;
+    }
     std::string enable = "";
     AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
     SetlocalSwitch(enable);
@@ -114,7 +121,6 @@ void ExtensionWrapper::RegisterDataSettingObserver()
     }
 
     if (aggregationRoamingObserver_ == nullptr) {
-        ANS_LOGE("aggregationRoamingObserver_ is null");
         return;
     }
     
@@ -176,22 +182,5 @@ int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 
     ANS_LOGD("convertToDelType from delete reason %d to delete type %d", deleteReason, delType);
     return delType;
-}
-
-void SubSystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
-{
-    if (systemAbilityId != DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
-        return;
-    }
-    if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
-    }
-}
-
-void SubSystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
-{
-    if (systemAbilityId != DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
-        return;
-    }
 }
 } // namespace OHOS::Notification

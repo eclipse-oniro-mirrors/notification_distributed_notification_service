@@ -15,6 +15,7 @@
 
 #include "advanced_notification_service_ability.h"
 #include "notification_extension_wrapper.h"
+#include "system_event_observer.h"
 
 namespace OHOS {
 namespace Notification {
@@ -42,6 +43,9 @@ void AdvancedNotificationServiceAbility::OnStart()
     service_->CreateDialogManager();
     service_->InitPublishProcess();
     reminderAgent_ = ReminderDataManager::InitInstance(service_);
+
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
 #else
@@ -53,6 +57,57 @@ void AdvancedNotificationServiceAbility::OnStop()
 {
     service_ = nullptr;
     reminderAgent_ = nullptr;
+}
+
+void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    ANS_LOGD("SubSystemAbilityListener::OnAddSystemAbility enter !");
+    if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
+        if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
+            if (isDatashaReready) {
+                return;
+            }
+            isDatashaReready =true;
+            ANS_LOGD("CheckIfSettingsDataReady() ok!");
+            EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+        }
+    } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        if (isDatashaReready) {
+            return;
+        }
+        EventFwk::MatchingSkills matchingSkills;
+        matchingSkills.AddEvent("usual.event.DATA_SHARE_READY");
+        EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+        subscriber_ = std::make_shared<SystemEventSubscriber>(
+            subscribeInfo, std::bind(&AdvancedNotificationServiceAbility::OnReceiveEvent, this, std::placeholders::_1));
+        if (subscriber_ == nullptr) {
+            ANS_LOGD("subscriber_ is nullptr");
+            return;
+        }
+        EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    }
+}
+
+void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEventData &data)
+{
+    ANS_LOGI("CheckIfSettingsDataReady() ok!");
+    if (isDatashaReready) {
+        return;
+    }
+    isDatashaReready =true;
+    auto const &want = data.GetWant();
+    std::string action = want.GetAction();
+    if (action == "usual.event.DATA_SHARE_READY") {
+        ANS_LOGI("COMMON_EVENT_SERVICE_ID OnReceiveEvent ok!");
+        EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+    }
+}
+
+void AdvancedNotificationServiceAbility::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    if (systemAbilityId != COMMON_EVENT_SERVICE_ID) {
+        return;
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS
