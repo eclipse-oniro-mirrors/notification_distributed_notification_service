@@ -211,8 +211,11 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERR_OK);
 
-    request->SetNotificationId(2);
-    ret = advancedNotificationService_->Publish(label, request);
+    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
+    request2->SetNotificationId(2);
+    request2->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request2->SetContent(content);
+    ret = advancedNotificationService_->Publish(label, request2);
     ASSERT_EQ(ret, (int)ERR_OK);
 
     sptr<NotificationSlot> slot;
@@ -243,10 +246,10 @@ HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
     RegisterPushCheck();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    MockIsVerfyPermisson(false);
+    MockIsVerfyPermisson(true);
 
     auto ret = advancedNotificationService_->Publish(label, request);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**

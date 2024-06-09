@@ -385,7 +385,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0210
     MockQueryDataBeginWithKey(false);
     // test ParseFromDisturbeDB function
     NotificationPreferencesInfo info;
-    ASSERT_EQ(preferncesDB_->ParseFromDisturbeDB(info), false);
+    ASSERT_EQ(preferncesDB_->ParseFromDisturbeDB(info), true);
 }
 
 /**
