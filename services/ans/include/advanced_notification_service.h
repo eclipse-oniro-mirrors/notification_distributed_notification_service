@@ -1030,6 +1030,11 @@ public:
     void ResetPushCallbackProxy();
 
     /**
+     * @brief Set the notification SlotFlags whitelist.
+     */
+    void SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
      * @brief Init The Default Installation Package Notification Enabled.
      */
     void InitNotificationEnableList();
