@@ -226,6 +226,12 @@ public:
      */
     static bool GetContentTypeByString(const std::string &strContentType, NotificationContent::Type &contentType);
 
+    inline void ResetToBasicContent() const
+    {
+        contentType_ = NotificationContent::Type::BASIC_TEXT;
+        content_->SetContentType(static_cast<int32_t>(NotificationContent::Type::BASIC_TEXT));
+    }
+
 private:
     NotificationContent() = default;
 
@@ -258,7 +264,7 @@ public:
     constexpr static const char* CONTENT_TYPE_LIVE_VIEW = "Live_view";
 
 private:
-    NotificationContent::Type contentType_ {NotificationContent::Type::NONE};
+    mutable NotificationContent::Type contentType_ {NotificationContent::Type::NONE};
     std::shared_ptr<NotificationBasicContent> content_ {};
     static std::map<std::string, NotificationContent::Type> convertStrToContentType_;
 };

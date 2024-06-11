@@ -25,6 +25,7 @@
 #include "notification_action_button.h"
 #include "notification_basic_content.h"      // for NotificationBasicContent
 #include "notification_capsule.h"
+#include "notification_content.h"
 #include "notification_json_convert.h"
 #include "notification_progress.h"
 #include "notification_local_live_view_button.h"
@@ -223,6 +224,10 @@ bool NotificationLocalLiveViewContent::Marshalling(Parcel &parcel) const
     if (!NotificationBasicContent::Marshalling(parcel)) {
         ANS_LOGE("Failed to write basic");
         return false;
+    }
+
+    if (contentType_ == static_cast<int32_t>(NotificationContent::Type::BASIC_TEXT)) {
+        return true;
     }
 
     if (!parcel.WriteInt32(type_)) {
