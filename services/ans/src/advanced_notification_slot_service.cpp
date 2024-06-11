@@ -466,7 +466,8 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
     }
     if (result == ERR_OK) {
         if (slot != nullptr &&
-            (slot->GetEnable() || (record->request->IsSystemLiveView()))) {
+            (slot->GetEnable() || (record->request->IsAgentNotification()&&
+            record->request->IsSystemLiveView()))) {
             record->slot = slot;
         } else {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
