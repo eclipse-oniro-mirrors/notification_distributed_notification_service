@@ -48,6 +48,8 @@ namespace Notification {
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 constexpr int32_t HOURS_IN_ONE_DAY = 24;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
+constexpr int32_t RSS_PID = 3051;
+constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1837,6 +1839,13 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
     std::string bundle = "";
     ErrCode result = PrePublishNotificationBySa(request, uid, bundle);
+    if (request->GetCreatorUid() == RSS_PID && request->IsSystemLiveView() &&
+        (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
+        request->GetContent()->GetNotificationContent())->GetType() != TYPE_CODE_DOWNLOAD)) {
+        request->SetSlotType(NotificationConstant::SlotType::OTHER);
+        request->GetContent()->ResetToBasicContent();
+        request->SetUnremovable(true);
+    }
     if (result != ERR_OK) {
         return result;
     }

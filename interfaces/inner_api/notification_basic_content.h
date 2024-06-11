@@ -107,6 +107,11 @@ public:
      */
     virtual bool Marshalling(Parcel &parcel) const override;
 
+    inline void SetContentType(int32_t type)
+    {
+        contentType_ = type;
+    }
+
 protected:
     NotificationBasicContent() = default;
 
@@ -130,6 +135,7 @@ protected:
     std::string title_ {};
     std::string additionalText_ {};
     std::shared_ptr<Media::PixelMap> lockScreenPicture_ {};
+    int32_t contentType_;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -96,6 +96,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationLocal
 
     contentType_ = NotificationContent::Type::LOCAL_LIVE_VIEW;
     content_ = localLiveViewContent;
+    content_->SetContentType(static_cast<int32_t>(NotificationContent::Type::LOCAL_LIVE_VIEW));
 }
 
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
