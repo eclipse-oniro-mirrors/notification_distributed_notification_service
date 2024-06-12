@@ -1668,14 +1668,6 @@ ErrCode AdvancedNotificationService::SetRequestBundleInfo(const sptr<Notificatio
             bundle = request->GetOwnerBundleName();
         }
     }
-
-    std::shared_ptr<NotificationBundleOption> agentBundle =
-        std::make_shared<NotificationBundleOption>(bundle, uid);
-    if (agentBundle == nullptr) {
-        ANS_LOGE("Failed to create agentBundle instance");
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    request->SetAgentBundle(agentBundle);
     return ERR_OK;
 }
 

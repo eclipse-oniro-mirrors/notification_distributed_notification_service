@@ -1830,6 +1830,16 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     int32_t uid = request->GetCreatorUid();
+    if (request->GetOwnerUid() != DEFAULT_UID) {
+        std::shared_ptr<NotificationBundleOption> agentBundle =
+        std::make_shared<NotificationBundleOption>("", uid);
+        if (agentBundle == nullptr) {
+            ANS_LOGE("Failed to create agentBundle instance");
+            return ERR_ANS_INVALID_BUNDLE;
+        }
+        request->SetAgentBundle(agentBundle);
+    }
+
     if (request->IsAgentNotification()) {
         uid = request->GetOwnerUid();
     }
@@ -1845,6 +1855,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         request->SetSlotType(NotificationConstant::SlotType::OTHER);
         request->GetContent()->ResetToBasicContent();
         request->SetUnremovable(true);
+        request->SetTapDismissed(false);
     }
     if (result != ERR_OK) {
         return result;
