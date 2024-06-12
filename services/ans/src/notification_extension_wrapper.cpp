@@ -109,7 +109,7 @@ void ExtensionWrapper::SetlocalSwitch(std::string &enable)
         ANS_LOGE("SetlocalSwitch wrapper symbol failed");
         return;
     }
-    bool status = (enable == "true" ? true : false);
+    bool status = (enable == "false" ? false : true);
     setLocalSwitch_(status);
 }
 
