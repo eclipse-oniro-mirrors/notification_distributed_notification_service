@@ -17,6 +17,7 @@
 #include "ans_log_wrapper.h"
 #include "os_account_manager_helper.h"
 #include "rdb_errno.h"
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -262,6 +263,7 @@ int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &u
 {
     ANS_LOGD("DeleteData start");
     std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
+    std::reverse(operatedTables.begin(), operatedTables.end());
     std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
@@ -296,6 +298,7 @@ int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &ke
     ANS_LOGD("Delete Bathch Data start");
     {
         std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
+        std::reverse(operatedTables.begin(), operatedTables.end());
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
@@ -327,7 +330,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &valu
     int32_t ret = NativeRdb::E_OK;
     for (auto tableName : operatedTables) {
         ret = QueryData(tableName, key, value);
-        if (ret == NativeRdb::E_OK) {
+        if (ret != NativeRdb::E_EMPTY_VALUES_BUCKET) {
             return ret;
         }
     }
@@ -370,7 +373,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::vector<uint8
     int32_t ret = NativeRdb::E_OK;
     for (auto tableName : operatedTables) {
         ret = QueryData(tableName, key, values);
-        if (ret == NativeRdb::E_OK) {
+        if (ret != NativeRdb::E_EMPTY_VALUES_BUCKET) {
             return ret;
         }
     }
