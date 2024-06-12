@@ -110,6 +110,7 @@ int32_t NotificationDataMgr::Init()
             notificationRdbConfig_.syncMode);
     rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
+    std::lock_guard<std::mutex> lock(createdTableMutex_);
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
         int32_t ret = NativeRdb::E_OK;
@@ -119,14 +120,12 @@ int32_t NotificationDataMgr::Init()
             ANS_LOGE("notification rdb init fail");
             return NativeRdb::E_ERROR;
         }
+        return InitCreatedTables();
     }
-
-    return InitCreatedTables();
 }
 
 int32_t NotificationDataMgr::InitCreatedTables()
 {
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
     std::string queryTableSql = "SELECT name FROM sqlite_master WHERE type='table'";
     auto absSharedResultSet = rdbStore_->QuerySql(queryTableSql);
     int32_t ret = absSharedResultSet->GoToFirstRow();
