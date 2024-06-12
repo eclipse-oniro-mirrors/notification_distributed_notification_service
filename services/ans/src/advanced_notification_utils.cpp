@@ -1706,6 +1706,12 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
         userId = request->GetCreatorUserId();
     }
 
+    if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT && request->GetOwnerUid() != DEFAULT_UID) {
+        int32_t ownerUserId = SUBSCRIBE_USER_INIT;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+        request->SetOwnerUserId(ownerUserId);
+    }
+
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
