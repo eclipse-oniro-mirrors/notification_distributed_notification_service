@@ -422,7 +422,10 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
             return ret;
         }
     }
-    return ret;
+    if (ret == NativeRdb::E_EMPTY_VALUES_BUCKET && values.empty()) {
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    return NativeRdb::E_OK;
 }
 
 int32_t NotificationDataMgr::QueryDataBeginWithKey(
@@ -481,7 +484,10 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
             return ret;
         }
     }
-    return ret;
+    if (ret == NativeRdb::E_EMPTY_VALUES_BUCKET && datas.empty()) {
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    return NativeRdb::E_OK;
 }
 
 int32_t NotificationDataMgr::QueryAllData(
