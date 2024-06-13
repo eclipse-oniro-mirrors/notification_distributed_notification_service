@@ -132,16 +132,32 @@ public:
      */
     void SetCallbackInfo(const napi_env &env, const std::string &type, const napi_ref &ref);
 
+    /**
+     * @brief Sets the callback information by type.
+     *
+     * @param type Indicates the type of callback.
+     * @param env Indicates the environment that the API is invoked under.
+     * @param ref Indicates the napi_ref of callback.
+     * @param tsfn Indicates the napi_threadsafe_function of callback.
+     */
+    void SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+
 private:
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+
     void SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     void SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+
     void SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref);
+
+    void SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
     void SetDieCallbackInfo(const napi_env &env, const napi_ref &ref);
 
@@ -163,6 +179,7 @@ private:
     struct CallbackInfo {
         napi_env env = nullptr;
         napi_ref ref = nullptr;
+        napi_threadsafe_function tsfn = nullptr;
     };
 
     CallbackInfo canceCallbackInfo_;
