@@ -140,7 +140,8 @@ public:
      * @param ref Indicates the napi_ref of callback.
      * @param tsfn Indicates the napi_threadsafe_function of callback.
      */
-    void SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+    void SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref,
+        const napi_threadsafe_function &tsfn);
 
 private:
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);

@@ -549,7 +549,7 @@ void SubscriberInstance::OnConnected()
         return;
     }
 
-    if(subscribeCallbackInfo_.tsfn == nullptr){
+    if (subscribeCallbackInfo_.tsfn == nullptr) {
         ANS_LOGI("subscribe tsfn is null");
         return;
     }
@@ -1085,7 +1085,8 @@ void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_
     consumeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn)
+void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref,
+    const napi_threadsafe_function &tsfn)
 {
     consumeCallbackInfo_.env = env;
     consumeCallbackInfo_.ref = ref;
@@ -1104,7 +1105,8 @@ void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const nap
     subscribeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn)
+void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref,
+    const napi_threadsafe_function &tsfn)
 {
     subscribeCallbackInfo_.env = env;
     subscribeCallbackInfo_.ref = ref;
@@ -1117,7 +1119,8 @@ void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const n
     unsubscribeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn)
+void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref,
+    const napi_threadsafe_function &tsfn)
 {
     unsubscribeCallbackInfo_.env = env;
     unsubscribeCallbackInfo_.ref = ref;
@@ -1206,10 +1209,11 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
 }
 
 
-void SubscriberInstance::SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn)
+void SubscriberInstance::SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref,
+    const napi_threadsafe_function &tsfn)
 {
     if (type == CONSUME) {
-        SetConsumeCallbackInfo(env, ref,tsfn);
+        SetConsumeCallbackInfo(env, ref, tsfn);
     } else if (type == CANCEL) {
         SetCancelCallbackInfo(env, ref);
     } else if (type == UPDATE) {
@@ -1296,7 +1300,7 @@ napi_value GetNotificationSubscriber(
         napi_create_string_latin1(env, "onConsume", NAPI_AUTO_LENGTH, &resourceName);
         napi_threadsafe_function tsfn = nullptr;
         napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
-        ThreadFinished, nullptr, ThreadSafeOnConsumed, &tsfn);
+            ThreadFinished, nullptr, ThreadSafeOnConsumed, &tsfn);
         subscriberInfo.subscriber->SetCallbackInfo(CONSUME, env, result, tsfn);
     }
     // onCancel?:(data: SubscribeCallbackData) => void
@@ -1347,8 +1351,8 @@ napi_value GetNotificationSubscriber(
         napi_create_string_latin1(env, "onConnect", NAPI_AUTO_LENGTH, &resourceName);
         napi_threadsafe_function tsfn = nullptr;
         napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
-        ThreadFinished, nullptr, ThreadSafeOnConnected, &tsfn);
-        subscriberInfo.subscriber->SetCallbackInfo(CONNECTED, env, result, tsfn);                
+            ThreadFinished, nullptr, ThreadSafeOnConnected, &tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(CONNECTED, env, result, tsfn);
     }
     // onDisconnect?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDisconnect", &hasProperty));
@@ -1368,8 +1372,8 @@ napi_value GetNotificationSubscriber(
         napi_create_string_latin1(env, "onDisconnect", NAPI_AUTO_LENGTH, &resourceName);
         napi_threadsafe_function tsfn = nullptr;
         napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
-        ThreadFinished, nullptr, ThreadSafeOnDisconnected, &tsfn);
-        subscriberInfo.subscriber->SetCallbackInfo(DIS_CONNECTED, env, result, tsfn);    
+            ThreadFinished, nullptr, ThreadSafeOnDisconnected, &tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(DIS_CONNECTED, env, result, tsfn);
     }
     // onDestroy?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDestroy", &hasProperty));
