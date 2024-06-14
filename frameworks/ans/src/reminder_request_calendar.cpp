@@ -231,6 +231,9 @@ bool ReminderRequestCalendar::OnDateTimeChange()
     if (IsExpired()) {
         return false;
     }
+    if (showed_) {
+        return false;
+    }
     uint64_t now = GetNowInstantMilli();
     if (now == 0) {
         ANSR_LOGE("get now time failed");
