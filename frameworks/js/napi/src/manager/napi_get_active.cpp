@@ -342,16 +342,20 @@ napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < ARGS_ONE) {
         ANS_LOGE("Wrong number of arguments");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
     // argv[0] : filter
     if (!AppExecFwk::IsTypeForNapiValue(env, argv[0], napi_object)) {
         ANS_LOGE("Wrong filter type. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (ParseGetLiveViewFilter(env, argv[0], filter) == nullptr) {
         ANS_LOGE("Parse filter from param failed.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
