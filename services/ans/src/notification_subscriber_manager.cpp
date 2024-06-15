@@ -519,7 +519,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
 
     int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
-    if (record->userId == sendUserId || record->userId == recvUserId) {
+    if (record->userId == recvUserId) {
         return true;
     }
 
