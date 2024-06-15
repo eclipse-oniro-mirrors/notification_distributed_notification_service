@@ -231,9 +231,6 @@ bool ReminderRequestCalendar::OnDateTimeChange()
     if (IsExpired()) {
         return false;
     }
-    if (showed_) {
-        return false;
-    }
     uint64_t now = GetNowInstantMilli();
     if (now == 0) {
         ANSR_LOGE("get now time failed");
@@ -244,7 +241,7 @@ bool ReminderRequestCalendar::OnDateTimeChange()
             GetDateTimeInfo(now / MILLI_SECONDS).c_str(),
             GetDateTimeInfo(startDateTime_ / MILLI_SECONDS).c_str(),
             GetDateTimeInfo(endDateTime_ / MILLI_SECONDS).c_str());
-        return true;
+        return ReminderRequest::IsNeedNotification();
     } else {
         uint64_t triggerTime = GetNextTriggerTime();
         SetTriggerTimeInMilli(triggerTime);
@@ -293,17 +290,13 @@ bool ReminderRequestCalendar::IsPullUpService()
 
 bool ReminderRequestCalendar::IsNeedNotification()
 {
-    bool expected = false;
-    if (!showed_.compare_exchange_strong(expected, true)) {
-        return false;
-    }
     uint64_t now = GetNowInstantMilli();
     if (now == 0) {
         ANSR_LOGE("get now time failed");
         return false;
     }
     if (now <= endDateTime_ && now >= startDateTime_) {
-        return true;
+        return ReminderRequest::IsNeedNotification();
     }
     return false;
 }
