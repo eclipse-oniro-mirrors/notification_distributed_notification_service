@@ -300,7 +300,6 @@ void ReminderRequest::OnClose(bool updateNext)
             snoozeTimesDynamic_ = snoozeTimes_;
         }
     }
-    showed_ = false;
 }
 
 bool ReminderRequest::OnDateTimeChange()
@@ -404,14 +403,11 @@ void ReminderRequest::OnShow(bool isPlaySoundOrVibration, bool isSysTimeChanged,
             SetState(true, REMINDER_STATUS_ALERTING, "OnShow");
         }
         UpdateNotificationStateForAlert();
-    } else {
-        showed_ = false;
     }
 }
 
 void ReminderRequest::OnShowFail()
 {
-    showed_ = false;
     SetState(false, REMINDER_STATUS_SHOWING, "OnShowFailed()");
 }
 
@@ -432,7 +428,6 @@ bool ReminderRequest::OnSnooze()
     if (timeIntervalInMilli_ > 0) {
         SetState(true, REMINDER_STATUS_SNOOZE, "onSnooze()");
     }
-    showed_ = false;
     return true;
 }
 

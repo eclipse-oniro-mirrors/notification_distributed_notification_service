@@ -241,7 +241,7 @@ bool ReminderRequestCalendar::OnDateTimeChange()
             GetDateTimeInfo(now / MILLI_SECONDS).c_str(),
             GetDateTimeInfo(startDateTime_ / MILLI_SECONDS).c_str(),
             GetDateTimeInfo(endDateTime_ / MILLI_SECONDS).c_str());
-        return ReminderRequest::IsNeedNotification();
+        return true;
     } else {
         uint64_t triggerTime = GetNextTriggerTime();
         SetTriggerTimeInMilli(triggerTime);
@@ -296,7 +296,7 @@ bool ReminderRequestCalendar::IsNeedNotification()
         return false;
     }
     if (now <= endDateTime_ && now >= startDateTime_) {
-        return ReminderRequest::IsNeedNotification();
+        return true;
     }
     return false;
 }
