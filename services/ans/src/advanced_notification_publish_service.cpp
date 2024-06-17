@@ -2085,9 +2085,8 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
         ANS_LOGE("no permission");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    ANS_LOGE("no permission111");
+    
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    ANS_LOGE("no permission1222");
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
