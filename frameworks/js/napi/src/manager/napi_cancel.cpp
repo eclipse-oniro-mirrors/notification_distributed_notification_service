@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiCancel(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGI("enter");
     ParametersInfoCancel paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

@@ -611,7 +611,9 @@ void AdvancedNotificationService::UpdateRecordByOwner(
 
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();
+    auto wantAgent = record->notification->GetNotificationRequest().GetWantAgent();
     record->request = oldRecord->request;
+    record->request->SetWantAgent(wantAgent);
     uint64_t timerId = 0;
     if (isSystemApp) {
         record->request->SetContent(content);
