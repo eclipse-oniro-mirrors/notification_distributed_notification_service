@@ -132,23 +132,14 @@ SubscriberInstance::~SubscriberInstance()
     if (consumeCallbackInfo_.ref != nullptr) {
         napi_delete_reference(consumeCallbackInfo_.env, consumeCallbackInfo_.ref);
     }
-    if (consumeCallbackInfo_.tsfn != nullptr) {
-        napi_release_threadsafe_function(consumeCallbackInfo_.tsfn, napi_tsfn_release);
-    }
     if (updateCallbackInfo_.ref != nullptr) {
         napi_delete_reference(updateCallbackInfo_.env, updateCallbackInfo_.ref);
     }
     if (subscribeCallbackInfo_.ref != nullptr) {
         napi_delete_reference(subscribeCallbackInfo_.env, subscribeCallbackInfo_.ref);
     }
-    if (subscribeCallbackInfo_.tsfn != nullptr) {
-        napi_release_threadsafe_function(subscribeCallbackInfo_.tsfn, napi_tsfn_release);
-    }
     if (unsubscribeCallbackInfo_.ref != nullptr) {
         napi_delete_reference(unsubscribeCallbackInfo_.env, unsubscribeCallbackInfo_.ref);
-    }
-    if (unsubscribeCallbackInfo_.tsfn != nullptr) {
-        napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_release);
     }
     if (dieCallbackInfo_.ref != nullptr) {
         napi_delete_reference(dieCallbackInfo_.env, dieCallbackInfo_.ref);
@@ -580,8 +571,6 @@ void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context
 
     Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, Common::NapiGetNull(dataWorkerData->env));
 
-    DelSubscriberInstancesInfo(dataWorkerData->env, dataWorkerData->subscriber);
-
     delete dataWorkerData;
     dataWorkerData = nullptr;
 }
@@ -612,7 +601,8 @@ void SubscriberInstance::OnDisconnected()
 
     napi_acquire_threadsafe_function(unsubscribeCallbackInfo_.tsfn);
     napi_call_threadsafe_function(unsubscribeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_abort);
+    DelSubscriberInstancesInfo(dataWorker->env, dataWorker->subscriber);
 }
 
 void UvQueueWorkOnDied(uv_work_t *work, int status)
