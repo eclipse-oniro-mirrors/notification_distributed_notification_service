@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,35 +13,54 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_INNER_ERRORS_H
-#define BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_INNER_ERRORS_H
+#ifndef INNER_ERRORS_H
+#define INNER_ERRORS_H
 
-#include <map>
-#include <sstream>
-#include "errors.h"
+#include <cstdint>
+#include <string>
+#include <unordered_map>
 
 namespace OHOS {
-namespace Notification {
 /**
  * ErrCode layout
  *
  * +-----+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  * | Bit |31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|09|08|07|06|05|04|03|02|01|00|
  * +-----+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * |Field|Reserved|        Subsystem      |  Module      |                              Code             |
+ * |Field|Reserved|        Subsystem      |  Module      |                  Code                         |
  * +-----+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  */
 
-constexpr uint32_t EVENT_SUB_MODULE_OFFSET = 8;  // sub-module offset value
+using ErrCode = int;
+namespace CJSystemapi {
+namespace Notification {
+const int32_t SUCCESS_CODE = 0;
+
+// be used to init the subsystem errorno.
+/**
+ * @brief Generate base error code for a specified module in specified
+ * subsystem.
+ *
+ * @param subsystem Value of 'Subsystem' segment.
+ * @param module Value of 'Module' segment,
+ * which is 0 by default.
+ * @return Return base ErrCode for specified module.
+ */
+constexpr ErrCode ErrCodeOffset(unsigned int subsystem, unsigned int module = 0)
+{
+    constexpr int subsystemBitNum = 21;
+    constexpr int moduleBitNum = 16;
+    return (subsystem << subsystemBitNum) | (module << moduleBitNum);
+}
+
+constexpr uint32_t SUBSYS_NOTIFICATION = 32;
 
 // ANS's module const defined.
 enum AnsModule : uint32_t {
     ANS_MODULE_COMMON = 0x00,
 };
 
-// Offset of common event sub-system's errcode base.
 constexpr ErrCode ANS_COMMON_ERR_OFFSET = ErrCodeOffset(SUBSYS_NOTIFICATION, ANS_MODULE_COMMON);
-
 // Error code defined.
 enum ErrorCode : uint32_t {
     ERR_ANS_SERVICE_NOT_READY = ANS_COMMON_ERR_OFFSET + 1,
@@ -88,38 +107,7 @@ enum ErrorCode : uint32_t {
     ERR_ANS_EXPIRED_NOTIFICATION,
     ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE,
     ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID,
-    ERR_ANS_OVER_MAX_UPDATE_PERSECOND,
-    ERR_ANS_DUPLICATE_MSG,
-    ERR_ANS_NO_AGENT_SETTING
 };
-
-enum ReminderErrorCode : uint32_t {
-    ERR_REMINDER_PERMISSION_DENIED = 201,
-    ERR_REMINDER_INVALID_PARAM = 401,
-    ERR_REMINDER_NOTIFICATION_NOT_ENABLE = 1700001,
-    ERR_REMINDER_NUMBER_OVERLOAD,
-    ERR_REMINDER_NOT_EXIST,
-    ERR_REMINDER_PACKAGE_NOT_EXIST,
-    ERR_REMINDER_CALLER_TOKEN_INVALID,
-    ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED,
-};
-
-static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
-    { ERR_REMINDER_PERMISSION_DENIED, "BussinessError 201: Permission denied." },
-    { ERR_REMINDER_INVALID_PARAM, "BussinessError 401: Parameter error." },
-    { ERR_REMINDER_NOTIFICATION_NOT_ENABLE, "BussinessError 1700001: Notification not enable." },
-    { ERR_REMINDER_NUMBER_OVERLOAD, "BussinessError 1700002: The number of reminders exceeds the limit." },
-    { ERR_REMINDER_NOT_EXIST, "BussinessError 1700003: The reminder not exist." },
-    { ERR_REMINDER_PACKAGE_NOT_EXIST, "BussinessError 1700004: The package name not exist." },
-    { ERR_REMINDER_CALLER_TOKEN_INVALID, "BussinessError 1700005: The caller token invalid." },
-    { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "BussinessError 1700006: The data share permission denied." }
-};
-
-// Notification error msg
-static inline std::string MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED = "Mandatory parameters are left unspecified.";
-static inline std::string INCORRECT_PARAMETER_TYPES                = "Incorrect parameter types.";
-static inline std::string PARAMETER_VERIFICATION_FAILED            = "Parameter verification failed.";
-
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
 const uint32_t ERROR_NOT_SYSTEM_APP    = 202;          // Not system application to call the interface.
@@ -143,10 +131,12 @@ const int32_t ERROR_DIALOG_IS_POPPING            = 1600013;    // A notification
 const int32_t ERROR_NO_RIGHT                     = 1600014;    // No permission.
 const int32_t ERROR_REPEAT_SET                   = 1600015;    // Repeat create or end.
 const int32_t ERROR_EXPIRED_NOTIFICATION         = 1600016;    // Low update version.
-const int32_t ERROR_NO_AGENT_SETTING             = 1600017;    // No corresponding agent relationship configuration.
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
-}  // namespace Notification
-}  // namespace OHOS
 
-#endif  // BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_INNER_ERRORS_H
+int32_t ErrorToExternal(uint32_t errCode);
+} // namespace Notification
+} // namespace CJSystemapi
+} // namespace OHOS
+
+#endif
