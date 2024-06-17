@@ -903,6 +903,8 @@ void NotificationPreferences::RemoveSettings(int32_t userId)
     }
 
     if (preferncesDB_ != nullptr) {
+        preferncesDB_->RemoveNotificationEnable(userId);
+        preferncesDB_->RemoveDoNotDisturbDate(userId);
         preferncesDB_->DropUserTable(userId);
     }
 }
