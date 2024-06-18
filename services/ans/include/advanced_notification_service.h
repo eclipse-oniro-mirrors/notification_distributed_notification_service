@@ -1109,6 +1109,12 @@ public:
      * @brief update unified group info.
      */
     void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo);
+
+    /**
+     * @brief Whether reminders are allowed.
+     */
+    bool AllowUseReminder(const std::string& bundleName);
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

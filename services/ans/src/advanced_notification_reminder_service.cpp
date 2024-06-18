@@ -58,15 +58,16 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (!CheckReminderPermission()) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+    std::string bundleName = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
+            "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
     ANSR_LOGD("is system app: %{public}d", AccessTokenHelper::IsSystemApp());
     reminder->SetSystemApp(AccessTokenHelper::IsSystemApp());
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
-    std::string bundle = GetClientBundleName();
-    reminder->InitCreatorBundleName(bundle);
+    reminder->InitCreatorBundleName(bundleName);
     reminder->InitCreatorUid(IPCSkeleton::GetCallingUid());
     if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
         ANSR_LOGE("wantagent info is nullptr");
@@ -111,8 +112,10 @@ ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Cancel Reminder");
-    if (!CheckReminderPermission()) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+    std::string bundleName = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
+            "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
 
@@ -131,8 +134,10 @@ ErrCode AdvancedNotificationService::CancelAllReminders()
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Cancel all reminders");
-    if (!CheckReminderPermission()) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+    std::string bundleName = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
+            "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
 
@@ -154,8 +159,10 @@ ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<Reminder
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("GetValidReminders");
-    if (!CheckReminderPermission()) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+    std::string bundleName = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
+            "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
 
@@ -177,8 +184,10 @@ ErrCode AdvancedNotificationService::AddExcludeDate(const int32_t reminderId, co
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Add Exclude Date");
-    if (!CheckReminderPermission()) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+    std::string bundleName = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
+            "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
 
@@ -199,8 +208,10 @@ ErrCode AdvancedNotificationService::DelExcludeDates(const int32_t reminderId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Del Exclude Dates");
-    if (!CheckReminderPermission()) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+    std::string bundleName = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
+            "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
 
@@ -221,8 +232,10 @@ ErrCode AdvancedNotificationService::GetExcludeDates(const int32_t reminderId, s
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Get Exclude Dates");
-    if (!CheckReminderPermission()) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER");
+    std::string bundleName = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
+            "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
 
