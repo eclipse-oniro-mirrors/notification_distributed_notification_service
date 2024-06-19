@@ -58,8 +58,8 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::string bundleName = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
+    std::string bundle = GetClientBundleName();
+    if (!CheckReminderPermission() || !AllowUseReminder(bundle)) {
         ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
             "or not allowed use reminder");
         return ERR_REMINDER_PERMISSION_DENIED;
@@ -67,7 +67,7 @@ ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &remi
     ANSR_LOGD("is system app: %{public}d", AccessTokenHelper::IsSystemApp());
     reminder->SetSystemApp(AccessTokenHelper::IsSystemApp());
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
-    reminder->InitCreatorBundleName(bundleName);
+    reminder->InitCreatorBundleName(bundle);
     reminder->InitCreatorUid(IPCSkeleton::GetCallingUid());
     if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
         ANSR_LOGE("wantagent info is nullptr");
