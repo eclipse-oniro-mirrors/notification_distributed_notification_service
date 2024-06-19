@@ -105,10 +105,11 @@ struct PermissionDialog {
                       left: Constants.DIALOG_REQ_MARGIN_LEFT,
                       right: Constants.DIALOG_REQ_MARGIN_RIGHT
                     })
+                    .textAlign(TextAlign.Center)
                   }
                 }
                 Row() {
-                  Flex({ justifyContent: FlexAlign.Start }) {
+                  Flex({ justifyContent: FlexAlign.Center }) {
                     Text() {
                       Span(permission.reason)
                     }
