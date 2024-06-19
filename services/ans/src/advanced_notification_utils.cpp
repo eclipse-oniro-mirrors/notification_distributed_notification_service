@@ -1328,7 +1328,7 @@ void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<Notification
 
 void AdvancedNotificationService::OnResourceRemove(int32_t userId)
 {
-    DeleteAllByUser(userId);
+    OnUserRemoved(userId);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
@@ -1338,7 +1338,6 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance().RemoveSettings(userId);
     }));
-    notificationSvrQueue_->wait(handler);
 }
 
 void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption)
@@ -1347,7 +1346,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
         ANS_LOGE("Serial queue is invalid.");
         return;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
         std::vector<sptr<Notification>> notifications;
@@ -1386,7 +1385,6 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
                 notifications, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
         }
     }));
-    notificationSvrQueue_->wait(handler);
 }
 
 bool AdvancedNotificationService::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
@@ -1401,7 +1399,7 @@ bool AdvancedNotificationService::CheckApiCompatibility(const sptr<NotificationB
 
 void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
 {
-    DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE);
+    DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE, true);
 }
 
 ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
@@ -1409,7 +1407,8 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
     return DeleteAllByUserInner(userId, NotificationConstant::CANCEL_ALL_REASON_DELETE);
 }
 
-ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId, int32_t deleteReason)
+ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId, int32_t deleteReason,
+    bool isAsync)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1427,8 +1426,8 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    std::shared_ptr<ErrCode> result = std::make_shared<ErrCode>(ERR_OK);
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         std::vector<sptr<Notification>> notifications;
@@ -1440,8 +1439,8 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
 #endif
             sptr<Notification> notification = nullptr;
 
-            result = RemoveFromNotificationListForDeleteAll(key, userId, notification);
-            if ((result != ERR_OK) || (notification == nullptr)) {
+            *result = RemoveFromNotificationListForDeleteAll(key, userId, notification);
+            if ((*result != ERR_OK) || (notification == nullptr)) {
                 continue;
             }
 
@@ -1462,11 +1461,14 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
                 notifications, nullptr, deleteReason);
         }
 
-        result = ERR_OK;
+        *result = ERR_OK;
     }));
-    notificationSvrQueue_->wait(handler);
 
-    return result;
+    if (!isAsync) {
+        notificationSvrQueue_->wait(handler);
+        return *result;
+    }
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
