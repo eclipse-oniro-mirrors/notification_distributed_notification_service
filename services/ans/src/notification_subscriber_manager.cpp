@@ -431,6 +431,13 @@ void NotificationSubscriberManager::NotifyConsumedInner(
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
         if (IsSubscribedBysubscriber(record, notification)) {
+            if (!record->subscriber->AsObject()->IsProxyObject()) {
+                MessageParcel data;
+                data.WriteParcelable(notification);
+                sptr<Notification> notificationStub = data.ReadParcelable<Notification>();
+                record->subscriber->OnConsumed(notificationStub, notificationMap);
+                continue;
+            }
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }
