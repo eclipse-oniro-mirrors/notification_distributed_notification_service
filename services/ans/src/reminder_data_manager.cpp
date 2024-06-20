@@ -326,9 +326,9 @@ void ReminderDataManager::CancelNotification(const sptr<ReminderRequest> &remind
         ANSR_LOGE("Cancel notification fail");
         return;
     }
+    std::string label = ReminderRequest::NOTIFICATION_LABEL + "_" + std::to_string(reminder->GetReminderId());
     sptr<NotificationBundleOption> bundleOption = FindNotificationBundleOption(reminder->GetReminderId());
-    advancedNotificationService_->CancelPreparedNotification(
-        notification->GetNotificationId(), ReminderRequest::NOTIFICATION_LABEL, bundleOption);
+    advancedNotificationService_->CancelPreparedNotification(notification->GetNotificationId(), label, bundleOption);
 }
 
 bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption,
