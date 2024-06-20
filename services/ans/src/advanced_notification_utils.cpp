@@ -1936,5 +1936,10 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
     flag->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
     record->request->SetFlags(flag);
 }
+
+bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
+{
+    return true;
+}
 }  // namespace Notification
 }  // namespace OHOS
