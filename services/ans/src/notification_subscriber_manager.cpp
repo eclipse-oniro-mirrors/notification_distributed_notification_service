@@ -577,8 +577,11 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const spt
 void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
     for (auto record : subscriberRecordList_) {
-        if (record != nullptr && record->subscriber != nullptr) {
+        if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
+            IsSystemUser(userId) || record->userId == userId) {
             record->subscriber->OnBadgeEnabledChanged(callbackData);
         }
     }
@@ -603,9 +606,14 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
         ANS_LOGE("queue is nullptr");
         return;
     }
-    std::function<void()> setBadgeNumberFunc = [badgeData] () {
-        for (auto record : NotificationSubscriberManager::GetInstance()->subscriberRecordList_) {
-            record->subscriber->OnBadgeChanged(badgeData);
+    std::function<void()> setBadgeNumberFunc = [this, badgeData] () {
+        int32_t userId = SUBSCRIBE_USER_INIT;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(badgeData->GetUid(), userId);
+        for (auto record : subscriberRecordList_) {
+            if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
+                IsSystemUser(userId) || record->userId == userId) {
+                record->subscriber->OnBadgeChanged(badgeData);
+            }
         }
     };
     notificationSubQueue_->submit(setBadgeNumberFunc);
