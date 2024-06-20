@@ -24,24 +24,26 @@
 
 namespace OHOS {
 namespace Notification {
-ErrCode OsAccountManagerHelper::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
+ErrCode OsAccountManagerHelper::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &userId)
 {
-    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, id);
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to call OsAccountManager::GetOsAccountLocalIdFromUid, code is %{public}d", ret);
+        ANS_LOGE("Get userId failed, uid = <%{public}d>, code is %{public}d", uid, ret);
+        return ret;
     }
+    ANS_LOGD("Get userId Success, uid = <%{public}d> userId = <%{public}d>", uid, userId);
     return ret;
 }
 
-ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &id)
+ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &userId)
 {
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, id);
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     if (ret != ERR_OK) {
-        ANS_LOGD("Get userId failed, callingUid = <%{public}d>", callingUid);
+        ANS_LOGE("Get userId failed, callingUid = <%{public}d>, code is %{public}d", callingUid, ret);
         return ERR_ANS_INVALID_PARAM;
     }
-    ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> userId = <%{public}d>", callingUid, id);
+    ANS_LOGD("Get userId Success, callingUid = <%{public}d> userId = <%{public}d>", callingUid, userId);
     return ERR_OK;
 }
 
@@ -84,7 +86,9 @@ bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
     int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
     if (ret != ERR_OK) {
         ANS_LOGE("Failed to call OsAccountManager::IsOsAccountExists, code is %{public}d", ret);
+        return ret;
     }
+    ANS_LOGD("Call IsOsAccountExists Success, user = %{public}d userExists = %{public}d", userId, isAccountExists);
     return isAccountExists;
 }
 
