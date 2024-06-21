@@ -236,12 +236,12 @@ bool ReminderRequestCalendar::OnDateTimeChange()
         ANSR_LOGE("get now time failed");
         return false;
     }
-    if (CheckCalenderIsExpired(now)) {
+    if (CheckCalenderIsExpired(now) && GetTriggerTimeInMilli() != INVALID_LONG_LONG_VALUE) {
         ANSR_LOGI("now: %{public}s, start: %{public}s, end: %{public}s",
             GetDateTimeInfo(now / MILLI_SECONDS).c_str(),
             GetDateTimeInfo(startDateTime_ / MILLI_SECONDS).c_str(),
             GetDateTimeInfo(endDateTime_ / MILLI_SECONDS).c_str());
-        return true;
+        return GetTriggerTimeInMilli() <= now;
     } else {
         uint64_t triggerTime = GetNextTriggerTime();
         SetTriggerTimeInMilli(triggerTime);
