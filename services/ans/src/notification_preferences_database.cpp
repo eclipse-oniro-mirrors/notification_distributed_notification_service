@@ -892,7 +892,7 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
     std::unordered_map<std::string, std::string> datas;
     const std::string ANS_BUNDLE_BEGIN = "ans_bundle_";
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     int32_t errCode = rdbDataManager_->QueryDataBeginWithKey(ANS_BUNDLE_BEGIN, datas, userId);
     if (errCode != NativeRdb::E_OK) {
         ANS_LOGE("Query data begin with ans_bundle_ from db error");
