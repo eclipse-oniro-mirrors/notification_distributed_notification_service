@@ -1068,10 +1068,11 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        if ((GetTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
-            NotificationContent::Type::LOCAL_LIVE_VIEW, recordList) != ERR_OK) &&
-            (GetCommonTargetRecordList(bundleName,  NotificationConstant::SlotType::LIVE_VIEW,
-            NotificationContent::Type::LIVE_VIEW, recordList) != ERR_OK)) {
+        GetTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationContent::Type::LOCAL_LIVE_VIEW, recordList);
+        GetCommonTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationContent::Type::LIVE_VIEW, recordList);
+        if (recordList.size() == 0) {
             ANS_LOGE("Get Target record list fail.");
             result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
             return;

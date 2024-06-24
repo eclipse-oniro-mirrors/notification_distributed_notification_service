@@ -701,12 +701,12 @@ void AdvancedNotificationService::OnDistributedKvStoreDeathRecipient()
     }));
 }
 
-ErrCode AdvancedNotificationService::GetTargetRecordList(const std::string& bundleName,
+ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid,
     NotificationConstant::SlotType slotType, NotificationContent::Type contentType,
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
     for (auto& notification : notificationList_) {
-        if (notification->request != nullptr && notification->request->GetOwnerBundleName() == bundleName &&
+        if (notification->request != nullptr && notification->request->GetCreatorUid() == uid &&
                 notification->request->GetSlotType()== slotType &&
                 notification->request->GetNotificationType() == contentType) {
                 recordList.emplace_back(notification);
@@ -718,7 +718,7 @@ ErrCode AdvancedNotificationService::GetTargetRecordList(const std::string& bund
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const std::string& bundleName,
+ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const int32_t uid,
     NotificationConstant::SlotType slotType, NotificationContent::Type contentType,
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
@@ -726,7 +726,7 @@ ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const std::string
         if (notification->request != nullptr && notification->request->IsCommonLiveView()) {
             auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
                 notification->request->GetContent()->GetNotificationContent());
-            if (notification->request->GetOwnerBundleName() == bundleName &&
+            if (notification->request->GetCreatorUid() == uid &&
                 notification->request->GetSlotType()== slotType &&
                 notification->request->GetNotificationType() == contentType &&
                 liveViewContent->GetIsOnlyLocalUpdate()) {
