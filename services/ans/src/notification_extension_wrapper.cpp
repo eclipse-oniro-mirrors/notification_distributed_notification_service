@@ -65,11 +65,13 @@ void ExtensionWrapper::InitExtentionWrapper()
     setLocalSwitch_ = (SET_LOCAL_SWITCH)dlsym(extensionWrapperHandle_, "SetlocalSwitch");
     initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
+    reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
     if (syncAdditionConfig_ == nullptr
         || getUnifiedGroupInfo_ == nullptr
         || updateByCancel_ == nullptr
         || initSummary_ == nullptr
-        || localControl_ == nullptr) {
+        || localControl_ == nullptr
+        || reminderControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
@@ -163,6 +165,15 @@ int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
         return 0;
     }
     return localControl_(request);
+}
+
+int32_t ExtensionWrapper::ReminderControl(const std::string &bundleName)
+{
+    if (reminderControl_ == nullptr) {
+        ANS_LOGE("ReminderControl wrapper symbol failed");
+        return 0;
+    }
+    return reminderControl_(bundleName);
 }
 
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
