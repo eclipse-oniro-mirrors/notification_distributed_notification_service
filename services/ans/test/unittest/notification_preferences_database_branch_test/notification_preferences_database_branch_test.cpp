@@ -1029,5 +1029,29 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, PutSlotFlags_00100, Function
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     ASSERT_EQ(preferncesDB_->PutSlotFlags(bundleInfo, 0), true);
 }
+
+/**
+ * @tc.name      : IsAgentRelationship_00100
+ * @tc.number    : IsAgentRelationship_00100
+ * @tc.desc      : test IsAgentRelationship.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsAgentRelationship_00100, Function | SmallTest | Level1)
+{
+    std::string agent = "agent";
+    std::string source = "source";
+    ASSERT_EQ(preferncesDB_->IsAgentRelationship(agent, source), false);
+}
+
+/**
+ * @tc.name      : GetAdditionalConfig_00100
+ * @tc.number    : GetAdditionalConfig_00100
+ * @tc.desc      : test GetAdditionalConfig.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, GetAdditionalConfig_00100, Function | SmallTest | Level1)
+{
+    std::string key = "key";
+    ASSERT_EQ(preferncesDB_->GetAdditionalConfig(key), "");
+}
+
 }  // namespace Notification
 }  // namespace OHOS

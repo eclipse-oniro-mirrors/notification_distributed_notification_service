@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+#include "errors.h"
 #include "notification_content.h"
 #include "notification_record.h"
+#include "notification_request.h"
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -681,6 +683,99 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02900,
 }
 
 /**
+ * @tc.number    : AdvancedNotificationServiceTest_03000
+ * @tc.name      : ANS_SetTargetDeviceStatus_0100
+ * @tc.desc      : Test SetTargetDeviceStatus function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03000, Function | SmallTest | Level1)
+{
+    const std::string device = "current";
+    const uint32_t status = 1;
+    ASSERT_EQ((int)advancedNotificationService_->SetTargetDeviceStatus(device, status),
+              (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_03100
+ * @tc.name      : ANS_ClearAllNotificationGroupInfo_0100
+ * @tc.desc      : Test ClearAllNotificationGroupInfo function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03100, Function | SmallTest | Level1)
+{
+    const std::string localSwitch = "current";
+    advancedNotificationService_->ClearAllNotificationGroupInfo(localSwitch);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_03200
+ * @tc.name      : ANS_UpdateUnifiedGroupInfo_0100
+ * @tc.desc      : Test UpdateUnifiedGroupInfo function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03200, Function | SmallTest | Level1)
+{
+    const std::string key = "key";
+    std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo;
+    advancedNotificationService_->UpdateUnifiedGroupInfo(key, groupInfo);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_03300
+ * @tc.name      : ANS_RemoveSystemLiveViewNotificationsOfSa_0100
+ * @tc.desc      : Test RemoveSystemLiveViewNotificationsOfSa function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03300, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    int32_t uid = 0;
+    ASSERT_EQ((int)advancedNotificationService_->RemoveSystemLiveViewNotificationsOfSa(uid),
+              (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_03400
+ * @tc.name      : ANS_IsAllowedNotifyForBundle_0100
+ * @tc.desc      : Test IsAllowedNotifyForBundle function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03400, Function | SmallTest | Level1)
+{
+    bool allowed = false;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    auto ret = advancedNotificationService_->IsAllowedNotifyForBundle(bundleOption, allowed);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_03500
+ * @tc.name      : ANS_CancelAsBundleWithAgent_0100
+ * @tc.desc      : Test CancelAsBundleWithAgent function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03500, Function | SmallTest | Level1)
+{
+    int32_t id = 0;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundleOption, id);
+    ASSERT_EQ(ret, (int)ERR_ANS_NO_AGENT_SETTING);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_03600
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0100
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03600, Function | SmallTest | Level1)
+{
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_03700
  * @tc.name      : ANS_Delete_0100
  * @tc.desc      : Test Delete function
@@ -765,6 +860,43 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04100,
         advancedNotificationService_->GetSpecialActiveNotifications(keys, specialActiveNotifications), (int)ERR_OK);
     ASSERT_EQ(specialActiveNotifications.size(), (size_t)1);
     SleepForFC();
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_04200
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0100
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04200, Function | SmallTest | Level1)
+{
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_04300
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0100
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04300, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    std::string bundleName = "bundleName";
+    advancedNotificationService_->SetAgentNotification(request, bundleName);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_04400
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0100
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04400, Function | SmallTest | Level1)
+{
+    std::string enable = "enable";
+    auto ret = advancedNotificationService_->GetUnifiedGroupInfoFromDb(enable);
+    ASSERT_EQ(ret, -1);
 }
 
 /**
