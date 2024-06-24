@@ -1909,7 +1909,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         }
 
         ChangeNotificationByControlFlags(record);
-        if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid)) {
+        if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
+        (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
+        record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
             result = SaPublishSystemLiveViewAsBundle(record);
             if (result == ERR_OK) {
                 SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
