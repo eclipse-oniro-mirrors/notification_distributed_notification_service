@@ -41,6 +41,7 @@ public:
     typedef void (*INIT_SUMMARY)(UPDATE_GROUP_INFO func);
     typedef void (*SET_LOCAL_SWITCH)(bool status);
     typedef int32_t (*LOCAL_CONTROL)(const sptr<NotificationRequest> &request);
+    typedef int32_t (*REMINDER_CONTROL)(const std::string &bundleName);
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
@@ -49,6 +50,7 @@ public:
     void SetlocalSwitch(std::string &enable);
     void CheckIfSetlocalSwitch();
     int32_t LocalControl(const sptr<NotificationRequest> &request);
+    int32_t ReminderControl(const std::string &bundleName);
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -60,6 +62,7 @@ private:
     INIT_SUMMARY initSummary_ = nullptr;
     SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
     LOCAL_CONTROL localControl_ = nullptr;
+    REMINDER_CONTROL reminderControl_ = nullptr;
     sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
     bool isRegisterDataSettingObserver = false;
 };

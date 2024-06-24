@@ -1939,7 +1939,14 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
 {
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    int32_t ctrlResult = EXTENTION_WRAPPER->ReminderControl(bundleName);
+    if (ctrlResult != ERR_OK) {
+        return ctrlResult;
+    }
+#else
     return true;
+#endif
 }
 }  // namespace Notification
 }  // namespace OHOS
