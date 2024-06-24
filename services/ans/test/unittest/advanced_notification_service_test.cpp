@@ -3766,12 +3766,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00014,
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = new NotificationRequest();
     record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-    std::string bundleName = "testBundle";
+    const int32_t uid = 0;
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
     advancedNotificationService_->notificationList_.clear();
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(bundleName, slotType, contentType, recordList),
+    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, slotType, contentType, recordList),
         ERR_ANS_NOTIFICATION_NOT_EXISTS);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00014 test end";
 }
@@ -3786,6 +3786,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00015,
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00015 test start";
     std::string bundleName = "testBundle";
+    const int32_t uid = 0;
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
 
@@ -3795,7 +3796,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00015,
     auto liveContent = std::make_shared<NotificationLocalLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
-    request->SetOwnerBundleName(bundleName);
+    request->SetCreatorUid(uid);
     sptr<Notification> notification = new (std::nothrow) Notification(request);
     EXPECT_NE(notification, nullptr);
     auto record = std::make_shared<NotificationRecord>();
@@ -3803,7 +3804,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00015,
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(bundleName, slotType, contentType, recordList),
+    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, slotType, contentType, recordList),
         ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00015 test end";
 }

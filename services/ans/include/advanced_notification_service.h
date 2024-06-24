@@ -1269,9 +1269,9 @@ private:
     static bool GetBundleInfoByNotificationBundleOption(
         const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
 
-    ErrCode GetTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
+    ErrCode GetTargetRecordList(const int32_t uid, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
-    ErrCode GetCommonTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
+    ErrCode GetCommonTargetRecordList(const int32_t uid, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
