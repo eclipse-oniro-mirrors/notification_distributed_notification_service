@@ -71,6 +71,7 @@ const std::string ReminderCalendarTable::REPEAT_MONTHS = "repeat_months";
 const std::string ReminderCalendarTable::REPEAT_DAYS_OF_WEEK = "repeat_days_of_week";
 const std::string ReminderCalendarTable::RRULE_WANT_AGENT = "rrule_want_agent";
 const std::string ReminderCalendarTable::EXCLUDE_DATES = "exclude_dates";
+const std::string ReminderCalendarTable::CALENDAR_LAST_DATE_TIME = "calendar_last_date_time";
 
 // reminder timer table
 const std::string ReminderTimerTable::TABLE_NAME = "reminder_timer";
@@ -162,7 +163,8 @@ void ReminderCalendarTable::InitDbColumns()
     AddColumn(REPEAT_MONTHS, "INT", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumn(REPEAT_DAYS_OF_WEEK, "INT", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumn(RRULE_WANT_AGENT, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
-    AddColumnEnd(EXCLUDE_DATES, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(EXCLUDE_DATES, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumnEnd(CALENDAR_LAST_DATE_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
 }
 
 void ReminderTimerTable::InitDbColumns()

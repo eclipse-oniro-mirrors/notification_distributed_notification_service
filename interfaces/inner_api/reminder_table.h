@@ -235,6 +235,7 @@ public:
     static const std::string REPEAT_DAYS_OF_WEEK;
     static const std::string RRULE_WANT_AGENT;
     static const std::string EXCLUDE_DATES;
+    static const std::string CALENDAR_LAST_DATE_TIME;
 
 public:
     static void InitDbColumns();
