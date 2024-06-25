@@ -1274,8 +1274,9 @@ ErrCode AnsManagerProxy::IsAllowedNotifySelf(bool &allowed)
     return result;
 }
 
-ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback, bool &canPop, std::string &bundleName)
-{   
+ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    bool &canPop, std::string &bundleName)
+{
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
         ANS_LOGE("[CanPopEnableNotificationDialog] fail: write interface token failed.");
@@ -1289,7 +1290,8 @@ ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<AnsDialogCall
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[CanPopEnableNotificationDialog] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;

@@ -549,7 +549,8 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback, bool &canPop, std::string &bundleName) override;
+    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+        bool &canPop, std::string &bundleName) override;
 
     /**
      * @brief Checks whether notifications are allowed for a specific bundle.

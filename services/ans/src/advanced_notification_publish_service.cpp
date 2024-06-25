@@ -844,7 +844,8 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(bool &allowed)
     return IsAllowedNotifySelf(bundleOption, allowed);
 }
 
-ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback, bool &canPop, std::string &bundleName)
+ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
+    const sptr<AnsDialogCallback> &callback, bool &canPop, std::string &bundleName)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     canPop = false;

@@ -344,7 +344,8 @@ ErrCode AnsManagerStub::IsAllowedNotifySelf(bool &allowed)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback, bool &canPop, std::string &bundleName)
+ErrCode AnsManagerStub::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    bool &canPop, std::string &bundleName)
 {
     ANS_LOGE("AnsManagerStub::CanPopEnableNotificationDialog called!");
     return ERR_INVALID_OPERATION;

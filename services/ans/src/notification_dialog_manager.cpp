@@ -127,7 +127,7 @@ ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
             result = OnDialogServiceDestroyed();
             break;
         case DialogStatus::REMOVE_BUNDLE:
-            result = onRemoveBundle(bundleName);   
+            result = onRemoveBundle(bundleName);
             break;
         default:
             result = false;
@@ -139,8 +139,9 @@ ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
     return ERR_OK;
 }
 
-ErrCode NotificationDialogManager::AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback)
-{   
+ErrCode NotificationDialogManager::AddDialogInfo(const sptr<NotificationBundleOption>& bundle,
+    const sptr<AnsDialogCallback>& callback)
+{
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
         return ERR_ANS_DIALOG_IS_POPPING;
     }
@@ -272,7 +273,7 @@ bool NotificationDialogManager::onRemoveBundle(const std::string bundleName)
         return false;
     }
     std::unique_ptr<NotificationDialogManager::DialogInfo> dialogInfoRemoved = nullptr;
-    RemoveDialogInfoByBundleOption(bundleOption, dialogInfoRemoved); 
+    RemoveDialogInfoByBundleOption(bundleOption, dialogInfoRemoved);
     return true;
 }
 

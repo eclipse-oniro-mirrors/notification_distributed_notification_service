@@ -54,9 +54,7 @@ private:
     int32_t sessionId_ = 0;
     std::string bundleName_;
     std::shared_ptr<OHOS::AbilityRuntime::AbilityContext> abilityContext_;
-
 };
-
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_ENABLE_NOTIFICATION_H

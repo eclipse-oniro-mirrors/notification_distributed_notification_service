@@ -431,7 +431,8 @@ ErrCode AnsNotification::IsAllowedNotifySelf(bool &allowed)
     return proxy->IsAllowedNotifySelf(allowed);
 }
 
-ErrCode AnsNotification::CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient, bool &canPop, std::string &bundleName)
+ErrCode AnsNotification::CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
+    bool &canPop, std::string &bundleName)
 {
     ANS_LOGD("enter");
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();

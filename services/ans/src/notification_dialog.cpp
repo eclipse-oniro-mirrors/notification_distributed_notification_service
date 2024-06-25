@@ -58,7 +58,6 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
-    //auto appBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     
     AAFwk::Want want;
     

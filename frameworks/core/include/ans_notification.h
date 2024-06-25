@@ -296,7 +296,8 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient, bool &canPop, std::string &bundleName);
+    ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
+        bool &canPop, std::string &bundleName);
 
     /**
      * @brief Allows the current application to publish notifications on a specified device.
