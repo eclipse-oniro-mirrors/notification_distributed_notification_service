@@ -33,6 +33,7 @@ public:
         const std::string &serviceBundleName,
         const std::string &serviceAbilityName,
         int32_t uid,
+        std::string appBundleName,
         const sptr<IRemoteObject> &callerToken);
 
     static int32_t GetActiveUserId();

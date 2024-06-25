@@ -20,7 +20,7 @@
 #include "common_event_manager.h"
 
 constexpr int32_t SIGNAL_NUM = 3;
-constexpr int32_t DIALOG_CRASH_CODE = 2;
+constexpr int32_t REMOVE_BUNDLE_CODE = 3;
 const static std::string DIALOG_CRASH_EVENT = "OnNotificationServiceDialogClicked";
 
 namespace OHOS {
@@ -45,7 +45,7 @@ void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName 
     ANS_LOGI("AbilityConnectionWrapperProxy::OnAbilityConnectDone result %{public}d", errCode);
     if (errCode != ERR_OK) {
         ANS_LOGD("send Request to SytemDialog fail");
-        SendCrashEvent();
+        SendRemoveBundleEvent();
     }
 }
 
@@ -55,19 +55,19 @@ void SystemDialogConnectStb::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
     ANS_LOGI("on ability disconnected");
 }
 
-void SystemDialogConnectStb::SendCrashEvent()
+void SystemDialogConnectStb::SendRemoveBundleEvent()
 {
     EventFwk::Want want;
     want.SetAction(DIALOG_CRASH_EVENT);
 
     EventFwk::CommonEventData commonData;
     commonData.SetWant(want);
-    commonData.SetCode(DIALOG_CRASH_CODE);
+    commonData.SetCode(REMOVE_BUNDLE_CODE);
     nlohmann::json root = nlohmann::json::parse(commandStr_);
     std::string from = root["from"];
     commonData.SetData(from);
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
-        ANS_LOGE("Publish Dialog Crash failed");
+        ANS_LOGE("Publish remove bundle failed");
     }
 }
 

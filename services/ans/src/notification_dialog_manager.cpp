@@ -98,6 +98,7 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
         bundle->GetUid(),
+        bundle->GetBundleName(),
         callerToken);
     if (result != ERR_OK) {
         ANS_LOGE("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
@@ -125,12 +126,23 @@ ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
         case DialogStatus::DIALOG_SERVICE_DESTROYED:
             result = OnDialogServiceDestroyed();
             break;
+        case DialogStatus::REMOVE_BUNDLE:
+            result = onRemoveBundle(bundleName);   
+            break;
         default:
             result = false;
     }
     if (!result) {
         ANS_LOGE("OnBundleEnabledStatusChanged failed");
         return ERROR_INTERNAL_ERROR;
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationDialogManager::AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback)
+{   
+    if (!AddDialogInfoIfNotExist(bundle, callback)) {
+        return ERR_ANS_DIALOG_IS_POPPING;
     }
     return ERR_OK;
 }
@@ -250,6 +262,18 @@ bool NotificationDialogManager::OnDialogServiceDestroyed()
 {
     ANS_LOGD("enter");
     return HandleAllDialogsClosed();
+}
+
+bool NotificationDialogManager::onRemoveBundle(const std::string bundleName)
+{
+    auto bundleOption = GetBundleOptionByBundleName(bundleName);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("onRemoveBundle bundle is null. bundleName = %{public}s", bundleName.c_str());
+        return false;
+    }
+    std::unique_ptr<NotificationDialogManager::DialogInfo> dialogInfoRemoved = nullptr;
+    RemoveDialogInfoByBundleOption(bundleOption, dialogInfoRemoved); 
+    return true;
 }
 
 bool NotificationDialogManager::HandleOneDialogClosed(

@@ -75,6 +75,10 @@ struct PermissionDialog {
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
+  panOption:PanGestureOptions =  new PanGestureOptions({
+    distance:100,
+    direction:PanDirection.Up
+    });
 
   build() {
     GridRow({ columns: { xs: Constants.XS_COLUMNS, sm: Constants.SM_COLUMNS, md: Constants.MD_COLUMNS, lg: Constants.LG_COLUMNS }, gutter: Constants.DIALOG_GUTTER }) {
@@ -165,6 +169,14 @@ struct PermissionDialog {
       right: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN,
       bottom: this.isBottomPopover ? this.naviHeight : 0
     })
+    .gesture(
+      PanGesture(this.panOption)
+      .onActionStart((event:GestureEvent)=>{
+        if(this.dialog?.want.parameters?.stageModel == false){
+          this.session?.terminateSelf();
+        }
+      })
+    )
   }
 
   async updateApplicationName(bundleName: string): Promise<void> {

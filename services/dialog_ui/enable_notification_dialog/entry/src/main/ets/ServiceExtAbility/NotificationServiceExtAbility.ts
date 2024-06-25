@@ -183,6 +183,13 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
   async onSessionCreate(want: Want, session: UIExtensionContentSession) {
     console.log(TAG, `UIExtAbility onSessionCreate`);    
     try {
+      let bundleName  = want.parameters['ohos.aafwk.param.callerBundleName'];
+      if(want.parameters['from'] === undefined){
+        want.parameters['from'] = bundleName;
+        want.parameters['stageModel'] = true;
+      }else{
+        want.parameters['stageModel'] = false;
+      }
       let dialog = new EnableNotificationDialog(1, want);
       await dialog.createUiExtensionWindow(session);
     } catch (err) {

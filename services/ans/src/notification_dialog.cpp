@@ -54,10 +54,11 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     const std::string &serviceBundleName,
     const std::string &serviceAbilityName,
     int32_t uid,
+    std::string appBundleName,
     const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
-    auto appBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    //auto appBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     
     AAFwk::Want want;
     
