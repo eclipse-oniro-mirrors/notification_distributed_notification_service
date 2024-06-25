@@ -1015,9 +1015,7 @@ private:
     void SetState(bool deSet, const uint8_t newState, std::string function);
     void SetWantAgent(AppExecFwk::ElementName &element);
     void UpdateActionButtons(const bool &setSnooze);
-    bool UpdateNextReminder(const bool force, const bool isSnooze = false);
-    bool UpdateReminderByShow(const uint64_t now);
-    bool UpdateReminderBySnooze(const uint64_t now);
+    bool UpdateNextReminder(const bool &force);
     void UpdateNotificationContent(const bool &setSnooze);
     void UpdateNotificationCommon(bool isSnooze);
 

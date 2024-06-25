@@ -396,7 +396,7 @@ void ReminderRequest::OnShow(bool isPlaySoundOrVibration, bool isSysTimeChanged,
     } else {
         reminderTimeInMilli_ = triggerTimeInMilli_;
     }
-    UpdateNextReminder(true, false);
+    UpdateNextReminder(false);
     if (allowToNotify) {
         SetState(true, REMINDER_STATUS_SHOWING, "OnShow");
         if (isPlaySoundOrVibration) {
@@ -421,7 +421,7 @@ bool ReminderRequest::OnSnooze()
         SetState(false, REMINDER_STATUS_ALERTING, "onSnooze()");
     }
     SetSnoozeTimesDynamic(GetSnoozeTimes());
-    if (!UpdateNextReminder(true, true)) {
+    if (!UpdateNextReminder(true)) {
         return false;
     }
     UpdateNotificationStateForSnooze();
@@ -1700,23 +1700,7 @@ void ReminderRequest::UpdateActionButtons(const bool &setSnooze)
     }
 }
 
-bool ReminderRequest::UpdateReminderByShow(const uint64_t now)
-{
-    if (snoozeTimesDynamic_ > 0 && timeIntervalInMilli_ > 0) {
-        triggerTimeInMilli_ = now + timeIntervalInMilli_;
-        --snoozeTimesDynamic_;
-    }
-}
-
-bool ReminderRequest::UpdateReminderBySnooze(const uint64_t now)
-{
-    if (timeIntervalInMilli_ != 0) {
-        triggerTimeInMilli_ = now + timeIntervalInMilli_;
-        snoozeTimesDynamic_ = snoozeTimes_;
-    }
-}
-
-bool ReminderRequest::UpdateNextReminder(const bool force, const bool isSnooze)
+bool ReminderRequest::UpdateNextReminder(const bool &force)
 {
     bool result = true;
     if (force) {
@@ -1724,10 +1708,10 @@ bool ReminderRequest::UpdateNextReminder(const bool force, const bool isSnooze)
         if (nowInstantMilli == 0) {
             result = false;
         } else {
-            if (isSnooze) {
-                UpdateReminderBySnooze(nowInstantMilli);
-            } else {
-                UpdateReminderByShow(nowInstantMilli);
+            triggerTimeInMilli_ = nowInstantMilli + timeIntervalInMilli_;
+            snoozeTimesDynamic_ = snoozeTimes_;
+            if (timeIntervalInMilli_ != 0) {
+                isExpired_ = false;
             }
         }
     } else {
