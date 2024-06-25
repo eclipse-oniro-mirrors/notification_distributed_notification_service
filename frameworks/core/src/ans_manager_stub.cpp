@@ -167,7 +167,7 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
                 std::placeholders::_3)},
         {NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG,
             std::bind(&AnsManagerStub::HandleCanPopEnableNotificationDialog, std::placeholders::_1,
-                std::placeholders::_2,std::placeholders::_3)},
+                std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY,
             std::bind(&AnsManagerStub::HandleIsSpecialBundleAllowedNotify, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},

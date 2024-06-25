@@ -296,10 +296,10 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             bool success = CreateUIExtension(asynccallbackinfo->params.context, bundleName);
             if (success) {
                 asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
-            }else{
+            } else {
                 asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-                SendRemoveDialogEvent(bundleName);    
-            }    
+                SendRemoveDialogEvent(bundleName);
+            }
         } else {
             ANS_LOGD("un stage mode");
             asynccallbackinfo->info.errorCode =
@@ -546,7 +546,7 @@ bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, s
             std::placeholders::_1, std::placeholders::_2),
         .onReceive = std::bind(&ModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
         .onError = std::bind(&ModalExtensionCallback::OnError, uiExtCallback,
-            std::placeholders::_1, std::placeholders::_2,std::placeholders::_3),
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
         .onRemoteReady = std::bind(&ModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
         .onDestroy = std::bind(&ModalExtensionCallback::OnDestroy, uiExtCallback),
     };
