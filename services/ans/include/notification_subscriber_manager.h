@@ -94,9 +94,10 @@ public:
     /**
      * @brief Notify all subscribers on dnd date changed.
      *
+     * @param userId Indicates which user need consume the update nofitication
      * @param date Indicates the NotificationDoNotDisturbDate object.
      */
-    void NotifyDoNotDisturbDateChanged(const sptr<NotificationDoNotDisturbDate> &date);
+    void NotifyDoNotDisturbDateChanged(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
 
     void NotifyEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
 
@@ -160,7 +161,7 @@ private:
     void BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap);
-    void NotifyDoNotDisturbDateChangedInner(const sptr<NotificationDoNotDisturbDate> &date);
+    void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
