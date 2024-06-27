@@ -92,6 +92,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest 
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
         uid,
+        bundleName,
         callerToken);
     ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
@@ -119,6 +120,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest 
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
         uid,
+        bundleName,
         callerToken);
     ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }

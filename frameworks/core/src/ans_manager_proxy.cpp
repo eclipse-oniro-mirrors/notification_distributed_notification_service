@@ -1274,6 +1274,46 @@ ErrCode AnsManagerProxy::IsAllowedNotifySelf(bool &allowed)
     return result;
 }
 
+ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    bool &canPop, std::string &bundleName)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (callback == nullptr || !data.WriteRemoteObject(callback->AsObject())) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: write callback failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG,
+        option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadBool(canPop)) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: read canPop failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!reply.ReadString(bundleName)) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: read bundleName failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed)
 {
     if (bundleOption == nullptr) {

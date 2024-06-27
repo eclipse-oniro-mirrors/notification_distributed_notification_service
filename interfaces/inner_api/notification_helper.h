@@ -292,6 +292,15 @@ public:
     static ErrCode IsAllowedNotifySelf(bool &allowed);
 
     /**
+     * @brief Checks whether this application can pop enable notification dialog.
+     *
+     * @param  canPop True if can pop enable notification dialog
+     * @return Returns is canPop result.
+     */
+    static ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
+        bool &canPop, std::string &bundleName);
+
+    /**
      * @brief Allow the current application to publish notifications on a specified device.
      *
      * @param deviceId Indicates the ID of the device running the application. At present, this parameter can

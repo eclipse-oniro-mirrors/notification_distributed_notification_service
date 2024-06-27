@@ -301,6 +301,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+        bool &canPop, std::string &bundleName) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed) override
     {
         return ERR_ANS_INVALID_PARAM;

@@ -38,7 +38,8 @@ enum class DialogStatus {
     ALLOW_CLICKED,
     DENY_CLICKED,
     DIALOG_CRASHED,
-    DIALOG_SERVICE_DESTROYED
+    DIALOG_SERVICE_DESTROYED,
+    REMOVE_BUNDLE
 };
 
 class NotificationDialogEventSubscriber : public EventFwk::CommonEventSubscriber {
@@ -94,6 +95,12 @@ public:
      */
     ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName);
 
+    /*
+     * AddDialogInfo
+     * @return ERR_OK when add Dialog successfully
+     */
+    ErrCode AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
+
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_BUNDLE = "com.ohos.notificationdialog";
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_ABILITY = "EnableNotificationDialog";
 
@@ -112,6 +119,7 @@ private:
     bool OnDialogButtonClicked(const std::string& bundleName, bool enabled);
     bool OnDialogCrashed(const std::string& bundleName);
     bool OnDialogServiceDestroyed();
+    bool onRemoveBundle(const std::string bundleName);
 
     bool HandleOneDialogClosed(sptr<NotificationBundleOption> bundleOption, EnabledDialogStatus status);
     bool HandleAllDialogsClosed();

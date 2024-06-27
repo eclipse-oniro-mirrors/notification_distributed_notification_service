@@ -21,6 +21,10 @@
 #include "ans_inner_errors.h"
 #include "enable_notification.h"
 #include "js_ans_dialog_callback.h"
+#include "common_event_manager.h"
+
+constexpr int32_t CRASH_CODE = 2;
+constexpr int32_t REMOVE_CODE = 3;
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -280,9 +284,31 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_IS_POPPING;
             return;
         }
-        asynccallbackinfo->info.errorCode =
+
+        if (asynccallbackinfo->params.context != nullptr) {
+            ANS_LOGD("stage mode");
+            bool canPop = false;
+            std::string bundleName {""};
+            ErrCode errCode = NotificationHelper::CanPopEnableNotificationDialog(client, canPop, bundleName);
+            ANS_LOGI("CanPopEnableNotificationDialog  result , errCode = %{public}d , canPop = %{public}d",
+                errCode, canPop);
+            if (canPop == false) {
+                asynccallbackinfo->info.errorCode = errCode;
+                return;
+            }
+            bool success = CreateUIExtension(asynccallbackinfo->params.context, bundleName);
+            if (success) {
+                asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
+            } else {
+                asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+                SendDialogEvent(bundleName, REMOVE_CODE);
+            }
+        } else {
+            ANS_LOGD("un stage mode");
+            asynccallbackinfo->info.errorCode =
             NotificationHelper::RequestEnableNotification(deviceId, client,
                 asynccallbackinfo->params.callerToken);
+        }
         ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
     };
     auto jsCb = [](napi_env env, napi_status status, void* data) {
@@ -358,6 +384,7 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
         if (status == napi_ok && stageMode) {
             auto context = OHOS::AbilityRuntime::GetStageModeContext(env, argv[PARAM0]);
             sptr<IRemoteObject> callerToken = context->GetToken();
+            params.context = context;
             params.callerToken = callerToken;
             params.hasCallerToken = true;
         } else {
@@ -484,5 +511,172 @@ napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info)
     napi_get_boolean(env, allowed, &result);
     return result;
 }
+
+bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName)
+{
+    if (context == nullptr) {
+        ANS_LOGE("Get context failed");
+        return false;
+    }
+
+    std::shared_ptr<OHOS::AbilityRuntime::AbilityContext> abilityContext =
+        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    if (abilityContext == nullptr) {
+        ANS_LOGE("abilityContext is null");
+        return false;
+    }
+    auto uiContent = abilityContext->GetUIContent();
+    if (uiContent == nullptr) {
+        ANS_LOGE("uiContent is null");
+        return false;
+    }
+
+    AAFwk::Want want;
+    std::string targetBundleName = "com.ohos.notificationdialog";
+    std::string targetAbilityName = "EnableNotificationDialog";
+    want.SetElementName(targetBundleName, targetAbilityName);
+
+    std::string typeKey = "ability.want.params.uiExtensionType";
+    std::string typeValue = "sysDialog/common";
+    want.SetParam(typeKey, typeValue);
+
+    auto uiExtCallback = std::make_shared<ModalExtensionCallback>();
+    uiExtCallback->SetAbilityContext(abilityContext);
+    uiExtCallback->SetBundleName(bundleName);
+    Ace::ModalUIExtensionCallbacks uiExtensionCallbacks = {
+        .onRelease = std::bind(&ModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
+        .onResult = std::bind(&ModalExtensionCallback::OnResult, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2),
+        .onReceive = std::bind(&ModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
+        .onError = std::bind(&ModalExtensionCallback::OnError, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+        .onRemoteReady = std::bind(&ModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
+        .onDestroy = std::bind(&ModalExtensionCallback::OnDestroy, uiExtCallback),
+    };
+
+    Ace::ModalUIExtensionConfig config;
+    config.isProhibitBack = true;
+
+    int32_t sessionId = uiContent->CreateModalUIExtension(want, uiExtensionCallbacks, config);
+    ANS_LOGI("Create end, sessionId: %{public}d", sessionId);
+    if (sessionId == 0) {
+        ANS_LOGE("Create component failed, sessionId is 0");
+        return false;
+    }
+    uiExtCallback->SetSessionId(sessionId);
+    return true;
+}
+
+void SendDialogEvent(std::string &bundleName, int32_t code)
+{
+    ANS_LOGD("SendDialogEvent start");
+    if (bundleName.empty()) {
+        ANS_LOGE("SendDialogEvent bundleName is nullptr");
+        return;
+    }
+    std::string action = "OnNotificationServiceDialogClicked";
+
+    EventFwk::Want want;
+    want.SetAction(action);
+
+    EventFwk::CommonEventData commonData;
+    commonData.SetWant(want);
+    commonData.SetCode(code);
+    commonData.SetData(bundleName);
+    if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
+        ANS_LOGE("PublishCommonEvent failed");
+    }
+    ANS_LOGD("SendDialogEvent end");
+}
+
+ModalExtensionCallback::ModalExtensionCallback()
+{}
+
+ModalExtensionCallback::~ModalExtensionCallback()
+{}
+
+
+/*
+ * when UIExtensionAbility use terminateSelfWithResult
+ */
+void ModalExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want& result)
+{
+    ANS_LOGD("OnResult");
+}
+
+/*
+ * when UIExtensionAbility send message to UIExtensionComponent
+ */
+void ModalExtensionCallback::OnReceive(const AAFwk::WantParams& receive)
+{
+    ANS_LOGD("OnReceive");
+}
+
+/*
+ * when UIExtensionAbility disconnect or use terminate or process die
+ * releaseCode is 0 when process normal exit
+ */
+void ModalExtensionCallback::OnRelease(int32_t releaseCode)
+{
+    ANS_LOGD("OnRelease");
+    ReleaseOrErrorHandle(releaseCode);
+}
+
+/*
+ * when UIExtensionComponent init or turn to background or destroy UIExtensionAbility occur error
+ */
+void ModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
+{
+    ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
+    ReleaseOrErrorHandle(code);
+    SendDialogEvent(this->bundleName_, CRASH_CODE);
+}
+
+/*
+ * when UIExtensionComponent connect to UIExtensionAbility, ModalUIExtensionProxy will init,
+ * UIExtensionComponent can send message to UIExtensionAbility by ModalUIExtensionProxy
+ */
+void ModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
+{
+    ANS_LOGD("OnRemoteReady");
+}
+
+/*
+ * when UIExtensionComponent destructed
+ */
+void ModalExtensionCallback::OnDestroy()
+{
+    ANS_LOGD("OnDestroy");
+}
+
+
+void ModalExtensionCallback::SetSessionId(int32_t sessionId)
+{
+    this->sessionId_ = sessionId;
+}
+
+void ModalExtensionCallback::SetBundleName(std::string bundleName)
+{
+    this->bundleName_ = bundleName;
+}
+
+void ModalExtensionCallback::SetAbilityContext(std::shared_ptr<OHOS::AbilityRuntime::AbilityContext> abilityContext)
+{
+    this->abilityContext_ = abilityContext;
+}
+
+void ModalExtensionCallback::ReleaseOrErrorHandle(int32_t code)
+{
+    ANS_LOGD("ReleaseOrErrorHandle start");
+    Ace::UIContent* uiContent = this->abilityContext_->GetUIContent();
+    if (uiContent == nullptr) {
+        ANS_LOGE("uiContent is null");
+        return;
+    }
+    uiContent->CloseModalUIExtension(this->sessionId_);
+    ANS_LOGD("ReleaseOrErrorHandle end");
+    return;
+}
+
 }  // namespace NotificationNapi
 }  // namespace OHOS

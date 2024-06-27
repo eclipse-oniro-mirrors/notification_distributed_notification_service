@@ -844,6 +844,51 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(bool &allowed)
     return IsAllowedNotifySelf(bundleOption, allowed);
 }
 
+ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
+    const sptr<AnsDialogCallback> &callback, bool &canPop, std::string &bundleName)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    canPop = false;
+    ErrCode result = ERR_OK;
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption == nullptr");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    // To get the permission
+    bool allowedNotify = false;
+    result = IsAllowedNotifySelf(bundleOption, allowedNotify);
+    if (result != ERR_OK) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    ANS_LOGI("allowedNotify = %{public}d", allowedNotify);
+    if (allowedNotify) {
+        return ERR_OK;
+    }
+    // Check to see if it has been popover before
+    bool hasPopped = false;
+    result = GetHasPoppedDialog(bundleOption, hasPopped);
+    if (result != ERR_OK) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    if (hasPopped) {
+        return ERR_OK;
+    }
+
+    if (!CreateDialogManager()) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    result = dialogManager_->AddDialogInfo(bundleOption, callback);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    canPop = true;
+    bundleName = bundleOption->GetBundleName();
+    return ERR_OK;
+    ANS_LOGI("CanPopEnableNotificationDialog end");
+}
+
 ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption,
     bool &allowed)
 {

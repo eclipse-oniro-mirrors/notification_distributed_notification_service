@@ -21,8 +21,7 @@
         "description": "$string:NotificationServiceExtAbility_desc",
         "icon": "$media:icon",
         "label": "$string:NotificationServiceExtAbility_label",
-        "visible": false,
-        "exported":false,
+        "exported":true,
         "type": "sysDialog/common"
       }
     ],

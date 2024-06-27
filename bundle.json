@@ -84,7 +84,8 @@
         "device_standby",
         "resource_management",
         "config_policy",
-        "screenlock_mgr"
+        "screenlock_mgr",
+        "ace_engine"
       ],
       "third_party": [
         "libuv",

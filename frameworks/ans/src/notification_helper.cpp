@@ -162,6 +162,13 @@ ErrCode NotificationHelper::IsAllowedNotifySelf(bool &allowed)
     return DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
 }
 
+ErrCode NotificationHelper::CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
+    bool &canPop, std::string &bundleName)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CanPopEnableNotificationDialog(
+        hostClient, canPop, bundleName);
+}
+
 ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId,
     sptr<AnsDialogHostClient> &hostClient,
     sptr<IRemoteObject> &callerToken)

@@ -544,6 +544,15 @@ public:
     ErrCode IsAllowedNotifySelf(bool &allowed) override;
 
     /**
+     * @brief Checks whether this application can pop enable notification dialog.
+     *
+     * @param  canPop True if can pop enable notification dialog
+     * @return Returns is canPop result.
+     */
+    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+        bool &canPop, std::string &bundleName) override;
+
+    /**
      * @brief Checks whether notifications are allowed for a specific bundle.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.

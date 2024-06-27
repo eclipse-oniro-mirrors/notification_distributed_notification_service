@@ -71,10 +71,15 @@ struct PermissionDialog {
   @State appName: string = '';
   @State naviHeight: number = 0;
   @State isBottomPopover: boolean = true;
+  @State clicked: boolean = true;
   @Link @Watch('updateOnPageShow') isUpdate: number;
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
+  panOption:PanGestureOptions =  new PanGestureOptions({
+    distance:100,
+    direction:PanDirection.Up
+    });
 
   build() {
     GridRow({ columns: { xs: Constants.XS_COLUMNS, sm: Constants.SM_COLUMNS, md: Constants.MD_COLUMNS, lg: Constants.LG_COLUMNS }, gutter: Constants.DIALOG_GUTTER }) {
@@ -165,6 +170,14 @@ struct PermissionDialog {
       right: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN,
       bottom: this.isBottomPopover ? this.naviHeight : 0
     })
+    .gesture(
+      PanGesture(this.panOption)
+      .onActionStart((event:GestureEvent)=>{
+        if(this.dialog?.stageModel == false){
+          this.session?.terminateSelf();
+        }
+      })
+    )
   }
 
   async updateApplicationName(bundleName: string): Promise<void> {
@@ -285,12 +298,16 @@ struct PermissionDialog {
   }
 
   async aboutToDisappear(): Promise<void> {
+    if(!this.clicked){
+      await this.dialog?.destroyException();
+    }
   }
 
   async enableNotification(enabled: boolean): Promise<void> {
     console.info(TAG, `NotificationDialog enableNotification: ${enabled}`);
     try {
       await this.dialog?.publishButtonClickedEvent(enabled);
+      this.clicked = true;
     } catch (err) {
       console.error(TAG, `NotificationDialog enable error, code is ${err?.code}`);
       await this.dialog?.destroyException();

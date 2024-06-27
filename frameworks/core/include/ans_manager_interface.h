@@ -501,6 +501,15 @@ public:
     virtual ErrCode IsAllowedNotifySelf(bool &allowed) = 0;
 
     /**
+     * @brief Checks whether this application can pop enable notification dialog.
+     *
+     * @param  canPop True if can pop enable notification dialog
+     * @return Returns is canPop result.
+     */
+    virtual ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+        bool &canPop, std::string &bundleName) = 0;
+
+    /**
      * @brief Checks whether notifications are allowed for a specific bundle.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.

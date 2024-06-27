@@ -165,6 +165,9 @@ const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *
         {NotificationInterfaceCode::IS_ALLOWED_NOTIFY_SELF,
             std::bind(&AnsManagerStub::HandleIsAllowedNotifySelf, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
+        {NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG,
+            std::bind(&AnsManagerStub::HandleCanPopEnableNotificationDialog, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3)},
         {NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY,
             std::bind(&AnsManagerStub::HandleIsSpecialBundleAllowedNotify, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3)},
@@ -1505,6 +1508,32 @@ ErrCode AnsManagerStub::HandleIsAllowedNotifySelf(MessageParcel &data, MessagePa
 
     if (!reply.WriteBool(allowed)) {
         ANS_LOGE("[HandleIsAllowedNotifySelf] fail: write allowed failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleCanPopEnableNotificationDialog(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    if (callback == nullptr) {
+        ANS_LOGE("[HandleCanPopEnableNotificationDialog] fail: read callback failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    bool canPop = false;
+    std::string bundleName;
+    ErrCode result = CanPopEnableNotificationDialog(iface_cast<AnsDialogCallback>(callback), canPop, bundleName);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleCanPopEnableNotificationDialog] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteBool(canPop)) {
+        ANS_LOGE("[HandleCanPopEnableNotificationDialog] fail: write canPop failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!reply.WriteString(bundleName)) {
+        ANS_LOGE("[HandleCanPopEnableNotificationDialog] fail: write bundleName failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
