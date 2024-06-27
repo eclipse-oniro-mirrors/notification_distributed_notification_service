@@ -1604,7 +1604,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance().SetDoNotDisturbDate(userId, newConfig);
         if (result == ERR_OK) {
-            NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(newConfig);
+            NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(userId, newConfig);
         }
     }));
     notificationSvrQueue_->wait(handler);

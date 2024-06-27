@@ -130,7 +130,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
     // Test NotifyDisturbModeChanged function.
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-    notificationSubscriberManager_->NotifyDoNotDisturbDateChanged(date);
+    notificationSubscriberManager_->NotifyDoNotDisturbDateChanged(0, date);
 
     // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();

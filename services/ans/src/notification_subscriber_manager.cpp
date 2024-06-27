@@ -224,14 +224,15 @@ void NotificationSubscriberManager::NotifyUpdated(const sptr<NotificationSorting
     notificationSubQueue_->submit(NotifyUpdatedFunc);
 }
 
-void NotificationSubscriberManager::NotifyDoNotDisturbDateChanged(const sptr<NotificationDoNotDisturbDate> &date)
+void NotificationSubscriberManager::NotifyDoNotDisturbDateChanged(const int32_t &userId,
+    const sptr<NotificationDoNotDisturbDate> &date)
 {
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
     }
     AppExecFwk::EventHandler::Callback func =
-        std::bind(&NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner, this, date);
+        std::bind(&NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner, this, userId, date);
 
     notificationSubQueue_->submit(func);
 }
@@ -574,10 +575,14 @@ void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSo
     }
 }
 
-void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const sptr<NotificationDoNotDisturbDate> &date)
+void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const int32_t &userId,
+    const sptr<NotificationDoNotDisturbDate> &date)
 {
     for (auto record : subscriberRecordList_) {
-        record->subscriber->OnDoNotDisturbDateChange(date);
+        if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
+            IsSystemUser(userId) || record->userId == userId) {
+            record->subscriber->OnDoNotDisturbDateChange(date);
+        }
     }
 }
 
@@ -602,8 +607,13 @@ bool NotificationSubscriberManager::IsSystemUser(int32_t userId)
 void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
     for (auto record : subscriberRecordList_) {
-        record->subscriber->OnEnabledNotificationChanged(callbackData);
+        if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
+                IsSystemUser(userId) || record->userId == userId) {
+            record->subscriber->OnEnabledNotificationChanged(callbackData);
+        }
     }
 }
 
