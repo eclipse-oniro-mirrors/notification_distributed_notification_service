@@ -2193,8 +2193,8 @@ void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
 {
 #ifdef HAS_HISYSEVENT_PART
     std::string event = "ALARM_TRIGGER";
-    std::string bundleName = reminder->GetCreatorBundleName();
-    int32_t uid = reminder->GetCreatorUid();
+    std::string bundleName = reminder->GetBundleName();
+    int32_t uid = reminder->GetUid();
     int32_t type = static_cast<int32_t>(reminder->GetReminderType());
     int32_t repeat = static_cast<int32_t>(reminder->IsRepeat());
     uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
