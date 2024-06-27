@@ -180,12 +180,14 @@ public:
     bool SetEndDateTime(const uint64_t time);
 
     /**
-     * @brief 
+     * @brief Sets the start time when the notification was last displayed in the notification bar.
+     * When OnDateTimeChange or OnClose, the time will change to next start time if the reminder
+     * is repeat, otherwise not changed.
      */
     void SetLastStartDateTime(const uint64_t time);
 
     /**
-     * @brief 
+     * @brief Get the start time when the notification was last displayed in the notification bar.
      */
     uint64_t GetLastStartDateTime() const;
 
@@ -226,6 +228,11 @@ private:
     void SetRepeatMonths(const std::vector<uint8_t> &repeatMonths);
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
     bool CheckCalenderIsExpired(const uint64_t now);
+
+    /**
+     * @brief When OnShow or OnSnooze, need calculate the start time of this alert
+     */
+    void CalcLastStartDateTime();
 
     void SetDateTime(const uint64_t time);
     uint64_t GetDateTime();

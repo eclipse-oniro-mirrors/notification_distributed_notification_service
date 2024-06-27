@@ -315,7 +315,7 @@ void ReminderRequestCalendar::CalcLastStartDateTime()
 
     t = static_cast<time_t>(startDateTime_/MILLI_SECONDS);
     struct tm startTime;
-    (void)localtime_r(&t, startTime);
+    (void)localtime_r(&t, &startTime);
 
     startTime.tm_year = nowTime.tm_year;
     startTime.tm_mon = nowTime.tm_mon;
@@ -758,7 +758,7 @@ void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::Res
     }
 
     uint64_t lastStartDateTime;
-    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, lastStartDateTime);
+    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_LAST_DATE_TIME, lastStartDateTime);
     if (lastStartDateTime == 0) {
         SetLastStartDateTime(dateTime);
     } else {
