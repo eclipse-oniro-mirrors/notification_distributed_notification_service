@@ -2195,7 +2195,7 @@ void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
     std::string event = "ALARM_TRIGGER";
     std::string bundleName = reminder->GetCreatorBundleName();
     int32_t uid = reminder->GetCreatorUid();
-    int32_t type = static_cast<int32_t>(reimder->GetReminderType());
+    int32_t type = static_cast<int32_t>(reminder->GetReminderType());
     int32_t repeat = static_cast<int32_t>(reminder->IsRepeat());
     uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
     int32_t ringTime = static_cast<int32_t>(reminder->GetRingDuration());
