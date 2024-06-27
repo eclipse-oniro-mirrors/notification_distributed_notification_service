@@ -245,7 +245,7 @@ bool ReminderRequestCalendar::OnDateTimeChange()
         ANSR_LOGE("get now time failed");
         return false;
     }
-    if (CheckCalenderIsExpired(now) && GetTriggerTimeInMilli() != INVALID_LONG_LONG_VALUE) {
+    if (CheckCalenderIsExpired(now)) {
         return GetTriggerTimeInMilli() <= now;
     } else {
         uint64_t triggerTime = GetNextTriggerTime(true);
@@ -306,6 +306,26 @@ bool ReminderRequestCalendar::IsNeedNotification()
     return false;
 }
 
+void ReminderRequestCalendar::CalcLastStartDateTime()
+{
+    time_t t;
+    (void)time(&t);
+    struct tm nowTime;
+    (void)localtime_r(&t, &nowTime);
+
+    t = static_cast<time_t>(startDateTime_/MILLI_SECONDS);
+    struct tm startTime;
+    (void)localtime_r(&t, startTime);
+
+    startTime.tm_year = nowTime.tm_year;
+    startTime.tm_mon = nowTime.tm_mon;
+    startTime.tm_mday = nowTime.tm_mday;
+    time_t target = mktime(&startTime);
+    if (target != -1) {
+        lastStartDateTime_ = ReminderRequest::GetDurationSinceEpochInMilli(target);
+    }
+}
+
 uint64_t ReminderRequestCalendar::GetNextTriggerTime(const bool updateLast)
 {
     uint64_t triggerTimeInMilli = INVALID_LONG_LONG_VALUE;
@@ -350,6 +370,8 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime(const bool updateLast)
     }
     if (updateLast) {
         lastStartDateTime_ = startDateTime_;
+    } else {
+        CalcLastStartDateTime();
     }
     return triggerTimeInMilli;
 }
