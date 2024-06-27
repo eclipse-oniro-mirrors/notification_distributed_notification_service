@@ -46,6 +46,9 @@
 #include "iservice_registry.h"
 #include "config_policy_utils.h"
 #include "hitrace_meter_adapter.h"
+#ifdef HAS_HISYSEVENT_PART
+#include "hisysevent.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -1116,6 +1119,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
         store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
         return;
     }
+    ReportSysEvent(reminder);
     bool toPlaySound = isNeedToPlaySound && ShouldAlert(reminder) ? true : false;
     reminder->OnShow(toPlaySound, isSysTimeChanged, true);
     AddToShowedReminders(reminder);
@@ -2183,6 +2187,22 @@ void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId, con
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
+}
+
+void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
+{
+#ifdef HAS_HISYSEVENT_PART
+    std::string event = "ALARM_TRIGGER";
+    std::string bundleName = reminder->GetCreatorBundleName();
+    int32_t uid = reminder->GetCreatorUid();
+    int32_t type = static_cast<int32_t>(reimder->GetReminderType());
+    int32_t repeat = static_cast<int32_t>(reminder->IsRepeat());
+    uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
+    int32_t ringTime = static_cast<int32_t>(reminder->GetRingDuration());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "PID", 0, "UID", uid, "NAME", bundleName, "TYPE", type, "repeat", repeat, "TRIGGER_TIME", triggerTime,
+        "RING_TIME", ringTime);
+#endif
 }
 }
 }

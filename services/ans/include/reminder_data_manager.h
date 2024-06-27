@@ -640,6 +640,11 @@ private:
     bool IsActionButtonDataShareValid(const sptr<ReminderRequest>& reminder,
         const uint32_t callerTokenId);
 
+    /**
+     * @brief report event to dfx
+     */
+    void ReportSysEvent(const sptr<ReminderRequest>& reminder);
+
    /**
     * Single instance.
     */

@@ -106,6 +106,10 @@ ALARM_TRIGGER:
   PID: {type: INT32, desc: thread pid}
   UID: {type: INT32, desc: package uid}
   NAME: {type: STRING, desc: call package name}
+  TYPE: {type: INT32, desc: reminder type}
+  REPEAT: {type: INT32, desc: reminder is repeat}
+  TRIGGER_TIME: {type: UINT64, desc: reminder trigger time}
+  RING_TIME: {type: INT32, desc: reminder ring time}
 
 STATIC_LIVE_VIEW_UPLOAD:
   __BASE: {type: STATISTIC, level: MINOR, desc: publish download liveview state}

@@ -17,9 +17,7 @@
 
 #include "ans_log_wrapper.h"
 #include "common_event_manager.h"
-#ifdef HAS_HISYSEVENT_PART
-#include "hisysevent.h"
-#endif
+
 #include "reminder_request.h"
 
 using namespace OHOS::EventFwk;
