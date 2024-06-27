@@ -63,10 +63,12 @@ export class EnableNotificationDialog {
   window: window.Window;
   extensionWindow:uiExtensionHost.UIExtensionHostWindowProxy;
   storage: LocalStorage;
+  stageModel: boolean;
 
-  constructor(id: number, want: Want) {
+  constructor(id: number, want: Want, stageModel: boolean) {
     this.id = id;
     this.want = want;
+    this.stageModel = stageModel;
     this.window = undefined;
     this.extensionWindow = undefined;
   }
@@ -183,14 +185,15 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
   async onSessionCreate(want: Want, session: UIExtensionContentSession) {
     console.log(TAG, `UIExtAbility onSessionCreate`);    
     try {
+      let stageModel = false;
       let bundleName  = want.parameters['ohos.aafwk.param.callerBundleName'];
       if(want.parameters['from'] === undefined){
         want.parameters['from'] = bundleName;
-        want.parameters['stageModel'] = true;
+        stageModel = true;
       }else{
-        want.parameters['stageModel'] = false;
+        stageModel = false;
       }
-      let dialog = new EnableNotificationDialog(1, want);
+      let dialog = new EnableNotificationDialog(1, want, stageModel);
       await dialog.createUiExtensionWindow(session);
     } catch (err) {
       console.error(TAG, `Failed to handle onSessionCreate`);

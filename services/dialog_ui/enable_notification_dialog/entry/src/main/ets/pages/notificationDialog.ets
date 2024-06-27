@@ -173,7 +173,7 @@ struct PermissionDialog {
     .gesture(
       PanGesture(this.panOption)
       .onActionStart((event:GestureEvent)=>{
-        if(this.dialog?.want.parameters?.stageModel == false){
+        if(this.dialog?.stageModel == false){
           this.session?.terminateSelf();
         }
       })
