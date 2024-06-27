@@ -33,7 +33,7 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
 napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback_info &info, IsEnableParams &params);
 napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info);
 bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName);
-void SendDialogEvent(std::string &bundleName, int_32 code);
+void SendDialogEvent(std::string &bundleName, int32_t code);
 
 class ModalExtensionCallback {
 public:
