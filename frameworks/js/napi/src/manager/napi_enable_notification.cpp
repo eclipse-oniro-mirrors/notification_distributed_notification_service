@@ -298,7 +298,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
             } else {
                 asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-                SendRemoveDialogEvent(bundleName);
+                SendDialogEvent(bundleName, 3);
             }
         } else {
             ANS_LOGD("un stage mode");
@@ -564,15 +564,14 @@ bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, s
     return true;
 }
 
-void SendRemoveDialogEvent(std::string &bundleName)
+void SendDialogEvent(std::string &bundleName, int_32 code)
 {
-    ANS_LOGD("SendRemoveDialogEvent start");
+    ANS_LOGD("SendDialogEvent start");
     if (bundleName.empty()) {
-        ANS_LOGE("SendRemoveDialogEvent bundleName is nullptr");
+        ANS_LOGE("SendDialogEvent bundleName is nullptr");
         return;
     }
     std::string action = "OnNotificationServiceDialogClicked";
-    int32_t code = 3;
 
     EventFwk::Want want;
     want.SetAction(action);
@@ -582,9 +581,9 @@ void SendRemoveDialogEvent(std::string &bundleName)
     commonData.SetCode(code);
     commonData.SetData(bundleName);
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
-        ANS_LOGE("Publish Remove bundle failed");
+        ANS_LOGE("PublishCommonEvent failed");
     }
-    ANS_LOGD("SendRemoveDialogEvent end");
+    ANS_LOGD("SendDialogEvent end");
 }
 
 ModalExtensionCallback::ModalExtensionCallback()
@@ -627,7 +626,7 @@ void ModalExtensionCallback::OnError(int32_t code, const std::string& name, cons
 {
     ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
-    SendRemoveDialogEvent(this->bundleName_);
+    SendDialogEvent(this->bundleName_, 2);
 }
 
 /*

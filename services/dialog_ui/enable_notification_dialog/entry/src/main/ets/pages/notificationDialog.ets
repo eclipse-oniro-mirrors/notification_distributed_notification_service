@@ -71,6 +71,7 @@ struct PermissionDialog {
   @State appName: string = '';
   @State naviHeight: number = 0;
   @State isBottomPopover: boolean = true;
+  @State clicked: boolean = true;
   @Link @Watch('updateOnPageShow') isUpdate: number;
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
@@ -297,12 +298,16 @@ struct PermissionDialog {
   }
 
   async aboutToDisappear(): Promise<void> {
+    if(!this.clicked){
+      await this.dialog?.destroyException();
+    }
   }
 
   async enableNotification(enabled: boolean): Promise<void> {
     console.info(TAG, `NotificationDialog enableNotification: ${enabled}`);
     try {
       await this.dialog?.publishButtonClickedEvent(enabled);
+      this.clicked = true;
     } catch (err) {
       console.error(TAG, `NotificationDialog enable error, code is ${err?.code}`);
       await this.dialog?.destroyException();
