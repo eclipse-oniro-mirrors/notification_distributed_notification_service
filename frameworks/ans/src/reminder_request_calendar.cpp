@@ -303,6 +303,8 @@ bool ReminderRequestCalendar::IsNeedNotification()
     if (now <= endDateTime_ && now >= startDateTime_) {
         return true;
     }
+    uint64_t triggerTime = GetNextTriggerTime(true);
+    SetTriggerTimeInMilli(triggerTime);
     return false;
 }
 
@@ -564,6 +566,7 @@ bool ReminderRequestCalendar::UpdateNextReminder()
     if (!IsRepeatReminder()) {
         ANSR_LOGI("No need to update next trigger time as it is an one-time reminder.");
         SetSnoozeTimesDynamic(GetSnoozeTimes());
+        SetTriggerTimeInMilli(INVALID_LONG_LONG_VALUE);
         return false;
     }
     uint8_t leftSnoozeTimes = GetSnoozeTimesDynamic();
@@ -575,7 +578,7 @@ bool ReminderRequestCalendar::UpdateNextReminder()
         SetSnoozeTimesDynamic(GetSnoozeTimes());
         if ((repeatMonth_ == 0 || repeatDay_ == 0) && (repeatDaysOfWeek_ == 0)) {
             ANSR_LOGI("Not a day repeat reminder, no need to update to next trigger time.");
-            SetExpired(true);
+            SetTriggerTimeInMilli(INVALID_LONG_LONG_VALUE);
             return false;
         } else {
             uint64_t nextTriggerTime = GetNextTriggerTime();

@@ -1708,9 +1708,9 @@ bool ReminderRequest::UpdateNextReminder(const bool &force)
         if (nowInstantMilli == 0) {
             result = false;
         } else {
-            triggerTimeInMilli_ = nowInstantMilli + timeIntervalInMilli_;
-            snoozeTimesDynamic_ = snoozeTimes_;
             if (timeIntervalInMilli_ != 0) {
+                triggerTimeInMilli_ = nowInstantMilli + timeIntervalInMilli_;
+                snoozeTimesDynamic_ = snoozeTimes_;
                 isExpired_ = false;
             }
         }
