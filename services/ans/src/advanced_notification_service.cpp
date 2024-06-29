@@ -740,9 +740,9 @@ void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::sha
 ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
 {
     ErrCode result = ERR_OK;
+    sptr<NotificationSlot> slot = record->slot;
     // only update auth info for LIVE_VIEW notification
     if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
-        sptr<NotificationSlot> slot = record->slot;
         // update authHintCnt when authorizedStatus is NOT_AUTHORIZED
         if (slot->GetAuthorizedStatus() == NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED) {
             slot->AddAuthHintCnt();
@@ -751,14 +751,19 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
         if (slot->GetAuthHintCnt() > MAX_LIVEVIEW_HINT_COUNT) {
             slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         }
-        std::vector<sptr<NotificationSlot>> slots;
-        slots.push_back(slot);
-        result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
-        ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
-            slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
-        if (result != ERR_OK) {
-            ANS_LOGE("UpdateSlotAuthInfo failed result: %{public}d.", result);
+    } else {
+        // for other notification, set status to AUTHORIZED directly
+        if (slot->GetAuthorizedStatus() == NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED) {
+            slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         }
+    }
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+    result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
+    ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
+        slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
+    if (result != ERR_OK) {
+        ANS_LOGE("UpdateSlotAuthInfo failed result: %{public}d.", result);
     }
     return result;
 }
