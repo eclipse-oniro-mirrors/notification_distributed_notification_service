@@ -52,6 +52,8 @@ const std::size_t NotificationRequest::MAX_USER_INPUT_HISTORY {5};
 const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
 
+constexpr int32_t MAX_MAP_SIZE = 1000;
+
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
     createTime_ = GetNowSysTime();
@@ -1662,6 +1664,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         notificationFlagsOfDevices_ = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
         int32_t mapSize = parcel.ReadInt32();
+        mapSize = (mapSize < MAX_MAP_SIZE) ? mapSize : MAX_MAP_SIZE;
         for (int32_t seq = 0; seq < mapSize; seq++) {
             std::string deviceType = parcel.ReadString();
             std::shared_ptr<NotificationFlags> notificationFlags =
