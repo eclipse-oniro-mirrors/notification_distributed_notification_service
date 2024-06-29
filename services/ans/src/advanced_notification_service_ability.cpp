@@ -44,10 +44,10 @@ void AdvancedNotificationServiceAbility::OnStart()
     service_->InitPublishProcess();
     reminderAgent_ = ReminderDataManager::InitInstance(service_);
 
-    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
-    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #else
     ANS_LOGI("Not enabled ans_ext");
 #endif
@@ -64,15 +64,14 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
     ANS_LOGD("SubSystemAbilityListener::OnAddSystemAbility enter !");
     if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
         if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-            if (isDatashaReready) {
+            if (isDatashaReready_) {
                 return;
             }
-            isDatashaReready =true;
-            ANS_LOGD("CheckIfSettingsDataReady() ok!");
             EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+            isDatashaReready_ = true;
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        if (isDatashaReready) {
+        if (isDatashaReready_) {
             return;
         }
         EventFwk::MatchingSkills matchingSkills;
@@ -91,13 +90,13 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
 void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
     ANS_LOGI("CheckIfSettingsDataReady() ok!");
-    if (isDatashaReready) {
+    if (isDatashaReready_) {
         return;
     }
-    isDatashaReready =true;
     auto const &want = data.GetWant();
     std::string action = want.GetAction();
     if (action == "usual.event.DATA_SHARE_READY") {
+        isDatashaReready_ = true;
         ANS_LOGI("COMMON_EVENT_SERVICE_ID OnReceiveEvent ok!");
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
     }
