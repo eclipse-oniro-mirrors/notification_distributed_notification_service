@@ -41,6 +41,7 @@ namespace Notification {
 namespace {
     constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
+    constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
 }
 const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
@@ -466,8 +467,8 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
     }
     if (result == ERR_OK) {
         if (slot != nullptr &&
-            (slot->GetEnable() || (record->request->IsAgentNotification()&&
-            record->request->IsSystemLiveView()))) {
+            (bundleOption->GetBundleName() == CALL_UI_BUNDLE || slot->GetEnable() ||
+            (record->request->IsAgentNotification() && record->request->IsSystemLiveView()))) {
             record->slot = slot;
         } else {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
