@@ -212,7 +212,8 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
     } else {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        ANS_LOGW("bundle not exist");
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
     }
     ANS_LOGD("%{public}s status  = %{public}d ", __FUNCTION__, result);
     return result;
