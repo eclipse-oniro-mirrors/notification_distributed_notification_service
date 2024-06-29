@@ -2244,9 +2244,6 @@ ErrCode AdvancedNotificationService::SetSmartReminderEnabled(const std::string &
         return ERR_ANS_PERMISSION_DENIED;
     }
     ErrCode result = NotificationPreferences::GetInstance().SetSmartReminderEnabled(deviceType, enabled);
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    ReminderSwingDecisionCenter::GetInstance().OnSmartReminderStatusChanged();
-#endif
     return result;
 }
 
@@ -2281,9 +2278,6 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
     }
 
     int ret = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status_);
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    ReminderSwingDecisionCenter::GetInstance().OnUpdateDeviceStatus(deviceType);
-#endif
     ANS_LOGI("%{public}s device status update with %{public}u",
         deviceType.c_str(), DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType));
     return ret;

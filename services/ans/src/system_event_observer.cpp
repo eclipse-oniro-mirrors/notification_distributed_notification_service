@@ -124,12 +124,6 @@ void SystemEventObserver::InitEventList()
         &SystemEventObserver::OnBundleUpdateEventInner;
     memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED] =
         &SystemEventObserver::OnBootSystemCompletedEventInner;
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED] =
-        &SystemEventObserver::OnScreenLock;
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED] =
-        &SystemEventObserver::OnScreenUnlock;
-#endif
 }
 
 void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &data)
@@ -175,21 +169,5 @@ void SystemEventObserver::OnBootSystemCompletedEventInner(const EventFwk::Common
         callbacks_.onBootSystemCompleted();
     }
 }
-
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-void SystemEventObserver::OnScreenLock(const EventFwk::CommonEventData &data)
-{
-    if (callbacks_.onScreenLock != nullptr) {
-        callbacks_.onScreenLock();
-    }
-}
-
-void SystemEventObserver::OnScreenUnlock(const EventFwk::CommonEventData &data)
-{
-    if (callbacks_.onScreenUnlock != nullptr) {
-        callbacks_.onScreenUnlock();
-    }
-}
-#endif
 }  // namespace Notification
 }  // namespace OHOS

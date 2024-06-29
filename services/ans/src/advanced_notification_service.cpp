@@ -303,10 +303,6 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnScreenOn, this),
         std::bind(&AdvancedNotificationService::OnScreenOff, this),
 #endif
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-        std::bind(&AdvancedNotificationService::OnScreenLock, this),
-        std::bind(&AdvancedNotificationService::OnScreenUnlock, this),
-#endif
         std::bind(&AdvancedNotificationService::OnResourceRemove, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataCleared, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataAdd, this, std::placeholders::_1),

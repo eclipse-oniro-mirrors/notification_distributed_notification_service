@@ -169,9 +169,6 @@ private:
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
 
 private:
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    void UpdateCrossDeviceNotificationStatus();
-#endif
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};

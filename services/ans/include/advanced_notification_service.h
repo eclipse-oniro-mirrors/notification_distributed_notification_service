@@ -1102,16 +1102,6 @@ public:
      * @return Returns register swing Callback result.
      */
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
-
-    /**
-     * @brief screen lock event callback.
-     */
-    void OnScreenLock();
-
-    /**
-     * @brief screen unlock event callback.
-     */
-    void OnScreenUnlock();
 #endif
 
     /**

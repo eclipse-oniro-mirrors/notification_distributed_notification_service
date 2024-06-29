@@ -50,10 +50,6 @@ private:
     void OnBundleUpdateEventInner(const EventFwk::CommonEventData &data);
     void OnBundleAddEventInner(const EventFwk::CommonEventData &data);
     void OnBootSystemCompletedEventInner(const EventFwk::CommonEventData &data);
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    void OnScreenLock(const EventFwk::CommonEventData &data);
-    void OnScreenUnlock(const EventFwk::CommonEventData &data);
-#endif
 private:
     std::shared_ptr<SystemEventSubscriber> subscriber_ = nullptr;
     ISystemEvent callbacks_;
