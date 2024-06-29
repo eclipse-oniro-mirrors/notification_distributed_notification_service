@@ -65,6 +65,7 @@
 #include "want_params_wrapper.h"
 #include "reminder_swing_decision_center.h"
 #include "notification_extension_wrapper.h"
+#include "bool_wrapper.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -1197,16 +1198,17 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 
-void AdvancedNotificationService::RemoveFromDelayedNotificationList(const std::string &key)
+bool AdvancedNotificationService::RemoveFromDelayedNotificationList(const std::string &key)
 {
     std::lock_guard<std::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         if (delayNotification.first->notification->GetKey() == key) {
             CancelTimer(delayNotification.second);
             delayNotificationList_.remove(delayNotification);
-            return;
+            return true;
         }
     }
+    return false;
 }
 
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotificationList(const std::string &key)
@@ -2078,6 +2080,30 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::CheckSystemLiveView(const sptr<NotificationRequest> &request,
+    const std::string &key)
+{
+    if (!request->IsSystemLiveView()) {
+        return ERR_OK;
+    }
+
+    // live view, not update
+    std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
+    if (additionalData && additionalData->HasParam("SYSTEM_UPDATE_ONLY")) {
+        auto updateIt = additionalData->GetParam("SYSTEM_UPDATE_ONLY");
+        AAFwk::IBoolean *bo = AAFwk::IBoolean::Query(updateIt);
+        if (bo == nullptr) {
+            return ERR_OK;
+        }
+
+        if (AAFwk::Boolean::Unbox(bo) && !IsNotificationExists(key)) {
+            ANS_LOGE("CheckSystemLiveView check failed, cant update.");
+            return ERR_ANS_INVALID_PARAM;
+        }
+    }
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::AddRecordToMemory(
     const std::shared_ptr<NotificationRecord> &record, bool isSystemApp, bool isUpdateByOwner)
 {
@@ -2098,9 +2124,15 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
     }
     CheckDoNotDisturbProfile(record);
 
+    bool remove = false;
     if (isUpdateByOwner) {
         UpdateRecordByOwner(record, isSystemApp);
-        RemoveFromDelayedNotificationList(record->notification->GetKey());
+        remove = RemoveFromDelayedNotificationList(record->notification->GetKey());
+    }
+
+    // solve long term continuous update(music)
+    if (!remove && CheckSystemLiveView(record->request, record->notification->GetKey()) != ERR_OK) {
+        return ERR_ANS_INVALID_PARAM;
     }
 
     result = AssignToNotificationList(record);

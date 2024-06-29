@@ -1173,7 +1173,7 @@ private:
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
         const int32_t &userId, sptr<Notification> &notification);
-    void RemoveFromDelayedNotificationList(const std::string &key);
+    bool RemoveFromDelayedNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
@@ -1351,6 +1351,7 @@ private:
     ErrCode StartPublishDelayedNotification(const std::shared_ptr<NotificationRecord> &record);
     void StartPublishDelayedNotificationTimeOut(const int32_t ownerUid, const int32_t notificationId);
     void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
+    ErrCode CheckSystemLiveView(const sptr<NotificationRequest> &request, const std::string &key);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
