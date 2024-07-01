@@ -94,7 +94,6 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
     ANS_LOGD("CheckIfSetlocalSwitch enter");
     if (extensionWrapperHandle_ == nullptr) {
         ANS_LOGE("CheckIfSetlocalSwitch extension wrapper symbol failed");
-        return;
     }
     if (!isRegisterDataSettingObserver) {
         RegisterDataSettingObserver();
@@ -118,6 +117,7 @@ void ExtensionWrapper::SetlocalSwitch(std::string &enable)
 void ExtensionWrapper::RegisterDataSettingObserver()
 {
     ANS_LOGD("ExtensionWrapper::RegisterDataSettingObserver enter");
+    sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
     if (aggregationRoamingObserver_ == nullptr) {
         aggregationRoamingObserver_ = new (std::nothrow) AdvancedAggregationDataRoamingObserver();
     }

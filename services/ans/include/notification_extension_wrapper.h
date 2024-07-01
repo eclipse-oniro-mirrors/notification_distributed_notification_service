@@ -63,7 +63,6 @@ private:
     SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
     LOCAL_CONTROL localControl_ = nullptr;
     REMINDER_CONTROL reminderControl_ = nullptr;
-    sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
     bool isRegisterDataSettingObserver = false;
 };
 
