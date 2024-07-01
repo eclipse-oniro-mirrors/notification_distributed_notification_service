@@ -36,7 +36,8 @@ const int32_t REMINDER_RDB_VERSION_V2 = 2;
 const int32_t REMINDER_RDB_VERSION_V3 = 3;
 const int32_t REMINDER_RDB_VERSION_V4 = 4;
 const int32_t REMINDER_RDB_VERSION_V5 = 5;
-const int32_t REMINDER_RDB_VERSION = 6;
+const int32_t REMINDER_RDB_VERSION_V6 = 6;
+const int32_t REMINDER_RDB_VERSION = 7;
 }
 
 const int32_t ReminderStore::STATE_OK = 0;
@@ -72,6 +73,10 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V5:
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CREATOR_UID, "INT", "-1");
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V6:
+                AddRdbColum(store, ReminderCalendarTable::TABLE_NAME,
+                    ReminderCalendarTable::CALENDAR_LAST_DATE_TIME, "BIGINT", "0");
                 [[fallthrough]];
             default:
                 break;

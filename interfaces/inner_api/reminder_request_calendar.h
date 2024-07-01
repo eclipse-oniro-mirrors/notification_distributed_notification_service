@@ -179,6 +179,18 @@ public:
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
     bool SetEndDateTime(const uint64_t time);
 
+    /**
+     * @brief Sets the start time when the notification was last displayed in the notification bar.
+     * When OnDateTimeChange or OnClose, the time will change to next start time if the reminder
+     * is repeat, otherwise not changed.
+     */
+    void SetLastStartDateTime(const uint64_t time);
+
+    /**
+     * @brief Get the start time when the notification was last displayed in the notification bar.
+     */
+    uint64_t GetLastStartDateTime() const;
+
 public:
     static constexpr uint8_t MAX_MONTHS_OF_YEAR = 12;
     static constexpr uint8_t MAX_DAYS_OF_MONTH = 31;
@@ -190,7 +202,7 @@ private:
     ReminderRequestCalendar() : ReminderRequest() {}
 
     uint8_t GetNextDay(const uint16_t &settedYear, const uint8_t &settedMonth, const tm &now, const tm &target) const;
-    uint64_t GetNextTriggerTime();
+    uint64_t GetNextTriggerTime(const bool updateLast = false);
     uint64_t GetNextTriggerTimeAsRepeatReminder(const tm &nowTime, const tm &tarTime) const;
     uint32_t GetRepeatDay() const
     {
@@ -216,6 +228,11 @@ private:
     void SetRepeatMonths(const std::vector<uint8_t> &repeatMonths);
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
     bool CheckCalenderIsExpired(const uint64_t now);
+
+    /**
+     * @brief When OnShow or OnSnooze, need calculate the start time of this alert
+     */
+    void CalcLastStartDateTime();
 
     void SetDateTime(const uint64_t time);
     uint64_t GetDateTime();
@@ -254,6 +271,7 @@ private:
     uint64_t startDateTime_{0};
     uint64_t endDateTime_{0};
     uint64_t durationTime_{0};
+    uint64_t lastStartDateTime_{0};
 
     std::set<uint64_t> excludeDates_;
 
