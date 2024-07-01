@@ -269,8 +269,8 @@ public:
      */
     void OnRemoveAppMgr();
 
-    static const uint8_t TIME_ZONE_CHANGE;
-    static const uint8_t DATE_TIME_CHANGE;
+    static constexpr uint8_t TIME_ZONE_CHANGE = 0;
+    static constexpr uint8_t DATE_TIME_CHANGE = 1;
 
 private:
     enum class TimerType : uint8_t {
@@ -661,17 +661,17 @@ private:
     /**
      * Max number of reminders limit for the whole system.
      */
-    static const int16_t MAX_NUM_REMINDER_LIMIT_SYSTEM;
+    static constexpr int16_t MAX_NUM_REMINDER_LIMIT_SYSTEM = 12000;
 
     /**
      * Max number of reminders limit for one system application.
      */
-    static const int16_t MAX_NUM_REMINDER_LIMIT_SYS_APP;
+    static constexpr int16_t MAX_NUM_REMINDER_LIMIT_SYS_APP = 10000;
 
     /**
      * Max number of reminders limit for one application.
      */
-    static const int16_t MAX_NUM_REMINDER_LIMIT_APP;
+    static constexpr int16_t MAX_NUM_REMINDER_LIMIT_APP = 30;
 
     bool isReminderAgentReady_ = false;
 
