@@ -20,6 +20,7 @@ ohos_hap("enable_notification_dialog_hap") {
     ":enable_notification_dialog_js_assets",
     ":enable_notification_dialog_resources",
   ]
+  publicity_file = "publicity.xml"
 
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "enable_notification_dialog"
