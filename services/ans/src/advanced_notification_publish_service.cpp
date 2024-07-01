@@ -70,7 +70,6 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
 
     if (!enabled) {
         ANS_LOGI("result = %{public}d", result);
-        result = RemoveAllNotificationsForDisable(bundle);
     }
     if (result == ERR_OK) {
         NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
