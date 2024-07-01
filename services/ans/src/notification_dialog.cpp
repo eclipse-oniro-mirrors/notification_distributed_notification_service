@@ -58,6 +58,13 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
+
+    auto topBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    auto topUid = NotificationDialog::GetUidByBundleName(topBundleName);
+    if (topUid != uid) {
+        ANS_LOGE("Current application isn't in foreground, top is %{private}s.", topBundleName.c_str());
+        return ERR_ANS_INVALID_BUNDLE;
+    }
     
     AAFwk::Want want;
     

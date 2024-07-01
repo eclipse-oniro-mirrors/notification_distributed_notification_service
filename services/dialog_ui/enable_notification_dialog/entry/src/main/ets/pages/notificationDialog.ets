@@ -76,7 +76,7 @@ struct PermissionDialog {
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
-  panOption:PanGestureOptions =  new PanGestureOptions({
+  panOption: PanGestureOptions = new PanGestureOptions({
     distance:100,
     direction:PanDirection.Up
     });
@@ -173,7 +173,7 @@ struct PermissionDialog {
     .gesture(
       PanGesture(this.panOption)
       .onActionStart((event:GestureEvent)=>{
-        if(this.dialog?.stageModel == false){
+        if (this.dialog?.stageModel == false) {
           this.session?.terminateSelf();
         }
       })
@@ -298,7 +298,7 @@ struct PermissionDialog {
   }
 
   async aboutToDisappear(): Promise<void> {
-    if(!this.clicked){
+    if (!this.clicked) {
       await this.dialog?.destroyException();
     }
   }
