@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Notification {
 #ifndef ANS_LOG_DOMAIN
-#define ANS_LOG_DOMAIN 0xD001200
+#define ANS_LOG_DOMAIN 0xD001203
 #endif
 
 #ifndef ANS_LOG_TAG

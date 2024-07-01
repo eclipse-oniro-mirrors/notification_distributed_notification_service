@@ -25,7 +25,7 @@
 #undef LOG_TAG
 #endif
  
-#define LOG_DOMAIN 0xD001200
+#define LOG_DOMAIN 0xD001203
 #define LOG_TAG "NOTIFICATION-MANAGER"
 
 #define LOGI(...)                                           \
