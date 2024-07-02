@@ -54,7 +54,6 @@
 #include "notification_subscriber_manager.h"
 #include "notification_local_live_view_subscriber_manager.h"
 #include "os_account_manager_helper.h"
-#include "parameters.h"
 #include "permission_filter.h"
 #include "push_callback_proxy.h"
 #include "trigger_info.h"
@@ -90,7 +89,6 @@ constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
 constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
 
-const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ans.check.sa.permission";
 const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
 const std::string CONTACTS_BUNDLE_NAME = "com.ohos.contacts";
 const std::string DO_NOT_DISTURB_MODE = "1";
@@ -105,7 +103,6 @@ std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
 std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> AdvancedNotificationService::checkRequests_;
-std::string AdvancedNotificationService::supportCheckSaPermission_ = "false";
 
 ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<NotificationRequest> &request)
 {
@@ -126,8 +123,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             return ERR_ANS_NON_SYSTEM_APP;
         }
 
-        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
-            !CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
+            !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
             return ERR_ANS_PERMISSION_DENIED;
         }
 
@@ -320,7 +317,6 @@ AdvancedNotificationService::AdvancedNotificationService()
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
 #endif
-    supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_ANS_CHECK_SA_PERMISSION, "false");
 }
 
 AdvancedNotificationService::~AdvancedNotificationService()
@@ -422,8 +418,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     } else {
         std::string sourceBundleName =
             request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
-        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
-            GetClientBundleName(), sourceBundleName)) {
+        if (!sourceBundleName.empty() &&
+            NotificationPreferences::GetInstance().IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 GetClientBundleName().c_str(), sourceBundleName.c_str());
             request->SetCreatorBundleName(request->GetOwnerBundleName());
@@ -1266,8 +1262,8 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("CheckPermission failed.");
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("AccessTokenHelper::CheckPermission failed.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1314,7 +1310,7 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("Check permission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -1495,7 +1491,7 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1527,8 +1523,8 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("CheckPermission is false.");
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1609,7 +1605,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1662,7 +1658,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const int32_t &userId,
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1684,7 +1680,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDate(const int32_t &userId,
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1717,8 +1713,8 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("CheckPermission is false.");
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1749,7 +1745,7 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1797,12 +1793,12 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER approval!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -1852,12 +1848,12 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -1880,8 +1876,8 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     ANS_LOGD("NotificationRequest slotType:%{public}d, contentType:%{public}d", slotType, contentType);
 
     if (request->IsCommonLiveView()) {
-        if (CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-            CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
             ANS_LOGI("The creator has the permission, no need to check.");
             return false;
         }
@@ -2156,7 +2152,7 @@ ErrCode AdvancedNotificationService::RegisterSwingCallback(const sptr<IRemoteObj
         ANS_LOGW("Not SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }

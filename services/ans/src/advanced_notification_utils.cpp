@@ -185,7 +185,7 @@ ErrCode AdvancedNotificationService::CheckCommonParams()
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("Check permission is false.");
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -255,7 +255,7 @@ ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
-        if (CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             return ERR_OK;
         }
 
@@ -805,7 +805,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const sptr<Notification
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGW("Check permission denied!");
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -828,7 +828,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDate(sptr<NotificationDoNotD
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -848,7 +848,7 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
     if (notificationSvrQueue_ == nullptr) {
@@ -877,7 +877,7 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
     if (notificationSvrQueue_ == nullptr) {
@@ -907,29 +907,12 @@ ErrCode AdvancedNotificationService::DoesSupportDoNotDisturbMode(bool &doesSuppo
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     doesSupport = SUPPORT_DO_NOT_DISTRUB;
     return ERR_OK;
-}
-
-bool AdvancedNotificationService::CheckPermission(const std::string &permission)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    if (supportCheckSaPermission_.compare("true") != 0) {
-        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-        if (isSubsystem) {
-            return true;
-        }
-    }
-    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    bool result = AccessTokenHelper::VerifyCallerPermission(tokenCaller, permission);
-    if (!result) {
-        ANS_LOGE("Permission denied");
-    }
-    return result;
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED

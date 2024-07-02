@@ -16,13 +16,21 @@
 #include "access_token_helper.h"
 
 #include "ans_log_wrapper.h"
+#include "ans_permission_def.h"
 #include "ipc_skeleton.h"
+#include "parameters.h"
 #include "tokenid_kit.h"
 
 using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
+namespace {
+const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ces.check.sa.permission";
+} // namespace
+
+std::string AccessTokenHelper::supportCheckSaPermission_ = "non-initilization";
+
 bool AccessTokenHelper::VerifyCallerPermission(
     const AccessTokenID &tokenCaller, const std::string &permission)
 {
@@ -66,6 +74,26 @@ bool AccessTokenHelper::VerifyShellToken(const AccessTokenID &callerToken)
 {
     ATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(callerToken);
     return (tokenType == ATokenTypeEnum::TOKEN_SHELL);
+}
+
+bool AccessTokenHelper::CheckPermission(const std::string &permission)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (supportCheckSaPermission_.compare("non-initilization") == 0) {
+        supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_ANS_CHECK_SA_PERMISSION, "false");
+    }
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    if (supportCheckSaPermission_.compare("true") != 0) {
+        bool isSubsystem = VerifyNativeToken(tokenCaller);
+        if (isSubsystem) {
+            return true;
+        }
+    }
+    bool result = VerifyCallerPermission(tokenCaller, permission);
+    if (!result) {
+        ANS_LOGE("Permission denied");
+    }
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -144,21 +144,6 @@ void AnsBranchTest::TestAddSlot(NotificationConstant::SlotType type)
 }
 
 /**
- * @tc.number    : AnsBranchTest_221
- * @tc.name      : CheckPermission_1000
- * @tc.desc      : Test permission function result is false.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_221, Function | SmallTest | Level1)
-{
-    MockIsVerfyPermisson(false);
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
-    bool result = advancedNotificationService_->CheckPermission(permission);
-    ASSERT_EQ(result, false);
-}
-
-/**
  * @tc.number    : AnsBranchTest_222000
  * @tc.name      : PrepareNotificationRequest_1000
  * @tc.desc      : Test PrepareNotificationRequest function return ERR_ANS_NON_SYSTEM_APP.
@@ -173,9 +158,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_222000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
-    std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
-    bool result = advancedNotificationService_->CheckPermission(permission);
-    ASSERT_EQ(result, false);
+
     ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
 }
 

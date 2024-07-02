@@ -402,6 +402,7 @@ ohos_unittest("access_token_helper_test") {
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
     "image_framework:image_native",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",

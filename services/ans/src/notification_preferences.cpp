@@ -17,13 +17,14 @@
 
 #include <fstream>
 
+#include "access_token_helper.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
 #include "hitrace_meter_adapter.h"
 #include "nlohmann/json.hpp"
-#include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 
 namespace OHOS {
@@ -1020,7 +1021,13 @@ int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key, const in
 bool NotificationPreferences::IsAgentRelationship(const std::string &agentBundleName,
     const std::string &sourceBundleName)
 {
+    if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        ANS_LOGD("Client has agent permission.");
+        return true;
+    }
+
     if (preferncesDB_ == nullptr) {
+        ANS_LOGD("perferencdDb is null.");
         return false;
     }
 
