@@ -56,7 +56,7 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
     }
 
     if (!request->IsRemoveAllowed()) {
-        if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
         }
     }

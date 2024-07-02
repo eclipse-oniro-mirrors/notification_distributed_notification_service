@@ -1205,7 +1205,6 @@ private:
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);
 
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);
-    static bool CheckPermission(const std::string &permission);
     ErrCode PrepareNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
     static bool GetActiveUserId(int& userId);
@@ -1372,7 +1371,6 @@ private:
     DistributedKv::DistributedKvDataManager dataManager_;
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
     std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
-    static std::string supportCheckSaPermission_;
     std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;

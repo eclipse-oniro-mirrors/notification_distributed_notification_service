@@ -413,20 +413,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
 
-/**
- * @tc.number  : AdvancedNotificationService_01300
- * @tc.name    : AdvancedNotificationService_01300
- * @tc.desc    : Test CheckPermission function and result is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01300, Function | SmallTest | Level1)
-{
-    std::string permission = "<permission>";
-    AdvancedNotificationService advancedNotificationService;
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    MockIsVerfyPermisson(false);
-    ASSERT_EQ(advancedNotificationService.CheckPermission(permission), false);
-}
 
 /**
  * @tc.number  : AdvancedNotificationService_01400
