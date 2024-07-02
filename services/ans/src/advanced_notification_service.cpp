@@ -261,7 +261,9 @@ void AdvancedNotificationService::SelfClean()
     }
 
     NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
+#endif
     NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
 }
 

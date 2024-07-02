@@ -58,6 +58,7 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
     device_usage = false
+    distributed_notification_supported = false
   }
 
   if (defined(global_parts_info) &&
