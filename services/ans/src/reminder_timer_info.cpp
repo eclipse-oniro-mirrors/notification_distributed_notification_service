@@ -17,9 +17,6 @@
 
 #include "ans_log_wrapper.h"
 #include "common_event_manager.h"
-#ifdef HAS_HISYSEVENT_PART
-#include "hisysevent.h"
-#endif
 #include "reminder_request.h"
 
 using namespace OHOS::EventFwk;
@@ -52,8 +49,6 @@ void ReminderTimerInfo::OnTrigger()
     if (action_ == ReminderRequest::REMINDER_EVENT_ALARM_ALERT) {
 #ifdef HAS_HISYSEVENT_PART
         std::string eventType = "ALARM_TRIGGER";
-        HiSysEventWrite(HiSysEvent::Domain::NOTIFICATION, eventType, HiSysEvent::EventType::STATISTIC,
-            "UID", uid_, "PID", pid_, "NAME", bundleName_);
 #endif
     }
 }

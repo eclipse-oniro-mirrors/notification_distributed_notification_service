@@ -46,6 +46,9 @@
 #include "iservice_registry.h"
 #include "config_policy_utils.h"
 #include "hitrace_meter_adapter.h"
+#ifdef HAS_HISYSEVENT_PART
+#include "hisysevent.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -66,11 +69,6 @@ const int INDEX_VALUE = 2;
 const std::string DEFAULT_REMINDER_SOUND_1 = "/system/etc/capture.ogg";
 const std::string DEFAULT_REMINDER_SOUND_2 = "resource/media/audio/alarms/Aegean_Sea.ogg";
 
-const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYSTEM = 12000;
-const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_SYS_APP = 10000;
-const int16_t ReminderDataManager::MAX_NUM_REMINDER_LIMIT_APP = 30;
-const uint8_t ReminderDataManager::TIME_ZONE_CHANGE = 0;
-const uint8_t ReminderDataManager::DATE_TIME_CHANGE = 1;
 std::shared_ptr<ReminderDataManager> ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
 std::mutex ReminderDataManager::MUTEX;
 std::mutex ReminderDataManager::SHOW_MUTEX;
@@ -129,9 +127,8 @@ ErrCode ReminderDataManager::CancelReminder(
         StopSoundAndVibrationLocked(reminder);
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
-    int32_t id = reminderId;
     CancelNotification(reminder);
-    RemoveReminderLocked(id);
+    RemoveReminderLocked(reminderId);
     StartRecentReminder();
     return ERR_OK;
 }
@@ -140,8 +137,7 @@ ErrCode ReminderDataManager::CancelAllReminders(const std::string& packageName, 
     const int32_t uid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGD("CancelAllReminders, userId=%{private}d, pkgName=%{public}s",
-        userId, packageName.c_str());
+    ANSR_LOGD("CancelAllReminders, userId=%{private}d, pkgName=%{public}s", userId, packageName.c_str());
     CancelRemindersImplLocked(packageName, userId, uid);
     return ERR_OK;
 }
@@ -261,7 +257,6 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
             }
             CancelNotification(*vit);
             RemoveFromShowedReminders(*vit);
-            ANSR_LOGD("Containers(vector/map) remove. reminderId=%{public}d", reminderId);
             vit = reminderVector_.erase(vit);
             notificationBundleOptionMap_.erase(mit);
             totalCount_--;
@@ -367,7 +362,6 @@ void ReminderDataManager::AddToShowedReminders(const sptr<ReminderRequest> &remi
             return;
         }
     }
-    ANSR_LOGD("Containers(shownVector) add. reminderId=%{public}d", reminder->GetReminderId());
     showedReminderVector_.push_back(reminder);
 }
 
@@ -385,7 +379,6 @@ void ReminderDataManager::OnServiceStart()
 {
     std::vector<sptr<ReminderRequest>> immediatelyShowReminders;
     GetImmediatelyShowRemindersLocked(immediatelyShowReminders);
-    ANSR_LOGD("immediatelyShowReminders size=%{public}zu", immediatelyShowReminders.size());
 }
 
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
@@ -409,8 +402,7 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
         int32_t reminderId = (*it)->GetReminderId();
         auto mit = notificationBundleOptionMap_.find(reminderId);
         if (mit == notificationBundleOptionMap_.end()) {
-            ANSR_LOGD(
-                "Not get bundle option, the reminder may has been cancelled, reminderId=%{public}d", reminderId);
+            ANSR_LOGD("Not get bundle option, the reminder may has been cancelled, reminderId=%{public}d", reminderId);
             CancelNotification(*it);
             showedReminderVector_.erase(it);
             --it;
@@ -424,7 +416,6 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
         } else {
             CancelNotification(*it);
             (*it)->OnClose(false);
-            ANSR_LOGD("Containers(shownVector) remove. reminderId=%{public}d", reminderId);
             showedReminderVector_.erase(it);
             --it;
         }
@@ -522,10 +513,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
         requestCode,
         AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
-        flags,
-        wants,
-        nullptr
-    );
+        flags, wants, nullptr);
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
@@ -895,19 +883,16 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
     reminder->InitBundleName(bundleOption->GetBundleName());
 
     if (reminder->GetTriggerTimeInMilli() == ReminderRequest::INVALID_LONG_LONG_VALUE) {
-        ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s",
-            reminder->Dump().c_str());
+        ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s", reminder->Dump().c_str());
         reminder->SetExpired(true);
     }
     int32_t reminderId = reminder->GetReminderId();
-    ANSR_LOGD("Containers(map) add. reminderId=%{public}d", reminderId);
     auto ret = notificationBundleOptionMap_.insert(
         std::pair<int32_t, sptr<NotificationBundleOption>>(reminderId, bundleOption));
     if (!ret.second) {
         ANSR_LOGE("Containers add to map error");
         return;
     }
-    ANSR_LOGD("Containers(vector) add. reminderId=%{public}d", reminderId);
     reminderVector_.push_back(reminder);
     totalCount_++;
     store_->UpdateOrInsert(reminder, bundleOption);
@@ -1001,7 +986,6 @@ void ReminderDataManager::SetActiveReminder(const sptr<ReminderRequest> &reminde
     } else {
         activeReminderId_ = reminder->GetReminderId();
         activeReminder_ = reminder;
-        ANSR_LOGD("Set activeReminder with id=%{public}d", activeReminderId_.load());
     }
     ANSR_LOGD("Set activeReminderId=%{public}d", activeReminderId_.load());
 }
@@ -1014,7 +998,6 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
     } else {
         alertingReminderId_ = reminder->GetReminderId();
         alertingReminder_ = reminder;
-        ANSR_LOGD("Set alertingReminder with id=%{public}d", alertingReminderId_.load());
     }
     ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
 }
@@ -1116,6 +1099,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
         store_->UpdateOrInsert(reminder, FindNotificationBundleOption(reminder->GetReminderId()));
         return;
     }
+    ReportSysEvent(reminder);
     bool toPlaySound = isNeedToPlaySound && ShouldAlert(reminder) ? true : false;
     reminder->OnShow(toPlaySound, isSysTimeChanged, true);
     AddToShowedReminders(reminder);
@@ -2183,6 +2167,22 @@ void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId, con
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
+}
+
+void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
+{
+#ifdef HAS_HISYSEVENT_PART
+    std::string event = "ALARM_TRIGGER";
+    std::string bundleName = reminder->GetBundleName();
+    int32_t uid = reminder->GetUid();
+    int32_t type = static_cast<int32_t>(reminder->GetReminderType());
+    int32_t repeat = static_cast<int32_t>(reminder->IsRepeat());
+    uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
+    int32_t ringTime = static_cast<int32_t>(reminder->GetRingDuration());
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "PID", 0, "UID", uid, "NAME", bundleName, "TYPE", type, "repeat", repeat, "TRIGGER_TIME", triggerTime,
+        "RING_TIME", ringTime);
+#endif
 }
 }
 }
