@@ -81,6 +81,7 @@ ohos_shared_library("libans") {
     "src/notification_smart_reminder/string_utils.cpp",
     "src/notification_subscriber_manager.cpp",
     "src/notification_timer_info.cpp",
+    "src/notification_trust_list.cpp",
     "src/os_account_manager_helper.cpp",
     "src/permission_filter.cpp",
     "src/reminder_config_change_observer.cpp",
