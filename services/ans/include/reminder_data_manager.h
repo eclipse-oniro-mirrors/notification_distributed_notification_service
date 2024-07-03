@@ -231,7 +231,7 @@ public:
     /**
      * Handle auto delete time
      */
-    void HandleAutoDeleteReminder(const int32_t reminderId, const int32_t uid);
+    void HandleAutoDeleteReminder(const int32_t notificationId, const int32_t uid, const int32_t autoDeletedTime);
 
     /**
      * @brief Terminate the alerting reminder.
