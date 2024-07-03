@@ -29,10 +29,6 @@ struct ISystemEvent {
     std::function<void()> onScreenOn;
     std::function<void()> onScreenOff;
 #endif
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    std::function<void()> onScreenLock;
-    std::function<void()> onScreenUnlock;
-#endif
     std::function<void(int32_t userId)> onResourceRemove;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleDataCleared;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleAdd;

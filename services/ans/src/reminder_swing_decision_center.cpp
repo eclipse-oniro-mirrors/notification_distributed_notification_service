@@ -25,9 +25,7 @@ mutex ReminderSwingDecisionCenter::swingMutex_;
 sptr<ISwingCallBack> ReminderSwingDecisionCenter::swingCallback_ = nullptr;
 
 ReminderSwingDecisionCenter::ReminderSwingDecisionCenter()
-{
-    GetCcmSwingRemind();
-}
+{}
 
 ReminderSwingDecisionCenter::~ReminderSwingDecisionCenter() {}
 
