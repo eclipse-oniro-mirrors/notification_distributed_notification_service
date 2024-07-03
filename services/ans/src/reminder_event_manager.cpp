@@ -31,12 +31,6 @@ using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
 static const std::string NOTIFICATION_LABEL = "REMINDER_AGENT";
-static constexpr uint32_t LABEL_SIZE = 3;
-static const std::string LABEL_PREFIX = "REMINDER";
-static const std::string LABEL_SUFFIX = "AGENT";
-static constexpr uint32_t LABEL_PREFIX_INDEX = 0;
-static constexpr uint32_t LABEL_SUFFIX_INDEX = 1;
-static constexpr uint32_t REMINDER_ID_INDEX = 2;
 std::shared_ptr<ReminderEventManager::ReminderNotificationSubscriber> ReminderEventManager::subscriber_
     = nullptr;
 
