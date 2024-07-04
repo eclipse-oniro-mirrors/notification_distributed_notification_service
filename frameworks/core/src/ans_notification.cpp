@@ -1279,7 +1279,6 @@ ErrCode AnsNotification::GetExcludeDates(const int32_t reminderId, std::vector<u
 sptr<AnsManagerInterface> AnsNotification::GetAnsManagerProxy()
 {
     sptr<AnsManagerInterface> proxy = nullptr;
-    std::lock_guard<std::mutex> lock(mutex_);
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
