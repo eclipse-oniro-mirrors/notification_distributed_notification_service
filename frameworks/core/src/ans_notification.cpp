@@ -1278,35 +1278,25 @@ ErrCode AnsNotification::GetExcludeDates(const int32_t reminderId, std::vector<u
 
 sptr<AnsManagerInterface> AnsNotification::GetAnsManagerProxy()
 {
-    sptr<AnsManagerInterface> proxy = nullptr;
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!ansManagerProxy_) {
-        sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-        if (!systemAbilityManager) {
-            ANS_LOGE("Failed to get system ability mgr.");
-            return proxy;
-        }
-
-        sptr<IRemoteObject> remoteObject =
-            systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
-        if (!remoteObject) {
-            ANS_LOGE("Failed to get notification Manager.");
-            return proxy;
-        }
-
-        ansManagerProxy_ = iface_cast<AnsManagerInterface>(remoteObject);
-        if ((!ansManagerProxy_) || (!ansManagerProxy_->AsObject())) {
-            ANS_LOGE("Failed to get notification Manager's proxy");
-            return proxy;
-        }
-
-        auto ansManagerDeathRecipient = DelayedSingleton<AnsManagerDeathRecipient>::GetInstance();
-        if (!ansManagerDeathRecipient->GetIsSubscribeSAManager()) {
-            ansManagerDeathRecipient->SubscribeSAManager();
-        }
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        ANS_LOGE("Failed to get system ability mgr.");
+        return nullptr;
     }
-    proxy = ansManagerProxy_;
+
+    sptr<IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+    if (!remoteObject) {
+        ANS_LOGE("Failed to get notification Manager.");
+        return nullptr;
+    }
+
+    sptr<AnsManagerInterface> proxy = iface_cast<AnsManagerInterface>(remoteObject);
+    if ((!proxy) || (!proxy->AsObject())) {
+        ANS_LOGE("Failed to get notification Manager's proxy");
+        return nullptr;
+    }
     return proxy;
 }
 
