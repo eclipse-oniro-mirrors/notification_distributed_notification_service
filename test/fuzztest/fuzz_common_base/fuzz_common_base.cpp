@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
+#include "accesstoken_kit.h"
+#include "access_token.h"
+#include "access_token_error.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 #include "fuzz_common_base.h"
 
 extern "C" {
-static constexpr uint32_t U32_AT_SIZE     = 4;
+static constexpr uint32_t U32_AT_SIZE     = 2;
 static constexpr uint32_t MAX_MEMORY_SIZE = 4 * 1024 * 1024;
+
+using namespace OHOS::Security::AccessToken;
 
 uint32_t GetU32Size()
 {
@@ -53,5 +60,77 @@ char* ParseData(const uint8_t* data, size_t size)
     }
 
     return ch;
+}
+
+void NativeTokenGet(const std::vector<std::string> &permissions)
+{
+    uint64_t tokenId;
+    size_t size = permissions.size();
+    const char **perms = new const char *[size];
+    for (size_t i = 0; i < permissions.size(); i++) {
+        perms[i] = permissions[i].c_str();
+    }
+    
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = size,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .aplStr = "system_core",
+    };
+
+    infoInstance.processName = "AnsFuzzTest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    AccessTokenKit::ReloadNativeTokenInfo();
+    delete []perms;
+}
+
+void SystemHapTokenGet(const std::vector<std::string> &permissions)
+{
+
+    HapPolicyParams hapPolicyPrams = {
+        .apl = APL_NORMAL,
+        .domain = "test.fuzz.ans",
+        .permList = {},
+        .permStateList = {}
+    };
+    
+    for (auto permission : permissions) {
+        PermissionStateFull permStateFull = {
+            .permissionName = permission,
+            .isGeneral = false,
+            .resDeviceID = {"device 1", "device 2"},
+            .grantStatus = {PermissionState::PERMISSION_GRANTED, PermissionState::PERMISSION_GRANTED},
+            .grantFlags = {1, 2}
+        };
+        PermissionDef permDef = {
+            .permissionName = permission,
+            .bundleName = "test.fuzz.ans",
+            .grantMode = 1,
+            .availableLevel = APL_NORMAL,
+            .label = "label3",
+            .labelId = 1,
+            .description = "break the door",
+            .descriptionId = 1,
+        };
+        hapPolicyPrams.permList.emplace_back(permDef);
+        hapPolicyPrams.permStateList.emplace_back(permStateFull);
+    }
+
+    HapInfoParams hapInfoParams = {
+        .userID = 100,
+        .bundleName = "test.fuzz.ans",
+        .instIndex = 0,
+        .appIDDesc = "test.fuzz.ans",
+        .apiVersion = 12,
+        .isSystemApp = true
+    };
+
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(hapInfoParams, hapPolicyPrams);
+    SetSelfTokenID(tokenIdEx.tokenIDEx);
 }
 }

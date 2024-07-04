@@ -14,7 +14,7 @@
  */
 
 #include "getactivenotificationnums_fuzzer.h"
-
+#include "ans_permission_def.h"
 #include "notification_helper.h"
 namespace OHOS {
     namespace {
@@ -42,6 +42,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     char *ch = ParseData(data, size);
     if (ch != nullptr && size >= GetU32Size()) {
+        std::vector<std::string> requestPermission = {
+            OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+            OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+            OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+        };
+        SystemHapTokenGet(requestPermission);
         OHOS::DoSomethingInterestingWithMyAPI(ch, size);
         free(ch);
         ch = nullptr;

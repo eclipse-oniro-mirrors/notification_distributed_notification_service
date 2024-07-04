@@ -15,7 +15,10 @@
 
 #include "addnotificationslot_fuzzer.h"
 
+#include "base/accesscontrol/sandbox_manager/test/fuzztest/common/alloc_token.h"
 #include "notification_helper.h"
+#include <string>
+#include <vector>
 
 namespace OHOS {
     namespace {
@@ -58,6 +61,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     char *ch = ParseData(data, size);
     if (ch != nullptr && size > GetU32Size()) {
+        std::vector<std::string> permissions;
+        NativeTokenGet(permissions);
         OHOS::DoSomethingInterestingWithMyAPI(ch, size);
         free(ch);
         ch = nullptr;

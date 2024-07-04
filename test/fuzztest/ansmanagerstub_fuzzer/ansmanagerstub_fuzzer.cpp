@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <string>
+#include <vector>
 #define private public
 #define protected public
 #include "ans_manager_stub.h"
@@ -20,24 +22,27 @@
 #undef protected
 #include "ansmanagerstub_fuzzer.h"
 #include "notification_request.h"
+#include "ans_permission_def.h"
 
 constexpr uint8_t SLOT_TYPE_NUM = 5;
-constexpr uint8_t ENABLE = 2;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzData fuzzData)
     {
-        std::string stringData(data, size);
+        std::string stringData = fuzzData.GenerateRandomString();
         Notification::AnsManagerStub ansManagerStub;
-        uint32_t code = GetU32Data(data);
         MessageParcel datas;
         MessageParcel reply;
         MessageOption flags;
-        ansManagerStub.OnRemoteRequest(code, datas, reply, flags);
-        ansManagerStub.HandlePublish(datas, reply);
-        ansManagerStub.HandleCancel(datas, reply);
-        ansManagerStub.HandleCancelAll(datas, reply);
-        ansManagerStub.HandleCancelAsBundle(datas, reply);
+        ansManagerStub.OnRemoteRequest(0, datas, reply, flags);
+        ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::PUBLISH_NOTIFICATION,
+            datas, reply, flags);
+        ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::CANCEL_NOTIFICATION,
+            datas, reply, flags);
+        ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS,
+            datas, reply, flags);
+        ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::CANCEL_AS_BUNDLE,
+            datas, reply, flags);
         ansManagerStub.HandleCancelAsBundleAndUser(datas, reply);
         ansManagerStub.HandleAddSlotByType(datas, reply);
         ansManagerStub.HandleAddSlots(datas, reply);
@@ -132,12 +137,12 @@ namespace OHOS {
         ansManagerStub.HandleSetTargetDeviceStatus(datas, reply);
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
         ansManagerStub.Publish(stringData, notification);
-        int notificationId = static_cast<int>(GetU32Data(data));
+        int notificationId = fuzzData.GetData<int>();
         ansManagerStub.Cancel(notificationId, stringData, 0);
         ansManagerStub.CancelAll(0);
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        int32_t userId = fuzzData.GetData<int32_t>();
         ansManagerStub.CancelAsBundle(notificationId, stringData, userId);
-        uint8_t type = *data % SLOT_TYPE_NUM;
+        uint8_t type = fuzzData.GetData<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         ansManagerStub.AddSlotByType(slotType);
         std::vector<sptr<Notification::NotificationSlot>> slots;
@@ -148,7 +153,9 @@ namespace OHOS {
         ansManagerStub.GetSlotByType(slotType, slot);
         ansManagerStub.GetSlots(slots);
         sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
-        uint64_t num = static_cast<uint64_t>(GetU32Data(data));
+        bundleOption->SetBundleName(fuzzData.GenerateRandomString());
+        bundleOption->SetUid(fuzzData.GenerateRandomInt32());
+        uint64_t num = fuzzData.GetData<uint64_t>();
         ansManagerStub.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
         ansManagerStub.GetActiveNotifications(notifications, 0);
@@ -159,15 +166,15 @@ namespace OHOS {
         ansManagerStub.GetSpecialActiveNotifications(key, notificationss);
         ansManagerStub.SetNotificationAgent(stringData);
         ansManagerStub.GetNotificationAgent(stringData);
-        bool canPublish = *data % ENABLE;
+        bool canPublish = fuzzData.GenerateRandomBool();
         ansManagerStub.CanPublishAsBundle(stringData, canPublish);
         ansManagerStub.PublishAsBundle(notification, stringData);
         ansManagerStub.SetNotificationBadgeNum(num);
-        int importance = static_cast<int>(GetU32Data(data));
+        int importance = fuzzData.GetData<int>();
         ansManagerStub.GetBundleImportance(importance);
-        bool granted = *data % ENABLE;
+        bool granted = fuzzData.GenerateRandomBool();
         ansManagerStub.HasNotificationPolicyAccessPermission(granted);
-        int32_t removeReason = static_cast<int32_t>(GetU32Data(data));
+        int32_t removeReason = fuzzData.GetData<int32_t>();
         ansManagerStub.RemoveNotification(bundleOption, notificationId, stringData, removeReason);
         ansManagerStub.RemoveAllNotifications(bundleOption);
         ansManagerStub.Delete(stringData, removeReason);
@@ -178,13 +185,13 @@ namespace OHOS {
         sptr<Notification::AnsDialogCallback> dialogCallback = nullptr;
         sptr<IRemoteObject> callerToken = nullptr;
         ansManagerStub.RequestEnableNotification(stringData, dialogCallback, callerToken);
-        bool enabled = *data % ENABLE;
+        bool enabled = fuzzData.GenerateRandomBool();
         ansManagerStub.SetNotificationsEnabledForBundle(stringData, enabled);
         ansManagerStub.SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);
         ansManagerStub.SetShowBadgeEnabledForBundle(bundleOption, enabled);
         ansManagerStub.GetShowBadgeEnabledForBundle(bundleOption, enabled);
         ansManagerStub.GetShowBadgeEnabled(enabled);
-        bool allowed = *data % ENABLE;
+        bool allowed = fuzzData.GenerateRandomBool();
         ansManagerStub.IsAllowedNotify(allowed);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allowed);
         ansManagerStub.CancelGroup(stringData, 0);
@@ -192,7 +199,7 @@ namespace OHOS {
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
         ansManagerStub.SetDoNotDisturbDate(date);
         ansManagerStub.GetDoNotDisturbDate(date);
-        bool doesSupport = *data % ENABLE;
+        bool doesSupport = fuzzData.GenerateRandomBool();
         ansManagerStub.DoesSupportDoNotDisturbMode(doesSupport);
         ansManagerStub.IsDistributedEnabled(enabled);
         ansManagerStub.EnableDistributedByBundle(bundleOption, enabled);
@@ -205,20 +212,20 @@ namespace OHOS {
         ansManagerStub.CancelContinuousTaskNotification(stringData, notificationId);
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequest();
         ansManagerStub.PublishReminder(reminder);
-        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
+        int32_t reminderId = fuzzData.GetData<int32_t>();
         ansManagerStub.CancelReminder(reminderId);
         std::vector<sptr<Notification::ReminderRequest>> reminders;
         ansManagerStub.GetValidReminders(reminders);
         ansManagerStub.CancelAllReminders();
-        uint64_t excludeDate = static_cast<uint64_t>(GetU32Data(data));
+        uint64_t excludeDate = fuzzData.GetData<uint64_t>();
         ansManagerStub.AddExcludeDate(reminderId, excludeDate);
         ansManagerStub.DelExcludeDates(reminderId);
         std::vector<uint64_t> excludeDates;
         ansManagerStub.GetExcludeDates(reminderId, excludeDates);
-        bool support = *data % ENABLE;
+        bool support = fuzzData.GenerateRandomBool();
         ansManagerStub.IsSupportTemplate(stringData, support);
         ansManagerStub.IsSpecialUserAllowedNotify(userId, allowed);
-        int32_t deviceIds = static_cast<int32_t>(GetU32Data(data));
+        int32_t deviceIds = fuzzData.GetData<int32_t>();
         ansManagerStub.SetNotificationsEnabledByUser(deviceIds, enabled);
         ansManagerStub.DeleteAllByUser(userId);
         ansManagerStub.SetDoNotDisturbDate(date);
@@ -237,11 +244,15 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
+    if (data != nullptr && size >= GetU32Size()) {
+        OHOS::FuzzData fuzzData(data, size);
+        std::vector<std::string> requestPermission = {
+            OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+            OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+            OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+        };
+        SystemHapTokenGet(requestPermission);
+        OHOS::DoSomethingInterestingWithMyAPI(fuzzData);
     }
     return 0;
 }

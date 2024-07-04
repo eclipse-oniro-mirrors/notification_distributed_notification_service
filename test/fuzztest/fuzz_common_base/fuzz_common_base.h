@@ -17,7 +17,10 @@
 #define FUZZ_COMMON_BASE_H
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include "securec.h"
+#include "fuzz_data.h"
 
 extern "C" {
 uint32_t GetU32Size();
@@ -25,6 +28,10 @@ uint32_t GetU32Size();
 uint32_t GetU32Data(const char* ptr);
 
 char* ParseData(const uint8_t* data, size_t size);
+
+void NativeTokenGet(const std::vector<std::string> &permissions);
+
+void SystemHapTokenGet(const std::vector<std::string> &permissions);
 }
 
 #endif // FUZZ_COMMON_BASE_H
