@@ -28,7 +28,9 @@
 #include "notification_constant.h"
 #include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_screen_status_manager.h"
+#endif
 #include "notification_local_live_view_subscriber_manager.h"
 
 #include "advanced_notification_inline.cpp"
