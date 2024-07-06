@@ -43,11 +43,13 @@ ohos_fuzztest("ReminderDataManagerFuzzTest") {
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
+    "data_share:datashare_common",
     "ffrt:libffrt",
     "hilog:libhilog",
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
+    "time_service:time_client",
   ]
 }
 

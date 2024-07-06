@@ -23,15 +23,52 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
-        std::string stringData(data);
-        Notification::ReminderStore reminderStore;
-        int32_t oldVersion = static_cast<int32_t>(GetU32Data(data));
-        reminderStore.Init();
-        reminderStore.InitData();
-        reminderStore.Delete(oldVersion);
-        reminderStore.DeleteUser(oldVersion);
-        reminderStore.Delete(stringData, oldVersion, oldVersion);
-        return reminderStore.DeleteBase(stringData);
+        std::string bundleName(data);
+        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        int32_t uid = static_cast<int32_t>(GetU32Data(data));
+        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
+        uint64_t date = static_cast<uint64_t>(GetU32Data(data));
+        bool value = static_cast<bool>(GetU32Data(data));
+
+        Notification::ReminderDataManager::InitInstance(nullptr);
+        auto manager = Notification::ReminderDataManager::GetInstance();
+        manager->Dump();
+        manager->CancelAllReminders(bundleName, userId, uid);
+        sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
+            bundleName, uid);
+        manager->CancelReminder(reminderId, option);
+        manager->CheckExcludeDateParam(reminderId, option);
+        manager->AddExcludeDate(reminderId, date, option);
+        manager->DelExcludeDates(reminderId, option);
+        std::vector<uint64_t> dates;
+        manager->GetExcludeDates(reminderId, option, dates);
+        EventFwk::Want want;
+        manager->CloseReminder(want, value);
+        std::vector<sptr<ReminderRequest>> reminders;
+        manager->GetValidReminders(option, reminders);
+        manager->Init(value);
+        manager->InitUserId();
+        std::vector<sptr<ReminderRequest>> immediatelyReminders;
+        std::vector<sptr<ReminderRequest>> extensionReminders;
+        manager->CheckReminderTime(immediatelyReminders, extensionReminders);
+        manager->RegisterConfigurationObserver();
+        manager->OnUserRemove(userId);
+        manager->OnServiceStart();
+        manager->OnUserSwitch(userId);
+        manager->OnProcessDiedLocked(option);
+
+        manager->ShowActiveReminder(want);
+        manager->SnoozeReminder(want);
+        manager->StartRecentReminder();
+        manager->HandleCustomButtonClick(want);
+        manager->ClickReminder(want);
+        manager->TerminateAlerting(want);
+        AppExecFwk::BundleInfo bundleInfo;
+        manager->GetBundleResMgr(bundleInfo);
+        manager->OnLanguageChanged();
+        manager->OnRemoveAppMgr();
+        manager->CancelAllReminders(userId);
+        return true;
     }
 }
 
