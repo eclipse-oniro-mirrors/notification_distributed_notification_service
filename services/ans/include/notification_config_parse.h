@@ -48,6 +48,7 @@ public:
     constexpr static const char* CFG_KEY_SLOT_TYPE_REMINDER = "slotTypeReminder";
     constexpr static const char* CFG_KEY_NAME = "name";
     constexpr static const char* CFG_KEY_REMINDER_FLAGS = "reminderFlags";
+    constexpr static const char* APP_PRIVILEGES = "appPrivileges";
     #ifdef CONFIG_POLICY_ENABLE
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
     # else

@@ -28,9 +28,11 @@
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
+#include "notification_trust_list.h"
 #include "os_account_manager.h"
 #include "notification_preferences.h"
 #include "distributed_database.h"
+#include "singleton.h"
 #include "want_agent_helper.h"
 #include "hitrace_meter.h"
 #include "notification_timer_info.h"
@@ -1750,32 +1752,7 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    if (!bundleOption->GetBundleName().compare("com.ohos.mms") ||
-        !bundleOption->GetBundleName().compare("com.ohos.locationdialog") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.hiviewcare") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.calendar") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.calendardata") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.ouc") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.settings") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmsapp.intelligent") ||
-        !bundleOption->GetBundleName().compare("com.ohos.callui") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.clock") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.health") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.health.core") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hms.payment") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.instantshare") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.dataclone") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.notepad") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.tips") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.tips.widget") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.parentcontrol") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.meetimeservice") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.finddevice") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.findservice") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.devicecollaboration") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.hicar") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.meetime") ||
-        !bundleOption->GetBundleName().compare("com.huawei.hmos.databackup")) {
+    if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
         ErrCode saveRef = NotificationPreferences::GetInstance().SetNotificationSlotFlagsForBundle(
             bundleOption, 0b111111);
         if (saveRef != ERR_OK) {
