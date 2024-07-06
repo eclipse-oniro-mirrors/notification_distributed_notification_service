@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "accesstoken_kit.h"
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "errors.h"
@@ -64,7 +65,7 @@ ErrCode AdvancedNotificationService::Subscribe(
             break;
         }
         
-        if (info) {
+        if (info != nullptr && info->GetAppUserId() != SUBSCRIBE_USER_ALL) {
             errCode = CheckUserIdParams(info->GetAppUserId());
             if (errCode != ERR_OK) {
                 break;

@@ -48,8 +48,7 @@ inline std::string GetClientBundleName()
 
 inline int32_t CheckUserIdParams(const int userId)
 {
-    if (userId != SUBSCRIBE_USER_ALL && userId != SUBSCRIBE_USER_INIT
-        && !OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+    if (userId != SUBSCRIBE_USER_INIT && !OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         return ERROR_USER_NOT_EXIST;
     }
     return ERR_OK;

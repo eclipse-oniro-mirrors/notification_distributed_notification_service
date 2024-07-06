@@ -90,26 +90,14 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
     return true;
 }
 
-std::string AdvancedDatashareHelper::GetFocusModeEnableUri() const
+std::string AdvancedDatashareHelper::GetFocusModeEnableUri(const int32_t &userId) const
 {
-    std::vector<int32_t> accountIds;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountIds);
-    std::string userId = "100";
-    if (!accountIds.empty()) {
-        userId = std::to_string(accountIds[0]);
-    }
-    return USER_SETTINGS_DATA_URI + userId + FOCUS_MODE_ENABLE_URI;
+    return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_ENABLE_URI;
 }
 
-std::string AdvancedDatashareHelper::GetFocusModeProfileUri() const
+std::string AdvancedDatashareHelper::GetFocusModeProfileUri(const int32_t &userId) const
 {
-    std::vector<int32_t> accountIds;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountIds);
-    std::string userId = "100";
-    if (!accountIds.empty()) {
-        userId = std::to_string(accountIds[0]);
-    }
-    return USER_SETTINGS_DATA_URI + userId + FOCUS_MODE_PROFILE_URI;
+    return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_PROFILE_URI;
 }
 } // namespace Notification
 } // namespace OHOS

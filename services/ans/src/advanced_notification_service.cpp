@@ -644,14 +644,15 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     return result;
 }
 
-void AdvancedNotificationService::QueryDoNotDisturbProfile(std::string &enable, std::string &profileId)
+void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId,
+    std::string &enable, std::string &profileId)
 {
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return;
     }
-    Uri enableUri(datashareHelper->GetFocusModeEnableUri());
+    Uri enableUri(datashareHelper->GetFocusModeEnableUri(userId));
     bool ret = datashareHelper->Query(enableUri, KEY_FOCUS_MODE_ENABLE, enable);
     if (!ret) {
         ANS_LOGE("Query focus mode enable fail.");
@@ -661,7 +662,7 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(std::string &enable, 
         ANS_LOGI("Currently not is do not disturb mode.");
         return;
     }
-    Uri idUri(datashareHelper->GetFocusModeProfileUri());
+    Uri idUri(datashareHelper->GetFocusModeProfileUri(userId));
     ret = datashareHelper->Query(idUri, KEY_FOCUS_MODE_PROFILE, profileId);
     if (!ret) {
         ANS_LOGE("Query focus mode id fail.");
@@ -676,9 +677,10 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         ANS_LOGE("Make notification record failed.");
         return;
     }
+    int32_t userId = record->notification->GetUserId();
     std::string enable;
     std::string profileId;
-    QueryDoNotDisturbProfile(enable, profileId);
+    QueryDoNotDisturbProfile(userId, enable, profileId);
     if (enable != DO_NOT_DISTURB_MODE) {
         ANS_LOGD("Currently not is do not disturb mode.");
         return;
@@ -690,7 +692,6 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         return;
     }
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
-    int32_t userId = record->notification->GetUserId();
     if (NotificationPreferences::GetInstance().GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
         ANS_LOGE("Get do not disturb profile failed.");
