@@ -44,12 +44,12 @@ namespace OHOS {
         manager->GetExcludeDates(reminderId, option, dates);
         EventFwk::Want want;
         manager->CloseReminder(want, value);
-        std::vector<sptr<ReminderRequest>> reminders;
+        std::vector<sptr<Notification::ReminderRequest>> reminders;
         manager->GetValidReminders(option, reminders);
         manager->Init(value);
         manager->InitUserId();
-        std::vector<sptr<ReminderRequest>> immediatelyReminders;
-        std::vector<sptr<ReminderRequest>> extensionReminders;
+        std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
+        std::vector<sptr<Notification::ReminderRequest>> extensionReminders;
         manager->CheckReminderTime(immediatelyReminders, extensionReminders);
         manager->RegisterConfigurationObserver();
         manager->OnUserRemove(userId);
