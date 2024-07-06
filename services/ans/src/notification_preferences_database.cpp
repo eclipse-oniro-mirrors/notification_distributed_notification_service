@@ -87,7 +87,7 @@ const static std::string KEY_BUNDLE_IMPORTANCE = "importance";
 /**
  * Indicates that disturbe key which bundle show badge.
  */
-const static std::string KEY_BUNDLE_SHOW_BADGE = "showBadge";
+const static std::string KEY_BUNDLE_SHOW_BADGE = "showBadgeEnable";
 
 /**
  * Indicates that disturbe key which bundle total badge num.
@@ -317,7 +317,7 @@ const std::map<std::string,
         },
         {
             KEY_BUNDLE_SHOW_BADGE,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleShowBadge, std::placeholders::_1,
+            std::bind(&NotificationPreferencesDatabase::ParseBundleShowBadgeEnable, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3),
         },
         {
@@ -1113,12 +1113,22 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPrefe
         rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
         ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
         NotificationPreferencesInfo::BundleInfo bunldeInfo;
+        std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
+        bool badgeEnableExist = false;
         for (auto bundleEntry : bundleEntries) {
             if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
                 ParseSlotFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry, userId);
             } else {
                 ParseBundlePropertyFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry);
             }
+
+            if (keyStr.compare(bundleEntry.first) == 0) {
+                badgeEnableExist = true;
+            }
+        }
+
+        if (!badgeEnableExist) {
+            bunldeInfo.SetIsShowBadge(static_cast<bool>(true));
         }
 
         info.SetBundleInfoFromDb(bunldeInfo, bundleKey);
@@ -1315,7 +1325,7 @@ void NotificationPreferencesDatabase::ParseBundleImportance(
     bundleInfo.SetImportance(static_cast<NotificationSlot::NotificationLevel>(StringToInt(value)));
 }
 
-void NotificationPreferencesDatabase::ParseBundleShowBadge(
+void NotificationPreferencesDatabase::ParseBundleShowBadgeEnable(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleShowBadge bundle show badge is %{public}s.", value.c_str());
