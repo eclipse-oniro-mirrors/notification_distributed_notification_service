@@ -47,7 +47,7 @@ const static int BUNDLE_POPPED_DIALOG = false;
 /**
  * Default params that bundle show badge is false.
  */
-const static bool BUNDLE_SHOW_BADGE = false;
+const static bool BUNDLE_SHOW_BADGE = true;
 
 /**
  * Indicates bundle type which used to DB store.

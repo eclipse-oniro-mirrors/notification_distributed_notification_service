@@ -279,7 +279,7 @@ private:
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
-    void ParseBundleShowBadge(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
+    void ParseBundleShowBadgeEnable(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleBadgeNum(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleEnableNotification(
         NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
