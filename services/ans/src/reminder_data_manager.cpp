@@ -321,9 +321,9 @@ void ReminderDataManager::CancelNotification(const sptr<ReminderRequest> &remind
         ANSR_LOGE("Cancel notification fail");
         return;
     }
-    std::string label = ReminderRequest::NOTIFICATION_LABEL + "_" + std::to_string(reminder->GetReminderId());
     sptr<NotificationBundleOption> bundleOption = FindNotificationBundleOption(reminder->GetReminderId());
-    advancedNotificationService_->CancelPreparedNotification(notification->GetNotificationId(), label, bundleOption);
+    advancedNotificationService_->CancelPreparedNotification(notification->GetNotificationId(),
+        ReminderRequest::NOTIFICATION_LABEL, bundleOption);
 }
 
 bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption,
@@ -2140,32 +2140,28 @@ bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderReques
     return true;
 }
 
-void ReminderDataManager::HandleAutoDeleteReminder(const int32_t reminderId, const int32_t uid)
+void ReminderDataManager::HandleAutoDeleteReminder(const int32_t notificationId, const int32_t uid,
+    const int64_t autoDeletedTime)
 {
-    ANSR_LOGI("auto delete reminder[%{public}d] start", reminderId);
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
-    if (reminder == nullptr) {
-        ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
-        return;
+    ANSR_LOGI("auto delete reminder start");
+    std::vector<sptr<ReminderRequest>> showedReminder;
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        showedReminder = showedReminderVector_;
     }
-    if (reminder->GetUid() != uid) {
-        ANSR_LOGW("reminder uid not match");
-        return;
+    for (auto reminder : showedReminder) {
+        if (reminder == nullptr) {
+            continue;
+        }
+
+        if (reminder->GetUid() != uid || notificationId != reminder->GetNotificationId() ||
+            reminder->GetAutoDeletedTime() != autoDeletedTime) {
+            continue;
+        }
+        CloseReminder(reminder, true);
+        UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
+        CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     }
-    int64_t autoDeleteTime = reminder->GetAutoDeletedTime();
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-    if (now < 0 || autoDeleteTime <= 0) {
-        ANSR_LOGW("get now time failed or auto delete time error.");
-        return;
-    }
-    if ((autoDeleteTime / ReminderRequest::MILLI_SECONDS) > now) {
-        ANSR_LOGW("auto delete time greater than now.");
-        return;
-    }
-    CloseReminder(reminder, true);
-    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
 }
 

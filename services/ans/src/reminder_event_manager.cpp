@@ -30,13 +30,7 @@
 using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
-static const std::string LABEL_SPLITER = "_";
-static constexpr uint32_t LABEL_SIZE = 3;
-static const std::string LABEL_PREFIX = "REMINDER";
-static const std::string LABEL_SUFFIX = "AGENT";
-static constexpr uint32_t LABEL_PREFIX_INDEX = 0;
-static constexpr uint32_t LABEL_SUFFIX_INDEX = 1;
-static constexpr uint32_t REMINDER_ID_INDEX = 2;
+static const std::string NOTIFICATION_LABEL = "REMINDER_AGENT";
 std::shared_ptr<ReminderEventManager::ReminderNotificationSubscriber> ReminderEventManager::subscriber_
     = nullptr;
 
@@ -302,23 +296,17 @@ void ReminderEventManager::ReminderNotificationSubscriber::OnCanceled(
     }
     NotificationRequest request = notification->GetNotificationRequest();
     std::string label = request.GetLabel();
-    std::vector<std::string> labelSplits;
-    SplitStr(label, LABEL_SPLITER, labelSplits);
-    if (labelSplits.size() != LABEL_SIZE || labelSplits[LABEL_PREFIX_INDEX] != LABEL_PREFIX
-        || labelSplits[LABEL_SUFFIX_INDEX] != LABEL_SUFFIX) {
-        return;
-    }
-
-    int32_t reminderId = 0;
-    if (!StrToInt(labelSplits[REMINDER_ID_INDEX], reminderId)) {
+    int64_t autoDeletedTime = request.GetAutoDeletedTime();
+    if (autoDeletedTime <= 0 || label != NOTIFICATION_LABEL) {
         return;
     }
 
     if (reminderDataManager_ == nullptr) {
         return;
     }
+    int32_t notificationId = request.GetNotificationId();
     int32_t uid = request.GetOwnerUid() == 0 ? request.GetCreatorUid() : request.GetOwnerUid();
-    reminderDataManager_->HandleAutoDeleteReminder(reminderId, uid);
+    reminderDataManager_->HandleAutoDeleteReminder(notificationId, uid, autoDeletedTime);
 }
 
 void ReminderEventManager::ReminderNotificationSubscriber::OnConsumed(const std::shared_ptr<Notification> &notification,
