@@ -1291,7 +1291,7 @@ private:
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
-    void QueryDoNotDisturbProfile(std::string &enable, std::string &profileId);
+    void QueryDoNotDisturbProfile(const int32_t &userId, std::string &enable, std::string &profileId);
     void CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record);
     void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();

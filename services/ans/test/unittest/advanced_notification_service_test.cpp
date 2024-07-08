@@ -3670,8 +3670,9 @@ HWTEST_F(AdvancedNotificationServiceTest, QueryDoNotDisturbProfile_0100, TestSiz
 {
     std::string enable;
     std::string profileId;
+    int32_t userId = 100;
     EXPECT_NE(advancedNotificationService_, nullptr);
-    advancedNotificationService_->QueryDoNotDisturbProfile(enable, profileId);
+    advancedNotificationService_->QueryDoNotDisturbProfile(userId, enable, profileId);
 }
 
 /**
