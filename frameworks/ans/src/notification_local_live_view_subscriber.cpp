@@ -43,8 +43,9 @@ NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::SubscriberLoca
 void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (GetAnsManagerProxy()) {
-        proxy_->AsObject()->AddDeathRecipient(recipient_);
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (proxy != nullptr) {
+        proxy->AsObject()->AddDeathRecipient(recipient_);
         ANS_LOGD("%s, Add death recipient.", __func__);
     }
     subscriber_.OnConnected();
@@ -53,8 +54,9 @@ void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConnect
 void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisconnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (GetAnsManagerProxy()) {
-        proxy_->AsObject()->RemoveDeathRecipient(recipient_);
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (proxy != nullptr) {
+        proxy->AsObject()->RemoveDeathRecipient(recipient_);
         ANS_LOGD("%s, Remove death recipient.", __func__);
     }
     subscriber_.OnDisconnected();
@@ -67,31 +69,26 @@ void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnRespons
     subscriber_.OnResponse(notificationId, buttonOption);
 }
 
-bool NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::GetAnsManagerProxy()
+sptr<AnsManagerInterface> NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::GetAnsManagerProxy()
 {
-    if (proxy_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (proxy_ == nullptr) {
-            sptr<ISystemAbilityManager> systemAbilityManager =
-                SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-            if (!systemAbilityManager) {
-                return false;
-            }
-
-            sptr<IRemoteObject> remoteObject =
-                systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
-            if (!remoteObject) {
-                return false;
-            }
-
-            proxy_ = iface_cast<AnsManagerInterface>(remoteObject);
-            if ((proxy_ == nullptr) || (proxy_->AsObject() == nullptr)) {
-                return false;
-            }
-        }
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        return nullptr;
     }
 
-    return true;
+    sptr<IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+    if (!remoteObject) {
+        return nullptr;
+    }
+
+    sptr<AnsManagerInterface> proxy = iface_cast<AnsManagerInterface>(remoteObject);
+    if ((proxy == nullptr) || (proxy->AsObject() == nullptr)) {
+        return nullptr;
+    }
+
+    return proxy;
 }
 
 NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::DeathRecipient::DeathRecipient(
@@ -102,7 +99,6 @@ NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::DeathRecipient
 void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::DeathRecipient::OnRemoteDied(
     const wptr<IRemoteObject> &object)
 {
-    subscriberImpl_.proxy_ = nullptr;
     subscriberImpl_.subscriber_.OnDied();
 }
 }  // namespace Notification
