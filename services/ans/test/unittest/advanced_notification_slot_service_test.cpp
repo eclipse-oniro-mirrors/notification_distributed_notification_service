@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#include "errors.h"
+#include "notification.h"
+#include "notification_basic_content.h"
+#include "notification_normal_content.h"
+#include "notification_request.h"
+#include "refbase.h"
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -535,6 +541,104 @@ HWTEST_F(AnsSlotServiceTest, GetConfigSlotReminderModeByType_00001, Function | S
     auto reminderMode =
         DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slotType);
     ASSERT_EQ(reminderMode, (int)0b111111);
+}
+
+/**
+ * @tc.name: SetLiveViewForceControlToRequest_00001
+ * @tc.desc: Test SetLiveViewForceControlToRequest
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, SetLiveViewForceControlToRequest_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto pContent = std::make_shared<NotificationLiveViewContent>();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetContent(std::make_shared<NotificationContent>(pContent));
+    
+    auto ret = advancedNotificationService_->SetLiveViewForceControlToRequest(request, bundle);
+
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: SetLiveViewForceControlToRequestToDB_00001
+ * @tc.desc: Test SetLiveViewForceControlToRequest
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, SetLiveViewForceControlToDB_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto pContent = std::make_shared<NotificationLiveViewContent>();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetContent(std::make_shared<NotificationContent>(pContent));
+    
+    auto ret = advancedNotificationService_->SetLiveViewForceControlToDB(request, bundle);
+
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: CheckLiveViewForceControlAsBundle_00001
+ * @tc.desc: Test CheckLiveViewForceControlAsBundle
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, CheckLiveViewForceControlAsBundle_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto pContent = std::make_shared<NotificationLiveViewContent>();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetContent(std::make_shared<NotificationContent>(pContent));
+    
+    sptr<Notification> notification = new Notification(request);
+    auto ret = advancedNotificationService_->CheckLiveViewForceControlAsBundle(false, request, bundle);
+
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckLiveViewForceControlAsBundle_00001
+ * @tc.desc: Test CheckLiveViewForceControlAsBundle
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, CheckLiveViewForceControlAsBundle_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto pContent = std::make_shared<NotificationLiveViewContent>();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetContent(std::make_shared<NotificationContent>(pContent));
+    
+    sptr<Notification> notification = new Notification(request);
+    auto ret = advancedNotificationService_->CheckLiveViewForceControlAsBundle(true, request, bundle);
+
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckLiveViewForceControlAsBundle_00001
+ * @tc.desc: Test CheckLiveViewForceControlAsBundle
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, CheckLiveViewForceControlAsBundle_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto pContent = std::make_shared<NotificationNormalContent>();
+    request->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    request->SetContent(std::make_shared<NotificationContent>(pContent));
+    
+    sptr<Notification> notification = new Notification(request);
+    auto ret = advancedNotificationService_->CheckLiveViewForceControlAsBundle(true, request, bundle);
+
+    EXPECT_EQ(ret, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

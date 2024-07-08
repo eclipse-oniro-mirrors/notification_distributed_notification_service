@@ -1208,6 +1208,8 @@ public:
 
     bool IsSystemLiveView() const;
 
+    bool IsLiveView() const;
+
     /**
      * @brief Checks whether the image size exceeds the limit in content.
      *
@@ -1372,6 +1374,13 @@ public:
      */
     bool IsUpdateByOwnerAllowed() const;
 
+    /**
+     * @brief Read a NotificationRequest object from a Parcel.
+     *
+     * @param forceControl Indicates the parcel object.
+     */
+    void SetLiveViewForceControl(bool forceControl);
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1491,6 +1500,7 @@ private:
     bool isRemoveAllowed_ {true};
     bool isCoverActionButtons_ {false};
     bool isUpdateByOwnerAllowed_ {false};
+    bool isLiveViewForceControl_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};

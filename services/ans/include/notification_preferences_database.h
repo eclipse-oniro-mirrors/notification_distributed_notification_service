@@ -303,6 +303,7 @@ private:
     void ParseSlotAuthorizedStatus(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotAuthHitnCnt(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotReminderMode(sptr<NotificationSlot> &slot, const std::string &value) const;
+    void ParseSlotForceControl(sptr<NotificationSlot> &slot, const std::string &value) const;
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,

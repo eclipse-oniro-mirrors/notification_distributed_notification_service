@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "access_token_helper.h"
 #include "advanced_notification_service.h"
 
 #include <functional>
@@ -130,6 +131,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         }
 
         if (IsNeedPushCheck(request)) {
+            SetLiveViewForceControlToDB(request, bundleOption);
             result = PushCheck(request);
         }
         if (result != ERR_OK) {
@@ -190,7 +192,8 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::s
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetInstanceKey(instanceKey);
-    return CancelPreparedNotification(notificationId, label, bundleOption);
+    bool checkLiveViewForceControl = AccessTokenHelper::IsThirdPartApp();
+    return CancelPreparedNotification(notificationId, label, bundleOption, checkLiveViewForceControl);
 }
 
 ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
@@ -211,8 +214,8 @@ ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
-
-        std::vector<std::string> keys = GetNotificationKeys(bundleOption);
+        bool checkForceControl = AccessTokenHelper::IsThirdPartApp();
+        std::vector<std::string> keys = GetNotificationKeys(bundleOption, checkForceControl);
         std::vector<sptr<Notification>> notifications;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -285,7 +288,7 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     }
     sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
         bundleOption->GetBundleName(), uid);
-    return CancelPreparedNotification(notificationId, "", bundle);
+    return CancelPreparedNotification(notificationId, "", bundle, true);
 }
 
 ErrCode AdvancedNotificationService::CancelAsBundle(
@@ -342,7 +345,7 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
         }
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             bundleOption->GetBundleName(), uid);
-        return CancelPreparedNotification(id, "", bundle);
+        return CancelPreparedNotification(id, "", bundle, false);
     }
 
     return ERR_ANS_NO_AGENT_SETTING;
@@ -1923,12 +1926,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
+    SetLiveViewForceControlToRequest(request, bundleOption);
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
         return ERR_ANS_NO_MEMORY;
     }
-
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -2151,7 +2154,7 @@ ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<Notification
     std::string uniqueKey = request->GenerateUniqueKey();
     if (IsDuplicateMsg(uniqueKey)) {
         ANS_LOGI("Duplicate msg, no need to notify, key is %{public}s, appmessageId is %{public}s",
-            request->GetKey().c_str(), request->GetAppMessageId().c_str());
+            uniqueKey.c_str(), request->GetAppMessageId().c_str());
         return ERR_ANS_DUPLICATE_MSG;
     }
 
