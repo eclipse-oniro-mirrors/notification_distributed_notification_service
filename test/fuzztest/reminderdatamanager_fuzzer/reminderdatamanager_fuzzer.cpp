@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "reminder_data_manager.h"
-#undef private
-#undef protected
+#include "reminder_request_timer.h"
 #include "reminderdatamanager_fuzzer.h"
 
 namespace OHOS {
@@ -29,6 +26,7 @@ namespace OHOS {
         int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
         uint64_t date = static_cast<uint64_t>(GetU32Data(data));
         bool value = static_cast<bool>(GetU32Data(data));
+        uint8_t type = static_cast<uint8_t>(GetU32Data(data));
 
         Notification::ReminderDataManager::InitInstance(nullptr);
         auto manager = Notification::ReminderDataManager::GetInstance();
@@ -56,7 +54,10 @@ namespace OHOS {
         manager->OnServiceStart();
         manager->OnUserSwitch(userId);
         manager->OnProcessDiedLocked(option);
+        manager->RefreshRemindersDueToSysTimeChange(type);
 
+        sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(1200);
+        manager->ShouldAlert(reminder);
         manager->ShowActiveReminder(want);
         manager->SnoozeReminder(want);
         manager->StartRecentReminder();
@@ -65,9 +66,15 @@ namespace OHOS {
         manager->TerminateAlerting(want);
         AppExecFwk::BundleInfo bundleInfo;
         manager->GetBundleResMgr(bundleInfo);
+        manager->UpdateReminderLanguage(reminder);
+        manager->UpdateReminderLanguageLocked(reminder);
         manager->OnLanguageChanged();
         manager->OnRemoveAppMgr();
         manager->CancelAllReminders(userId);
+        manager->CheckUpdateConditions(reminder, Notification::ReminderRequest::ActionButtonType::INVALID,
+            reminder->GetActionButtons());
+        manager->AddToShowedReminders(reminder);
+        manager->PublishReminder(reminder, option);
         return true;
     }
 }
