@@ -86,7 +86,7 @@ bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
     int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
     if (ret != ERR_OK) {
         ANS_LOGE("Failed to call OsAccountManager::IsOsAccountExists, code is %{public}d", ret);
-        return ret;
+        return false;
     }
     ANS_LOGD("Call IsOsAccountExists Success, user = %{public}d userExists = %{public}d", userId, isAccountExists);
     return isAccountExists;
