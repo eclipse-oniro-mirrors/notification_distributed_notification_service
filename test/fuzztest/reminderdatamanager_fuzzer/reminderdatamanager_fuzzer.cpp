@@ -62,7 +62,6 @@ namespace OHOS {
         manager->ShouldAlert(reminder);
         manager->ShowActiveReminder(want);
         manager->SnoozeReminder(want);
-        manager->StartRecentReminder();
 
         manager->HandleCustomButtonClick(want);
         manager->ClickReminder(want);
