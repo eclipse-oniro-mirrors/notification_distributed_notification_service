@@ -18,7 +18,7 @@
 #include "reminderdatamanager_fuzzer.h"
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithManager(const char* data, size_t size)
     {
         std::string bundleName(data);
         int32_t userId = static_cast<int32_t>(GetU32Data(data));
@@ -27,6 +27,9 @@ namespace OHOS {
         uint64_t date = static_cast<uint64_t>(GetU32Data(data));
         bool value = static_cast<bool>(GetU32Data(data));
         uint8_t type = static_cast<uint8_t>(GetU32Data(data));
+        EventFwk::Want want;
+        constepxr uint64_t seconds = 1200;
+        sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
 
         Notification::ReminderDataManager::InitInstance(nullptr);
         auto manager = Notification::ReminderDataManager::GetInstance();
@@ -38,9 +41,9 @@ namespace OHOS {
         manager->CheckExcludeDateParam(reminderId, option);
         manager->AddExcludeDate(reminderId, date, option);
         manager->DelExcludeDates(reminderId, option);
+
         std::vector<uint64_t> dates;
         manager->GetExcludeDates(reminderId, option, dates);
-        EventFwk::Want want;
         manager->CloseReminder(want, value);
         std::vector<sptr<Notification::ReminderRequest>> reminders;
         manager->GetValidReminders(option, reminders);
@@ -49,18 +52,18 @@ namespace OHOS {
         std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
         std::vector<sptr<Notification::ReminderRequest>> extensionReminders;
         manager->CheckReminderTime(immediatelyReminders, extensionReminders);
+
         manager->RegisterConfigurationObserver();
         manager->OnUserRemove(userId);
         manager->OnServiceStart();
         manager->OnUserSwitch(userId);
         manager->OnProcessDiedLocked(option);
         manager->RefreshRemindersDueToSysTimeChange(type);
-
-        sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(1200);
         manager->ShouldAlert(reminder);
         manager->ShowActiveReminder(want);
         manager->SnoozeReminder(want);
         manager->StartRecentReminder();
+
         manager->HandleCustomButtonClick(want);
         manager->ClickReminder(want);
         manager->TerminateAlerting(want);
@@ -70,11 +73,60 @@ namespace OHOS {
         manager->UpdateReminderLanguageLocked(reminder);
         manager->OnLanguageChanged();
         manager->OnRemoveAppMgr();
+        return true;
+    }
+
+    bool DoSomethingInterestingWithReminder(const char* data, size_t size)
+    {
+        std::string bundleName(data);
+        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        int32_t uid = static_cast<int32_t>(GetU32Data(data));
+        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
+        bool value = static_cast<bool>(GetU32Data(data));
+        uint8_t type = static_cast<uint8_t>(GetU32Data(data));
+        EventFwk::Want want;
+        constepxr uint64_t seconds = 1200;
+        sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
+        auto manager = Notification::ReminderDataManager::GetInstance();
+
         manager->CancelAllReminders(userId);
         manager->CheckUpdateConditions(reminder, Notification::ReminderRequest::ActionButtonType::INVALID,
             reminder->GetActionButtons());
+        manager->GetCustomRingUri(reminder);
+        manager->CancelRemindersImplLocked(bundleName, userId, uid);
+        manager->CloseRemindersByGroupId(reminderId, bundleName, bundleName);
+        manager->CancelNotification(reminder);
+        manager->CheckReminderLimitExceededLocked(bundleOption, reminder);
+        manager->GetImmediatelyShowRemindersLocked(reminders);
+        manager->GetSoundUri(reminder);
         manager->AddToShowedReminders(reminder);
+
+        manager->IsAllowedNotify(reminder);
+        manager->PlaySoundAndVibrationLocked(reminder);
+        manager->PlaySoundAndVibration(reminder);
+        manager->StopSoundAndVibrationLocked(reminder);
+        manager->StopSoundAndVibration(reminder);
+        manager->RemoveFromShowedReminders(reminder);
+        manager->RemoveReminderLocked(reminderId);
+        manager->SetActiveReminder(reminder);
+        manager->SetAlertingReminder(reminder);
+        manager->ShowActiveReminderExtendLocked(reminder);
+
         manager->PublishReminder(reminder, option);
+        manager->FindReminderRequestLocked(reminderId);
+        manager->FindReminderRequestLocked(reminderId, bundleName);
+        manager->FindNotificationBundleOption(reminderId);
+        manager->GetRecentReminderLocked();
+        manager->HandleImmediatelyShow(immediatelyReminders);
+        manager->HandleExtensionReminder(extensionReminders);
+        manager->HandleSameNotificationIdShowing(reminder);
+        manager->IsBelongToSameApp(option, option);
+        manager->CheckIsSameApp(reminder, option);
+
+        Notification::ReminderDataManager::StartRecentReminder(reminder);
+        Notification::ReminderDataManager::AsyncStartExtensionAbility(reminder);
+        manager->ShowReminder(reminder, value, value, value, value);
+        manager->SnoozeReminderImpl(reminder);
         return true;
     }
 }
@@ -86,6 +138,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     char *ch = ParseData(data, size);
     if (ch != nullptr && size >= GetU32Size()) {
         OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        OHOS::DoSomethingInterestingWithReminder(ch, size);
         free(ch);
         ch = nullptr;
     }
