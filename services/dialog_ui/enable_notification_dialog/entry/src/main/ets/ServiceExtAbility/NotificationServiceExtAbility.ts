@@ -135,7 +135,7 @@ export class EnableNotificationDialog {
           isModal: true,
           isTopmost: true
         };
-        await extensionWindow.createSubWindowWithOptions('subWindowForHost'+ Date(), subWindowOpts)
+        await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts)
           .then((subWindow: window.Window) => {
             let subWindow1 = subWindow;
             subWindow1.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
