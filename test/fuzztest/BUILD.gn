@@ -73,6 +73,7 @@ group("fuzztest") {
     "publishcontinuoustasknotification_fuzzer:PublishContinuousTaskNotificationFuzzTest",
     "publishnotification_fuzzer:PublishNotificationFuzzTest",
     "readfromparcel_fuzzer:ReadFromParcelFuzzTest",
+    "reminderdatamanager_fuzzer:ReminderDataManagerFuzzTest",
     "reminderhelper_fuzzer:ReminderHelperFuzzTest",
     "reminderrequest_fuzzer:ReminderRequestFuzzTest",
     "reminderrequestalarm_fuzzer:ReminderRequestAlarmFuzzTest",
