@@ -91,7 +91,8 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
         return ERROR_INTERNAL_ERROR;
     }
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
-        ANS_LOGE("AddDialogIfNotExist failed. Dialog already exists.");
+        ANS_LOGE("AddDialogIfNotExist failed. Dialog already exists. bundle = %{public}s",
+            bundle->GetBundleName().c_str());
         return ERR_ANS_DIALOG_IS_POPPING;
     }
     ErrCode result = NotificationDialog::StartEnableNotificationDialogAbility(

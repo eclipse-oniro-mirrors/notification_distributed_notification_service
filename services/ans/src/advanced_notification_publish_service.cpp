@@ -863,7 +863,8 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
     if (result != ERR_OK) {
         return ERROR_INTERNAL_ERROR;
     }
-    ANS_LOGI("allowedNotify = %{public}d", allowedNotify);
+    ANS_LOGI("allowedNotify = %{public}d, bundle = %{public}s", allowedNotify,
+        bundleOption->GetBundleName().c_str());
     if (allowedNotify) {
         return ERR_OK;
     }
