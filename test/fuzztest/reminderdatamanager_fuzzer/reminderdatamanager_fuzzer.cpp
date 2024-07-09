@@ -71,8 +71,6 @@ namespace OHOS {
         manager->GetBundleResMgr(bundleInfo);
         manager->UpdateReminderLanguage(reminder);
         manager->UpdateReminderLanguageLocked(reminder);
-        manager->OnLanguageChanged();
-        manager->OnRemoveAppMgr();
         return true;
     }
 
@@ -89,6 +87,8 @@ namespace OHOS {
 
         sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
             bundleName, uid);
+        manager->OnLanguageChanged();
+        manager->OnRemoveAppMgr();
         manager->CancelAllReminders(userId);
         manager->CheckUpdateConditions(reminder, Notification::ReminderRequest::ActionButtonType::INVALID,
             reminder->GetActionButtons());
