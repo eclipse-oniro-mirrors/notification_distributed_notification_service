@@ -73,13 +73,11 @@ private:
 
         void OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption) override;
 
-        bool GetAnsManagerProxy();
+        sptr<AnsManagerInterface> GetAnsManagerProxy();
 
     public:
         NotificationLocalLiveViewSubscriber &subscriber_;
         sptr<DeathRecipient> recipient_ {nullptr};
-        sptr<AnsManagerInterface> proxy_ {nullptr};
-        std::mutex mutex_ {};
     };
 
 private:

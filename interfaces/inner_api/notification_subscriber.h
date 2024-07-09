@@ -170,13 +170,11 @@ private:
 
         void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
-        bool GetAnsManagerProxy();
+        sptr<AnsManagerInterface> GetAnsManagerProxy();
 
     public:
         NotificationSubscriber &subscriber_;
         sptr<DeathRecipient> recipient_ {nullptr};
-        sptr<AnsManagerInterface> proxy_ {nullptr};
-        std::mutex mutex_ {};
     };
 
 private:
