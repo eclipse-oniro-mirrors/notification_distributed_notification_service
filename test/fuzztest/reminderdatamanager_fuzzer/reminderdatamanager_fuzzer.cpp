@@ -126,7 +126,6 @@ namespace OHOS {
         manager->IsBelongToSameApp(option, option);
         manager->CheckIsSameApp(reminder, option);
         manager->ShowReminder(reminder, value, value, value, value);
-        manager->SnoozeReminderImpl(reminder);
         return true;
     }
 }
