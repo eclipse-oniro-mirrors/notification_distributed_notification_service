@@ -28,7 +28,7 @@ namespace OHOS {
         bool value = static_cast<bool>(GetU32Data(data));
         uint8_t type = static_cast<uint8_t>(GetU32Data(data));
         EventFwk::Want want;
-        constepxr uint64_t seconds = 1200;
+        constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
 
         Notification::ReminderDataManager::InitInstance(nullptr);
@@ -83,12 +83,12 @@ namespace OHOS {
         int32_t uid = static_cast<int32_t>(GetU32Data(data));
         int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
         bool value = static_cast<bool>(GetU32Data(data));
-        uint8_t type = static_cast<uint8_t>(GetU32Data(data));
-        EventFwk::Want want;
-        constepxr uint64_t seconds = 1200;
+        constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
         auto manager = Notification::ReminderDataManager::GetInstance();
 
+        sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
+            bundleName, uid);
         manager->CancelAllReminders(userId);
         manager->CheckUpdateConditions(reminder, Notification::ReminderRequest::ActionButtonType::INVALID,
             reminder->GetActionButtons());
@@ -96,7 +96,8 @@ namespace OHOS {
         manager->CancelRemindersImplLocked(bundleName, userId, uid);
         manager->CloseRemindersByGroupId(reminderId, bundleName, bundleName);
         manager->CancelNotification(reminder);
-        manager->CheckReminderLimitExceededLocked(bundleOption, reminder);
+        manager->CheckReminderLimitExceededLocked(option, reminder);
+        std::vector<sptr<Notification::ReminderRequest>> reminders;
         manager->GetImmediatelyShowRemindersLocked(reminders);
         manager->GetSoundUri(reminder);
         manager->AddToShowedReminders(reminder);
@@ -112,19 +113,18 @@ namespace OHOS {
         manager->SetAlertingReminder(reminder);
         manager->ShowActiveReminderExtendLocked(reminder);
 
+        std::vector<sptr<Notification::ReminderRequest>> extensionReminders;
+        std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
         manager->PublishReminder(reminder, option);
         manager->FindReminderRequestLocked(reminderId);
         manager->FindReminderRequestLocked(reminderId, bundleName);
         manager->FindNotificationBundleOption(reminderId);
         manager->GetRecentReminderLocked();
-        manager->HandleImmediatelyShow(immediatelyReminders);
+        manager->HandleImmediatelyShow(immediatelyReminders, value);
         manager->HandleExtensionReminder(extensionReminders);
         manager->HandleSameNotificationIdShowing(reminder);
         manager->IsBelongToSameApp(option, option);
         manager->CheckIsSameApp(reminder, option);
-
-        Notification::ReminderDataManager::StartRecentReminder(reminder);
-        Notification::ReminderDataManager::AsyncStartExtensionAbility(reminder);
         manager->ShowReminder(reminder, value, value, value, value);
         manager->SnoozeReminderImpl(reminder);
         return true;
