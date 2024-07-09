@@ -1098,6 +1098,11 @@ void AdvancedNotificationService::OnDistributedDelete(
             recordDeviceId = deviceId;
         }
 
+        if (bundleOption == nullptr) {
+            ANS_LOGE("Failed to get bundleOption!");
+            return;
+        }
+
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->deviceId == recordDeviceId) &&

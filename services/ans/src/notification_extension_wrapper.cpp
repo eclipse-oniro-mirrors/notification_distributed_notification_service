@@ -117,17 +117,17 @@ void ExtensionWrapper::SetlocalSwitch(std::string &enable)
 void ExtensionWrapper::RegisterDataSettingObserver()
 {
     ANS_LOGD("ExtensionWrapper::RegisterDataSettingObserver enter");
-    sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
-    if (aggregationRoamingObserver_ == nullptr) {
-        aggregationRoamingObserver_ = new (std::nothrow) AdvancedAggregationDataRoamingObserver();
+    sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver;
+    if (aggregationRoamingObserver == nullptr) {
+        aggregationRoamingObserver = new (std::nothrow) AdvancedAggregationDataRoamingObserver();
     }
 
-    if (aggregationRoamingObserver_ == nullptr) {
+    if (aggregationRoamingObserver == nullptr) {
         return;
     }
     
     Uri dataEnableUri(SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI);
-    AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(dataEnableUri, aggregationRoamingObserver_);
+    AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(dataEnableUri, aggregationRoamingObserver);
 }
 
 ErrCode ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::string& value)
