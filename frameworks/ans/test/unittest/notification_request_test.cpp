@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include "notification_content.h"
 #include <gtest/gtest.h>
-#include <memory>
 #include <utility>
 
 #define private public
@@ -955,7 +953,7 @@ HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0001, Level1)
     notificationRequest.SetLabel(string("test"));
     notificationRequest.SetCreatorBundleName(string("push.com"));
     auto key = notificationRequest.GetKey();
-    string expectKey {"ans_live_view__1_0_push.com_test_10_0"};
+    string expectKey {"ans_live_view__1_0_push.com_test_10"};
     EXPECT_EQ(key, expectKey);
 }
 
@@ -975,30 +973,7 @@ HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0002, Level1)
     notificationRequest.SetOwnerBundleName(string("test.com"));
     notificationRequest.SetIsAgentNotification(true);
     auto key = notificationRequest.GetKey();
-    string expectKey {"ans_live_view__1_2_test.com_test_10_0"};
-    EXPECT_EQ(key, expectKey);
-}
-
-/**
- * @tc.name: GetNotificationRequestKey_0003
- * @tc.desc: Check get key right
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0003, Level1)
-{
-    int32_t myNotificationId = 10;
-    NotificationRequest notificationRequest(myNotificationId);
-    auto pContent = std::make_shared<NotificationLiveViewContent>();
-    notificationRequest.SetOwnerUid(2);
-    notificationRequest.SetOwnerUserId(1);
-    notificationRequest.SetLabel(string("test"));
-    notificationRequest.SetOwnerBundleName(string("test.com"));
-    notificationRequest.SetIsAgentNotification(true);
-    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    notificationRequest.SetContent(std::make_shared<NotificationContent>(pContent));
-    auto key = notificationRequest.GetKey();
-    string expectKey {"ans_live_view__1_2_test.com_test_10_0"};
+    string expectKey {"ans_live_view__1_2_test.com_test_10"};
     EXPECT_EQ(key, expectKey);
 }
 
@@ -1229,36 +1204,6 @@ HWTEST_F(NotificationRequestTest, SetArchiveDeadLine_0001, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetArchiveDeadLine(archiveDeadLine);
     EXPECT_EQ(notificationRequest.GetArchiveDeadLine(), 1);
-}
-
-/**
- * @tc.name: SetLiveViewForceControl_00001
- * @tc.desc: Test SetLiveViewForceControl parameters.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRequestTest, SetLiveViewForceControl_00001, Level1)
-{
-    std::string deviceId = "DeviceId";
-    int32_t userId = 10;
-    int32_t uid = 20;
-    std::string label = "Lable";
-    int32_t id = 30;
-    auto pContent = std::make_shared<NotificationLiveViewContent>();
-    sptr<NotificationRequest> request = sptr<NotificationRequest>::MakeSptr();
-    request->SetIsAgentNotification(true);
-    request->SetOwnerUid(uid);
-    request->SetOwnerUserId(userId);
-    request->SetLabel(label);
-    request->SetNotificationId(id);
-    request->SetCreatorBundleName("come.push");
-    request->SetOwnerBundleName("come.test");
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request->SetContent(std::make_shared<NotificationContent>(pContent));
-    request->SetLiveViewForceControl(true);
-
-    std::string result = "ans_live_view__10_20_come.test_Lable_30_1";
-    EXPECT_EQ(request->GetKey(), result);
 }
 } // namespace Notification
 } // namespace OHOS

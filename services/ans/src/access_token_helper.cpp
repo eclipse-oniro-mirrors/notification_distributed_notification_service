@@ -57,19 +57,6 @@ bool AccessTokenHelper::IsSystemApp()
     return false;
 }
 
-bool AccessTokenHelper::IsThirdPartApp()
-{
-    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
-    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (type == ATokenTypeEnum::TOKEN_HAP) {
-        uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
-        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool AccessTokenHelper::IsDlpHap(const AccessTokenID &callerToken)
 {
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(callerToken);

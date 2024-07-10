@@ -32,10 +32,8 @@
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
 #include "errors.h"
-#include "notification_bundle_option.h"
 #include "notification_extension_wrapper.h"
 #include "notification_record.h"
-#include "refbase.h"
 #include "os_account_manager_helper.h"
 #ifdef DEVICE_USAGE_STATISTICS_ENABLE
 #include "bundle_active_client.h"
@@ -357,8 +355,8 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
     return result;
 }
 
-ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
-    const std::string &label, const sptr<NotificationBundleOption> &bundleOption, const bool checkLiveViewForceControl)
+ErrCode AdvancedNotificationService::CancelPreparedNotification(
+    int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption == nullptr) {
@@ -373,8 +371,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
-        result = RemoveFromNotificationList(bundleOption, label, notificationId, notification,
-            checkLiveViewForceControl, true);
+        result = RemoveFromNotificationList(bundleOption, label, notificationId, notification, true);
         if (result != ERR_OK) {
             return;
         }
@@ -559,7 +556,6 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
     const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption)
 {
     auto record = std::make_shared<NotificationRecord>();
-    SetLiveViewForceControlToRequest(request, bundleOption);
     record->request = request;
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
@@ -983,10 +979,6 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid())) {
-                bool checkLiveViewForceControl = AccessTokenHelper::IsThirdPartApp();
-                if (CheckLiveViewForceControlAsBundle(checkLiveViewForceControl, record->request, bundleOption)) {
-                    continue;
-                }
                 notifications.push_back(record->request);
             }
         }
@@ -1015,10 +1007,6 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid())) {
-                bool checkLiveViewForceControl = AccessTokenHelper::IsThirdPartApp();
-                if (CheckLiveViewForceControlAsBundle(checkLiveViewForceControl, record->request, bundleOption)) {
-                    continue;
-                }
                 count += 1;
             }
         }
@@ -1090,18 +1078,14 @@ ErrCode AdvancedNotificationService::GetUnifiedGroupInfoFromDb(std::string &enab
 }
 
 std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
-    const sptr<NotificationBundleOption> &bundleOption, bool checkLiveViewForceControl)
+    const sptr<NotificationBundleOption> &bundleOption)
 {
     std::vector<std::string> keys;
 
     for (auto record : notificationList_) {
-        if (bundleOption != nullptr) {
-            if (record->bundleOption->GetUid() != bundleOption->GetUid()) {
-                continue;
-            }
-            if (CheckLiveViewForceControlAsBundle(checkLiveViewForceControl, record->request, bundleOption)) {
-                continue;
-            }
+        if ((bundleOption != nullptr) &&
+            (record->bundleOption->GetUid() != bundleOption->GetUid())) {
+            continue;
         }
         keys.push_back(record->notification->GetKey());
     }
@@ -1118,8 +1102,7 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
 }
 
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
-    const std::string &label, int32_t notificationId, sptr<Notification> &notification, bool checkLiveViewForceControl,
-    bool isCancel)
+    const std::string &label, int32_t notificationId, sptr<Notification> &notification, bool isCancel)
 {
     for (auto record : notificationList_) {
         if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
@@ -1130,9 +1113,6 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             && record->deviceId.empty()
 #endif
         ) {
-            if (CheckLiveViewForceControlAsBundle(checkLiveViewForceControl, record->request, bundleOption)) {
-                continue;
-            }
             if (!isCancel && !record->notification->IsRemoveAllowed()) {
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }

@@ -27,12 +27,8 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "hitrace_meter_adapter.h"
-#include "notification_preferences.h"
-#include "notification_slot.h"
 #include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
-#include "notification_bundle_option.h"
-#include "refbase.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "smart_reminder_center.h"
 #endif
@@ -790,52 +786,6 @@ bool AdvancedNotificationService::IsAgentRelationship(const std::string &agentBu
     notificationSvrQueue_->wait(handler);
 
     return result;
-}
-
-ErrCode AdvancedNotificationService::SetLiveViewForceControlToRequest(const sptr<NotificationRequest> &request,
-    const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (request->IsLiveView()) {
-        sptr<NotificationSlot> slot;
-        NotificationConstant::SlotType slotType = request->GetSlotType();
-        ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
-        if (result == ERR_OK && slot != nullptr) {
-            request->SetLiveViewForceControl(slot->GetForceControl());
-        }
-    }
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::SetLiveViewForceControlToDB(const sptr<NotificationRequest> &request,
-    const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (request->IsLiveView()) {
-        sptr<NotificationSlot> slot;
-        NotificationConstant::SlotType slotType = request->GetSlotType();
-        ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
-        if (result == ERR_OK && slot != nullptr && !slot->GetForceControl()) {
-            slot->SetForceControl(true);
-            std::vector<sptr<NotificationSlot>> slots;
-            slots.emplace_back(slot);
-            NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption, slots);
-        }
-    }
-    return ERR_OK;
-}
-
-
-bool AdvancedNotificationService::CheckLiveViewForceControlAsBundle(const bool checkLiveViewForceControl,
-    const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (checkLiveViewForceControl && request->IsLiveView()) {
-        sptr<NotificationSlot> slot;
-        NotificationConstant::SlotType slotType = request->GetSlotType();
-        ErrCode result = NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot);
-        if (result == ERR_OK && slot != nullptr) {
-            return slot->GetForceControl();
-        }
-    }
-    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS
