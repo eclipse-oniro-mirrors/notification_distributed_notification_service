@@ -541,7 +541,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             if (liveViewContent != nullptr) {
                 liveViewContent->ClearPictureMarshallingMap();
                 ANS_LOGD("live batch delete clear picture");
-            } 
+            }
             if (IsSubscribedBysubscriber(record, notification)) {
                 currNotifications.emplace_back(notification);
             }
@@ -553,6 +553,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             }
         }
     }
+    return;
 }
 
 void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap)
