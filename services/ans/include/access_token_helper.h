@@ -35,7 +35,6 @@ public:
         const Security::AccessToken::AccessTokenID &tokenCaller, const std::string &permission);
     static bool VerifyNativeToken(const Security::AccessToken::AccessTokenID &callerToken);
     static bool IsSystemApp();
-    static bool IsThirdPartApp();
     static bool IsDlpHap(const Security::AccessToken::AccessTokenID &callerToken);
     static bool VerifyShellToken(const Security::AccessToken::AccessTokenID &callerToken);
     static bool CheckPermission(const std::string &permission);

@@ -30,7 +30,7 @@ Notification::Notification(const sptr<NotificationRequest> &request)
     }
     request_ = request;
     if (request != nullptr) {
-        key_ = request->GetBaseKey(deviceId_);
+        key_ = request->GetBaseKey("");
     }
 }
 
@@ -39,7 +39,7 @@ Notification::Notification(const std::string &deviceId, const sptr<NotificationR
     deviceId_ = deviceId;
     request_ = request;
     if (request != nullptr) {
-        key_ = request->GetBaseKey(deviceId_);
+        key_ = request->GetBaseKey(deviceId);
     }
 }
 

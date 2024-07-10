@@ -156,6 +156,7 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetSound(DEFAULT_NOTIFICATION_SOUND);
             SetVibrationStyle(DEFAULT_NOTIFICATION_VIBRATION);
             SetLevel(LEVEL_DEFAULT);
+            SetForceControl(true);
             break;
         case NotificationConstant::SlotType::CUSTOMER_SERVICE:
             id_ = "CUSTOMER_SERVICE";

@@ -25,7 +25,6 @@
 #include "event_handler.h"
 #include "event_runner.h"
 #include "ffrt.h"
-#include "notification_request.h"
 #include "refbase.h"
 
 #include "ans_const_define.h"
@@ -908,8 +907,8 @@ public:
      */
     void OnDistributedKvStoreDeathRecipient();
 
-    ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
-        const sptr<NotificationBundleOption> &bundleOption, const bool checkLiveViewForceControl = false);
+    ErrCode CancelPreparedNotification(
+        int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishPreparedNotification(const sptr<NotificationRequest> &request,
@@ -1159,8 +1158,7 @@ private:
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption, const std::string &label,
-        int32_t notificationId, sptr<Notification> &notification, bool checkLiveViewForceControl,
-        bool isCancel = false);
+        int32_t notificationId, sptr<Notification> &notification, bool isCancel = false);
     ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
@@ -1170,8 +1168,7 @@ private:
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
         const int32_t ownerUid, const int32_t notificationId);
-    std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption,
-        bool checkLiveViewForceControl = false);
+    std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);
     void SortNotificationList();
     static bool NotificationCompare(
@@ -1204,12 +1201,7 @@ private:
     void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request);
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
-    ErrCode SetLiveViewForceControlToRequest(const sptr<NotificationRequest> &request,
-        const sptr<NotificationBundleOption> &bundleOption);
-    ErrCode SetLiveViewForceControlToDB(const sptr<NotificationRequest> &request,
-        const sptr<NotificationBundleOption> &bundleOption);
-    bool CheckLiveViewForceControlAsBundle(const bool checkLiveViewForceControl,
-        const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
+
     ErrCode SetNotificationRemindType(sptr<Notification> notification, bool isLocal);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     std::vector<std::string> GetLocalNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
