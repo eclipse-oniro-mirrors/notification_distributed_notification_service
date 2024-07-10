@@ -71,7 +71,8 @@ void ExtensionWrapper::InitExtentionWrapper()
         || updateByCancel_ == nullptr
         || initSummary_ == nullptr
         || localControl_ == nullptr
-        || reminderControl_ == nullptr) {
+        || reminderControl_ == nullptr
+        || updateByBundle_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
@@ -167,6 +168,16 @@ int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
     return localControl_(request);
 }
 
+void ExtensionWrapper::UpdateByBundle(const std::string bundleName, int deleteReason)
+{
+    if(updateByBundle_ == nullptr) {
+        ANS_LOGE("UpdateByBundle wrapper symbol failed");
+        return;
+    }
+    int32_t deleteType = convertToDelType(deleteReason);
+    updateByBundle_(bundleName, deleteType);
+}
+
 int32_t ExtensionWrapper::ReminderControl(const std::string &bundleName)
 {
     if (reminderControl_ == nullptr) {
@@ -180,7 +191,6 @@ int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 {
     int32_t delType = ACTIVE_DELETE;
     switch (deleteReason) {
-        case NotificationConstant::APP_CANCEL_ALL_REASON_DELETE:
         case NotificationConstant::PACKAGE_CHANGED_REASON_DELETE:
         case NotificationConstant::USER_REMOVED_REASON_DELETE:
         case NotificationConstant::DISABLE_SLOT_REASON_DELETE:
