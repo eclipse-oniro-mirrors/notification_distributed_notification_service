@@ -536,8 +536,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             }
             std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
             liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
-                    notification->GetNotificationRequest().GetContent()->GetNotificationContent());
-                
+                notification->GetNotificationRequest().GetContent()->GetNotificationContent());    
             if (liveViewContent != nullptr) {
                 liveViewContent->ClearPictureMarshallingMap();
                 ANS_LOGD("live batch delete clear picture");
@@ -553,7 +552,6 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             }
         }
     }
-    return;
 }
 
 void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap)
