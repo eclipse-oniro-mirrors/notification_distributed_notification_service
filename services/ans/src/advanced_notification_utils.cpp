@@ -37,6 +37,7 @@
 #include "hitrace_meter.h"
 #include "notification_timer_info.h"
 #include "time_service_client.h"
+#include "notification_extension_wrapper.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"

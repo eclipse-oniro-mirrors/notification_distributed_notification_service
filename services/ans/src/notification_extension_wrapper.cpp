@@ -66,6 +66,7 @@ void ExtensionWrapper::InitExtentionWrapper()
     initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
     reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
+    updateByBundle_ = (UPDATE_BY_BUNDLE)dlsym(extensionWrapperHandle_, "UpdateByBundle");
     if (syncAdditionConfig_ == nullptr
         || getUnifiedGroupInfo_ == nullptr
         || updateByCancel_ == nullptr
