@@ -171,7 +171,7 @@ int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
 
 void ExtensionWrapper::UpdateByBundle(const std::string bundleName, int deleteReason)
 {
-    if(updateByBundle_ == nullptr) {
+    if (updateByBundle_ == nullptr) {
         ANS_LOGE("UpdateByBundle wrapper symbol failed");
         return;
     }
