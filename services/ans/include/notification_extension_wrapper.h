@@ -42,6 +42,7 @@ public:
     typedef void (*SET_LOCAL_SWITCH)(bool status);
     typedef int32_t (*LOCAL_CONTROL)(const sptr<NotificationRequest> &request);
     typedef int32_t (*REMINDER_CONTROL)(const std::string &bundleName);
+    typedef void (*UPDATE_BY_BUNDLE)(const std::string bundleName, int deleteType);
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
@@ -51,6 +52,7 @@ public:
     void CheckIfSetlocalSwitch();
     int32_t LocalControl(const sptr<NotificationRequest> &request);
     int32_t ReminderControl(const std::string &bundleName);
+    void UpdateByBundle(const std::string bundleName, int deleteType);
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -63,6 +65,7 @@ private:
     SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
     LOCAL_CONTROL localControl_ = nullptr;
     REMINDER_CONTROL reminderControl_ = nullptr;
+    UPDATE_BY_BUNDLE updateByBundle_ = nullptr;
     bool isRegisterDataSettingObserver = false;
 };
 

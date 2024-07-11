@@ -37,6 +37,7 @@
 #include "hitrace_meter.h"
 #include "notification_timer_info.h"
 #include "time_service_client.h"
+#include "notification_extension_wrapper.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -572,6 +573,10 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         RemoveDoNotDisturbProfileTrustList(bundleOption);
     }));
     NotificationPreferences::GetInstance().RemoveEnabledDbByBundle(bundleOption);
+#ifdef ENABLE_ANS_EXT_WAPPER
+    EXTENTION_WRAPPER->UpdateByUpdate(bundleOption->GetBundleName(),
+        NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
+#endif
 }
 
 void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
