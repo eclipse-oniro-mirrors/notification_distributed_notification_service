@@ -67,10 +67,6 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
 
     ErrCode result = ERR_OK;
     result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
-
-    if (!enabled) {
-        ANS_LOGI("result = %{public}d", result);
-    }
     if (result == ERR_OK) {
         NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
         PublishSlotChangeCommonEvent(bundle);

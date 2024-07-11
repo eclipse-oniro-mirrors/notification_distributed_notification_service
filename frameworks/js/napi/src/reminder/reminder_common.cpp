@@ -348,7 +348,7 @@ std::vector<uint8_t> ReminderCommon::Convert2U8Vector(const napi_env &env, const
         }
     } else {
         napi_get_arraybuffer_info(env, input_array, &data, &length);
-        if (data == nullptr || length <= 0) {
+        if (data == nullptr || length == 0) {
             ANSR_LOGW("napi_get_arraybuffer_info err");
             return {};
         }
