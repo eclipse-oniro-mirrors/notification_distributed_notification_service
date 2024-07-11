@@ -21,7 +21,7 @@
 #include "fuzz_common_base.h"
 
 extern "C" {
-static constexpr uint32_t U32_AT_SIZE     = 2;
+static constexpr uint32_t U32_AT_SIZE     = 3;
 static constexpr uint32_t MAX_MEMORY_SIZE = 4 * 1024 * 1024;
 
 using namespace OHOS::Security::AccessToken;
@@ -34,7 +34,7 @@ uint32_t GetU32Size()
 uint32_t GetU32Data(const char* ptr)
 {
     // convert fuzz input data to an integer
-    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
+    return (ptr[0] << 16) | (ptr[1] << 8) | ptr[2];
 }
 
 char* ParseData(const uint8_t* data, size_t size)

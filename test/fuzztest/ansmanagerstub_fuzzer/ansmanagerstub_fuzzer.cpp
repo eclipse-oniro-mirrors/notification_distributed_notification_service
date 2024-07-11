@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#include "notification_constant.h"
+#include "notification_content.h"
+#include "notification_normal_content.h"
+#include "refbase.h"
+#include <memory>
+#include <new>
 #include <string>
 #include <vector>
 #define private public
@@ -37,12 +43,10 @@ namespace OHOS {
         ansManagerStub.OnRemoteRequest(0, datas, reply, flags);
         ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::PUBLISH_NOTIFICATION,
             datas, reply, flags);
-        ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::CANCEL_NOTIFICATION,
-            datas, reply, flags);
-        ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS,
-            datas, reply, flags);
-        ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::CANCEL_AS_BUNDLE,
-            datas, reply, flags);
+        ansManagerStub.HandlePublish(datas, reply);
+        ansManagerStub.HandleCancelAsBundle(datas, reply);
+        ansManagerStub.HandleCancelAll(datas, reply);
+        ansManagerStub.HandleCancel(datas, reply);
         ansManagerStub.HandleCancelAsBundleAndUser(datas, reply);
         ansManagerStub.HandleAddSlotByType(datas, reply);
         ansManagerStub.HandleAddSlots(datas, reply);
@@ -136,6 +140,11 @@ namespace OHOS {
         ansManagerStub.HandleCancelAsBundleWithAgent(datas, reply);
         ansManagerStub.HandleSetTargetDeviceStatus(datas, reply);
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
+        notification->SetOwnerUid(fuzzData.GenerateRandomInt32());
+        notification->SetCreatorUid(fuzzData.GenerateRandomInt32());
+        notification->SetSlotType(Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+        auto content = std::make_shared<Notification::NotificationNormalContent>();
+        notification->SetContent(std::make_shared<Notification::NotificationContent>(content));
         ansManagerStub.Publish(stringData, notification);
         int notificationId = fuzzData.GetData<int>();
         ansManagerStub.Cancel(notificationId, stringData, 0);
@@ -251,7 +260,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
             OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
             OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
         };
-        SystemHapTokenGet(requestPermission);
+        NativeTokenGet(requestPermission);
         OHOS::DoSomethingInterestingWithMyAPI(fuzzData);
     }
     return 0;
