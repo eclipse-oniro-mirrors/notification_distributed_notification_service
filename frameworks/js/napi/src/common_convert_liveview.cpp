@@ -29,6 +29,7 @@
 #include "pixel_map_napi.h"
 
 namespace OHOS {
+using namespace Global::Resource;
 namespace NotificationNapi {
 napi_value Common::SetNotificationLocalLiveViewContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
@@ -185,6 +186,59 @@ napi_value Common::SetTime(const napi_env &env, const NotificationTime &time,
     return NapiGetBoolean(env, true);
 }
 
+napi_value Common::SetObjectStringProperty(const napi_env& env, napi_value& object,
+    const std::string& key, const std::string& value)
+{
+    napi_value property;
+    napi_status status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to create value.");
+        return nullptr;
+    }
+    status = napi_set_named_property(env, object, key.c_str(), property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to set locale property");
+        return nullptr;
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::SetObjectUint32Property(const napi_env &env, napi_value& object,
+    const std::string& key, uint32_t value)
+{
+    napi_value property;
+    napi_status status = napi_create_uint32(env, value, &property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to create value.");
+        return nullptr;
+    }
+
+    status = napi_set_named_property(env, object, key.c_str(), property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to set locale property");
+        return nullptr;
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::SetResourceObject(napi_env env, std::shared_ptr<ResourceManager::Resource> &resource,
+    napi_value &object)
+{
+    if (SetObjectStringProperty(env, object, "bundleName", resource->bundleName) == nullptr) {
+        ANS_LOGE("Failed to set property bundleName");
+        return NapiGetBoolean(env, false);
+    }
+    if (SetObjectStringProperty(env, object, "moduleName", resource->moduleName) == nullptr) {
+        ANS_LOGE("Failed to set property moduleName");
+        return NapiGetBoolean(env, false);
+    }
+    if (SetObjectUint32Property(env, object, "id", resource->id) == nullptr) {
+        ANS_LOGE("Failed to set property id");
+        return NapiGetBoolean(env, false);
+    }
+    return NapiGetBoolean(env, true);
+}
+
 napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result)
 {
     ANS_LOGD("enter");
@@ -219,6 +273,26 @@ napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveVie
         iconCount++;
     }
     napi_set_named_property(env, result, "icons", iconArr);
+
+    // buttonIcons: Array<Resource>
+    iconCount = 0;
+    napi_value resourceArr = nullptr;
+    napi_create_array(env, &resourceArr);
+    auto iconResources = button.GetAllButtonIconResource();
+    for (auto resource : iconResources) {
+        napi_value object;
+        napi_status status = napi_create_object(env, &object);
+        if (status != napi_ok) {
+            ANS_LOGE("Failed to create Configuration object");
+            return NapiGetBoolean(env, false);
+        }
+        if (!SetResourceObject(env, resource, object)) {
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_element(env, resourceArr, iconCount, object);
+        iconCount++;
+    }
+    napi_set_named_property(env, result, "iconsResource", resourceArr);
 
     return NapiGetBoolean(env, true);
 }
@@ -434,6 +508,57 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
     return NapiGetNull(env);
 }
 
+napi_value Common::GetResourceObject(napi_env env,
+    std::shared_ptr<ResourceManager::Resource> &resource, napi_value &value)
+{
+    napi_value name;
+    size_t strLen = 0;
+    char str[STR_MAX_SIZE] = {0};
+    std::vector<std::string> typeName = {"bundleName", "moduleName"};
+    for (const std::string& type: typeName) {
+        napi_status status = napi_get_named_property(env, value, type.c_str(), &name);
+        if (status != napi_ok || name == nullptr) {
+            ANS_LOGE("Failed to get resource name property");
+            return nullptr;
+        }
+        napi_valuetype valueType = napi_valuetype::napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, name, &valueType));
+        if (valueType != napi_string) {
+            ANS_LOGE("Failed to get resource type %{public}d", valueType);
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, name, str, STR_MAX_SIZE - 1, &strLen));
+        if (type == "bundleName") {
+            resource->bundleName = str;
+        } else if (type == "moduleName") {
+            resource->moduleName = str;
+        }
+    }
+
+    napi_value id;
+    napi_status status = napi_get_named_property(env, value, "id", &id);
+    if (status != napi_ok || id == nullptr) {
+        ANS_LOGE("Failed to get resource id property");
+        return nullptr;
+    }
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    napi_typeof(env, id, &valueType);
+    if (valueType != napi_number) {
+        ANS_LOGE("Failed to get resource name string");
+        return nullptr;
+    }
+    int32_t resId = 0;
+    status = napi_get_value_int32(env, id, &resId);
+    if (status != napi_ok) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
+    resource->id = resId;
+    ANS_LOGE("Get to get resource bundleName %{public}s moduleName %{public}s id %{public}d",
+        resource->bundleName.c_str(), resource->moduleName.c_str(), resource->id);
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetNotificationLocalLiveViewButton(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content)
@@ -508,6 +633,34 @@ napi_value Common::GetNotificationLocalLiveViewButton(
             }
         }
     }
+
+    NAPI_CALL(env, napi_has_named_property(env, buttonResult, "iconsResource", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, buttonResult, "iconsResource", &result);
+        napi_is_array(env, result, &isArray);
+        if (!isArray) {
+            ANS_LOGE("Property icon resource is expected to be an array.");
+            return nullptr;
+        }
+        napi_get_array_length(env, result, &length);
+        for (size_t i = 0; i < length; i++) {
+            napi_value iconResource = nullptr;
+            auto resource = std::make_shared<ResourceManager::Resource>();
+            napi_get_element(env, result, i, &iconResource);
+            NAPI_CALL(env, napi_typeof(env, iconResource, &valuetype));
+            if (valuetype != napi_object) {
+                ANS_LOGE("Wrong argument type. Object expected.");
+                return nullptr;
+            }
+            if (Common::GetResourceObject(env, resource, iconResource) == nullptr) {
+                ANS_LOGW("Invalid icon resource object.");
+                return nullptr;
+            } else {
+                button.addSingleButtonIconResource(resource);
+            }
+        }
+    }
+
     ANS_LOGD("button buttonIcon = %{public}s", str);
     content->SetButton(button);
     content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::BUTTON);
