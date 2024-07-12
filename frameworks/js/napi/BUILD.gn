@@ -111,6 +111,7 @@ ohos_shared_library("notification") {
     "image_framework:image",
     "napi:ace_napi",
     "relational_store:native_rdb",
+    "resource_management:global_resmgr",
   ]
 
   relative_install_dir = "module"

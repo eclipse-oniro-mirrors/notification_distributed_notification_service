@@ -1700,7 +1700,7 @@ public:
          * @return Returns a napi value with specified error object for callback
          */
     static napi_value CreateErrorValue(napi_env env, int32_t errCode, std::string &msg);
-    
+
     /**
      * @brief Sets a js object by specified BadgeNumberCallbackData object
      *
@@ -1733,6 +1733,14 @@ public:
         const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
     static napi_value SetAgentBundle(const napi_env &env,
         const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result);
+    static napi_value GetResourceObject(napi_env env, std::shared_ptr<ResourceManager::Resource> &resource,
+        napi_value &value);
+    static napi_value SetResourceObject(napi_env env, std::shared_ptr<ResourceManager::Resource> &resource,
+        napi_value &value);
+    static napi_value SetObjectStringProperty(const napi_env &env, napi_value& object, const std::string& key,
+        const std::string& value);
+    static napi_value SetObjectUint32Property(const napi_env &env, napi_value& object, const std::string& key,
+        uint32_t value);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

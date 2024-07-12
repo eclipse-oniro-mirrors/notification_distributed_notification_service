@@ -23,9 +23,12 @@
 #include "parcel.h"
 #include "uri.h"
 #include <vector>
+#include "resource_manager.h"
 
 namespace OHOS {
 namespace Notification {
+using namespace Global::Resource;
+
 class NotificationLocalLiveViewButton : public Parcelable, public NotificationJsonConvertionBase {
 public:
     NotificationLocalLiveViewButton() = default;
@@ -48,6 +51,15 @@ public:
     std::vector<std::shared_ptr<Media::PixelMap>> GetAllButtonIcons() const;
 
     void addSingleButtonIcon(std::shared_ptr<Media::PixelMap> &icon);
+
+    /**
+     * @brief Obtains the buttion icon resource when this message arrived.
+     *
+     * @return Returns the buttion icon resource when this message arrived.
+     */
+    std::vector<std::shared_ptr<ResourceManager::Resource>> GetAllButtonIconResource() const;
+
+    void addSingleButtonIconResource(std::shared_ptr<ResourceManager::Resource> &iconResource);
 
     /**
      * @brief Returns a string representation of the object.
@@ -96,9 +108,11 @@ private:
      * @return Returns true if succeed; returns false otherwise.
      */
     bool ReadFromParcel(Parcel &parcel);
-
+    static bool ResourceFromJson(const nlohmann::json &resource,
+        std::shared_ptr<ResourceManager::Resource>& resourceObj);
     std::vector<std::string> buttonNames_ {};
     std::vector<std::shared_ptr<Media::PixelMap>> buttonIcons_ {};
+    std::vector<std::shared_ptr<ResourceManager::Resource>> buttonIconsResource_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS
