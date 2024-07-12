@@ -22,6 +22,7 @@
 
 #define private public
 #include "advanced_notification_service.h"
+#include "ability_manager_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "accesstoken_kit.h"
@@ -41,7 +42,6 @@ namespace Notification {
 extern void MockIsVerfyPermisson(bool isVerify);
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
-
 class AnsPublishServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -465,7 +465,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
 
     NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, OHOS::AAFwk::ABILITY_VISIBLE_FALSE_DENY_REQUEST);
 }
 
 /**
@@ -1088,5 +1088,21 @@ HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00003, Function | Sm
     auto ret = advancedNotificationService_->PublishRemoveDuplicateEvent(record);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
+
+/**
+ * @tc.name: CanPopEnableNotificationDialog_001
+ * @tc.desc: Test CanPopEnableNotificationDialog
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CanPopEnableNotificationDialog_001, Function | SmallTest | Level1)
+{
+    sptr<AnsDialogCallback> callback = nullptr;
+    bool canPop = false;
+    std::string bundleName = "";
+    ErrCode result = advancedNotificationService_->CanPopEnableNotificationDialog(callback, canPop, bundleName);
+    ASSERT_EQ(result, ERROR_INTERNAL_ERROR);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

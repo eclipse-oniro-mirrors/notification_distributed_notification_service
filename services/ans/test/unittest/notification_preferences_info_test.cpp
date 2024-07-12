@@ -17,6 +17,7 @@
 
 #include "ans_inner_errors.h"
 #include "ans_ut_constant.h"
+#include "notification_bundle_option.h"
 #include "notification_constant.h"
 #define private public
 #define protected public
@@ -160,6 +161,19 @@ HWTEST_F(NotificationPreferencesInfoTest, GetDoNotDisturbProfiles_0100, TestSize
     preferencesInfo->AddDoNotDisturbProfiles(userId, profiles);
     auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
     ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: RemoveBundleInfo_0100
+ * @tc.desc: test RemoveBundleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, RemoveBundleInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    sptr<NotificationBundleOption> bundleInfo = new NotificationBundleOption("test", 1);;
+    auto res = preferencesInfo->RemoveBundleInfo(bundleInfo);
+    ASSERT_EQ(res, false);
 }
 }
 }

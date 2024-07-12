@@ -1520,5 +1520,18 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0300, TestSize.Leve
     auto res = NotificationPreferences::GetInstance().GetDoNotDisturbProfile(profileId, userId, profile);
     ASSERT_EQ(res, ERR_OK);
 }
+
+/**
+ * @tc.name: GetBundleSoundPermission_0100
+ * @tc.desc: test GetBundleSoundPermission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetBundleSoundPermission_0100, TestSize.Level1)
+{
+    bool allPackage = true;
+    std::set<std::string> bundleNames = {};
+    auto res = NotificationPreferences::GetInstance().GetBundleSoundPermission(allPackage, bundleNames);
+    ASSERT_EQ(res, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

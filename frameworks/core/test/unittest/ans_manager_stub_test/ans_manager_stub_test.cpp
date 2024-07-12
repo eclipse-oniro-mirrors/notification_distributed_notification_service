@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#include "errors.h"
+#include "ipc_types.h"
+#include "iremote_object.h"
+#include "notification_button_option.h"
+#include "notification_check_request.h"
+#include "notification_subscribe_info.h"
 #include <gtest/gtest.h>
 
 #define private public
@@ -22,6 +28,8 @@
 #include "reminder_request_alarm.h"
 #include "reminder_request_timer.h"
 #include "reminder_request_calendar.h"
+#include "ans_dialog_host_client.h"
+#include "notification_subscriber.h"
 #undef private
 #undef protected
 
@@ -427,6 +435,130 @@ HWTEST_F(AnsManagerStubTest, HandleCancelAsBundle08, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: HandleCancelAsBundleWithAgent01
+ * @tc.desc: Test HandleCancelAsBundleWithAgent.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleCancelAsBundleWithAgent01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t id = 1;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(id);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HandleCancelAsBundleWithAgent02
+ * @tc.desc: Test HandleCancelAsBundleWithAgent.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleCancelAsBundleWithAgent02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleCancelAsBundleWithAgent03
+ * @tc.desc: Test HandleCancelAsBundleWithAgent.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleCancelAsBundleWithAgent03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetTargetDeviceStatus01
+ * @tc.desc: Test HandleSetTargetDeviceStatus.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetTargetDeviceStatus01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    int32_t status = 1;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteString("device");
+    data.WriteInt32(status);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetTargetDeviceStatus02
+ * @tc.desc: Test HandleSetTargetDeviceStatus.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetTargetDeviceStatus02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteString("device");
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetTargetDeviceStatus03
+ * @tc.desc: Test HandleSetTargetDeviceStatus.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetTargetDeviceStatus03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
  * @tc.name: HandleAddSlotByType01
  * @tc.desc: Test HandleAddSlotByType succeeds.
  * @tc.type: FUNC
@@ -600,6 +732,164 @@ HWTEST_F(AnsManagerStubTest, HandleGetAllActiveNotifications01, Function | Small
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleGetActiveNotificationByFilter01
+ * @tc.desc: Test HandleGetActiveNotificationByFilter succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetActiveNotificationByFilter01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_BY_FILTER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleGetActiveNotificationByFilter02
+ * @tc.desc: Test HandleGetActiveNotificationByFilter succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetActiveNotificationByFilter02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_BY_FILTER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t notificationId = 1;
+    std::string label = "this is a label";
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(notificationId);
+    data.WriteString(label);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HandleGetActiveNotificationByFilter03
+ * @tc.desc: Test HandleGetActiveNotificationByFilter succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetActiveNotificationByFilter03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_BY_FILTER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t notificationId = 1;
+    std::string label = "this is a label";
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(notificationId);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleTriggerLocalLiveView01
+ * @tc.desc: Test HandleTriggerLocalLiveView succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleTriggerLocalLiveView01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleTriggerLocalLiveView02
+ * @tc.desc: Test HandleTriggerLocalLiveView succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleTriggerLocalLiveView02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t notificationId = 1;
+    sptr<NotificationButtonOption> buttonOption = new NotificationButtonOption();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(notificationId);
+    data.WriteStrongParcelable(buttonOption);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleTriggerLocalLiveView03
+ * @tc.desc: Test HandleTriggerLocalLiveView succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleTriggerLocalLiveView03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    int32_t notificationId = 1;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    data.WriteInt32(notificationId);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleTriggerLocalLiveView04
+ * @tc.desc: Test HandleTriggerLocalLiveView succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleTriggerLocalLiveView04, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteStrongParcelable(bundleOption);
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -1464,12 +1754,57 @@ HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification01, Function | Small
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
+    std::string deviceId = "this is a deviceId";
+    sptr<AnsDialogHostClient> callback = new AnsDialogHostClient();
 
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteString(deviceId);
+    data.WriteRemoteObject(callback->AsObject());
+    data.WriteBool(false);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleRequestEnableNotification03
+ * @tc.desc: Test HandleRequestEnableNotification succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    std::string deviceId = "this is a deviceId";
+    const sptr<AnsDialogHostClient> callback = new AnsDialogHostClient();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteString(deviceId);
+    data.WriteRemoteObject(callback->AsObject());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleRequestEnableNotification04
+ * @tc.desc: Test HandleRequestEnableNotification succeed.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification04, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
     std::string deviceId = "this is a deviceId";
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(deviceId);
-    data.WriteBool(false);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
@@ -1493,6 +1828,71 @@ HWTEST_F(AnsManagerStubTest, HandleRequestEnableNotification02, Function | Small
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
+
+/**
+ * @tc.name: HandleSubscribeSelf01
+ * @tc.desc: Test SubscribeSelf.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSubscribeSelf01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION_SELF);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSubscribeLocalLiveView01
+ * @tc.desc: Test HandleSubscribeLocalLiveView.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSubscribeLocalLiveView01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteBool(true);
+    data.WriteStrongParcelable(info);
+    data.WriteBool(true);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSubscribeLocalLiveView02
+ * @tc.desc: Test HandleSubscribeLocalLiveView.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleSubscribeLocalLiveView02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<NotificationSubscribeInfo> info = nullptr;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteBool(true);
+    data.WriteStrongParcelable(info);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
 
 /**
  * @tc.name: HandleSetNotificationsEnabledForBundle01
@@ -2078,13 +2478,11 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe01, Function | SmallTest | Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-
-    sptr<IRemoteObject> subscriber;
     bool subcribeInfo = true;
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteParcelable(subscriber);
+    data.WriteParcelable(info);
     data.WriteBool(subcribeInfo);
     data.WriteParcelable(info);
 
@@ -2159,6 +2557,47 @@ HWTEST_F(AnsManagerStubTest, HandleUnsubscribe04, Function | SmallTest | Level1)
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteBool(subcribeInfo);
     data.WriteParcelable(info);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleCanPopEnableNotificationDialog01
+ * @tc.desc: Test HandleCanPopEnableNotificationDialog.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleCanPopEnableNotificationDialog01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(nullptr);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleCanPopEnableNotificationDialog2
+ * @tc.desc: Test HandleCanPopEnableNotificationDialog.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleCanPopEnableNotificationDialog02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<AnsDialogHostClient> callback = new AnsDialogHostClient();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(callback->AsObject());
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
@@ -3472,6 +3911,49 @@ HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlot03, Function | SmallTe
 }
 
 /**
+ * @tc.name: HandleGetEnabledForBundleSlotSelf01
+ * @tc.desc: Test type in data is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleGetEnabledForBundleSlotSelf01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT_SELF);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    int32_t type = 4;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(type);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleSetBadgeNumber03
+ * @tc.desc: HandleSetBadgeNumber.
+ * @tc.type: FUNC
+ * @tc.require: issueI620XB
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_BADGE_NUMBER);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    int32_t type = 4;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInt32(type);
+    data.WriteInt32(type);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: HandleDistributedSetEnabledWithoutApp01
  * @tc.desc: Test HandleDistributedSetEnabledWithoutApp succeed.
  * @tc.type: FUNC
@@ -4440,6 +4922,56 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber02, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: HandleSetAdditionConfig01
+ * @tc.desc: Test HandleSetAdditionConfig.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetAdditionConfig01, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString("key");
+    data.WriteString("value");
+
+    ErrCode ret = ansManagerStub_->HandleSetAdditionConfig(data, reply);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HandleSetAdditionConfig02
+ * @tc.desc: Test HandleSetAdditionConfig.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetAdditionConfig02, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString("key");
+
+    ErrCode ret = ansManagerStub_->HandleSetAdditionConfig(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleSetAdditionConfig03
+ * @tc.desc: Test HandleSetAdditionConfig.
+ * @tc.type: FUNC
+ * @tc.require: #I6C2X9
+ */
+HWTEST_F(AnsManagerStubTest, HandleSetAdditionConfig03, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    ErrCode ret = ansManagerStub_->HandleSetAdditionConfig(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
  * @tc.name: HandleRemoveNotifications01
  * @tc.desc: Test HandleRemoveNotifications function
  * @tc.type: FUNC
@@ -4478,6 +5010,50 @@ HWTEST_F(AnsManagerStubTest, HandleRegisterPushCallback01, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     ErrCode ret = ansManagerStub_->HandleRegisterPushCallback(data, reply);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: HandleRegisterPushCallback02
+ * @tc.desc: Test HandleRegisterPushCallback succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleRegisterPushCallback02, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REGISTER_PUSH_CALLBACK);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<AnsDialogHostClient> callback = new AnsDialogHostClient();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(callback->AsObject());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_NE((int)ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: HandleRegisterPushCallback03
+ * @tc.desc: Test HandleRegisterPushCallback succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issueI5XQ4E
+ */
+HWTEST_F(AnsManagerStubTest, HandleRegisterPushCallback03, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::REGISTER_PUSH_CALLBACK);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<AnsDialogHostClient> callback = new AnsDialogHostClient();
+    sptr<NotificationCheckRequest> checkRequest = nullptr;
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(callback->AsObject());
+    data.WriteParcelable(checkRequest);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
@@ -4640,6 +5216,21 @@ HWTEST_F(AnsManagerStubTest, SetDistributedEnabledByBundle_0100, TestSize.Level1
     EXPECT_EQ(res, ERR_OK);
 }
 
+/*
+ * @tc.name: SetDistributedEnabledByBundle_0200
+ * @tc.desc: test SetDistributedEnabledByBundle
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+
+    ErrCode res = ansManagerStub_->HandleSetDistributedEnabledByBundle(data, reply);
+    EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+}
+
 /**
  * @tc.name: IsDistributedEnabledByBundle_0100
  * @tc.desc: test IsDistributedEnabledByBundle with parameters
@@ -4660,6 +5251,22 @@ HWTEST_F(AnsManagerStubTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
     data.WriteBool(enable);
     ErrCode result = ansManagerStub_->HandleIsDistributedEnabledByBundle(data, reply);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsDistributedEnabledByBundle_0200
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteParcelable(nullptr);
+
+    ErrCode result = ansManagerStub_->HandleIsDistributedEnabledByBundle(data, reply);
+    EXPECT_EQ(result, ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**

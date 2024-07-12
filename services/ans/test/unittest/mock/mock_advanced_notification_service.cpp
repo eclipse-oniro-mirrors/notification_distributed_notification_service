@@ -47,7 +47,5 @@ ErrCode AdvancedNotificationService::GetDistributedEnableInApplicationInfo(
     }
     return ERR_OK;
 }
-
-
 }  // namespace Notification
 }  // namespace OHOS

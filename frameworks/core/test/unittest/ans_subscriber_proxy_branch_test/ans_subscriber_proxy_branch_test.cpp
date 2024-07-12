@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "notification_request.h"
 #include <gtest/gtest.h>
 
 #define protected public
@@ -88,7 +89,8 @@ HWTEST_F(AnsSubscriberProxyBranchTest, OnCanceledList_0200, Function | MediumTes
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
     notifications.emplace_back(notification);
     sptr<NotificationSortingMap> notificationMap = nullptr;
@@ -111,7 +113,8 @@ HWTEST_F(AnsSubscriberProxyBranchTest, OnCanceledList_0300, Function | MediumTes
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
     notifications.emplace_back(notification);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
