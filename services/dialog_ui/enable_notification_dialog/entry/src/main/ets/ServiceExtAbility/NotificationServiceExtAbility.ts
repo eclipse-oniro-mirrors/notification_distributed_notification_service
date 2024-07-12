@@ -131,24 +131,24 @@ export class EnableNotificationDialog {
       if (stageModel) {
         let subWindowOpts : window.SubWindowOptions = {
           'title': '',
-          decorEnabled: true,
+          decorEnabled: false,
           isModal: true,
           isTopmost: true
         };
-        await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts)
-          .then((subWindow: window.Window) => {
-            let subWindow1 = subWindow;
-            subWindow1.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
-            subWindow1.showWindow();
-        });  
+        let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost'+ Date(), subWindowOpts);
+        await subWindow.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
+        await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
+        await subWindow.showWindow();
       } else {
         await session.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);  
       }
-      
       try {    
         await extensionWindow.hideNonSecureWindows(shouldHide);
       } catch (err) {
         console.error(TAG, 'window hideNonSecureWindows failed!');
+      }
+      if (!stageModel) {
+        await session.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
       }
     } catch (err) {
       console.error(TAG, 'window create failed!');
@@ -222,13 +222,21 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
   onForeground() {
     console.log(TAG, `UIExtAbility onForeground`);
     let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
-    dialog?.extensionWindow?.hideNonSecureWindows(true);
+    try {
+      dialog?.extensionWindow?.hideNonSecureWindows(true);
+    } catch (err) {
+      console.error(TAG, 'onForeground hideNonSecureWindows failed!');
+    }  
   }
 
   onBackground() {
     console.log(TAG, `UIExtAbility onBackground`);
     let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
-    dialog?.extensionWindow?.hideNonSecureWindows(true);
+    try {
+      dialog?.extensionWindow?.hideNonSecureWindows(false);
+    } catch (err) {
+      console.error(TAG, 'onBackground hideNonSecureWindows failed!');
+    }
   }
 
   onSessionDestroy(session: UIExtensionContentSession) {
@@ -237,7 +245,11 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       console.log(TAG, `UIExtAbility onSessionDestroy unclick destory`);
       let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
       dialog?.destroyException();
-      dialog?.extensionWindow?.hideNonSecureWindows(true);
+      try {
+        dialog?.extensionWindow?.hideNonSecureWindows(false);
+      } catch (err) {
+        console.error(TAG, 'onBackground onSessionDestroy failed!');
+      }
     }
   }
 
