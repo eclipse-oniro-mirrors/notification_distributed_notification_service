@@ -28,7 +28,7 @@ void DistributedDeviceCallback::OnDeviceOnline(const DistributedHardware::DmDevi
 {
     ANS_LOGI("start");
     if (callback_.OnConnected) {
-        ANS_LOGI("device %{private}s is online", deviceInfo.deviceId);
+        ANS_LOGI("device is online");
         callback_.OnConnected(deviceInfo.deviceId);
     }
 }
@@ -37,19 +37,19 @@ void DistributedDeviceCallback::OnDeviceOffline(const DistributedHardware::DmDev
 {
     ANS_LOGI("start");
     if (callback_.OnConnected) {
-        ANS_LOGI("device %{private}s is offline", deviceInfo.deviceId);
+        ANS_LOGI("device is offline");
         callback_.OnDisconnected(deviceInfo.deviceId);
     }
 }
 
 void DistributedDeviceCallback::OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
-    ANS_LOGI("device %{private}s is changed", deviceInfo.deviceId);
+    ANS_LOGI("device is changed");
 }
 
 void DistributedDeviceCallback::OnDeviceReady(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
-    ANS_LOGI("device %{private}s is ready", deviceInfo.deviceId);
+    ANS_LOGI("device is ready");
 }
 }  // namespace Notification
 }  // namespace OHOS
