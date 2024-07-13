@@ -517,7 +517,8 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     return false;
 }
 
-__attribute__((no_sanitize("cfi"))) void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
+__attribute__((no_sanitize("cfi"))) void NotificationSubscriberManager::BatchNotifyCanceledInner(
+    const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
