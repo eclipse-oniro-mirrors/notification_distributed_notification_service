@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,320 +29,9 @@
 
 namespace OHOS {
 namespace Notification {
-const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
-    AnsManagerStub::interfaces_ = {
-        {NotificationInterfaceCode::PUBLISH_NOTIFICATION,
-            std::bind(
-                &AnsManagerStub::HandlePublish, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_NOTIFICATION,
-            std::bind(
-                &AnsManagerStub::HandleCancel, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS,
-            std::bind(
-                &AnsManagerStub::HandleCancelAll, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION,
-            std::bind(
-                &AnsManagerStub::HandleCancelAsBundleOption, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER,
-            std::bind(
-                &AnsManagerStub::HandleCancelAsBundleAndUser, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_AS_BUNDLE,
-            std::bind(&AnsManagerStub::HandleCancelAsBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::ADD_SLOT_BY_TYPE,
-            std::bind(&AnsManagerStub::HandleAddSlotByType, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::ADD_SLOTS,
-            std::bind(
-                &AnsManagerStub::HandleAddSlots, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::REMOVE_SLOT_BY_TYPE,
-            std::bind(&AnsManagerStub::HandleRemoveSlotByType, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::REMOVE_ALL_SLOTS,
-            std::bind(&AnsManagerStub::HandleRemoveAllSlots, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SLOT_BY_TYPE,
-            std::bind(&AnsManagerStub::HandleGetSlotByType, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SLOTS,
-            std::bind(
-                &AnsManagerStub::HandleGetSlots, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SLOT_NUM_AS_BUNDLE,
-            std::bind(&AnsManagerStub::HandleGetSlotNumAsBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ACTIVE_NOTIFICATIONS,
-            std::bind(&AnsManagerStub::HandleGetActiveNotifications, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_NUMS,
-            std::bind(&AnsManagerStub::HandleGetActiveNotificationNums, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ALL_ACTIVE_NOTIFICATIONS,
-            std::bind(&AnsManagerStub::HandleGetAllActiveNotifications, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SPECIAL_ACTIVE_NOTIFICATIONS,
-            std::bind(&AnsManagerStub::HandleGetSpecialActiveNotifications, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_BY_FILTER,
-            std::bind(&AnsManagerStub::HandleGetActiveNotificationByFilter, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_NOTIFICATION_AGENT,
-            std::bind(&AnsManagerStub::HandleSetNotificationAgent, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_NOTIFICATION_AGENT,
-            std::bind(&AnsManagerStub::HandleGetNotificationAgent, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CAN_PUBLISH_AS_BUNDLE,
-            std::bind(&AnsManagerStub::HandleCanPublishAsBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::PUBLISH_AS_BUNDLE,
-            std::bind(&AnsManagerStub::HandlePublishAsBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_NOTIFICATION_BADGE_NUM,
-            std::bind(&AnsManagerStub::HandleSetNotificationBadgeNum, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_BUNDLE_IMPORTANCE,
-            std::bind(&AnsManagerStub::HandleGetBundleImportance, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_NOTIFICATION_POLICY_ACCESS_GRANTED,
-            std::bind(&AnsManagerStub::HandleIsNotificationPolicyAccessGranted, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::REMOVE_NOTIFICATION,
-            std::bind(&AnsManagerStub::HandleRemoveNotification, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::REMOVE_ALL_NOTIFICATIONS,
-            std::bind(&AnsManagerStub::HandleRemoveAllNotifications, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::REMOVE_NOTIFICATIONS_BY_KEYS,
-            std::bind(&AnsManagerStub::HandleRemoveNotifications, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::DELETE_NOTIFICATION,
-            std::bind(
-                &AnsManagerStub::HandleDelete, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::DELETE_NOTIFICATION_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleDeleteByBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS,
-            std::bind(
-                &AnsManagerStub::HandleDeleteAll, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SLOTS_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleGetSlotsByBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::UPDATE_SLOTS,
-            std::bind(&AnsManagerStub::HandleUpdateSlots, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION,
-            std::bind(&AnsManagerStub::HandleRequestEnableNotification, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_BUNDLE,
-            std::bind(&AnsManagerStub::HandleSetNotificationsEnabledForBundle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE,
-            std::bind(&AnsManagerStub::HandleSetNotificationsEnabledForAllBundles, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE,
-            std::bind(&AnsManagerStub::HandleSetNotificationsEnabledForSpecialBundle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE,
-            std::bind(&AnsManagerStub::HandleSetShowBadgeEnabledForBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE,
-            std::bind(&AnsManagerStub::HandleGetShowBadgeEnabledForBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED,
-            std::bind(&AnsManagerStub::HandleGetShowBadgeEnabled, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION,
-            std::bind(
-                &AnsManagerStub::HandleSubscribe, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::UNSUBSCRIBE_NOTIFICATION,
-            std::bind(&AnsManagerStub::HandleUnsubscribe, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_ALLOWED_NOTIFY,
-            std::bind(&AnsManagerStub::HandleIsAllowedNotify, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_ALLOWED_NOTIFY_SELF,
-            std::bind(&AnsManagerStub::HandleIsAllowedNotifySelf, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG,
-            std::bind(&AnsManagerStub::HandleCanPopEnableNotificationDialog, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY,
-            std::bind(&AnsManagerStub::HandleIsSpecialBundleAllowedNotify, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE,
-            std::bind(&AnsManagerStub::HandleSetDoNotDisturbDate, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE,
-            std::bind(&AnsManagerStub::HandleGetDoNotDisturbDate, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::DOES_SUPPORT_DO_NOT_DISTURB_MODE,
-            std::bind(&AnsManagerStub::HandleDoesSupportDoNotDisturbMode, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_GROUP,
-            std::bind(&AnsManagerStub::HandleCancelGroup, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::REMOVE_GROUP_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleRemoveGroupByBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED,
-            std::bind(&AnsManagerStub::HandleIsDistributedEnabled, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::ENABLE_DISTRIBUTED,
-            std::bind(&AnsManagerStub::HandleEnableDistributed, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::ENABLE_DISTRIBUTED_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleEnableDistributedByBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::ENABLE_DISTRIBUTED_SELF,
-            std::bind(&AnsManagerStub::HandleEnableDistributedSelf, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleIsDistributedEnableByBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_DEVICE_REMIND_TYPE,
-            std::bind(&AnsManagerStub::HandleGetDeviceRemindType, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SHELL_DUMP,
-            std::bind(
-                &AnsManagerStub::HandleShellDump, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::PUBLISH_CONTINUOUS_TASK_NOTIFICATION,
-            std::bind(
-                &AnsManagerStub::HandlePublishContinuousTaskNotification, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_CONTINUOUS_TASK_NOTIFICATION,
-            std::bind(
-                &AnsManagerStub::HandleCancelContinuousTaskNotification, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::PUBLISH_REMINDER,
-            std::bind(&AnsManagerStub::HandlePublishReminder, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_REMINDER,
-            std::bind(&AnsManagerStub::HandleCancelReminder, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_ALL_REMINDERS,
-            std::bind(
-                &AnsManagerStub::HandleCancelAllReminders, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ALL_VALID_REMINDERS,
-            std::bind(&AnsManagerStub::HandleGetValidReminders, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_SUPPORT_TEMPLATE,
-            std::bind(
-                &AnsManagerStub::HandleIsSupportTemplate, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::IS_SPECIAL_USER_ALLOWED_NOTIFY,
-            std::bind(&AnsManagerStub::HandleIsSpecialUserAllowedNotifyByUser, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_BY_USER,
-            std::bind(&AnsManagerStub::HandleSetNotificationsEnabledByUser, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS_BY_USER,
-            std::bind(&AnsManagerStub::HandleDeleteAllByUser, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER,
-            std::bind(&AnsManagerStub::HandleSetDoNotDisturbDateByUser, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER,
-            std::bind(&AnsManagerStub::HandleGetDoNotDisturbDateByUser, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_ENABLED_FOR_BUNDLE_SLOT,
-            std::bind(&AnsManagerStub::HandleSetEnabledForBundleSlot, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT,
-            std::bind(&AnsManagerStub::HandleGetEnabledForBundleSlot, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT_SELF,
-            std::bind(&AnsManagerStub::HandleGetEnabledForBundleSlotSelf, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_DISTRIBUTED_ENABLED_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleSetDistributedEnabledByBundle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_DISTRIBUTED_ENABLED_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleIsDistributedEnabledByBundle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_SMART_REMINDER_ENABLED,
-            std::bind(&AnsManagerStub::HandleSetSmartReminderEnabled, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SMART_REMINDER_ENABLED,
-            std::bind(&AnsManagerStub::HandleIsSmartReminderEnabled, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
-            std::bind(&AnsManagerStub::HandleDistributedSetEnabledWithoutApp, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
-            std::bind(&AnsManagerStub::HandleDistributedGetEnabledWithoutApp, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_BADGE_NUMBER,
-            std::bind(&AnsManagerStub::HandleSetBadgeNumber, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_BADGE_NUMBER_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleSetBadgeNumberByBundle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS,
-            std::bind(&AnsManagerStub::HandleGetAllNotificationEnableStatus, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::REGISTER_PUSH_CALLBACK,
-            std::bind(&AnsManagerStub::HandleRegisterPushCallback, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::UNREGISTER_PUSH_CALLBACK,
-            std::bind(&AnsManagerStub::HandleUnregisterPushCallback, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION,
-            std::bind(&AnsManagerStub::HandleSubscribeLocalLiveView, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION,
-            std::bind(&AnsManagerStub::HandleTriggerLocalLiveView, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION_SELF,
-            std::bind(&AnsManagerStub::HandleSubscribeSelf, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_SLOTFLAGS_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleSetSlotFlagsAsBundle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleGetSlotFlagsAsBundle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP,
-            std::bind(&AnsManagerStub::HandleSetAdditionConfig, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT,
-            std::bind(&AnsManagerStub::HandleCancelAsBundleWithAgent, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_SLOT_BY_BUNDLE,
-            std::bind(&AnsManagerStub::HandleGetSlotByBundle, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-        {NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES,
-            std::bind(&AnsManagerStub::HandleAddDoNotDisturbProfiles, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES,
-            std::bind(&AnsManagerStub::HandleRemoveDoNotDisturbProfiles, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS,
-            std::bind(&AnsManagerStub::HandleSetTargetDeviceStatus, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3)},
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-        {NotificationInterfaceCode::REGISTER_SWING_CALLBACK,
-            std::bind(&AnsManagerStub::HandleRegisterSwingCallback, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-#endif
-        {NotificationInterfaceCode::ADD_EXCLUDE_DATE_REMINDER,
-            std::bind(&AnsManagerStub::HandleAddExcludeDate, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::DEL_EXCLUDE_DATES_REMINDER,
-            std::bind(&AnsManagerStub::HandleDelExcludeDates, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-        {NotificationInterfaceCode::GET_EXCLUDE_DATES_REMINDER,
-            std::bind(&AnsManagerStub::HandleGetExcludeDates, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3)},
-};
+AnsManagerStub::AnsManagerStub() {}
 
-AnsManagerStub::AnsManagerStub()
-{}
-
-AnsManagerStub::~AnsManagerStub()
-{}
+AnsManagerStub::~AnsManagerStub() {}
 
 int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &flags)
 {
@@ -352,20 +41,411 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
         ANS_LOGE("[OnRemoteRequest] fail: invalid interface token!");
         return OBJECT_NULL;
     }
-
-    auto it = interfaces_.find(static_cast<NotificationInterfaceCode>(code));
-    if (it == interfaces_.end()) {
-        ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
+    ErrCode result = NO_ERROR;
+    switch (code) {
+        case static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_NOTIFICATION): {
+            result = HandlePublish(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_NOTIFICATION): {
+            result = HandleCancel(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS): {
+            result = HandleCancelAll(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_OPTION): {
+            result = HandleCancelAsBundleOption(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_AND_USER): {
+            result = HandleCancelAsBundleAndUser(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE): {
+            result = HandleCancelAsBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ADD_SLOT_BY_TYPE): {
+            result = HandleAddSlotByType(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ADD_SLOTS): {
+            result = HandleAddSlots(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_SLOT_BY_TYPE): {
+            result = HandleRemoveSlotByType(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_ALL_SLOTS): {
+            result = HandleRemoveAllSlots(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOT_BY_TYPE): {
+            result = HandleGetSlotByType(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTS): {
+            result = HandleGetSlots(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOT_NUM_AS_BUNDLE): {
+            result = HandleGetSlotNumAsBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATIONS): {
+            result = HandleGetActiveNotifications(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_NUMS): {
+            result = HandleGetActiveNotificationNums(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_ACTIVE_NOTIFICATIONS): {
+            result = HandleGetAllActiveNotifications(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SPECIAL_ACTIVE_NOTIFICATIONS): {
+            result = HandleGetSpecialActiveNotifications(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATION_BY_FILTER): {
+            result = HandleGetActiveNotificationByFilter(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT): {
+            result = HandleSetNotificationAgent(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_AGENT): {
+            result = HandleGetNotificationAgent(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CAN_PUBLISH_AS_BUNDLE): {
+            result = HandleCanPublishAsBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_AS_BUNDLE): {
+            result = HandlePublishAsBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_BADGE_NUM): {
+            result = HandleSetNotificationBadgeNum(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_BUNDLE_IMPORTANCE): {
+            result = HandleGetBundleImportance(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_NOTIFICATION_POLICY_ACCESS_GRANTED): {
+            result = HandleIsNotificationPolicyAccessGranted(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_NOTIFICATION): {
+            result = HandleRemoveNotification(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_ALL_NOTIFICATIONS): {
+            result = HandleRemoveAllNotifications(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_NOTIFICATIONS_BY_KEYS): {
+            result = HandleRemoveNotifications(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DELETE_NOTIFICATION): {
+            result = HandleDelete(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DELETE_NOTIFICATION_BY_BUNDLE): {
+            result = HandleDeleteByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS): {
+            result = HandleDeleteAll(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTS_BY_BUNDLE): {
+            result = HandleGetSlotsByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::UPDATE_SLOTS): {
+            result = HandleUpdateSlots(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION): {
+            result = HandleRequestEnableNotification(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_BUNDLE): {
+            result = HandleSetNotificationsEnabledForBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_ALL_BUNDLE): {
+            result = HandleSetNotificationsEnabledForAllBundles(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE): {
+            result = HandleSetNotificationsEnabledForSpecialBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_SHOW_BADGE_ENABLED_FOR_BUNDLE): {
+            result = HandleSetShowBadgeEnabledForBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED_FOR_BUNDLE): {
+            result = HandleGetShowBadgeEnabledForBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SHOW_BADGE_ENABLED): {
+            result = HandleGetShowBadgeEnabled(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION): {
+            result = HandleSubscribe(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::UNSUBSCRIBE_NOTIFICATION): {
+            result = HandleUnsubscribe(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_ALLOWED_NOTIFY): {
+            result = HandleIsAllowedNotify(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_ALLOWED_NOTIFY_SELF): {
+            result = HandleIsAllowedNotifySelf(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CAN_POP_ENABLE_NOTIFICATION_DIALOG): {
+            result = HandleCanPopEnableNotificationDialog(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY): {
+            result = HandleIsSpecialBundleAllowedNotify(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE): {
+            result = HandleSetDoNotDisturbDate(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE): {
+            result = HandleGetDoNotDisturbDate(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DOES_SUPPORT_DO_NOT_DISTURB_MODE): {
+            result = HandleDoesSupportDoNotDisturbMode(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_GROUP): {
+            result = HandleCancelGroup(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_GROUP_BY_BUNDLE): {
+            result = HandleRemoveGroupByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED): {
+            result = HandleIsDistributedEnabled(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED): {
+            result = HandleEnableDistributed(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED_BY_BUNDLE): {
+            result = HandleEnableDistributedByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ENABLE_DISTRIBUTED_SELF): {
+            result = HandleEnableDistributedSelf(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_DISTRIBUTED_ENABLED_BY_BUNDLE): {
+            result = HandleIsDistributedEnableByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DEVICE_REMIND_TYPE): {
+            result = HandleGetDeviceRemindType(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SHELL_DUMP): {
+            result = HandleShellDump(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_CONTINUOUS_TASK_NOTIFICATION): {
+            result = HandlePublishContinuousTaskNotification(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_CONTINUOUS_TASK_NOTIFICATION): {
+            result = HandleCancelContinuousTaskNotification(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER): {
+            result = HandlePublishReminder(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_REMINDER): {
+            result = HandleCancelReminder(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_ALL_REMINDERS): {
+            result = HandleCancelAllReminders(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_VALID_REMINDERS): {
+            result = HandleGetValidReminders(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_SUPPORT_TEMPLATE): {
+            result = HandleIsSupportTemplate(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_USER_ALLOWED_NOTIFY): {
+            result = HandleIsSpecialUserAllowedNotifyByUser(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_BY_USER): {
+            result = HandleSetNotificationsEnabledByUser(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DELETE_ALL_NOTIFICATIONS_BY_USER): {
+            result = HandleDeleteAllByUser(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER): {
+            result = HandleSetDoNotDisturbDateByUser(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER): {
+            result = HandleGetDoNotDisturbDateByUser(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_ENABLED_FOR_BUNDLE_SLOT): {
+            result = HandleSetEnabledForBundleSlot(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT): {
+            result = HandleGetEnabledForBundleSlot(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT_SELF): {
+            result = HandleGetEnabledForBundleSlotSelf(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DISTRIBUTED_ENABLED_BY_BUNDLE): {
+            result = HandleSetDistributedEnabledByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DISTRIBUTED_ENABLED_BY_BUNDLE): {
+            result = HandleIsDistributedEnabledByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_SMART_REMINDER_ENABLED): {
+            result = HandleSetSmartReminderEnabled(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SMART_REMINDER_ENABLED): {
+            result = HandleIsSmartReminderEnabled(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP): {
+            result = HandleDistributedSetEnabledWithoutApp(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP): {
+            result = HandleDistributedGetEnabledWithoutApp(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_BADGE_NUMBER): {
+            result = HandleSetBadgeNumber(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_BADGE_NUMBER_BY_BUNDLE): {
+            result = HandleSetBadgeNumberByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS): {
+            result = HandleGetAllNotificationEnableStatus(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REGISTER_PUSH_CALLBACK): {
+            result = HandleRegisterPushCallback(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::UNREGISTER_PUSH_CALLBACK): {
+            result = HandleUnregisterPushCallback(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION): {
+            result = HandleSubscribeLocalLiveView(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::TRIGGER_LOCAL_LIVE_VIEW_NOTIFICATION): {
+            result = HandleTriggerLocalLiveView(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_NOTIFICATION_SELF): {
+            result = HandleSubscribeSelf(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_SLOTFLAGS_BY_BUNDLE): {
+            result = HandleSetSlotFlagsAsBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOTFLAGS_BY_BUNDLE): {
+            result = HandleGetSlotFlagsAsBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP): {
+            result = HandleSetAdditionConfig(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_AS_BUNDLE_WITH_AGENT): {
+            result = HandleCancelAsBundleWithAgent(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_SLOT_BY_BUNDLE): {
+            result = HandleGetSlotByBundle(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES): {
+            result = HandleAddDoNotDisturbProfiles(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES): {
+            result = HandleRemoveDoNotDisturbProfiles(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS): {
+            result = HandleSetTargetDeviceStatus(data, reply);
+            break;
+        }
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+        case static_cast<uint32_t>(NotificationInterfaceCode::REGISTER_SWING_CALLBACK): {
+            result = HandleRegisterSwingCallback(data, reply);
+            break;
+        }
+#endif
+        case static_cast<uint32_t>(NotificationInterfaceCode::ADD_EXCLUDE_DATE_REMINDER): {
+            result = HandleAddExcludeDate(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DEL_EXCLUDE_DATES_REMINDER): {
+            result = HandleDelExcludeDates(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_EXCLUDE_DATES_REMINDER): {
+            result = HandleGetExcludeDates(data, reply);
+            break;
+        }
+        default: {
+            ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
+        }
     }
-
-    auto fun = it->second;
-    if (fun == nullptr) {
-        ANS_LOGE("[OnRemoteRequest] fail: not find function!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
-    }
-
-    ErrCode result = fun(this, data, reply);
     if (SUCCEEDED(result)) {
         return NO_ERROR;
     }
@@ -431,7 +511,7 @@ ErrCode AnsManagerStub::HandleCancelAll(MessageParcel &data, MessageParcel &repl
         ANS_LOGE("[HandleCancelAll] fail: read instanceKey failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    
+
     ErrCode result = CancelAll(instanceKey);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCancelAll] fail: write result failed, ErrCode=%{public}d", result);
@@ -1223,8 +1303,7 @@ ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, Mes
         callerToken = data.ReadRemoteObject();
     }
 
-    ErrCode result = RequestEnableNotification(deviceId,
-        iface_cast<AnsDialogCallback>(callback), callerToken);
+    ErrCode result = RequestEnableNotification(deviceId, iface_cast<AnsDialogCallback>(callback), callerToken);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1298,8 +1377,8 @@ ErrCode AnsManagerStub::HandleSetNotificationsEnabledForSpecialBundle(MessagePar
 
     ErrCode result = SetNotificationsEnabledForSpecialBundle(deviceId, bundleOption, enabled);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE(
-            "[HandleSetNotificationsEnabledForSpecialBundle] fail: write result failed, ErrCode=%{public}d", result);
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: write result failed, ErrCode=%{public}d",
+            result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -1441,8 +1520,8 @@ ErrCode AnsManagerStub::HandleSubscribeLocalLiveView(MessageParcel &data, Messag
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = SubscribeLocalLiveView(
-        iface_cast<AnsSubscriberLocalLiveViewInterface>(subscriber), info, isNative);
+    ErrCode result =
+        SubscribeLocalLiveView(iface_cast<AnsSubscriberLocalLiveViewInterface>(subscriber), info, isNative);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSubscribeLocalLiveView] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1704,7 +1783,7 @@ ErrCode AnsManagerStub::HandleIsDistributedEnableByBundle(MessageParcel &data, M
 
 ErrCode AnsManagerStub::HandleGetDeviceRemindType(MessageParcel &data, MessageParcel &reply)
 {
-    auto rType {NotificationConstant::RemindType::NONE};
+    auto rType{ NotificationConstant::RemindType::NONE };
     ErrCode result = GetDeviceRemindType(rType);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleGetDeviceRemindType] fail: write result failed, ErrCode=%{public}d", result);
@@ -2158,8 +2237,7 @@ ErrCode AnsManagerStub::HandleDistributedSetEnabledWithoutApp(MessageParcel &dat
 
     ErrCode result = SetSyncNotificationEnabledWithoutApp(userId, enabled);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleDistributedSetEnabledWithoutApp] fail: write result failed, ErrCode=%{public}d",
-            result);
+        ANS_LOGE("[HandleDistributedSetEnabledWithoutApp] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2177,8 +2255,7 @@ ErrCode AnsManagerStub::HandleDistributedGetEnabledWithoutApp(MessageParcel &dat
     bool enabled = false;
     ErrCode result = GetSyncNotificationEnabledWithoutApp(userId, enabled);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleDistributedGetEnabledWithoutApp] fail: write result failed, ErrCode=%{public}d",
-            result);
+        ANS_LOGE("[HandleDistributedGetEnabledWithoutApp] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -2341,8 +2418,8 @@ ErrCode AnsManagerStub::HandleSetDistributedEnabledByBundle(MessageParcel &data,
 
     ErrCode result = SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE(
-            "[HandleSetNotificationsEnabledForSpecialBundle] fail: write result failed, ErrCode=%{public}d", result);
+        ANS_LOGE("[HandleSetNotificationsEnabledForSpecialBundle] fail: write result failed, ErrCode=%{public}d",
+            result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -2383,15 +2460,14 @@ ErrCode AnsManagerStub::HandleIsDistributedEnabledByBundle(MessageParcel &data, 
         ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: read deviceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    
+
     bool enabled = false;
     ErrCode result = IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE(
-            "[HandleIsDistributedEnabledByBundle] fail: write result failed, ErrCode=%{public}d", result);
+        ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
-  
+
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleIsDistributedEnabledByBundle] fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2438,8 +2514,7 @@ ErrCode AnsManagerStub::HandleSetSmartReminderEnabled(MessageParcel &data, Messa
 
     ErrCode result = SetSmartReminderEnabled(deviceType, enabled);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE(
-            "[HandleSetSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
+        ANS_LOGE("[HandleSetSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -2475,14 +2550,14 @@ ErrCode AnsManagerStub::HandleIsSmartReminderEnabled(MessageParcel &data, Messag
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: read deviceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    
+
     bool enabled = false;
     ErrCode result = IsSmartReminderEnabled(deviceType, enabled);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
-  
+
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2529,5 +2604,5 @@ ErrCode AnsManagerStub::HandleRegisterSwingCallback(MessageParcel &data, Message
     return result;
 }
 #endif
-}  // namespace Notification
-}  // namespace OHOS
+} // namespace Notification
+} // namespace OHOS

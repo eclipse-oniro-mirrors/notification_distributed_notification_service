@@ -107,24 +107,6 @@ HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest02, Function | SmallTest | Le
 }
 
 /**
-* @tc.name: OnRemoteRequest03
-* @tc.desc: test function error
-* @tc.type: Fun
-*/
-HWTEST_F(AnsSubscriberStubUnitTest, OnRemoteRequest03, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(AnsSubscriberStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED);
-    stub_->interfaces_[NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED] = nullptr;
-    ErrCode res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_TRUE(res != NO_ERROR);
-}
-
-/**
 * @tc.name: OnRemoteRequest04
 * @tc.desc: test ON_CONNECTED success
 * @tc.type: Fun

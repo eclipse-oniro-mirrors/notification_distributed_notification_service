@@ -932,8 +932,6 @@ public:
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
 #endif
 private:
-    static const std::map<NotificationInterfaceCode, std::function<ErrCode(AnsManagerStub *, MessageParcel &, MessageParcel &)>>
-        interfaces_;
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancel(MessageParcel &data, MessageParcel &reply);
