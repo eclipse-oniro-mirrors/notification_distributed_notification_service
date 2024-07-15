@@ -413,8 +413,15 @@ void NotificationSubscriberManager::NotifyConsumedInner(
         if (IsSubscribedBysubscriber(record, notification)) {
             if (!record->subscriber->AsObject()->IsProxyObject()) {
                 MessageParcel data;
-                data.WriteParcelable(notification);
+                if (!data.WriteParcelable(notification)) {
+                    ANS_LOGE("WriteParcelable failed.");
+                    continue;
+                }
                 sptr<Notification> notificationStub = data.ReadParcelable<Notification>();
+                if (notificationStub == nullptr) {
+                    ANS_LOGE("ReadParcelable failed.");
+                    continue;
+                }
                 record->subscriber->OnConsumed(notificationStub, notificationMap);
                 continue;
             }
