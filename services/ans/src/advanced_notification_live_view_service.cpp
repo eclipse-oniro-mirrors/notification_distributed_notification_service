@@ -73,6 +73,11 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
             continue;
         }
 
+        // Turn off ringtone and vibration during recovery process
+        auto notificationFlags = record->request->GetFlags();
+        notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+        notificationFlags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+        record->request->SetFlags(notificationFlags);
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Add notification to record list failed.");
             continue;
@@ -544,7 +549,7 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
 
     record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;
     StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES);
-    
+
     return ERR_OK;
 }
 
@@ -624,9 +629,9 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         auto data = downloadTemplate->GetTemplateData();
         AAFwk::WantParamWrapper wrapper(*data);
         ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
-        
+
         CancelTimer(oldRecord->notification->GetFinishTimer());
-        
+
         uint64_t process = 0;
         if (data->HasParam(PROGRESS_VALUE)) {
             process = data->GetIntParam(PROGRESS_VALUE, 0);
