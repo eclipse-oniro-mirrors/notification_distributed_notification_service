@@ -517,8 +517,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     return false;
 }
 
-__attribute__((no_sanitize("cfi"))) void NotificationSubscriberManager::BatchNotifyCanceledInner(
-    const std::vector<sptr<Notification>> &notifications,
+void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
@@ -534,13 +533,6 @@ __attribute__((no_sanitize("cfi"))) void NotificationSubscriberManager::BatchNot
             sptr<Notification> notification = notifications[i];
             if (notification == nullptr) {
                 continue;
-            }
-            std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
-            liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
-                notification->GetNotificationRequest().GetContent()->GetNotificationContent());
-            if (liveViewContent != nullptr) {
-                liveViewContent->ClearPictureMarshallingMap();
-                ANS_LOGD("live batch delete clear picture");
             }
             if (IsSubscribedBysubscriber(record, notification)) {
                 currNotifications.emplace_back(notification);
