@@ -33,6 +33,10 @@ void NotificationTrustList::GetCcmPrivilegesConfig()
         ANS_LOGE("Failed to get JsonPoint CCM config file.");
         return;
     }
+    if (!root.contains(NotificationConfigParse::APP_PRIVILEGES)) {
+        ANS_LOGW("not found jsonKey appPrivileges");
+        return;
+    }
     nlohmann::json affects = root[NotificationConfigParse::APP_PRIVILEGES];
     if (affects.is_null() || affects.empty()) {
         ANS_LOGE("GetCcmPrivileges failed as invalid ccmPrivileges json.");

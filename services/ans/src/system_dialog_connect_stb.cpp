@@ -63,13 +63,18 @@ void SystemDialogConnectStb::SendRemoveBundleEvent()
     EventFwk::CommonEventData commonData;
     commonData.SetWant(want);
     commonData.SetCode(REMOVE_BUNDLE_CODE);
-    nlohmann::json root = nlohmann::json::parse(commandStr_);
-    if (root.is_null() or !root.is_object()) {
+
+    if (commandStr_.empty() || !nlohmann::json::accept(commandStr_)) {
         ANS_LOGW("Invaild json param");
         return;
     }
+    nlohmann::json root = nlohmann::json::parse(commandStr_);
     if (!root.contains("from")) {
         ANS_LOGW("not found jsonKey from");
+        return;
+    }
+    if (!root["from"].is_string()) {
+        ANS_LOGW("value type of json key from is not string");
         return;
     }
     std::string from = root["from"];
