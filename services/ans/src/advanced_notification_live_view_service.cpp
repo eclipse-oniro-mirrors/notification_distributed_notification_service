@@ -73,6 +73,11 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
             continue;
         }
 
+        // Turn off ringtone and vibration during recovery process
+        auto notificationFlags = record->request->GetFlags();
+        notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+        notificationFlags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+        record->request->SetFlags(notificationFlags);
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Add notification to record list failed.");
             continue;
