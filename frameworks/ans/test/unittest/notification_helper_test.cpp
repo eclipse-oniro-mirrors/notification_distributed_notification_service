@@ -262,7 +262,7 @@ HWTEST_F(NotificationHelperTest, CancelAsBundle_00001, Function | SmallTest | Le
     int32_t userId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_UID);
+    EXPECT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
 }
 
 /**

@@ -465,7 +465,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
 
     NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    ASSERT_EQ(ret, OHOS::AAFwk::ABILITY_VISIBLE_FALSE_DENY_REQUEST);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
