@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,24 +28,12 @@
 
 namespace OHOS {
 namespace Notification {
-AnsSubscriberLocalLiveViewStub::AnsSubscriberLocalLiveViewStub()
-{
-    interfaces_.emplace(NotificationInterfaceCode::ON_CONNECTED,
-        std::bind(&AnsSubscriberLocalLiveViewStub::HandleOnConnected,
-            this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_DISCONNECTED,
-        std::bind(&AnsSubscriberLocalLiveViewStub::HandleOnDisconnected,
-            this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_RESPONSE,
-        std::bind(&AnsSubscriberLocalLiveViewStub::HandleOnResponse,
-            this, std::placeholders::_1, std::placeholders::_2));
-}
+AnsSubscriberLocalLiveViewStub::AnsSubscriberLocalLiveViewStub() {}
 
-AnsSubscriberLocalLiveViewStub::~AnsSubscriberLocalLiveViewStub()
-{}
+AnsSubscriberLocalLiveViewStub::~AnsSubscriberLocalLiveViewStub() {}
 
-int32_t AnsSubscriberLocalLiveViewStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &flags)
+int32_t AnsSubscriberLocalLiveViewStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &flags)
 {
     std::u16string descriptor = AnsSubscriberLocalLiveViewStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
@@ -53,21 +41,26 @@ int32_t AnsSubscriberLocalLiveViewStub::OnRemoteRequest(
         ANS_LOGW("[OnRemoteRequest] fail: invalid interface token!");
         return OBJECT_NULL;
     }
-
-    auto it = interfaces_.find(static_cast<NotificationInterfaceCode>(code));
-    if (it == interfaces_.end()) {
-        ANS_LOGW("[OnRemoteRequest] fail: unknown code!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
+    ErrCode result = NO_ERROR;
+    switch (code) {
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CONNECTED): {
+            result = HandleOnConnected(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_DISCONNECTED): {
+            result = HandleOnDisconnected(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_RESPONSE): {
+            result = HandleOnResponse(data, reply);
+            break;
+        }
+        default: {
+            ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
+        }
     }
-
-    auto fun = it->second;
-    if (fun == nullptr) {
-        ANS_LOGW("[OnRemoteRequest] fail: not find function!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
-    }
-
-    fun(data, reply);
-    return NO_ERROR;
+    return result;
 }
 
 ErrCode AnsSubscriberLocalLiveViewStub::HandleOnConnected(MessageParcel &data, MessageParcel &reply)
@@ -82,7 +75,7 @@ ErrCode AnsSubscriberLocalLiveViewStub::HandleOnDisconnected(MessageParcel &data
     return ERR_OK;
 }
 
-template<typename T>
+template <typename T>
 bool AnsSubscriberLocalLiveViewStub::ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data)
 {
     int32_t infoSize = 0;
@@ -122,13 +115,10 @@ ErrCode AnsSubscriberLocalLiveViewStub::HandleOnResponse(MessageParcel &data, Me
     return ERR_OK;
 }
 
-void AnsSubscriberLocalLiveViewStub::OnConnected()
-{}
+void AnsSubscriberLocalLiveViewStub::OnConnected() {}
 
-void AnsSubscriberLocalLiveViewStub::OnDisconnected()
-{}
+void AnsSubscriberLocalLiveViewStub::OnDisconnected() {}
 
-void AnsSubscriberLocalLiveViewStub::OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption)
-{}
-}  // namespace Notification
-}  // namespace OHOS
+void AnsSubscriberLocalLiveViewStub::OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption) {}
+} // namespace Notification
+} // namespace OHOS
