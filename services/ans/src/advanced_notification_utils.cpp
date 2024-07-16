@@ -573,8 +573,8 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         RemoveDoNotDisturbProfileTrustList(bundleOption);
     }));
     NotificationPreferences::GetInstance().RemoveEnabledDbByBundle(bundleOption);
-#ifdef ENABLE_ANS_EXT_WAPPER
-    EXTENTION_WRAPPER->UpdateByUpdate(bundleOption->GetBundleName(),
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
         NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
 #endif
 }
