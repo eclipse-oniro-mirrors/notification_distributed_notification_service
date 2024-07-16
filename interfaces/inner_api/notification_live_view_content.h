@@ -145,6 +145,8 @@ public:
 
     void ClearPictureMarshallingMap();
 
+    void ClearPictureMap();
+
     PictureMarshallingMap GetPictureMarshallingMap() const;
 
     void SetIsOnlyLocalUpdate(const bool &isOnlyLocalUpdate);

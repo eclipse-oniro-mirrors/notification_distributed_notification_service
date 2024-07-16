@@ -102,7 +102,7 @@ void AdvancedNotificationService::SendCancelHiSysEvent(int32_t notificationId, c
     const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode)
 {
     if (bundleOption == nullptr || errCode != ERR_OK) {
-        ANS_LOGD("bundleOption is nullptr.");
+        ANS_LOGD("bundleOption is nullptr or not ok %{public}d.", errCode);
         return;
     }
 
