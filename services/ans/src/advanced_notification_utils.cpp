@@ -554,12 +554,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
                 int32_t reason = NotificationConstant::PACKAGE_CHANGED_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
-                if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
-                    std::vector<sptr<Notification>> currNotificationList = notifications;
-                    NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                        currNotificationList, nullptr, reason);
-                    notifications.clear();
-                }
+                ExecBatchCancel(notifications, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete("", "", notification);
 #endif
@@ -577,6 +572,17 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
     EXTENTION_WRAPPER->UpdateByUpdate(bundleOption->GetBundleName(),
         NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
 #endif
+}
+
+void AdvancedNotificationService::ExecBatchCancel(std::vector<sptr<Notification>> &notifications,
+    int32_t &reason)
+{
+    if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+        std::vector<sptr<Notification>> currNotificationList = notifications;
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+            currNotificationList, nullptr, reason);
+        notifications.clear();
+    }
 }
 
 void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(

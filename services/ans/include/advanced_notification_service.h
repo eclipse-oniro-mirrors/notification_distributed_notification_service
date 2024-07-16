@@ -821,6 +821,13 @@ public:
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
+     * @brief Obtains the event of bundle batch removed.
+     *
+     * @param notifications Notification vector.
+     */
+    void ExecBatchCancel(std::vector<sptr<Notification>> &notifications, int32_t &reason);
+
+    /**
      * @brief Obtains the event of user removed.
      *
      * @param userId Indicates the user.
