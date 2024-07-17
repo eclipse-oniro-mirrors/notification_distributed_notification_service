@@ -253,7 +253,7 @@ struct PermissionDialog {
   }
 
   async updateStatus(): Promise<void> {
-    let bundleNameObj = this.dialog?.want.parameters?.from;
+    let bundleNameObj = this.dialog?.want.parameters?.bundleName;
     let bundleName = bundleNameObj ? bundleNameObj.toString() : '';
     await this.updateApplicationName(bundleName);
     await this.updateIsBottomPopover();

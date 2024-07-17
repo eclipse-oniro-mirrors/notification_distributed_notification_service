@@ -24,6 +24,8 @@
 #include "notification_bundle_option.h"
 #include "notification_dialog.h"
 #include "notification_preferences.h"
+#include <cstdlib>
+#include <string>
 
 namespace OHOS::Notification {
 using DialogInfo = NotificationDialogManager::DialogInfo;
@@ -47,10 +49,11 @@ NotificationDialogEventSubscriber::NotificationDialogEventSubscriber(
 void NotificationDialogEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
     int32_t code = data.GetCode();
-    std::string text = data.GetData();
-    ANS_LOGI("NotificationDialogEventSubscriber Get Data %{public}d %{public}s", code, text.c_str());
-    dialogManager_.OnBundleEnabledStatusChanged(
-        static_cast<DialogStatus>(code), text);
+    std::string bundleName = data.GetWant().GetStringParam("bundleName");
+    int32_t bundleUid = std::atoi(data.GetWant().GetStringParam("bundleUid").c_str());
+    ANS_LOGI("NotificationDialogEventSubscriber Get Data %{public}d %{public}s %{public}d", code,
+        bundleName.c_str(), bundleUid);
+    dialogManager_.OnBundleEnabledStatusChanged(static_cast<DialogStatus>(code), bundleName, bundleUid);
 }
 
 NotificationDialogEventSubscriber::~NotificationDialogEventSubscriber()
@@ -110,25 +113,25 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
 }
 
 ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
-    DialogStatus status, const std::string& bundleName)
+    DialogStatus status, const std::string& bundleName, const int32_t& uid)
 {
     ANS_LOGD("enter");
     bool result = false;
     switch (status) {
         case DialogStatus::ALLOW_CLICKED:
-            result = OnDialogButtonClicked(bundleName, true);
+            result = OnDialogButtonClicked(bundleName, uid, true);
             break;
         case DialogStatus::DENY_CLICKED:
-            result = OnDialogButtonClicked(bundleName, false);
+            result = OnDialogButtonClicked(bundleName, uid, false);
             break;
         case DialogStatus::DIALOG_CRASHED:
-            result = OnDialogCrashed(bundleName);
+            result = OnDialogCrashed(bundleName, uid);
             break;
         case DialogStatus::DIALOG_SERVICE_DESTROYED:
             result = OnDialogServiceDestroyed();
             break;
         case DialogStatus::REMOVE_BUNDLE:
-            result = onRemoveBundle(bundleName);
+            result = onRemoveBundle(bundleName, uid);
             break;
         default:
             result = false;
@@ -155,9 +158,10 @@ bool NotificationDialogManager::AddDialogInfoIfNotExist(
 {
     std::lock_guard<std::mutex> lock(dialogsMutex_);
     std::string name = bundle->GetBundleName();
+    int32_t uid = bundle->GetUid();
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
         [&](const std::unique_ptr<DialogInfo>& dialogInfo) {
-            return dialogInfo->bundleOption->GetBundleName() == name;
+            return dialogInfo->bundleOption->GetBundleName() == name && dialogInfo->bundleOption->GetUid() == uid;
         });
     if (dialogIter != dialogsOpening_.end()) {
         return false;
@@ -170,12 +174,12 @@ bool NotificationDialogManager::AddDialogInfoIfNotExist(
 }
 
 sptr<NotificationBundleOption> NotificationDialogManager::GetBundleOptionByBundleName(
-    const std::string& bundleName)
+    const std::string& bundleName, const int32_t& uid)
 {
     std::lock_guard<std::mutex> lock(dialogsMutex_);
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
         [&](const std::unique_ptr<DialogInfo>& dialogInfo) {
-            return dialogInfo->bundleOption->GetBundleName() == bundleName;
+            return dialogInfo->bundleOption->GetBundleName() == bundleName && dialogInfo->bundleOption->GetUid() == uid;
         });
     if (dialogIter == dialogsOpening_.end()) {
         return nullptr;
@@ -189,9 +193,10 @@ void NotificationDialogManager::RemoveDialogInfoByBundleOption(const sptr<Notifi
 {
     std::lock_guard<std::mutex> lock(dialogsMutex_);
     std::string name = bundle->GetBundleName();
+    int32_t uid = bundle->GetUid();
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
         [&](const std::unique_ptr<DialogInfo>& dialogInfo) {
-            return dialogInfo->bundleOption->GetBundleName() == name;
+            return dialogInfo->bundleOption->GetBundleName() == name && dialogInfo->bundleOption->GetUid() == uid;
         });
     if (dialogIter == dialogsOpening_.end()) {
         dialogInfoRemoved = nullptr;
@@ -221,10 +226,10 @@ bool NotificationDialogManager::SetHasPoppedDialog(
     return result == ERR_OK;
 }
 
-bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleName, bool enabled)
+bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleName, const int32_t& uid, bool enabled)
 {
     ANS_LOGD("enter");
-    auto bundleOption = GetBundleOptionByBundleName(bundleName);
+    auto bundleOption = GetBundleOptionByBundleName(bundleName, uid);
     if (bundleOption == nullptr) {
         return false;
     }
@@ -242,10 +247,10 @@ bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleN
     return HandleOneDialogClosed(bundleOption, status);
 }
 
-bool NotificationDialogManager::OnDialogCrashed(const std::string& bundleName)
+bool NotificationDialogManager::OnDialogCrashed(const std::string& bundleName, const int32_t& uid)
 {
     ANS_LOGD("enter");
-    auto bundleOption = GetBundleOptionByBundleName(bundleName);
+    auto bundleOption = GetBundleOptionByBundleName(bundleName, uid);
     if (bundleOption == nullptr) {
         return false;
     }
@@ -266,9 +271,9 @@ bool NotificationDialogManager::OnDialogServiceDestroyed()
     return HandleAllDialogsClosed();
 }
 
-bool NotificationDialogManager::onRemoveBundle(const std::string bundleName)
+bool NotificationDialogManager::onRemoveBundle(const std::string bundleName, const int32_t& uid)
 {
-    auto bundleOption = GetBundleOptionByBundleName(bundleName);
+    auto bundleOption = GetBundleOptionByBundleName(bundleName, uid);
     if (bundleOption == nullptr) {
         ANS_LOGE("onRemoveBundle bundle is null. bundleName = %{public}s", bundleName.c_str());
         return false;

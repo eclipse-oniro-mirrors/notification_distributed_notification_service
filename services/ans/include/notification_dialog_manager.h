@@ -55,6 +55,7 @@ public:
 
 private:
     inline static const std::string EVENT_NAME = "OnNotificationServiceDialogClicked";
+
     NotificationDialogManager& dialogManager_;
 };
 
@@ -93,7 +94,7 @@ public:
      * "com.ohos.notificationdialog", caller token is not checked
      * when commonEvent callback is triggered.
      */
-    ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName);
+    ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName, const int32_t& uid);
 
     /*
      * AddDialogInfo
@@ -110,16 +111,16 @@ private:
 
     // bundle need to be not null
     bool AddDialogInfoIfNotExist(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
-    sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName);
+    sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName, const int32_t& uid);
     // bundle need to be not null
     void RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
         std::unique_ptr<DialogInfo>& dialogInfoRemoved);
     void RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved);
 
-    bool OnDialogButtonClicked(const std::string& bundleName, bool enabled);
-    bool OnDialogCrashed(const std::string& bundleName);
+    bool OnDialogButtonClicked(const std::string& bundleName, const int32_t& uid, bool enabled);
+    bool OnDialogCrashed(const std::string& bundleName, const int32_t& uid);
     bool OnDialogServiceDestroyed();
-    bool onRemoveBundle(const std::string bundleName);
+    bool onRemoveBundle(const std::string bundleName, const int32_t& uid);
 
     bool HandleOneDialogClosed(sptr<NotificationBundleOption> bundleOption, EnabledDialogStatus status);
     bool HandleAllDialogsClosed();
