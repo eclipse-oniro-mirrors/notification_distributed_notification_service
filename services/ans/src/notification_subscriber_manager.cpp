@@ -32,6 +32,7 @@
 #include "os_account_manager_helper.h"
 #include "remote_death_recipient.h"
 #include "advanced_notification_service.h"
+#include "notification_analytics_util.h"
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
@@ -135,6 +136,9 @@ void NotificationSubscriberManager::NotifyConsumed(
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
+        HaMetaMessage message = HaMetaMessage().SceneId(33).BranchId(1).ErrorCode(ERROR_INTERNAL_ERROR)
+            .Message("queue is nullptr").BundleName(notification->GetBundleName());
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(notification->GetNotificationRequestPoint(), message);
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
