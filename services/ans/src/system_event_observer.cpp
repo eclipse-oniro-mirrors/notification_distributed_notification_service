@@ -49,7 +49,6 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
         commonEventSubscribeInfo, std::bind(&SystemEventObserver::OnReceiveEvent, this, std::placeholders::_1));
 
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
-    InitEventList();
 }
 
 SystemEventObserver::~SystemEventObserver()
@@ -116,31 +115,18 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
     }
 }
 
-void SystemEventObserver::InitEventList()
-{
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED] =
-        &SystemEventObserver::OnBundleAddEventInner;
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED] =
-        &SystemEventObserver::OnBundleUpdateEventInner;
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED] =
-        &SystemEventObserver::OnBootSystemCompletedEventInner;
-}
-
 void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    auto itFunc = memberFuncMap_.find(action);
-    if (itFunc == memberFuncMap_.end()) {
-        ANS_LOGE("Action %{public}s callback is not found.", action.c_str());
-        return;
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) == 0) {
+        return OnBundleAddEventInner(data);
     }
-
-    if (itFunc->second == nullptr) {
-        ANS_LOGE("Action [%{public}s] callback is nullptr.", action.c_str());
-        return;
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) == 0) {
+        return OnBundleUpdateEventInner(data);
     }
-
-    (this->*(itFunc->second))(data);
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0) {
+        return OnBootSystemCompletedEventInner(data);
+    }
 }
 
 void SystemEventObserver::OnBundleAddEventInner(const EventFwk::CommonEventData &data)
