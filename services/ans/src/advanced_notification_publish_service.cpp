@@ -1468,6 +1468,11 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->request->GetSlotType() == slot->GetType())) {
+            if (((*it)->request->IsAgentNotification() && (*it)->request->IsSystemLiveView())) {
+                ANS_LOGI("Agent systemliveview no need remove.");
+                it++;
+                continue;
+            }
             notification = (*it)->notification;
             notificationRequest = (*it)->request;
 
