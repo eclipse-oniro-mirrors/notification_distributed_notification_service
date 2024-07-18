@@ -74,7 +74,8 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
 
     nlohmann::json root;
     std::string uiExtensionType = "sysDialog/common";
-    root["from"] = appBundleName;
+    root["bundleName"] = appBundleName;
+    root["bundleUid"] = uid;
     root["ability.want.params.uiExtensionType"] = uiExtensionType;
     std::string command  = root.dump();
     
