@@ -25,11 +25,6 @@
         "type": "sysDialog/common"
       }
     ],
-    "permission": [
-      {
-        "name": "ohos.permission.NOTIFICATION_CONTROLLER"
-      }
-    ],
     "requestPermissions": [
       {
         "name": "ohos.permission.START_ABILITIES_FROM_BACKGROUND"
