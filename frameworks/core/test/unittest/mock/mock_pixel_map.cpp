@@ -66,7 +66,7 @@ std::unique_ptr<PixelMap> PixelMap::Create(const InitializationOptions &opts)
 }
 
 void PixelMap::UpdatePixelsAlpha(const AlphaType &alphaType, const PixelFormat &pixelFormat, uint8_t *dstPixels,
-                                 PixelMap dstPixelMap)
+                                 PixelMap &dstPixelMap)
 {}
 
 std::unique_ptr<PixelMap> PixelMap::Create(PixelMap &source, const InitializationOptions &opts)
