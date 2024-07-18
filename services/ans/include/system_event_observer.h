@@ -45,16 +45,12 @@ private:
     void OnReceiveEventInner(const EventFwk::CommonEventData &data);
     sptr<NotificationBundleOption> GetBundleOption(AAFwk::Want want);
 
-    void InitEventList();
-
     void OnBundleUpdateEventInner(const EventFwk::CommonEventData &data);
     void OnBundleAddEventInner(const EventFwk::CommonEventData &data);
     void OnBootSystemCompletedEventInner(const EventFwk::CommonEventData &data);
 private:
     std::shared_ptr<SystemEventSubscriber> subscriber_ = nullptr;
     ISystemEvent callbacks_;
-    using SystemEventObserverFunc = void (SystemEventObserver::*)(const EventFwk::CommonEventData &data);
-    std::map<std::string, SystemEventObserverFunc> memberFuncMap_;
 };
 }  // namespace Notification
 }  // namespace OHOS
