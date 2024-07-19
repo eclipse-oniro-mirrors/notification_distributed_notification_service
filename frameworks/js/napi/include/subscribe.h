@@ -146,11 +146,15 @@ public:
 private:
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
     void SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
+
+    void SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
     void SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref);
 
@@ -162,19 +166,36 @@ private:
 
     void SetDieCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetDieCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+
     void SetDisturbModeCallbackInfo(const napi_env &env, const napi_ref &ref);
+
+    void SetDisturbModeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
     void SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+
     void SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref);
+
+    void SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
     void SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref,
+        const napi_threadsafe_function &tsfn);
+
     void SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref);
+
+    void SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
     void SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    void SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
+
     void SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
+
+    void SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
 private:
     struct CallbackInfo {
