@@ -200,7 +200,7 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::s
 ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
+    const int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -268,7 +268,7 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        std::string message = "no systemApp";
+        std::string message = "not systemApp";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 1)
             .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(notificationId);
         ReportDeleteFailedEventPush(haMetaMessage, reason, message);
@@ -278,10 +278,11 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        std::string message = "no systemApp";
+        std::string message = "no acl permission";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 2)
-            .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(notificationId);
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED).NotificationId(notificationId);
         ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -341,7 +342,7 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
     int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        std::string message = "no systemApp";
+        std::string message = "not systemApp";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 4)
             .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(id);
         ReportDeleteFailedEventPush(haMetaMessage, reason, message);
@@ -419,22 +420,21 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
 ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t removeReason)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    int reason = NotificationConstant::APP_REMOVE_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        std::string message = "no systemApp. key:" + key + ".";
+        std::string message = "not systemApp. key:" + key + ".";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 1)
             .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        std::string message = "no acl. key:" + key + ".";
+        std::string message = "no acl permission. key:" + key + ".";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 2)
-            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -442,13 +442,13 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is invalidated. key:" + key + ".";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 3)
-            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     
-    return ExcuteDelete(key, reason);
+    return ExcuteDelete(key, removeReason);
 }
 
 ErrCode AdvancedNotificationService::ExcuteDelete(const std::string &key, const int32_t removeReason)
@@ -1281,12 +1281,20 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGE("no system app.");
+        std::string message = "not systemApp.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 4)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("AccessTokenHelper::CheckPermission is bogus.");
+        std::string message = "no acl controller permission.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 5)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1296,7 +1304,11 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is null.");
+        std::string message = "NotificationSvrQueue_ is null.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 6)
+            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
@@ -1349,7 +1361,13 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
         }
     }));
     notificationSvrQueue_->wait(handler);
-
+    if (result != ERR_OK) {
+        std::string message = "remove notificaiton error";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 7)
+            .ErrorCode(result).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+    }
     SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
     return result;
 }

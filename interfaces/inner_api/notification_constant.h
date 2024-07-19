@@ -223,12 +223,12 @@ public:
     /**
      * Indicates that a notification is deleted because the application cancel it by group.
      */
-    static const int32_t APP_CANCEL_GROPU_REASON_DELETE = 16;
-
+    static const int32_t APP_CANCEL_GROPU_REASON_DELETE = 17;
+    
     /**
-     * Indicates that a notification is deleted because the system cancel it.
+     * Indicates that a notification is deleted by group because the system cancel it.
      */
-    static const int32_t APP_REMOVE_REASON_DELETE = 16;
+    static const int32_t APP_REMOVE_GROUP_REASON_DELETE = 18;
 
     /**
      * Indicates that a notification is deleted for other reasons.
