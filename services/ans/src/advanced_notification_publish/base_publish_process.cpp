@@ -23,6 +23,7 @@
 #include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
 #include "parameters.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -39,11 +40,16 @@ ErrCode BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
 
 ErrCode BasePublishProcess::CommonPublishCheck(const sptr<NotificationRequest> &request)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_1);
     if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
         if (!AccessTokenHelper::IsSystemApp()) {
+            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_NON_SYSTEM_APP;
         }
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_PERMISSION_DENIED;
         }
     }

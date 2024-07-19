@@ -46,6 +46,7 @@
 #endif
 
 #include "advanced_notification_inline.cpp"
+#include "notification_analytics_util.h"
 
 #define CHECK_BUNDLE_OPTION_IS_INVALID(option)                              \
     if (option == nullptr || option->GetBundleName().empty()) {             \
@@ -1677,6 +1678,7 @@ ErrCode AdvancedNotificationService::SetRequestBundleInfo(const sptr<Notificatio
 ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
     int32_t uid, std::string &bundle)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2);
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         ANS_LOGE("failed to get bundleManager!");
@@ -1685,6 +1687,8 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     bundle = bundleManager->GetBundleNameByUid(uid);
     ErrCode result = SetRequestBundleInfo(request, uid, bundle);
     if (result != ERR_OK) {
+        message.ErrorCode(result);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
@@ -1712,7 +1716,8 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     }
     result = CheckPictureSize(request);
     if (result != ERR_OK) {
-        ANS_LOGE("Failed to check picture size");
+        message.ErrorCode(result).Message("Failed to check picture size", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
     ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid,

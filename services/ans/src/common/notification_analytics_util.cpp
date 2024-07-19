@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Notification {
 constexpr char MESSAGE_DELIMITER = '#';
-constexpr char MESSAGE_PREFIX[] = "Detail:";
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
@@ -33,9 +32,16 @@ constexpr const int32_t MODIFY_SUCCESS_EVENT_CODE = 7;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
+    : sceneId_(sceneId), branchId_(branchId)
 {
-    sceneId_ = sceneId;
-    branchId_ = branchId;
+}
+
+bool HaMetaMessage::NeedReport() const
+{
+    if (errorCode_ == ERR_OK && checkfailed_) {
+        return false;
+    }
+    return true;
 }
 
 HaMetaMessage& HaMetaMessage::SceneId(uint32_t sceneId)
@@ -56,9 +62,18 @@ HaMetaMessage& HaMetaMessage::ErrorCode(uint32_t errorCode)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::Message(const std::string& message)
+HaMetaMessage& HaMetaMessage::Message(const std::string& message, bool print)
 {
-    message_ = MESSAGE_PREFIX + message;
+    message_ = message;
+    if (print) {
+        ANSR_LOGE("%{public}s, %{public}d", message.c_str(), errorCode_);
+    }
+    return *this;
+}
+
+HaMetaMessage& HaMetaMessage::Checkfailed(bool checkfailed)
+{
+    checkfailed_ = checkfailed;
     return *this;
 }
 
@@ -94,9 +109,9 @@ std::string HaMetaMessage::GetMessage() const
 
 std::string HaMetaMessage::Build() const
 {
-    return MESSAGE_DELIMITER + std::to_string(sceneId_) + MESSAGE_DELIMITER +
+    return std::to_string(sceneId_) + MESSAGE_DELIMITER +
         std::to_string(branchId_) + MESSAGE_DELIMITER + std::to_string(errorCode_) +
-        MESSAGE_DELIMITER + message_;
+        MESSAGE_DELIMITER + message_ + MESSAGE_DELIMITER;
 }
 
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
@@ -108,8 +123,8 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<Notification
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
     HaMetaMessage& message)
 {
-    if (request == nullptr) {
-        ANS_LOGE("request is null");
+    if (request == nullptr || !message.NeedReport()) {
+        ANS_LOGE("request is null %{public}d", message.NeedReport());
         return;
     }
     std::shared_ptr<NotificationBundleOption> agentBundleNameOption = request->GetAgentBundle();
@@ -149,12 +164,15 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
 void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
     EventFwk::Want want, int32_t eventCode, const std::string& reason)
 {
-    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (request->GetUnifiedGroupInfo() != nullptr &&
         request->GetUnifiedGroupInfo()->GetExtraInfo() != nullptr) {
         extraInfo = request->GetUnifiedGroupInfo()->GetExtraInfo();
+    } else {
+        extraInfo = std::make_shared<AAFwk::WantParams>();
     }
-    extraInfo->SetParam("reason", AAFwk::String::Box(reason));
+    std::string reasons = reason + std::to_string(request->GetFlags()->GetReminderFlags());
+    extraInfo->SetParam("reason", AAFwk::String::Box(reasons));
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
     std::string extraContent = wWrapper.ToString();
 
@@ -167,8 +185,14 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
 
     want.SetParam("id", request->GetNotificationId());
     want.SetParam("slotType", static_cast<int32_t>(slotType));
-    want.SetParam("contentType", static_cast<int32_t>(contentType));
+    want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
     want.SetParam("extraInfo", extraContent);
+    if (!request->GetCreatorBundleName().empty()) {
+        want.SetParam("bundleName", request->GetCreatorBundleName());
+    }
+    if (!request->GetOwnerBundleName().empty()) {
+        want.SetParam("agentBundleName", request->GetOwnerBundleName());
+    }
     want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});

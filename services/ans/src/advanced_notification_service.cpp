@@ -74,6 +74,7 @@
 
 #include "advanced_notification_inline.cpp"
 #include "advanced_datashare_helper_ext.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -198,7 +199,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
         request->SetOwnerBundleName(bundle);
     }
-    
+
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
@@ -294,7 +295,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 
     std::function<void()> recoverFunc = std::bind(&AdvancedNotificationService::RecoverLiveViewFromDb, this);
     notificationSvrQueue_->submit(recoverFunc);
-    
+
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::OnBundleRemoved, this, std::placeholders::_1),
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -402,6 +403,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_3);
     if (request == nullptr) {
         ANS_LOGE("request is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -413,6 +415,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
     ErrCode result = PrepareNotificationRequest(request);
     if (result != ERR_OK) {
+        message.ErrorCode(result);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
@@ -436,6 +440,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
 
     if (bundleOption == nullptr) {
+        message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_BUNDLE;
     }
     ANS_LOGI(
@@ -583,9 +589,12 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
     if (ctrlResult != ERR_OK) {
+        message.ErrorCode(ctrlResult);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ctrlResult;
     }
 #endif
@@ -593,6 +602,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
+        message.ErrorCode(result);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
@@ -1428,10 +1439,13 @@ static bool SortNotificationsByLevelAndTime(
 
 ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2);
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> lock(flowControlMutex_);
     RemoveExpired(flowControlTimestampList_, now);
     if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
+        message.ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
     flowControlTimestampList_.push_back(now);

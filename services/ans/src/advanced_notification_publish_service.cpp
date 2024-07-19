@@ -39,7 +39,7 @@
 #include "common_event_publish_info.h"
 #include "want_params_wrapper.h"
 #include "ans_convert_enum.h"
-
+#include "notification_analytics_util.h"
 
 #include "advanced_notification_inline.cpp"
 
@@ -92,16 +92,18 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     request->SetCreateTime(GetCurrentTime());
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
     ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (result != ERR_OK) {
-        ANSR_LOGE("Failed to process request, result is %{public}d", result);
+        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
     result = CheckUserIdParams(request->GetReceiverUserId());
     if (result != ERR_OK) {
-        ANSR_LOGE("User is invalid");
+        message.SceneId(EventSceneId::SCENE_3).ErrorCode(result).Message("User is invalid", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -123,6 +125,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
         result = CheckSoundPermission(request, bundleOption->GetBundleName());
         if (result != ERR_OK) {
+            message.ErrorCode(result).Message("Check sound failed.");
             break;
         }
 
@@ -130,14 +133,17 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             result = PushCheck(request);
         }
         if (result != ERR_OK) {
+            message.ErrorCode(result).Message("Push check failed.");
             break;
         }
         result = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
         if (result != ERR_OK) {
+            message.ErrorCode(result).Message("Publish prepared failed.");
             break;
         }
     } while (0);
 
+    NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
     SendPublishHiSysEvent(request, result);
     return result;
 }
@@ -447,7 +453,7 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
-    
+
     return ExcuteDelete(key, removeReason);
 }
 
@@ -1977,12 +1983,15 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     int32_t uid = request->GetCreatorUid();
     if (request->GetOwnerUid() != DEFAULT_UID) {
         std::shared_ptr<NotificationBundleOption> agentBundle =
         std::make_shared<NotificationBundleOption>("", uid);
         if (agentBundle == nullptr) {
             ANS_LOGE("Failed to create agentBundle instance");
+            message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_INVALID_BUNDLE;
         }
         request->SetAgentBundle(agentBundle);
@@ -1992,7 +2001,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         uid = request->GetOwnerUid();
     }
     if (uid <= 0) {
-        ANS_LOGE("CreatorUid[%{public}d] error", uid);
+        message.ErrorCode(ERR_ANS_INVALID_UID).Message("createUid failed" + std::to_string(uid), true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_UID;
     }
     std::string bundle = "";
@@ -2235,7 +2245,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
         ANS_LOGE("no permission");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    
+
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
