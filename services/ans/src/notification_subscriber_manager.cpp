@@ -33,6 +33,9 @@
 #include "remote_death_recipient.h"
 #include "advanced_notification_service.h"
 #include "notification_analytics_util.h"
+
+#include "advanced_notification_inline.cpp"
+
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
@@ -487,6 +490,9 @@ void NotificationSubscriberManager::NotifyCanceledInner(
             notification->GetNotificationRequest().GetContent()->GetNotificationContent());
         liveViewContent->FillPictureMarshallingMap();
     }
+
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 6).ErrorCode(ERR_OK);
+    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage, deleteReason, "success");
 
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);

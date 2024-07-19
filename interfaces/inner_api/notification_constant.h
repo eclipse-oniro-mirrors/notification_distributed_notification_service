@@ -138,6 +138,8 @@ public:
         CLOSE
     };
 
+    static const int32_t DEFAULT_REASON_DELETE = 0;
+
     /**
      * Indicates that a notification is deleted because it is clicked.
      */
@@ -202,6 +204,31 @@ public:
      * Indicates that a notification is deleted because enable state is changed.
      */
     static const int32_t DISABLE_NOTIFICATION_REASON_DELETE = 13;
+
+    /**
+     * Indicates that a notification is deleted by bundle because the application cancel it.
+     */
+    static const int32_t APP_CANCEL_AS_BUNELE_REASON_DELETE = 14;
+
+    /**
+     * Indicates that a notification is deleted by agent because the application cancel it.
+     */
+    static const int32_t APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE = 15;
+
+    /**
+     * Indicates that a notification is deleted because the reminder cancel it.
+     */
+    static const int32_t APP_CANCEL_REMINDER_REASON_DELETE = 16;
+
+    /**
+     * Indicates that a notification is deleted because the application cancel it by group.
+     */
+    static const int32_t APP_CANCEL_GROPU_REASON_DELETE = 16;
+
+    /**
+     * Indicates that a notification is deleted because the system cancel it.
+     */
+    static const int32_t APP_REMOVE_REASON_DELETE = 16;
 
     /**
      * Indicates that a notification is deleted for other reasons.

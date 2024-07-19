@@ -323,7 +323,7 @@ void ReminderDataManager::CancelNotification(const sptr<ReminderRequest> &remind
     }
     sptr<NotificationBundleOption> bundleOption = FindNotificationBundleOption(reminder->GetReminderId());
     advancedNotificationService_->CancelPreparedNotification(notification->GetNotificationId(),
-        ReminderRequest::NOTIFICATION_LABEL, bundleOption);
+        ReminderRequest::NOTIFICATION_LABEL, bundleOption, NotificationConstant::APP_CANCEL_REMINDER_REASON_DELETE);
 }
 
 bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption,

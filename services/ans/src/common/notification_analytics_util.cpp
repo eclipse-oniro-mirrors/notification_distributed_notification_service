@@ -32,6 +32,12 @@ constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t MODIFY_SUCCESS_EVENT_CODE = 7;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 
+HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
+{
+    sceneId_ = sceneId;
+    branchId_ = branchId;
+}
+
 HaMetaMessage& HaMetaMessage::SceneId(uint32_t sceneId)
 {
     sceneId_ = sceneId;
@@ -62,6 +68,30 @@ HaMetaMessage& HaMetaMessage::BundleName(const std::string& bundleName)
     return *this;
 }
 
+HaMetaMessage& HaMetaMessage::AgentBundleName(const std::string& agentBundleName)
+{
+    agentBundleName_ = agentBundleName;
+    return *this;
+}
+
+HaMetaMessage& HaMetaMessage::TypeCode(int32_t typeCode)
+{
+    typeCode_ = typeCode;
+    return *this;
+}
+
+HaMetaMessage& HaMetaMessage::NotificationId(int32_t notificationId)
+{
+    notificationId_ = notificationId;
+    return *this;
+}
+
+std::string HaMetaMessage::GetMessage() const
+{
+    return message_;
+}
+
+
 std::string HaMetaMessage::Build() const
 {
     return MESSAGE_DELIMITER + std::to_string(sceneId_) + MESSAGE_DELIMITER +
@@ -76,8 +106,19 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<Notification
 }
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
-    const HaMetaMessage& message)
+    HaMetaMessage& message)
 {
+    if (request == nullptr) {
+        ANS_LOGE("request is null");
+        return;
+    }
+    std::shared_ptr<NotificationBundleOption> agentBundleNameOption = request->GetAgentBundle();
+    if (agentBundleNameOption != nullptr) {
+        std::string agentBundleName = agentBundleNameOption->GetBundleName();
+        if (!agentBundleName.empty()) {
+            message = message.AgentBundleName(agentBundleName);
+        }
+    }
     CommonNotificationEvent(request, DELETE_ERROR_EVENT_CODE, message);
 }
 
@@ -132,11 +173,40 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
     EventFwk::CommonEventData commonData {want, eventCode, ""};
+    ANS_LOGD("Publish event success %{public}d, %{public}s", eventCode, reason.c_str());
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
         ANS_LOGE("Publish event failed %{public}d, %{public}s", eventCode, reason.c_str());
     }
 }
 
+void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& message)
+{
+    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+    std::string reason = message.Build();
+    extraInfo->SetParam("reason", AAFwk::String::Box(reason));
+    AAFwk::WantParamWrapper wWrapper(*extraInfo);
+    std::string extraContent = wWrapper.ToString();
 
+    EventFwk::Want want;
+    want.SetParam("agentBundleName", message.agentBundleName_);
+    want.SetParam("bundleName", message.bundleName_);
+    want.SetParam("typeCode", message.typeCode_);
+    want.SetParam("id", message.notificationId_);
+    want.SetParam("extraInfo", extraContent);
+    ReportNotificationEvent(want, DELETE_ERROR_EVENT_CODE, message.Build());
+}
+
+void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
+    int32_t eventCode, const std::string& reason)
+{
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
+    EventFwk::CommonEventData commonData {want, eventCode, ""};
+    ANS_LOGD("Publish event success %{public}d, %{public}s", eventCode, reason.c_str());
+    if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
+        ANS_LOGE("Publish event failed %{public}d, %{public}s", eventCode, reason.c_str());
+    }
+}
 } // namespace Notification
 } // namespace OHOS
