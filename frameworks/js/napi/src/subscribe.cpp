@@ -849,7 +849,6 @@ void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_r
     canceCallbackInfo_.env = env;
     canceCallbackInfo_.ref = ref;
     consumeCallbackInfo_.tsfn = tsfn;
-
 }
 
 void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -962,7 +961,6 @@ void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const n
     disturbDateCallbackInfo_.env = env;
     disturbDateCallbackInfo_.ref = ref;
     disturbDateCallbackInfo_.tsfn = tsfn;
-
 }
 
 void SubscriberInstance::SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -1169,8 +1167,7 @@ napi_value GetNotificationSubscriber(
         napi_threadsafe_function tsfn = nullptr;
         napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
             ThreadFinished, nullptr, ThreadSafeOnCancel, &tsfn);
-        subscriberInfo.subscriber->SetCallbackInfo(CANCEL, env, result, tsfn);
-        
+        subscriberInfo.subscriber->SetCallbackInfo(CANCEL, env, result, tsfn);    
     }
     // onUpdate?:(data: NotificationSortingMap) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onUpdate", &hasProperty));
