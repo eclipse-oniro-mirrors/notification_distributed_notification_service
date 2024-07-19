@@ -355,16 +355,25 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
     return result;
 }
 
-ErrCode AdvancedNotificationService::CancelPreparedNotification(
-    int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption)
+ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
+    const std::string &label, const sptr<NotificationBundleOption> &bundleOption, int32_t reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption == nullptr) {
+        std::string message = "bundleOption is null";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 2)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        std::string message = "notificationSvrQueue is null";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 3)
+            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -377,7 +386,6 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
         }
 
         if (notification != nullptr) {
-            int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
             UpdateRecentNotification(notification, true, reason);
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1114,6 +1122,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 #endif
         ) {
             if (!isCancel && !record->notification->IsRemoveAllowed()) {
+                std::string message = "notification unremove.";
+                OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 4)
+                    .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+                ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
+                    NotificationConstant::DEFAULT_REASON_DELETE, message);
+                ANS_LOGE("%{public}s", message.c_str());
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
             notification = record->notification;
@@ -1142,6 +1156,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             return ERR_OK;
         }
     }
+    std::string message = "notification not exist";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 5)
+        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage,
+        NotificationConstant::DEFAULT_REASON_DELETE, message);
+    ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 
@@ -1154,6 +1174,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         }
 
         if (!isCancel && !record->notification->IsRemoveAllowed()) {
+            std::string message = "notification unremove.";
+            OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 7)
+                .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+            ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
+                NotificationConstant::DEFAULT_REASON_DELETE, message);
+            ANS_LOGE("%{public}s", message.c_str());
             return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
         }
         notification = record->notification;
@@ -1169,7 +1195,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         return ERR_OK;
     }
     RemoveFromDelayedNotificationList(key);
-
+    std::string message = "notification not exist";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 8)
+        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage,
+        NotificationConstant::DEFAULT_REASON_DELETE, message);
+    ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 

@@ -28,15 +28,24 @@ public:
     HaMetaMessage() = default;
     ~HaMetaMessage() = default;
 
+    explicit HaMetaMessage(uint32_t sceneId, uint32_t branchId);
+
     HaMetaMessage& SceneId(uint32_t sceneId);
     HaMetaMessage& BranchId(uint32_t branchId);
     HaMetaMessage& ErrorCode(uint32_t errorCode);
     HaMetaMessage& Message(const std::string& message);
     HaMetaMessage& BundleName(const std::string& bundleName_);
+    HaMetaMessage& AgentBundleName(const std::string& agentBundleName);
+    HaMetaMessage& TypeCode(int32_t typeCode);
+    HaMetaMessage& NotificationId(int32_t notificationId);
+    std::string GetMessage() const;
 
     std::string Build() const;
 
     std::string bundleName_;
+    int32_t notificationId_ = -1;
+    std::string agentBundleName_ = "";
+    int32_t typeCode_ = -1;
 private:
     uint32_t sceneId_;
     uint32_t branchId_;
@@ -49,17 +58,23 @@ class NotificationAnalyticsUtil {
 public:
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
 
-    static void ReportDeleteFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+    static void ReportDeleteFailedEvent(const sptr<NotificationRequest>& request, HaMetaMessage& message);
 
     static void ReportModifyFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
 
     static void ReportModifySuccessEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+
+    static void ReportDeleteFailedEvent(const HaMetaMessage& message);
 
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);
     static void CommonNotificationEvent(const sptr<NotificationRequest>& request,
         int32_t eventCode, const HaMetaMessage& message);
+
+    static void CommonNotificationEvent(int32_t eventCode, const HaMetaMessage& message);
+
+    static void ReportNotificationEvent(EventFwk::Want want, int32_t eventCode, const std::string& reason);
 };
 } // namespace Notification
 } // namespace OHOS
