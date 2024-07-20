@@ -884,7 +884,7 @@ void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_r
 {
     canceCallbackInfo_.env = env;
     canceCallbackInfo_.ref = ref;
-    consumeCallbackInfo_.tsfn = tsfn;
+    canceCallbackInfo_.tsfn = tsfn;
 }
 
 void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref)
