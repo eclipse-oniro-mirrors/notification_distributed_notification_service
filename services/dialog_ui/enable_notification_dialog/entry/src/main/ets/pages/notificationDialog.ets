@@ -299,6 +299,7 @@ struct PermissionDialog {
 
   async aboutToDisappear(): Promise<void> {
     console.info(TAG, `aboutToDisappear`);
+    this.session?.terminateSelf();
   }
 
   async enableNotification(enabled: boolean): Promise<void> {
