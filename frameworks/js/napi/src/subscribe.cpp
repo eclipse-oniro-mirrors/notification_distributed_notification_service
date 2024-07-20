@@ -168,6 +168,10 @@ void ThreadSafeOnCancel(napi_env env, napi_value jsCallback, void* context, void
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!SetSubscribeCallbackData(dataWorkerData->env,
         dataWorkerData->request,
@@ -237,6 +241,10 @@ void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context,
     napi_value resultArray = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_array(dataWorkerData->env, &resultArray);
     int index = 0;
     for (auto request : dataWorkerData->requestList) {
@@ -318,6 +326,10 @@ void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, vo
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!SetSubscribeCallbackData(dataWorkerData->env,
         dataWorkerData->request,
@@ -390,6 +402,10 @@ void ThreadSafeOnUpdate(napi_env env, napi_value jsCallback, void* context, void
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!Common::SetNotificationSortingMap(dataWorkerData->env, dataWorkerData->sortingMap, result)) {
         ANS_LOGE("Failed to convert data to JS");
@@ -574,6 +590,10 @@ void ThreadSafeOnDoNotDisturbDateChange(napi_env env, napi_value jsCallback, voi
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetDoNotDisturbDate(dataWorkerData->env, dataWorkerData->date, result)) {
@@ -632,6 +652,10 @@ void ThreadSafeOnDoNotDisturbChanged(napi_env env, napi_value jsCallback, void* 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetDoNotDisturbDate(dataWorkerData->env, dataWorkerData->date, result)) {
@@ -687,6 +711,10 @@ void ThreadSafeOnEnabledNotificationChanged(napi_env env, napi_value jsCallback,
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetEnabledNotificationCallbackData(dataWorkerData->env, dataWorkerData->callbackData, result)) {
@@ -743,6 +771,10 @@ void ThreadSafeOnBadgeChanged(napi_env env, napi_value jsCallback, void* context
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetBadgeCallbackData(dataWorkerData->env, dataWorkerData->badge, result)) {
@@ -798,6 +830,10 @@ void ThreadSafeOnBadgeEnabledChanged(napi_env env, napi_value jsCallback, void* 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!Common::SetEnabledNotificationCallbackData(dataWorkerData->env, dataWorkerData->callbackData, result)) {
         result = Common::NapiGetNull(dataWorkerData->env);
