@@ -366,7 +366,7 @@ public:
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
     ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlot> &slot);
+        const sptr<NotificationSlot> &slot, const int reason);
 
     /**
      * @brief Delete notification based on key.
@@ -1291,10 +1291,12 @@ private:
     void CancelTimer(uint64_t timerId);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
+        int64_t expireTimePoint, const int32_t reason);
     void CancelFinishTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode StartUpdateTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    ErrCode StartUpdateTimer(const std::shared_ptr<NotificationRecord> &record,
+        int64_t expireTimePoint, const int32_t reason);
     void CancelUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);

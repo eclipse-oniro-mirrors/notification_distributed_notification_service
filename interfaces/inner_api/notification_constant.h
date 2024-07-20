@@ -231,6 +231,61 @@ public:
     static const int32_t APP_REMOVE_GROUP_REASON_DELETE = 18;
 
     /**
+     * Indicates that aLL notification is deleted because the system cancel it.
+     */
+    static const int32_t APP_REMOVE_ALL_REASON_DELETE = 19;
+
+    /**
+     * Indicates that aLL notification is deleted by userId because the system cancel it.
+     */
+    static const int32_t APP_REMOVE_ALL_USER_REASON_DELETE = 20;
+
+    /**
+     * Indicates that notification is deleted because eight-hour timer cancel it.
+     */
+    static const int32_t TRIGGER_EIGHT_HOUR_REASON_DELETE = 21;
+
+    /**
+     * Indicates that notification is deleted because four-hour timer cancel it.
+     */
+    static const int32_t TRIGGER_FOUR_HOUR_REASON_DELETE = 22;
+
+    /**
+     * Indicates that notification is deleted because ten-minutes timer cancel it.
+     */
+    static const int32_t TRIGGER_TEN_MINUTES_REASON_DELETE = 23;
+    
+    /**
+     * Indicates that notification is deleted because fifteen-minutes timer cancel it.
+     */
+    static const int32_t TRIGGER_FIFTEEN_MINUTES_REASON_DELETE = 24;
+
+    /**
+     * Indicates that notification is deleted because thirty-minutes timer cancel it.
+     */
+    static const int32_t TRIGGER_THIRTY_MINUTES_REASON_DELETE = 25;
+
+    /**
+     * Indicates that notification is deleted because startArchive timer cancel it.
+     */
+    static const int32_t TRIGGER_START_ARCHIVE_REASON_DELETE = 26;
+
+    /**
+     * Indicates that notification is deleted because auto delete timer cancel it.
+     */
+    static const int32_t TRIGGER_AUTO_DELETE_REASON_DELETE = 27;
+
+    /**
+     * Indicates that notification is deleted because auto packge remove cancel it.
+     */
+    static const int32_t PACKAGE_REMOVE_REASON_DELETE = 28;
+
+    /**
+     * Indicates that notification is deleted because slot enabled close remove cancel it.
+     */
+    static const int32_t SLOT_ENABLED_REASON_DELETE = 29;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;

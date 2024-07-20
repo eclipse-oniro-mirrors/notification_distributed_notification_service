@@ -203,7 +203,7 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
     EventFwk::CommonEventData commonData {want, eventCode, ""};
-    ANS_LOGD("Publish event success %{public}d, %{public}s", eventCode, reason.c_str());
+    ANS_LOGE("Publish event success %{public}d, %{public}s", eventCode, reason.c_str());
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
         ANS_LOGE("Publish event failed %{public}d, %{public}s", eventCode, reason.c_str());
     }

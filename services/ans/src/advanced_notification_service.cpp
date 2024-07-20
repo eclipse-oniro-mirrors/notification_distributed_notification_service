@@ -445,13 +445,17 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::StartFinishTimer(
-    const std::shared_ptr<NotificationRecord> &record, int64_t expiredTimePoint)
+ErrCode AdvancedNotificationService::StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
+    int64_t expiredTimePoint, const int32_t reason)
 {
     uint64_t timerId = StartAutoDelete(record,
-        expiredTimePoint, NotificationConstant::APP_CANCEL_REASON_OTHER);
+        expiredTimePoint, reason);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
-        ANS_LOGE("Start finish auto delete timer failed.");
+        std::string message = "Start finish auto delete timer failed.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(7, 1)
+            .ErrorCode(ERR_ANS_TASK_ERR);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_TASK_ERR;
     }
     record->notification->SetFinishTimer(timerId);
@@ -461,7 +465,8 @@ ErrCode AdvancedNotificationService::StartFinishTimer(
 ErrCode AdvancedNotificationService::SetFinishTimer(const std::shared_ptr<NotificationRecord> &record)
 {
     int64_t maxExpiredTime = GetCurrentTime() + NotificationConstant::MAX_FINISH_TIME;
-    auto result = StartFinishTimer(record, maxExpiredTime);
+    auto result = StartFinishTimer(record, maxExpiredTime,
+        NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
     if (result != ERR_OK) {
         return result;
     }
@@ -477,12 +482,17 @@ void AdvancedNotificationService::CancelFinishTimer(const std::shared_ptr<Notifi
 }
 
 ErrCode AdvancedNotificationService::StartUpdateTimer(
-    const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint)
+    const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint,
+    const int32_t reason)
 {
     uint64_t timerId = StartAutoDelete(record,
-        expireTimePoint, NotificationConstant::APP_CANCEL_REASON_OTHER);
+        expireTimePoint, reason);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
-        ANS_LOGE("Start update auto delete timer failed.");
+        std::string message = "Start update auto delete timer failed.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(7, 2)
+            .ErrorCode(ERR_ANS_TASK_ERR);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_TASK_ERR;
     }
     record->notification->SetUpdateTimer(timerId);
@@ -492,7 +502,8 @@ ErrCode AdvancedNotificationService::StartUpdateTimer(
 ErrCode AdvancedNotificationService::SetUpdateTimer(const std::shared_ptr<NotificationRecord> &record)
 {
     int64_t maxExpiredTime = GetCurrentTime() + NotificationConstant::MAX_UPDATE_TIME;
-    ErrCode result = StartUpdateTimer(record, maxExpiredTime);
+    ErrCode result = StartUpdateTimer(record, maxExpiredTime,
+        NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
     if (result != ERR_OK) {
         return result;
     }
@@ -511,7 +522,8 @@ void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<Notifi
 {
     auto deleteTime = record->request->GetAutoDeletedTime();
     if (deleteTime == NotificationConstant::NO_DELAY_DELETE_TIME) {
-        TriggerAutoDelete(record->notification->GetKey(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+        TriggerAutoDelete(record->notification->GetKey(),
+            NotificationConstant::TRIGGER_START_ARCHIVE_REASON_DELETE);
         return;
     }
     if (deleteTime <= NotificationConstant::INVALID_AUTO_DELETE_TIME) {
@@ -520,7 +532,7 @@ void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<Notifi
     int64_t maxExpiredTime = GetCurrentTime() +
         NotificationConstant::SECOND_TO_MS * deleteTime;
     uint64_t timerId = StartAutoDelete(record,
-        maxExpiredTime, NotificationConstant::APP_CANCEL_REASON_DELETE);
+        maxExpiredTime, NotificationConstant::TRIGGER_START_ARCHIVE_REASON_DELETE);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
         ANS_LOGE("Start archive auto delete timer failed.");
     }
@@ -640,7 +652,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
         StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
     return result;
 }
@@ -1178,7 +1190,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
             OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 7)
                 .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
             ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
-                NotificationConstant::DEFAULT_REASON_DELETE, message);
+                removeReason, message);
             ANS_LOGE("%{public}s", message.c_str());
             return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
         }
@@ -1199,7 +1211,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
     OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 8)
         .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS);
     ReportDeleteFailedEventPushByNotification(notification, haMetaMessage,
-        NotificationConstant::DEFAULT_REASON_DELETE, message);
+        removeReason, message);
     ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
