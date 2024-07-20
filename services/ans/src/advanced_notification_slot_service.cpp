@@ -778,20 +778,8 @@ bool AdvancedNotificationService::IsAgentRelationship(const std::string &agentBu
         ANS_LOGE("The parameter is invalid.");
         return false;
     }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    bool result = false;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().IsAgentRelationship(agentBundleName, sourceBundleName);
-    }));
-    notificationSvrQueue_->wait(handler);
-
-    return result;
+    
+    return NotificationPreferences::GetInstance().IsAgentRelationship(agentBundleName, sourceBundleName);
 }
 }  // namespace Notification
 }  // namespace OHOS
