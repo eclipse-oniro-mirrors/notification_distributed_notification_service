@@ -256,11 +256,6 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       console.log(TAG, `UIExtAbility onSessionDestroy unclick destory`);
       let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
       await dialog?.destroyException();
-      try {
-        dialog?.extensionWindow?.hideNonSecureWindows(false);
-      } catch (err) {
-        console.error(TAG, 'onBackground onSessionDestroy failed!');
-      }
     }
   }
 
