@@ -49,7 +49,7 @@ async function handleDialogQuitException(want: Want): Promise<void> {
       data: want.parameters.bundleName.toString(),
       parameters: {
         bundleName: want.parameters.bundleName.toString(),
-        bundleuid: want.parameters.bundleUid.toString()
+        bundleUid: want.parameters.bundleUid.toString()
       }
     } as CommonEventManager.CommonEventPublishData,
     () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
@@ -168,7 +168,7 @@ export class EnableNotificationDialog {
         data: this.want.parameters.bundleName.toString(),
         parameters: {
           bundleName: this.want.parameters.bundleName.toString(),
-          bundleuid: this.want.parameters.bundleUid.toString()
+          bundleUid: this.want.parameters.bundleUid.toString()
         }
       } as CommonEventManager.CommonEventPublishData,
       () => { console.info(TAG, 'publish CLICKED succeeded'); }
@@ -214,7 +214,6 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       if (want.parameters['bundleName'] === undefined) {
         want.parameters['bundleName'] = bundleName;
         want.parameters['bundleUid'] = bundleUid;
-        console.error(TAG, `Failed to handle onSessionCreate`);
         stageModel = true;
       } else {
         stageModel = false;
