@@ -63,7 +63,7 @@ void AnsSlotServiceTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp start";
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
@@ -489,7 +489,7 @@ HWTEST_F(AnsSlotServiceTest, UpdateSlotReminderModeBySlotFlags_00002, Function |
     advancedNotificationService_->GenerateSlotReminderMode(slot, bundle);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    NotificationPreferences::GetInstance().AddNotificationSlots(bundle, slots);
+    NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
 
     auto ret = advancedNotificationService_->UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
     ASSERT_EQ(ret, (int)ERR_OK);

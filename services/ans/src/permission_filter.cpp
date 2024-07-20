@@ -33,7 +33,7 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
     bool isForceControl = false;
     bool enable = false;
     ErrCode result =
-        NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(record->bundleOption, enable);
+        NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(record->bundleOption, enable);
     if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         result = ERR_OK;
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
@@ -44,7 +44,7 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
 
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
-    result = NotificationPreferences::GetInstance().GetNotificationSlot(record->bundleOption, slotType, slot);
+    result = NotificationPreferences::GetInstance()->GetNotificationSlot(record->bundleOption, slotType, slot);
     if (result == ERR_OK) {
         if (slot != nullptr) {
             isForceControl = slot->GetForceControl();

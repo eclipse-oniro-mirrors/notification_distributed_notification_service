@@ -149,7 +149,7 @@ void ReminderSwingDecisionCenter::SwingExecuteDecision(bool isScreenUnlockTrigge
     }
 
     bool isSmartReminderEnable = false;
-    if (ERR_OK != NotificationPreferences::GetInstance().IsSmartReminderEnabled(enableSwingDeviceType_,
+    if (ERR_OK != NotificationPreferences::GetInstance()->IsSmartReminderEnabled(enableSwingDeviceType_,
         isSmartReminderEnable)) {
         ANS_LOGI("IsSmartReminderEnable error");
         return;

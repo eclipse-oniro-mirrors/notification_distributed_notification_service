@@ -532,7 +532,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
     }
     notificationSvrQueue_->submit(std::bind([this, bundleOption]() {
         ANS_LOGD("ffrt enter!");
-        ErrCode result = NotificationPreferences::GetInstance().RemoveNotificationForBundle(bundleOption);
+        ErrCode result = NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleOption);
         if (result != ERR_OK) {
             ANS_LOGW("NotificationPreferences::RemoveNotificationForBundle failed: %{public}d", result);
         }
@@ -565,10 +565,10 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
         }
-        NotificationPreferences::GetInstance().RemoveAnsBundleDbInfo(bundleOption);
+        NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
         RemoveDoNotDisturbProfileTrustList(bundleOption);
     }));
-    NotificationPreferences::GetInstance().RemoveEnabledDbByBundle(bundleOption);
+    NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
         NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
@@ -595,7 +595,7 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
         ANS_LOGE("Failed to get active user id.");
         return;
     }
-    NotificationPreferences::GetInstance().RemoveDoNotDisturbProfileTrustList(userId, bundleOption);
+    NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfileTrustList(userId, bundleOption);
 }
 
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
@@ -611,12 +611,12 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 
         // In order to adapt to the publish reminder interface, currently only the input from the whitelist is written
         if (bundleInfo.applicationInfo.allowEnableNotification) {
-            auto errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleOption, true);
+            auto errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
             SetSlotFlagsTrustlistsAsBundle(bundleOption);
-            errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
             }
@@ -643,16 +643,16 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         }
 
         bool hasPopped = false;
-        auto errCode = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
+        auto errCode = NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption, hasPopped);
         if (errCode != ERR_OK) {
             ANS_LOGD("Get notification user option fail, need to insert data");
-            errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
+            errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
                 bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
             SetSlotFlagsTrustlistsAsBundle(bundleOption);
-            errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
             }
@@ -664,12 +664,12 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             return;
         }
 
-        errCode = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
+        errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
             bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
         if (errCode != ERR_OK) {
             ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
         }
-        errCode = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+        errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
         if (errCode != ERR_OK) {
             ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
         }
@@ -877,7 +877,7 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
     ffrt::task_handle handler =
         notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
             ANS_LOGD("The ffrt enter.");
-            NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(copyUserId, copyProfiles);
+            NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(copyUserId, copyProfiles);
         }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
@@ -906,7 +906,7 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     ffrt::task_handle handler =
         notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
             ANS_LOGD("The ffrt enter.");
-            NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(copyUserId, copyProfiles);
+            NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(copyUserId, copyProfiles);
         }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
@@ -1297,7 +1297,7 @@ ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templa
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         support = false;
-        result = NotificationPreferences::GetInstance().GetTemplateSupported(templateName, support);
+        result = NotificationPreferences::GetInstance()->GetTemplateSupported(templateName, support);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1338,7 +1338,7 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        NotificationPreferences::GetInstance().RemoveSettings(userId);
+        NotificationPreferences::GetInstance()->RemoveSettings(userId);
     }));
 }
 
@@ -1604,7 +1604,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().SetDoNotDisturbDate(userId, newConfig);
+        result = NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, newConfig);
         if (result == ERR_OK) {
             NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(userId, newConfig);
         }
@@ -1625,7 +1625,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationDoNotDisturbDate> currentConfig = nullptr;
-        result = NotificationPreferences::GetInstance().GetDoNotDisturbDate(userId, currentConfig);
+        result = NotificationPreferences::GetInstance()->GetDoNotDisturbDate(userId, currentConfig);
         if (result == ERR_OK) {
             int64_t now = GetCurrentTime();
             switch (currentConfig->GetDoNotDisturbType()) {
@@ -1638,7 +1638,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
                             ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
                             return;
                         }
-                        NotificationPreferences::GetInstance().SetDoNotDisturbDate(userId, date);
+                        NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, date);
                     } else {
                         date = currentConfig;
                     }
@@ -1774,7 +1774,7 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
     if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
-        ErrCode saveRef = NotificationPreferences::GetInstance().SetNotificationSlotFlagsForBundle(
+        ErrCode saveRef = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
             bundleOption, 0b111111);
         if (saveRef != ERR_OK) {
             ANS_LOGE("Set slotflags error! code: %{public}d", saveRef);
@@ -1799,17 +1799,17 @@ void AdvancedNotificationService::InitNotificationEnableList()
                     bundleInfo.applicationInfo.bundleName.c_str());
                 continue;
             }
-            ErrCode saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
+            ErrCode saveRef = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
                 bundleOption, notificationEnable);
             // record already exists
             if (saveRef == ERR_OK) {
                 continue;
             }
-            saveRef = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleOption, true);
+            saveRef = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption, true);
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set enable error! code: %{public}d", saveRef);
             }
-            saveRef = NotificationPreferences::GetInstance().SetShowBadge(bundleOption, true);
+            saveRef = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", saveRef);
             }

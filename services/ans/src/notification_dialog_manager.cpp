@@ -222,7 +222,7 @@ bool NotificationDialogManager::SetHasPoppedDialog(
     if (bundleOption == nullptr) {
         return false;
     }
-    ErrCode result = NotificationPreferences::GetInstance().SetHasPoppedDialog(bundleOption, hasPopped);
+    ErrCode result = NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundleOption, hasPopped);
     return result == ERR_OK;
 }
 

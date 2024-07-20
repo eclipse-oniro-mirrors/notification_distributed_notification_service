@@ -80,7 +80,7 @@ void AnsLiveViewServiceTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp start";
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);

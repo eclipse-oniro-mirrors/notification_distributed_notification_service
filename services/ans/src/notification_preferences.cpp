@@ -16,6 +16,8 @@
 #include "notification_preferences.h"
 
 #include <fstream>
+#include <memory>
+#include <mutex>
 
 #include "access_token_helper.h"
 #include "ans_const_define.h"
@@ -29,18 +31,29 @@
 
 namespace OHOS {
 namespace Notification {
+
+std::mutex NotificationPreferences::instanceMutex_;
+std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
+
 NotificationPreferences::NotificationPreferences()
 {
     preferncesDB_ = std::make_unique<NotificationPreferencesDatabase>();
     InitSettingFromDisturbDB();
 }
 
-NotificationPreferences::~NotificationPreferences()
-{}
-
-NotificationPreferences &NotificationPreferences::GetInstance()
+std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
 {
-    return DelayedRefSingleton<NotificationPreferences>::GetInstance();
+    if (instance_ == nullptr) {
+        std::lock_guard<std::mutex> lock(instanceMutex_);
+        if (instance_ == nullptr) {
+            auto instance = std::make_shared<NotificationPreferences>();
+            if (instance == nullptr) {
+                ANS_LOGE("failed to create NotificationPreference");
+            }
+            instance_ = instance;
+        }
+    }
+    return instance_;
 }
 
 ErrCode NotificationPreferences::AddNotificationSlots(

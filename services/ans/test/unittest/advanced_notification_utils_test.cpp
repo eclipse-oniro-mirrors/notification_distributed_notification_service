@@ -74,7 +74,7 @@ void AnsUtilsTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp start";
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
@@ -429,7 +429,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataAdd_00001, Function | SmallTest | Level1)
     advancedNotificationService_->OnBundleDataAdd(bundle);
     SleepForFC();
     bool enable = false;
-    NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundle, enable);
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
     ASSERT_EQ(enable, false);
 }
 
@@ -445,7 +445,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataUpdate_00001, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     TestAddNotification(notificationId, bundle);
 
-    NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, true);
+    NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, true);
     advancedNotificationService_->OnBundleDataUpdate(bundle);
 }
 }  // namespace Notification

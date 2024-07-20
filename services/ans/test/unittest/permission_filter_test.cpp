@@ -36,12 +36,12 @@ public:
 
 void PermissionFilterTest::SetUp()
 {
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
 }
 
 void PermissionFilterTest::TearDown()
 {
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
 }
 
 /**
@@ -59,7 +59,7 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00100, Function | SmallTest 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    NotificationPreferences::GetInstance().AddNotificationSlots(
+    NotificationPreferences::GetInstance()->AddNotificationSlots(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots);
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
@@ -85,9 +85,9 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    NotificationPreferences::GetInstance().AddNotificationSlots(
+    NotificationPreferences::GetInstance()->AddNotificationSlots(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots);
-    NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(
+    NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false);
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);

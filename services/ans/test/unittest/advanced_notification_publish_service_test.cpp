@@ -68,7 +68,7 @@ void AnsPublishServiceTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp start";
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
@@ -458,12 +458,12 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
 
     auto bundle = advancedNotificationService_->GenerateBundleOption();
-    NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, true);
+    NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, true);
 
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 
-    NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, false);
+    NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }

@@ -21,18 +21,19 @@
 
 #include "notification_do_not_disturb_date.h"
 #include "notification_preferences_database.h"
+#include <memory>
 #include <mutex>
 
 namespace OHOS {
 namespace Notification {
 class NotificationPreferences final {
 public:
-    DISALLOW_COPY_AND_MOVE(NotificationPreferences);
-
+    NotificationPreferences();
+    ~NotificationPreferences() = default;
     /**
      * @brief Get NotificationPreferences instance object.
      */
-    static NotificationPreferences &GetInstance();
+    static std::shared_ptr<NotificationPreferences> GetInstance();
 
     /**
      * @brief Add notification slots into DB.
@@ -393,10 +394,11 @@ private:
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption) const;
 
 private:
+    static std::mutex instanceMutex_;
+    static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
     std::mutex preferenceMutex_;
     std::unique_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
-    DECLARE_DELAYED_REF_SINGLETON(NotificationPreferences);
 };
 }  // namespace Notification
 }  // namespace OHOS
