@@ -78,6 +78,10 @@ void UvQueueWorkOnResponse(uv_work_t *work, int status)
     napi_handle_scope scope;
     napi_value notificationId = nullptr;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
 
     // notificationId: number
     napi_create_int32(dataWorkerData->env, dataWorkerData->notificationId, &notificationId);
