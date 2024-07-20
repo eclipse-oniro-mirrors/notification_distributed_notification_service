@@ -633,16 +633,19 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00001, Function | Small
     MockIsSystemApp(false);
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = nullptr;
-    auto ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    auto ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -667,7 +670,8 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00002, Function | Small
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
     auto slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 

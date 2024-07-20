@@ -546,13 +546,13 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         for (auto key : keys) {
             sptr<Notification> notification = nullptr;
             result = RemoveFromNotificationList(key, notification, true,
-                NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
+                NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
             if (result != ERR_OK) {
                 continue;
             }
 
             if (notification != nullptr) {
-                int32_t reason = NotificationConstant::PACKAGE_CHANGED_REASON_DELETE;
+                int32_t reason = NotificationConstant::PACKAGE_REMOVE_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
                 ExecBatchCancel(notifications, reason);
@@ -563,7 +563,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         }
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                notifications, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
+                notifications, nullptr, NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
         }
         NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
         RemoveDoNotDisturbProfileTrustList(bundleOption);
@@ -571,7 +571,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
-        NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
+        NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
 #endif
 }
 
@@ -1406,7 +1406,7 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
 
 ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
 {
-    return DeleteAllByUserInner(userId, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+    return DeleteAllByUserInner(userId, NotificationConstant::APP_REMOVE_ALL_USER_REASON_DELETE);
 }
 
 ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId, int32_t deleteReason,
@@ -1416,16 +1416,29 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 5)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Input userId is invalid.");
+        std::string message = "userId is error.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 6)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        std::string message = "Serial queue is invalid.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 7)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     std::shared_ptr<ErrCode> result = std::make_shared<ErrCode>(ERR_OK);

@@ -84,8 +84,10 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
         }
         UpdateRecentNotification(record->notification, false, 0);
 
-        StartFinishTimer(record, requestObj.request->GetFinishDeadLine());
-        StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine());
+        StartFinishTimer(record, requestObj.request->GetFinishDeadLine(),
+            NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
+        StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine(),
+            NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
     }
 
     // publish notifications
@@ -544,11 +546,12 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
     NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
         StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
 
     record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;
-    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES);
+    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES,
+        NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE);
     
     return ERR_OK;
 }
@@ -639,10 +642,12 @@ void AdvancedNotificationService::UpdateRecordByOwner(
 
         if (process == NotificationConstant::FINISH_PER) {
             record->finish_status = UploadStatus::FINISH;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES);
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES,
+                NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE);
         } else {
             record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES);
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
+                NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
         }
         timerId = record->notification->GetFinishTimer();
     }

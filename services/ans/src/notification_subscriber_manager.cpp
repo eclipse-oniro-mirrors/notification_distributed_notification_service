@@ -544,6 +544,11 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
 
     ANS_LOGD("notifications size = <%{public}zu>", notifications.size());
+    std::string message = "BatchNotifyCanceledInner.size:" +
+        std::to_string(notifications.size()) + ".";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 9)
+        .ErrorCode(ERR_OK);
+    ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
     for (auto record : subscriberRecordList_) {
         if (record == nullptr) {
             continue;

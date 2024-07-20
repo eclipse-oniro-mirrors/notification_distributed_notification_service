@@ -122,9 +122,7 @@ inline OHOS::Notification::HaMetaMessage AddInformationInMessage(
     OHOS::Notification::HaMetaMessage haMetaMessage, const int32_t reason,
     std::string message)
 {
-    if (reason != NotificationConstant::DEFAULT_REASON_DELETE) {
-        message += "reason:" + std::to_string(reason) + ".";
-    }
+    message += "reason:" + std::to_string(reason) + ".";
 
     std::string bundleName;
     int32_t callingUid = IPCSkeleton::GetCallingUid();

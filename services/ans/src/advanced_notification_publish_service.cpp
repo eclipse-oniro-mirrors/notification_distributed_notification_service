@@ -548,18 +548,32 @@ ErrCode AdvancedNotificationService::DeleteAll()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    const int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 8)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
+        std::string message = "no acl permission.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 9)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        std::string message = "Serial queue is invalidity.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 10)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -585,7 +599,6 @@ ErrCode AdvancedNotificationService::DeleteAll()
             }
 
             if (notification->GetUserId() == activeUserId) {
-                int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -594,12 +607,12 @@ ErrCode AdvancedNotificationService::DeleteAll()
             }
             if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
                 ANS_LOGD("Notifications size greater than or equal to MAX_CANCELED_PARCELABLE_VECTOR_NUM.");
-                SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+                SendNotificationsOnCanceled(notifications, nullptr, reason);
             }
         }
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                notifications, nullptr, NotificationConstant::CANCEL_REASON_DELETE);
+                notifications, nullptr, reason);
         }
 
         result = ERR_OK;
@@ -1386,7 +1399,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsForDisable(
 
 ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption)
 {
-    return RemoveAllNotificationsInner(bundleOption, NotificationConstant::CANCEL_REASON_DELETE);
+    return RemoveAllNotificationsInner(bundleOption, NotificationConstant::APP_REMOVE_ALL_REASON_DELETE);
 }
 
 ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
@@ -1397,21 +1410,39 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 1)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission is fake.");
+        std::string message = "no acl permission.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 2)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        std::string message = "budle is nullptr.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 3)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is nullptr.");
+        std::string message = "Serial queue is nullptr.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 4)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -1525,7 +1556,7 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
 }
 
 ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-    const sptr<NotificationSlot> &slot)
+    const sptr<NotificationSlot> &slot, const int reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1666,27 +1697,51 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
     const sptr<NotificationBundleOption> &bundleOption, const std::string &groupName)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    const int32_t reason = NotificationConstant::APP_REMOVE_GROUP_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not systemApp.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 1)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        std::string message = "no acl permission";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 2)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (bundleOption == nullptr || groupName.empty()) {
+        std::string message = "groupName empty";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 3)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        std::string message = "bundle is nullptr";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 4)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        std::string message = "Serial queue is invalid.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 5)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -1893,10 +1948,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         }
 
         if (!slot->GetEnable()) {
-            RemoveNotificationBySlot(bundle, slot);
+            RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
         } else {
             if (!slot->GetForceControl() && !allowed) {
-                RemoveNotificationBySlot(bundle, slot);
+                RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE);
             }
         }
 
@@ -2092,7 +2147,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
         StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
     return ERR_OK;
 }
