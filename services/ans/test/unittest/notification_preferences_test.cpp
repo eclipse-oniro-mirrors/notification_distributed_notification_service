@@ -63,7 +63,7 @@ sptr<AdvancedNotificationService> NotificationPreferencesTest::advancedNotificat
 
 void NotificationPreferencesTest::TearDown()
 {
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
 }
 
 void NotificationPreferencesTest::TestAddNotificationSlot()
@@ -71,13 +71,13 @@ void NotificationPreferencesTest::TestAddNotificationSlot()
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots);
+    NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots);
 }
 
 void NotificationPreferencesTest::TestAddNotificationSlot(NotificationPreferencesInfo &info)
 {
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    NotificationPreferences::GetInstance().CheckSlotForCreateSlot(bundleOption_, slot, info);
+    NotificationPreferences::GetInstance()->CheckSlotForCreateSlot(bundleOption_, slot, info);
 }
 
 /**
@@ -90,7 +90,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00100, Function | Sma
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
 }
 
 /**
@@ -103,7 +103,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00200, Function | Sma
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(bundleEmptyOption_, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleEmptyOption_, slots),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -115,7 +115,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00200, Function | Sma
 HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00300, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slots;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -130,7 +130,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00400, Function | Sma
     sptr<NotificationSlot> slot = nullptr;
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
@@ -148,7 +148,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00500, Function | Sma
     slots.push_back(slot1);
     slots.push_back(slot2);
 
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
 }
 
 /**
@@ -161,7 +161,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00600, Function | Sma
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(nullptr, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(nullptr, slots),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -173,7 +173,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00600, Function | Sma
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00100, Function | SmallTest | Level1)
 {
     TestAddNotificationSlot();
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   bundleOption_, NotificationConstant::SlotType::OTHER),
         (int)ERR_OK);
 }
@@ -185,7 +185,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00100, Function | S
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   bundleEmptyOption_, NotificationConstant::SlotType::OTHER),
         (int)ERR_ANS_INVALID_PARAM);
 }
@@ -199,7 +199,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00200, Function | S
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00300, Function | SmallTest | Level1)
 {
     TestAddNotificationSlot();
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   noExsitbundleOption_, NotificationConstant::SlotType::OTHER),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
@@ -213,7 +213,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00300, Function | S
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00400, Function | SmallTest | Level1)
 {
     TestAddNotificationSlot();
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   bundleOption_, NotificationConstant::SlotType::SERVICE_REMINDER),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
@@ -226,7 +226,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00400, Function | S
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00500, Function | SmallTest | Level1)
 {
     TestAddNotificationSlot();
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   nullptr, NotificationConstant::SlotType::OTHER),
         (int)ERR_ANS_INVALID_PARAM);
 }
@@ -239,7 +239,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00500, Function | S
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00100, Function | SmallTest | Level1)
 {
     TestAddNotificationSlot();
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationForBundle(bundleOption_), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleOption_), (int)ERR_OK);
     advancedNotificationService_->OnBundleRemoved(bundleOption_);
 }
 
@@ -251,7 +251,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00100, Functio
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationForBundle(bundleEmptyOption_),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleEmptyOption_),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -263,7 +263,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00200, Functio
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00300, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationForBundle(noExsitbundleOption_),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(noExsitbundleOption_),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
@@ -275,7 +275,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00300, Functio
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00400, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationForBundle(nullptr),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(nullptr),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -289,12 +289,12 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00100, Function | 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
     std::string des("This is a description.");
     slot->SetDescription(des);
     slots.clear();
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundleOption_, slots), (int)ERR_OK);
 }
 
 /**
@@ -307,7 +307,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00200, Function | 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlots(bundleEmptyOption_, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundleEmptyOption_, slots),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -319,7 +319,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00200, Function | 
 HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00300, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slots;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlots(bundleOption_, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundleOption_, slots),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -334,7 +334,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00400, Function | 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlots(noExsitbundleOption_, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(noExsitbundleOption_, slots),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
@@ -349,7 +349,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00500, Function | 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlots(noExsitbundleOption_, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(noExsitbundleOption_, slots),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
@@ -363,7 +363,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00600, Function | 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().UpdateNotificationSlots(nullptr, slots),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(nullptr, slots),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -376,7 +376,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00100, Function | Smal
 {
     TestAddNotificationSlot();
     sptr<NotificationSlot> slot;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   bundleOption_, NotificationConstant::SlotType::OTHER, slot),
         (int)ERR_OK);
 }
@@ -390,7 +390,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00100, Function | Smal
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00200, Function | SmallTest | Level1)
 {
     sptr<NotificationSlot> slot;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   bundleEmptyOption_, NotificationConstant::SlotType::OTHER, slot),
         (int)ERR_ANS_INVALID_PARAM);
 }
@@ -405,7 +405,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00300, Function | Smal
 {
     TestAddNotificationSlot();
     sptr<NotificationSlot> slot;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   bundleOption_, NotificationConstant::SlotType::CONTENT_INFORMATION, slot),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
@@ -420,7 +420,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00400, Function | Smal
 {
     TestAddNotificationSlot();
     sptr<NotificationSlot> slot;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   noExsitbundleOption_, NotificationConstant::SlotType::OTHER, slot),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
@@ -434,7 +434,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00400, Function | Smal
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00500, Function | SmallTest | Level1)
 {
     sptr<NotificationSlot> slot;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   nullptr, NotificationConstant::SlotType::OTHER, slot),
         (int)ERR_ANS_INVALID_PARAM);
 }
@@ -450,7 +450,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00100, Function | 
     TestAddNotificationSlot();
     std::vector<sptr<NotificationSlot>> slotsResult;
     ASSERT_EQ(
-        (int)NotificationPreferences::GetInstance().GetNotificationAllSlots(bundleOption_, slotsResult), (int)ERR_OK);
+        (int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundleOption_, slotsResult), (int)ERR_OK);
     ASSERT_EQ((int)slotsResult.size(), 1);
 }
 
@@ -467,11 +467,11 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00200, Function | 
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot1);
     slots.push_back(slot2);
-    NotificationPreferences::GetInstance().AddNotificationSlots(bundleOption_, slots);
+    NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots);
 
     std::vector<sptr<NotificationSlot>> slotsResult;
     ASSERT_EQ(
-        (int)NotificationPreferences::GetInstance().GetNotificationAllSlots(bundleOption_, slotsResult), (int)ERR_OK);
+        (int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundleOption_, slotsResult), (int)ERR_OK);
     ASSERT_EQ((int)slotsResult.size(), 2);
 }
 
@@ -484,7 +484,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00200, Function | 
 HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00300, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slotsResult;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlots(bundleEmptyOption_, slotsResult),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundleEmptyOption_, slotsResult),
         (int)ERR_ANS_INVALID_PARAM);
     ASSERT_EQ((int)slotsResult.size(), 0);
 }
@@ -498,7 +498,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00300, Function | 
 HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slotsResult;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlots(noExsitbundleOption_, slotsResult),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(noExsitbundleOption_, slotsResult),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
     ASSERT_EQ((int)slotsResult.size(), 0);
     ErrCode result = advancedNotificationService_->GetSlots(slotsResult);
@@ -514,7 +514,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | 
 HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00500, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slotsResult;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationAllSlots(nullptr, slotsResult),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(nullptr, slotsResult),
         (int)ERR_ANS_INVALID_PARAM);
     ASSERT_EQ((int)slotsResult.size(), 0);
 }
@@ -526,7 +526,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00500, Function | 
  */
 HWTEST_F(NotificationPreferencesTest, SetShowBadge_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetShowBadge(bundleOption_, true), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetShowBadge(bundleOption_, true), (int)ERR_OK);
 }
 
 /**
@@ -536,8 +536,8 @@ HWTEST_F(NotificationPreferencesTest, SetShowBadge_00100, Function | SmallTest |
  */
 HWTEST_F(NotificationPreferencesTest, SetShowBadge_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ(
-        (int)NotificationPreferences::GetInstance().SetShowBadge(bundleEmptyOption_, true), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetShowBadge(bundleEmptyOption_, true),
+        (int)ERR_ANS_INVALID_PARAM);
     auto result = bundleEmptyOption_->GetBundleName();
     ASSERT_EQ(result, "");
 }
@@ -550,7 +550,7 @@ HWTEST_F(NotificationPreferencesTest, SetShowBadge_00200, Function | SmallTest |
 HWTEST_F(NotificationPreferencesTest, SetShowBadge_00300, Function | SmallTest | Level1)
 {
     ASSERT_EQ(
-        (int)NotificationPreferences::GetInstance().SetShowBadge(nullptr, true), (int)ERR_ANS_INVALID_PARAM);
+        (int)NotificationPreferences::GetInstance()->SetShowBadge(nullptr, true), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -561,8 +561,8 @@ HWTEST_F(NotificationPreferencesTest, SetShowBadge_00300, Function | SmallTest |
 HWTEST_F(NotificationPreferencesTest, IsShowBadge_00100, Function | SmallTest | Level1)
 {
     bool enable = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetShowBadge(bundleOption_, true), (int)ERR_OK);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().IsShowBadge(bundleOption_, enable), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetShowBadge(bundleOption_, true), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->IsShowBadge(bundleOption_, enable), (int)ERR_OK);
     EXPECT_TRUE(enable);
 }
 
@@ -575,7 +575,7 @@ HWTEST_F(NotificationPreferencesTest, IsShowBadge_00100, Function | SmallTest | 
 HWTEST_F(NotificationPreferencesTest, IsShowBadge_00200, Function | SmallTest | Level1)
 {
     bool enable = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().IsShowBadge(bundleEmptyOption_, enable),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->IsShowBadge(bundleEmptyOption_, enable),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -587,7 +587,7 @@ HWTEST_F(NotificationPreferencesTest, IsShowBadge_00200, Function | SmallTest | 
 HWTEST_F(NotificationPreferencesTest, IsShowBadge_00300, Function | SmallTest | Level1)
 {
     bool enable = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().IsShowBadge(nullptr, enable),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->IsShowBadge(nullptr, enable),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -599,7 +599,7 @@ HWTEST_F(NotificationPreferencesTest, IsShowBadge_00300, Function | SmallTest | 
 HWTEST_F(NotificationPreferencesTest, SetImportance_00100, Function | SmallTest | Level1)
 {
     int importance = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetImportance(bundleOption_, importance), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetImportance(bundleOption_, importance), (int)ERR_OK);
 }
 
 /**
@@ -610,7 +610,7 @@ HWTEST_F(NotificationPreferencesTest, SetImportance_00100, Function | SmallTest 
 HWTEST_F(NotificationPreferencesTest, SetImportance_00200, Function | SmallTest | Level1)
 {
     int importance = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetImportance(bundleEmptyOption_, importance),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetImportance(bundleEmptyOption_, importance),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -622,7 +622,7 @@ HWTEST_F(NotificationPreferencesTest, SetImportance_00200, Function | SmallTest 
 HWTEST_F(NotificationPreferencesTest, SetImportance_00300, Function | SmallTest | Level1)
 {
     int importance = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetImportance(nullptr, importance),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetImportance(nullptr, importance),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -634,10 +634,10 @@ HWTEST_F(NotificationPreferencesTest, SetImportance_00300, Function | SmallTest 
 HWTEST_F(NotificationPreferencesTest, GetImportance_00100, Function | SmallTest | Level1)
 {
     int importance = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetImportance(bundleOption_, importance), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetImportance(bundleOption_, importance), (int)ERR_OK);
     int getImportance = 0;
 
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetImportance(bundleOption_, getImportance), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetImportance(bundleOption_, getImportance), (int)ERR_OK);
     ASSERT_EQ(getImportance, 1);
 }
 
@@ -649,7 +649,7 @@ HWTEST_F(NotificationPreferencesTest, GetImportance_00100, Function | SmallTest 
 HWTEST_F(NotificationPreferencesTest, GetImportance_00200, Function | SmallTest | Level1)
 {
     int getImportance = 0;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetImportance(bundleEmptyOption_, getImportance),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetImportance(bundleEmptyOption_, getImportance),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -661,7 +661,7 @@ HWTEST_F(NotificationPreferencesTest, GetImportance_00200, Function | SmallTest 
 HWTEST_F(NotificationPreferencesTest, GetImportance_00300, Function | SmallTest | Level1)
 {
     int getImportance = 0;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetImportance(nullptr, getImportance),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetImportance(nullptr, getImportance),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -673,7 +673,7 @@ HWTEST_F(NotificationPreferencesTest, GetImportance_00300, Function | SmallTest 
 HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00100, Function | SmallTest | Level1)
 {
     int num = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleOption_, num), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetTotalBadgeNums(bundleOption_, num), (int)ERR_OK);
 }
 
 /**
@@ -684,7 +684,7 @@ HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00100, Function | SmallT
 HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00200, Function | SmallTest | Level1)
 {
     int num = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleEmptyOption_, num),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetTotalBadgeNums(bundleEmptyOption_, num),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -696,7 +696,7 @@ HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00200, Function | SmallT
 HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00300, Function | SmallTest | Level1)
 {
     int num = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetTotalBadgeNums(nullptr, num),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetTotalBadgeNums(nullptr, num),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -708,9 +708,10 @@ HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00300, Function | SmallT
 HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00100, Function | SmallTest | Level1)
 {
     int num = 1;
-    NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleOption_, num);
+    NotificationPreferences::GetInstance()->SetTotalBadgeNums(bundleOption_, num);
     int totalBadgeNum = 0;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetTotalBadgeNums(bundleOption_, totalBadgeNum), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetTotalBadgeNums(bundleOption_, totalBadgeNum),
+        (int)ERR_OK);
     ASSERT_EQ(totalBadgeNum, num);
 }
 
@@ -722,7 +723,7 @@ HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00100, Function | SmallT
 HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00200, Function | SmallTest | Level1)
 {
     int totalBadgeNum = 0;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetTotalBadgeNums(bundleEmptyOption_, totalBadgeNum),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetTotalBadgeNums(bundleEmptyOption_, totalBadgeNum),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -734,7 +735,7 @@ HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00200, Function | SmallT
 HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00300, Function | SmallTest | Level1)
 {
     int totalBadgeNum = 0;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetTotalBadgeNums(nullptr, totalBadgeNum),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetTotalBadgeNums(nullptr, totalBadgeNum),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -745,7 +746,7 @@ HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00300, Function | SmallT
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleOption_, false),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption_, false),
         (int)ERR_OK);
 }
 
@@ -757,7 +758,7 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00100, Fu
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleEmptyOption_, false),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleEmptyOption_, false),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -769,7 +770,7 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00200, Fu
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00300, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(nullptr, false),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(nullptr, false),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -780,10 +781,10 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00300, Fu
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundleOption_, false),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption_, false),
         (int)ERR_OK);
     bool enabled = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption_, enabled),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption_, enabled),
         (int)ERR_OK);
     EXPECT_FALSE(enabled);
 }
@@ -797,8 +798,8 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00100, Fu
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00200, Function | SmallTest | Level1)
 {
     bool enabled = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleEmptyOption_, enabled),
-        (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleEmptyOption_,
+        enabled), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -810,7 +811,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00200, Fu
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00300, Function | SmallTest | Level1)
 {
     bool enabled = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(nullptr, enabled),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(nullptr, enabled),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -821,7 +822,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00300, Fu
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabled_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabled(100, true), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(100, true), (int)ERR_OK);
 }
 
 /**
@@ -831,7 +832,7 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabled_00100, Function | 
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabled_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, true),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, true),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -842,9 +843,9 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabled_00200, Function | 
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabled(100, true), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(100, true), (int)ERR_OK);
     bool enable = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabled(100, enable), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabled(100, enable), (int)ERR_OK);
     EXPECT_TRUE(enable);
 }
 
@@ -855,14 +856,14 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00100, Function | 
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetNotificationsEnabled(100, true), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(100, true), (int)ERR_OK);
     bool enable = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabled(100, enable), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabled(100, enable), (int)ERR_OK);
     EXPECT_TRUE(enable);
 
     enable = false;
     ASSERT_EQ(
-        (int)NotificationPreferences::GetInstance().GetNotificationsEnabled(101, enable), (int)ERR_ANS_INVALID_PARAM);
+        (int)NotificationPreferences::GetInstance()->GetNotificationsEnabled(101, enable), (int)ERR_ANS_INVALID_PARAM);
     EXPECT_FALSE(enable);
 }
 
@@ -874,7 +875,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00200, Function | 
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00300, Function | SmallTest | Level1)
 {
     bool enable = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, enable),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, enable),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -894,7 +895,7 @@ HWTEST_F(NotificationPreferencesTest, SetDoNotDisturbDate_00100, Function | Smal
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
 
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetDoNotDisturbDate(SYSTEM_APP_UID, date), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetDoNotDisturbDate(SYSTEM_APP_UID, date), (int)ERR_OK);
 }
 
 /**
@@ -913,7 +914,7 @@ HWTEST_F(NotificationPreferencesTest, SetDoNotDisturbDate_00200, Function | Smal
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
 
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetDoNotDisturbDate(TEST_SUBSCRIBE_USER_INIT, date),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetDoNotDisturbDate(TEST_SUBSCRIBE_USER_INIT, date),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -932,10 +933,10 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbDate_00100, Function | Smal
     int64_t endDate = endDuration.count();
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::DAILY, beginDate, endDate);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetDoNotDisturbDate(SYSTEM_APP_UID, date), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetDoNotDisturbDate(SYSTEM_APP_UID, date), (int)ERR_OK);
 
     sptr<NotificationDoNotDisturbDate> getDate;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetDoNotDisturbDate(SYSTEM_APP_UID, getDate), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetDoNotDisturbDate(SYSTEM_APP_UID, getDate), (int)ERR_OK);
     ASSERT_EQ(getDate->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::DAILY);
     ASSERT_EQ(getDate->GetBeginDate(), beginDate);
     ASSERT_EQ(getDate->GetEndDate(), endDate);
@@ -956,16 +957,16 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbDate_00200, Function | Smal
     int64_t endDate = endDuration.count();
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::DAILY, beginDate, endDate);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetDoNotDisturbDate(SYSTEM_APP_UID, date), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetDoNotDisturbDate(SYSTEM_APP_UID, date), (int)ERR_OK);
 
     sptr<NotificationDoNotDisturbDate> getDate;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetDoNotDisturbDate(SYSTEM_APP_UID, getDate), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetDoNotDisturbDate(SYSTEM_APP_UID, getDate), (int)ERR_OK);
     ASSERT_EQ(getDate->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::DAILY);
     ASSERT_EQ(getDate->GetBeginDate(), beginDate);
     ASSERT_EQ(getDate->GetEndDate(), endDate);
 
     sptr<NotificationDoNotDisturbDate> getExsitDate;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetDoNotDisturbDate(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetDoNotDisturbDate(
         NON_SYSTEM_APP_UID, getExsitDate), (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -977,7 +978,7 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbDate_00200, Function | Smal
 HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbDate_00300, Function | SmallTest | Level1)
 {
     sptr<NotificationDoNotDisturbDate> getDate;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetDoNotDisturbDate(TEST_SUBSCRIBE_USER_INIT, getDate),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetDoNotDisturbDate(TEST_SUBSCRIBE_USER_INIT, getDate),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -990,7 +991,7 @@ HWTEST_F(NotificationPreferencesTest, SetHasPoppedDialog_00100, Function | Small
 {
     bool hasPopped = false;
 
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetHasPoppedDialog(bundleOption_, hasPopped), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundleOption_, hasPopped), (int)ERR_OK);
 }
 
 /**
@@ -1002,10 +1003,10 @@ HWTEST_F(NotificationPreferencesTest, GetHasPoppedDialog_00100, Function | Small
 {
     bool popped = true;
 
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().SetHasPoppedDialog(bundleOption_, popped), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundleOption_, popped), (int)ERR_OK);
 
     bool hasPopped = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption_, hasPopped), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption_, hasPopped), (int)ERR_OK);
     EXPECT_TRUE(hasPopped);
 }
 
@@ -1018,7 +1019,7 @@ HWTEST_F(NotificationPreferencesTest, GetHasPoppedDialog_00100, Function | Small
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationBundleProperty(bundleOption_),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationBundleProperty(bundleOption_),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
@@ -1031,7 +1032,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00100, Funct
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationBundleProperty(bundleEmptyOption_),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationBundleProperty(bundleEmptyOption_),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1044,7 +1045,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00200, Funct
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00300, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().AddNotificationBundleProperty(nullptr),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationBundleProperty(nullptr),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1057,7 +1058,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00300, Funct
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationAllSlots(bundleOption_),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationAllSlots(bundleOption_),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
@@ -1070,7 +1071,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00100, Function
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationAllSlots(bundleEmptyOption_),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationAllSlots(bundleEmptyOption_),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1083,7 +1084,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00200, Function
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00300, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().RemoveNotificationAllSlots(nullptr),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationAllSlots(nullptr),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1097,7 +1098,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00300, Function
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00100, Function | SmallTest | Level1)
 {
     uint64_t num = 1;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlotsNumForBundle(bundleOption_, num),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(bundleOption_, num),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
@@ -1111,7 +1112,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00100, Fu
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00200, Function | SmallTest | Level1)
 {
     uint64_t num = 2;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlotsNumForBundle(bundleEmptyOption_, num),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(bundleEmptyOption_, num),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1125,7 +1126,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00200, Fu
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00300, Function | SmallTest | Level1)
 {
     uint64_t num = 2;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetNotificationSlotsNumForBundle(nullptr, num),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(nullptr, num),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1139,7 +1140,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00100, Function | S
 {
     NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForCreateSlot(bundleOption_, nullptr, info),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForCreateSlot(bundleOption_, nullptr, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
@@ -1153,7 +1154,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00200, Function | S
 {
     NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForCreateSlot(bundleOption_, slot, info),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForCreateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
 }
 
@@ -1168,7 +1169,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00100, Function | S
 {
     NotificationPreferencesInfo info;
     TestAddNotificationSlot(info);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForRemoveSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForRemoveSlot(
         bundleOption_, NotificationConstant::SlotType::OTHER, info), (int)ERR_OK);
 }
 
@@ -1181,7 +1182,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00100, Function | S
 HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00200, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo info;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForRemoveSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForRemoveSlot(
         bundleOption_, NotificationConstant::SlotType::OTHER, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
@@ -1196,7 +1197,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00300, Function | S
 {
     NotificationPreferencesInfo info;
     TestAddNotificationSlot(info);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForRemoveSlot(
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForRemoveSlot(
         bundleOption_, NotificationConstant::SlotType::CONTENT_INFORMATION, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
@@ -1208,7 +1209,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00300, Function | S
  */
 HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0100, TestSize.Level1)
 {
-    ErrCode res = NotificationPreferences::GetInstance().SetSmartReminderEnabled("testDeviceType",
+    ErrCode res = NotificationPreferences::GetInstance()->SetSmartReminderEnabled("testDeviceType",
         true);
     ASSERT_EQ(res, ERR_OK);
 }
@@ -1220,7 +1221,7 @@ HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0100, TestSize.Lev
  */
 HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0200, TestSize.Level1)
 {
-    ErrCode res = NotificationPreferences::GetInstance().SetSmartReminderEnabled("", true);
+    ErrCode res = NotificationPreferences::GetInstance()->SetSmartReminderEnabled("", true);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1232,7 +1233,7 @@ HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0200, TestSize.Lev
 HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0100, TestSize.Level1)
 {
     bool enable = true;
-    ErrCode result = NotificationPreferences::GetInstance().IsSmartReminderEnabled("testDeviceType1",
+    ErrCode result = NotificationPreferences::GetInstance()->IsSmartReminderEnabled("testDeviceType1",
         enable);
     ASSERT_EQ(result, ERR_OK);
 }
@@ -1245,7 +1246,7 @@ HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0100, TestSize.Leve
 HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0200, TestSize.Level1)
 {
     bool enable = true;
-    ErrCode result = NotificationPreferences::GetInstance().IsSmartReminderEnabled("", enable);
+    ErrCode result = NotificationPreferences::GetInstance()->IsSmartReminderEnabled("", enable);
     ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1259,7 +1260,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00100, Function | S
 {
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     NotificationPreferencesInfo info;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, nullptr, info),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForUpdateSlot(bundleOption_, nullptr, info),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1274,7 +1275,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00200, Function | S
 {
     NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
@@ -1290,7 +1291,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | S
     NotificationPreferencesInfo info;
     TestAddNotificationSlot(info);
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
@@ -1304,7 +1305,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | S
 HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().GetAllNotificationEnabledBundles(bundleOption),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption),
         (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
@@ -1319,7 +1320,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00400, Function | S
     NotificationPreferencesInfo info;
     TestAddNotificationSlot(info);
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    ASSERT_EQ((int)NotificationPreferences::GetInstance().CheckSlotForUpdateSlot(bundleOption_, slot, info),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForUpdateSlot(bundleOption_, slot, info),
         (int)ERR_OK);
 }
 
@@ -1333,7 +1334,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0100, TestSi
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode res = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
     ASSERT_EQ(res, ERR_OK);
 }
 
@@ -1347,7 +1348,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSi
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("", 1));
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundleOption,
+    ErrCode res = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
         deviceType, true);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
@@ -1362,7 +1363,7 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0100, TestSiz
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
-    ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
+    ErrCode result = NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
         deviceType, enable);
     ASSERT_EQ(result, ERR_OK);
 }
@@ -1377,7 +1378,7 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSiz
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
-    ErrCode result = NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundleOption,
+    ErrCode result = NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
         deviceType, enable);
     ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
@@ -1394,7 +1395,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0100, TestSize.Lev
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(0);
     profiles.emplace_back(profile);
-    auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1408,7 +1409,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0200, TestSize.Lev
     int32_t userId = 1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     profiles.clear();
-    auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
@@ -1424,7 +1425,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0300, TestSize.Lev
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(1);
     profiles.emplace_back(profile);
-    auto res = NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, ERR_OK);
 }
 
@@ -1440,7 +1441,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0100, TestSize.
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(0);
     profiles.emplace_back(profile);
-    auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1455,7 +1456,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0200, TestSize.
     int32_t userId = 1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     profiles.clear();
-    auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
@@ -1471,7 +1472,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0300, TestSize.
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profile->SetProfileId(1);
     profiles.emplace_back(profile);
-    auto res = NotificationPreferences::GetInstance().RemoveDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, ERR_OK);
 }
 
@@ -1485,7 +1486,7 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0100, TestSize.Leve
     int32_t profileId = 0;
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbProfile> profile;
-    auto res = NotificationPreferences::GetInstance().GetDoNotDisturbProfile(profileId, userId, profile);
+    auto res = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(profileId, userId, profile);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1499,7 +1500,7 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0200, TestSize.Leve
     int32_t profileId = 1;
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbProfile> profile;
-    auto res = NotificationPreferences::GetInstance().GetDoNotDisturbProfile(profileId, userId, profile);
+    auto res = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(profileId, userId, profile);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1516,8 +1517,8 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0300, TestSize.Leve
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     profile->SetProfileId(profileId);
     profiles.emplace_back(profile);
-    NotificationPreferences::GetInstance().AddDoNotDisturbProfiles(userId, profiles);
-    auto res = NotificationPreferences::GetInstance().GetDoNotDisturbProfile(profileId, userId, profile);
+    NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(userId, profiles);
+    auto res = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(profileId, userId, profile);
     ASSERT_EQ(res, ERR_OK);
 }
 
@@ -1530,7 +1531,7 @@ HWTEST_F(NotificationPreferencesTest, GetBundleSoundPermission_0100, TestSize.Le
 {
     bool allPackage = true;
     std::set<std::string> bundleNames = {};
-    auto res = NotificationPreferences::GetInstance().GetBundleSoundPermission(allPackage, bundleNames);
+    auto res = NotificationPreferences::GetInstance()->GetBundleSoundPermission(allPackage, bundleNames);
     ASSERT_EQ(res, ERR_OK);
 }
 }  // namespace Notification

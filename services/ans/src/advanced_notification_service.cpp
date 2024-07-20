@@ -173,7 +173,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     } else {
         std::string sourceBundleName =
             request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
-        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance()->IsAgentRelationship(
             bundle, sourceBundleName)) {
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 bundle.c_str(), sourceBundleName.c_str());
@@ -427,7 +427,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         std::string sourceBundleName =
             request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
         if (!sourceBundleName.empty() &&
-            NotificationPreferences::GetInstance().IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
+            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 GetClientBundleName().c_str(), sourceBundleName.c_str());
             request->SetCreatorBundleName(request->GetOwnerBundleName());
@@ -704,7 +704,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         return;
     }
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
-    if (NotificationPreferences::GetInstance().GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
+    if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
         ANS_LOGE("Get do not disturb profile failed.");
         return;
@@ -771,7 +771,7 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
     }
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
+    result = NotificationPreferences::GetInstance()->AddNotificationSlots(record->bundleOption, slots);
     ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
         slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
     if (result != ERR_OK) {
@@ -1068,7 +1068,7 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
-            result = NotificationPreferences::GetInstance().GetImportance(bundleOption, importance);
+            result = NotificationPreferences::GetInstance()->GetImportance(bundleOption, importance);
         }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1739,7 +1739,7 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
+        result = NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption, hasPopped);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -2111,7 +2111,7 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
         if (soundPermissionInfo_->needUpdateCache_.load()) {
             soundPermissionInfo_->allPackage_ = false;
             soundPermissionInfo_->bundleName_.clear();
-            NotificationPreferences::GetInstance().GetBundleSoundPermission(
+            NotificationPreferences::GetInstance()->GetBundleSoundPermission(
                 soundPermissionInfo_->allPackage_, soundPermissionInfo_->bundleName_);
             soundPermissionInfo_->needUpdateCache_ = false;
         }

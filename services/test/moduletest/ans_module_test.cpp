@@ -101,14 +101,14 @@ sptr<AdvancedNotificationService> AnsModuleTest::g_advancedNotificationService;
 void AnsModuleTest::SetUpTestCase()
 {
     passed = false;
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     g_advancedNotificationService = OHOS::Notification::AdvancedNotificationService::GetInstance();
 }
 
 void AnsModuleTest::TearDownTestCase()
 {
     passed = false;
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     if (g_advancedNotificationService != nullptr) {
         g_advancedNotificationService->SelfClean();
     }
@@ -117,12 +117,12 @@ void AnsModuleTest::TearDownTestCase()
 void AnsModuleTest::SetUp()
 {
     passed = false;
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
 }
 
 void AnsModuleTest::TearDown()
 {
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     passed = false;
 }
 

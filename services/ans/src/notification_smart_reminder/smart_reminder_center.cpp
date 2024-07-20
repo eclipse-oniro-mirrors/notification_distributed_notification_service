@@ -298,7 +298,7 @@ void SmartReminderCenter::HandleReminderMethods(
 bool SmartReminderCenter::IsNeedSynergy(const string &deviceType, const string &ownerBundleName) const
 {
     bool isEnable = true;
-    if (NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, isEnable) != ERR_OK || !isEnable) {
+    if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, isEnable) != ERR_OK || !isEnable) {
         return false;
     }
     int32_t userId = -1;
@@ -309,7 +309,7 @@ bool SmartReminderCenter::IsNeedSynergy(const string &deviceType, const string &
         return false;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(ownerBundleName, userId);
-    if (NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(
+    if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
         bundleOption, deviceType, isEnable) != ERR_OK || !isEnable) {
         return false;
     }

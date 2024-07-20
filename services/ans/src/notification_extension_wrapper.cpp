@@ -78,12 +78,12 @@ void ExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
-    std::string ctrlConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
+    std::string ctrlConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
     if (!ctrlConfig.empty()) {
         syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
     }
 
-    std::string aggregateConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("AGGREGATE_CONFIG");
+    std::string aggregateConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("AGGREGATE_CONFIG");
     if (!aggregateConfig.empty()) {
         syncAdditionConfig_("AGGREGATE_CONFIG", aggregateConfig);
     }

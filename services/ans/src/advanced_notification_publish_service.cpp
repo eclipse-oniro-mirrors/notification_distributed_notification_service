@@ -67,7 +67,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     }
 
     ErrCode result = ERR_OK;
-    result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
+    result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
     if (result == ERR_OK) {
         NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
         PublishSlotChangeCommonEvent(bundle);
@@ -417,7 +417,7 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
-            result = NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleOption, num);
+            result = NotificationPreferences::GetInstance()->SetTotalBadgeNums(bundleOption, num);
         }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -635,7 +635,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
-            result = NotificationPreferences::GetInstance().SetShowBadge(bundle, enabled);
+            result = NotificationPreferences::GetInstance()->SetShowBadge(bundle, enabled);
             if (result == ERR_OK) {
                 HandleBadgeEnabledChanged(bundle, enabled);
             }
@@ -685,7 +685,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().IsShowBadge(bundle, enabled);
+        result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = false;
@@ -711,7 +711,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().IsShowBadge(bundleOption, enabled);
+        result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = false;
@@ -800,7 +800,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
         ANS_LOGD("ffrt enter!");
         if (deviceId.empty()) {
             // Local device
-            result = NotificationPreferences::GetInstance().SetNotificationsEnabled(userId, enabled);
+            result = NotificationPreferences::GetInstance()->SetNotificationsEnabled(userId, enabled);
         } else {
             // Remote device
         }
@@ -840,10 +840,10 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     ErrCode result = ERR_OK;
     if (deviceId.empty()) {
         bool notificationEnable = false;
-        ErrCode saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
+        ErrCode saveRef = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
             bundleOption, notificationEnable);
         // Local device
-        result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
+        result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
         if (!enabled) {
             result = RemoveAllNotificationsForDisable(bundle);
         }
@@ -889,7 +889,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -968,9 +968,9 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
 
     ErrCode result = ERR_OK;
     allowed = false;
-    result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     if (result == ERR_OK && allowed) {
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             // FA model app can publish notification without user confirm
@@ -997,9 +997,9 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
 
     ErrCode result = ERR_OK;
     allowed = false;
-    result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     if (result == ERR_OK && allowed) {
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             // FA model app can publish notification without user confirm
@@ -1047,9 +1047,9 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
 
     ErrCode result = ERR_OK;
         allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
         if (result == ERR_OK && allowed) {
-            result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(targetBundle, allowed);
+            result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(targetBundle, allowed);
             if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
                 result = ERR_OK;
                 allowed = CheckApiCompatibility(targetBundle);
@@ -1796,7 +1796,7 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(const int32_t &u
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1822,7 +1822,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(const int32_t
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().SetNotificationsEnabled(userId, enabled);
+        result = NotificationPreferences::GetInstance()->SetNotificationsEnabled(userId, enabled);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1848,7 +1848,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         sptr<NotificationSlot> slot;
-        result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
+        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
             result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             slot = new (std::nothrow) NotificationSlot(slotType);
@@ -1864,16 +1864,16 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
                 slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
                 std::vector<sptr<NotificationSlot>> slots;
                 slots.push_back(slot);
-                result = NotificationPreferences::GetInstance().AddNotificationSlots(bundle, slots);
+                result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
                 return;
             }
-            NotificationPreferences::GetInstance().RemoveNotificationSlot(bundle, slotType);
+            NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundle, slotType);
         } else {
             ANS_LOGE("Set enable slot: GetNotificationSlot failed");
             return;
         }
         bool allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundle, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             allowed = CheckApiCompatibility(bundle);
@@ -1886,7 +1886,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         std::vector<sptr<NotificationSlot>> slots;
         slots.push_back(slot);
-        result = NotificationPreferences::GetInstance().AddNotificationSlots(bundle, slots);
+        result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
         if (result != ERR_OK) {
             ANS_LOGE("Set enable slot: AddNotificationSlot failed");
             return;
@@ -1936,7 +1936,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> slot;
-        result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
+        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
         if (result != ERR_OK) {
             ANS_LOGE("Get enable slot: GetNotificationSlot failed");
             return;
@@ -2227,7 +2227,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    return NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundle, deviceType, enabled);
+    return NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, deviceType, enabled);
 }
 
 ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
@@ -2251,7 +2251,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    return NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundle, deviceType, enabled);
+    return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType, enabled);
 }
 
 ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<NotificationRequest> &request)
@@ -2355,7 +2355,7 @@ ErrCode AdvancedNotificationService::SetSmartReminderEnabled(const std::string &
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-    ErrCode result = NotificationPreferences::GetInstance().SetSmartReminderEnabled(deviceType, enabled);
+    ErrCode result = NotificationPreferences::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
     return result;
 }
 
@@ -2373,7 +2373,7 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    return NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, enabled);
+    return NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
