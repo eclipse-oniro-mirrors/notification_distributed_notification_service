@@ -139,9 +139,6 @@ void NotificationSubscriberManager::NotifyConsumed(
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
-        HaMetaMessage message = HaMetaMessage().SceneId(33).BranchId(1).ErrorCode(ERROR_INTERNAL_ERROR)
-            .Message("queue is nullptr").BundleName(notification->GetBundleName());
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(notification->GetNotificationRequestPoint(), message);
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
@@ -414,6 +411,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1).Checkfailed(false);
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
@@ -429,9 +427,15 @@ void NotificationSubscriberManager::NotifyConsumedInner(
                     ANS_LOGE("ReadParcelable failed.");
                     continue;
                 }
+                message.Message(notificationStub->GetKey());
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(
+                    notificationStub->GetNotificationRequestPoint(), message);
                 record->subscriber->OnConsumed(notificationStub, notificationMap);
                 continue;
             }
+            message.Message(notification->GetKey());
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(notification->GetNotificationRequestPoint(),
+                message);
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }

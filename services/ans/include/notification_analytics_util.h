@@ -23,6 +23,27 @@
 namespace OHOS {
 namespace Notification {
 
+enum EventSceneId {
+    SCENE_0 = 0,
+    SCENE_1 = 1,
+    SCENE_2 = 2,
+    SCENE_3 = 3,
+    SCENE_4 = 4,
+    SCENE_5 = 5,
+    SCENE_6 = 6,
+    SCENE_7 = 7,
+    SCENE_8 = 8,
+};
+
+enum EventBranchId {
+    BRANCH_0 = 0,
+    BRANCH_1 = 1,
+    BRANCH_2 = 2,
+    BRANCH_3 = 3,
+    BRANCH_4 = 4,
+    BRANCH_5 = 5,
+    BRANCH_6 = 6,
+};
 class HaMetaMessage {
 public:
     HaMetaMessage() = default;
@@ -33,12 +54,14 @@ public:
     HaMetaMessage& SceneId(uint32_t sceneId);
     HaMetaMessage& BranchId(uint32_t branchId);
     HaMetaMessage& ErrorCode(uint32_t errorCode);
-    HaMetaMessage& Message(const std::string& message);
+    HaMetaMessage& Message(const std::string& message, bool print = false);
     HaMetaMessage& BundleName(const std::string& bundleName_);
     HaMetaMessage& AgentBundleName(const std::string& agentBundleName);
     HaMetaMessage& TypeCode(int32_t typeCode);
     HaMetaMessage& NotificationId(int32_t notificationId);
     std::string GetMessage() const;
+    HaMetaMessage& Checkfailed(bool checkfailed);
+    bool NeedReport() const;
 
     std::string Build() const;
 
@@ -49,8 +72,9 @@ public:
 private:
     uint32_t sceneId_;
     uint32_t branchId_;
-    uint32_t errorCode_;
+    uint32_t errorCode_ = ERR_OK;
     std::string message_;
+    bool checkfailed_ = true;
 };
 
 
