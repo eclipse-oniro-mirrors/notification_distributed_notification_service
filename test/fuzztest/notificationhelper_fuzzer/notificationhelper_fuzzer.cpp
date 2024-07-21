@@ -21,20 +21,30 @@
 #include "notificationhelper_fuzzer.h"
 
 namespace OHOS {
-    namespace {
-        constexpr uint8_t ENABLE = 2;
-    }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+
+    bool DoSomethingInterestingWithMyAPI(FuzzData fuzzData)
     {
         Notification::NotificationHelper notificationHelper;
         // test IsSoundEnabled function
-        std::string representativeBundle(data);
-        Notification::NotificationRequest request;
-        notificationHelper.PublishNotificationAsBundle(representativeBundle, request);
+        std::string representativeBundle = fuzzData.GenerateRandomString();
+        Notification::NotificationRequest notification;
+        notification.SetOwnerUid(fuzzData.GenerateRandomInt32());
+        notification.SetCreatorUid(fuzzData.GenerateRandomInt32());
+        notification.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
+        auto content = std::make_shared<Notification::NotificationLiveViewContent>();
+        notification.SetContent(std::make_shared<Notification::NotificationContent>(content));
+        notificationHelper.PublishNotificationAsBundle(representativeBundle, notification);
         notificationHelper.RemoveNotifications();
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
-        bool enabled = *data % ENABLE;
-        notificationHelper.SetNotificationsEnabledForAllBundles(userId, enabled);
+        int32_t intData = fuzzData.GenerateRandomInt32();
+        bool enabled = fuzzData.GenerateRandomBool();
+        notificationHelper.SetNotificationsEnabledForAllBundles(intData, enabled);
+        Notification::NotificationBundleOption bundleOption;
+        bundleOption.SetBundleName(fuzzData.GenerateRandomString());
+        bundleOption.SetUid(fuzzData.GenerateRandomInt32());
+        uint32_t flag = 0;
+        notificationHelper.GetNotificationSlotFlagsAsBundle(bundleOption, flag);
+        notificationHelper.SetNotificationSlotFlagsAsBundle(bundleOption, intData);
+        notificationHelper.CancelAsBundle(bundleOption, intData);
         return true;
     }
 }
@@ -42,12 +52,9 @@ namespace OHOS {
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
+    if (data != nullptr && size >= GetU32Size()) {
+        OHOS::FuzzData fuzzData(data, size);
+        OHOS::DoSomethingInterestingWithMyAPI(fuzzData);
     }
     return 0;
 }
