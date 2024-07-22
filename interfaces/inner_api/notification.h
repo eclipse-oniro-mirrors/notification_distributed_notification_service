@@ -229,18 +229,18 @@ public:
     int32_t GetUserId() const;
 
     /**
-     * @brief Obtains the UserId of the notification receiver.
-     *
-     * @return Returns the UserId of the notification receiver.
-     */
-    int32_t GetRecvUserId() const;
-
-    /**
      * @brief Obtains the instance key of the notification creator.
      *
      * @return Returns the instance key of the notification creator.
      */
     int32_t GetInstanceKey() const;
+
+    /**
+     * @brief Obtains the UserId of the notification receiver.
+     *
+     * @return Returns the UserId of the notification receiver.
+     */
+    int32_t GetRecvUserId() const;
 
     /**
      * @brief Dumps a string representation of the object.

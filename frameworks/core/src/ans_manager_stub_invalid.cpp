@@ -596,12 +596,6 @@ ErrCode AnsManagerStub::UnregisterPushCallback()
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::SetAdditionConfig(const std::string &key, const std::string &value)
-{
-    ANS_LOGE("Called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
     const std::string &deviceType, const bool enabled)
 {
@@ -625,6 +619,12 @@ ErrCode AnsManagerStub::SetSmartReminderEnabled(const std::string &deviceType, c
 ErrCode AnsManagerStub::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
 {
     ANS_LOGE("IsSmartReminderEnabled called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    ANS_LOGE("Called!");
     return ERR_INVALID_OPERATION;
 }
 
