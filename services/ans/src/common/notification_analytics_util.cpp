@@ -171,8 +171,12 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
     } else {
         extraInfo = std::make_shared<AAFwk::WantParams>();
     }
-    std::string reasons = reason + std::to_string(request->GetFlags()->GetReminderFlags());
-    extraInfo->SetParam("reason", AAFwk::String::Box(reasons));
+    if (request->GetFlags() == nullptr) {
+        extraInfo->SetParam("reason", AAFwk::String::Box(reason));
+    } else {
+        std::string reasons = reason + std::to_string(request->GetFlags()->GetReminderFlags());
+        extraInfo->SetParam("reason", AAFwk::String::Box(reasons));
+    }
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
     std::string extraContent = wWrapper.ToString();
 
