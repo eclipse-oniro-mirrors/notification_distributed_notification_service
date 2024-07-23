@@ -122,7 +122,7 @@ ErrCode ReminderDataManager::CancelReminder(
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", reminderId);
         {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::ACTIVE_MUTEX);
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
         }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
@@ -242,10 +242,13 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
     const int32_t uid)
 {
     MUTEX.lock();
-    if (activeReminderId_ != -1 && IsMatched(activeReminder_, packageName, userId, uid)) {
-        activeReminder_->OnStop();
-        StopTimer(TimerType::TRIGGER_TIMER);
-        ANSR_LOGD("Stop active reminder, reminderId=%{public}d", activeReminderId_.load());
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+        if (activeReminderId_ != -1 && IsMatched(activeReminder_, packageName, userId, uid)) {
+            activeReminder_->OnStop();
+            StopTimer(TimerType::TRIGGER_TIMER);
+            ANSR_LOGD("Stop active reminder, reminderId=%{public}d", activeReminderId_.load());
+        }
     }
     for (auto vit = reminderVector_.begin(); vit != reminderVector_.end();) {
         int32_t reminderId = (*vit)->GetReminderId();
@@ -626,7 +629,7 @@ void ReminderDataManager::CloseReminder(const sptr<ReminderRequest> &reminder, b
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Stop active reminder due to CloseReminder");
         {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::ACTIVE_MUTEX);
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
         }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
@@ -821,7 +824,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     if (activeReminderId_ != -1) {
         ANSR_LOGD("Stop active reminder due to date/time or timeZone change");
         {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::ACTIVE_MUTEX);
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
         }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
@@ -995,7 +998,7 @@ void ReminderDataManager::SetActiveReminder(const sptr<ReminderRequest> &reminde
         activeReminderId_ = -1;
     } else {
         activeReminderId_ = reminder->GetReminderId();
-        std::lock_guard<std::mutex> lock(ReminderDataManager::ACTIVE_MUTEX);
+        std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
         activeReminder_ = reminder;
     }
     ANSR_LOGD("Set activeReminderId=%{public}d", activeReminderId_.load());
@@ -1183,7 +1186,7 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", activeReminderId_.load());
         {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::ACTIVE_MUTEX);
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
         }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
@@ -1230,7 +1233,7 @@ void ReminderDataManager::StartRecentReminder()
     }
     if (activeReminderId_ != -1) {
         {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::ACTIVE_MUTEX);
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
             store_->UpdateOrInsert(activeReminder_, FindNotificationBundleOption(activeReminderId_));
         }
