@@ -74,6 +74,7 @@ std::mutex ReminderDataManager::MUTEX;
 std::mutex ReminderDataManager::SHOW_MUTEX;
 std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
+std::mutex ReminderDataManager::ACTIVE_MUTEX;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
 std::shared_ptr<ffrt::queue> ReminderDataManager::serviceQueue_ = nullptr;
@@ -120,7 +121,10 @@ ErrCode ReminderDataManager::CancelReminder(
     }
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", reminderId);
-        activeReminder_->OnStop();
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+            activeReminder_->OnStop();
+        }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
     if (alertingReminderId_ == reminderId) {
@@ -238,10 +242,13 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string &packageNa
     const int32_t uid)
 {
     MUTEX.lock();
-    if (activeReminderId_ != -1 && IsMatched(activeReminder_, packageName, userId, uid)) {
-        activeReminder_->OnStop();
-        StopTimer(TimerType::TRIGGER_TIMER);
-        ANSR_LOGD("Stop active reminder, reminderId=%{public}d", activeReminderId_.load());
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+        if (activeReminderId_ != -1 && IsMatched(activeReminder_, packageName, userId, uid)) {
+            activeReminder_->OnStop();
+            StopTimer(TimerType::TRIGGER_TIMER);
+            ANSR_LOGD("Stop active reminder, reminderId=%{public}d", activeReminderId_.load());
+        }
     }
     for (auto vit = reminderVector_.begin(); vit != reminderVector_.end();) {
         int32_t reminderId = (*vit)->GetReminderId();
@@ -621,7 +628,10 @@ void ReminderDataManager::CloseReminder(const sptr<ReminderRequest> &reminder, b
     int32_t reminderId = reminder->GetReminderId();
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Stop active reminder due to CloseReminder");
-        activeReminder_->OnStop();
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+            activeReminder_->OnStop();
+        }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
     if (alertingReminderId_ == reminderId) {
@@ -813,7 +823,10 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     ANSR_LOGI("Refresh all reminders due to %{public}s changed by user", typeInfo.c_str());
     if (activeReminderId_ != -1) {
         ANSR_LOGD("Stop active reminder due to date/time or timeZone change");
-        activeReminder_->OnStop();
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+            activeReminder_->OnStop();
+        }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
     std::vector<sptr<ReminderRequest>> showImmediately;
@@ -985,6 +998,7 @@ void ReminderDataManager::SetActiveReminder(const sptr<ReminderRequest> &reminde
         activeReminderId_ = -1;
     } else {
         activeReminderId_ = reminder->GetReminderId();
+        std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
         activeReminder_ = reminder;
     }
     ANSR_LOGD("Set activeReminderId=%{public}d", activeReminderId_.load());
@@ -1171,7 +1185,10 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
     int32_t reminderId = reminder->GetReminderId();
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", activeReminderId_.load());
-        activeReminder_->OnStop();
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+            activeReminder_->OnStop();
+        }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
 
@@ -1215,8 +1232,11 @@ void ReminderDataManager::StartRecentReminder()
         return;
     }
     if (activeReminderId_ != -1) {
-        activeReminder_->OnStop();
-        store_->UpdateOrInsert(activeReminder_, FindNotificationBundleOption(activeReminderId_));
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+            activeReminder_->OnStop();
+            store_->UpdateOrInsert(activeReminder_, FindNotificationBundleOption(activeReminderId_));
+        }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
     ANSR_LOGI("Start recent reminder");
@@ -2118,67 +2138,6 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
         }
         break;
     }
-}
-
-bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderRequest>& reminder,
-    const uint32_t callerTokenId)
-{
-    auto actionButtonMap = reminder->GetActionButtons();
-    for (auto it = actionButtonMap.begin(); it != actionButtonMap.end(); ++it) {
-        ReminderRequest::ActionButtonInfo& buttonInfo = it->second;
-        if (buttonInfo.dataShareUpdate->uri.empty()) {
-            continue;
-        }
-        Uri uri(buttonInfo.dataShareUpdate->uri);
-        auto ret = DataShare::DataSharePermission::VerifyPermission(callerTokenId, uri, false);
-        if (ret != DataShare::E_OK) {
-            ANSR_LOGE("publish failed, DataSharePermission::VerifyPermission return error[%{public}d],",
-                static_cast<int32_t>(ret));
-            return false;
-        }
-    }
-    return true;
-}
-
-void ReminderDataManager::HandleAutoDeleteReminder(const int32_t notificationId, const int32_t uid,
-    const int64_t autoDeletedTime)
-{
-    ANSR_LOGI("auto delete reminder start");
-    std::vector<sptr<ReminderRequest>> showedReminder;
-    {
-        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
-        showedReminder = showedReminderVector_;
-    }
-    for (auto reminder : showedReminder) {
-        if (reminder == nullptr) {
-            continue;
-        }
-
-        if (reminder->GetUid() != uid || notificationId != reminder->GetNotificationId() ||
-            reminder->GetAutoDeletedTime() != autoDeletedTime) {
-            continue;
-        }
-        CloseReminder(reminder, true);
-        UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-        CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
-    }
-    StartRecentReminder();
-}
-
-void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
-{
-#ifdef HAS_HISYSEVENT_PART
-    std::string event = "ALARM_TRIGGER";
-    std::string bundleName = reminder->GetBundleName();
-    int32_t uid = reminder->GetUid();
-    int32_t type = static_cast<int32_t>(reminder->GetReminderType());
-    int32_t repeat = static_cast<int32_t>(reminder->IsRepeat());
-    uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
-    int32_t ringTime = static_cast<int32_t>(reminder->GetRingDuration());
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "PID", 0, "UID", uid, "NAME", bundleName, "TYPE", type, "repeat", repeat, "TRIGGER_TIME", triggerTime,
-        "RING_TIME", ringTime);
-#endif
 }
 }
 }

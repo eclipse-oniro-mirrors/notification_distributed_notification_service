@@ -87,6 +87,7 @@ ohos_shared_library("libans") {
     "src/permission_filter.cpp",
     "src/reminder_config_change_observer.cpp",
     "src/reminder_data_manager.cpp",
+    "src/reminder_data_manager_inner.cpp",
     "src/reminder_event_manager.cpp",
     "src/reminder_swing_decision_center.cpp",
     "src/reminder_timer_info.cpp",
