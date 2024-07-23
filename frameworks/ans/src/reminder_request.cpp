@@ -1747,6 +1747,10 @@ void ReminderRequest::UpdateNotificationCommon(bool isSnooze)
     notificationNormalContent->SetTitle(title_);
     auto notificationContent = std::make_shared<NotificationContent>(notificationNormalContent);
     notificationRequest_->SetContent(notificationContent);
+    if ((reminderType_ == ReminderRequest::ReminderType::TIMER) ||
+        (reminderType_ == ReminderRequest::ReminderType::ALARM)) {
+        notificationRequest_->SetUnremovable(true);
+    }
 }
 
 void ReminderRequest::UpdateNotificationBundleInfo()
