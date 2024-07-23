@@ -28,15 +28,14 @@
 #include "notification_constant.h"
 #include "os_account_manager_helper.h"
 #include "notification_preferences.h"
+#include "notification_analytics_util.h"
 
 
 namespace OHOS {
 namespace Notification {
-inline std::string GetClientBundleName()
+inline std::string GetClientBundleNameByUid(int32_t callingUid)
 {
     std::string bundle;
-
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
 
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager != nullptr) {
@@ -44,6 +43,12 @@ inline std::string GetClientBundleName()
     }
 
     return bundle;
+}
+
+inline std::string GetClientBundleName()
+{
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    return GetClientBundleNameByUid(callingUid);
 }
 
 inline int32_t CheckUserIdParams(const int userId)
@@ -111,6 +116,43 @@ inline void RemoveExpired(
             break;
         }
     }
+}
+
+inline OHOS::Notification::HaMetaMessage AddInformationInMessage(
+    OHOS::Notification::HaMetaMessage haMetaMessage, const int32_t reason,
+    std::string message)
+{
+    message += "reason:" + std::to_string(reason) + ".";
+
+    std::string bundleName;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    message += "uid:" + std::to_string(callingUid) + ".";
+    bundleName = GetClientBundleNameByUid(callingUid);
+
+    haMetaMessage = haMetaMessage.BundleName(bundleName);
+    haMetaMessage = haMetaMessage.Message(message);
+    return haMetaMessage;
+}
+
+
+inline void ReportDeleteFailedEventPush(OHOS::Notification::HaMetaMessage haMetaMessage,
+    const int32_t reason, std::string message)
+{
+    haMetaMessage = AddInformationInMessage(haMetaMessage, reason, message);
+    NotificationAnalyticsUtil::ReportDeleteFailedEvent(haMetaMessage);
+}
+
+inline void ReportDeleteFailedEventPushByNotification(const sptr<Notification> &notification,
+    OHOS::Notification::HaMetaMessage haMetaMessage, const int32_t reason,
+    std::string message)
+{
+    if (notification == nullptr) {
+        ANS_LOGE("report notificaiton is null");
+        return;
+    }
+    haMetaMessage = AddInformationInMessage(haMetaMessage, reason, message);
+    NotificationAnalyticsUtil::ReportDeleteFailedEvent(
+        notification->GetNotificationRequestPoint(), haMetaMessage);
 }
 }  // namespace Notification
 }  // namespace OHOS

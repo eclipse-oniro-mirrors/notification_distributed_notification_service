@@ -39,6 +39,7 @@
 #include "common_event_publish_info.h"
 #include "want_params_wrapper.h"
 #include "ans_convert_enum.h"
+#include "notification_analytics_util.h"
 
 #include "advanced_notification_inline.cpp"
 
@@ -66,7 +67,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     }
 
     ErrCode result = ERR_OK;
-    result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
+    result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
     if (result == ERR_OK) {
         NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
         PublishSlotChangeCommonEvent(bundle);
@@ -91,16 +92,18 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     request->SetCreateTime(GetCurrentTime());
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
     ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (result != ERR_OK) {
-        ANSR_LOGE("Failed to process request, result is %{public}d", result);
+        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
     result = CheckUserIdParams(request->GetReceiverUserId());
     if (result != ERR_OK) {
-        ANSR_LOGE("User is invalid");
+        message.SceneId(EventSceneId::SCENE_3).ErrorCode(result).Message("User is invalid", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -122,6 +125,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
         result = CheckSoundPermission(request, bundleOption->GetBundleName());
         if (result != ERR_OK) {
+            message.ErrorCode(result).Message("Check sound failed.");
             break;
         }
 
@@ -129,14 +133,17 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             result = PushCheck(request);
         }
         if (result != ERR_OK) {
+            message.ErrorCode(result).Message("Push check failed.");
             break;
         }
         result = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
         if (result != ERR_OK) {
+            message.ErrorCode(result).Message("Publish prepared failed.");
             break;
         }
     } while (0);
 
+    NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
     SendPublishHiSysEvent(request, result);
     return result;
 }
@@ -183,16 +190,23 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::s
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        std::string message = "get bundleOption is null.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 1)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::APP_CANCEL_REASON_DELETE,
+            message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetInstanceKey(instanceKey);
-    return CancelPreparedNotification(notificationId, label, bundleOption);
+    return CancelPreparedNotification(notificationId, label, bundleOption,
+        NotificationConstant::APP_CANCEL_REASON_DELETE);
 }
 
 ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    const int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -203,6 +217,13 @@ ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
         ANS_LOGE("Serial queue is invalidated.");
         return ERR_ANS_INVALID_PARAM;
     }
+    ErrCode result = ExcuteCancelAll(bundleOption, reason);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::ExcuteCancelAll(
+    const sptr<NotificationBundleOption>& bundleOption, const int32_t reason)
+{
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -216,14 +237,12 @@ ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
             std::string bundleName;
             GetDistributedInfo(key, deviceId, bundleName);
 #endif
-            result = RemoveFromNotificationList(key, notification, true,
-                NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+            result = RemoveFromNotificationList(key, notification, true, reason);
             if (result != ERR_OK) {
                 continue;
             }
 
             if (notification != nullptr) {
-                int32_t reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -233,14 +252,14 @@ ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
             if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
                 std::vector<sptr<Notification>> currNotificationList = notifications;
                 NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                    currNotificationList, nullptr, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+                    currNotificationList, nullptr, reason);
                 notifications.clear();
             }
         }
 
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                notifications, nullptr, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+                notifications, nullptr, reason);
         }
         result = ERR_OK;
     }));
@@ -252,13 +271,24 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not systemApp";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 1)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        std::string message = "no acl permission";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 2)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -277,11 +307,16 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
         uid = bundleOption->GetUid();
     }
     if (uid < 0) {
+        std::string message = "uid error";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 3)
+            .ErrorCode(ERR_ANS_INVALID_UID).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_UID;
     }
     sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
         bundleOption->GetBundleName(), uid);
-    return CancelPreparedNotification(notificationId, "", bundle);
+    return CancelPreparedNotification(notificationId, "", bundle, reason);
 }
 
 ErrCode AdvancedNotificationService::CancelAsBundle(
@@ -310,9 +345,14 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
 {
     ANS_LOGD("Called.");
-
+    int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not systemApp";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 4)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(id);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -334,13 +374,22 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
             uid = bundleOption->GetUid();
         }
         if (uid < 0) {
+            std::string message = "uid error";
+            OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 5)
+                .ErrorCode(ERR_ANS_INVALID_UID).NotificationId(id);
+            ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+            ANS_LOGE("%{public}s", message.c_str());
             return ERR_ANS_INVALID_UID;
         }
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             bundleOption->GetBundleName(), uid);
-        return CancelPreparedNotification(id, "", bundle);
+        return CancelPreparedNotification(id, "", bundle, reason);
     }
-
+    std::string message = "no agent setting";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 6)
+        .ErrorCode(ERR_ANS_NO_AGENT_SETTING).NotificationId(id);
+    ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+    ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NO_AGENT_SETTING;
 }
 
@@ -368,7 +417,7 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
-            result = NotificationPreferences::GetInstance().SetTotalBadgeNums(bundleOption, num);
+            result = NotificationPreferences::GetInstance()->SetTotalBadgeNums(bundleOption, num);
         }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -377,21 +426,39 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
 ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t removeReason)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("VerifyNativeToken and IsSystemApp is false.");
+        std::string message = "not systemApp. key:" + key + ".";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 1)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        std::string message = "no acl permission. key:" + key + ".";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 2)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidated.");
+        std::string message = "Serial queue is invalidated. key:" + key + ".";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 3)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
+
+    return ExcuteDelete(key, removeReason);
+}
+
+ErrCode AdvancedNotificationService::ExcuteDelete(const std::string &key, const int32_t removeReason)
+{
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -481,18 +548,32 @@ ErrCode AdvancedNotificationService::DeleteAll()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    const int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 8)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
+        std::string message = "no acl permission.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 9)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        std::string message = "Serial queue is invalidity.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 10)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -518,7 +599,6 @@ ErrCode AdvancedNotificationService::DeleteAll()
             }
 
             if (notification->GetUserId() == activeUserId) {
-                int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -527,12 +607,12 @@ ErrCode AdvancedNotificationService::DeleteAll()
             }
             if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
                 ANS_LOGD("Notifications size greater than or equal to MAX_CANCELED_PARCELABLE_VECTOR_NUM.");
-                SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::CANCEL_ALL_REASON_DELETE);
+                SendNotificationsOnCanceled(notifications, nullptr, reason);
             }
         }
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                notifications, nullptr, NotificationConstant::CANCEL_REASON_DELETE);
+                notifications, nullptr, reason);
         }
 
         result = ERR_OK;
@@ -568,7 +648,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
-            result = NotificationPreferences::GetInstance().SetShowBadge(bundle, enabled);
+            result = NotificationPreferences::GetInstance()->SetShowBadge(bundle, enabled);
             if (result == ERR_OK) {
                 HandleBadgeEnabledChanged(bundle, enabled);
             }
@@ -618,7 +698,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().IsShowBadge(bundle, enabled);
+        result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = false;
@@ -644,7 +724,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().IsShowBadge(bundleOption, enabled);
+        result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = false;
@@ -733,7 +813,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
         ANS_LOGD("ffrt enter!");
         if (deviceId.empty()) {
             // Local device
-            result = NotificationPreferences::GetInstance().SetNotificationsEnabled(userId, enabled);
+            result = NotificationPreferences::GetInstance()->SetNotificationsEnabled(userId, enabled);
         } else {
             // Remote device
         }
@@ -773,10 +853,10 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     ErrCode result = ERR_OK;
     if (deviceId.empty()) {
         bool notificationEnable = false;
-        ErrCode saveRef = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(
+        ErrCode saveRef = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
             bundleOption, notificationEnable);
         // Local device
-        result = NotificationPreferences::GetInstance().SetNotificationsEnabledForBundle(bundle, enabled);
+        result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
         if (!enabled) {
             result = RemoveAllNotificationsForDisable(bundle);
         }
@@ -822,7 +902,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -901,9 +981,9 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
 
     ErrCode result = ERR_OK;
     allowed = false;
-    result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     if (result == ERR_OK && allowed) {
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             // FA model app can publish notification without user confirm
@@ -930,9 +1010,9 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
 
     ErrCode result = ERR_OK;
     allowed = false;
-    result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     if (result == ERR_OK && allowed) {
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundleOption, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             // FA model app can publish notification without user confirm
@@ -980,9 +1060,9 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
 
     ErrCode result = ERR_OK;
         allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
         if (result == ERR_OK && allowed) {
-            result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(targetBundle, allowed);
+            result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(targetBundle, allowed);
             if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
                 result = ERR_OK;
                 allowed = CheckApiCompatibility(targetBundle);
@@ -1220,11 +1300,20 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not systemApp.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 4)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission is bogus.");
+        std::string message = "no acl controller permission.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 5)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1234,7 +1323,11 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is null.");
+        std::string message = "NotificationSvrQueue_ is null.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 6)
+            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
@@ -1287,7 +1380,13 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
         }
     }));
     notificationSvrQueue_->wait(handler);
-
+    if (result != ERR_OK) {
+        std::string message = "remove notificaiton error";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 7)
+            .ErrorCode(result).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+    }
     SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
     return result;
 }
@@ -1300,7 +1399,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsForDisable(
 
 ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption)
 {
-    return RemoveAllNotificationsInner(bundleOption, NotificationConstant::CANCEL_REASON_DELETE);
+    return RemoveAllNotificationsInner(bundleOption, NotificationConstant::APP_REMOVE_ALL_REASON_DELETE);
 }
 
 ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
@@ -1311,21 +1410,39 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 1)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission is fake.");
+        std::string message = "no acl permission.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 2)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        std::string message = "budle is nullptr.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 3)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is nullptr.");
+        std::string message = "Serial queue is nullptr.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 4)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -1439,7 +1556,7 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
 }
 
 ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-    const sptr<NotificationSlot> &slot)
+    const sptr<NotificationSlot> &slot, const int reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1468,6 +1585,11 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->request->GetSlotType() == slot->GetType())) {
+            if (((*it)->request->IsAgentNotification() && (*it)->request->IsSystemLiveView())) {
+                ANS_LOGI("Agent systemliveview no need remove.");
+                it++;
+                continue;
+            }
             notification = (*it)->notification;
             notificationRequest = (*it)->request;
 
@@ -1493,20 +1615,44 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, i
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    int32_t reason = NotificationConstant::APP_CANCEL_GROPU_REASON_DELETE;
     if (groupName.empty()) {
+        std::string message = "groupName empty.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(3, 1)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
+        std::string message = "bundle is nullptr.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(3, 2)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        std::string message = "Serial queue is invalid.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(3, 3)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ExcuteCancelGroupCancel(bundleOption, groupName, reason);
+    return ERR_OK;
+}
+
+void AdvancedNotificationService::ExcuteCancelGroupCancel(
+    const sptr<NotificationBundleOption>& bundleOption,
+    const std::string &groupName, const int32_t reason)
+{
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
@@ -1525,7 +1671,6 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, i
         for (auto record : removeList) {
             notificationList_.remove(record);
             if (record->notification != nullptr) {
-                int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1535,46 +1680,68 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, i
             if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
                 std::vector<sptr<Notification>> currNotificationList = notifications;
                 NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                    currNotificationList, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+                    currNotificationList, nullptr, reason);
                 notifications.clear();
             }
         }
 
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                notifications, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+                notifications, nullptr, reason);
         }
     }));
     notificationSvrQueue_->wait(handler);
-
-    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RemoveGroupByBundle(
     const sptr<NotificationBundleOption> &bundleOption, const std::string &groupName)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    const int32_t reason = NotificationConstant::APP_REMOVE_GROUP_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not systemApp.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 1)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        std::string message = "no acl permission";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 2)
+            .ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (bundleOption == nullptr || groupName.empty()) {
+        std::string message = "groupName empty";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 3)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        std::string message = "bundle is nullptr";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 4)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        std::string message = "Serial queue is invalid.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 5)
+            .ErrorCode(ERR_ANS_INVALID_PARAM);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -1684,7 +1851,7 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(const int32_t &u
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabled(userId, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1710,7 +1877,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(const int32_t
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance().SetNotificationsEnabled(userId, enabled);
+        result = NotificationPreferences::GetInstance()->SetNotificationsEnabled(userId, enabled);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1736,7 +1903,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         sptr<NotificationSlot> slot;
-        result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
+        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
             result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             slot = new (std::nothrow) NotificationSlot(slotType);
@@ -1752,16 +1919,16 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
                 slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
                 std::vector<sptr<NotificationSlot>> slots;
                 slots.push_back(slot);
-                result = NotificationPreferences::GetInstance().AddNotificationSlots(bundle, slots);
+                result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
                 return;
             }
-            NotificationPreferences::GetInstance().RemoveNotificationSlot(bundle, slotType);
+            NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundle, slotType);
         } else {
             ANS_LOGE("Set enable slot: GetNotificationSlot failed");
             return;
         }
         bool allowed = false;
-        result = NotificationPreferences::GetInstance().GetNotificationsEnabledForBundle(bundle, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             allowed = CheckApiCompatibility(bundle);
@@ -1774,17 +1941,17 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         std::vector<sptr<NotificationSlot>> slots;
         slots.push_back(slot);
-        result = NotificationPreferences::GetInstance().AddNotificationSlots(bundle, slots);
+        result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
         if (result != ERR_OK) {
             ANS_LOGE("Set enable slot: AddNotificationSlot failed");
             return;
         }
 
         if (!slot->GetEnable()) {
-            RemoveNotificationBySlot(bundle, slot);
+            RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
         } else {
             if (!slot->GetForceControl() && !allowed) {
-                RemoveNotificationBySlot(bundle, slot);
+                RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE);
             }
         }
 
@@ -1824,7 +1991,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> slot;
-        result = NotificationPreferences::GetInstance().GetNotificationSlot(bundle, slotType, slot);
+        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
         if (result != ERR_OK) {
             ANS_LOGE("Get enable slot: GetNotificationSlot failed");
             return;
@@ -1871,12 +2038,15 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     int32_t uid = request->GetCreatorUid();
     if (request->GetOwnerUid() != DEFAULT_UID) {
         std::shared_ptr<NotificationBundleOption> agentBundle =
         std::make_shared<NotificationBundleOption>("", uid);
         if (agentBundle == nullptr) {
             ANS_LOGE("Failed to create agentBundle instance");
+            message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_INVALID_BUNDLE;
         }
         request->SetAgentBundle(agentBundle);
@@ -1886,7 +2056,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         uid = request->GetOwnerUid();
     }
     if (uid <= 0) {
-        ANS_LOGE("CreatorUid[%{public}d] error", uid);
+        message.ErrorCode(ERR_ANS_INVALID_UID).Message("createUid failed" + std::to_string(uid), true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_UID;
     }
     std::string bundle = "";
@@ -1976,7 +2147,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
         StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
     return ERR_OK;
 }
@@ -2111,7 +2282,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    return NotificationPreferences::GetInstance().SetDistributedEnabledByBundle(bundle, deviceType, enabled);
+    return NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, deviceType, enabled);
 }
 
 ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
@@ -2129,13 +2300,13 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
         ANS_LOGE("no permission");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    
+
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    return NotificationPreferences::GetInstance().IsDistributedEnabledByBundle(bundle, deviceType, enabled);
+    return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType, enabled);
 }
 
 ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<NotificationRequest> &request)
@@ -2239,7 +2410,7 @@ ErrCode AdvancedNotificationService::SetSmartReminderEnabled(const std::string &
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-    ErrCode result = NotificationPreferences::GetInstance().SetSmartReminderEnabled(deviceType, enabled);
+    ErrCode result = NotificationPreferences::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
     return result;
 }
 
@@ -2257,7 +2428,7 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    return NotificationPreferences::GetInstance().IsSmartReminderEnabled(deviceType, enabled);
+    return NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)

@@ -366,7 +366,7 @@ public:
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
     ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlot> &slot);
+        const sptr<NotificationSlot> &slot, const int reason);
 
     /**
      * @brief Delete notification based on key.
@@ -821,6 +821,13 @@ public:
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
+     * @brief Obtains the event of bundle batch removed.
+     *
+     * @param notifications Notification vector.
+     */
+    void ExecBatchCancel(std::vector<sptr<Notification>> &notifications, int32_t &reason);
+
+    /**
      * @brief Obtains the event of user removed.
      *
      * @param userId Indicates the user.
@@ -907,8 +914,9 @@ public:
      */
     void OnDistributedKvStoreDeathRecipient();
 
-    ErrCode CancelPreparedNotification(
-        int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
+        
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishPreparedNotification(const sptr<NotificationRequest> &request,
@@ -1283,10 +1291,12 @@ private:
     void CancelTimer(uint64_t timerId);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
+        int64_t expireTimePoint, const int32_t reason);
     void CancelFinishTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode StartUpdateTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    ErrCode StartUpdateTimer(const std::shared_ptr<NotificationRecord> &record,
+        int64_t expireTimePoint, const int32_t reason);
     void CancelUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
@@ -1341,6 +1351,10 @@ private:
     void StartPublishDelayedNotificationTimeOut(const int32_t ownerUid, const int32_t notificationId);
     void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     ErrCode CheckSystemLiveView(const sptr<NotificationRequest> &request, const std::string &key);
+    void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
+        const std::string &groupName, const int32_t reason);
+    ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
+    ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

@@ -57,28 +57,30 @@ void SystemDialogConnectStb::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
 
 void SystemDialogConnectStb::SendRemoveBundleEvent()
 {
-    EventFwk::Want want;
-    want.SetAction(DIALOG_CRASH_EVENT);
-
-    EventFwk::CommonEventData commonData;
-    commonData.SetWant(want);
-    commonData.SetCode(REMOVE_BUNDLE_CODE);
-
     if (commandStr_.empty() || !nlohmann::json::accept(commandStr_)) {
         ANS_LOGW("Invaild json param");
         return;
     }
     nlohmann::json root = nlohmann::json::parse(commandStr_);
-    if (!root.contains("from")) {
+    if (!root.contains("bundleName") || !root.contains("bundleUid")) {
         ANS_LOGW("not found jsonKey from");
         return;
     }
-    if (!root["from"].is_string()) {
+    if (!root["bundleName"].is_string() || !root["bundleUid"].is_string()) {
         ANS_LOGW("value type of json key from is not string");
         return;
     }
-    std::string from = root["from"];
-    commonData.SetData(from);
+    EventFwk::CommonEventData commonData;
+    std::string bundleName = root["bundleName"];
+    std::string bundleUid = root["bundleUid"];
+    
+    EventFwk::Want want;
+    want.SetAction(DIALOG_CRASH_EVENT);
+    want.SetParam("bundleName", bundleName);
+    want.SetParam("bundleUid", bundleUid);
+    commonData.SetWant(want);
+    commonData.SetCode(REMOVE_BUNDLE_CODE);
+    commonData.SetData(bundleName);
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
         ANS_LOGE("Publish remove bundle failed");
     }

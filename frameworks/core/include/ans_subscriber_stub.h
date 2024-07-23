@@ -110,7 +110,6 @@ public:
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
 private:
-    std::map<NotificationInterfaceCode, std::function<ErrCode(MessageParcel &, MessageParcel &)>> interfaces_;
 
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDisconnected(MessageParcel &data, MessageParcel &reply);

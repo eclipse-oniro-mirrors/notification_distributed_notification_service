@@ -32,6 +32,10 @@
 #include "os_account_manager_helper.h"
 #include "remote_death_recipient.h"
 #include "advanced_notification_service.h"
+#include "notification_analytics_util.h"
+
+#include "advanced_notification_inline.cpp"
+
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
@@ -407,17 +411,31 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1).Checkfailed(false);
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
         if (IsSubscribedBysubscriber(record, notification)) {
             if (!record->subscriber->AsObject()->IsProxyObject()) {
                 MessageParcel data;
-                data.WriteParcelable(notification);
+                if (!data.WriteParcelable(notification)) {
+                    ANS_LOGE("WriteParcelable failed.");
+                    continue;
+                }
                 sptr<Notification> notificationStub = data.ReadParcelable<Notification>();
+                if (notificationStub == nullptr) {
+                    ANS_LOGE("ReadParcelable failed.");
+                    continue;
+                }
+                message.Message(notificationStub->GetKey());
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(
+                    notificationStub->GetNotificationRequestPoint(), message);
                 record->subscriber->OnConsumed(notificationStub, notificationMap);
                 continue;
             }
+            message.Message(notification->GetKey());
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(notification->GetNotificationRequestPoint(),
+                message);
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }
@@ -477,6 +495,9 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         liveViewContent->FillPictureMarshallingMap();
     }
 
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 6).ErrorCode(ERR_OK);
+    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage, deleteReason, "success");
+
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification)) {
@@ -523,6 +544,11 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
 
     ANS_LOGD("notifications size = <%{public}zu>", notifications.size());
+    std::string message = "BatchNotifyCanceledInner.size:" +
+        std::to_string(notifications.size()) + ".";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 9)
+        .ErrorCode(ERR_OK);
+    ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
     for (auto record : subscriberRecordList_) {
         if (record == nullptr) {
             continue;
@@ -533,6 +559,15 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             sptr<Notification> notification = notifications[i];
             if (notification == nullptr) {
                 continue;
+            }
+            auto requestContent = notification->GetNotificationRequest().GetContent();
+            if (requestContent->GetContentType() == NotificationContent::Type::LIVE_VIEW &&
+                requestContent->GetNotificationContent() != nullptr) {
+                auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+                    requestContent->GetNotificationContent());
+                liveViewContent->ClearPictureMap();
+                liveViewContent->ClearPictureMarshallingMap();
+                ANS_LOGD("live view batch delete clear picture");
             }
             if (IsSubscribedBysubscriber(record, notification)) {
                 currNotifications.emplace_back(notification);

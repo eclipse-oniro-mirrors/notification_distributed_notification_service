@@ -68,7 +68,7 @@ void AnsPublishServiceTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp start";
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
@@ -458,14 +458,14 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
 
     auto bundle = advancedNotificationService_->GenerateBundleOption();
-    NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, true);
+    NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, true);
 
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 
-    NotificationPreferences::GetInstance().SetHasPoppedDialog(bundle, false);
+    NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    ASSERT_EQ(ret, OHOS::AAFwk::ABILITY_VISIBLE_FALSE_DENY_REQUEST);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -633,16 +633,19 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00001, Function | Small
     MockIsSystemApp(false);
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = nullptr;
-    auto ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    auto ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -667,7 +670,8 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00002, Function | Small
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
     auto slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 

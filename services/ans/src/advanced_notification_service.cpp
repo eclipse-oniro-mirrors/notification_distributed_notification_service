@@ -74,6 +74,7 @@
 
 #include "advanced_notification_inline.cpp"
 #include "advanced_datashare_helper_ext.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -172,7 +173,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     } else {
         std::string sourceBundleName =
             request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
-        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance().IsAgentRelationship(
+        if (!sourceBundleName.empty() && NotificationPreferences::GetInstance()->IsAgentRelationship(
             bundle, sourceBundleName)) {
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 bundle.c_str(), sourceBundleName.c_str());
@@ -198,7 +199,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
         request->SetOwnerBundleName(bundle);
     }
-    
+
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
@@ -294,7 +295,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 
     std::function<void()> recoverFunc = std::bind(&AdvancedNotificationService::RecoverLiveViewFromDb, this);
     notificationSvrQueue_->submit(recoverFunc);
-    
+
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::OnBundleRemoved, this, std::placeholders::_1),
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -355,16 +356,25 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
     return result;
 }
 
-ErrCode AdvancedNotificationService::CancelPreparedNotification(
-    int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption)
+ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
+    const std::string &label, const sptr<NotificationBundleOption> &bundleOption, int32_t reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption == nullptr) {
+        std::string message = "bundleOption is null";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 2)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        std::string message = "notificationSvrQueue is null";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 3)
+            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -377,7 +387,6 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(
         }
 
         if (notification != nullptr) {
-            int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
             UpdateRecentNotification(notification, true, reason);
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -394,6 +403,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_3);
     if (request == nullptr) {
         ANS_LOGE("request is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -405,6 +415,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
     ErrCode result = PrepareNotificationRequest(request);
     if (result != ERR_OK) {
+        message.ErrorCode(result);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
@@ -415,7 +427,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         std::string sourceBundleName =
             request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
         if (!sourceBundleName.empty() &&
-            NotificationPreferences::GetInstance().IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
+            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 GetClientBundleName().c_str(), sourceBundleName.c_str());
             request->SetCreatorBundleName(request->GetOwnerBundleName());
@@ -428,6 +440,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
 
     if (bundleOption == nullptr) {
+        message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_BUNDLE;
     }
     ANS_LOGI(
@@ -437,13 +451,17 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::StartFinishTimer(
-    const std::shared_ptr<NotificationRecord> &record, int64_t expiredTimePoint)
+ErrCode AdvancedNotificationService::StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
+    int64_t expiredTimePoint, const int32_t reason)
 {
     uint64_t timerId = StartAutoDelete(record,
-        expiredTimePoint, NotificationConstant::APP_CANCEL_REASON_OTHER);
+        expiredTimePoint, reason);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
-        ANS_LOGE("Start finish auto delete timer failed.");
+        std::string message = "Start finish auto delete timer failed.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(7, 1)
+            .ErrorCode(ERR_ANS_TASK_ERR);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_TASK_ERR;
     }
     record->notification->SetFinishTimer(timerId);
@@ -453,7 +471,8 @@ ErrCode AdvancedNotificationService::StartFinishTimer(
 ErrCode AdvancedNotificationService::SetFinishTimer(const std::shared_ptr<NotificationRecord> &record)
 {
     int64_t maxExpiredTime = GetCurrentTime() + NotificationConstant::MAX_FINISH_TIME;
-    auto result = StartFinishTimer(record, maxExpiredTime);
+    auto result = StartFinishTimer(record, maxExpiredTime,
+        NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
     if (result != ERR_OK) {
         return result;
     }
@@ -469,12 +488,17 @@ void AdvancedNotificationService::CancelFinishTimer(const std::shared_ptr<Notifi
 }
 
 ErrCode AdvancedNotificationService::StartUpdateTimer(
-    const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint)
+    const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint,
+    const int32_t reason)
 {
     uint64_t timerId = StartAutoDelete(record,
-        expireTimePoint, NotificationConstant::APP_CANCEL_REASON_OTHER);
+        expireTimePoint, reason);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
-        ANS_LOGE("Start update auto delete timer failed.");
+        std::string message = "Start update auto delete timer failed.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(7, 2)
+            .ErrorCode(ERR_ANS_TASK_ERR);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_TASK_ERR;
     }
     record->notification->SetUpdateTimer(timerId);
@@ -484,7 +508,8 @@ ErrCode AdvancedNotificationService::StartUpdateTimer(
 ErrCode AdvancedNotificationService::SetUpdateTimer(const std::shared_ptr<NotificationRecord> &record)
 {
     int64_t maxExpiredTime = GetCurrentTime() + NotificationConstant::MAX_UPDATE_TIME;
-    ErrCode result = StartUpdateTimer(record, maxExpiredTime);
+    ErrCode result = StartUpdateTimer(record, maxExpiredTime,
+        NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
     if (result != ERR_OK) {
         return result;
     }
@@ -503,7 +528,8 @@ void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<Notifi
 {
     auto deleteTime = record->request->GetAutoDeletedTime();
     if (deleteTime == NotificationConstant::NO_DELAY_DELETE_TIME) {
-        TriggerAutoDelete(record->notification->GetKey(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+        TriggerAutoDelete(record->notification->GetKey(),
+            NotificationConstant::TRIGGER_START_ARCHIVE_REASON_DELETE);
         return;
     }
     if (deleteTime <= NotificationConstant::INVALID_AUTO_DELETE_TIME) {
@@ -512,7 +538,7 @@ void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<Notifi
     int64_t maxExpiredTime = GetCurrentTime() +
         NotificationConstant::SECOND_TO_MS * deleteTime;
     uint64_t timerId = StartAutoDelete(record,
-        maxExpiredTime, NotificationConstant::APP_CANCEL_REASON_DELETE);
+        maxExpiredTime, NotificationConstant::TRIGGER_START_ARCHIVE_REASON_DELETE);
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
         ANS_LOGE("Start archive auto delete timer failed.");
     }
@@ -575,9 +601,12 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
     if (ctrlResult != ERR_OK) {
+        message.ErrorCode(ctrlResult);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ctrlResult;
     }
 #endif
@@ -585,6 +614,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
+        message.ErrorCode(result);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
@@ -632,7 +663,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
         StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
     return result;
 }
@@ -685,7 +716,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         return;
     }
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
-    if (NotificationPreferences::GetInstance().GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
+    if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
         ANS_LOGE("Get do not disturb profile failed.");
         return;
@@ -752,7 +783,7 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
     }
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
-    result = NotificationPreferences::GetInstance().AddNotificationSlots(record->bundleOption, slots);
+    result = NotificationPreferences::GetInstance()->AddNotificationSlots(record->bundleOption, slots);
     ANS_LOGD("UpdateSlotAuthInfo status: %{public}d), cnt: %{public}d, res: %{public}d.",
         slot->GetAuthorizedStatus(), slot->GetAuthHintCnt(), result);
     if (result != ERR_OK) {
@@ -1049,7 +1080,7 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
-            result = NotificationPreferences::GetInstance().GetImportance(bundleOption, importance);
+            result = NotificationPreferences::GetInstance()->GetImportance(bundleOption, importance);
         }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1114,6 +1145,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 #endif
         ) {
             if (!isCancel && !record->notification->IsRemoveAllowed()) {
+                std::string message = "notification unremove.";
+                OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 4)
+                    .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+                ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
+                    NotificationConstant::DEFAULT_REASON_DELETE, message);
+                ANS_LOGE("%{public}s", message.c_str());
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
             notification = record->notification;
@@ -1142,6 +1179,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             return ERR_OK;
         }
     }
+    std::string message = "notification not exist";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 5)
+        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage,
+        NotificationConstant::DEFAULT_REASON_DELETE, message);
+    ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 
@@ -1154,6 +1197,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         }
 
         if (!isCancel && !record->notification->IsRemoveAllowed()) {
+            std::string message = "notification unremove.";
+            OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 7)
+                .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+            ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
+                removeReason, message);
+            ANS_LOGE("%{public}s", message.c_str());
             return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
         }
         notification = record->notification;
@@ -1169,7 +1218,12 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         return ERR_OK;
     }
     RemoveFromDelayedNotificationList(key);
-
+    std::string message = "notification not exist";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 8)
+        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage,
+        removeReason, message);
+    ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 
@@ -1397,10 +1451,13 @@ static bool SortNotificationsByLevelAndTime(
 
 ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2);
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> lock(flowControlMutex_);
     RemoveExpired(flowControlTimestampList_, now);
     if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
+        message.ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
     flowControlTimestampList_.push_back(now);
@@ -1694,7 +1751,7 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        result = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
+        result = NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption, hasPopped);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -2066,7 +2123,7 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
         if (soundPermissionInfo_->needUpdateCache_.load()) {
             soundPermissionInfo_->allPackage_ = false;
             soundPermissionInfo_->bundleName_.clear();
-            NotificationPreferences::GetInstance().GetBundleSoundPermission(
+            NotificationPreferences::GetInstance()->GetBundleSoundPermission(
                 soundPermissionInfo_->allPackage_, soundPermissionInfo_->bundleName_);
             soundPermissionInfo_->needUpdateCache_ = false;
         }

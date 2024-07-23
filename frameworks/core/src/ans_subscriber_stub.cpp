@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,39 +24,12 @@
 
 namespace OHOS {
 namespace Notification {
-AnsSubscriberStub::AnsSubscriberStub()
-{
-    interfaces_.emplace(NotificationInterfaceCode::ON_CONNECTED,
-        std::bind(&AnsSubscriberStub::HandleOnConnected, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_DISCONNECTED,
-        std::bind(&AnsSubscriberStub::HandleOnDisconnected, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_CONSUMED_MAP,
-        std::bind(&AnsSubscriberStub::HandleOnConsumedMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_CONSUMED_LIST_MAP,
-        std::bind(&AnsSubscriberStub::HandleOnConsumedListMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_CANCELED_MAP,
-        std::bind(&AnsSubscriberStub::HandleOnCanceledMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_CANCELED_LIST_MAP,
-        std::bind(&AnsSubscriberStub::HandleOnCanceledListMap, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_UPDATED,
-        std::bind(&AnsSubscriberStub::HandleOnUpdated, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_DND_DATE_CHANGED,
-        std::bind(
-            &AnsSubscriberStub::HandleOnDoNotDisturbDateChange, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED,
-        std::bind(&AnsSubscriberStub::HandleOnEnabledNotificationChanged, this, std::placeholders::_1,
-            std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_BADGE_CHANGED,
-        std::bind(&AnsSubscriberStub::HandleOnBadgeChanged, this, std::placeholders::_1, std::placeholders::_2));
-    interfaces_.emplace(NotificationInterfaceCode::ON_BADGE_ENABLED_CHANGED,
-        std::bind(&AnsSubscriberStub::HandleOnBadgeEnabledChanged, this, std::placeholders::_1, std::placeholders::_2));
-}
+AnsSubscriberStub::AnsSubscriberStub() {}
 
-AnsSubscriberStub::~AnsSubscriberStub()
-{}
+AnsSubscriberStub::~AnsSubscriberStub() {}
 
-int32_t AnsSubscriberStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &flags)
+int32_t AnsSubscriberStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &flags)
 {
     std::u16string descriptor = AnsSubscriberStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
@@ -64,21 +37,58 @@ int32_t AnsSubscriberStub::OnRemoteRequest(
         ANS_LOGW("[OnRemoteRequest] fail: invalid interface token!");
         return OBJECT_NULL;
     }
-
-    auto it = interfaces_.find(static_cast<NotificationInterfaceCode>(code));
-    if (it == interfaces_.end()) {
-        ANS_LOGW("[OnRemoteRequest] fail: unknown code!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
+    ErrCode result = NO_ERROR;
+    switch (code) {
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CONNECTED): {
+            result = HandleOnConnected(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_DISCONNECTED): {
+            result = HandleOnDisconnected(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CONSUMED_MAP): {
+            result = HandleOnConsumedMap(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CONSUMED_LIST_MAP): {
+            result = HandleOnConsumedListMap(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CANCELED_MAP): {
+            result = HandleOnCanceledMap(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CANCELED_LIST_MAP): {
+            result = HandleOnCanceledListMap(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_UPDATED): {
+            result = HandleOnUpdated(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_DND_DATE_CHANGED): {
+            result = HandleOnDoNotDisturbDateChange(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_ENABLED_NOTIFICATION_CHANGED): {
+            result = HandleOnEnabledNotificationChanged(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_BADGE_CHANGED): {
+            result = HandleOnBadgeChanged(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_BADGE_ENABLED_CHANGED): {
+            result = HandleOnBadgeEnabledChanged(data, reply);
+            break;
+        }
+        default: {
+            ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
+        }
     }
-
-    auto fun = it->second;
-    if (fun == nullptr) {
-        ANS_LOGW("[OnRemoteRequest] fail: not find function!");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
-    }
-
-    fun(data, reply);
-    return NO_ERROR;
+    return result;
 }
 
 ErrCode AnsSubscriberStub::HandleOnConnected(MessageParcel &data, MessageParcel &reply)
@@ -296,11 +306,9 @@ ErrCode AnsSubscriberStub::HandleOnBadgeEnabledChanged(MessageParcel &data, Mess
     return ERR_OK;
 }
 
-void AnsSubscriberStub::OnConnected()
-{}
+void AnsSubscriberStub::OnConnected() {}
 
-void AnsSubscriberStub::OnDisconnected()
-{}
+void AnsSubscriberStub::OnDisconnected() {}
 
 void AnsSubscriberStub::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
@@ -318,19 +326,14 @@ void AnsSubscriberStub::OnCanceledList(const std::vector<sptr<Notification>> &no
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {}
 
-void AnsSubscriberStub::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
-{}
+void AnsSubscriberStub::OnUpdated(const sptr<NotificationSortingMap> &notificationMap) {}
 
-void AnsSubscriberStub::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
-{}
+void AnsSubscriberStub::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) {}
 
-void AnsSubscriberStub::OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
-{}
+void AnsSubscriberStub::OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) {}
 
-void AnsSubscriberStub::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
-{}
+void AnsSubscriberStub::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) {}
 
-void AnsSubscriberStub::OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
-{}
-}  // namespace Notification
-}  // namespace OHOS
+void AnsSubscriberStub::OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) {}
+} // namespace Notification
+} // namespace OHOS

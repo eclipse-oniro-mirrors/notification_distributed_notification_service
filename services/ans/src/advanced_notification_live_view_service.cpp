@@ -73,14 +73,21 @@ void AdvancedNotificationService::RecoverLiveViewFromDb()
             continue;
         }
 
+        // Turn off ringtone and vibration during recovery process
+        auto notificationFlags = record->request->GetFlags();
+        notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+        notificationFlags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+        record->request->SetFlags(notificationFlags);
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Add notification to record list failed.");
             continue;
         }
         UpdateRecentNotification(record->notification, false, 0);
 
-        StartFinishTimer(record, requestObj.request->GetFinishDeadLine());
-        StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine());
+        StartFinishTimer(record, requestObj.request->GetFinishDeadLine(),
+            NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
+        StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine(),
+            NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
     }
 
     // publish notifications
@@ -235,7 +242,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         return ERR_ANS_TASK_ERR;
     }
 
-    auto result = NotificationPreferences::GetInstance().SetKvToDb(
+    auto result = NotificationPreferences::GetInstance()->SetKvToDb(
         request->GetKey(), jsonObject.dump(), request->GetReceiverUserId());
     if (result != ERR_OK) {
         ANS_LOGE(
@@ -258,7 +265,7 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
     std::string value;
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
-    int32_t result = NotificationPreferences::GetInstance().GetKvFromDb(key, value, userId);
+    int32_t result = NotificationPreferences::GetInstance()->GetKvFromDb(key, value, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Get notification request failed, key %{public}s.", key.c_str());
         return result;
@@ -294,7 +301,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
     }
     for (const int32_t userId : userIds) {
         int32_t result =
-            NotificationPreferences::GetInstance().GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords, userId);
+            NotificationPreferences::GetInstance()->GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords, userId);
         if (result != ERR_OK) {
             ANS_LOGE("Get batch notification request failed.");
             return result;
@@ -325,14 +332,14 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vec
 
 int32_t AdvancedNotificationService::DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId)
 {
-    auto result = NotificationPreferences::GetInstance().DeleteKvFromDb(key, userId);
+    auto result = NotificationPreferences::GetInstance()->DeleteKvFromDb(key, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Delete notification request failed, key %{public}s.", key.c_str());
         return result;
     }
 
     std::string lockScreenPictureKey = LOCK_SCREEN_PICTURE_TAG + key;
-    result = NotificationPreferences::GetInstance().DeleteKvFromDb(lockScreenPictureKey, userId);
+    result = NotificationPreferences::GetInstance()->DeleteKvFromDb(lockScreenPictureKey, userId);
     if (result != ERR_OK) {
         ANS_LOGE("Delete notification lock screen picture failed, key %{public}s.", lockScreenPictureKey.c_str());
         return result;
@@ -348,7 +355,7 @@ ErrCode AdvancedNotificationService::IsAllowedRemoveSlot(const sptr<Notification
     }
 
     sptr<NotificationSlot> slot;
-    if (NotificationPreferences::GetInstance().GetNotificationSlot(bundleOption, slotType, slot) != ERR_OK) {
+    if (NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot) != ERR_OK) {
         ANS_LOGE("Failed to get slot.");
         return ERR_OK;
     }
@@ -393,7 +400,7 @@ ErrCode AdvancedNotificationService::SetLockScreenPictureToDb(const sptr<Notific
     std::vector<uint8_t> pixelsVec(pixels, pixels + size);
 
     std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
-    auto res = NotificationPreferences::GetInstance().SetByteToDb(key, pixelsVec, request->GetReceiverUserId());
+    auto res = NotificationPreferences::GetInstance()->SetByteToDb(key, pixelsVec, request->GetReceiverUserId());
     if (res != ERR_OK) {
         ANS_LOGE("Failed to set lock screen picture to db, res is %{public}d.", res);
         return res;
@@ -406,7 +413,7 @@ ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequ
 {
     std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
     std::vector<uint8_t> pixelsVec;
-    uint32_t res = NotificationPreferences::GetInstance().GetByteFromDb(key, pixelsVec, request->GetReceiverUserId());
+    uint32_t res = NotificationPreferences::GetInstance()->GetByteFromDb(key, pixelsVec, request->GetReceiverUserId());
     if (res != ERR_OK) {
         ANS_LOGE("Failed to get lock screen picture from db, res is %{public}d.", res);
         return res;
@@ -539,11 +546,12 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
     NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
         StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
 
     record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;
-    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES);
+    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES,
+        NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE);
     
     return ERR_OK;
 }
@@ -634,10 +642,12 @@ void AdvancedNotificationService::UpdateRecordByOwner(
 
         if (process == NotificationConstant::FINISH_PER) {
             record->finish_status = UploadStatus::FINISH;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES);
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES,
+                NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE);
         } else {
             record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES);
+            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
+                NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
         }
         timerId = record->notification->GetFinishTimer();
     }

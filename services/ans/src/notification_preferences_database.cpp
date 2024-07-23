@@ -222,131 +222,6 @@ const static std::string KEY_REMINDER_MODE = "reminderMode";
 constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
 constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 
-const std::map<std::string,
-    std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
-    NotificationPreferencesDatabase::slotMap_ = {
-        {
-            KEY_SLOT_DESCRIPTION,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotDescription, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_LEVEL,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotLevel, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_SHOW_BADGE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotShowBadge, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLE_LIGHT,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnableLight, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLE_VRBRATION,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnableVrbration, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_LED_LIGHT_COLOR,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotLedLightColor, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_LOCKSCREEN_VISIBLENESS,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotLockscreenVisibleness, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_SOUND,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotSound, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_VIBRATION_STYLE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotVibrationSytle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLE_BYPASS_DND,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnableBypassDnd, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLED,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnabled, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_SLOTFLGS_TYPE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotFlags, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_AUTHORIZED_STATUS,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthorizedStatus, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_AUTH_HINT_CNT,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthHitnCnt, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_REMINDER_MODE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotReminderMode, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-};
-
-const std::map<std::string,
-    std::function<void(NotificationPreferencesDatabase *, NotificationPreferencesInfo::BundleInfo &, std::string &)>>
-    NotificationPreferencesDatabase::bundleMap_ = {
-        {
-            KEY_BUNDLE_NAME,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleName, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_IMPORTANCE,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleImportance, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_SHOW_BADGE,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleShowBadgeEnable, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_BADGE_TOTAL_NUM,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleBadgeNum, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_ENABLE_NOTIFICATION,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleEnableNotification, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_POPPED_DIALOG,
-            std::bind(&NotificationPreferencesDatabase::ParseBundlePoppedDialog, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_UID,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleUid, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_SLOTFLGS_TYPE,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleSlotFlags, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-};
-
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
     NotificationRdbConfig notificationRdbConfig;
@@ -1161,10 +1036,29 @@ void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
     std::string typeStr = FindLastString(GenerateBundleKey(bundleKey), entry.first);
     std::string valueStr = entry.second;
 
-    auto iter = bundleMap_.find(typeStr);
-    if (iter != bundleMap_.end()) {
-        auto func = iter->second;
-        func(this, bundleInfo, valueStr);
+    if (typeStr.compare(KEY_BUNDLE_NAME) == 0) {
+        return ParseBundleName(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_IMPORTANCE) == 0) {
+        return ParseBundleImportance(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_SHOW_BADGE) == 0) {
+        return ParseBundleShowBadgeEnable(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_BADGE_TOTAL_NUM) == 0) {
+        return ParseBundleBadgeNum(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_ENABLE_NOTIFICATION) == 0) {
+        return ParseBundleEnableNotification(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_POPPED_DIALOG) == 0) {
+        return ParseBundlePoppedDialog(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_UID) == 0) {
+        return ParseBundleUid(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_SLOTFLGS_TYPE) == 0) {
+        return ParseBundleSlotFlags(bundleInfo, valueStr);
     }
 }
 
@@ -1178,10 +1072,50 @@ void NotificationPreferencesDatabase::ParseSlot(const std::string &findString, s
         typeStr.c_str(),
         entry.second.c_str());
 
-    auto iter = slotMap_.find(typeStr);
-    if (iter != slotMap_.end()) {
-        auto func = iter->second;
-        func(this, slot, valueStr);
+    if (typeStr.compare(KEY_SLOT_DESCRIPTION) == 0) {
+        return ParseSlotDescription(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_LEVEL) == 0) {
+        return ParseSlotLevel(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_SHOW_BADGE) == 0) {
+        return ParseSlotShowBadge(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLE_LIGHT) == 0) {
+        return ParseSlotEnableLight(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLE_VRBRATION) == 0) {
+        return ParseSlotEnableVrbration(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_LED_LIGHT_COLOR) == 0) {
+        return ParseSlotLedLightColor(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_LOCKSCREEN_VISIBLENESS) == 0) {
+        return ParseSlotLockscreenVisibleness(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_SOUND) == 0) {
+        return ParseSlotSound(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_VIBRATION_STYLE) == 0) {
+        return ParseSlotVibrationSytle(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLE_BYPASS_DND) == 0) {
+        return ParseSlotEnableBypassDnd(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLED) == 0) {
+        return ParseSlotEnabled(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_SLOTFLGS_TYPE) == 0) {
+        return ParseSlotFlags(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_AUTHORIZED_STATUS) == 0) {
+        return ParseSlotAuthorizedStatus(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_AUTH_HINT_CNT) == 0) {
+        return ParseSlotAuthHitnCnt(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_REMINDER_MODE) == 0) {
+        return ParseSlotReminderMode(slot, valueStr);
     }
 
     if (!typeStr.compare(KEY_SLOT_VIBRATION_STYLE)) {

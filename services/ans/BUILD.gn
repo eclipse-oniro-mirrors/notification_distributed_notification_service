@@ -64,6 +64,7 @@ ohos_shared_library("libans") {
     "src/advanced_notification_utils.cpp",
     "src/bundle_manager_helper.cpp",
     "src/common/file_utils.cpp",
+    "src/common/notification_analytics_util.cpp",
     "src/common/notification_config_parse.cpp",
     "src/distributed_device_status.cpp",
     "src/event_report.cpp",
@@ -185,7 +186,7 @@ ohos_shared_library("libans") {
     defines += [ "HITRACE_METER_ENABLE" ]
   }
 
-  if (notification_ext_feature_summary) {
+  if (distributed_notification_service_feature_summary) {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
   }
 

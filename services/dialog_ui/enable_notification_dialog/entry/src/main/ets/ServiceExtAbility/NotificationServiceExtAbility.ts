@@ -46,7 +46,11 @@ async function handleDialogQuitException(want: Want): Promise<void> {
     COMMON_EVENT_NAME,
     {
       code: DialogStatus.DIALOG_CRASHED,
-      data: want.parameters.from.toString(),
+      data: want.parameters.bundleName.toString(),
+      parameters: {
+        bundleName: want.parameters.bundleName.toString(),
+        bundleUid: want.parameters.bundleUid.toString()
+      }
     } as CommonEventManager.CommonEventPublishData,
     () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
   );
@@ -135,7 +139,7 @@ export class EnableNotificationDialog {
           isModal: true,
           isTopmost: true
         };
-        let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost'+ Date(), subWindowOpts);
+        let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         await subWindow.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
@@ -161,7 +165,11 @@ export class EnableNotificationDialog {
       COMMON_EVENT_NAME,
       {
         code: enabled ? DialogStatus.ALLOW_CLICKED : DialogStatus.DENY_CLICKED,
-        data: this.want.parameters.from.toString(),
+        data: this.want.parameters.bundleName.toString(),
+        parameters: {
+          bundleName: this.want.parameters.bundleName.toString(),
+          bundleUid: this.want.parameters.bundleUid.toString()
+        }
       } as CommonEventManager.CommonEventPublishData,
       () => { console.info(TAG, 'publish CLICKED succeeded'); }
     );
@@ -199,16 +207,19 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
   }
 
   async onSessionCreate(want: Want, session: UIExtensionContentSession) {
-    console.log(TAG, `UIExtAbility onSessionCreate`);    
     try {
       let stageModel = false;
       let bundleName = want.parameters['ohos.aafwk.param.callerBundleName'];
-      if (want.parameters['from'] === undefined) {
-        want.parameters['from'] = bundleName;
+      let bundleUid = want.parameters['ohos.aafwk.param.callerUid'];
+      if (want.parameters['bundleName'] === undefined) {
+        want.parameters['bundleName'] = bundleName;
+        want.parameters['bundleUid'] = bundleUid;
         stageModel = true;
       } else {
         stageModel = false;
       }
+      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters['bundleName']}`
+        + `uid ${want.parameters['bundleUid']}`);    
       let dialog = new EnableNotificationDialog(1, want, stageModel);
       await dialog.createUiExtensionWindow(session, stageModel);
       AppStorage.setOrCreate('clicked', false);
@@ -239,17 +250,12 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
     }
   }
 
-  onSessionDestroy(session: UIExtensionContentSession) {
+  async onSessionDestroy(session: UIExtensionContentSession) {
     console.log(TAG, `UIExtAbility onSessionDestroy`);  
     if (AppStorage.get('clicked') === false) {
       console.log(TAG, `UIExtAbility onSessionDestroy unclick destory`);
       let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
-      dialog?.destroyException();
-      try {
-        dialog?.extensionWindow?.hideNonSecureWindows(false);
-      } catch (err) {
-        console.error(TAG, 'onBackground onSessionDestroy failed!');
-      }
+      await dialog?.destroyException();
     }
   }
 

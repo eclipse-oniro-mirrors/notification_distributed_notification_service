@@ -279,7 +279,8 @@ private:
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
-    void ParseBundleShowBadgeEnable(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
+    void ParseBundleShowBadgeEnable(NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        const std::string &value) const;
     void ParseBundleBadgeNum(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleEnableNotification(
         NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
@@ -313,13 +314,6 @@ private:
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetEnableAllNotification(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId);
-
-    static const std::map<std::string,
-        std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
-        slotMap_;
-    static const std::map<std::string, std::function<void(NotificationPreferencesDatabase *,
-                                           NotificationPreferencesInfo::BundleInfo &, std::string &)>>
-        bundleMap_;
 
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
 };

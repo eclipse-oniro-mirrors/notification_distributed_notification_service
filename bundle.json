@@ -42,7 +42,7 @@
       "SystemCapability.Notification.Notification",
       "SystemCapability.Notification.ReminderAgent"
     ],
-    "features": [],
+    "features": ["distributed_notification_service_feature_summary"],
     "adapted_system_type": [
       "standard"
     ],

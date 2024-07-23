@@ -52,7 +52,6 @@ public:
     void OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption) override;
 
 private:
-    std::map<NotificationInterfaceCode, std::function<ErrCode(MessageParcel &, MessageParcel &)>> interfaces_;
 
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnDisconnected(MessageParcel &data, MessageParcel &reply);
