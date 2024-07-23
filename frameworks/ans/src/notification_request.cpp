@@ -1379,7 +1379,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         ANS_LOGE("Failed to write bundleOption for the notification");
         return false;
     }
-
+ 
     if (valid) {
         if (!parcel.WriteParcelable(notificationBundleOption_.get())) {
             ANS_LOGE("Failed to write notification bundleOption");
@@ -1874,11 +1874,10 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
-    this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
-    this->notificationBundleOption_ = other.notificationBundleOption_;
     this->agentBundle_ = other.agentBundle_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
-
+    this->notificationBundleOption_ = other.notificationBundleOption_;
+    this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->publishDelayTime_ = other.publishDelayTime_;
 }
 
@@ -2394,7 +2393,6 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
                 GetCreatorBundleName().c_str(), GetNotificationId());
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
-
         return ERR_OK;
     }
 

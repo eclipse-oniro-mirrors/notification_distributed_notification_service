@@ -912,15 +912,6 @@ public:
     static ErrCode UnregisterPushCallback();
 
     /**
-     * @brief Set agent relationship.
-     *
-     * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
-     * @param value Indicates key-value pair of agent relationship.
-     * @return Returns set result.
-     */
-    static ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
-
-    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
@@ -969,6 +960,15 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     static ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Set agent relationship.
+     *
+     * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
+     * @param value Indicates key-value pair of agent relationship.
+     * @return Returns set result.
+     */
+    static ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
      * @brief Cancels a published agent notification.

@@ -104,7 +104,8 @@ ErrCode NotificationHelper::CancelAsBundle(
         notificationId, representativeBundle, userId);
 }
 
-ErrCode NotificationHelper::CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId)
+ErrCode NotificationHelper::CancelAsBundle(
+    const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
         bundleOption, notificationId);
@@ -498,11 +499,6 @@ ErrCode NotificationHelper::UnregisterPushCallback()
     return DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
 }
 
-ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std::string &value)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
-}
-
 ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, const bool enabled)
 {
@@ -522,14 +518,19 @@ ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceTyp
     return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
 }
 
+ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
+}
+
 ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(bundleOption, id);
 }
 
-ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
+ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std::string &value)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
 }
 
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)

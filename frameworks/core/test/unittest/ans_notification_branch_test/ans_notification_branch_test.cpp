@@ -530,13 +530,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override
+    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-        const std::string &deviceType, const bool enabled) override
+    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -840,7 +840,7 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
     ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-
+ 
     notification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     bundle.SetBundleName("test");
     bundle.SetUid(1);
@@ -849,7 +849,7 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
     ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
-
+ 
 /*
  * @tc.name: PublishNotification_0001
  * @tc.desc: PublishNotification

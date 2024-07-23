@@ -29,7 +29,6 @@
 #include "distributed_device_status.h"
 #include "file_utils.h"
 #include "nlohmann/json.hpp"
-#include "notification_config_parse.h"
 #include "notification_constant.h"
 #include "notification_content.h"
 #include "notification_flags.h"
