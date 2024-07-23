@@ -774,11 +774,6 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
 bool AdvancedNotificationService::IsAgentRelationship(const std::string &agentBundleName,
     const std::string &sourceBundleName)
 {
-    if (agentBundleName.empty() || sourceBundleName.empty()) {
-        ANS_LOGE("The parameter is invalid.");
-        return false;
-    }
-
     return NotificationPreferences::GetInstance()->IsAgentRelationship(agentBundleName, sourceBundleName);
 }
 }  // namespace Notification
