@@ -88,6 +88,12 @@ ErrCode LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequ
     return ERR_OK;
 }
 
+bool LivePublishProcess::CheckLocalLiveViewSubscribedByUid(
+    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed, int32_t uid)
+{
+    return CheckLocalLiveViewSubscribed(request, isUpdateByOwnerAllowed, uid);
+}
+
 bool LivePublishProcess::CheckLocalLiveViewSubscribed(
     const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed, int32_t uid)
 {
