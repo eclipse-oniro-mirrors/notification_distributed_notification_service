@@ -627,9 +627,11 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
-
+    int32_t uid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
+            !LivePublishProcess::GetInstance()->CheckLocalLiveViewSubscribed(record->request, isUpdateByOwner, uid))
         if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
             (void)PublishRemoveDuplicateEvent(record);
             return;
