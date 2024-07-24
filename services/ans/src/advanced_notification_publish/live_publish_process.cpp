@@ -51,10 +51,6 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckLocalLiveViewSubscribed(request, isUpdateByOwnerAllowed)) {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     if (!request->IsRemoveAllowed()) {
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
@@ -92,18 +88,24 @@ ErrCode LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequ
     return ERR_OK;
 }
 
+bool LivePublishProcess::CheckLocalLiveViewSubscribedByUid(
+    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed, int32_t uid)
+{
+    return CheckLocalLiveViewSubscribed(request, isUpdateByOwnerAllowed, uid);
+}
+
 bool LivePublishProcess::CheckLocalLiveViewSubscribed(
-    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
+    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed, int32_t uid)
 {
     if (request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW) {
-        return GetLiveViewSubscribeState(IPCSkeleton::GetCallingUid()) || isUpdateByOwnerAllowed;
+        return GetLiveViewSubscribeState(uid) || isUpdateByOwnerAllowed;
     }
     if (request->IsCommonLiveView()) {
         std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
         liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
             request->GetContent()->GetNotificationContent());
         if (liveViewContent != nullptr && liveViewContent->GetIsOnlyLocalUpdate() &&
-            !GetLiveViewSubscribeState(IPCSkeleton::GetCallingUid())) {
+            !GetLiveViewSubscribeState(uid)) {
             ANS_LOGE("Not subscribe common live view.");
             return false;
         }
