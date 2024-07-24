@@ -703,7 +703,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         ANS_LOGE("Make notification record failed.");
         return;
     }
-    int32_t userId = record->notification->GetUserId();
+    int32_t userId = record->notification->GetRecvUserId();
     std::string enable;
     std::string profileId;
     QueryDoNotDisturbProfile(userId, enable, profileId);
