@@ -315,13 +315,6 @@ private:
     void GetEnableAllNotification(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId);
 
-    static const std::map<std::string,
-        std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
-        slotMap_;
-    static const std::map<std::string, std::function<void(NotificationPreferencesDatabase *,
-                                           NotificationPreferencesInfo::BundleInfo &, std::string &)>>
-        bundleMap_;
-
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
 };
 } // namespace Notification
