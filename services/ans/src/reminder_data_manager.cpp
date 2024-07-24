@@ -374,7 +374,6 @@ void ReminderDataManager::AddToShowedReminders(const sptr<ReminderRequest> &remi
 
 void ReminderDataManager::OnUserRemove(const int32_t& userId)
 {
-    ANSR_LOGD("Remove user id: %{private}d", userId);
     if (!IsReminderAgentReady()) {
         ANSR_LOGW("Give up to remove user id: %{private}d for reminderAgent is not ready", userId);
         return;
@@ -465,8 +464,10 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
                 return allowInfo.GetName() == name;
             });
         if (reminderRequest->IsSystemApp() || it != allowInfoList.end()) {
+            ANS_LOGI("%{public}s is systemapp or in allowlist, set ALARM type.", name.c_str());
             timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
         } else {
+            ANS_LOGI("%{public}s is CALENDAR or TIMER type.", name.c_str());
             uint8_t timerTypeAns = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_INEXACT_REMINDER);
             timerType = static_cast<int32_t>(timerTypeAns | timerTypeExact);
         }
@@ -1028,8 +1029,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         }
         uint64_t tempTriggerTime = (*it)->GetTriggerTimeInMilli();
         if (tempTriggerTime < triggerTime) {
-            ANSR_LOGE("this reminder triggerTime is less than target triggerTime. "
-                "now trigger time is %{public}" PRIu64 ".", tempTriggerTime);
+            ANSR_LOGE("this reminder triggerTime is less than target triggerTime.");
             continue;
         }
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
@@ -1124,7 +1124,6 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
     advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
-    ANSR_LOGD("publish notification.(reminderId=%{public}d)", reminder->GetReminderId());
     ErrCode errCode = advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
     if (errCode != ERR_OK) {
         reminder->OnShowFail();
@@ -1337,7 +1336,6 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminderLocked()
         if (mit == notificationBundleOptionMap_.end()) {
             ANSR_LOGE("Remove notificationBundleOption(reminderId=%{public}d) fail", reminderId);
         } else {
-            ANSR_LOGD("Containers(map) remove. reminderId=%{public}d", reminderId);
             notificationBundleOptionMap_.erase(mit);
         }
         it = reminderVector_.erase(it);
@@ -1625,7 +1623,8 @@ void ReminderDataManager::PlaySoundAndVibrationLocked(const sptr<ReminderRequest
     PlaySoundAndVibration(reminder);
 }
 
-std::string ReminderDataManager::GetCustomRingUri(const sptr<ReminderRequest> &reminder) {
+std::string ReminderDataManager::GetCustomRingUri(const sptr<ReminderRequest> &reminder)
+{
     if (reminder == nullptr) {
         return "";
     }
