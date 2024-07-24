@@ -34,13 +34,28 @@ const bottomPopoverTypes = ['default', 'phone'];
 
 let storage = LocalStorage.getShared();
 
-@Extend(Button) function customizeButton() {
+@Extend(Button) function rightCustomizeButton() {
   .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
   .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
   .fontWeight(FontWeight.Medium)
   .height(Constants.BUTTON_HEIGHT)
   .flexGrow(Constants.FLEX_GROW)
+  .margin({
+    left: Constants.BUTTON_LEFT,
+  })
+}
+
+@Extend(Button) function leftCustomizeButton() {
+  .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
+  .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
+  .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
+  .fontWeight(FontWeight.Medium)
+  .height(Constants.BUTTON_HEIGHT)
+  .flexGrow(Constants.FLEX_GROW)
+  .margin({
+    right: Constants.BUTTON_RIGHT,
+  })
 }
 
 @Entry(storage)
@@ -139,17 +154,18 @@ struct PermissionDialog {
                   .onClick(async (): Promise<void> => {
                    await this.enableNotification(false);
                   })
-                  .customizeButton()
+                  .leftCustomizeButton()
                 Divider()
                   .color($r('sys.color.ohos_id_color_list_separator'))
                   .vertical(true)
                   .height(Constants.DIVIDER_HEIGHT)
+                  .strokeWidth(Constants.DIVIDER_WIDTH)
                   .opacity(.2)
                 Button($r('app.string.ALLOW'))
                   .onClick(async (): Promise<void> => {
                     await this.enableNotification(true);
                   })
-                  .customizeButton()
+                  .rightCustomizeButton()
               }
               .margin({ left: Constants.BUTTON_MARGIN_LEFT, right: Constants.BUTTON_MARGIN_RIGHT })
             }

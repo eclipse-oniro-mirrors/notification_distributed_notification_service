@@ -92,7 +92,8 @@ export default class Constants {
   static OFFSET = 100;
   static CLICK_SHADOW_LENGTH = 48;
   static DIVIDER = '1px';
-  static DIVIDER_HEIGHT = 40;
+  static DIVIDER_HEIGHT = 24;
+  static DIVIDER_WIDTH = 2;
   static DIVIDER_MARGIN_RIGHT_PERMISSION = 52;
   static DIVIDER_MARGIN_RIGHT_APPLICATION = 68;
 
@@ -135,6 +136,8 @@ export default class Constants {
   static BUTTON_MARGIN_LEFT = 16;
   static BUTTON_MARGIN_RIGHT = 16;
   static BUTTON_HEIGHT = 40;
+  static BUTTON_LEFT = 7;
+  static BUTTON_RIGHT = 7;
 
   static DIALOG_PRIVACY_BORDER_RADIUS = 32;
   static DIALOG_PADDING_BOTTOM = 16;
