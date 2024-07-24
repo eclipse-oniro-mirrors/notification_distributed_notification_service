@@ -1071,7 +1071,12 @@ void NotificationPreferencesDatabase::ParseSlot(const std::string &findString, s
         entry.first.c_str(),
         typeStr.c_str(),
         entry.second.c_str());
+    SetSoltProperty(slot, typeStr, valueStr, findString, userId);
+}
 
+void NotificationPreferencesDatabase::SetSoltProperty(sptr<NotificationSlot> &slot, std::string &typeStr,
+    std::string &valueStr, const std::string &findString, const int32_t &userId)
+{
     if (typeStr.compare(KEY_SLOT_DESCRIPTION) == 0) {
         return ParseSlotDescription(slot, valueStr);
     }
@@ -1114,10 +1119,15 @@ void NotificationPreferencesDatabase::ParseSlot(const std::string &findString, s
     if (typeStr.compare(KEY_SLOT_AUTH_HINT_CNT) == 0) {
         return ParseSlotAuthHitnCnt(slot, valueStr);
     }
+    ExecuteDisturbeDB(slot, typeStr, valueStr, findString, userId);
+}
+
+void NotificationPreferencesDatabase::ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr,
+    std::string &valueStr, const std::string &findString, const int32_t &userId)
+{
     if (typeStr.compare(KEY_REMINDER_MODE) == 0) {
         return ParseSlotReminderMode(slot, valueStr);
     }
-
     if (!typeStr.compare(KEY_SLOT_VIBRATION_STYLE)) {
         GetValueFromDisturbeDB(findString + KEY_SLOT_ENABLE_VRBRATION, userId,
             [&](std::string &value) { ParseSlotEnableVrbration(slot, value); });
