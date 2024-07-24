@@ -26,7 +26,7 @@ public:
     ErrCode PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed) override;
     ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) override;
     void EraseLiveViewSubsciber(int32_t uid);
-    void AddLiveViewSubscriber();
+    void AddLiveViewSubscriber(int32_t uid);
     bool CheckLocalLiveViewSubscribed(
         const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed, int32_t uid);
 

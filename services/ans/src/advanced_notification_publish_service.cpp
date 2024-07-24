@@ -1182,13 +1182,13 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
     const std::string& bundleName, const int32_t uid)
 {
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
         GetTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,
             NotificationContent::Type::LOCAL_LIVE_VIEW, recordList);
         GetCommonTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,
@@ -1206,7 +1206,6 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
 
 ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32_t uid)
 {
-    LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
     {
         std::lock_guard<std::mutex> lock(delayNotificationMutext_);
         for (auto iter = delayNotificationList_.begin(); iter != delayNotificationList_.end();) {
@@ -1222,6 +1221,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
         std::vector<std::shared_ptr<NotificationRecord>> recordList;
         for (auto item : notificationList_) {
             if (item->notification->GetNotificationRequest().GetCreatorUid() == uid &&
@@ -2255,7 +2255,10 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
         }
     } while (0);
     if (errCode == ERR_OK) {
-        LivePublishProcess::GetInstance()->AddLiveViewSubscriber();
+        int32_t callingUid = IPCSkeleton::GetCallingUid();
+        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+            LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
+        }));
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;

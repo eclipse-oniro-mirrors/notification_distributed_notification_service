@@ -122,11 +122,9 @@ bool LivePublishProcess::CheckLocalLiveViewAllowed(
     return true;
 }
 
-void LivePublishProcess::AddLiveViewSubscriber()
+void LivePublishProcess::AddLiveViewSubscriber(int32_t uid)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    std::lock_guard<std::mutex> lock(liveViewMutext_);
-    localLiveViewSubscribedList_.emplace(callingUid);
+    localLiveViewSubscribedList_.emplace(uid);
 }
 
 void LivePublishProcess::EraseLiveViewSubsciber(int32_t uid)

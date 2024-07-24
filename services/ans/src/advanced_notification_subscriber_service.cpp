@@ -119,7 +119,10 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
     } while (0);
 
     if (errCode == ERR_OK) {
-        LivePublishProcess::GetInstance()->AddLiveViewSubscriber();
+        int32_t callingUid = IPCSkeleton::GetCallingUid();
+        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+            LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
+        }));
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
     return errCode;
