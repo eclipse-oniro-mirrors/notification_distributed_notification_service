@@ -627,7 +627,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
-    int32_t uid = IPCSkeleton::GetCallingUid(request);
+    int32_t uid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
