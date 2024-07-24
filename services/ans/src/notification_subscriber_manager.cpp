@@ -103,10 +103,13 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         ANS_LOGE("queue is nullptr");
         return result;
     }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2);
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber, &subInfo, &result]() {
         result = this->AddSubscriberInner(subscriber, subInfo);
     }));
     notificationSubQueue_->wait(handler);
+    message.Message("Subscribe notification: " + GetClientBundleName() + " " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -124,12 +127,15 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         ANS_LOGE("queue is nullptr");
         return result;
     }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3);
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber,
         &subscribeInfo, &result]() {
         ANS_LOGE("ffrt enter!");
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationSubQueue_->wait(handler);
+    message.Message("Remove subscriber: " + GetClientBundleName() + " " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 

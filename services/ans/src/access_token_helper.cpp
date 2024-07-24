@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "parameters.h"
 #include "tokenid_kit.h"
+#include "notification_analytics_util.h"
 
 using namespace OHOS::Security::AccessToken;
 
@@ -79,6 +80,7 @@ bool AccessTokenHelper::VerifyShellToken(const AccessTokenID &callerToken)
 bool AccessTokenHelper::CheckPermission(const std::string &permission)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     if (supportCheckSaPermission_.compare("non-initilization") == 0) {
         supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_ANS_CHECK_SA_PERMISSION, "false");
     }
@@ -91,7 +93,8 @@ bool AccessTokenHelper::CheckPermission(const std::string &permission)
     }
     bool result = VerifyCallerPermission(tokenCaller, permission);
     if (!result) {
-        ANS_LOGE("Permission denied");
+        message.Message("Permission denied: " + permission, true);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
     return result;
 }

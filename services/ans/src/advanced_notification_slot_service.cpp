@@ -35,6 +35,7 @@
 
 #include "advanced_notification_inline.cpp"
 #include "notification_extension_wrapper.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -444,6 +445,10 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2)
+        .Message("Set slotflags " + bundleOption->GetBundleName() + " flag " +
+        std::to_string(slotFlags) + " ret " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -483,14 +488,18 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags)
 {
     std::vector<sptr<NotificationSlot>> slots;
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_1);
     ErrCode ret = NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundle, slots);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to get slots by bundle, ret is %{public}d.", ret);
+        message.Message("Failed to get slots by bundle, ret:" + std::to_string(ret), true);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ret;
     }
 
+    message.BundleName((bundle == nullptr) ? "" : bundle->GetBundleName());
     if (slots.empty()) {
-        ANS_LOGW("The bundle has no slots.");
+        message.Message("The bundle has no slots.", true);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_OK;
     }
 
@@ -499,6 +508,9 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
             DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
         slot->SetReminderMode(slotFlags & configSlotReminderMode);
         std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
+        message.Message("Update reminderMode " + std::to_string(slot->GetType()) + ' '
+            + std::to_string(slot->GetReminderMode()));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
             slot->GetType(), bundleName.c_str(), slot->GetReminderMode());
     }
@@ -741,8 +753,10 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        message.Message("Serial queue is invalid.", true);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -757,6 +771,8 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
 #ifdef ENABLE_ANS_EXT_WRAPPER
     ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
     if (sync_result != ERR_OK) {
+        message.Message("Set addition config " + key + " ret " + std::to_string(sync_result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return sync_result;
     }
 #endif
@@ -767,7 +783,8 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
     notificationSvrQueue_->wait(handler);
-
+    message.Message("Set addition config " + key + " ret " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
