@@ -2255,8 +2255,8 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
         }
     } while (0);
     if (errCode == ERR_OK) {
+        int32_t callingUid = IPCSkeleton::GetCallingUid();
         ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-            int32_t callingUid = IPCSkeleton::GetCallingUid();
             LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
         }));
     }
