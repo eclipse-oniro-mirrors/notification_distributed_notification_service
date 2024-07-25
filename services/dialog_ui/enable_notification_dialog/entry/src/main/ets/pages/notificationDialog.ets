@@ -34,7 +34,8 @@ const bottomPopoverTypes = ['default', 'phone'];
 
 let storage = LocalStorage.getShared();
 
-@Extend(Button) function rightCustomizeButton() {
+@Extend(Button) function rightCustomizeButton()
+{
   .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
   .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
@@ -46,7 +47,8 @@ let storage = LocalStorage.getShared();
   })
 }
 
-@Extend(Button) function leftCustomizeButton() {
+@Extend(Button) function leftCustomizeButton()
+{
   .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
   .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
