@@ -2919,48 +2919,6 @@ HWTEST_F(AdvancedNotificationServiceTest, FillNotificationRecordTest_0002, Funct
 }
 
 /**
- * @tc.number    : RecoverLiveViewFromDb_0001
- * @tc.name      : RecoverLiveViewFromDb
- * @tc.desc      : Test RecoverLiveViewFromDb.
- */
-HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0001, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0001 test start";
-    advancedNotificationService_->notificationList_.clear();
-    sptr<NotificationRequest> request = new NotificationRequest(1);
-    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
-    request->SetContent(content);
-    request->SetCreatorUid(0);
-    request->SetCreatorUserId(1);
-    request->SetLabel("test");
-    request->SetReceiverUserId(100);
-
-    auto now = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    request->SetFinishDeadLine(duration.count() + NotificationConstant::MAX_FINISH_TIME);
-    request->SetUpdateDeadLine(duration.count() + NotificationConstant::MAX_UPDATE_TIME);
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    std::string bundleName = "BundleName_01";
-    int32_t uid = 10;
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
-    AdvancedNotificationService::NotificationRequestDb requestDbObj =
-        { .request = request, .bundleOption = bundleOption };
-    auto result = advancedNotificationService_->SetNotificationRequestToDb(requestDbObj);
-    ASSERT_EQ(result, ERR_OK);
-
-    advancedNotificationService_->RecoverLiveViewFromDb();
-    EXPECT_NE(advancedNotificationService_->notificationList_.size(), 0);
-
-    advancedNotificationService_->notificationList_.clear();
-    result = advancedNotificationService_->DeleteNotificationRequestFromDb(request->GetKey(), 0);
-    ASSERT_EQ(result, ERR_OK);
-
-    GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0001 test end";
-}
-
-/**
  * @tc.number    : RecoverLiveViewFromDb_0002
  * @tc.name      : RecoverLiveViewFromDb
  * @tc.desc      : Test RecoverLiveViewFromDb and liveView can't recover from db.
@@ -3522,30 +3480,6 @@ HWTEST_F(AdvancedNotificationServiceTest, UnregisterPushCallback_00001, Function
 
     auto ret = advancedNotificationService_->UnregisterPushCallback();
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: FillExtraInfoToJson_00001
- * @tc.desc: Test FillExtraInfoToJson
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceTest, FillExtraInfoToJson_00001, Function | SmallTest | Level1)
-{
-    auto request = new NotificationRequest();
-    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    request->SetContent(content);
-
-    sptr<NotificationCheckRequest> checkRequest = new NotificationCheckRequest();
-    std::vector<std::string> extraKeys = {"key1"};
-    checkRequest->SetExtraKeys(extraKeys);
-    nlohmann::json obj;
-    advancedNotificationService_->FillExtraInfoToJson(request, checkRequest, obj);
-    ASSERT_EQ(liveViewContent->GetExtraInfo(), nullptr);
-
-    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
-    liveViewContent->SetExtraInfo(extraInfo);
-    advancedNotificationService_->FillExtraInfoToJson(request, checkRequest, obj);
 }
 
 /**

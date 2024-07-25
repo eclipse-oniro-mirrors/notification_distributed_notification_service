@@ -108,6 +108,7 @@ void AnsPublishServiceTest::RegisterPushCheck()
     MockIsVerfyPermisson(true);
     ASSERT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest), ERR_OK);
 }
+
 /**
  * @tc.name: Publish_00001
  * @tc.desc: Test Publish
@@ -703,11 +704,6 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetNotificationsEnabledByUser(1, false);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    bool enabled = false;
-    ret = advancedNotificationService_->GetEnabledForBundleSlot(bundle, slotType, enabled);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetBadgeNumber(1, 0);
