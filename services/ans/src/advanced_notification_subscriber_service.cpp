@@ -36,6 +36,7 @@
 #endif
 
 #include "advanced_notification_inline.cpp"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -45,7 +46,7 @@ ErrCode AdvancedNotificationService::Subscribe(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {
@@ -64,20 +65,21 @@ ErrCode AdvancedNotificationService::Subscribe(
             errCode = ERR_ANS_PERMISSION_DENIED;
             break;
         }
-        
+
         if (info != nullptr && info->GetAppUserId() != SUBSCRIBE_USER_ALL) {
             errCode = CheckUserIdParams(info->GetAppUserId());
             if (errCode != ERR_OK) {
                 break;
             }
         }
-        
+
         errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, info);
         if (errCode != ERR_OK) {
             break;
         }
     } while (0);
-
+    message.Message("Subscribe notification: " + std::to_string(errCode));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
 }
@@ -88,6 +90,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
     ANS_LOGD("%{public}s", __FUNCTION__);
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
     ErrCode errCode = ERR_OK;
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2);
     do {
         if (subscriber == nullptr) {
             errCode = ERR_ANS_INVALID_PARAM;
@@ -118,6 +121,8 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
         }
     } while (0);
 
+    message.Message("SubscribeSelf notification: " + std::to_string(errCode));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     if (errCode == ERR_OK) {
         int32_t callingUid = IPCSkeleton::GetCallingUid();
         ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -135,18 +140,24 @@ ErrCode AdvancedNotificationService::Unsubscribe(
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info);
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Client is not a system app or subsystem");
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_NON_SYSTEM_APP));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_PERMISSION_DENIED));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (subscriber == nullptr) {
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_INVALID_PARAM));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
 

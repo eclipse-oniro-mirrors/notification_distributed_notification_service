@@ -107,11 +107,14 @@ std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueu
 
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::string bundle = "";
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
         bundle = GetClientBundleName();
         if (bundle.empty()) {
+            message.Message("bundleOption is nullptr", true);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return nullptr;
         }
     }
@@ -119,7 +122,8 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
     int32_t uid = IPCSkeleton::GetCallingUid();
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (bundleOption == nullptr) {
-        ANS_LOGE("Failed to create NotificationBundleOption instance");
+        message.Message("Failed to create instance" + std::to_string(uid), true);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return nullptr;
     }
     return bundleOption;
