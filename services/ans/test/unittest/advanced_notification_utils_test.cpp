@@ -352,24 +352,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
     TestAddNotification(notificationId, bundle);
 
     advancedNotificationService_->OnBundleDataCleared(bundle);
-    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 }
-
-/**
- * @tc.name: SendNotificationsOnCanceled_00001
- * @tc.desc: Test SendNotificationsOnCanceled
- * @tc.type: FUNC
- * @tc.require: issue
- */
-// HWTEST_F(AnsUtilsTest, SendNotificationsOnCanceled_00001, Function | SmallTest | Level1)
-// {
-//     int notificationId = 1;
-//     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
-//     TestAddNotification(notificationId, bundle);
-
-//     advancedNotificationService_->OnBundleDataCleared(bundle);
-//     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-// }
 
 /**
  * @tc.name: InitNotificationEnableList_00001

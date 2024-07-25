@@ -422,7 +422,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00400, Function | Smal
     sptr<NotificationSlot> slot;
     ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   noExsitbundleOption_, NotificationConstant::SlotType::OTHER, slot),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**

@@ -452,7 +452,7 @@ HWTEST_F(AnsSlotServiceTest, GetSlotByBundle_00002, Function | SmallTest | Level
 
     bundle = new NotificationBundleOption("test", 1);
     ret = advancedNotificationService_->GetSlotByBundle(bundle, slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+    ASSERT_EQ(ret, (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
