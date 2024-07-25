@@ -22,6 +22,7 @@
 #include "common_event_publish_info.h"
 #include "ans_convert_enum.h"
 #include "ans_permission_def.h"
+#include "in_process_call_wrapper.h"
 namespace OHOS {
 namespace Notification {
 constexpr char MESSAGE_DELIMITER = '#';
@@ -158,7 +159,8 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
 
     EventFwk::Want want;
     want.SetParam("bundleName", message.bundleName_);
-    ReportNotificationEvent(request, want, eventCode, message.Build());
+    IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
+        request, want, eventCode, message.Build()));
 }
 
 void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
@@ -221,7 +223,8 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
     want.SetParam("typeCode", message.typeCode_);
     want.SetParam("id", message.notificationId_);
     want.SetParam("extraInfo", extraContent);
-    ReportNotificationEvent(want, DELETE_ERROR_EVENT_CODE, message.Build());
+    IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
+        want, DELETE_ERROR_EVENT_CODE, message.Build()));
 }
 
 void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
@@ -231,7 +234,7 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
     EventFwk::CommonEventData commonData {want, eventCode, ""};
-    ANS_LOGE("Publish event success %{public}d, %{public}s", eventCode, reason.c_str());
+    ANS_LOGD("Publish event success %{public}d, %{public}s", eventCode, reason.c_str());
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
         ANS_LOGE("Publish event failed %{public}d, %{public}s", eventCode, reason.c_str());
     }
