@@ -2072,11 +2072,15 @@ uint64_t ReminderRequest::GetTriggerTime(const time_t now, const time_t nextTrig
     struct tm test;
     (void)localtime_r(&triggerTime, &test);
     ANSR_LOGI("NextTriggerTime: year=%{public}d, mon=%{public}d, day=%{public}d, hour=%{public}d, "
-        "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
+            "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
         GetActualTime(TimeTransferType::YEAR, test.tm_year),
         GetActualTime(TimeTransferType::MONTH, test.tm_mon),
-        test.tm_mday, test.tm_hour, test.tm_min, test.tm_sec,
-        GetActualTime(TimeTransferType::WEEK, test.tm_wday), (long long)triggerTime);
+        test.tm_mday,
+        test.tm_hour,
+        test.tm_min,
+        test.tm_sec,
+        GetActualTime(TimeTransferType::WEEK, test.tm_wday),
+        (long long)triggerTime);
 
     if (static_cast<int64_t>(triggerTime) <= 0) {
         return 0;
