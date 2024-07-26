@@ -52,7 +52,10 @@ struct NotificationDialogPage {
     builder: PermissionDialog({ isUpdate: $isUpdate }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
-    customStyle: true
+    customStyle: true,
+    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
+      console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
+    }
   });
 
   build() {}
