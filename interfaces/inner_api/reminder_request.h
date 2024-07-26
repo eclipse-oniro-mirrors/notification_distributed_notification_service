@@ -90,7 +90,7 @@ namespace Notification {
     }                                                   \
 
 #define WRITE_INT64_RETURN_FALSE_LOG(parcel, value, msg) \
-    if (!((parcel).WriteInt64(value))) {                   \
+    if (!((parcel).WriteInt64(value))) {                 \
         ANSR_LOGE("Failed to write %s", msg);            \
         return false;                                    \
     }                                                    \
