@@ -1323,6 +1323,7 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    READ_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
     READ_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
     READ_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
 
@@ -1337,7 +1338,6 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 
     READ_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
 
-    READ_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
     READ_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
     READ_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
     READ_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
