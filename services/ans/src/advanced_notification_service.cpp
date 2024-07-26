@@ -195,6 +195,14 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_UID;
             }
             request->SetOwnerUid(uid);
+            int32_t agentUid = IPCSkeleton::GetCallingUid();
+            std::shared_ptr<NotificationBundleOption> agentBundle =
+                std::make_shared<NotificationBundleOption>(bundle, agentUid);
+            if (agentBundle == nullptr) {
+                ANS_LOGE("Failed to create agentBundle instance");
+                return ERR_ANS_INVALID_BUNDLE;
+            }
+            request->SetAgentBundle(agentBundle);
             bundle = sourceBundleName;
         }
         request->SetOwnerBundleName(bundle);
