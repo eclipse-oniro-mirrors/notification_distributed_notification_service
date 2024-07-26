@@ -1304,7 +1304,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
 /**
  * @tc.number  : AdvancedNotificationService_06800
  * @tc.name    : AdvancedNotificationService_06800
- * @tc.desc    : Test GetEnabledForBundleSlotSelf function and GetNotificationSlot false 
+ * @tc.desc    : Test GetEnabledForBundleSlotSelf function and GetNotificationSlot false
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06800, Function | SmallTest | Level1)
 {
