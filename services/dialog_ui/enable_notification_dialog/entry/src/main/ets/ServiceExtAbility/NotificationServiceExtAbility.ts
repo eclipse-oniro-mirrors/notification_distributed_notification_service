@@ -211,15 +211,15 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       let stageModel = false;
       let bundleName = want.parameters['ohos.aafwk.param.callerBundleName'];
       let bundleUid = want.parameters['ohos.aafwk.param.callerUid'];
-      if (want.parameters['bundleName'] === undefined) {
-        want.parameters['bundleName'] = bundleName;
-        want.parameters['bundleUid'] = bundleUid;
+      if (want.parameters.bundleName === undefined) {
+        want.parameters.bundleName = bundleName;
+        want.parameters.bundleUid = bundleUid;
         stageModel = true;
       } else {
         stageModel = false;
       }
-      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters['bundleName']}`
-        + `uid ${want.parameters['bundleUid']}`);    
+      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters.bundleName}`
+        + `uid ${want.parameters.bundleUid}`);
       let dialog = new EnableNotificationDialog(1, want, stageModel);
       await dialog.createUiExtensionWindow(session, stageModel);
       AppStorage.setOrCreate('clicked', false);
