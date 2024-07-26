@@ -27,7 +27,7 @@ AdvancedAggregationDataRoamingObserver::~AdvancedAggregationDataRoamingObserver(
 
 void AdvancedAggregationDataRoamingObserver::OnChange()
 {
-    string enable = "";
+    std::string enable = "";
     AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
     ANS_LOGI("GetUnifiedGroupInfoFromDb enter, enable:%{public}s", enable.c_str());
 
