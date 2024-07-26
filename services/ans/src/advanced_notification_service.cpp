@@ -1424,31 +1424,7 @@ ErrCode AdvancedNotificationService::SetRecentNotificationCount(const std::strin
 void AdvancedNotificationService::UpdateRecentNotification(sptr<Notification> &notification,
     bool isDelete, int32_t reason)
 {
-    for (auto recentNotification : recentInfo_->list) {
-        if (recentNotification->notification->GetKey() == notification->GetKey()) {
-            if (!isDelete) {
-                recentInfo_->list.remove(recentNotification);
-                recentNotification->isActive = true;
-                recentNotification->notification = notification;
-                recentInfo_->list.emplace_front(recentNotification);
-            } else {
-                recentNotification->isActive = false;
-                recentNotification->deleteReason = reason;
-                recentNotification->deleteTime = GetNowSysTime();
-            }
-            return;
-        }
-    }
-
-    if (!isDelete) {
-        if (recentInfo_->list.size() >= recentInfo_->recentCount) {
-            recentInfo_->list.pop_back();
-        }
-        auto recentNotification = std::make_shared<RecentNotification>();
-        recentNotification->isActive = true;
-        recentNotification->notification = notification;
-        recentInfo_->list.emplace_front(recentNotification);
-    }
+    return;
 }
 static bool SortNotificationsByLevelAndTime(
     const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second)
