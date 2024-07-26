@@ -129,7 +129,7 @@ inline OHOS::Notification::HaMetaMessage AddInformationInMessage(
     message += "uid:" + std::to_string(callingUid) + ".";
     bundleName = GetClientBundleNameByUid(callingUid);
 
-    haMetaMessage = haMetaMessage.BundleName(bundleName);
+    haMetaMessage = haMetaMessage.AgentBundleName(bundleName);
     haMetaMessage = haMetaMessage.Message(message);
     return haMetaMessage;
 }
@@ -147,7 +147,7 @@ inline void ReportDeleteFailedEventPushByNotification(const sptr<Notification> &
     std::string message)
 {
     if (notification == nullptr) {
-        ANS_LOGE("report notificaiton is null");
+        ANS_LOGW("report notificaiton is null");
         return;
     }
     haMetaMessage = AddInformationInMessage(haMetaMessage, reason, message);
