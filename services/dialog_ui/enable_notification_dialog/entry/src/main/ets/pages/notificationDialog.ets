@@ -115,7 +115,7 @@ struct PermissionDialog {
                     Text() {
                       Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
                     }
-                    .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
+                    .fontSize($r('sys.float.ohos_id_text_size_headline8'))
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
                     .fontWeight(FontWeight.Bold)
                     .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
@@ -160,7 +160,6 @@ struct PermissionDialog {
                   .vertical(true)
                   .height(Constants.DIVIDER_HEIGHT)
                   .strokeWidth(Constants.DIVIDER_WIDTH)
-                  .opacity(.2)
                 Button($r('app.string.ALLOW'))
                   .onClick(async (): Promise<void> => {
                     await this.enableNotification(true);
