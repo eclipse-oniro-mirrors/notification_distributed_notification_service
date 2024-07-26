@@ -658,7 +658,8 @@ ErrCode AnsManagerProxy::HasNotificationPolicyAccessPermission(bool &granted)
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_NOTIFICATION_POLICY_ACCESS_GRANTED, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_NOTIFICATION_POLICY_ACCESS_GRANTED,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[HasNotificationPolicyAccessPermission] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1095,7 +1096,8 @@ ErrCode AnsManagerProxy::SetNotificationsEnabledForSpecialBundle(
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_SPECIAL_BUNDLE,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[SetNotificationsEnabledForSpecialBundle] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
@@ -1641,7 +1643,8 @@ ErrCode AnsManagerProxy::PublishContinuousTaskNotification(const sptr<Notificati
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::PUBLISH_CONTINUOUS_TASK_NOTIFICATION, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::PUBLISH_CONTINUOUS_TASK_NOTIFICATION,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[PublishContinuousTaskNotification] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;

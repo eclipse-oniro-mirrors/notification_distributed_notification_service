@@ -99,7 +99,8 @@ public:
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
 private:
-    ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags, MessageParcel &data, MessageParcel &reply);
+    ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
+        MessageParcel &data, MessageParcel &reply);
     static inline BrokerDelegator<AnsSubscriberProxy> delegator_;
 
     template<typename T>
