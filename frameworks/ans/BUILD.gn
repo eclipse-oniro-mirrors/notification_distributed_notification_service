@@ -162,7 +162,6 @@ ohos_shared_library("ans_innerkits") {
     defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
   }
 
-  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
