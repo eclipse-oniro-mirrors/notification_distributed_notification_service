@@ -108,7 +108,8 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         result = this->AddSubscriberInner(subscriber, subInfo);
     }));
     notificationSubQueue_->wait(handler);
-    message.Message("Subscribe notification: " + GetClientBundleName() + " " + std::to_string(result));
+    message.Message("Subscribe notification: " + GetClientBundleName() + " user " +
+        std::to_string(subInfo->GetAppUserId()) + " " + std::to_string(result));
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
@@ -134,7 +135,8 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationSubQueue_->wait(handler);
-    message.Message("Remove subscriber: " + GetClientBundleName() + " " + std::to_string(result));
+    message.Message("Remove subscriber: " + GetClientBundleName() + " user " +
+        std::to_string(subscribeInfo->GetAppUserId()) + " " + std::to_string(result));
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
@@ -433,18 +435,15 @@ void NotificationSubscriberManager::NotifyConsumedInner(
                     ANS_LOGE("ReadParcelable failed.");
                     continue;
                 }
-                message.Message(notificationStub->GetKey());
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(
-                    notificationStub->GetNotificationRequestPoint(), message);
                 record->subscriber->OnConsumed(notificationStub, notificationMap);
                 continue;
             }
-            message.Message(notification->GetKey());
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(notification->GetNotificationRequestPoint(),
-                message);
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }
+    message.Message(notification->GetKey() + " " + std::to_string(notification->GetUserId()) +
+        " size " + std::to_string(subscriberRecordList_.size()));
+    NotificationAnalyticsUtil::ReportPublishFailedEvent(notification->GetNotificationRequestPoint(), message);
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
