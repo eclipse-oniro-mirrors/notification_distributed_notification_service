@@ -377,6 +377,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
+
 /**
  * @tc.name: ReminderDataManagerTest_016
  * @tc.desc: Reminder data manager test
@@ -393,14 +394,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
     std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
         std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     reminder->SetSystemApp(false);
-    reminder->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE, "",
-        buttonWantAgent, buttonDataShareUpdate);
+    reminder->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE,
+        "", buttonWantAgent, buttonDataShareUpdate);
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-
+ 
     // INVALID ActionButtonType
     reminder->SetSystemApp(true);
-    reminder->SetActionButton("无效的", ReminderRequest::ActionButtonType::INVALID, "",
-        buttonWantAgent, buttonDataShareUpdate);
+    reminder->SetActionButton("无效的", ReminderRequest::ActionButtonType::INVALID,
+        "", buttonWantAgent, buttonDataShareUpdate);
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::INVALID);
 
     // actionButtonType does not exist
@@ -410,10 +411,10 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
     // null ButtonDataShareUpdate
     reminder->SetActionButton("稍后提醒", ReminderRequest::ActionButtonType::SNOOZE, "", buttonWantAgent);
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
-
+ 
     // not have uri
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-
+ 
     // update datashare
     sptr<ReminderRequest> reminder1 = new ReminderRequestAlarm(2, 3, daysOfWeek);
     std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent1 =
@@ -774,6 +775,48 @@ HWTEST_F(ReminderDataManagerTest, InitStartExtensionAbility_0001, Level1)
 }
 
 /**
+ * @tc.name: ReminderNotificationSubscriber_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderNotificationSubscriber_00001, Level1)
+{
+    ReminderEventManager::ReminderNotificationSubscriber test(manager);
+    sptr<NotificationRequest> notificationReq = new NotificationRequest();
+    std::shared_ptr<Notification> notification = std::make_shared<Notification>(notificationReq);
+    test.OnCanceled(notification, nullptr, NotificationConstant::CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    test.OnCanceled(nullptr, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("TEST_1");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("TEST_NOTIFICATION_1");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("REMINDER_NOTIFICATION_1");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("REMINDER_AGENT_INFO");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+
+    notificationReq->SetLabel("REMINDER_AGENT_0");
+    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
+    SUCCEED();
+}
+
+/**
  * @tc.name: CancelAllReminders_00001
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
@@ -845,48 +888,6 @@ HWTEST_F(ReminderDataManagerTest, IsMatched_00001, Level1)
     EXPECT_EQ(ret, false);
     ret = manager->IsMatched(reminder, "test_IsMatched", 100, 98765);
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: ReminderNotificationSubscriber_00001
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issue#I9IIDE
- */
-HWTEST_F(ReminderDataManagerTest, ReminderNotificationSubscriber_00001, Level1)
-{
-    ReminderEventManager::ReminderNotificationSubscriber test(manager);
-    sptr<NotificationRequest> notificationReq = new NotificationRequest();
-    std::shared_ptr<Notification> notification = std::make_shared<Notification>(notificationReq);
-    test.OnCanceled(notification, nullptr, NotificationConstant::CANCEL_REASON_DELETE);
-    SUCCEED();
-
-    test.OnCanceled(nullptr, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
-    SUCCEED();
-
-    notificationReq->SetLabel("");
-    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
-    SUCCEED();
-
-    notificationReq->SetLabel("TEST_1");
-    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
-    SUCCEED();
-
-    notificationReq->SetLabel("TEST_NOTIFICATION_1");
-    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
-    SUCCEED();
-
-    notificationReq->SetLabel("REMINDER_NOTIFICATION_1");
-    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
-    SUCCEED();
-
-    notificationReq->SetLabel("REMINDER_AGENT_INFO");
-    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
-    SUCCEED();
-
-    notificationReq->SetLabel("REMINDER_AGENT_0");
-    test.OnCanceled(notification, nullptr, NotificationConstant::APP_CANCEL_REASON_DELETE);
-    SUCCEED();
 }
 }  // namespace Notification
 }  // namespace OHOS

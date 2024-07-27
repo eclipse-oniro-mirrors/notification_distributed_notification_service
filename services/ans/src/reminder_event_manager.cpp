@@ -81,6 +81,11 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
         ANSR_LOGD("SubscribeNotification failed");
     }
 
+    SubscribeSystemAbility(reminderDataManager);
+}
+
+void ReminderEventManager::SubscribeSystemAbility(std::shared_ptr<ReminderDataManager> &reminderDataManager) const
+{
     sptr<SystemAbilityStatusChangeListener> statusChangeListener
         = new (std::nothrow) SystemAbilityStatusChangeListener(reminderDataManager);
     if (statusChangeListener == nullptr) {
