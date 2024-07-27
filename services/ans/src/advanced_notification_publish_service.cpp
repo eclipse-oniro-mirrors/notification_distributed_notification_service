@@ -863,7 +863,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     if (deviceId.empty()) {
         bool notificationEnable = false;
         ErrCode saveRef = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
-            bundleOption, notificationEnable);
+            bundle, notificationEnable);
         // Local device
         result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
         if (!enabled) {
