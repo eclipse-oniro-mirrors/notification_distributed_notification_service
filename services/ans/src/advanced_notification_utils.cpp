@@ -591,7 +591,7 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
 {
     ANS_LOGD("Called.");
     int32_t userId = 0;
-    if (!GetActiveUserId(userId)) {
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id.");
         return;
     }
