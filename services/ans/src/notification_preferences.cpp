@@ -75,6 +75,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
     for (auto slot : slots) {
         result = CheckSlotForCreateSlot(bundleOption, slot, preferencesInfo);
         if (result != ERR_OK) {
+            message.SlotType(static_cast<uint32_t>(slot->GetType()));
             message.Message("Check slot for create failed." + std::to_string(result));
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return result;
@@ -122,18 +123,25 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1)
+        .BundleName(bundleOption->GetBundleName());
+    message.SlotType(static_cast<uint32_t>(slotType));
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     result = CheckSlotForRemoveSlot(bundleOption, slotType, preferencesInfo);
     if (result == ERR_OK &&
         (!preferncesDB_->RemoveSlotFromDisturbeDB(GenerateBundleKey(bundleOption), slotType, bundleOption->GetUid()))) {
+        message.Message("Remove slot failed: " + std::to_string(result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
     }
+    message.Message("Remove slot successful");
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -143,6 +151,8 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1)
+        .BundleName(bundleOption->GetBundleName());
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
@@ -161,6 +171,8 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
         ANS_LOGD("result is ERR_OK");
         preferencesInfo_ = preferencesInfo;
     }
+    message.Message("Remove all slot: " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 

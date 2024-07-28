@@ -180,7 +180,7 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
     want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
     want.SetParam("extraInfo", extraContent);
     if (!request->GetCreatorBundleName().empty()) {
-        want.SetParam("bundleName", request->GetCreatorBundleName());
+        want.SetBundle(request->GetCreatorBundleName());
     }
     if (!request->GetOwnerBundleName().empty()) {
         want.SetParam("agentBundleName", request->GetOwnerBundleName());
@@ -205,10 +205,11 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
     std::string extraContent = wWrapper.ToString();
 
     EventFwk::Want want;
-    want.SetParam("bundleName", message.bundleName_);
-    want.SetParam("slotType", std::to_string(message.slotType_));
+    want.SetBundle(message.bundleName_);
+    want.SetParam("slotType", static_cast<int32_t>(message.slotType_));
     want.SetParam("extraInfo", extraContent);
-    ReportNotificationEvent(want, MODIFY_ERROR_EVENT_CODE, message.Build());
+    IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(want, MODIFY_ERROR_EVENT_CODE,
+        message.Build()));
 }
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& message)
@@ -221,7 +222,7 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
 
     EventFwk::Want want;
     want.SetParam("agentBundleName", message.agentBundleName_);
-    want.SetParam("bundleName", message.bundleName_);
+    want.SetBundle(message.bundleName_);
     want.SetParam("typeCode", message.typeCode_);
     want.SetParam("id", message.notificationId_);
     want.SetParam("extraInfo", extraContent);
