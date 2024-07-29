@@ -16,9 +16,6 @@
 #include "reminder_request_calendar.h"
 
 #include "ans_log_wrapper.h"
-#include "reminder_table.h"
-#include "reminder_table_old.h"
-#include "reminder_store.h"
 #include "nlohmann/json.hpp"
 
 namespace OHOS {
@@ -126,6 +123,56 @@ bool ReminderRequestCalendar::IsInExcludeDate() const
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequestCalendar::GetRRuleWantAgentInfo()
 {
     return rruleWantAgentInfo_;
+}
+
+void ReminderRequestCalendar::SetRepeatDay(const uint32_t repeatDay)
+{
+    repeatDay_ = repeatDay;
+}
+
+void ReminderRequestCalendar::SetRepeatMonth(const uint16_t repeatMonth)
+{
+    repeatMonth_ = repeatMonth;
+}
+
+void ReminderRequestCalendar::SetFirstDesignateYear(const uint16_t firstDesignateYear)
+{
+    firstDesignateYear_ = firstDesignateYear;
+}
+
+void ReminderRequestCalendar::SetFirstDesignageMonth(const uint16_t firstDesignateMonth)
+{
+    firstDesignateMonth_ = firstDesignateMonth;
+}
+
+void ReminderRequestCalendar::SetFirstDesignateDay(const uint16_t firstDesignateDay)
+{
+    firstDesignateDay_ = firstDesignateDay;
+}
+
+void ReminderRequestCalendar::SetYear(const uint16_t year)
+{
+    year_ = year;
+}
+
+void ReminderRequestCalendar::SetMonth(const uint8_t month)
+{
+    month_ = month;
+}
+
+void ReminderRequestCalendar::SetDay(const uint8_t day)
+{
+    day_ = day;
+}
+
+void ReminderRequestCalendar::SetHour(const uint8_t hour)
+{
+    hour_ = hour;
+}
+
+void ReminderRequestCalendar::SetMinute(const uint8_t minute)
+{
+    minute_ = minute;
 }
 
 bool ReminderRequestCalendar::InitTriggerTime()
@@ -687,145 +734,6 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         return true;
     }
     return false;
-}
-
-void ReminderRequestCalendar::RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
-{
-    ReminderRequest::RecoverFromOldVersion(resultSet);
-
-    // repeatDay
-    repeatDay_ = static_cast<uint32_t>(RecoverInt64FromDb(resultSet, ReminderTable::REPEAT_DAYS,
-        DbRecoveryType::INT));
-
-    // repeatMonth
-    repeatMonth_ =
-        static_cast<uint16_t>(RecoverInt64FromDb(resultSet, ReminderTable::REPEAT_MONTHS,
-            DbRecoveryType::INT));
-
-    // firstDesignateYear
-    firstDesignateYear_ =
-        static_cast<uint16_t>(RecoverInt64FromDb(resultSet, ReminderTable::FIRST_DESIGNATE_YEAR,
-            DbRecoveryType::INT));
-
-    // firstDesignateMonth
-    firstDesignateMonth_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::FIRST_DESIGNATE_MONTH,
-            DbRecoveryType::INT));
-
-    // firstDesignateDay
-    firstDesignateDay_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::FIRST_DESIGNATE_DAY,
-            DbRecoveryType::INT));
-
-    // year
-    year_ = static_cast<uint16_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_YEAR,
-        DbRecoveryType::INT));
-
-    // month
-    month_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_MONTH,
-        DbRecoveryType::INT));
-
-    // day
-    day_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_DAY,
-        DbRecoveryType::INT));
-
-    // hour
-    hour_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_HOUR,
-        DbRecoveryType::INT));
-
-    // minute
-    minute_ = static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::CALENDAR_MINUTE,
-        DbRecoveryType::INT));
-}
-
-void ReminderRequestCalendar::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
-{
-    if (resultSet == nullptr) {
-        ANSR_LOGE("ResultSet is null");
-        return;
-    }
-    ReminderStore::GetUInt16Val(resultSet, ReminderCalendarTable::FIRST_DESIGNATE_YEAR, firstDesignateYear_);
-    ReminderStore::GetUInt8Val(resultSet, ReminderCalendarTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth_);
-    ReminderStore::GetUInt8Val(resultSet, ReminderCalendarTable::FIRST_DESIGNATE_DAY, firstDesignateDay_);
-
-    uint64_t dateTime;
-    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
-    SetDateTime(dateTime);
-
-    uint64_t endDateTime;
-    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
-    if (endDateTime != 0 && endDateTime >= dateTime) {
-        SetEndDateTime(endDateTime);
-    } else {
-        SetEndDateTime(startDateTime_);
-    }
-
-    uint64_t lastStartDateTime;
-    ReminderStore::GetUInt64Val(resultSet, ReminderCalendarTable::CALENDAR_LAST_DATE_TIME, lastStartDateTime);
-    if (lastStartDateTime == 0) {
-        SetLastStartDateTime(dateTime);
-    } else {
-        SetLastStartDateTime(lastStartDateTime);
-    }
-
-    int32_t repeatDay;
-    ReminderStore::GetInt32Val(resultSet, ReminderCalendarTable::REPEAT_DAYS, repeatDay);
-    repeatDay_ = static_cast<uint32_t>(repeatDay);
-
-    ReminderStore::GetUInt16Val(resultSet, ReminderCalendarTable::REPEAT_MONTHS, repeatMonth_);
-    ReminderStore::GetUInt8Val(resultSet, ReminderCalendarTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek_);
-
-    std::string rruleWantAgent;
-    ReminderStore::GetStringVal(resultSet, ReminderCalendarTable::RRULE_WANT_AGENT, rruleWantAgent);
-    DeserializationRRule(rruleWantAgent);
-
-    std::string excludeDates;
-    ReminderStore::GetStringVal(resultSet, ReminderCalendarTable::EXCLUDE_DATES, excludeDates);
-    DeserializationExcludeDates(excludeDates);
-}
-
-void ReminderRequestCalendar::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-    const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values)
-{
-    uint16_t firstDesignateYear = 0;
-    uint8_t firstDesignateMonth = 0;
-    uint8_t firstDesignateDay = 0;
-    uint64_t dateTime = 0;
-    uint32_t repeatDay = 0;
-    uint16_t repeatMonth = 0;
-    uint8_t repeatDaysOfWeek = 0;
-    uint64_t endDateTime = 0;
-    uint64_t lastStartDateTime = 0;
-    std::string rruleWantAgent;
-    std::string excludeDates;
-    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
-        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
-        if (calendar != nullptr) {
-            repeatDay = calendar->GetRepeatDay();
-            repeatMonth = calendar->GetRepeatMonth();
-            firstDesignateYear = calendar->GetFirstDesignateYear();
-            firstDesignateMonth = calendar->GetFirstDesignageMonth();
-            firstDesignateDay = calendar->GetFirstDesignateDay();
-            dateTime = calendar->GetDateTime();
-            repeatDaysOfWeek = calendar->GetRepeatDaysOfWeek();
-            endDateTime = calendar->GetEndDateTime();
-            lastStartDateTime = calendar->GetLastStartDateTime();
-            rruleWantAgent = calendar->SerializationRRule();
-            excludeDates = calendar->SerializationExcludeDates();
-        }
-    }
-    values.PutInt(ReminderCalendarTable::REMINDER_ID, reminder->GetReminderId());
-    values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_YEAR, firstDesignateYear);
-    values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_MONTH, firstDesignateMonth);
-    values.PutInt(ReminderCalendarTable::FIRST_DESIGNATE_DAY, firstDesignateDay);
-    values.PutLong(ReminderCalendarTable::CALENDAR_DATE_TIME, dateTime);
-    values.PutLong(ReminderCalendarTable::CALENDAR_END_DATE_TIME, endDateTime);
-    values.PutLong(ReminderCalendarTable::CALENDAR_LAST_DATE_TIME, lastStartDateTime);
-    values.PutInt(ReminderCalendarTable::REPEAT_DAYS, repeatDay);
-    values.PutInt(ReminderCalendarTable::REPEAT_MONTHS, repeatMonth);
-    values.PutInt(ReminderCalendarTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
-    values.PutString(ReminderCalendarTable::RRULE_WANT_AGENT, rruleWantAgent);
-    values.PutString(ReminderCalendarTable::EXCLUDE_DATES, excludeDates);
 }
 
 void ReminderRequestCalendar::SetDateTime(const uint64_t time)

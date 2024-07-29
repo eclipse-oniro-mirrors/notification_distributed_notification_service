@@ -118,6 +118,33 @@ public:
         return firstDesignateDay_;
     }
 
+    uint32_t GetRepeatDay() const
+    {
+        return repeatDay_;
+    }
+    uint16_t GetRepeatMonth() const
+    {
+        return repeatMonth_;
+    }
+
+    void SetRepeatDay(const uint32_t repeatDay);
+    void SetRepeatMonth(const uint16_t repeatMonth);
+    void SetFirstDesignateYear(const uint16_t firstDesignateYear);
+    void SetFirstDesignageMonth(const uint16_t firstDesignateMonth);
+    void SetFirstDesignateDay(const uint16_t firstDesignateDay);
+    void SetYear(const uint16_t year);
+    void SetMonth(const uint8_t month);
+    void SetDay(const uint8_t day);
+    void SetHour(const uint8_t hour);
+    void SetMinute(const uint8_t minute);
+    void SetDateTime(const uint64_t time);
+    uint64_t GetDateTime();
+    uint64_t GetEndDateTime();
+
+    std::string SerializationRRule();
+    std::string SerializationExcludeDates();
+    void DeserializationRRule(const std::string& str);
+    void DeserializationExcludeDates(const std::string& str);
     bool InitTriggerTime();
 
     std::vector<uint8_t> GetRepeatMonths() const;
@@ -171,11 +198,6 @@ public:
     bool ReadFromParcel(Parcel &parcel) override;
     bool SetNextTriggerTime() override;
 
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
-
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
     bool SetEndDateTime(const uint64_t time);
 
@@ -204,14 +226,6 @@ private:
     uint8_t GetNextDay(const uint16_t &settedYear, const uint8_t &settedMonth, const tm &now, const tm &target) const;
     uint64_t GetNextTriggerTime(const bool updateLast = false);
     uint64_t GetNextTriggerTimeAsRepeatReminder(const tm &nowTime, const tm &tarTime) const;
-    uint32_t GetRepeatDay() const
-    {
-        return repeatDay_;
-    }
-    uint16_t GetRepeatMonth() const
-    {
-        return repeatMonth_;
-    }
     uint64_t GetTimeInstantMilli(
         uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) const;
 
@@ -233,15 +247,6 @@ private:
      * @brief When OnShow or OnSnooze, need calculate the start time of this alert
      */
     void CalcLastStartDateTime();
-
-    void SetDateTime(const uint64_t time);
-    uint64_t GetDateTime();
-    uint64_t GetEndDateTime();
-
-    std::string SerializationRRule();
-    std::string SerializationExcludeDates();
-    void DeserializationRRule(const std::string& str);
-    void DeserializationExcludeDates(const std::string& str);
 
     static const uint8_t DEFAULT_SNOOZE_TIMES;
 

@@ -24,7 +24,6 @@ namespace OHOS {
     namespace {
         constexpr uint8_t ENABLE = 2;
         constexpr uint8_t ACTION_BUTTON_TYPE = 3;
-        constexpr uint8_t COLUMN_TYPE = 2;
         constexpr uint8_t SLOT_TYPE_NUM = 5;
     }
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
@@ -65,16 +64,7 @@ namespace OHOS {
         reminderRequest.OnStop();
         reminderRequest.OnTerminate();
         reminderRequest.OnTimeZoneChange();
-        std::shared_ptr<NativeRdb::ResultSet> resultSet =
-            std::make_shared<NativeRdb::AbsSharedResultSet>();
-        uint8_t column = *data % COLUMN_TYPE;
-        Notification::ReminderRequest::DbRecoveryType columnType =
-            Notification::ReminderRequest::DbRecoveryType(column);
-        reminderRequest.RecoverInt64FromDb(resultSet, stringData, columnType);
-        reminderRequest.RecoverFromDb(resultSet);
-        reminderRequest.RecoverActionButton(resultSet);
         reminderRequest.StringSplit(stringData, stringData);
-        reminderRequest.RecoverWantAgent(stringData, *data);
         std::shared_ptr< Notification::ReminderRequest::MaxScreenAgentInfo> maxScreenWantAgentInfo =
             std::make_shared< Notification::ReminderRequest::MaxScreenAgentInfo>();
         reminderRequest.SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);

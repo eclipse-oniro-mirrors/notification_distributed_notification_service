@@ -37,6 +37,7 @@ ohos_unittest("reminder_unit_test") {
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
     "reminder_data_manager_test.cpp",
+    "reminder_store_test.cpp",
   ]
 
   deps = [

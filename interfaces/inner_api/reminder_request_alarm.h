@@ -71,6 +71,20 @@ public:
      */
     uint8_t GetMinute() const;
 
+    /**
+     * @brief Obtains the setted {@link hour_}.
+     *
+     * @return setted hour.
+     */
+    void SetHour(const uint8_t hour);
+
+    /**
+     * @brief Obtains the setted {@link minute_}.
+     *
+     * @return setted minute.
+     */
+    void SetMinute(const uint8_t minute);
+
     virtual bool UpdateNextReminder() override;
 
     /**
@@ -95,10 +109,6 @@ public:
      * @return true if read parcel success.
      */
     bool ReadFromParcel(Parcel &parcel) override;
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;

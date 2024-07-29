@@ -27,6 +27,7 @@
 #include "reminder_request_alarm.h"
 #include "reminder_request_timer.h"
 #include "reminder_request_calendar.h"
+#include "reminder_store_strategy.h"
 
 namespace OHOS {
 namespace Notification {
@@ -177,14 +178,17 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
         switch (reminderType) {
             case (static_cast<int32_t>(ReminderRequest::ReminderType::TIMER)): {
                 reminderReq = new (std::nothrow) ReminderRequestTimer(reminderId);
+                ReminderTimerStrategy::RecoverFromOldVersion(reminder, queryResultSet);
                 break;
             }
             case (static_cast<int32_t>(ReminderRequest::ReminderType::CALENDAR)): {
                 reminderReq = new (std::nothrow) ReminderRequestCalendar(reminderId);
+                ReminderCalendarStrategy::RecoverFromOldVersion(reminder, queryResultSet);
                 break;
             }
             case (static_cast<int32_t>(ReminderRequest::ReminderType::ALARM)): {
                 reminderReq = new (std::nothrow) ReminderRequestAlarm(reminderId);
+                ReminderAlarmStrategy::RecoverFromOldVersion(reminder, queryResultSet);
                 break;
             }
             default: {
@@ -192,7 +196,6 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
             }
         }
         if (reminderReq != nullptr) {
-            reminderReq->RecoverFromOldVersion(queryResult);
             reminders.push_back(reminderReq);
         }
         queryResult->IsAtLastRow(isLastRow);
@@ -211,7 +214,7 @@ void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::Rdb
         }
         bundleOption->SetBundleName(reminder->GetBundleName());
         NativeRdb::ValuesBucket baseValues;
-        ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues, true);
+        ReminderStrategy::AppendValuesBucket(reminder, baseValues, true);
 
         store.BeginTransaction();
         // insert reminder_base
@@ -228,15 +231,15 @@ void ReminderStore::ReminderStoreDataCallBack::InsertNewReminders(NativeRdb::Rdb
         rowId = STATE_FAIL;
         switch (reminder->GetReminderType()) {
             case ReminderRequest::ReminderType::CALENDAR:
-                ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
+                ReminderCalendarStrategy::AppendValuesBucket(reminder, values);
                 ret = store.Insert(rowId, ReminderCalendarTable::TABLE_NAME, values);
                 break;
             case ReminderRequest::ReminderType::ALARM:
-                ReminderRequestAlarm::AppendValuesBucket(reminder, bundleOption, values);
+                ReminderAlarmStrategy::AppendValuesBucket(reminder, values);
                 ret = store.Insert(rowId, ReminderAlarmTable::TABLE_NAME, values);
                 break;
             case ReminderRequest::ReminderType::TIMER:
-                ReminderRequestTimer::AppendValuesBucket(reminder, bundleOption, values);
+                ReminderTimerStrategy::AppendValuesBucket(reminder, values);
                 ret = store.Insert(rowId, ReminderTimerTable::TABLE_NAME, values);
                 break;
             default:
@@ -596,7 +599,7 @@ int32_t ReminderStore::Insert(
     }
     int64_t rowId = STATE_FAIL;
     NativeRdb::ValuesBucket baseValues;
-    ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues);
+    ReminderStrategy::AppendValuesBucket(reminder, baseValues);
     
     rdbStore_->BeginTransaction();
     // insert reminder_base
@@ -613,17 +616,17 @@ int32_t ReminderStore::Insert(
     rowId = STATE_FAIL;
     switch (reminder->GetReminderType()) {
         case ReminderRequest::ReminderType::CALENDAR: {
-            ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
+            ReminderCalendarStrategy::AppendValuesBucket(reminder, values);
             ret = rdbStore_->Insert(rowId, ReminderCalendarTable::TABLE_NAME, values);
             break;
         }
         case ReminderRequest::ReminderType::ALARM: {
-            ReminderRequestAlarm::AppendValuesBucket(reminder, bundleOption, values);
+            ReminderAlarmStrategy::AppendValuesBucket(reminder, values);
             ret = rdbStore_->Insert(rowId, ReminderAlarmTable::TABLE_NAME, values);
             break;
         }
         case ReminderRequest::ReminderType::TIMER: {
-            ReminderRequestTimer::AppendValuesBucket(reminder, bundleOption, values);
+            ReminderTimerStrategy::AppendValuesBucket(reminder, values);
             ret = rdbStore_->Insert(rowId, ReminderTimerTable::TABLE_NAME, values);
             break;
         }
@@ -653,7 +656,7 @@ int32_t ReminderStore::Update(
     }
     int32_t rowId = STATE_FAIL;
     NativeRdb::ValuesBucket baseValues;
-    ReminderRequest::AppendValuesBucket(reminder, bundleOption, baseValues);
+    ReminderStrategy::AppendValuesBucket(reminder, baseValues);
 
     std::string updateCondition = ReminderBaseTable::REMINDER_ID
         + " = " + std::to_string(reminder->GetReminderId());
@@ -674,15 +677,15 @@ int32_t ReminderStore::Update(
     rowId = STATE_FAIL;
     switch (reminder->GetReminderType()) {
         case ReminderRequest::ReminderType::CALENDAR:
-            ReminderRequestCalendar::AppendValuesBucket(reminder, bundleOption, values);
+            ReminderCalendarStrategy::AppendValuesBucket(reminder, values);
             ret = rdbStore_->Update(rowId, ReminderCalendarTable::TABLE_NAME, values, updateCondition, whereArgs);
             break;
         case ReminderRequest::ReminderType::ALARM:
-            ReminderRequestAlarm::AppendValuesBucket(reminder, bundleOption, values);
+            ReminderAlarmStrategy::AppendValuesBucket(reminder, values);
             ret = rdbStore_->Update(rowId, ReminderAlarmTable::TABLE_NAME, values, updateCondition, whereArgs);
             break;
         case ReminderRequest::ReminderType::TIMER:
-            ReminderRequestTimer::AppendValuesBucket(reminder, bundleOption, values);
+            ReminderTimerStrategy::AppendValuesBucket(reminder, values);
             ret = rdbStore_->Update(rowId, ReminderTimerTable::TABLE_NAME, values, updateCondition, whereArgs);
             break;
         default:
@@ -753,16 +756,19 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
         case (static_cast<int32_t>(ReminderRequest::ReminderType::TIMER)): {
             reminder = new (std::nothrow) ReminderRequestTimer(reminderId);
             resultSet = Query(ReminderTimerTable::TABLE_NAME, ReminderTimerTable::SELECT_COLUMNS, reminderId);
+            ReminderTimerStrategy::RecoverFromDb(reminder, resultBase, resultSet);
             break;
         }
         case (static_cast<int32_t>(ReminderRequest::ReminderType::CALENDAR)): {
             reminder = new (std::nothrow) ReminderRequestCalendar(reminderId);
             resultSet = Query(ReminderCalendarTable::TABLE_NAME, ReminderCalendarTable::SELECT_COLUMNS, reminderId);
+            ReminderCalendarStrategy::RecoverFromDb(reminder, resultBase, resultSet);
             break;
         }
         case (static_cast<int32_t>(ReminderRequest::ReminderType::ALARM)): {
             reminder = new (std::nothrow) ReminderRequestAlarm(reminderId);
             resultSet = Query(ReminderAlarmTable::TABLE_NAME, ReminderAlarmTable::SELECT_COLUMNS, reminderId);
+            ReminderAlarmStrategy::RecoverFromDb(reminder, resultBase, resultSet);
             break;
         }
         default: {
@@ -771,8 +777,6 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
         }
     }
     if (reminder != nullptr) {
-        reminder->RecoverFromDbBase(resultBase);
-        reminder->RecoverFromDb(resultSet);
         ANSR_LOGI("BuildReminder success.");
     } else {
         ANSR_LOGW("BuildReminder fail.");

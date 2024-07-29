@@ -785,21 +785,6 @@ HWTEST_F(ReminderRequestTest, OnTimeZoneChange_00001, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: RecoverInt64FromDb_00001
- * @tc.desc: Test RecoverInt64FromDb parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5UYHP
- */
-HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00001, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NativeRdb::ResultSet> resultSet = nullptr;
-    std::string columnName = "columnName";
-    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->RecoverInt64FromDb(resultSet, columnName, columnType), 0);
-}
-
-/**
  * @tc.name: StringSplit_00001
  * @tc.desc: Test StringSplit parameters.
  * @tc.type: FUNC
@@ -991,7 +976,7 @@ HWTEST_F(ReminderRequestTest, IsAlerting_00001, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, GetButtonInfo_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->GetButtonInfo(), "");
+    EXPECT_EQ(rrc->SerializeButtonInfo(), "");
 }
 
 /**
@@ -1023,33 +1008,6 @@ HWTEST_F(ReminderRequestTest, GetShowTime_00002, Function | SmallTest | Level1)
     std::string ret = "8";
     std::string res = rrc->GetShowTime(showTime);
     EXPECT_EQ(res.substr(4, res.size()), ret);
-}
-
-/**
- * @tc.name: GetUid_00001
- * @tc.desc: Test GetUid parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderRequestTest, GetUid_00001, Function | SmallTest | Level1)
-{
-    int32_t userId = 1;
-    std::string bundleName = "bundleName";
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->GetUid(userId, bundleName), -1);
-}
-
-/**
- * @tc.name: GetUserId_00001
- * @tc.desc: Test GetUserId parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderRequestTest, GetUserId_00001, Function | SmallTest | Level1)
-{
-    int32_t uid = 1;
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->GetUserId(uid), 0);
 }
 
 /**
@@ -1210,49 +1168,6 @@ HWTEST_F(ReminderRequestTest, OnStart_00001, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: RecoverInt64FromDb_00002
- * @tc.desc: Test RecoverInt64FromDb parameters.
- * @tc.type: FUNC
- * @tc.require: issueI65R21
- */
-HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00002, Function | SmallTest | Level1)
-
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-    std::string columnName = "this is columnName";
-    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType::INT;
-    int64_t result = rrc->RecoverInt64FromDb(resultSet, columnName, columnType);
-    EXPECT_EQ(result, 0);
-
-    ReminderRequest::DbRecoveryType columnType2 = ReminderRequest::DbRecoveryType::LONG;
-    int64_t result2 = rrc->RecoverInt64FromDb(resultSet, columnName, columnType2);
-    EXPECT_EQ(result2, 0);
-    rrc->RecoverFromDb(resultSet);
-    rrc->RecoverActionButton(resultSet);
-    rrc->RecoverActionButton(nullptr);
-}
-
-/**
- * @tc.name: RecoverInt64FromDb_00003
- * @tc.desc: Test RecoverInt64FromDb parameters.
- * @tc.type: FUNC
- * @tc.require: issueI65R21
- */
-HWTEST_F(ReminderRequestTest, RecoverInt64FromDb_00003, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-    std::string columnName = "this is columnName";
-
-    ReminderRequest::DbRecoveryType columnType = ReminderRequest::DbRecoveryType(3);
-    int64_t result2 = rrc->RecoverInt64FromDb(resultSet, columnName, columnType);
-    EXPECT_EQ(result2, 0);
-}
-
-/**
  * @tc.name: RecoverWantAgent_00002
  * @tc.desc: Test RecoverWantAgent parameters.
  * @tc.type: FUNC
@@ -1332,20 +1247,6 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00002, Function | SmallTest | Leve
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
         reminderRequestChild->CreateWantAgent(element);
     EXPECT_EQ(WantAgent, nullptr);
-}
-
-/**
- * @tc.name: AddColumn_00002
- * @tc.desc: Test AddColumn parameters.
- * @tc.type: FUNC
- * @tc.require: issueI65R21
- */
-HWTEST_F(ReminderRequestTest, AddColumn_00002, Function | SmallTest | Level1)
-{
-    std::string name = "this is name";
-    std::string type = "this is type";
-    ReminderTable::AddColumn(name, type, true);
-    ReminderTable::AddColumn(name, type, false);
 }
 
 /**
@@ -1467,7 +1368,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00003, Function | SmallTest | Lev
     uint8_t type = 0;
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 2);
-    rrc->RecoverWantAgent(wantAgentInfo, type);
+    rrc->DeserializeWantAgent(wantAgentInfo, type);
 }
 
 /**
@@ -1483,7 +1384,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00004, Function | SmallTest | Lev
     uint8_t type = 1;
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 2);
-    rrc->RecoverWantAgent(wantAgentInfo, type);
+    rrc->DeserializeWantAgent(wantAgentInfo, type);
 }
 
 /**
@@ -1499,7 +1400,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00005, Function | SmallTest | Lev
     uint8_t type = 2;
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 2);
-    rrc->RecoverWantAgent(wantAgentInfo, type);
+    rrc->DeserializeWantAgent(wantAgentInfo, type);
 }
 
 /**
@@ -1515,7 +1416,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00006, Function | SmallTest | Lev
     uint8_t type = 0;
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 3);
-    rrc->RecoverWantAgent(wantAgentInfo, type);
+    rrc->DeserializeWantAgent(wantAgentInfo, type);
 }
 
 /**
@@ -2017,23 +1918,23 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00007, Function | SmallTest | Lev
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string jsonValue = "";
-    rrc->RecoverWantAgent(jsonValue, 0);
+    rrc->DeserializeWantAgent(jsonValue, 0);
     EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
-    rrc->RecoverWantAgent(jsonValue, 1);
+    rrc->DeserializeWantAgent(jsonValue, 1);
     EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
 
     jsonValue = R"(})";
-    rrc->RecoverWantAgent(jsonValue, 1);
+    rrc->DeserializeWantAgent(jsonValue, 1);
     EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
 
     jsonValue = R"({})";
-    rrc->RecoverWantAgent(jsonValue, 1);
+    rrc->DeserializeWantAgent(jsonValue, 1);
     EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
 
     jsonValue = "fawexcdvasdfwessdf";
-    rrc->RecoverWantAgent(jsonValue, 1);
+    rrc->DeserializeWantAgent(jsonValue, 1);
     EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
 }
 
@@ -2065,59 +1966,6 @@ HWTEST_F(ReminderRequestTest, MarshallingWantParameters_00001, Function | SmallT
     ret = rrc->ReadWantParametersFromParcel(p2, params2);
     EXPECT_EQ(ret, true);
     EXPECT_EQ(params2.GetStringParam(key), value);
-}
-
-/**
- * @tc.name: AppendWantAgentValuesBucket_00001
- * @tc.desc: Test AppendWantAgentValuesBucket parameters.
- * @tc.type: FUNC
- * @tc.require: issue#I94VJT
- */
-HWTEST_F(ReminderRequestTest, AppendWantAgentValuesBucket_00001, Function | SmallTest | Level1)
-{
-    sptr<ReminderRequestChild> rrc = new ReminderRequestChild;
-    NativeRdb::ValuesBucket values;
-    ReminderRequest::AppendWantAgentValuesBucket(rrc, values);
-
-    NativeRdb::ValueObject object;
-    values.GetObject(ReminderBaseTable::WANT_AGENT, object);
-    std::string result;
-    object.GetString(result);
-    EXPECT_NE(result.find("pkgName"), -1);
-
-    values.GetObject(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, object);
-    object.GetString(result);
-    EXPECT_NE(result.find("pkgName"), -1);
-}
-
-/**
- * @tc.name: AppendWantAgentValuesBucket_00002
- * @tc.desc: Test AppendWantAgentValuesBucket parameters.
- * @tc.type: FUNC
- * @tc.require: issue#I94VJT
- */
-HWTEST_F(ReminderRequestTest, AppendWantAgentValuesBucket_00002, Function | SmallTest | Level1)
-{
-    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
-    wantInfo->pkgName = "test";
-    auto maxWantInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
-    maxWantInfo->pkgName = "maxTest";
-
-    sptr<ReminderRequestChild> rrc = new ReminderRequestChild;
-    rrc->SetWantAgentInfo(wantInfo);
-    rrc->SetMaxScreenWantAgentInfo(maxWantInfo);
-    NativeRdb::ValuesBucket values;
-    ReminderRequest::AppendWantAgentValuesBucket(rrc, values);
-
-    NativeRdb::ValueObject object;
-    values.GetObject(ReminderBaseTable::WANT_AGENT, object);
-    std::string result;
-    object.GetString(result);
-    EXPECT_NE(result.find("test"), -1);
-
-    values.GetObject(ReminderBaseTable::MAX_SCREEN_WANT_AGENT, object);
-    object.GetString(result);
-    EXPECT_NE(result.find("maxTest"), -1);
 }
 
 /**
@@ -2310,8 +2158,6 @@ HWTEST_F(ReminderRequestTest, InitCreatorUid_00001, Function | SmallTest | Level
 
     rrc->InitCreatorUid(-1);
     EXPECT_EQ(rrc->GetCreatorUid(), -1);
-
-    EXPECT_EQ(ReminderRequest::GetAppIndex(20020152), 0);
 }
 }
 }

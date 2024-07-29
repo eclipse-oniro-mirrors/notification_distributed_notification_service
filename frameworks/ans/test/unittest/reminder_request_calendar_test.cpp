@@ -421,9 +421,6 @@ HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_03000, F
     struct tm nowTime;
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
-    std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-    calendar->RecoverFromDb(resultSet);
 
     EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext),
     calendar->GetNextTriggerTime());
@@ -954,9 +951,6 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
 
-    std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-    calendar->RecoverFromDb(resultSet);
     bool result = calendar->IsRepeatDay(1);
     EXPECT_EQ(result, false);
 }
@@ -1102,9 +1096,6 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromOldVersion_00001, Function | Sm
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
 
-    std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-    calendar->RecoverFromOldVersion(resultSet);
     bool result = calendar->IsRepeatDay(1);
     EXPECT_EQ(result, false);
 }
@@ -1501,15 +1492,6 @@ HWTEST_F(ReminderRequestCalendarTest, AppendValuesBucket_00001, Function | Small
     std::vector<uint8_t> daysOfWeek;
     sptr<ReminderRequest> calendar = new ReminderRequestCalendar(nowTime, repeatMonths, repeatDays, daysOfWeek);
     EXPECT_NE(nullptr, calendar);
-    calendar->reminderId_ = 100;
-
-    NativeRdb::ValuesBucket bucket;
-    NativeRdb::ValueObject object;
-    ReminderRequestCalendar::AppendValuesBucket(calendar, nullptr, bucket);
-    bucket.GetObject(ReminderCalendarTable::REMINDER_ID, object);
-    int32_t result {0};
-    object.GetInt(result);
-    EXPECT_EQ(result, 100);
 }
 
 /**
