@@ -178,17 +178,17 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
         switch (reminderType) {
             case (static_cast<int32_t>(ReminderRequest::ReminderType::TIMER)): {
                 reminderReq = new (std::nothrow) ReminderRequestTimer(reminderId);
-                ReminderTimerStrategy::RecoverFromOldVersion(reminder, queryResultSet);
+                ReminderTimerStrategy::RecoverFromOldVersion(reminderReq, queryResult);
                 break;
             }
             case (static_cast<int32_t>(ReminderRequest::ReminderType::CALENDAR)): {
                 reminderReq = new (std::nothrow) ReminderRequestCalendar(reminderId);
-                ReminderCalendarStrategy::RecoverFromOldVersion(reminder, queryResultSet);
+                ReminderCalendarStrategy::RecoverFromOldVersion(reminderReq, queryResult);
                 break;
             }
             case (static_cast<int32_t>(ReminderRequest::ReminderType::ALARM)): {
                 reminderReq = new (std::nothrow) ReminderRequestAlarm(reminderId);
-                ReminderAlarmStrategy::RecoverFromOldVersion(reminder, queryResultSet);
+                ReminderAlarmStrategy::RecoverFromOldVersion(reminderReq, queryResult);
                 break;
             }
             default: {
