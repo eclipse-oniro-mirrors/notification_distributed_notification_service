@@ -197,6 +197,24 @@ public:
     static bool ReasonCToJS(const int32_t &inType, int32_t &outType);
 
     /**
+     * @brief Converts reason type from native to js
+     *
+     * @param inType Indicates a native reason type
+     * @param outType Indicates a js reason type
+     * @return Returns true if success, returns false otherwise
+     */
+    static void ReasonCToJSExt(const int32_t &inType, int32_t &outType);
+
+    /**
+     * @brief Converts reason type from native to js
+     *
+     * @param inType Indicates a native reason type
+     * @param outType Indicates a js reason type
+     * @return Returns true if success, returns false otherwise
+     */
+    static void ReasonCToJSSecondExt(const int32_t &inType, int32_t &outType);
+
+    /**
      * @brief Converts do-not-disturb type from js to native
      *
      * @param inType Indicates a js DoNotDisturbType object
