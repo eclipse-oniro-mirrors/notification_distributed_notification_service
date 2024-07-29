@@ -135,8 +135,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationSubQueue_->wait(handler);
+    std::string appUserId = (subscribeInfo == nullptr) ? "all" : std::to_string(subscribeInfo->GetAppUserId());
     message.Message("Remove subscriber: " + GetClientBundleName() + " user " +
-        std::to_string(subscribeInfo->GetAppUserId()) + " " + std::to_string(result));
+        appUserId + " " + std::to_string(result));
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
