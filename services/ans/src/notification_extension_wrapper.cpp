@@ -24,8 +24,6 @@
  
 #include "common_event_subscriber.h"
 #include "system_event_observer.h"
-#include "interface_system_event.h"
-#include "system_event_subscriber.h"
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
@@ -65,15 +63,15 @@ void ExtensionWrapper::InitExtentionWrapper()
     setLocalSwitch_ = (SET_LOCAL_SWITCH)dlsym(extensionWrapperHandle_, "SetlocalSwitch");
     initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
-    reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
     updateByBundle_ = (UPDATE_BY_BUNDLE)dlsym(extensionWrapperHandle_, "UpdateByBundle");
+    reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
     if (syncAdditionConfig_ == nullptr
         || getUnifiedGroupInfo_ == nullptr
         || updateByCancel_ == nullptr
         || initSummary_ == nullptr
         || localControl_ == nullptr
-        || reminderControl_ == nullptr
-        || updateByBundle_ == nullptr) {
+        || updateByBundle_ == nullptr
+        || reminderControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
@@ -96,6 +94,7 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
     ANS_LOGD("CheckIfSetlocalSwitch enter");
     if (extensionWrapperHandle_ == nullptr) {
         ANS_LOGE("CheckIfSetlocalSwitch extension wrapper symbol failed");
+        return;
     }
     if (!isRegisterDataSettingObserver) {
         RegisterDataSettingObserver();
@@ -160,6 +159,15 @@ ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &r
     return getUnifiedGroupInfo_(request);
 }
 
+int32_t ExtensionWrapper::ReminderControl(const std::string &bundleName)
+{
+    if (reminderControl_ == nullptr) {
+        ANS_LOGE("ReminderControl wrapper symbol failed");
+        return 0;
+    }
+    return reminderControl_(bundleName);
+}
+
 int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
 {
     if (localControl_ == nullptr) {
@@ -177,15 +185,6 @@ void ExtensionWrapper::UpdateByBundle(const std::string bundleName, int deleteRe
     }
     int32_t deleteType = convertToDelType(deleteReason);
     updateByBundle_(bundleName, deleteType);
-}
-
-int32_t ExtensionWrapper::ReminderControl(const std::string &bundleName)
-{
-    if (reminderControl_ == nullptr) {
-        ANS_LOGE("ReminderControl wrapper symbol failed");
-        return 0;
-    }
-    return reminderControl_(bundleName);
 }
 
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)

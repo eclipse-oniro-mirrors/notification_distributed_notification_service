@@ -34,6 +34,7 @@ public:
 
 private:
     void init(std::shared_ptr<ReminderDataManager> &reminderDataManager) const;
+    void SubscribeSystemAbility(std::shared_ptr<ReminderDataManager> &reminderDataManager) const;
 
 class ReminderEventSubscriber : public EventFwk::CommonEventSubscriber {
 public:

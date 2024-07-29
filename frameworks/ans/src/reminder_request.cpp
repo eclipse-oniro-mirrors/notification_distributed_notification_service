@@ -1199,6 +1199,7 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
 
@@ -1211,7 +1212,6 @@ bool ReminderRequest::Marshalling(Parcel &parcel) const
     WRITE_INT32_RETURN_FALSE_LOG(parcel, reminderId_, "reminderId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
 
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
     WRITE_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
     WRITE_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
     WRITE_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
@@ -1323,6 +1323,7 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
     READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    READ_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
     READ_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
     READ_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
 
@@ -1337,7 +1338,6 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 
     READ_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
 
-    READ_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
     READ_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
     READ_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
     READ_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
@@ -1613,23 +1613,23 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWan
     AppExecFwk::ElementName &element) const
 {
     int32_t requestCode = 10;
-    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
-    flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> wantFlags;
+    wantFlags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetAction(REMINDER_EVENT_CLICK_ALERT);
     want->SetParam(PARAM_REMINDER_ID, reminderId_);
-    std::vector<std::shared_ptr<AAFwk::Want>> wants;
-    wants.push_back(want);
-    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
+    std::vector<std::shared_ptr<AAFwk::Want>> wantes;
+    wantes.push_back(want);
+    AbilityRuntime::WantAgent::WantAgentInfo wantInfo(
         requestCode,
         AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
-        flags,
-        wants,
+        wantFlags,
+        wantes,
         nullptr
     );
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    auto wantAgent = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, userId_);
-    IPCSkeleton::SetCallingIdentity(identity);
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
+    auto wantAgent = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantInfo, userId_);
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
     return wantAgent;
 }
 
@@ -2072,11 +2072,15 @@ uint64_t ReminderRequest::GetTriggerTime(const time_t now, const time_t nextTrig
     struct tm test;
     (void)localtime_r(&triggerTime, &test);
     ANSR_LOGI("NextTriggerTime: year=%{public}d, mon=%{public}d, day=%{public}d, hour=%{public}d, "
-        "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
+            "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
         GetActualTime(TimeTransferType::YEAR, test.tm_year),
         GetActualTime(TimeTransferType::MONTH, test.tm_mon),
-        test.tm_mday, test.tm_hour, test.tm_min, test.tm_sec,
-        GetActualTime(TimeTransferType::WEEK, test.tm_wday), (long long)triggerTime);
+        test.tm_mday,
+        test.tm_hour,
+        test.tm_min,
+        test.tm_sec,
+        GetActualTime(TimeTransferType::WEEK, test.tm_wday),
+        (long long)triggerTime);
 
     if (static_cast<int64_t>(triggerTime) <= 0) {
         return 0;

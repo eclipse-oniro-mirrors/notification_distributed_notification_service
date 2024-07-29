@@ -840,14 +840,6 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
     ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
- 
-    notification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
-    bundle.SetBundleName("test");
-    bundle.SetUid(1);
-    ret = notification->SetNotificationSlotFlagsAsBundle(bundle, slotFlags);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-    ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
  
 /*

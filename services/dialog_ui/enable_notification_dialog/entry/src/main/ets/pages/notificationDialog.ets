@@ -34,13 +34,28 @@ const bottomPopoverTypes = ['default', 'phone'];
 
 let storage = LocalStorage.getShared();
 
-@Extend(Button) function customizeButton() {
+@Extend(Button) function rightCustomizeButton() {
   .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
-  .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
+  .fontColor($r('sys.color.font_emphasize'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
   .fontWeight(FontWeight.Medium)
   .height(Constants.BUTTON_HEIGHT)
   .flexGrow(Constants.FLEX_GROW)
+  .margin({
+    left: Constants.BUTTON_LEFT
+  })
+}
+
+@Extend(Button) function leftCustomizeButton() {
+  .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
+  .fontColor($r('sys.color.font_emphasize'))
+  .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
+  .fontWeight(FontWeight.Medium)
+  .height(Constants.BUTTON_HEIGHT)
+  .flexGrow(Constants.FLEX_GROW)
+  .margin({
+    right: Constants.BUTTON_RIGHT
+  })
 }
 
 @Entry(storage)
@@ -52,7 +67,10 @@ struct NotificationDialogPage {
     builder: PermissionDialog({ isUpdate: $isUpdate }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
-    customStyle: true
+    customStyle: true,
+    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
+      console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
+    }
   });
 
   build() {}
@@ -100,7 +118,7 @@ struct PermissionDialog {
                     Text() {
                       Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
                     }
-                    .fontSize(Constants.DIALOG_REQ_FONT_SIZE)
+                    .fontSize($r('sys.float.ohos_id_text_size_headline8'))
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
                     .fontWeight(FontWeight.Bold)
                     .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
@@ -139,17 +157,17 @@ struct PermissionDialog {
                   .onClick(async (): Promise<void> => {
                    await this.enableNotification(false);
                   })
-                  .customizeButton()
+                  .leftCustomizeButton()
                 Divider()
-                  .color($r('sys.color.ohos_id_color_list_separator'))
+                  .color($r('sys.color.comp_divider'))
                   .vertical(true)
                   .height(Constants.DIVIDER_HEIGHT)
-                  .opacity(.2)
+                  .strokeWidth(Constants.DIVIDER_WIDTH)
                 Button($r('app.string.ALLOW'))
                   .onClick(async (): Promise<void> => {
                     await this.enableNotification(true);
                   })
-                  .customizeButton()
+                  .rightCustomizeButton()
               }
               .margin({ left: Constants.BUTTON_MARGIN_LEFT, right: Constants.BUTTON_MARGIN_RIGHT })
             }

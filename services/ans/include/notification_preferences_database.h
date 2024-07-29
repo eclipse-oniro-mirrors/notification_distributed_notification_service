@@ -314,14 +314,10 @@ private:
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetEnableAllNotification(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId);
-
-    static const std::map<std::string,
-        std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
-        slotMap_;
-    static const std::map<std::string, std::function<void(NotificationPreferencesDatabase *,
-                                           NotificationPreferencesInfo::BundleInfo &, std::string &)>>
-        bundleMap_;
-
+    void SetSoltProperty(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
+        const std::string &findString, const int32_t &userId);
+    void ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
+        const std::string &findString, const int32_t &userId);
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
 };
 } // namespace Notification

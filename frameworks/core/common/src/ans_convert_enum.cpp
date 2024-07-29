@@ -307,7 +307,8 @@ void AnsEnumUtil::ReasonCToJSExt(const int &inType, int &outType)
     }
 }
 
-void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType){
+void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType)
+{
     switch (inType) {
         case NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::TRIGGER_TEN_MINUTES_REASON_DELETE);

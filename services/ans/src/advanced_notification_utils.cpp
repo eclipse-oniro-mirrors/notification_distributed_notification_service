@@ -107,11 +107,14 @@ std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueu
 
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::string bundle = "";
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
         bundle = GetClientBundleName();
         if (bundle.empty()) {
+            message.Message("bundleOption is nullptr", true);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return nullptr;
         }
     }
@@ -119,7 +122,8 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
     int32_t uid = IPCSkeleton::GetCallingUid();
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (bundleOption == nullptr) {
-        ANS_LOGE("Failed to create NotificationBundleOption instance");
+        message.Message("Failed to create instance" + std::to_string(uid), true);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return nullptr;
     }
     return bundleOption;
@@ -591,7 +595,7 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
 {
     ANS_LOGD("Called.");
     int32_t userId = 0;
-    if (!GetActiveUserId(userId)) {
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id.");
         return;
     }
@@ -1786,12 +1790,14 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
+    uint32_t slotFlags = 0b111111;
     if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
         ErrCode saveRef = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
-            bundleOption, 0b111111);
+            bundleOption, slotFlags);
         if (saveRef != ERR_OK) {
             ANS_LOGE("Set slotflags error! code: %{public}d", saveRef);
         }
+        UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
     }
 }
 
@@ -1922,6 +1928,9 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
 {
+    if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsReminderTrustList(bundleName)) {
+        return true;
+    }
 #ifdef ENABLE_ANS_EXT_WRAPPER
     int32_t ctrlResult = EXTENTION_WRAPPER->ReminderControl(bundleName);
     if (ctrlResult != ERR_OK) {

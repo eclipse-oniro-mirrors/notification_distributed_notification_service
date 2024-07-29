@@ -910,6 +910,8 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
         return nullptr;
     }
 
+    ConvertJsonToAgentBundle(pRequest, jsonObject);
+
     return pRequest;
 }
 

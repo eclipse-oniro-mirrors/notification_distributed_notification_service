@@ -195,6 +195,14 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_UID;
             }
             request->SetOwnerUid(uid);
+            int32_t agentUid = IPCSkeleton::GetCallingUid();
+            std::shared_ptr<NotificationBundleOption> agentBundle =
+                std::make_shared<NotificationBundleOption>(bundle, agentUid);
+            if (agentBundle == nullptr) {
+                ANS_LOGE("Failed to create agentBundle instance");
+                return ERR_ANS_INVALID_BUNDLE;
+            }
+            request->SetAgentBundle(agentBundle);
             bundle = sourceBundleName;
         }
         request->SetOwnerBundleName(bundle);
@@ -703,7 +711,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         ANS_LOGE("Make notification record failed.");
         return;
     }
-    int32_t userId = record->notification->GetUserId();
+    int32_t userId = record->notification->GetRecvUserId();
     std::string enable;
     std::string profileId;
     QueryDoNotDisturbProfile(userId, enable, profileId);
@@ -720,7 +728,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
-        ANS_LOGE("Get do not disturb profile failed.");
+        ANS_LOGE("profile failed. pid: %{public}s, userid: %{public}d", profileId.c_str(), userId);
         return;
     }
     if (profile == nullptr) {
@@ -1183,9 +1191,8 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
     }
     std::string message = "notification not exist";
     OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 5)
-        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS);
-    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage,
-        NotificationConstant::DEFAULT_REASON_DELETE, message);
+        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS).NotificationId(notificationId);
+    ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::DEFAULT_REASON_DELETE, message);
     ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
@@ -1220,11 +1227,10 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         return ERR_OK;
     }
     RemoveFromDelayedNotificationList(key);
-    std::string message = "notification not exist";
+    std::string message = "notification not exist. key:" + key + ".";
     OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 8)
-        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS);
-    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage,
-        removeReason, message);
+        .ErrorCode(ERR_ANS_INVALID_BUNDLE);
+    ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
     ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
@@ -1416,31 +1422,7 @@ ErrCode AdvancedNotificationService::SetRecentNotificationCount(const std::strin
 void AdvancedNotificationService::UpdateRecentNotification(sptr<Notification> &notification,
     bool isDelete, int32_t reason)
 {
-    for (auto recentNotification : recentInfo_->list) {
-        if (recentNotification->notification->GetKey() == notification->GetKey()) {
-            if (!isDelete) {
-                recentInfo_->list.remove(recentNotification);
-                recentNotification->isActive = true;
-                recentNotification->notification = notification;
-                recentInfo_->list.emplace_front(recentNotification);
-            } else {
-                recentNotification->isActive = false;
-                recentNotification->deleteReason = reason;
-                recentNotification->deleteTime = GetNowSysTime();
-            }
-            return;
-        }
-    }
-
-    if (!isDelete) {
-        if (recentInfo_->list.size() >= recentInfo_->recentCount) {
-            recentInfo_->list.pop_back();
-        }
-        auto recentNotification = std::make_shared<RecentNotification>();
-        recentNotification->isActive = true;
-        recentNotification->notification = notification;
-        recentInfo_->list.emplace_front(recentNotification);
-    }
+    return;
 }
 static bool SortNotificationsByLevelAndTime(
     const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second)

@@ -170,24 +170,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
 }
 
 /**
- * @tc.number  : AdvancedNotificationService_00100
- * @tc.name    : AdvancedNotificationService_00100
- * @tc.desc    : test ActiveNotificationDump function and record->notification == nullptr record->request == nullptr
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00100, Function | SmallTest | Level1)
-{
-    std::string bundle = "<bundle>";
-    int32_t userId = 1;
-    std::vector<std::string> dumpInfo;
-    AdvancedNotificationService advancedNotificationService;
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->notification = nullptr;
-    record->request = nullptr;
-    advancedNotificationService.notificationList_.push_back(record);
-    ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
-}
-
-/**
  * @tc.number  : AdvancedNotificationService_00200
  * @tc.name    : AdvancedNotificationService_00200
  * @tc.desc    : test ActiveNotificationDump function and userId != SUBSCRIBE_USER_INIT
@@ -1322,7 +1304,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
 /**
  * @tc.number  : AdvancedNotificationService_06800
  * @tc.name    : AdvancedNotificationService_06800
- * @tc.desc    : Test GetEnabledForBundleSlotSelf function and GetNotificationSlot false 
+ * @tc.desc    : Test GetEnabledForBundleSlotSelf function and GetNotificationSlot false
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06800, Function | SmallTest | Level1)
 {

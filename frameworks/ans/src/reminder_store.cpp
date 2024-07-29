@@ -159,43 +159,43 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
         + ReminderTable::TABLE_NAME;
     std::vector<sptr<ReminderRequest>> reminders;
     std::vector<std::string> whereArgs;
-    auto queryResultSet = store.QuerySql(sql, whereArgs);
-    if (queryResultSet == nullptr) {
+    auto queryResult = store.QuerySql(sql, whereArgs);
+    if (queryResult == nullptr) {
         return reminders;
     }
 
-    bool isAtLastRow = false;
-    queryResultSet->IsAtLastRow(isAtLastRow);
-    while (!isAtLastRow) {
-        queryResultSet->GoToNextRow();
+    bool isLastRow = false;
+    queryResult->IsAtLastRow(isLastRow);
+    while (!isLastRow) {
+        queryResult->GoToNextRow();
         int32_t reminderId;
         int32_t reminderType;
-        GetInt32Val(queryResultSet, ReminderTable::REMINDER_ID, reminderId);
-        GetInt32Val(queryResultSet, ReminderTable::REMINDER_TYPE, reminderType);
+        GetInt32Val(queryResult, ReminderTable::REMINDER_ID, reminderId);
+        GetInt32Val(queryResult, ReminderTable::REMINDER_TYPE, reminderType);
 
-        sptr<ReminderRequest> reminder = nullptr;
+        sptr<ReminderRequest> reminderReq = nullptr;
         switch (reminderType) {
             case (static_cast<int32_t>(ReminderRequest::ReminderType::TIMER)): {
-                reminder = new (std::nothrow) ReminderRequestTimer(reminderId);
+                reminderReq = new (std::nothrow) ReminderRequestTimer(reminderId);
                 break;
             }
             case (static_cast<int32_t>(ReminderRequest::ReminderType::CALENDAR)): {
-                reminder = new (std::nothrow) ReminderRequestCalendar(reminderId);
+                reminderReq = new (std::nothrow) ReminderRequestCalendar(reminderId);
                 break;
             }
             case (static_cast<int32_t>(ReminderRequest::ReminderType::ALARM)): {
-                reminder = new (std::nothrow) ReminderRequestAlarm(reminderId);
+                reminderReq = new (std::nothrow) ReminderRequestAlarm(reminderId);
                 break;
             }
             default: {
                 break;
             }
         }
-        if (reminder != nullptr) {
-            reminder->RecoverFromOldVersion(queryResultSet);
-            reminders.push_back(reminder);
+        if (reminderReq != nullptr) {
+            reminderReq->RecoverFromOldVersion(queryResult);
+            reminders.push_back(reminderReq);
         }
-        queryResultSet->IsAtLastRow(isAtLastRow);
+        queryResult->IsAtLastRow(isLastRow);
     }
     return reminders;
 }

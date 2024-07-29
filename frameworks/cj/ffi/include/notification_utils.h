@@ -21,8 +21,8 @@
 namespace OHOS {
 namespace CJSystemapi {
 
-constexpr int32_t STR_MAX_SIZE = 200;
-constexpr int32_t LONG_STR_MAX_SIZE = 1024;
+constexpr int32_t STR_MAX_SIZE = 204;
+constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr int32_t EOK = 0;
 
 struct CNotificationBasicContent {

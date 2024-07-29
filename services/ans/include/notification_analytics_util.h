@@ -59,6 +59,7 @@ public:
     HaMetaMessage& AgentBundleName(const std::string& agentBundleName);
     HaMetaMessage& TypeCode(int32_t typeCode);
     HaMetaMessage& NotificationId(int32_t notificationId);
+    HaMetaMessage& SlotType(int32_t slotType);
     std::string GetMessage() const;
     HaMetaMessage& Checkfailed(bool checkfailed);
     bool NeedReport() const;
@@ -69,7 +70,7 @@ public:
     int32_t notificationId_ = -1;
     std::string agentBundleName_ = "";
     int32_t typeCode_ = -1;
-private:
+    uint32_t slotType_ = -1;
     uint32_t sceneId_;
     uint32_t branchId_;
     uint32_t errorCode_ = ERR_OK;
@@ -84,9 +85,7 @@ public:
 
     static void ReportDeleteFailedEvent(const sptr<NotificationRequest>& request, HaMetaMessage& message);
 
-    static void ReportModifyFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
-
-    static void ReportModifySuccessEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+    static void ReportModifyEvent(const HaMetaMessage& message);
 
     static void ReportDeleteFailedEvent(const HaMetaMessage& message);
 

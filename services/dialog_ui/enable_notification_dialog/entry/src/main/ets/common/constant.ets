@@ -92,7 +92,7 @@ export default class Constants {
   static OFFSET = 100;
   static CLICK_SHADOW_LENGTH = 48;
   static DIVIDER = '1px';
-  static DIVIDER_HEIGHT = 40;
+  static DIVIDER_HEIGHT = 24;
   public static DIVIDER_WIDTH = '2px';
   static DIVIDER_MARGIN_RIGHT_PERMISSION = 52;
   static DIVIDER_MARGIN_RIGHT_APPLICATION = 68;
@@ -118,11 +118,11 @@ export default class Constants {
 
   // request text of dialog
   static DIALOG_REQ_FONT_SIZE = 20;
-  static DIALOG_REQ_MARGIN_TOP = 18;
-  static DIALOG_REQ_MARGIN_BUTTOM = 18;
+  static DIALOG_REQ_MARGIN_TOP = 16;
+  static DIALOG_REQ_MARGIN_BUTTOM = 16;
   static DIALOG_REQ_MARGIN_LEFT = 24;
   static DIALOG_REQ_MARGIN_RIGHT = 24;
-  public static DIALOG_REQ_LINE_HEIGHT = 27;
+  public static DIALOG_REQ_LINE_HEIGHT = 24;
 
   // description text of dialog
   static DIALOG_DESP_FONT_SIZE = 16;

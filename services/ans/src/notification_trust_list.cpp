@@ -17,6 +17,7 @@
 namespace OHOS {
 namespace Notification {
 
+constexpr static uint32_t REMINDER_LIST_INDEX = 2;
 NotificationTrustList::NotificationTrustList()
 {
     GetCcmPrivilegesConfig();
@@ -44,13 +45,22 @@ void NotificationTrustList::GetCcmPrivilegesConfig()
     }
     for (auto &affect : affects.items()) {
         std::string affects_value = affect.value().get<std::string>();
-        if (affects_value.length() < PRIVILEGES_CONFIG_MIN_LEN ||
-            affects_value[PRIVILEGES_BANNER_INDEX] == PRIVILEGES_BANNER_NOT_ALLOW) {
-            continue;
+        if (affects_value.length() >= PRIVILEGES_CONFIG_MIN_LEN &&
+            affects_value[PRIVILEGES_BANNER_INDEX] != PRIVILEGES_BANNER_NOT_ALLOW) {
+            notificationSlotFlagsTrustlist_.insert(affect.key());
+        }
+        if (affects_value.length() >= REMINDER_LIST_INDEX + 1 &&
+            affects_value[REMINDER_LIST_INDEX] != PRIVILEGES_BANNER_NOT_ALLOW) {
+            reminderTrustlist_.insert(affect.key());
         }
         notificationSlotFlagsTrustlist_.insert(affect.key());
     }
     return;
+}
+
+bool NotificationTrustList::IsReminderTrustList(const std::string& bundleName)
+{
+    return reminderTrustlist_.count(bundleName);
 }
 
 bool NotificationTrustList::IsSlotFlagsTrustlistAsBundle(const sptr<NotificationBundleOption> &bundleOption)

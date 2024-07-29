@@ -80,7 +80,6 @@
         "device_manager",
         "kv_store",
         "ffrt",
-        "config_policy",
         "device_standby",
         "resource_management",
         "config_policy",
