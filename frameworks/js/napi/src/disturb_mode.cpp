@@ -282,6 +282,10 @@ bool ParseProfilesParameters(
             return false;
         }
         sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+        if (profile == nullptr) {
+            ANS_LOGE("Failed to create NotificationDoNotDisturbProfile.");
+            return false;
+        }
         if (!GetDoNotDisturbProfile(env, nProfile, profile)) {
             return false;
         }
