@@ -566,13 +566,21 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
                 continue;
             }
             auto requestContent = notification->GetNotificationRequest().GetContent();
-            if (requestContent->GetContentType() == NotificationContent::Type::LIVE_VIEW &&
+            if (notification->GetNotificationRequest().IsCommonLiveView() &&
                 requestContent->GetNotificationContent() != nullptr) {
                 auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
                     requestContent->GetNotificationContent());
                 liveViewContent->ClearPictureMap();
                 liveViewContent->ClearPictureMarshallingMap();
                 ANS_LOGD("live view batch delete clear picture");
+            }
+            if (notification->GetNotificationRequest().IsSystemLiveView() &&
+                requestContent->GetNotificationContent() != nullptr) {
+                auto localLiveViewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
+                    requestContent->GetNotificationContent());
+                localLiveViewContent->ClearButton();
+                localLiveViewContent->ClearCapsuleIcon();
+                ANS_LOGD("local live view batch delete clear picture");
             }
             if (IsSubscribedBysubscriber(record, notification)) {
                 currNotifications.emplace_back(notification);

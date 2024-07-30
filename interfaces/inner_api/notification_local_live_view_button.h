@@ -100,6 +100,10 @@ public:
      */
     static NotificationLocalLiveViewButton *Unmarshalling(Parcel &parcel);
 
+    void ClearButtonIcons();
+
+    void ClearButtonIconsResource();
+
 private:
     /**
      * @brief Read a NotificationConversationalMessage object from a Parcel.

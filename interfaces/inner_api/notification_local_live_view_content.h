@@ -163,6 +163,10 @@ public:
      */
     static NotificationLocalLiveViewContent *Unmarshalling(Parcel &parcel);
 
+    void ClearButton();
+
+    void ClearCapsuleIcon();
+
 protected:
     /**
      * @brief Read a NotificationConversationalContent object from a Parcel.
