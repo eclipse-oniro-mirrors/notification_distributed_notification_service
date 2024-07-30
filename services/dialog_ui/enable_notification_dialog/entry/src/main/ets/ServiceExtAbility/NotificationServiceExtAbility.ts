@@ -140,6 +140,8 @@ export class EnableNotificationDialog {
           isTopmost: true
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
+        let dis = display.getDefaultDisplaySync();
+        await subWindow?.resize(dis.width, dis.height);
         await subWindow.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
