@@ -258,6 +258,16 @@ bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
         case NotificationConstant::FLOW_CONTROL_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::FLOW_CONTROL_REASON_DELETE);
             break;
+        default:
+            ReasonCToJSExt(inType, outType);
+            break;
+    }
+    return true;
+}
+
+void AnsEnumUtil::ReasonCToJSExt(const int &inType, int &outType)
+{
+    switch (inType) {
         case NotificationConstant::DISABLE_SLOT_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::DISABLE_SLOT_REASON_DELETE);
             break;
@@ -291,6 +301,15 @@ bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
         case NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::TRIGGER_FOUR_HOUR_REASON_DELETE);
             break;
+        default:
+            ReasonCToJSSecondExt(inType, outType);
+            break;
+    }
+}
+
+void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType)
+{
+    switch (inType) {
         case NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::TRIGGER_TEN_MINUTES_REASON_DELETE);
             break;
@@ -320,7 +339,6 @@ bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
             ANS_LOGW("Reason %{public}d is an invalid value", inType);
             break;
     }
-    return true;
 }
 
 bool AnsEnumUtil::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, NotificationConstant::DoNotDisturbType &outType)
