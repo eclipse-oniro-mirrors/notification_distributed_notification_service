@@ -144,7 +144,6 @@ public:
      */
     uint64_t GetEndDateTime() const;
 
-
     /**
      * @brief Sets the year.
      *
