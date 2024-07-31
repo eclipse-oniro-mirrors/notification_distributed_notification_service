@@ -20,9 +20,9 @@ export struct NotificationDialogBody {
   build() {
     Column() {
       Text($r('app.string.if_allow_to_publish_notification'))
-        .width("350vp")
+        .width('350vp')
         .fontSize(18)
-        .fontColor("#182431")
+        .fontColor('#182431')
         .fontWeight(400)
         .opacity(1)
         .maxLines(2)
@@ -34,19 +34,19 @@ export struct NotificationDialogBody {
           Row() {
             Text($r('app.string.ban'))
               .textAlign(TextAlign.Center)
-              .fontSize("19fp")
+              .fontSize('19fp')
               .fontWeight(500)
-              .fontColor("#0D81F2")
+              .fontColor('#0D81F2')
           }
         }
         .onClick(() => {
           this.privacyChose(false)
-          console.info("after privacyChose")
+          console.info('after privacyChose')
         })
-        .width("116vp")
-        .height("40vp")
-        .margin({ top: "9vp", bottom: "9vp", left: "8vp" })
-        .backgroundColor("#FFFFFF")
+        .width('116vp')
+        .height('40vp')
+        .margin({ top: '9vp', bottom: '9vp', left: '8vp' })
+        .backgroundColor('#FFFFFF')
 
         Text()
           .backgroundColor('#e1e1e1')
@@ -57,38 +57,38 @@ export struct NotificationDialogBody {
           Row() {
             Text($r('app.string.allow'))
               .textAlign(TextAlign.Center)
-              .fontSize("19fp")
+              .fontSize('19fp')
               .fontWeight(500)
-              .fontColor("#0D81F2")
+              .fontColor('#0D81F2')
           }
         }
         .onClick(() => {
           this.privacyChose(true)
-          console.info("after privacyChose")
+          console.info('after privacyChose')
         })
-        .width("116vp")
-        .height("40vp")
-        .margin({ top: "9vp", right: "8vp", bottom: "9vp" })
-        .backgroundColor("#FFFFFF")
+        .width('116vp')
+        .height('40vp')
+        .margin({ top: '9vp', right: '8vp', bottom: '9vp' })
+        .backgroundColor('#FFFFFF')
       }
       .height(56)
     }
     .width('360vp')
     .borderRadius(24)
     .alignItems(HorizontalAlign.Center)
-    .backgroundColor("#FFFFFF")
+    .backgroundColor('#FFFFFF')
     .borderColor('#e1e1e1')
     .borderWidth('1px')
     .padding({left:24, top:24, right:24})
   }
 
   async privacyChose(flag) {
-    console.info("NotificationDialog privacyChose: " + flag)
+    console.info('NotificationDialog privacyChose: ' + flag)
     let enable = flag;
     let bundleOption = {
       bundle: globalThis.abilityWant.parameters['from']
     }
-    console.info("NotificationDialog before enableNotification")
+    console.info('NotificationDialog before enableNotification')
     await notification.enableNotification(bundleOption, enable, (err) => {
       if (err.code) {
         console.error('Start enableNotification failed. ErrCode: ' + JSON.stringify(err.code));

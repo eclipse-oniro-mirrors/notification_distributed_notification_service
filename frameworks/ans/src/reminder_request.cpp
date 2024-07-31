@@ -317,8 +317,8 @@ bool ReminderRequest::HandleTimeZoneChange(
     if (isExpired_) {
         return false;
     }
-    ANSR_LOGD("Handle timezone change, oldZoneTriggerTime:%{public}" PRIu64 "\
-        , newZoneTriggerTime:%{public}" PRIu64 "", oldZoneTriggerTime, newZoneTriggerTime);
+    ANSR_LOGD("Handle timezone change, oldZoneTriggerTime: %{public}" PRIu64 ", \
+        newZoneTriggerTime: %{public}" PRIu64 "", oldZoneTriggerTime, newZoneTriggerTime);
     if (oldZoneTriggerTime == newZoneTriggerTime) {
         return false;
     }
