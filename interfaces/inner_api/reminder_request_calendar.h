@@ -118,33 +118,134 @@ public:
         return firstDesignateDay_;
     }
 
+    /**
+     * @brief Gets the repeat day.
+     */
     uint32_t GetRepeatDay() const
     {
         return repeatDay_;
     }
+
+    /**
+     * @brief Gets the repeat month.
+     */
     uint16_t GetRepeatMonth() const
     {
         return repeatMonth_;
     }
 
-    void SetRepeatDay(const uint32_t repeatDay);
-    void SetRepeatMonth(const uint16_t repeatMonth);
-    void SetFirstDesignateYear(const uint16_t firstDesignateYear);
-    void SetFirstDesignageMonth(const uint16_t firstDesignateMonth);
-    void SetFirstDesignateDay(const uint16_t firstDesignateDay);
-    void SetYear(const uint16_t year);
-    void SetMonth(const uint8_t month);
-    void SetDay(const uint8_t day);
-    void SetHour(const uint8_t hour);
-    void SetMinute(const uint8_t minute);
-    void SetDateTime(const uint64_t time);
-    uint64_t GetDateTime();
-    uint64_t GetEndDateTime();
+    /**
+     * @brief Gets the start date time.
+     */
+    uint64_t GetDateTime() const;
 
+    /**
+     * @brief Gets the end date time.
+     */
+    uint64_t GetEndDateTime() const;
+
+
+    /**
+     * @brief Sets the year.
+     *
+     * @param year Indicates the year.
+     */
+    void SetYear(const uint16_t year);
+
+    /**
+     * @brief Sets the month.
+     *
+     * @param month Indicates the month.
+     */
+    void SetMonth(const uint8_t month);
+
+    /**
+     * @brief Sets the day.
+     *
+     * @param day Indicates the day.
+     */
+    void SetDay(const uint8_t day);
+
+    /**
+     * @brief Sets the hour.
+     *
+     * @param hour Indicates the hour.
+     */
+    void SetHour(const uint8_t hour);
+
+    /**
+     * @brief Sets the minute.
+     *
+     * @param minute Indicates the minute.
+     */
+    void SetMinute(const uint8_t minute);
+
+    /**
+     * @brief Sets the repeat day.
+     *
+     * @param repeatDay Indicates the repeat day.
+     */
+    void SetRepeatDay(const uint32_t repeatDay);
+
+    /**
+     * @brief Sets the repeat month.
+     *
+     * @param repeatMonth Indicates the repeat month.
+     */
+    void SetRepeatMonth(const uint16_t repeatMonth);
+
+    /**
+     * @brief Sets the first designate year.
+     *
+     * @param firstDesignateYear Indicates the first designate year.
+     */
+    void SetFirstDesignateYear(const uint16_t firstDesignateYear);
+
+    /**
+     * @brief Sets the first designate month.
+     *
+     * @param firstDesignateMonth Indicates the first designate month.
+     */
+    void SetFirstDesignageMonth(const uint16_t firstDesignateMonth);
+
+    /**
+     * @brief Sets the first designate day.
+     *
+     * @param firstDesignateDay Indicates the first designate day.
+     */
+    void SetFirstDesignateDay(const uint16_t firstDesignateDay);
+
+    /**
+     * @brief Sets the hour.
+     *
+     * @param hour Indicates the hour.
+     */
+    void SetDateTime(const uint64_t time);
+
+    /**
+     * @brief Serialize the rrule to string.
+     * Persist to the rdb.
+     */
     std::string SerializationRRule();
-    std::string SerializationExcludeDates();
+
+    /**
+     * @brief Deserialize the rrule from string.
+     * Recover from the rdb.
+     */
     void DeserializationRRule(const std::string& str);
+
+    /**
+     * @brief Serialize the exclude date to string.
+     * Persist to the rdb.
+     */
+    std::string SerializationExcludeDates();
+
+    /**
+     * @brief Deserialize the exclude date from string.
+     * Recover from the rdb.
+     */
     void DeserializationExcludeDates(const std::string& str);
+
     bool InitTriggerTime();
 
     std::vector<uint8_t> GetRepeatMonths() const;

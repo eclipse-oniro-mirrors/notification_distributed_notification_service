@@ -89,14 +89,14 @@ ohos_shared_library("libans") {
     "src/reminder_data_manager.cpp",
     "src/reminder_data_manager_inner.cpp",
     "src/reminder_event_manager.cpp",
+    "src/reminder_store.cpp",
+    "src/reminder_store_strategy.cpp",
     "src/reminder_swing_decision_center.cpp",
+    "src/reminder_table.cpp",
+    "src/reminder_table_old.cpp",
     "src/reminder_timer_info.cpp",
     "src/system_dialog_connect_stb.cpp",
     "src/system_event_observer.cpp",
-    "src/reminder_table.cpp",
-    "src/reminder_store.cpp",
-    "src/reminder_table_old.cpp",
-    "src/reminder_store_strategy.cpp",
   ]
 
   configs = [ ":public_ans_config" ]

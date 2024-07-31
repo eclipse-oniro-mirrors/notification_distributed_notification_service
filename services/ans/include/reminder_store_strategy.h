@@ -25,53 +25,109 @@ namespace OHOS {
 namespace Notification {
 class ReminderStrategy {
 public:
+    /**
+     * @brief Gets the value from rdb result.
+     *
+     * @param resultSet the rdb result.
+     * @param name the column name in rdb.
+     * @param value the column value in rdb.
+     */
     template<typename T>
     static void GetRdbValue(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
         const std::string& name, T& value);
 
 public:
+    /**
+     * @brief Persist the reminder to the database.
+     */
     static void AppendValuesBucket(const sptr<ReminderRequest>& reminder,
         NativeRdb::ValuesBucket &values, const bool oldVersion = false);
 
-    static void RecoverBasicFromOldVersion(sptr<ReminderRequest>& reminder,
-        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    /**
+     * @brief Restore the reminder from the database(old version rdb).
+     */
     static void RecoverFromOldVersion(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 
-    static void RecoverBasicFromDb(sptr<ReminderRequest>& reminder,
-        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    /**
+     * @brief Restore the reminder from the database.
+     */
     static void RecoverFromDb(sptr<ReminderRequest>& reminder, const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+
+private:
+    static void RecoverIntFromOldVersion(sptr<ReminderRequest>& reminder,
+        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    static void RecoverStringFromOldVersion(sptr<ReminderRequest>& reminder,
+        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+
+    static void RecoverIntFromDb(sptr<ReminderRequest>& reminder,
+        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    static void RecoverStringFromDb(sptr<ReminderRequest>& reminder,
+        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 };
 
-class ReminderTimerStrategy : public ReminderStrategy {
+class ReminderTimerStrategy {
 public:
+    /**
+     * @brief Persist the reminder to the database.
+     */
     static void AppendValuesBucket(const sptr<ReminderRequest>& reminder,
         NativeRdb::ValuesBucket& values);
 
+    /**
+     * @brief Restore the reminder from the database(old version rdb).
+     */
     static void RecoverFromOldVersion(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+
+    /**
+     * @brief Restore the reminder from the database.
+     */
     static void RecoverFromDb(sptr<ReminderRequest>& reminder, const std::shared_ptr<NativeRdb::ResultSet>& baseResult,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 };
 
-class ReminderAlarmStrategy : public ReminderStrategy {
+class ReminderAlarmStrategy {
 public:
+    /**
+     * @brief Persist the reminder to the database.
+     */
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder, NativeRdb::ValuesBucket &values);
 
+    /**
+     * @brief Restore the reminder from the database(old version rdb).
+     */
     static void RecoverFromOldVersion(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+
+    /**
+     * @brief Restore the reminder from the database.
+     */
     static void RecoverFromDb(sptr<ReminderRequest>& reminder, const std::shared_ptr<NativeRdb::ResultSet>& baseResult,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 };
 
-class ReminderCalendarStrategy : public ReminderStrategy {
+class ReminderCalendarStrategy {
 public:
+    /**
+     * @brief Persist the reminder to the database.
+     */
     static void AppendValuesBucket(const sptr<ReminderRequest> &reminder, NativeRdb::ValuesBucket &values);
 
+    /**
+     * @brief Restore the reminder from the database(old version rdb).
+     */
     static void RecoverFromOldVersion(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+
+    /**
+     * @brief Restore the reminder from the database.
+     */
     static void RecoverFromDb(sptr<ReminderRequest>& reminder, const std::shared_ptr<NativeRdb::ResultSet>& baseResult,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+
+private:
+    static void RecoverTime(sptr<ReminderRequest>& reminder, const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 };
 
 template<typename T>

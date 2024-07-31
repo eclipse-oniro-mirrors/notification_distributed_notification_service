@@ -72,16 +72,16 @@ public:
     uint8_t GetMinute() const;
 
     /**
-     * @brief Obtains the setted {@link hour_}.
+     * @brief Sets the hour.
      *
-     * @return setted hour.
+     * @param hour Indicates the hour.
      */
     void SetHour(const uint8_t hour);
 
     /**
-     * @brief Obtains the setted {@link minute_}.
+     * @brief Sets the minute.
      *
-     * @return setted minute.
+     * @param minute Indicates the minute.
      */
     void SetMinute(const uint8_t minute);
 

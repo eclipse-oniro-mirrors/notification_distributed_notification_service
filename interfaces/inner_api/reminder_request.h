@@ -444,7 +444,7 @@ public:
 
     /**
      * @brief Set the reminder state.
-     * 
+     *
      * @param state the reminder state.
      */
     void SetState(const uint8_t state);
@@ -890,18 +890,47 @@ public:
     std::vector<int32_t> GetDaysOfWeek() const;
 
     /**
+     * @brief Create notification request struct when recover from rdb or
+     * recv reminder info from ipc.
+     */
+    bool InitNotificationRequest();
+
+    /**
+     * @brief Gets repeat days of week
+     */
+    uint8_t GetRepeatDaysOfWeek() const;
+
+    /**
      * @brief When system language change, will call this function.
      *     need load resource to update button title
      * @param resMgr Indicates the resource manager for get button title
      */
     void OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr);
 
+public:
+    /**
+     * @brief Serialize want agent info and max want agent info to string.
+     * Persist to the rdb.
+     */
     void SerializeWantAgent(std::string& wantInfoStr, std::string& maxWantInfoStr) const;
+
+    /**
+     * @brief Deserialize want agent info and max want agent info from string.
+     * Recover from the rdb.
+     */
     void DeserializeWantAgent(const std::string& wantAgentInfo, const uint8_t type);
+
+    /**
+     * @brief Serialize action button info to string.
+     * Persist to the rdb.
+     */
     std::string SerializeButtonInfo() const;
+
+    /**
+     * @brief Deserialize action button info from string.
+     * Recover from the rdb.
+     */
     void DeserializeButtonInfo(const std::string& buttonInfoStr);
-    bool InitNotificationRequest();
-    uint8_t GetRepeatDaysOfWeek() const;
 
     static int32_t GetActualTime(const TimeTransferType &type, int32_t cTime);
     static int32_t GetCTime(const TimeTransferType &type, int32_t actualTime);
