@@ -104,6 +104,8 @@ public:
      */
     static NotificationCapsule *Unmarshalling(Parcel &parcel);
 
+    void ResetIcon();
+
 private:
     /**
      * @brief Read a NotificationConversationalMessage object from a Parcel.

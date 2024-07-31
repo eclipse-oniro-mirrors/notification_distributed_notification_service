@@ -184,5 +184,12 @@ NotificationCapsule *NotificationCapsule::Unmarshalling(Parcel &parcel)
 
     return capsule;
 }
+
+void NotificationCapsule::ResetIcon()
+{
+    if (icon_) {
+        icon_.reset();
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS

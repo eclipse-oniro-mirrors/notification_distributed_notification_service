@@ -278,5 +278,15 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::Unmarshalling(
 
     return button;
 }
+
+void NotificationLocalLiveViewButton::ClearButtonIcons()
+{
+    buttonIcons_.clear();
+}
+
+void NotificationLocalLiveViewButton::ClearButtonIconsResource()
+{
+    buttonIconsResource_.clear();
+}
 }  // namespace Notification
 }  // namespace OHOS

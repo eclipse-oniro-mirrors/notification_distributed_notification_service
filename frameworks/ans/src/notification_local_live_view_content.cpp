@@ -329,5 +329,16 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
 
     return true;
 }
+
+void NotificationLocalLiveViewContent::ClearButton()
+{
+    button_.ClearButtonIcons();
+    button_.ClearButtonIconsResource();
+}
+
+void NotificationLocalLiveViewContent::ClearCapsuleIcon()
+{
+    capsule_.ResetIcon();
+}
 }  // namespace Notification
 }  // namespace OHOS
