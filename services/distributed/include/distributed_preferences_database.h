@@ -83,7 +83,6 @@ private:
     bool CheckKvDataManager();
     void GetKvStore();
     bool CheckKvStore();
-    void CloseKvStore();
 
     std::mutex mutex_;
     std::unique_ptr<DistributedKv::DistributedKvDataManager> kvDataManager_;
