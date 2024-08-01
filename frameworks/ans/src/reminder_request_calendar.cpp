@@ -761,12 +761,12 @@ bool ReminderRequestCalendar::SetEndDateTime(const uint64_t time)
     return true;
 }
 
-uint64_t ReminderRequestCalendar::GetDateTime()
+uint64_t ReminderRequestCalendar::GetDateTime() const
 {
     return startDateTime_;
 }
 
-uint64_t ReminderRequestCalendar::GetEndDateTime()
+uint64_t ReminderRequestCalendar::GetEndDateTime() const
 {
     return endDateTime_;
 }

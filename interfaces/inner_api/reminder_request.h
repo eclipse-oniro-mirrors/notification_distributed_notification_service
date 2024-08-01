@@ -912,7 +912,7 @@ public:
      * @brief Serialize want agent info and max want agent info to string.
      * Persist to the rdb.
      */
-    void SerializeWantAgent(std::string& wantInfoStr, std::string& maxWantInfoStr) const;
+    void SerializeWantAgent(std::string& wantInfoStr, std::string& maxWantInfoStr);
 
     /**
      * @brief Deserialize want agent info and max want agent info from string.
