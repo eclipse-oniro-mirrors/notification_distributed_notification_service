@@ -31,7 +31,7 @@ using namespace OHOS::Notification;
 
 constexpr int32_t STR_MAX_SIZE = 200;
 constexpr int32_t LONG_STR_MAX_SIZE = 1024;
-constexpr uint8_t OPERATION_TYPE_COMMON_EVENT = 4;
+constexpr uint8_t OPERATION_MAX_TYPE = 3;
 constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
 constexpr int8_t NO_ERROR = 0;
 constexpr int8_t ERROR = -1;
