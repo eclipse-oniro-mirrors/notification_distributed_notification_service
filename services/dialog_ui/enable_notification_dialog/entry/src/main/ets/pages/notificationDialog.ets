@@ -22,7 +22,7 @@ import { NotificationDialogBody } from '../pages/notifybody'
 @Component
 struct NotificationDialog {
   controller: CustomDialogController
-  private TAG = "[NotificationDialog_Service]"
+  private TAG = '[NotificationDialog_Service]'
   listener = mediaquery.matchMediaSync('(orientation: landscape)')
   @State isLand: boolean = false
   onLand = (mediaQueryResult) => {
@@ -39,15 +39,15 @@ struct NotificationDialog {
       Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
         NotificationDialogBody()
       }
-      .width("100%")
-      .height("100%")
+      .width('100%')
+      .height('100%')
     } else {
       //vertical
       Flex({ direction: FlexDirection.Row, justifyContent: FlexAlign.Center, alignItems: ItemAlign.End }) {
         NotificationDialogBody()
       }
-      .width("100%")
-      .height("100%")
+      .width('100%')
+      .height('100%')
       .padding({bottom: 48})
     }
   }
