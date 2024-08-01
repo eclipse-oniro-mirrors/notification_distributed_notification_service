@@ -98,14 +98,12 @@ bool DistributedPreferencesDatabase::PutToDistributedDB(const std::string &key, 
 
     if (!KvStoreFlowControl()) {
         ANS_LOGE("KvStoreFlowControl is false.");
-        CloseKvStore();
         return false;
     }
 
     DistributedKv::Key kvStoreKey(key);
     DistributedKv::Value kvStoreValue(value);
     DistributedKv::Status status = kvStore_->Put(kvStoreKey, kvStoreValue);
-    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore Put() failed ret = 0x%{public}x", status);
         return false;
@@ -123,13 +121,11 @@ bool DistributedPreferencesDatabase::GetFromDistributedDB(const std::string &key
 
     if (!KvStoreFlowControl()) {
         ANS_LOGE("KvStoreFlowControl is defeat.");
-        CloseKvStore();
         return false;
     }
     DistributedKv::Key kvStoreKey(key);
     DistributedKv::Value kvStoreValue;
     DistributedKv::Status status = kvStore_->Get(kvStoreKey, kvStoreValue);
-    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore Get() failed ret = 0x%{public}x", status);
         return false;
@@ -147,12 +143,10 @@ bool DistributedPreferencesDatabase::GetEntriesFromDistributedDB(
     }
     if (!KvStoreFlowControl()) {
         ANS_LOGE("KvStoreFlowControl is false.");
-        CloseKvStore();
         return false;
     }
     DistributedKv::Key kvStoreKey(prefixKey);
     DistributedKv::Status status = kvStore_->GetEntries(kvStoreKey, entries);
-    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore GetEntries() failed ret = 0x%{public}x", status);
         return false;
@@ -169,13 +163,11 @@ bool DistributedPreferencesDatabase::DeleteToDistributedDB(const std::string &ke
     }
     if (!KvStoreFlowControl()) {
         ANS_LOGE("kvStore flow control.");
-        CloseKvStore();
         return false;
     }
     DistributedKv::Key kvStoreKey(key);
     DistributedKv::Value kvStoreValue;
     DistributedKv::Status status = kvStore_->Delete(kvStoreKey);
-    CloseKvStore();
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore Delete() failed ret = 0x%{public}x", status);
         return false;
@@ -210,12 +202,6 @@ bool DistributedPreferencesDatabase::ClearDatabase()
         return false;
     }
     return true;
-}
-
-void DistributedPreferencesDatabase::CloseKvStore()
-{
-    DistributedKv::AppId appId = {.appId = APP_ID};
-    kvDataManager_->CloseKvStore(appId, kvStore_);
 }
 }  // namespace Notification
 }  // namespace OHOS
