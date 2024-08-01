@@ -629,19 +629,17 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-    auto bundleUpdate = [bundleOption, this]() {
-        CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-        AppExecFwk::BundleInfo bundleInfo;
-        if (!GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo)) {
-            ANS_LOGE("Failed to get BundleInfo using NotificationBundleOption.");
-            return;
-        }
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo)) {
+        ANS_LOGE("Failed to get BundleInfo using NotificationBundleOption.");
+        return;
+    }
 
-        if (!bundleInfo.applicationInfo.allowEnableNotification) {
-            ANS_LOGE("Current application allowEnableNotification is false, do not record.");
-            return;
-        }
-
+    if (!bundleInfo.applicationInfo.allowEnableNotification) {
+        ANS_LOGE("Current application allowEnableNotification is false, do not record.");
+        return;
+    }
+    auto bundleUpdate = [bundleOption, bundleInfo, this]() {
         bool hasPopped = false;
         auto errCode = NotificationPreferences::GetInstance().GetHasPoppedDialog(bundleOption, hasPopped);
         if (errCode != ERR_OK) {
