@@ -639,7 +639,11 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
-            !LivePublishProcess::GetInstance()->CheckLocalLiveViewSubscribed(record->request, isUpdateByOwner, uid))
+            !LivePublishProcess::GetInstance()->CheckLocalLiveViewSubscribed(record->request, isUpdateByOwner, uid)) {
+            result = ERR_ANS_INVALID_PARAM;
+            ANS_LOGE("CheckLocalLiveViewSubscribed Failed!");
+            return;
+        }
         if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
             (void)PublishRemoveDuplicateEvent(record);
             return;
