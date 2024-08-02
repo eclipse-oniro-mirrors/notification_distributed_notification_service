@@ -2280,6 +2280,7 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
         ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
             LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
         }));
+        notificationSvrQueue_->wait(handler);
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
