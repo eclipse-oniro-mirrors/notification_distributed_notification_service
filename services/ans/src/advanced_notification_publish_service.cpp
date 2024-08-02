@@ -976,8 +976,8 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
 
     canPop = true;
     bundleName = bundleOption->GetBundleName();
-    return ERR_OK;
     ANS_LOGI("CanPopEnableNotificationDialog end");
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption,
@@ -2058,12 +2058,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     if (request->GetOwnerUid() != DEFAULT_UID) {
         std::shared_ptr<NotificationBundleOption> agentBundle =
         std::make_shared<NotificationBundleOption>("", uid);
-        if (agentBundle == nullptr) {
-            ANS_LOGE("Failed to create agentBundle instance");
-            message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-            return ERR_ANS_INVALID_BUNDLE;
-        }
         request->SetAgentBundle(agentBundle);
     }
 

@@ -168,7 +168,7 @@ void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<s
     if (notificationMap == nullptr) {
         subscriber_.OnBatchCanceled(notificationList,
             std::make_shared<NotificationSortingMap>(), deleteReason);
-    } else if (notificationMap != nullptr) {
+    } else {
         subscriber_.OnBatchCanceled(notificationList,
             std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
     }
