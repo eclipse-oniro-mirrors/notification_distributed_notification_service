@@ -161,8 +161,6 @@ napi_value NapiPush::OnUnregisterPushCallback(napi_env env, const napi_callback_
     }
 
     NotificationHelper::UnregisterPushCallback();
-    delete jsPushCallBack_;
-    jsPushCallBack_ = nullptr;
     return undefined;
 }
 
