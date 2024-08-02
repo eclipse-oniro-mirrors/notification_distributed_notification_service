@@ -33,7 +33,6 @@ namespace OHOS {
 
         Notification::ReminderDataManager::InitInstance(nullptr);
         auto manager = Notification::ReminderDataManager::GetInstance();
-        manager->Init(false);
         manager->Dump();
         manager->CancelAllReminders(bundleName, userId, uid);
         sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
