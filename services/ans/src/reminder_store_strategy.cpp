@@ -133,7 +133,6 @@ void ReminderStrategy::RecoverIntFromOldVersion(sptr<ReminderRequest>& reminder,
     int32_t notificationId = 0;
     ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::NOTIFICATION_ID, notificationId);
     reminder->SetNotificationId(notificationId);
-
 }
 
 void ReminderStrategy::RecoverStringFromOldVersion(sptr<ReminderRequest>& reminder,

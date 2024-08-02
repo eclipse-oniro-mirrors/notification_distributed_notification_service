@@ -1748,7 +1748,7 @@ int32_t ReminderRequest::GetCTime(const TimeTransferType &type, int32_t actualTi
     }
 }
 
-void ReminderRequest::SerializeWantAgent(std::string& wantInfoStr, std::string& maxWantInfoStr) const
+void ReminderRequest::SerializeWantAgent(std::string& wantInfoStr, std::string& maxWantInfoStr)
 {
     std::string pkgName;
     std::string abilityName;

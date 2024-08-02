@@ -437,7 +437,7 @@ public:
 
     /**
      * @brief Set the reminder type.
-     * 
+     *
      * @param reminderType the reminder type.
      */
     void SetReminderType(const ReminderType type);
