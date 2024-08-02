@@ -46,11 +46,6 @@ void ReminderTimerInfo::SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantA
 void ReminderTimerInfo::OnTrigger()
 {
     ANSR_LOGI("Timing is arrivelled.");
-    if (action_ == ReminderRequest::REMINDER_EVENT_ALARM_ALERT) {
-#ifdef HAS_HISYSEVENT_PART
-        std::string eventType = "ALARM_TRIGGER";
-#endif
-    }
 }
 }
 }

@@ -48,9 +48,6 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
         std::lock_guard<std::mutex> lock(instanceMutex_);
         if (instance_ == nullptr) {
             auto instance = std::make_shared<NotificationPreferences>();
-            if (instance == nullptr) {
-                ANS_LOGE("failed to create NotificationPreference");
-            }
             instance_ = instance;
         }
     }

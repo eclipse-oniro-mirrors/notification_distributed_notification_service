@@ -92,12 +92,12 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
 
 std::string AdvancedDatashareHelper::GetFocusModeEnableUri(const int32_t &userId) const
 {
-    return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_ENABLE_URI;
+    return USER_SETTINGS_DATA_SECURE_URI + std::to_string(userId) + FOCUS_MODE_ENABLE_URI;
 }
 
 std::string AdvancedDatashareHelper::GetFocusModeProfileUri(const int32_t &userId) const
 {
-    return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_PROFILE_URI;
+    return USER_SETTINGS_DATA_SECURE_URI + std::to_string(userId) + FOCUS_MODE_PROFILE_URI;
 }
 } // namespace Notification
 } // namespace OHOS
