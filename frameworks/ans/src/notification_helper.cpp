@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "notification_helper.h"
 #include "ans_notification.h"
 #include "singleton.h"
