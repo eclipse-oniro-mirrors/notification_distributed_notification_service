@@ -53,6 +53,8 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
   ]
 }
 
