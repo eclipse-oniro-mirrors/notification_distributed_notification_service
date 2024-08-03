@@ -45,6 +45,8 @@
 #include "system_event_observer.h"
 #include "notification_subscriber_manager.h"
 #include "distributed_device_status.h"
+#include "datashare_helper.h"
+#include "datashare_predicates.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_swing_decision_center.h"
 #endif
@@ -600,6 +602,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override;
+
+    /**
+     * @brief Is coming call need silent in do not disturb mode.
+     *
+     * @param phoneNumber the calling format number.
+     * @return Returns silent in do not disturb mode.
+     */
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber) override;
 
     /**
      * @brief Cancel notifications according to group.
@@ -1355,6 +1365,12 @@ private:
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
+
+    std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
+    bool IsPhoneNumberInContact(const std::string &phoneNumber, const std::string &policy);
+    bool dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper, 
+            std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
+ 
 
 private:
     static sptr<AdvancedNotificationService> instance_;

@@ -1032,6 +1032,17 @@ ErrCode AnsNotification::DoesSupportDoNotDisturbMode(bool &doesSupport)
     return proxy->DoesSupportDoNotDisturbMode(doesSupport);
 }
 
+ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber)
+{
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber);
+}
+
 ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationRequest &request)
 {
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {

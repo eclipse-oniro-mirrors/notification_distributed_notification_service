@@ -27,6 +27,7 @@ namespace Notification {
 namespace {
 constexpr const char *KEY_FOCUS_MODE_ENABLE = "focus_mode_enable";
 constexpr const char *KEY_FOCUS_MODE_PROFILE = "focus_mode_profile";
+constexpr const char *KEY_FOCUS_MODE_CALL_MESSAGE_POLICY = "focus_mode_call_message_policy";
 } // namespace
 
 class AdvancedDatashareHelper : DelayedSingleton<AdvancedDatashareHelper> {
@@ -36,6 +37,7 @@ public:
     bool Query(Uri &uri, const std::string &key, std::string &value);
     std::string GetFocusModeEnableUri(const int32_t &userId) const;
     std::string GetFocusModeProfileUri(const int32_t &userId) const;
+    std::string GetFocusModeCallPolicyUri(const int32_t &userId) const;
     std::string GetUnifiedGroupEnableUri() const;
 
 private:

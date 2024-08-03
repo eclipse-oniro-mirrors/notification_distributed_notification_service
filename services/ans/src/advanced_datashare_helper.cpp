@@ -35,6 +35,7 @@ constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
 constexpr const char *FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
 constexpr const char *FOCUS_MODE_PROFILE_URI = "?Proxy=true&key=focus_mode_profile";
+constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true&key=focus_mode_call_message_policy";
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
@@ -98,6 +99,11 @@ std::string AdvancedDatashareHelper::GetFocusModeEnableUri(const int32_t &userId
 std::string AdvancedDatashareHelper::GetFocusModeProfileUri(const int32_t &userId) const
 {
     return USER_SETTINGS_DATA_SECURE_URI + std::to_string(userId) + FOCUS_MODE_PROFILE_URI;
+}
+
+std::string AdvancedDatashareHelper::GetFocusModeCallPolicyUri(const int32_t &userId) const
+{
+    return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_CALL_POLICY_URI;
 }
 } // namespace Notification
 } // namespace OHOS
