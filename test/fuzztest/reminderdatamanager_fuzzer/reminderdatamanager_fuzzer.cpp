@@ -126,8 +126,16 @@ namespace OHOS {
         manager->IsBelongToSameApp(option, option);
         manager->CheckIsSameApp(reminder, option);
         manager->ShowReminder(reminder, value, value, value, value);
-        auto handler = manager->queue_->submit_h(std::bind([]() {}));
-        manager->queue_->wait(handler);
+        return true;
+    }
+
+    bool Clear()
+    {
+        auto manager = Notification::ReminderDataManager::GetInstance();
+        if (manager->queue_ != nullptr) {
+            auto handler = manager->queue_->submit_h(std::bind([]() {}));
+            manager->queue_->wait(handler);
+        }
         return true;
     }
 }
@@ -140,6 +148,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (ch != nullptr && size >= GetU32Size()) {
         OHOS::DoSomethingInterestingWithManager(ch, size);
         OHOS::DoSomethingInterestingWithReminder(ch, size);
+        Clear();
         free(ch);
         ch = nullptr;
     }
