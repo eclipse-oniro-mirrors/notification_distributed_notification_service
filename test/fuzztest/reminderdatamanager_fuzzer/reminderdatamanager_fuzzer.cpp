@@ -148,7 +148,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (ch != nullptr && size >= GetU32Size()) {
         OHOS::DoSomethingInterestingWithManager(ch, size);
         OHOS::DoSomethingInterestingWithReminder(ch, size);
-        Clear();
+        OHOS::Clear();
         free(ch);
         ch = nullptr;
     }
