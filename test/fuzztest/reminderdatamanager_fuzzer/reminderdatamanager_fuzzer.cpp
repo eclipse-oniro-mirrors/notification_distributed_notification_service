@@ -33,6 +33,7 @@ namespace OHOS {
 
         Notification::ReminderDataManager::InitInstance(nullptr);
         auto manager = Notification::ReminderDataManager::GetInstance();
+        manager->Init(false);
         manager->Dump();
         manager->CancelAllReminders(bundleName, userId, uid);
         sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
@@ -125,6 +126,8 @@ namespace OHOS {
         manager->IsBelongToSameApp(option, option);
         manager->CheckIsSameApp(reminder, option);
         manager->ShowReminder(reminder, value, value, value, value);
+        auto handler = manager->queue_->submit_h(std::bind([]() {}));
+        manager->queue_->wait(handler);
         return true;
     }
 }
