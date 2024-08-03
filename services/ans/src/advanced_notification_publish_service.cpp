@@ -46,7 +46,6 @@
 #include "advanced_datashare_helper.h"
 #include "advanced_datashare_helper_ext.h"
 #include "datashare_result_set.h"
-#include "datashare_helper.h"
 #include "system_ability_definition.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -67,8 +66,7 @@ static constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
 static constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
 static constexpr const char *RAW_CONTACT_URI = "datashare:///com.ohos.contactsdataability/contacts/raw_contact";
 static constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
-std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {
-        FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST};
+std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST};
 
 std::shared_ptr<DataShare::DataShareHelper> AdvancedNotificationService::CreateContactDataShareHelper(std::string uri)
 {
@@ -1690,17 +1688,17 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::s
         ANS_LOGE("Query focus mode call message policy fail.");
         return -1;
     }
-    switch(atoi(policy.c_str())) {
-        case 1:
+    switch (atoi(policy.c_str())) {
+        case ContactPolicy::FORBID_EVERYONE:
             ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is 1");
             break;
-        case 2:
+        case ContactPolicy::ALLOW_EVERYONE:
             ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is 2");
             isNeedSilent = true;
             break;
-        case 3:
-        case 4:
-        case 5:
+        case ContactPolicy::ALLOW_EXISTING_CONTACTS:
+        case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
+        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
             ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is %{public}s", policy.c_str());
             isNeedSilent = IsPhoneNumberInContact(phoneNumber, policy);
             break;
@@ -1709,8 +1707,9 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::s
     return isNeedSilent ? 1 : 0;
 }
 
-bool AdvancedNotificationService::IsPhoneNumberInContact(const std::string &phoneNumber, const std::string &policy) {
-    std::string identity = IPCSkeleton::ResetCallingIdentity();    
+bool AdvancedNotificationService::IsPhoneNumberInContact(const std::string &phoneNumber, const std::string &policy)
+{
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_URI);
     if (helper == nullptr) {
         ANS_LOGE("helper is nullptr");
@@ -1735,7 +1734,7 @@ bool AdvancedNotificationService::IsPhoneNumberInContact(const std::string &phon
         helper->Release();
         return false;
     }
-    int rowCount = 0; 
+    int rowCount = 0;
     resultSet->GetRowCount(rowCount);
     if (rowCount == 0) {
         ANS_LOGE("Query failed failed");
@@ -1752,15 +1751,15 @@ bool AdvancedNotificationService::dealWithContactResult(std::shared_ptr<DataShar
     bool isNeedSilent = false;
     int32_t columnIndex;
     int32_t favorite;
-    std::string focus_mode_list;        
-    switch(atoi(policy.c_str())){
-        case 4:
+    std::string focus_mode_list;
+    switch (atoi(policy.c_str())) {
+        case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
             resultSet->GetColumnIndex(FAVORITE, columnIndex);
             resultSet->GetInt(columnIndex, favorite);
             ANS_LOGI("IsPhoneNumberInContact: favorite = %{public}d", favorite);
             isNeedSilent = favorite == 1;
             break;
-        case 5:
+        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
             resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
             resultSet->GetString(columnIndex, focus_mode_list);
             ANS_LOGI("IsPhoneNumberInContact: focus_mode_list = %{public}s", focus_mode_list.c_str());
@@ -1775,7 +1774,7 @@ bool AdvancedNotificationService::dealWithContactResult(std::shared_ptr<DataShar
         default:
             isNeedSilent = true;
             break;
-        }
+    }
     resultSet->Close();
     helper->Release();
     return isNeedSilent;

@@ -1163,6 +1163,14 @@ private:
         FINISH
     };
 
+    enum ContactPolicy {
+        FORBID_EVERYONE = 1,
+        ALLOW_EVERYONE = 2,
+        ALLOW_EXISTING_CONTACTS = 3,
+        ALLOW_FAVORITE_CONTACTS = 4,
+        ALLOW_SPECIFIED_CONTACTS = 5,
+    };
+
     AdvancedNotificationService();
 
     void StartFilters();
@@ -1368,9 +1376,8 @@ private:
 
     std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
     bool IsPhoneNumberInContact(const std::string &phoneNumber, const std::string &policy);
-    bool dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper, 
+    bool dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
             std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
- 
 
 private:
     static sptr<AdvancedNotificationService> instance_;

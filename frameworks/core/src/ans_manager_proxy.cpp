@@ -1372,12 +1372,12 @@ ErrCode AnsManagerProxy::IsNeedSilentInDoNotDisturbMode(const std::string &phone
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::IS_NEED_SILENT_IN_DO_NOT_DISTURB_MODE,
         option, data, reply);
-    if(result != ERR_OK) {
+    if (result != ERR_OK) {
         ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
     }
 
-    if(!reply.ReadInt32(result)) {
+    if (!reply.ReadInt32(result)) {
         ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
