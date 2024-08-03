@@ -1749,7 +1749,7 @@ void ReminderRequest::UpdateNotificationCommon(bool isSnooze)
     notificationRequest_->SetContent(notificationContent);
     if ((reminderType_ == ReminderRequest::ReminderType::TIMER) ||
         (reminderType_ == ReminderRequest::ReminderType::ALARM)) {
-        notificationRequest_->SetUnremovable(true);
+        notificationRequest_->SetUnremovable(false);
     }
 }
 
