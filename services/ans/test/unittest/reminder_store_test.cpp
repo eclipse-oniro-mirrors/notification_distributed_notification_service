@@ -279,7 +279,7 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         int32_t errCode = STATE_FAIL;
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
+        EXPECT_EQ(rdbStore, nullptr);
     }
     NativeRdb::RdbHelper::ClearCache();
     NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");

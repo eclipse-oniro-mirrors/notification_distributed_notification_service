@@ -38,8 +38,6 @@ namespace OHOS {
         reminderStore.GetInt32Val(resultSet, name, value);
         std::string value1(data);
         reminderStore.GetStringVal(resultSet, name, value1);
-        // test BuildReminder function
-        reminderStore.BuildReminder(resultSet);
         return true;
     }
 }

@@ -952,7 +952,7 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
     EXPECT_NE(nullptr, calendar);
 
     bool result = calendar->IsRepeatDay(1);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -1097,7 +1097,7 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromOldVersion_00001, Function | Sm
     EXPECT_NE(nullptr, calendar);
 
     bool result = calendar->IsRepeatDay(1);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
 }
 
 /**

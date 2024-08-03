@@ -451,7 +451,7 @@ public:
 
     /**
      * @brief Set the reminder repeat days of week.
-     * 
+     *
      * @param state the reminder repeat days of week.
      */
     void SetRepeatDaysOfWeek(const uint8_t repeatDaysOfWeek);
