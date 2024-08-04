@@ -50,7 +50,7 @@ constexpr const char *FAVORITE = "favorite";
 constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
-std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO,};
+std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
 AdvancedDatashareHelper::AdvancedDatashareHelper()
 {
@@ -156,14 +156,13 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
 }
 
 bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
-            std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy)
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy)
 {
     bool isNeedSilent = false;
     int32_t columnIndex;
     int32_t favorite;
     std::string focus_mode_list;
-    switch (atoi(policy.c_str()))
-    {
+    switch (atoi(policy.c_str())) {
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
             resultSet->GetColumnIndex(FAVORITE, columnIndex);
             resultSet->GetInt(columnIndex, favorite);
