@@ -48,10 +48,9 @@ constexpr const char *DETAIL_INFO = "detail_info";
 constexpr const char *FORMAT_PHONE_NUMBER = "format_phone_number";
 constexpr const char *FAVORITE = "favorite";
 constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
-std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO,};
-
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
+std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO,};
 } // namespace
 AdvancedDatashareHelper::AdvancedDatashareHelper()
 {
