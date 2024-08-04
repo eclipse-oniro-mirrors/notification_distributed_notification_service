@@ -49,7 +49,7 @@ private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
     bool dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
-        std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
+            std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
 };
 } // namespace Notification
 } // namespace OHOS
