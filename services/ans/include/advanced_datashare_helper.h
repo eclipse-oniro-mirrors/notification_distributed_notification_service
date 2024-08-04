@@ -27,6 +27,7 @@ namespace Notification {
 namespace {
 constexpr const char *KEY_FOCUS_MODE_ENABLE = "focus_mode_enable";
 constexpr const char *KEY_FOCUS_MODE_PROFILE = "focus_mode_profile";
+constexpr const char *KEY_FOCUS_MODE_CALL_MESSAGE_POLICY = "focus_mode_call_message_policy";
 } // namespace
 
 class AdvancedDatashareHelper : DelayedSingleton<AdvancedDatashareHelper> {
@@ -34,12 +35,21 @@ public:
     AdvancedDatashareHelper();
     ~AdvancedDatashareHelper() = default;
     bool Query(Uri &uri, const std::string &key, std::string &value);
+    bool QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy);
     std::string GetFocusModeEnableUri(const int32_t &userId) const;
     std::string GetFocusModeProfileUri(const int32_t &userId) const;
+    std::string GetFocusModeCallPolicyUri(const int32_t &userId) const;
     std::string GetUnifiedGroupEnableUri() const;
 
 private:
+    enum ContactPolicy {
+        ALLOW_FAVORITE_CONTACTS = 4,
+        ALLOW_SPECIFIED_CONTACTS = 5,
+    };
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
+    std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
+    bool dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
+            std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
 };
 } // namespace Notification
 } // namespace OHOS

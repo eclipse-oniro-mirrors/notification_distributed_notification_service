@@ -602,6 +602,14 @@ public:
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override;
 
     /**
+     * @brief Is coming call need silent in do not disturb mode.
+     *
+     * @param phoneNumber the calling format number.
+     * @return Returns silent in do not disturb mode.
+     */
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber) override;
+
+    /**
      * @brief Cancel notifications according to group.
      *
      * @param groupName Indicates the group name.
@@ -1151,6 +1159,14 @@ private:
         CONTINUOUS_UPDATE_TIME_OUT,
         END,
         FINISH
+    };
+
+    enum ContactPolicy {
+        FORBID_EVERYONE = 1,
+        ALLOW_EVERYONE = 2,
+        ALLOW_EXISTING_CONTACTS = 3,
+        ALLOW_FAVORITE_CONTACTS = 4,
+        ALLOW_SPECIFIED_CONTACTS = 5,
     };
 
     AdvancedNotificationService();

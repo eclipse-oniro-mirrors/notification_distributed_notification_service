@@ -239,6 +239,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleDoesSupportDoNotDisturbMode(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::IS_NEED_SILENT_IN_DO_NOT_DISTURB_MODE): {
+            result = HandleIsNeedSilentInDoNotDisturbMode(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_GROUP): {
             result = HandleCancelGroup(data, reply);
             break;
@@ -1002,6 +1006,22 @@ ErrCode AnsManagerStub::HandleDoesSupportDoNotDisturbMode(MessageParcel &data, M
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleIsNeedSilentInDoNotDisturbMode(MessageParcel &data, MessageParcel &reply)
+{
+    std::string phoneNumber;
+    if (!data.ReadString(phoneNumber)) {
+        ANS_LOGE("[HandleIsNeedSilentInDoNotDisturbMode] fail: read phoneNumber failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = IsNeedSilentInDoNotDisturbMode(phoneNumber);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleIsNeedSilentInDoNotDisturbMode] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return ERR_OK;
 }
 

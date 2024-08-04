@@ -43,6 +43,13 @@
 
 #include "advanced_notification_inline.cpp"
 #include "notification_analytics_util.h"
+#include "advanced_datashare_helper.h"
+#include "advanced_datashare_helper_ext.h"
+#include "datashare_result_set.h"
+#include "system_ability_definition.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
+#include "datashare_predicates.h"
 
 namespace OHOS {
 namespace Notification {
@@ -52,6 +59,7 @@ constexpr int32_t HOURS_IN_ONE_DAY = 24;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 constexpr int32_t RSS_PID = 3051;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
+static constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1624,6 +1632,56 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         }
     }
     return result;
+}
+
+ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission is bogus.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("The data share helper is nullptr.");
+        return -1;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!GetActiveUserId(userId)) {
+        ANS_LOGD("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    ANS_LOGI("IsNeedSilentInDoNotDisturbMode: userId = %{public}d", userId);
+    std::string policy;
+    bool isNeedSilent = false;
+    Uri policyUri(datashareHelper->GetFocusModeCallPolicyUri(userId));
+    bool ret = datashareHelper->Query(policyUri, KEY_FOCUS_MODE_CALL_MESSAGE_POLICY, policy);
+    ANS_LOGI("get policy[%{public}s]: ", policy.c_str());
+    if (!ret) {
+        ANS_LOGE("Query focus mode call message policy fail.");
+        return -1;
+    }
+    switch (atoi(policy.c_str())) {
+        case ContactPolicy::FORBID_EVERYONE:
+            ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is 1");
+            break;
+        case ContactPolicy::ALLOW_EVERYONE:
+            ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is 2");
+            isNeedSilent = true;
+            break;
+        case ContactPolicy::ALLOW_EXISTING_CONTACTS:
+        case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
+        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
+            ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is %{public}s", policy.c_str());
+            Uri uri(CONTACT_DATA);
+            isNeedSilent = datashareHelper->QueryContact(uri, phoneNumber, policy);
+            break;
+    }
+    ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
+    return isNeedSilent ? 1 : 0;
 }
 
 ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, int32_t instanceKey)
