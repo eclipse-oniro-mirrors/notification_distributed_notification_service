@@ -72,14 +72,14 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateDataS
     return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
 }
 
-std::shared_ptrDataShare::DataShareHelper AdvancedDatashareHelper::CreateContactDataShareHelper(std::string uri)
+std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateContactDataShareHelper(std::string uri)
 {
-    sptr saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         ANS_LOGE("The sa manager is nullptr.");
         return nullptr;
     }
-    sptr remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     if (remoteObj == nullptr) {
         ANS_LOGE("The remoteObj is nullptr.");
         return nullptr;
