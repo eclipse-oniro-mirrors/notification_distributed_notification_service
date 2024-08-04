@@ -1678,7 +1678,6 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::s
             ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is %{public}s", policy.c_str());
             Uri uri(CONTACT_DATA);
             isNeedSilent = datashareHelper->QueryContact(uri, phoneNumber, policy);
-            isNeedSilent = IsPhoneNumberInContact(phoneNumber, policy);
             break;
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
