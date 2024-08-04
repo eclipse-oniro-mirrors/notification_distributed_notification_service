@@ -49,6 +49,7 @@
 #include "system_ability_definition.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "datashare_predicates.h"
 
 namespace OHOS {
 namespace Notification {
@@ -58,32 +59,7 @@ constexpr int32_t HOURS_IN_ONE_DAY = 24;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 constexpr int32_t RSS_PID = 3051;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
-static constexpr const char *PHONE_NUMBER = "format_phone_number";
-static constexpr const char *IS_DELETED = "is_deleted";
-static constexpr const char *FORMAT_PHONE_NUMBER = "format_phone_number";
-static constexpr const char *FAVORITE = "favorite";
-static constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
-static constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
-static constexpr const char *RAW_CONTACT_URI = "datashare:///com.ohos.contactsdataability/contacts/raw_contact";
 static constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
-std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST};
-
-std::shared_ptr<DataShare::DataShareHelper> AdvancedNotificationService::CreateContactDataShareHelper(std::string uri)
-{
-    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (saManager == nullptr) {
-        ANS_LOGE("saManager is nullptr");
-        return nullptr;
-    }
-    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
-    if (remoteObj == nullptr) {
-        ANS_LOGE("GetSystemAbility Service Failed.");
-        return nullptr;
-    }
-    std::shared_ptr<DataShare::DataShareHelper> helper =
-        DataShare::DataShareHelper::Creator(remoteObj, uri);
-    return helper;
-}
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1700,84 +1676,13 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::s
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
             ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is %{public}s", policy.c_str());
+            Uri uri(CONTACT_DATA);
+            isNeedSilent = datashareHelper->QueryContact(uri, phoneNumber, policy);
             isNeedSilent = IsPhoneNumberInContact(phoneNumber, policy);
             break;
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
     return isNeedSilent ? 1 : 0;
-}
-
-bool AdvancedNotificationService::IsPhoneNumberInContact(const std::string &phoneNumber, const std::string &policy)
-{
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_URI);
-    if (helper == nullptr) {
-        ANS_LOGE("helper is nullptr");
-        return false;
-    }
-    Uri uri(CONTACT_DATA);
-    DataShare::DataSharePredicates predicates;
-    std::vector<std::string> columns;
-    predicates.EqualTo(IS_DELETED, 0);
-    predicates.And();
-    predicates.EqualTo(PHONE_NUMBER, phoneNumber);
-    auto resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
-    IPCSkeleton::SetCallingIdentity(identity);
-    if (resultSet == nullptr) {
-        ANS_LOGE("Query error, resultSet is null.");
-        helper->Release();
-        return false;
-    }
-    if (resultSet->GoToFirstRow() != DataShare::E_OK) {
-        ANS_LOGE("Query failed, go to first row error.");
-        resultSet->Close();
-        helper->Release();
-        return false;
-    }
-    int rowCount = 0;
-    resultSet->GetRowCount(rowCount);
-    if (rowCount == 0) {
-        ANS_LOGE("Query failed failed");
-        return false;
-    } else {
-        return dealWithContactResult(helper, resultSet, policy);
-    }
-    return false;
-}
-
-bool AdvancedNotificationService::dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
-    std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy)
-{
-    bool isNeedSilent = false;
-    int32_t columnIndex;
-    int32_t favorite;
-    std::string focus_mode_list;
-    switch (atoi(policy.c_str())) {
-        case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
-            resultSet->GetColumnIndex(FAVORITE, columnIndex);
-            resultSet->GetInt(columnIndex, favorite);
-            ANS_LOGI("IsPhoneNumberInContact: favorite = %{public}d", favorite);
-            isNeedSilent = favorite == 1;
-            break;
-        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
-            resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
-            resultSet->GetString(columnIndex, focus_mode_list);
-            ANS_LOGI("IsPhoneNumberInContact: focus_mode_list = %{public}s", focus_mode_list.c_str());
-            if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
-                isNeedSilent = false;
-                break;
-            }
-            if (focus_mode_list.c_str()[0] == '1') {
-                isNeedSilent = true;
-                break;
-            }
-        default:
-            isNeedSilent = true;
-            break;
-    }
-    resultSet->Close();
-    helper->Release();
-    return isNeedSilent;
 }
 
 ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, int32_t instanceKey)
