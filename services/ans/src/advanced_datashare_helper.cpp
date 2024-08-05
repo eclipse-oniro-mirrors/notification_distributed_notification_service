@@ -53,6 +53,8 @@ constexpr const char *FAVORITE = "favorite";
 constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
+constexpr const int PHONE_NUMBER_LENGTH = 7;
+constexpr const int TYPE_ID_FIVE = 5;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
 AdvancedDatashareHelper::AdvancedDatashareHelper()
@@ -132,11 +134,9 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> columns;
     predicates.EqualTo(IS_DELETED, 0);
-    predicates.EqualTo(TYPE_ID, 5);
-    if (phoneNumber.size() >= 7) {
-        predicates.EndsWith(DETAIL_INFO, phoneNumber.substr(phoneNumber.size() - 7, phoneNumber.size()));
-    } else {
-        predicates.EqualTo(DETAIL_INFO, phoneNumber);
+    predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
+    if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
+        predicates.EndsWith(DETAIL_INFO, phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size()));
     }
     auto resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
     IPCSkeleton::SetCallingIdentity(identity);
@@ -153,10 +153,10 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
     } else {
         int resultId = -1;
         #ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
-        resultId = TelCustManager::GetInstance().GetCallerIndex(resultSet, phoneNumber);
+        resultId = Telephony::TelCustManager::GetInstance().GetCallerIndex(resultSet, phoneNumber);
         #endif
-        if ((phoneNumber.size() >= 7 && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
-            (phoneNumber.size() < 7 && resultSet->GoToFirstRow() == DataShare::E_OK)) {
+        if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
+            (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
             return dealWithContactResult(helper, resultSet, policy);
         }
     }
