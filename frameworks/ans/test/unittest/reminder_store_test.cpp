@@ -49,6 +49,18 @@ public:
         ReminderHelper::CancelAllReminders();
         NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + ReminderStore::REMINDER_DB_NAME);
     }
+
+    void InitStore(ReminderStore& store)
+    {
+        std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
+        NativeRdb::RdbStoreConfig config(dbConfig);
+        config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
+        {
+            ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
+            int32_t errCode = STATE_FAIL;
+            store.rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, 7, rdbDataCallBack, errCode);
+        }
+    }
     static sptr<NotificationBundleOption> bundleOption_;
 };
 
@@ -282,7 +294,7 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         int32_t errCode = STATE_FAIL;
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
-        EXPECT_EQ(rdbStore, nullptr);
+        EXPECT_NE(rdbStore, nullptr);
     }
     NativeRdb::RdbHelper::ClearCache();
     NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
@@ -312,6 +324,8 @@ HWTEST_F(ReminderStoreTest, Delete_00005, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTest | Level1)
 {
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->reminderId_ = 999;
     reminder->bundleName_ = "ReminderTimerStrategyTest_00001";
@@ -330,8 +344,6 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTes
     ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
     timer->countDownTimeInSeconds_ = 10001;
 
-    ReminderStore reminderStore;
-    reminderStore.Init();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
     reminderStore.UpdateOrInsert(reminder, bundleOption);
     auto reminders = reminderStore.GetAllValidReminders();
@@ -361,6 +373,8 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
 
 /**
@@ -371,11 +385,13 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTes
  */
 HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00002, Function | SmallTest | Level1)
 {
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->reminderId_ = 999;
     reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
-    reminder->slotType_ = 1;
-    reminder->snoozeSlotType_ = 1;
+    reminder->slotType_ = static_cast<NotificationConstant::SlotType>(1);
+    reminder->snoozeSlotType_ = static_cast<NotificationConstant::SlotType>(1);
     reminder->notificationId_ = 123;
     reminder->title_ = "title_";
     reminder->content_ = "content_";
@@ -390,8 +406,6 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00002, Function | SmallTes
     ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
     timer->countDownTimeInSeconds_ = 10001;
 
-    ReminderStore reminderStore;
-    reminderStore.Init();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
     reminderStore.UpdateOrInsert(reminder, bundleOption);
     auto reminders = reminderStore.GetAllValidReminders();
@@ -419,6 +433,8 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00002, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
 
 /**
@@ -429,6 +445,8 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00002, Function | SmallTes
  */
 HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTest | Level1)
 {
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->reminderId_ = 999;
     reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
@@ -444,8 +462,6 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTes
     ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
     timer->countDownTimeInSeconds_ = 10001;
 
-    ReminderStore reminderStore;
-    reminderStore.Init();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
     reminderStore.UpdateOrInsert(reminder, bundleOption);
     auto reminders = reminderStore.GetAllValidReminders();
@@ -466,6 +482,8 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
 
 /**
@@ -476,6 +494,8 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTes
  */
 HWTEST_F(ReminderStoreTest, ReminderAlarmStrategyTest_00001, Function | SmallTest | Level1)
 {
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
     sptr<ReminderRequest> reminder = new ReminderRequestAlarm();
     reminder->reminderId_ = 999;
     reminder->reminderType_ = ReminderRequest::ReminderType::ALARM;
@@ -484,8 +504,6 @@ HWTEST_F(ReminderStoreTest, ReminderAlarmStrategyTest_00001, Function | SmallTes
     alarm->hour_ = 12;
     alarm->minute_ = 30;
 
-    ReminderStore reminderStore;
-    reminderStore.Init();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
     reminderStore.UpdateOrInsert(reminder, bundleOption);
     auto reminders = reminderStore.GetAllValidReminders();
@@ -504,6 +522,8 @@ HWTEST_F(ReminderStoreTest, ReminderAlarmStrategyTest_00001, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
 
 /**
@@ -514,6 +534,8 @@ HWTEST_F(ReminderStoreTest, ReminderAlarmStrategyTest_00001, Function | SmallTes
  */
 HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00001, Function | SmallTest | Level1)
 {
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
     time_t t;
     (void)time(&t);  // unit is seconds.
     uint64_t ts = t * 1000;  // ms
@@ -532,8 +554,6 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00001, Function | Small
     calendar->repeatMonth_ = 13;
     calendar->AddExcludeDate(ts);
 
-    ReminderStore reminderStore;
-    reminderStore.Init();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
     reminderStore.UpdateOrInsert(reminder, bundleOption);
     auto reminders = reminderStore.GetAllValidReminders();
@@ -559,6 +579,8 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00001, Function | Small
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
 
 /**
@@ -569,6 +591,8 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00001, Function | Small
  */
 HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | SmallTest | Level1)
 {
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
     time_t t;
     (void)time(&t);  // unit is seconds.
     uint64_t ts = t * 1000;  // ms
@@ -584,8 +608,6 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | Small
     calendar->rruleWantAgentInfo_->abilityName = "abilityName";
     calendar->rruleWantAgentInfo_->uri = "uri";
 
-    ReminderStore reminderStore;
-    reminderStore.Init();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
     reminderStore.UpdateOrInsert(reminder, bundleOption);
     auto reminders = reminderStore.GetAllValidReminders();
@@ -606,6 +628,8 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | Small
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
 }
 }

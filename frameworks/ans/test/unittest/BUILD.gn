@@ -68,10 +68,12 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/reminder_request_alarm_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_request_calendar_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/reminder_request_timer_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/reminder_store_test.cpp",
   ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
     "//third_party/googletest:gtest_main",
   ]
 
