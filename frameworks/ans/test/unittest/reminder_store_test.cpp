@@ -58,8 +58,15 @@ public:
         {
             ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
             int32_t errCode = STATE_FAIL;
-            store.rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, 7, rdbDataCallBack, errCode);
+            constexpr int32_t version = 7;
+            store.rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, version, rdbDataCallBack, errCode);
         }
+    }
+
+    void ClearStore()
+    {
+        NativeRdb::RdbHelper::ClearCache();
+        NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
     }
     static sptr<NotificationBundleOption> bundleOption_;
 };
@@ -373,8 +380,7 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+    ClearStore();
 }
 
 /**
@@ -433,8 +439,7 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00002, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+    ClearStore();
 }
 
 /**
@@ -482,8 +487,7 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+    ClearStore();
 }
 
 /**
@@ -522,8 +526,7 @@ HWTEST_F(ReminderStoreTest, ReminderAlarmStrategyTest_00001, Function | SmallTes
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+    ClearStore();
 }
 
 /**
@@ -579,8 +582,7 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00001, Function | Small
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+    ClearStore();
 }
 
 /**
@@ -628,8 +630,7 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | Small
     }
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
+    ClearStore();
 }
 }
 }
