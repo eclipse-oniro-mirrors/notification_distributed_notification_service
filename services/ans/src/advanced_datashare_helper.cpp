@@ -23,6 +23,9 @@
 #include "singleton.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
+#ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
+#include "tel_cust_manager.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -129,18 +132,16 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> columns;
     predicates.EqualTo(IS_DELETED, 0);
-    predicates.And();
-    predicates.EqualTo(FORMAT_PHONE_NUMBER, phoneNumber);
+    predicates.EqualTo(TYPE_ID, 5);
+    if (phoneNumber.size() >= 7) {
+        predicates.EndsWith(DETAIL_INFO, phoneNumber.substr(phoneNumber.size() - 7, phoneNumber.size()));
+    } else {
+        predicates.EqualTo(DETAIL_INFO, phoneNumber);
+    }
     auto resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
     IPCSkeleton::SetCallingIdentity(identity);
     if (resultSet == nullptr) {
         ANS_LOGE("Query error, resultSet is null.");
-        helper->Release();
-        return false;
-    }
-    if (resultSet->GoToFirstRow() != DataShare::E_OK) {
-        ANS_LOGE("Query failed, go to first row error.");
-        resultSet->Close();
         helper->Release();
         return false;
     }
@@ -150,7 +151,14 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
         ANS_LOGE("Query failed failed");
         return false;
     } else {
-        return dealWithContactResult(helper, resultSet, policy);
+        int resultId = -1;
+        #ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
+        resultId = TelCustManager::GetInstance().GetCallerIndex(resultSet, phoneNumber);
+        #endif
+        if ((phoneNumber.size() >= 7 && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
+            (phoneNumber.size() < 7 && resultSet->GoToFirstRow() == DataShare::E_OK)) {
+            return dealWithContactResult(helper, resultSet, policy);
+        }
     }
     return false;
 }
@@ -181,6 +189,7 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
                 isNeedSilent = true;
                 break;
             }
+            break;
         default:
             isNeedSilent = true;
             break;

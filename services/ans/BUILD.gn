@@ -159,6 +159,7 @@ ohos_shared_library("libans") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "time_service:time_client",
+    "core_service:tel_core_service_api",
   ]
   external_deps += component_external_deps
 
@@ -189,6 +190,11 @@ ohos_shared_library("libans") {
 
   if (distributed_notification_service_feature_summary) {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
+  }
+
+  if (telephony_cust) {
+    external_deps += [ "telephony_cust:telephony_cust_api" ]
+    defines += [ "OHOS_BUILD_ENABLE_TELEPHONY_CUST" ]
   }
 
   if (ans_config_policy_enable) {

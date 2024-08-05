@@ -84,7 +84,9 @@
         "resource_management",
         "config_policy",
         "screenlock_mgr",
-        "ace_engine"
+        "ace_engine",
+        "telephony_cust",
+        "core_service"
       ],
       "third_party": [
         "libuv",
