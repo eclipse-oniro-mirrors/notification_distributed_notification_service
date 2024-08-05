@@ -158,7 +158,7 @@ ohos_shared_library("libans") {
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "core_service:tel_core_service_api",
+    "time_service:time_client",
   ]
   external_deps += component_external_deps
 
