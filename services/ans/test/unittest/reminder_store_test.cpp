@@ -20,6 +20,9 @@
 #include "reminder_store.h"
 #include "reminder_table.h"
 #include "reminder_table_old.h"
+#include "reminder_request_alarm.h"
+#include "reminder_request_calendar.h"
+#include "reminder_request_timer.h"
 #undef private
 #undef protected
 #include "reminder_helper.h"
@@ -299,6 +302,89 @@ HWTEST_F(ReminderStoreTest, Delete_00005, Function | SmallTest | Level1)
 
     ret = reminderStore.Delete("com.example.simple", 100, -1);
     EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: ReminderStrategyTest_00001
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer();
+    reminder->reminderId_ = 999;
+    reminder->bundleName_ = "ReminderTimerStrategyTest_00001";
+    reminder->userId_ = 998;
+    reminder->uid_ = 997;
+    reminder->isSystemApp_ = true;
+    reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
+    reminder->reminderTimeInMilli_ = 123456789;
+    reminder->triggerTimeInMilli_ = 987654321;
+    reminder->SetTimeInterval(100);
+    reminder->snoozeTimes_ = 10;
+    reminder->snoozeTimesDynamic_ = 9;
+    reminder->SetRingDuration(500);
+    reminder->isExpired_ = false;
+    reminder->state_ = 123;
+    reminder->customButtonUri_ = "customButtonUri_";
+    reminder->slotType_ = 1;
+    reminder->snoozeSlotType_ = 1;
+    reminder->notificationId_ = 123;
+    reminder->title_ = "title_";
+    reminder->content_ = "content_";
+    reminder->snoozeContent_ = "snoozeContent_";
+    reminder->expiredContent_ = "expiredContent_";
+    reminder->tapDismissed_ = false;
+    reminder->autoDeletedTime_ = 666;
+    reminder->groupId_ = "groupId_";
+    reminder->customRingUri_ = "customRingUri_";
+    reminder->creatorBundleName_ = "creatorBundleName_";
+    reminder->creatorUid_ = 101;
+    ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
+    timer->countDownTimeInSeconds_ = 10001;
+
+    ReminderStore reminderStore;
+    reminderStore.Init();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
+    reminderStore.UpdateOrInsert(reminder, bundleOption);
+    auto reminders = reminderStore.GetAllValidReminders();
+    for (auto each : reminders) {
+        if (each->reminderId_ != reminder->reminderId_) {
+            continue;
+        }
+
+        EXPECT_EQ(reminder->bundleName_, each->bundleName_);
+        EXPECT_EQ(reminder->userId_, each->userId_);
+        EXPECT_EQ(reminder->uid_, each->uid_);
+        EXPECT_EQ(reminder->isSystemApp_, each->isSystemApp_);
+        EXPECT_EQ(reminder->reminderType_, each->reminderType_);
+        EXPECT_EQ(reminder->reminderTimeInMilli_, each->reminderTimeInMilli_);
+        EXPECT_EQ(reminder->triggerTimeInMilli_, each->triggerTimeInMilli_);
+        EXPECT_EQ(reminder->GetTimeInterval(), each->GetTimeInterval());
+        EXPECT_EQ(reminder->snoozeTimes_, each->snoozeTimes_);
+        EXPECT_EQ(reminder->snoozeTimesDynamic_, each->snoozeTimesDynamic_);
+        EXPECT_EQ(reminder->GetRingDuration(), each->GetRingDuration());
+        EXPECT_EQ(reminder->isExpired_, each->isExpired_);
+        EXPECT_EQ(reminder->state_, each->state_);
+        EXPECT_EQ(reminder->customButtonUri_, each->customButtonUri_);
+        EXPECT_EQ(reminder->slotType_, each->slotType_);
+        EXPECT_EQ(reminder->snoozeSlotType_, each->snoozeSlotType_);
+        EXPECT_EQ(reminder->notificationId_, each->notificationId_);
+        EXPECT_EQ(reminder->title_, each->title_);
+        EXPECT_EQ(reminder->content_, each->content_);
+        EXPECT_EQ(reminder->snoozeContent_, each->snoozeContent_);
+        EXPECT_EQ(reminder->expiredContent_, each->expiredContent_);
+        EXPECT_EQ(reminder->tapDismissed_, each->tapDismissed_);
+        EXPECT_EQ(reminder->autoDeletedTime_, each->autoDeletedTime_);
+        EXPECT_EQ(reminder->groupId_, each->groupId_);
+        EXPECT_EQ(reminder->customRingUri_, each->customRingUri_);
+        EXPECT_EQ(reminder->creatorBundleName_, each->creatorBundleName_);
+        EXPECT_EQ(reminder->creatorUid_, each->creatorUid_);
+        ReminderRequestTimer* timer1 = static_cast<ReminderRequestTimer*>(each.GetRefPtr());
+        EXPECT_EQ(timer1->countDownTimeInSeconds_, timer->countDownTimeInSeconds_);
+        break;
+    }
 }
 }
 }

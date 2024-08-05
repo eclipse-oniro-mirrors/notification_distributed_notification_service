@@ -55,14 +55,36 @@ public:
     static void RecoverFromDb(sptr<ReminderRequest>& reminder, const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 
 private:
-    static void RecoverIntFromOldVersion(sptr<ReminderRequest>& reminder,
+    /**
+     * @brief Recovery time related fields from the database(old version rdb).
+     */
+    static void RecoverTimeFromOldVersion(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    static void RecoverStringFromOldVersion(sptr<ReminderRequest>& reminder,
+    /**
+     * @brief Recovery id related fields from the database(old version rdb).
+     */
+    static void RecoverIdFromOldVersion(sptr<ReminderRequest>& reminder,
+        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    /**
+     * @brief Recovery context related from the database(old version rdb).
+     */
+    static void RecoverContextFromOldVersion(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 
-    static void RecoverIntFromDb(sptr<ReminderRequest>& reminder,
+    /**
+     * @brief Recovery time related fields from the database.
+     */
+    static void RecoverTimeFromDb(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    static void RecoverStringFromDb(sptr<ReminderRequest>& reminder,
+    /**
+     * @brief Recovery id related fields from the database.
+     */
+    static void RecoverIdFromDb(sptr<ReminderRequest>& reminder,
+        const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
+    /**
+     * @brief Recovery context related from the database.
+     */
+    static void RecoverContextFromDb(sptr<ReminderRequest>& reminder,
         const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
 };
 

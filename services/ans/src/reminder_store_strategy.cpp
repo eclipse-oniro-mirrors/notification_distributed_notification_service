@@ -71,25 +71,9 @@ void ReminderStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,
     values.PutInt(ReminderBaseTable::CREATOR_UID, reminder->GetCreatorUid());
 }
 
-void ReminderStrategy::RecoverIntFromOldVersion(sptr<ReminderRequest>& reminder,
+void ReminderStrategy::RecoverTimeFromOldVersion(sptr<ReminderRequest>& reminder,
     const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
 {
-    int32_t reminderId = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::REMINDER_ID, reminderId);
-    reminder->SetReminderId(reminderId);
-
-    int32_t userId = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::USER_ID, userId);
-    reminder->InitUserId(userId);
-
-    int32_t uid = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::UID, uid);
-    reminder->InitUid(uid);
-
-    int32_t reminderType = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::REMINDER_TYPE, reminderType);
-    reminder->SetReminderType(ReminderRequest::ReminderType(reminderType));
-
     uint64_t reminderTime = 0;
     ReminderStrategy::GetRdbValue<uint64_t>(resultSet, ReminderTable::REMINDER_TIME, reminderTime);
     reminder->SetReminderTimeInMilli(reminderTime);
@@ -114,13 +98,29 @@ void ReminderStrategy::RecoverIntFromOldVersion(sptr<ReminderRequest>& reminder,
     ReminderStrategy::GetRdbValue<uint64_t>(resultSet, ReminderTable::RING_DURATION, ringDuration);
     reminder->SetRingDuration(ringDuration);
 
-    uint8_t state = 0;
-    ReminderStrategy::GetRdbValue<uint8_t>(resultSet, ReminderTable::STATE, state);
-    reminder->SetState(state);
+    int64_t autoDeletedTime = 0;
+    ReminderStrategy::GetRdbValue<int64_t>(resultSet, ReminderTable::AUTO_DELETED_TIME, autoDeletedTime);
+    reminder->SetAutoDeletedTime(autoDeletedTime);
+}
 
-    uint8_t repeatDaysOfWeek = 0;
-    ReminderStrategy::GetRdbValue<uint8_t>(resultSet, ReminderTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
-    reminder->SetRepeatDaysOfWeek(repeatDaysOfWeek);
+void ReminderStrategy::RecoverIdFromOldVersion(sptr<ReminderRequest>& reminder,
+    const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
+{
+    int32_t reminderId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::REMINDER_ID, reminderId);
+    reminder->SetReminderId(reminderId);
+
+    int32_t userId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::USER_ID, userId);
+    reminder->InitUserId(userId);
+
+    int32_t uid = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::UID, uid);
+    reminder->InitUid(uid);
+
+    int32_t reminderType = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::REMINDER_TYPE, reminderType);
+    reminder->SetReminderType(ReminderRequest::ReminderType(reminderType));
 
     int32_t slotType = 0;
     ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::SLOT_ID, slotType);
@@ -133,26 +133,18 @@ void ReminderStrategy::RecoverIntFromOldVersion(sptr<ReminderRequest>& reminder,
     int32_t notificationId = 0;
     ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderTable::NOTIFICATION_ID, notificationId);
     reminder->SetNotificationId(notificationId);
+
+    std::string groupId;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::GROUP_ID, groupId);
+    reminder->SetGroupId(groupId);
 }
 
-void ReminderStrategy::RecoverStringFromOldVersion(sptr<ReminderRequest>& reminder,
+void ReminderStrategy::RecoverContextFromOldVersion(sptr<ReminderRequest>& reminder,
     const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
 {
     std::string bundleName;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::PKG_NAME, bundleName);
     reminder->InitBundleName(bundleName);
-
-    std::string isSystemApp;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::SYS_APP, isSystemApp);
-    reminder->SetSystemApp(isSystemApp == "true" ? true : false);
-
-    std::string isExpired;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::IS_EXPIRED, isExpired);
-    reminder->SetExpired(isExpired == "true" ? true : false);
-
-    std::string actionButtons;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::ACTION_BUTTON_INFO, actionButtons);
-    reminder->DeserializeButtonInfo(actionButtons);
 
     std::string title;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::TITLE, title);
@@ -169,6 +161,18 @@ void ReminderStrategy::RecoverStringFromOldVersion(sptr<ReminderRequest>& remind
     std::string expiredContent;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::EXPIRED_CONTENT, expiredContent);
     reminder->SetExpiredContent(expiredContent);
+
+    std::string customButtonUri;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::CUSTOM_BUTTON_URI, customButtonUri);
+    reminder->SetCustomButtonUri(customButtonUri);
+
+    std::string customRingUri;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::CUSTOM_RING_URI, customRingUri);
+    reminder->SetCustomRingUri(customRingUri);
+
+    std::string creatorBundleName;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::CREATOR_BUNDLE_NAME, creatorBundleName);
+    reminder->InitCreatorBundleName(creatorBundleName);
 }
 
 void ReminderStrategy::RecoverFromOldVersion(sptr<ReminderRequest>& reminder,
@@ -179,8 +183,29 @@ void ReminderStrategy::RecoverFromOldVersion(sptr<ReminderRequest>& reminder,
         return;
     }
 
-    ReminderStrategy::RecoverIntFromOldVersion(reminder, resultSet);
-    ReminderStrategy::RecoverStringFromOldVersion(reminder, resultSet);
+    ReminderStrategy::RecoverTimeFromOldVersion(reminder, resultSet);
+    ReminderStrategy::RecoverIdFromOldVersion(reminder, resultSet);
+    ReminderStrategy::RecoverContextFromOldVersion(reminder, resultSet);
+
+    std::string isSystemApp;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::SYS_APP, isSystemApp);
+    reminder->SetSystemApp(isSystemApp == "true" ? true : false);
+
+    std::string isExpired;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::IS_EXPIRED, isExpired);
+    reminder->SetExpired(isExpired == "true" ? true : false);
+
+    std::string actionButtons;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::ACTION_BUTTON_INFO, actionButtons);
+    reminder->DeserializeButtonInfo(actionButtons);
+
+    uint8_t state = 0;
+    ReminderStrategy::GetRdbValue<uint8_t>(resultSet, ReminderTable::STATE, state);
+    reminder->SetState(state);
+
+    uint8_t repeatDaysOfWeek = 0;
+    ReminderStrategy::GetRdbValue<uint8_t>(resultSet, ReminderTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
+    reminder->SetRepeatDaysOfWeek(repeatDaysOfWeek);
 
     std::string wantAgent;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::AGENT, wantAgent);
@@ -193,47 +218,11 @@ void ReminderStrategy::RecoverFromOldVersion(sptr<ReminderRequest>& reminder,
     std::string tapDismissed;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::TAP_DISMISSED, tapDismissed);
     reminder->SetTapDismissed(tapDismissed == "true" ? true : false);
-
-    int64_t autoDeletedTime = 0;
-    ReminderStrategy::GetRdbValue<int64_t>(resultSet, ReminderTable::AUTO_DELETED_TIME, autoDeletedTime);
-    reminder->SetAutoDeletedTime(autoDeletedTime);
-
-    std::string customButtonUri;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::CUSTOM_BUTTON_URI, customButtonUri);
-    reminder->SetCustomButtonUri(customButtonUri);
-
-    std::string groupId;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::GROUP_ID, groupId);
-    reminder->SetGroupId(groupId);
-
-    std::string customRingUri;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::CUSTOM_RING_URI, customRingUri);
-    reminder->SetCustomRingUri(customRingUri);
-
-    std::string creatorBundleName;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderTable::CREATOR_BUNDLE_NAME, creatorBundleName);
-    reminder->InitCreatorBundleName(creatorBundleName);
 }
 
-void ReminderStrategy::RecoverIntFromDb(sptr<ReminderRequest>& reminder,
+void ReminderStrategy::RecoverTimeFromDb(sptr<ReminderRequest>& reminder,
     const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
 {
-    int32_t reminderId = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::REMINDER_ID, reminderId);
-    reminder->SetReminderId(reminderId);
-
-    int32_t userId = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::USER_ID, userId);
-    reminder->InitUserId(userId);
-
-    int32_t uid = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::UID, uid);
-    reminder->InitUid(uid);
-
-    int32_t reminderType = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::REMINDER_TYPE, reminderType);
-    reminder->SetReminderType(ReminderRequest::ReminderType(reminderType));
-
     uint64_t reminderTime = 0;
     ReminderStrategy::GetRdbValue<uint64_t>(resultSet, ReminderBaseTable::REMINDER_TIME, reminderTime);
     reminder->SetReminderTimeInMilli(reminderTime);
@@ -258,9 +247,29 @@ void ReminderStrategy::RecoverIntFromDb(sptr<ReminderRequest>& reminder,
     ReminderStrategy::GetRdbValue<uint64_t>(resultSet, ReminderBaseTable::RING_DURATION, ringDuration);
     reminder->SetRingDuration(ringDuration);
 
-    uint8_t state = 0;
-    ReminderStrategy::GetRdbValue<uint8_t>(resultSet, ReminderBaseTable::STATE, state);
-    reminder->SetState(state);
+    int64_t autoDeletedTime = 0;
+    ReminderStrategy::GetRdbValue<int64_t>(resultSet, ReminderBaseTable::AUTO_DELETED_TIME, autoDeletedTime);
+    reminder->SetAutoDeletedTime(autoDeletedTime);
+}
+
+void ReminderStrategy::RecoverIdFromDb(sptr<ReminderRequest>& reminder,
+    const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
+{
+    int32_t reminderId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::REMINDER_ID, reminderId);
+    reminder->SetReminderId(reminderId);
+
+    int32_t userId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::USER_ID, userId);
+    reminder->InitUserId(userId);
+
+    int32_t uid = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::UID, uid);
+    reminder->InitUid(uid);
+
+    int32_t reminderType = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::REMINDER_TYPE, reminderType);
+    reminder->SetReminderType(ReminderRequest::ReminderType(reminderType));
 
     int32_t slotType = 0;
     ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::SLOT_ID, slotType);
@@ -273,26 +282,22 @@ void ReminderStrategy::RecoverIntFromDb(sptr<ReminderRequest>& reminder,
     int32_t notificationId = 0;
     ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::NOTIFICATION_ID, notificationId);
     reminder->SetNotificationId(notificationId);
+
+    std::string groupId;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::GROUP_ID, groupId);
+    reminder->SetGroupId(groupId);
+
+    int32_t creatorUid;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::CREATOR_UID, creatorUid);
+    reminder->InitCreatorUid(creatorUid);
 }
 
-void ReminderStrategy::RecoverStringFromDb(sptr<ReminderRequest>& reminder,
+void ReminderStrategy::RecoverContextFromDb(sptr<ReminderRequest>& reminder,
     const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
 {
     std::string bundleName;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::PACKAGE_NAME, bundleName);
     reminder->InitBundleName(bundleName);
-
-    std::string isSystemApp;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::SYSTEM_APP, isSystemApp);
-    reminder->SetSystemApp(isSystemApp == "true" ? true : false);
-
-    std::string isExpired;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::IS_EXPIRED, isExpired);
-    reminder->SetExpired(isExpired == "true" ? true : false);
-
-    std::string actionButtons;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::ACTION_BUTTON_INFO, actionButtons);
-    reminder->DeserializeButtonInfo(actionButtons);
 
     std::string customButtonUri;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::CUSTOM_BUTTON_URI, customButtonUri);
@@ -313,6 +318,14 @@ void ReminderStrategy::RecoverStringFromDb(sptr<ReminderRequest>& reminder,
     std::string expiredContent;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::EXPIRED_CONTENT, expiredContent);
     reminder->SetExpiredContent(expiredContent);
+
+    std::string customRingUri;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::CUSTOM_RING_URI, customRingUri);
+    reminder->SetCustomRingUri(customRingUri);
+
+    std::string creatorBundleName;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::CREATOR_BUNDLE_NAME, creatorBundleName);
+    reminder->InitCreatorBundleName(creatorBundleName);
 }
 
 void ReminderStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
@@ -322,8 +335,25 @@ void ReminderStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
         ANSR_LOGE("ResultSet is null or reminder is null");
         return;
     }
-    ReminderStrategy::RecoverIntFromDb(reminder, resultSet);
-    ReminderStrategy::RecoverStringFromDb(reminder, resultSet);
+    ReminderStrategy::RecoverTimeFromDb(reminder, resultSet);
+    ReminderStrategy::RecoverIdFromDb(reminder, resultSet);
+    ReminderStrategy::RecoverContextFromDb(reminder, resultSet);
+
+    uint8_t state = 0;
+    ReminderStrategy::GetRdbValue<uint8_t>(resultSet, ReminderBaseTable::STATE, state);
+    reminder->SetState(state);
+
+    std::string isSystemApp;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::SYSTEM_APP, isSystemApp);
+    reminder->SetSystemApp(isSystemApp == "true" ? true : false);
+
+    std::string isExpired;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::IS_EXPIRED, isExpired);
+    reminder->SetExpired(isExpired == "true" ? true : false);
+
+    std::string actionButtons;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::ACTION_BUTTON_INFO, actionButtons);
+    reminder->DeserializeButtonInfo(actionButtons);
 
     reminder->InitNotificationRequest();  // must set before wantAgent & maxScreenWantAgent
     std::string wantAgent;
@@ -337,26 +367,6 @@ void ReminderStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     std::string tapDismissed;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::TAP_DISMISSED, tapDismissed);
     reminder->SetTapDismissed(tapDismissed == "true" ? true : false);
-
-    int64_t autoDeletedTime = 0;
-    ReminderStrategy::GetRdbValue<int64_t>(resultSet, ReminderBaseTable::AUTO_DELETED_TIME, autoDeletedTime);
-    reminder->SetAutoDeletedTime(autoDeletedTime);
-
-    std::string groupId;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::GROUP_ID, groupId);
-    reminder->SetGroupId(groupId);
-
-    std::string customRingUri;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::CUSTOM_RING_URI, customRingUri);
-    reminder->SetCustomRingUri(customRingUri);
-
-    std::string creatorBundleName;
-    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::CREATOR_BUNDLE_NAME, creatorBundleName);
-    reminder->InitCreatorBundleName(creatorBundleName);
-
-    int32_t creatorUid;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::CREATOR_UID, creatorUid);
-    reminder->InitCreatorUid(creatorUid);
 }
 
 void ReminderTimerStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,
@@ -386,8 +396,7 @@ void ReminderTimerStrategy::RecoverFromOldVersion(sptr<ReminderRequest>& reminde
 void ReminderTimerStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     const std::shared_ptr<NativeRdb::ResultSet>& baseResult, const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
 {
-    if (resultSet == nullptr || reminder == nullptr
-        || baseResult == nullptr) {
+    if (resultSet == nullptr || reminder == nullptr || baseResult == nullptr) {
         ANSR_LOGE("ResultSet is null or reminder is null");
         return;
     }
@@ -442,8 +451,7 @@ void ReminderAlarmStrategy::RecoverFromOldVersion(sptr<ReminderRequest>& reminde
 void ReminderAlarmStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     const std::shared_ptr<NativeRdb::ResultSet>& baseResult, const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
 {
-    if (resultSet == nullptr || reminder == nullptr
-        || baseResult == nullptr) {
+    if (resultSet == nullptr || reminder == nullptr || baseResult == nullptr) {
         ANSR_LOGE("ResultSet is null or reminder is null");
         return;
     }
@@ -607,8 +615,7 @@ void ReminderCalendarStrategy::RecoverTime(sptr<ReminderRequest>& reminder,
 void ReminderCalendarStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     const std::shared_ptr<NativeRdb::ResultSet>& baseResult, const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
 {
-    if (resultSet == nullptr || reminder == nullptr
-        || baseResult == nullptr) {
+    if (resultSet == nullptr || reminder == nullptr || baseResult == nullptr) {
         ANSR_LOGE("ResultSet is null or reminder is null");
         return;
     }
