@@ -327,7 +327,53 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTes
     reminder->SetRingDuration(500);
     reminder->isExpired_ = false;
     reminder->state_ = 123;
-    reminder->customButtonUri_ = "customButtonUri_";
+    ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
+    timer->countDownTimeInSeconds_ = 10001;
+
+    ReminderStore reminderStore;
+    reminderStore.Init();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
+    reminderStore.UpdateOrInsert(reminder, bundleOption);
+    auto reminders = reminderStore.GetAllValidReminders();
+    bool succeed = false;
+    for (auto each : reminders) {
+        if (each->reminderId_ != reminder->reminderId_) {
+            continue;
+        }
+
+        EXPECT_EQ(reminder->bundleName_, each->bundleName_);
+        EXPECT_EQ(reminder->userId_, each->userId_);
+        EXPECT_EQ(reminder->uid_, each->uid_);
+        EXPECT_EQ(reminder->isSystemApp_, each->isSystemApp_);
+        EXPECT_EQ(reminder->reminderType_, each->reminderType_);
+        EXPECT_EQ(reminder->reminderTimeInMilli_, each->reminderTimeInMilli_);
+        EXPECT_EQ(reminder->triggerTimeInMilli_, each->triggerTimeInMilli_);
+        EXPECT_EQ(reminder->GetTimeInterval(), each->GetTimeInterval());
+        EXPECT_EQ(reminder->snoozeTimes_, each->snoozeTimes_);
+        EXPECT_EQ(reminder->snoozeTimesDynamic_, each->snoozeTimesDynamic_);
+        EXPECT_EQ(reminder->GetRingDuration(), each->GetRingDuration());
+        EXPECT_EQ(reminder->isExpired_, each->isExpired_);
+        EXPECT_EQ(reminder->state_, each->state_);
+        ReminderRequestTimer* timer1 = static_cast<ReminderRequestTimer*>(each.GetRefPtr());
+        EXPECT_EQ(timer1->countDownTimeInSeconds_, timer->countDownTimeInSeconds_);
+        succeed = true;
+        break;
+    }
+    reminderStore.Delete(reminder->reminderId_);
+    EXPECT_EQ(succeed, true);
+}
+
+/**
+ * @tc.name: ReminderTimerStrategyTest_00002
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00002, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer();
+    reminder->reminderId_ = 999;
+    reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
     reminder->slotType_ = 1;
     reminder->snoozeSlotType_ = 1;
     reminder->notificationId_ = 123;
@@ -349,25 +395,12 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTes
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
     reminderStore.UpdateOrInsert(reminder, bundleOption);
     auto reminders = reminderStore.GetAllValidReminders();
+    bool succeed = false;
     for (auto each : reminders) {
         if (each->reminderId_ != reminder->reminderId_) {
             continue;
         }
 
-        EXPECT_EQ(reminder->bundleName_, each->bundleName_);
-        EXPECT_EQ(reminder->userId_, each->userId_);
-        EXPECT_EQ(reminder->uid_, each->uid_);
-        EXPECT_EQ(reminder->isSystemApp_, each->isSystemApp_);
-        EXPECT_EQ(reminder->reminderType_, each->reminderType_);
-        EXPECT_EQ(reminder->reminderTimeInMilli_, each->reminderTimeInMilli_);
-        EXPECT_EQ(reminder->triggerTimeInMilli_, each->triggerTimeInMilli_);
-        EXPECT_EQ(reminder->GetTimeInterval(), each->GetTimeInterval());
-        EXPECT_EQ(reminder->snoozeTimes_, each->snoozeTimes_);
-        EXPECT_EQ(reminder->snoozeTimesDynamic_, each->snoozeTimesDynamic_);
-        EXPECT_EQ(reminder->GetRingDuration(), each->GetRingDuration());
-        EXPECT_EQ(reminder->isExpired_, each->isExpired_);
-        EXPECT_EQ(reminder->state_, each->state_);
-        EXPECT_EQ(reminder->customButtonUri_, each->customButtonUri_);
         EXPECT_EQ(reminder->slotType_, each->slotType_);
         EXPECT_EQ(reminder->snoozeSlotType_, each->snoozeSlotType_);
         EXPECT_EQ(reminder->notificationId_, each->notificationId_);
@@ -381,10 +414,198 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00001, Function | SmallTes
         EXPECT_EQ(reminder->customRingUri_, each->customRingUri_);
         EXPECT_EQ(reminder->creatorBundleName_, each->creatorBundleName_);
         EXPECT_EQ(reminder->creatorUid_, each->creatorUid_);
-        ReminderRequestTimer* timer1 = static_cast<ReminderRequestTimer*>(each.GetRefPtr());
-        EXPECT_EQ(timer1->countDownTimeInSeconds_, timer->countDownTimeInSeconds_);
+        succeed = true;
         break;
     }
+    reminderStore.Delete(reminder->reminderId_);
+    EXPECT_EQ(succeed, true);
+}
+
+/**
+ * @tc.name: ReminderTimerStrategyTest_00003
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer();
+    reminder->reminderId_ = 999;
+    reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
+    reminder->customButtonUri_ = "customButtonUri_";
+    if (reminder->wantAgentInfo_ == nullptr) {
+        reminder->InitServerObj();
+    }
+    reminder->wantAgentInfo_->pkgName = "pkgName";
+    reminder->wantAgentInfo_->abilityName = "abilityName";
+    reminder->wantAgentInfo_->uri = "uri";
+    reminder->maxScreenWantAgentInfo_->pkgName = "pkgName1";
+    reminder->maxScreenWantAgentInfo_->abilityName = "abilityName1";
+    ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
+    timer->countDownTimeInSeconds_ = 10001;
+
+    ReminderStore reminderStore;
+    reminderStore.Init();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
+    reminderStore.UpdateOrInsert(reminder, bundleOption);
+    auto reminders = reminderStore.GetAllValidReminders();
+    bool succeed = false;
+    for (auto each : reminders) {
+        if (each->reminderId_ != reminder->reminderId_) {
+            continue;
+        }
+
+        EXPECT_EQ(reminder->customButtonUri_, each->customButtonUri_);
+        EXPECT_EQ(reminder->wantAgentInfo_->pkgName, each->wantAgentInfo_->pkgName);
+        EXPECT_EQ(reminder->wantAgentInfo_->abilityName, each->wantAgentInfo_->abilityName);
+        EXPECT_EQ(reminder->wantAgentInfo_->uri, each->wantAgentInfo_->uri);
+        EXPECT_EQ(reminder->maxScreenWantAgentInfo_->pkgName, each->maxScreenWantAgentInfo_->pkgName);
+        EXPECT_EQ(reminder->maxScreenWantAgentInfo_->abilityName, each->maxScreenWantAgentInfo_->abilityName);
+        succeed = true;
+        break;
+    }
+    reminderStore.Delete(reminder->reminderId_);
+    EXPECT_EQ(succeed, true);
+}
+
+/**
+ * @tc.name: ReminderAlarmStrategyTest_00001
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderAlarmStrategyTest_00001, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestAlarm();
+    reminder->reminderId_ = 999;
+    reminder->reminderType_ = ReminderRequest::ReminderType::ALARM;
+    reminder->repeatDaysOfWeek_ = 55;
+    ReminderRequestAlarm* alarm = static_cast<ReminderRequestAlarm*>(reminder.GetRefPtr());
+    alarm->hour_ = 12;
+    alarm->minute_ = 30;
+
+    ReminderStore reminderStore;
+    reminderStore.Init();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
+    reminderStore.UpdateOrInsert(reminder, bundleOption);
+    auto reminders = reminderStore.GetAllValidReminders();
+    bool succeed = false;
+    for (auto each : reminders) {
+        if (each->reminderId_ != reminder->reminderId_) {
+            continue;
+        }
+
+        EXPECT_EQ(reminder->repeatDaysOfWeek_, each->repeatDaysOfWeek_);
+        ReminderRequestAlarm* alarm1 = static_cast<ReminderRequestAlarm*>(each.GetRefPtr());
+        EXPECT_EQ(alarm->hour_, alarm1->hour_);
+        EXPECT_EQ(alarm->minute_, alarm1->minute_);
+        succeed = true;
+        break;
+    }
+    reminderStore.Delete(reminder->reminderId_);
+    EXPECT_EQ(succeed, true);
+}
+
+/**
+ * @tc.name: ReminderCalendarStrategyTest_00001
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00001, Function | SmallTest | Level1)
+{
+    time_t t;
+    (void)time(&t);  // unit is seconds.
+    uint64_t ts = t * 1000;  // ms
+
+    sptr<ReminderRequest> reminder = new ReminderRequestCalendar();
+    reminder->reminderId_ = 999;
+    reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
+    ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+    calendar->firstDesignateYear_ = 2006;
+    calendar->firstDesignateMonth_ = 6;
+    calendar->firstDesignateDay_ = 6;
+    calendar->SetDateTime(ts);
+    calendar->SetEndDateTime(ts + 60 * 1000);
+    calendar->SetLastStartDateTime(ts + 10 * 1000);
+    calendar->repeatDay_ = 12;
+    calendar->repeatMonth_ = 13;
+    calendar->AddExcludeDate(ts);
+
+    ReminderStore reminderStore;
+    reminderStore.Init();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
+    reminderStore.UpdateOrInsert(reminder, bundleOption);
+    auto reminders = reminderStore.GetAllValidReminders();
+    bool succeed = false;
+    for (auto each : reminders) {
+        if (each->reminderId_ != reminder->reminderId_) {
+            continue;
+        }
+
+        ReminderRequestCalendar* calendar1 = static_cast<ReminderRequestCalendar*>(each.GetRefPtr());
+        EXPECT_EQ(calendar1->firstDesignateYear_, calendar->firstDesignateYear_);
+        EXPECT_EQ(calendar1->firstDesignateMonth_, calendar->firstDesignateMonth_);
+        EXPECT_EQ(calendar1->firstDesignateDay_, calendar->firstDesignateDay_);
+        EXPECT_EQ(calendar1->repeatDay_, calendar->repeatDay_);
+        EXPECT_EQ(calendar1->repeatMonth_, calendar->repeatMonth_);
+        EXPECT_EQ(calendar1->GetDateTime(), calendar->GetDateTime());
+        EXPECT_EQ(calendar1->GetEndDateTime(), calendar->GetEndDateTime());
+        EXPECT_EQ(calendar1->GetLastStartDateTime(), calendar->GetLastStartDateTime());
+        EXPECT_EQ(calendar1->SerializationExcludeDates(), calendar->SerializationExcludeDates());
+        EXPECT_EQ(calendar1->SerializationRRule(), calendar->SerializationRRule());
+        succeed = true;
+        break;
+    }
+    reminderStore.Delete(reminder->reminderId_);
+    EXPECT_EQ(succeed, true);
+}
+
+/**
+ * @tc.name: ReminderCalendarStrategyTest_00002
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | SmallTest | Level1)
+{
+    time_t t;
+    (void)time(&t);  // unit is seconds.
+    uint64_t ts = t * 1000;  // ms
+
+    sptr<ReminderRequest> reminder = new ReminderRequestCalendar();
+    reminder->reminderId_ = 999;
+    reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
+    reminder->repeatDaysOfWeek_ = 55;
+    ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+    calendar->SetDateTime(ts);
+    calendar->rruleWantAgentInfo_ = std::make_shared<ReminderRequest::WantAgentInfo>();
+    calendar->rruleWantAgentInfo_->pkgName = "pkgName";
+    calendar->rruleWantAgentInfo_->abilityName = "abilityName";
+    calendar->rruleWantAgentInfo_->uri = "uri";
+
+    ReminderStore reminderStore;
+    reminderStore.Init();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 101);
+    reminderStore.UpdateOrInsert(reminder, bundleOption);
+    auto reminders = reminderStore.GetAllValidReminders();
+    bool succeed = false;
+    for (auto each : reminders) {
+        if (each->reminderId_ != reminder->reminderId_) {
+            continue;
+        }
+
+        EXPECT_EQ(reminder->repeatDaysOfWeek_, each->repeatDaysOfWeek_);
+        ReminderRequestCalendar* calendar1 = static_cast<ReminderRequestCalendar*>(each.GetRefPtr());
+        EXPECT_EQ(calendar1->GetDateTime(), calendar->GetDateTime());
+        EXPECT_EQ(calendar1->GetEndDateTime(), calendar->GetDateTime());
+        EXPECT_EQ(calendar1->GetLastStartDateTime(), calendar->GetDateTime());
+        EXPECT_EQ(calendar1->SerializationRRule(), calendar->SerializationRRule());
+        succeed = true;
+        break;
+    }
+    reminderStore.Delete(reminder->reminderId_);
+    EXPECT_EQ(succeed, true);
 }
 }
 }
