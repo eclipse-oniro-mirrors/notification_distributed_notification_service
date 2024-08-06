@@ -1493,6 +1493,15 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
                 && record->deviceId.empty()
 #endif
                 ) {
+                auto notificationRequest = record->request;
+                if (!BundleManagerHelper::GetInstance()->IsSystemApp(bundle->GetUid()) &&
+                    notificationRequest->IsSystemLiveView()) {
+                    auto localLiveviewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
+                        notificationRequest->GetContent()->GetNotificationContent());
+                    if (localLiveviewContent->GetType() == 0) {
+                        continue;
+                    }
+                }
                 ProcForDeleteLiveView(record);
                 removeList.push_back(record);
             }
@@ -1611,7 +1620,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->request->GetSlotType() == slot->GetType())) {
-            if (((*it)->request->IsAgentNotification() && (*it)->request->IsSystemLiveView())) {
+            if (((*it)->request->GetAgentBundle() != nullptr && (*it)->request->IsSystemLiveView())) {
                 ANS_LOGI("Agent systemliveview no need remove.");
                 it++;
                 continue;
