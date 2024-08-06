@@ -59,6 +59,7 @@ declare_args() {
   ans_config_policy_enable = true
   screenlock_mgr_enable = true
   telephony_cust = true
+  telephony_core = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
@@ -99,6 +100,11 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.telephony_telephony_cust)) {
     telephony_cust = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.telephony_core_service)) {
+    telephony_core = false
   }
 
   if (defined(global_parts_info) &&

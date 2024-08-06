@@ -53,7 +53,7 @@ constexpr const char *FAVORITE = "favorite";
 constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
-constexpr const int PHONE_NUMBER_LENGTH = 7;
+constexpr const unsigned int PHONE_NUMBER_LENGTH = 7;
 constexpr const int TYPE_ID_FIVE = 5;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace

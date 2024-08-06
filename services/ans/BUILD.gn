@@ -196,6 +196,10 @@ ohos_shared_library("libans") {
     defines += [ "OHOS_BUILD_ENABLE_TELEPHONY_CUST" ]
   }
 
+  if (telephony_core) {
+    external_deps += [ "core_service:tel_core_service_api" ]
+  }
+
   if (ans_config_policy_enable) {
     external_deps += [ "config_policy:configpolicy_util" ]
     defines += [ "CONFIG_POLICY_ENABLE" ]
