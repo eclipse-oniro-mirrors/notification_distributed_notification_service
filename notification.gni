@@ -107,11 +107,6 @@ declare_args() {
     telephony_core = false
   }
 
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.telephony_core_service)) {
-    component_external_deps += [ "core_service:tel_core_service_api" ]
-  }
-
   print("hisysevent_usage = " + "$hisysevent_usage")
   print("ans_hitrace_usage = " + "$ans_hitrace_usage")
 }
