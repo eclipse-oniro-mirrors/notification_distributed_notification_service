@@ -72,9 +72,6 @@ ErrCode NotificationPreferences::AddNotificationSlots(
     for (auto slot : slots) {
         result = CheckSlotForCreateSlot(bundleOption, slot, preferencesInfo);
         if (result != ERR_OK) {
-            message.SlotType(static_cast<uint32_t>(slot->GetType()));
-            message.Message("Check slot for create failed." + std::to_string(result));
-            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return result;
         }
     }

@@ -3292,6 +3292,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
 {
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> bundle1 = nullptr;
     auto request = new (std::nothrow) NotificationRequest();
 
     auto ret = advancedNotificationService_->EnableDistributedSelf(true);
@@ -3301,7 +3302,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
     ret = advancedNotificationService_->IsDistributedEnableByBundle(bundle, enable);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    ret = advancedNotificationService_->GetHasPoppedDialog(bundle, enable);
+    ret = advancedNotificationService_->GetHasPoppedDialog(bundle1, enable);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(1, enable);
@@ -3310,7 +3311,6 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
     ret = advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(1, enable);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    advancedNotificationService_->FillActionButtons(request);
     request->SetIsCoverActionButtons(true);
     advancedNotificationService_->FillActionButtons(request);
 }
