@@ -108,7 +108,7 @@ std::string HaMetaMessage::GetMessage() const
 
 HaMetaMessage& HaMetaMessage::SlotType(int32_t slotType)
 {
-    slotType_ = slotType;
+    slotType_ = static_cast<uint32_t>(slotType);
     return *this;
 }
 
