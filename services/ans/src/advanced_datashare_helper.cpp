@@ -138,6 +138,8 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
     if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
         predicates.EndsWith(DETAIL_INFO,
             phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size()));
+    } else {
+        predicates.EqualTo(DETAIL_INFO, phoneNumber);
     }
     auto resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
     IPCSkeleton::SetCallingIdentity(identity);
