@@ -20,6 +20,7 @@
 #include "bundle_mgr_interface.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "bundle_manager_helper.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -228,7 +229,7 @@ sptr<NotificationBundleOption> ReminderEventManager::ReminderEventSubscriber::Ge
     OHOS::AppExecFwk::ElementName ele = want.GetElement();
     std::string bundleName = ele.GetBundleName();
     int32_t userId = want.GetIntParam(OHOS::AppExecFwk::Constants::USER_ID, -1);
-    int32_t uid = ReminderRequest::GetUid(userId, bundleName);
+    int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
     ANSR_LOGD("bundleName=%{public}s, userId=%{private}d, uid=%{public}d", bundleName.c_str(), userId, uid);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
     if (bundleOption == nullptr) {

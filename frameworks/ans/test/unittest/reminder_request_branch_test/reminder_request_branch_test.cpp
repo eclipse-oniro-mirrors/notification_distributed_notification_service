@@ -295,7 +295,7 @@ HWTEST_F(ReminderRequestBranchTest, GetButtonInfo_00100, Function | SmallTest | 
     info.wantAgent = nullptr;
     reminderRequest->actionButtonMap_.insert(
         std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
-    EXPECT_NE(reminderRequest->GetButtonInfo(), "");
+    EXPECT_NE(reminderRequest->SerializeButtonInfo(), "");
 }
 
 /**
@@ -323,7 +323,7 @@ HWTEST_F(ReminderRequestBranchTest, GetButtonInfo_00200, Function | SmallTest | 
     info.wantAgent->abilityName = abilityName;
     reminderRequest->actionButtonMap_.insert(
         std::pair<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo>(actionButtonType, info));
-    EXPECT_NE(reminderRequest->GetButtonInfo(), "");
+    EXPECT_NE(reminderRequest->SerializeButtonInfo(), "");
 }
 
 /**

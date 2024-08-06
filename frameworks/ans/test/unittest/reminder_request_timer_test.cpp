@@ -114,20 +114,5 @@ HWTEST_F(ReminderRequestTimerTest, ReadFromParcel_00100, Function | SmallTest | 
     auto result = rrc->ReadFromParcel(parcel);
     EXPECT_EQ(result, false);
 }
-
-/**
- * @tc.name: RecoverFromDb_00001
- * @tc.desc: Test RecoverFromDb parameters.
- * @tc.type: FUNC
- * @tc.require: issueI92BU9
- */
-HWTEST_F(ReminderRequestTimerTest, RecoverFromDb_00001, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestTimer>(10);
-    std::shared_ptr<NativeRdb::ResultSet> resultSet = nullptr;
-    rrc->RecoverFromDb(resultSet);
-    uint64_t ret = rrc->GetInitInfo();
-    EXPECT_EQ(ret, 0);
-}
 }
 }

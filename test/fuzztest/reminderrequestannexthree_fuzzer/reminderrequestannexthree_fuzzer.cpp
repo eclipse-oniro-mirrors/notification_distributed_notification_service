@@ -32,8 +32,6 @@ namespace OHOS {
         int32_t cTime = static_cast<int32_t>(GetU32Data(data));
         reminderRequest.GetActualTime(type, cTime);
         reminderRequest.GetCTime(type, cTime);
-        int32_t uid = static_cast<int32_t>(GetU32Data(data));
-        reminderRequest.GetUserId(uid);
         return reminderRequest.IsAlerting();
     }
 }

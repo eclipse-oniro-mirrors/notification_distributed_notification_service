@@ -20,8 +20,6 @@
 
 #include "ans_log_wrapper.h"
 #include "time_service_client.h"
-#include "reminder_table.h"
-#include "reminder_store.h"
 
 namespace OHOS {
 namespace Notification {
@@ -56,6 +54,11 @@ ReminderRequestTimer::ReminderRequestTimer(const ReminderRequestTimer &other) : 
 uint64_t ReminderRequestTimer::GetInitInfo() const
 {
     return countDownTimeInSeconds_;
+}
+
+void ReminderRequestTimer::SetInitInfo(const uint64_t countDownTimeInSeconds)
+{
+    countDownTimeInSeconds_ = countDownTimeInSeconds;
 }
 
 uint64_t ReminderRequestTimer::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext)
@@ -149,29 +152,6 @@ bool ReminderRequestTimer::ReadFromParcel(Parcel &parcel)
         return true;
     }
     return false;
-}
-
-void ReminderRequestTimer::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
-{
-    if (resultSet == nullptr) {
-        ANSR_LOGE("ResultSet is null");
-        return;
-    }
-    ReminderStore::GetUInt64Val(resultSet, ReminderTimerTable::TRIGGER_SECOND, countDownTimeInSeconds_);
-}
-
-void ReminderRequestTimer::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-    const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values)
-{
-    uint64_t seconds = 0;
-    if (reminder->GetReminderType() == ReminderRequest::ReminderType::TIMER) {
-        ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
-        seconds = timer->GetInitInfo();
-    }
-    values.PutInt(ReminderTimerTable::REMINDER_ID, reminder->GetReminderId());
-    values.PutLong(ReminderTimerTable::TRIGGER_SECOND, seconds);
-    values.PutLong(ReminderTimerTable::START_DATE_TIME, 0);
-    values.PutLong(ReminderTimerTable::END_DATE_TIME, 0);
 }
 }
 }

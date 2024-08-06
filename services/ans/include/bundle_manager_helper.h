@@ -108,6 +108,13 @@ public:
     bool GetBundleInfos(
         const AppExecFwk::BundleFlag flag, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
 
+    /**
+     * @brief Obtains the app index by uid.
+     * @param uid Indicates uid.
+     * @return Returns the query result if succeed, retrun 0(main index) otherwise.
+     */
+    int32_t GetAppIndexByUid(const int32_t uid);
+
 private:
     void Connect();
     void Disconnect();

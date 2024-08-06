@@ -28,6 +28,8 @@
 #include "reminder_request_timer.h"
 #include "system_ability_definition.h"
 
+#include <thread>
+
 namespace OHOS {
 namespace Notification {
 namespace {
