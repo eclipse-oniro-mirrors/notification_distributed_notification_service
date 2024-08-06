@@ -151,7 +151,6 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
     if (rowCount <= 0) {
         ANS_LOGE("Query failed failed");
     } else {
-        return dealWithContactResult(helper, resultSet, policy);
         int resultId = -1;
         #ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
         resultId = Telephony::TelCustManager::GetInstance().GetCallerIndex(resultSet, phoneNumber);
