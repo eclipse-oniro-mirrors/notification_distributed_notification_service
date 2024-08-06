@@ -150,8 +150,19 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
     resultSet->GetRowCount(rowCount);
     if (rowCount <= 0) {
         ANS_LOGE("Query failed failed");
-        resultSet->Close();
-        helper->Release();
+    } else {
+        return dealWithContactResult(helper, resultSet, policy);
+        int resultId = -1;
+        #ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
+        resultId = Telephony::TelCustManager::GetInstance().GetCallerIndex(resultSet, phoneNumber);
+        #endif
+        if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
+            (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
+            return dealWithContactResult(helper, resultSet, policy);
+        }
+    }
+    resultSet->Close();
+    helper->Release();
     return false;
 }
 
