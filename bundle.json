@@ -40,7 +40,8 @@
     "subsystem": "notification",
     "syscap": [
       "SystemCapability.Notification.Notification",
-      "SystemCapability.Notification.ReminderAgent"
+      "SystemCapability.Notification.ReminderAgent",
+      "SystemCapability.Notification.NotificationSettings"
     ],
     "features": ["distributed_notification_service_feature_summary"],
     "adapted_system_type": [
