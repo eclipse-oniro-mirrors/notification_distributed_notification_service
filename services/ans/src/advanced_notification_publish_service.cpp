@@ -1660,7 +1660,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNum
     }
 
     bool isNeedSilent = false;
-    std::string policy;    
+    std::string policy;
     Uri policyUri(datashareHelper->GetFocusModeCallPolicyUri(userId));
     bool ret = datashareHelper->Query(policyUri, KEY_FOCUS_MODE_CALL_MESSAGE_POLICY, policy);
     if (!ret) {
@@ -1688,7 +1688,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNum
             break;
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
-        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:            
+        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
             Uri uri(CONTACT_DATA);
             isNeedSilent = datashareHelper->QueryContact(uri, phoneNumber, policy);
             break;

@@ -207,7 +207,8 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
     return isNeedSilent;
 }
 
-bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber) {
+bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)
+{
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CALLLOG_URI);
     if (helper == nullptr) {
