@@ -1482,6 +1482,15 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
                 && record->deviceId.empty()
 #endif
                 ) {
+                auto notificationRequest = record->request;
+                if (!BundleManagerHelper::GetInstance()->IsSystemApp(bundle->GetUid()) &&
+                    notificationRequest->IsSystemLiveView()) {
+                    auto localLiveviewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
+                        notificationRequest->GetContent()->GetNotificationContent());
+                    if (localLiveviewContent->GetType() == 0) {
+                        continue;
+                    }
+                }
                 ProcForDeleteLiveView(record);
                 removeList.push_back(record);
             }

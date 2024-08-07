@@ -17,7 +17,6 @@
 
 #include <functional>
 #include <iomanip>
-#include <new>
 #include <sstream>
 
 #include "fa_ability_context.h"
@@ -31,7 +30,6 @@
 #include "ans_log_wrapper.h"
 #include "ans_watchdog.h"
 #include "ans_permission_def.h"
-#include "bundle_manager_helper.h"
 #include "errors.h"
 #include "notification_extension_wrapper.h"
 #include "notification_bundle_option.h"
@@ -602,14 +600,6 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
         bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
     }
     record->bundleOption = bundleOption;
-    if (!request->IsAgentNotification() && request->GetAgentBundle() != nullptr && request->IsSystemLiveView() &&
-        AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        auto agentBundle = new (std::nothrow) NotificationBundleOption(request->GetAgentBundle()->GetBundleName(),
-            request->GetAgentBundle()->GetUid());
-        if (agentBundle != nullptr) {
-            record->bundleOption = agentBundle;
-        }
-    }
     SetNotificationRemindType(record->notification, true);
     return record;
 }
