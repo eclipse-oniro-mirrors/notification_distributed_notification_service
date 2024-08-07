@@ -1635,7 +1635,8 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
     return result;
 }
 
-ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType = 0)
+ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
+    const std::string &phoneNumber, int32_t callerType = 0)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1646,7 +1647,8 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::s
     return CheckNeedSilent(phoneNumber, callerType);
 }
 
-ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNumber, int32_t callerType) {
+ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNumber, int32_t callerType)
+{
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
