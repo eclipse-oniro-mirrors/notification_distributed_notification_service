@@ -59,6 +59,7 @@ constexpr int32_t HOURS_IN_ONE_DAY = 24;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 constexpr int32_t RSS_PID = 3051;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
+constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
 static constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
@@ -1634,7 +1635,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
     return result;
 }
 
-ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber)
+ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType = 0)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1642,7 +1643,10 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::s
         ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission is bogus.");
         return ERR_ANS_PERMISSION_DENIED;
     }
+    return CheckNeedSilent(phoneNumber, callerType);
+}
 
+ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNumber, int32_t callerType) {
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
@@ -1654,28 +1658,37 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(const std::s
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
-    ANS_LOGI("IsNeedSilentInDoNotDisturbMode: userId = %{public}d", userId);
-    std::string policy;
+
     bool isNeedSilent = false;
+    std::string policy;    
     Uri policyUri(datashareHelper->GetFocusModeCallPolicyUri(userId));
     bool ret = datashareHelper->Query(policyUri, KEY_FOCUS_MODE_CALL_MESSAGE_POLICY, policy);
-    ANS_LOGI("get policy[%{public}s]: ", policy.c_str());
     if (!ret) {
         ANS_LOGE("Query focus mode call message policy fail.");
         return -1;
     }
+    std::string repeat_call;
+    bool repeat_ret = datashareHelper->Query(policyUri, KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE, repeat_call);
+    if (!repeat_ret) {
+        ANS_LOGE("Query focus mode repeat callers enable fail.");
+    }
+    ANS_LOGI("focus_mode_call_policy is %{public}s, repeat_call is %{public}s", policy.c_str(), repeat_call.c_str());
+    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE &&
+        callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
+        if (datashareHelper->isRepeatCall(phoneNumber)) {
+            return 1;
+        }
+    }
+
     switch (atoi(policy.c_str())) {
         case ContactPolicy::FORBID_EVERYONE:
-            ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is 1");
             break;
         case ContactPolicy::ALLOW_EVERYONE:
-            ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is 2");
             isNeedSilent = true;
             break;
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
-        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
-            ANS_LOGI("IsNeedSilentInDoNotDisturbMode: focus_mode_call_message_policy is %{public}s", policy.c_str());
+        case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:            
             Uri uri(CONTACT_DATA);
             isNeedSilent = datashareHelper->QueryContact(uri, phoneNumber, policy);
             break;

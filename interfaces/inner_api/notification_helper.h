@@ -673,7 +673,7 @@ public:
      * @param phoneNumber the calling format number.
      * @return Returns silent in do not disturb mode.
      */
-    static ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber);
+    static ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType);
 
     /**
      * @brief Check if the device supports distributed notification.
