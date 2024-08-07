@@ -1636,7 +1636,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
 }
 
 ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
-    const std::string &phoneNumber, int32_t callerType = 0)
+    const std::string &phoneNumber, int32_t callerType)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
