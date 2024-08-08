@@ -253,7 +253,7 @@ void NapiAsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data
 
 napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGI("NapiRequestEnableNotification enter");
     IsEnableParams params {};
     if (ParseRequestEnableParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -617,7 +617,7 @@ void ModalExtensionCallback::OnReceive(const AAFwk::WantParams& receive)
  */
 void ModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
-    ANS_LOGD("OnRelease");
+    ANS_LOGI("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
 }
 
