@@ -1354,10 +1354,15 @@ void ReminderDataManager::HandleImmediatelyShow(
 {
     bool isAlerting = false;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
+        if ((*it->IsShowing())) {
+            continue;
+        }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
+            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             ShowReminder((*it), true, false, isSysTimeChanged, true);
             isAlerting = true;
         } else {
+            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             ShowReminder((*it), false, false, isSysTimeChanged, false);
         }
     }
@@ -2065,6 +2070,7 @@ void ReminderDataManager::OnLanguageChanged()
         showedReminder = showedReminderVector_;
     }
     for (auto it = showedReminder.begin(); it != showedReminder.end(); ++it) {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder((*it), false, false, false, false);
     }
 }
