@@ -1201,8 +1201,9 @@ std::vector<std::string> AdvancedNotificationService::GetLocalNotificationKeys(
     std::vector<std::string> keys;
 
     for (auto record : notificationList_) {
-        if ((bundleOption != nullptr) && (record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) &&
-            (record->bundleOption->GetUid() != bundleOption->GetUid()) && record->deviceId.empty()) {
+        if ((bundleOption != nullptr) && 
+            ((record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) || (record->bundleOption->GetUid() != bundleOption->GetUid())) &&
+            record->deviceId.empty()) {
             continue;
         }
         keys.push_back(record->notification->GetKey());
