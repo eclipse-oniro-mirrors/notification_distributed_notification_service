@@ -60,7 +60,7 @@ const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUS
 constexpr int32_t RSS_PID = 3051;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
-static constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
+static constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)

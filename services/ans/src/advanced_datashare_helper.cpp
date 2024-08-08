@@ -39,10 +39,9 @@ constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
 constexpr const char *FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
 constexpr const char *FOCUS_MODE_PROFILE_URI = "?Proxy=true&key=focus_mode_profile";
-constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true&key=focus_mode_call_message_policy";
+constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true";
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
-constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
 constexpr const char *CALLLOG_URI = "datashare:///com.ohos.calllogability";
 constexpr const char *CALL_SUBSECTION = "datashare:///com.ohos.calllogability/calls/calllog?Proxy=true";
 constexpr const char *PHONE_NUMBER = "phone_number";
