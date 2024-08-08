@@ -49,6 +49,7 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_NO_MEMORY, "No memory space"},
     {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
     {ERROR_NO_AGENT_SETTING, "There is no corresponding agent relationship configuration"},
+    {ERROR_DIALOG_IS_POPPING, "Dialog is popping"},
 };
 }
 
@@ -313,7 +314,8 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
         {ERR_ANS_PUSH_CHECK_FAILED, ERROR_NO_RIGHT},
         {ERR_ANS_PUSH_CHECK_UNREGISTERED, ERROR_NO_RIGHT},
         {ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE, ERROR_NETWORK_UNREACHABLE},
-        {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING}
+        {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING},
+        {ERR_ANS_DIALOG_IS_POPPING, ERROR_DIALOG_IS_POPPING}
     };
 
     int32_t ExternalCode = ERROR_INTERNAL_ERROR;
