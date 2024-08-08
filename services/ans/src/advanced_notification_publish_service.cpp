@@ -1674,14 +1674,14 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNum
     if (!repeat_ret) {
         ANS_LOGE("Query focus mode repeat callers enable fail.");
     }
-    ANS_LOGI("focus_mode_call_policy is %{public}s, repeat_call is %{public}s", policy.c_str(), repeat_call.c_str());
+    ANS_LOGI("IsNeedSilent: policy: %{public}s, repeat: %{public}s, callerType: %{public}d",
+        policy.c_str(), repeat_call.c_str(), callerType);
     if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE &&
         callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
         if (datashareHelper->isRepeatCall(phoneNumber)) {
             return 1;
         }
     }
-
     switch (atoi(policy.c_str())) {
         case ContactPolicy::FORBID_EVERYONE:
             break;

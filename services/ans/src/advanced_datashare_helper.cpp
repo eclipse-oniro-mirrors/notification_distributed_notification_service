@@ -42,10 +42,9 @@ constexpr const char *FOCUS_MODE_PROFILE_URI = "?Proxy=true&key=focus_mode_profi
 constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true&key=focus_mode_call_message_policy";
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
-constexpr const char *RAW_CONTACT_URI = "datashare:///com.ohos.contactsdataability/contacts/raw_contact";
-constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
+constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
 constexpr const char *CALLLOG_URI = "datashare:///com.ohos.calllogability";
-constexpr const char *CALL_SUBSECTION = "datashare:///com.ohos.calllogability/calls/calllog";
+constexpr const char *CALL_SUBSECTION = "datashare:///com.ohos.calllogability/calls/calllog?Proxy=true";
 constexpr const char *PHONE_NUMBER = "phone_number";
 constexpr const char *IS_DELETED = "is_deleted";
 constexpr const char *TYPE_ID = "type_id";
@@ -94,7 +93,7 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateConta
         ANS_LOGE("The remoteObj is nullptr.");
         return nullptr;
     }
-    return DataShare::DataShareHelper::Creator(remoteObj, CONTACT_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, uri);
 }
 
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
@@ -131,13 +130,12 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
 bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy)
 {
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_DATA);
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_URI);
     if (helper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return false;
     }
     DataShare::DataSharePredicates predicates;
-    std::vector<std::string> columns;
     predicates.EqualTo(IS_DELETED, 0);
     predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
     if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
