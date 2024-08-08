@@ -1371,7 +1371,7 @@ private:
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
-    ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType);
+    ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

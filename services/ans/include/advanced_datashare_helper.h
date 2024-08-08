@@ -41,6 +41,7 @@ public:
     std::string GetFocusModeEnableUri(const int32_t &userId) const;
     std::string GetFocusModeProfileUri(const int32_t &userId) const;
     std::string GetFocusModeCallPolicyUri(const int32_t &userId) const;
+    std::string GetFocusModeRepeatCallUri(const int32_t &userId) const;
     std::string GetUnifiedGroupEnableUri() const;
 
 private:

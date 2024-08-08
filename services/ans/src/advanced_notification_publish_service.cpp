@@ -1644,21 +1644,22 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
         ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission is bogus.");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    return CheckNeedSilent(phoneNumber, callerType);
-}
-
-ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNumber, int32_t callerType)
-{
-    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
-    if (datashareHelper == nullptr) {
-        ANS_LOGE("The data share helper is nullptr.");
-        return -1;
-    }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (!GetActiveUserId(userId)) {
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    return CheckNeedSilent(phoneNumber, callerType, userId);
+}
+
+ErrCode AdvancedNotificationService::CheckNeedSilent(
+    const std::string &phoneNumber, int32_t callerType, int32_t userId)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("The data share helper is nullptr.");
+        return -1;
     }
 
     bool isNeedSilent = false;
@@ -1670,7 +1671,8 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(const std::string &phoneNum
         return -1;
     }
     std::string repeat_call;
-    bool repeat_ret = datashareHelper->Query(policyUri, KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE, repeat_call);
+    Uri repeatUri(datashareHelper->GetFocusModeRepeatCallUri(userId));
+    bool repeat_ret = datashareHelper->Query(repeatUri, KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE, repeat_call);
     if (!repeat_ret) {
         ANS_LOGE("Query focus mode repeat callers enable fail.");
     }

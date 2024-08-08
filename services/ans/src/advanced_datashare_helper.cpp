@@ -39,7 +39,8 @@ constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
 constexpr const char *FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
 constexpr const char *FOCUS_MODE_PROFILE_URI = "?Proxy=true&key=focus_mode_profile";
-constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true";
+constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true&key=focus_mode_call_message_policy";
+constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE_URI = "?Proxy=true&key=focus_mode_repeate_callers_enable";
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
 constexpr const char *CALLLOG_URI = "datashare:///com.ohos.calllogability";
@@ -257,6 +258,11 @@ std::string AdvancedDatashareHelper::GetFocusModeProfileUri(const int32_t &userI
 std::string AdvancedDatashareHelper::GetFocusModeCallPolicyUri(const int32_t &userId) const
 {
     return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_CALL_POLICY_URI;
+}
+
+std::string AdvancedDatashareHelper::GetFocusModeRepeatCallUri(const int32_t &userId) const
+{
+    return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_REPEAT_CALLERS_ENABLE_URI;
 }
 } // namespace Notification
 } // namespace OHOS
