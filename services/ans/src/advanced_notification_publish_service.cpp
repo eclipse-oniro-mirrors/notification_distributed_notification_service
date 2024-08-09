@@ -61,6 +61,7 @@ constexpr int32_t RSS_PID = 3051;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
 constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -120,7 +121,15 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     if (isSubsystem) {
         return PublishNotificationBySa(request);
     }
-
+    if (request->GetRemovalWantAgent() != nullptr) {
+        uint32_t operationType = (uint32_t)(request->GetRemovalWantAgent()->GetPendingWant()
+            ->GetType(request->GetRemovalWantAgent()->GetPendingWant()->GetTarget()));
+        bool isSystemApp = AccessTokenHelper::IsSystemApp();
+        if (!isSubsystem && !isSystemApp && operationType != OPERATION_TYPE_COMMON_EVENT) {
+            ANS_LOGI("SetRemovalWantAgent as nullptr");
+            request->SetRemovalWantAgent(nullptr);
+        }
+    }
     do {
         result = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
         if (result != ERR_OK) {
