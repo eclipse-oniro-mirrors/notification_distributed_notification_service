@@ -1355,7 +1355,7 @@ ErrCode AnsManagerProxy::IsSpecialBundleAllowedNotify(const sptr<NotificationBun
     return result;
 }
 
-ErrCode AnsManagerProxy::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber)
+ErrCode AnsManagerProxy::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -1364,7 +1364,12 @@ ErrCode AnsManagerProxy::IsNeedSilentInDoNotDisturbMode(const std::string &phone
     }
 
     if (!data.WriteString(phoneNumber)) {
-        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: write groupName failed.");
+        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: write phoneNumber failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(callerType)) {
+        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: write callerType failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

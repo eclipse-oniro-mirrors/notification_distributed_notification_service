@@ -552,7 +552,7 @@ public:
      * @param phoneNumber the calling format number.
      * @return Returns silent in do not disturb mode.
      */
-    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber) override;
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override;
 
     /**
      * @brief Cancel notifications according to group.

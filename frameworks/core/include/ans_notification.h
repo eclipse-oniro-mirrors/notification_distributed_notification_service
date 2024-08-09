@@ -691,7 +691,7 @@ public:
      * @param phoneNumber the calling format number.
      * @return Returns silent in do not disturb mode.
      */
-    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber);
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType);
 
     /**
      * @brief Checks if the device supports distributed notification.

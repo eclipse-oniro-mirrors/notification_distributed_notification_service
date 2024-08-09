@@ -1017,7 +1017,13 @@ ErrCode AnsManagerStub::HandleIsNeedSilentInDoNotDisturbMode(MessageParcel &data
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = IsNeedSilentInDoNotDisturbMode(phoneNumber);
+    int32_t callerType = 0;
+    if (!data.ReadInt32(callerType)) {
+        ANS_LOGE("[HandleIsNeedSilentInDoNotDisturbMode] fail: read callerType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleIsNeedSilentInDoNotDisturbMode] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;

@@ -1034,7 +1034,7 @@ ErrCode AnsNotification::DoesSupportDoNotDisturbMode(bool &doesSupport)
     return proxy->DoesSupportDoNotDisturbMode(doesSupport);
 }
 
-ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber)
+ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType)
 {
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -1042,7 +1042,7 @@ ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phone
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber);
+    return proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
 }
 
 ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationRequest &request)
