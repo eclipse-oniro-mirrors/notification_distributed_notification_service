@@ -34,6 +34,7 @@
 #include "napi_local_live_view.h"
 #include "napi_distributed_enable.h"
 #include "napi_sync_config.h"
+#include "napi_open_settings.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -120,6 +121,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getSlotByBundle", NapiGetSlotByBundle),
         DECLARE_NAPI_FUNCTION("setAdditionalConfig", NapiSetAdditionConfig),
         DECLARE_NAPI_FUNCTION("isNotificationEnabledSync", NapiIsNotificationEnabledSync),
+        DECLARE_NAPI_FUNCTION("openNotificationSettings", NapiOpenNotificationSettings),
 };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
