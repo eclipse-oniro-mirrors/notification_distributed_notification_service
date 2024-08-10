@@ -81,16 +81,7 @@ bool AccessTokenHelper::CheckPermission(const std::string &permission)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
-    if (supportCheckSaPermission_.compare("non-initilization") == 0) {
-        supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_ANS_CHECK_SA_PERMISSION, "false");
-    }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    if (supportCheckSaPermission_.compare("true") != 0) {
-        bool isSubsystem = VerifyNativeToken(tokenCaller);
-        if (isSubsystem) {
-            return true;
-        }
-    }
     bool result = VerifyCallerPermission(tokenCaller, permission);
     if (!result) {
         message.Message("Permission denied: " + permission, true);
