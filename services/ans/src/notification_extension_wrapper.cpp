@@ -27,6 +27,7 @@
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
+const std::string EXTENTION_TELEPHONY_PATH = "libtelephony_cust.z.so";
 const int32_t ACTIVE_DELETE = 0;
 const int32_t PASSITIVE_DELETE = 1;
 static constexpr const char *SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI =
@@ -86,6 +87,22 @@ void ExtensionWrapper::InitExtentionWrapper()
         syncAdditionConfig_("AGGREGATE_CONFIG", aggregateConfig);
     }
     initSummary_(UpdateUnifiedGroupInfo);
+    ANS_LOGD("extension wrapper init success");
+}
+
+void ExtensionWrapper::InitTelExtentionWrapper()
+{
+    telephonyCustHandle_ = dlopen(EXTENTION_TELEPHONY_PATH.c_str(), RTLD_NOW);
+    if (telephonyCustHandle_ == nullptr) {
+        ANS_LOGE("telephony cust symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+
+    getCallerIndex_ = (GET_CALLER_INDEX)dlsym(telephonyCustHandle_, "GetCallerIndex");
+    if (getCallerIndex_ == nullptr) {
+        ANS_LOGE("telephony cust symbol failed, error: %{public}s", dlerror());
+        return;
+    }
     ANS_LOGD("extension wrapper init success");
 }
 
@@ -203,5 +220,14 @@ int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 
     ANS_LOGD("convertToDelType from delete reason %d to delete type %d", deleteReason, delType);
     return delType;
+}
+
+ErrCode ExtensionWrapper::GetCallerIndex(std::shared_ptr<DataShare::DataShareResultSet> resultSet, std::string compNum)
+{
+    if (getCallerIndex_ == nullptr) {
+        ANS_LOGE("GetCallerIndex wrapper symbol failed");
+        return 0;
+    }
+    return getCallerIndex_(resultSet, compNum);
 }
 } // namespace OHOS::Notification
