@@ -426,5 +426,40 @@ ErrCode AnsManagerProxy::IsSmartReminderEnabled(const std::string &deviceType, b
 
     return result;
 }
+
+ErrCode AnsManagerProxy::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(phoneNumber)) {
+        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: write phoneNumber failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(callerType)) {
+        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: write callerType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::IS_NEED_SILENT_IN_DO_NOT_DISTURB_MODE,
+        option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[IsNeedSilentInDoNotDisturbMode] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

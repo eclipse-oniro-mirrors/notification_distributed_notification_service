@@ -158,9 +158,9 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
         ANS_LOGI("Query success, but rowCount is 0.");
     } else {
         int resultId = -1;
-        #ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
-        resultId = Telephony::TelCustManager::GetInstance().GetCallerIndex(resultSet, phoneNumber);
-        #endif
+#ifdef ENABLE_ANS_EXT_WRAPPER
+        resultId = EXTENTION_WRAPPER->GetCallerIndex(resultSet, phoneNumber);
+#endif
         if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
             (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
             isFound = dealWithContactResult(helper, resultSet, policy);
