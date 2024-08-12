@@ -23,9 +23,7 @@
 #include "singleton.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
-#ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
-#include "tel_cust_manager.h"
-#endif
+#include "notification_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
