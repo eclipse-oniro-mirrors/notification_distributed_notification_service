@@ -33,6 +33,7 @@ class ExtensionWrapper final {
 public:
     DISALLOW_COPY_AND_MOVE(ExtensionWrapper);
     void InitExtentionWrapper();
+    void InitTelExtentionWrapper();
     typedef ErrCode (*SYNC_ADDITION_CONFIG)(const std::string& key, const std::string& value);
     typedef void (*UPDATE_BY_CANCEL)(const std::vector<sptr<Notification>>& notifications, int deleteType);
     typedef ErrCode (*GET_UNIFIED_GROUP_INFO)(const sptr<NotificationRequest> &request);
