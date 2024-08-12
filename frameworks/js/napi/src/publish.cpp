@@ -239,7 +239,6 @@ napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc == 0) {
         ANS_LOGW("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -248,8 +247,6 @@ napi_value ParseShowOptions(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGW("Wrong argument type. Object expected.");
-        std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
