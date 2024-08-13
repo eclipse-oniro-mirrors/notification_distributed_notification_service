@@ -16,9 +16,9 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_LOCAL_LIVE_VIEW_CONTENT_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_LOCAL_LIVE_VIEW_CONTENT_H
 
-#include "base/notification/distributed_notification_service/interfaces/inner_api/notification_capsule.h"
-#include "base/notification/distributed_notification_service/interfaces/inner_api/notification_progress.h"
-#include "base/notification/distributed_notification_service/interfaces/inner_api/notification_local_live_view_button.h"
+#include "notification_capsule.h"
+#include "notification_progress.h"
+#include "notification_local_live_view_button.h"
 #include "message_user.h"
 #include "notification_basic_content.h"
 #include "notification_conversational_message.h"
@@ -38,7 +38,7 @@ public:
         TIME,
         INITIAL_TIME,
     };
-    
+
     NotificationLocalLiveViewContent() = default;
     ~NotificationLocalLiveViewContent() = default;
 
@@ -85,7 +85,6 @@ public:
      * @brief Sets the progress to be included in a local live view notification.
      *
      * @param progress Indicates the type to be included.
-     
      */
     void SetProgress(NotificationProgress progress);
 
@@ -99,7 +98,6 @@ public:
      * @brief Sets the time to be included in a local live view notification.
      *
      * @param time Indicates the type to be included.
-     
      */
     void SetTime(NotificationTime time);
 
@@ -113,7 +111,6 @@ public:
      * @add flag function.
      *
      * @param flag Indicates the flag to be added.
-     
      */
     void addFlag(int32_t flag);
 
