@@ -1790,8 +1790,8 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    uint32_t slotFlags = 0b111111;
     if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
+        uint32_t slotFlags = 0b111111;
         ErrCode saveRef = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
             bundleOption, slotFlags);
         if (saveRef != ERR_OK) {
