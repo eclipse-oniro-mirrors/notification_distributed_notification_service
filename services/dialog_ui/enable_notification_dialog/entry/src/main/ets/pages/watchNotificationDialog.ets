@@ -30,7 +30,6 @@ const permission: Record<string, Resource> = {
   'icon': $r('app.media.ic_public_ring'),
   'reason': $r('app.string.reason'),
 };
-const bottomPopoverTypes = ['default', 'phone'];
 
 let storage = LocalStorage.getShared();
 
@@ -41,10 +40,10 @@ struct NotificationDialogPage {
   privacyDialogController: CustomDialogController = new CustomDialogController({
     builder: PermissionDialog({ isUpdate: $isUpdate }),
     autoCancel: false,
-    alignment: DialogAlignment.Center,
-    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
-      console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
-    }
+    alignment: DialogAlignment.TopStart,
+    customStyle: false,
+    width: '466px',
+    height: '466px'
   });
 
   build() {}
@@ -72,10 +71,10 @@ struct PermissionDialog {
     Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {   
       Column() {
         Image(permission.icon)
-        .width(Constants.DIALOG_ICON_WIDTH)
-        .height(Constants.DIALOG_ICON_HEIGHT)
+        .width('92px')
+        .height('92px')
         .margin({
-            top: 4
+            top: '2%'
         })
 
         Scroll() {
@@ -85,15 +84,14 @@ struct PermissionDialog {
                 Text() {
                   Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
                 }
-                .fontSize(10)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                .fontWeight(FontWeight.Bold)
-                .lineHeight(12)
+                .fontSize('38px')
+                .fontColor('#FFFFFF')
+                .fontWeight(500)
+                .lineHeight('45px')
                 .margin({
-                  top: 4,
-                  bottom:0,
-                  left: 4,
-                  right: 4
+                  top: '4.1%',
+                  left: '11.2%',
+                  right: '11.2%'
                 })
                 .textAlign(TextAlign.Center)
               }
@@ -101,47 +99,59 @@ struct PermissionDialog {
 
             Row() {
               Flex({ justifyContent: FlexAlign.Center }) {
-                Text() {
-                  Span(permission.reason)
-                }
-                .fontSize(10)
-                .fontWeight(FontWeight.Regular)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                .lineHeight(12)
-                .margin({
-                  top: 4,
-                  left: 4,
-                  right: 4,
-                  bottom: 0
+                Button($r('app.string.ALLOW'))
+                .onClick(async (): Promise<void> => {
+                  await this.enableNotification(true);
                 })
+                .backgroundColor('#1F71FF')
+                .width('232px')
+                .height('80px')  
+                .fontColor('#FFFFFF')
+                .fontSize('30px')
+                .fontWeight(500)
               }
+              .margin({top:'4.1%'})
+            }
+
+            Row() {
+              Flex({ justifyContent: FlexAlign.Center }) {
+                Button($r('app.string.BAN'))
+                .onClick(async (): Promise<void> => {
+                  await this.enableNotification(false);
+                })
+                .backgroundColor('#255EA1FF')
+                .width('232px')
+                .height('80px')  
+                .fontColor('#5EA1FF')
+                .fontSize('30px')
+                .fontWeight(500)
+              }
+              .margin({top:'4.1%'})
             }
           }
-        }
-        Row() {
-          Flex({ justifyContent: FlexAlign.Center }) {
-            Button($r('app.string.ALLOW'))
-              .onClick(async (): Promise<void> => {
-                await this.enableNotification(true);
-              })
-          }
-          .margin({top:4})
-        }
-
-        Row() {
-          Flex({ justifyContent: FlexAlign.Center }) {
-            Button($r('app.string.BAN'))
-              .onClick(async (): Promise<void> => {
-                await this.enableNotification(false);
-              })
-          }
-          .margin({top:4})
-        }
-
+        } 
+        .scrollable(ScrollDirection.Vertical)
+        .scrollBar(BarState.Off)
       } 
     }
-    .width(Constants.FULL_WIDTH)
-    .height(Constants.FULL_HEIGHT)
+    .margin({
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
+    })
+    .width('100%')
+    .height('100%')
+    .backgroundColor('#35000000')
+    .backgroundEffect({
+      radius: 20,
+      saturation: 50,
+      adaptiveColor: AdaptiveColor.AVERAGE,
+      blurOptions: {
+        grayscale: [35, 35]
+      }
+    })
+    
   }
 
   async updateApplicationName(bundleName: string): Promise<void> {
