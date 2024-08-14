@@ -127,6 +127,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
         .params = paras
     };
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;

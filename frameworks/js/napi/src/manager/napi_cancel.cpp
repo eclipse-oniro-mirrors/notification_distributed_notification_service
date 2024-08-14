@@ -38,6 +38,7 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
         .hasOption = paras.hasOption
     };
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -103,6 +104,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -162,6 +164,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
     AsyncCallbackInfoCancelGroup *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoCancelGroup {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -230,6 +233,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
         .hasOption = paras.hasOption
     };
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;

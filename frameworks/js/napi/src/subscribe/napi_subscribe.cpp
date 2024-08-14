@@ -44,6 +44,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
             delete objectInfo;
             objectInfo = nullptr;
         }
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -133,6 +134,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
             delete objectInfo;
             objectInfo = nullptr;
         }
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -201,6 +203,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
     AsyncCallbackInfoUnsubscribe *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoUnsubscribe {.env = env, .asyncWork = nullptr, .objectInfo = paras.objectInfo};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;

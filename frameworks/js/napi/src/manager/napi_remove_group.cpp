@@ -121,6 +121,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoRemoveGroupByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
