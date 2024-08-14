@@ -152,11 +152,11 @@ export class EnableNotificationDialog {
           if (res) {
             let fileContent = fs.readTextSync(filePaths[i]);
             let config: NotificationConfig = JSON.parse(fileContent);
-            if (config.deviceInfo != undefined) {
+            if (config.deviceInfo !== undefined) {
               let deviceInfo: DeviceInfo = config.deviceInfo;
-              if (deviceInfo.isWatch != undefined) {
+              if (deviceInfo.isWatch !== undefined) {
                 path = EnableNotificationDialog.WATCH_DIALOG_PATH;
-                console.info(TAG, "watch request");
+                console.info(TAG, 'watch request');
               }
             }
           }
@@ -175,6 +175,7 @@ export class EnableNotificationDialog {
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         let dis = display.getDefaultDisplaySync();
         await subWindow?.resize(dis.width, dis.height);
+        console.info(TAG, `size : ${dis.width}  ${dis.height}`);
         await subWindow.loadContent(path, this.storage);
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
