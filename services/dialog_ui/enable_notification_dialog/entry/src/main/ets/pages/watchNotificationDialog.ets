@@ -44,7 +44,7 @@ struct NotificationDialogPage {
     customStyle: false,
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
-    }
+    },
     width: '466px',
     height: '466px'
   });
