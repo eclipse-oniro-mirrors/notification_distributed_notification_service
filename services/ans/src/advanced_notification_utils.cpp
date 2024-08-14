@@ -644,36 +644,21 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         return;
     }
     auto bundleUpdate = [bundleOption, bundleInfo, this]() {
-        bool hasPopped = false;
-        auto errCode = NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption, hasPopped);
+        bool enabled = false;
+        auto errCode = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
+            bundleOption, enabled);
+        if (bundleOption->GetBundleName().compare("com.ohos.mms") == 0) {
+            uint32_t slotFlags = 63;
+            auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundleOption, slotFlags);
+            if (ret != ERR_OK) {
+                ANS_LOGE("Failed to get slotflags for bundle, use default slotflags.");
+            }
+            UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
+        }
         if (errCode != ERR_OK) {
             ANS_LOGD("Get notification user option fail, need to insert data");
-            errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
-            if (errCode != ERR_OK) {
-                ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
-            }
-            SetSlotFlagsTrustlistsAsBundle(bundleOption);
-            errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
-            if (errCode != ERR_OK) {
-                ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
-            }
+            OnBundleDataAdd(bundleOption);
             return;
-        }
-
-        if (hasPopped) {
-            ANS_LOGI("The user has made changes, subject to the user's selection");
-            return;
-        }
-
-        errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-            bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
-        if (errCode != ERR_OK) {
-            ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
-        }
-        errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
-        if (errCode != ERR_OK) {
-            ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
         }
     };
 
