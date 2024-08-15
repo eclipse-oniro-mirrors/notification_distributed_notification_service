@@ -82,8 +82,12 @@ bool AccessTokenHelper::CheckPermission(const std::string &permission)
     ANS_LOGD("%{public}s", __FUNCTION__);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
     bool result = VerifyCallerPermission(tokenCaller, permission);
     if (!result) {
+        ANS_LOGE("CheckPermission failed %{public}s, %{public}d, %{public}d",
+            permission.c_str(), callingUid, callingPid);
         message.Message("Permission denied: " + permission, true);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
