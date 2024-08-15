@@ -228,9 +228,9 @@ bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)
     int rowCount = 0;
     resultSet->GetRowCount(rowCount);
     if (rowCount > 0) {
-        int32_t columnIndex;
         int32_t callTime = 0;
         if (resultSet->GoToFirstRow() == 0) {
+            int32_t columnIndex;
             resultSet->GetColumnIndex(CREATE_TIME, columnIndex);
             resultSet->GetInt(columnIndex, callTime);
         }
