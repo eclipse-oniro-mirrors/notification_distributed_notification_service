@@ -16,8 +16,8 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_LOCAL_LIVE_VIEW_BUTTON_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_LOCAL_LIVE_VIEW_BUTTON_H
 
-#include "base/notification/distributed_notification_service/interfaces/inner_api/notification_button_option.h"
-#include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
+#include "notification_button_option.h"
+#include "pixel_map.h"
 #include "message_user.h"
 #include "notification_json_convert.h"
 #include "parcel.h"
