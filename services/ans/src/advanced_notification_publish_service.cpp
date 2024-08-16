@@ -2448,6 +2448,26 @@ ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<Notification
     return ERR_OK;
 }
 
+void AdvancedNotificationService::DeleteDuplicateMsgs(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr");
+        return;
+    }
+    const char *keySpliter = "_";
+    std::stringstream stream;
+    stream << bundleOption->GetUid() << keySpliter << bundleOption->GetBundleName() << keySpliter;
+    std::string uniqueKeyHead = stream.str();
+    auto iter = uniqueKeyList_.begin();
+    for (auto iter = uniqueKeyList_.begin(); iter != uniqueKeyList_.end();) {
+        if ((*iter).second.find(uniqueKeyHead) == 0) {
+            iter = uniqueKeyList_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
 void AdvancedNotificationService::RemoveExpiredUniqueKey()
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();

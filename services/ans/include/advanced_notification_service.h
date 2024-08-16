@@ -1340,6 +1340,7 @@ private:
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);
+    void DeleteDuplicateMsgs(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record);
     std::vector<AppExecFwk::BundleInfo> GetBundlesOfActiveUser();
