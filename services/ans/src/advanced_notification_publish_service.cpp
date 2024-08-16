@@ -1661,8 +1661,9 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission is bogus.");
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission failed.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
