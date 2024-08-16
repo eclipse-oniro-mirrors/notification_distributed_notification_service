@@ -385,11 +385,7 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
         bool stageMode = false;
         napi_status status = OHOS::AbilityRuntime::IsStageContext(env, argv[PARAM0], stageMode);
         if (status == napi_ok && stageMode) {
-            auto context = OHOS::AbilityRuntime::GetStageModeContext(env, argv[PARAM0]);
-            sptr<IRemoteObject> callerToken = context->GetToken();
-            params.context = context;
-            params.callerToken = callerToken;
-            params.hasCallerToken = true;
+            SetEnableParam(params, env, argv[PARAM0]);
         } else {
             ANS_LOGE("Only support stage mode");
             std::string msg = "Incorrect parameter types.Only support stage mode.";
@@ -590,6 +586,18 @@ void SendDialogEvent(std::string &bundleName, int32_t code)
         ANS_LOGE("PublishCommonEvent failed");
     }
     ANS_LOGD("SendDialogEvent end");
+}
+
+void SetEnableParam(IsEnableParams &params, const napi_env &env, napi_value &object)
+{
+    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, object);
+    sptr<IRemoteObject> callerToken = nullptr;
+    if (context != nullptr) {
+        callerToken = context->GetToken();
+    }
+    params.context = context;
+    params.callerToken = callerToken;
+    params.hasCallerToken = true;
 }
 
 ModalExtensionCallback::ModalExtensionCallback()
