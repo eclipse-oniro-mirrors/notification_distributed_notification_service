@@ -34,6 +34,7 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
 napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info);
 bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName);
 void SendDialogEvent(std::string &bundleName, int32_t code);
+void SetEnableParam(IsEnableParams &params, const napi_env &env, napi_value &object);
 
 class ModalExtensionCallback {
 public:
