@@ -103,6 +103,7 @@ napi_value NapiAddSlots(napi_env env, napi_callback_info info)
         new (std::nothrow) AsyncCallbackInfoAddSlots {.env = env, .asyncWork = nullptr, .slots = paras.slots};
     if (!asynccallbackinfo) {
         ANS_LOGD("Asynccallbackinfo is nullptr.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -300,6 +301,7 @@ napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoGetSlotNumByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotNumByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -502,6 +504,7 @@ napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoGetSlotsByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotsByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -580,6 +583,7 @@ napi_value NapiGetSlotByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoGetSlotByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -745,6 +749,7 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
     AsyncCallbackInfoInfoEnableSlot *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoInfoEnableSlot {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -808,6 +813,7 @@ napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info)
     AsyncCallbackInfoInfoIsEnableSlot *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoInfoIsEnableSlot {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -870,6 +876,7 @@ napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoSetSlotFlagsByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoSetSlotFlagsByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -930,6 +937,7 @@ napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoGetSlotFlagsByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotFlagsByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;

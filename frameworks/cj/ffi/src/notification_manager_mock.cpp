@@ -25,4 +25,20 @@ FFI_EXPORT int FfiOHOSNotificationManagerSetBadgeNumber = 0;
 FFI_EXPORT int FfiOHOSNotificationManagerRequestEnableNotification = 0;
 FFI_EXPORT int FfiOHOSNotificationManagerRequestEnableNotificationWithContext = 0;
 FFI_EXPORT int FfiOHOSNotificationManagerIsDistributedEnabled = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerGetSlot = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerGetSlots = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerRemoveSlot = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerRemoveAllSlots = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerGetActiveNotificationCount = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerGetActiveNotifications = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerCancelGroup = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerIsSupportTemplate = 0;
+
+FFI_EXPORT int FfiOHOSNotificationManagerSetNotificationEnable = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerDisplayBadge = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerIsBadgeDisplayed = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerSetSlotFlagsByBundle = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerGetSlotFlagsByBundle = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerGetSlotNumByBundle = 0;
+FFI_EXPORT int FfiOHOSNotificationManagerRemoveGroupByBundle = 0;
 }
