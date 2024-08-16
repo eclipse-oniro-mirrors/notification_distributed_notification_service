@@ -972,7 +972,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
-        return ERR_OK;
+        return ERR_ANS_NOT_ALLOWED;
     }
 
     if (!CreateDialogManager()) {
