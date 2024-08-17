@@ -85,7 +85,6 @@ public:
      * @brief Sets the progress to be included in a local live view notification.
      *
      * @param progress Indicates the type to be included.
-
      */
     void SetProgress(NotificationProgress progress);
 
@@ -99,7 +98,6 @@ public:
      * @brief Sets the time to be included in a local live view notification.
      *
      * @param time Indicates the type to be included.
-
      */
     void SetTime(NotificationTime time);
 
@@ -113,7 +111,6 @@ public:
      * @add flag function.
      *
      * @param flag Indicates the flag to be added.
-
      */
     void addFlag(int32_t flag);
 
