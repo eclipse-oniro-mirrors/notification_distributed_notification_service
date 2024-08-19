@@ -155,7 +155,7 @@ namespace Notification {
         if (strcpy_s(appMessageId, STR_MAX_SIZE, cjRequest.appMessageId) != EOK) {
             return false;
         }
-        request.SetAppMessageId(appMessageId);
+        request.SetAppMessageId(std::string(appMessageId));
 
         return true;
     }
@@ -1314,7 +1314,7 @@ namespace Notification {
         auto vecs = button.GetAllButtonNames();
         CArrString names = { .head = nullptr, .size = 0 };
         names.head = static_cast<char **>(malloc(sizeof(char *) * vecs.size()));
-        names.size = vecs.size();
+        names.size = static_cast<int64_t>(vecs.size());
         if (names.head == nullptr) {
             LOGE("NotificationButton names malloc failed");
             return false;
