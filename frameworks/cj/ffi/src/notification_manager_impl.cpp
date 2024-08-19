@@ -289,7 +289,7 @@ namespace CJSystemapi {
             return ret;
         }
         int code = NotificationHelper::GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
-        ret.code = ErrorToExternal(code);
+        ret.code = static_cast<uint32_t>(ErrorToExternal(code));
         ret.data = slotFlags;
         return ret;
     }
@@ -304,7 +304,7 @@ namespace CJSystemapi {
             return ret;
         }
         int code = NotificationHelper::GetNotificationSlotNumAsBundle(bundleOption, num);
-        ret.code = ErrorToExternal(code);
+        ret.code = static_cast<uint32_t>(ErrorToExternal(code));
         ret.data = static_cast<uint32_t>(num);
         return ret;
     }
