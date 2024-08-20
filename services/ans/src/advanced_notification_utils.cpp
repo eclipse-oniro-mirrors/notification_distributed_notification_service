@@ -570,6 +570,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         }
         NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
         RemoveDoNotDisturbProfileTrustList(bundleOption);
+        DeleteDuplicateMsgs(bundleOption);
     }));
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER

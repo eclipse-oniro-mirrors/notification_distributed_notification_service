@@ -2645,10 +2645,10 @@ std::string NotificationRequest::GenerateUniqueKey()
 
     std::stringstream stream;
     if (IsAgentNotification()) {
-        stream << ownerUserId_ << keySpliter << ownerBundleName_ << keySpliter <<
+        stream << ownerUid_ << keySpliter << ownerBundleName_ << keySpliter << ownerUserId_ << keySpliter <<
             typeFlag << keySpliter << appMessageId_;
     } else {
-        stream << creatorUserId_ << keySpliter << creatorBundleName_ << keySpliter <<
+        stream << creatorUid_ << keySpliter << creatorBundleName_ << keySpliter << creatorUserId_ << keySpliter <<
             typeFlag << keySpliter << appMessageId_;
     }
     return stream.str();
