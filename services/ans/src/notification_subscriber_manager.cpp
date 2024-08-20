@@ -280,7 +280,7 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
         std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
             auto subscriberUid = record->subscriberUid;
-            ANS_LOGW("subscriber removed.");
+            ANS_LOGI("subscriber removed . subscriberUid = %{public}d", record->subscriberUid);
             subscriberRecordList_.remove(record);
             AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(record->subscriberUid);
         }
