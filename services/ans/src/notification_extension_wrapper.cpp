@@ -27,7 +27,7 @@
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
-const std::string EXTENTION_TELEPHONY_PATH = "libtelephony_ext_service.z.so";
+const std::string EXTENTION_TELEPHONY_PATH = "libtelephony_cust_api.z.so";
 const int32_t ACTIVE_DELETE = 0;
 const int32_t PASSITIVE_DELETE = 1;
 static constexpr const char *SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI =
