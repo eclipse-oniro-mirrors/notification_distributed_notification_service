@@ -98,7 +98,7 @@ void ExtensionWrapper::InitTelExtentionWrapper()
         return;
     }
 
-    getCallerIndex_ = (GET_CALLER_INDEX)dlsym(telephonyCustHandle_, "GetCallerIndex");
+    getCallerIndex_ = (GET_CALLER_INDEX)dlsym(telephonyCustHandle_, "GetCallerNumIndex");
     if (getCallerIndex_ == nullptr) {
         ANS_LOGE("telephony cust symbol failed, error: %{public}s", dlerror());
         return;
