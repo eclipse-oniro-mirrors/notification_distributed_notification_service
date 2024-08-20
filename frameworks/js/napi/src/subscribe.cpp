@@ -208,7 +208,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         return;
     }
     ANS_LOGI("OnCanceled NotificationKey = %{public}s. sortingMap size = %{public}zu. deleteReason = %{public}d",
-        request->GetKey().c_str(),sortingMap->GetKey().size(), deleteReason);
+        request->GetKey().c_str(), sortingMap->GetKey().size(), deleteReason);
 
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
