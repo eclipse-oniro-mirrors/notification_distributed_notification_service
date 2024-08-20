@@ -261,16 +261,6 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
 ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
     const std::shared_ptr<NotificationRecord> &record)
 {
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            return ERR_OK;
-        }
-
-        ANS_LOGD("Get live view by filter failed because check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
     std::string bundle = GetClientBundleName();
     if (bundle.empty()) {
         ANS_LOGD("Get live view by filter failed because bundle name is empty.");
@@ -290,6 +280,15 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            return ERR_OK;
+        }
+
+        ANS_LOGD("Get live view by filter failed because check permission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidity.");
