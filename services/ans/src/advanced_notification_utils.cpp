@@ -259,19 +259,13 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
 }
 
 ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
-    const std::shared_ptr<NotificationRecord> &record)
+    const std::shared_ptr<NotificationRecord> &record, const sptr<NotificationBundleOption> &bundleOption)
 {
-    std::string bundle = GetClientBundleName();
-    if (bundle.empty()) {
-        ANS_LOGD("Get live view by filter failed because bundle name is empty.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    if (uid == record->bundleOption->GetUid() && bundle == record->bundleOption->GetBundleName()) {
+    if (bundleOption->GetUid() == record->bundleOption->GetUid() &&
+        bundleOption->GetBundleName() == record->bundleOption->GetBundleName()) {
         return ERR_OK;
     }
-
-    ANS_LOGD("Get live view by filter failed because no permission.");
+    ANS_LOGE("Get live view by filter failed because no permission.");
     return ERR_ANS_PERMISSION_DENIED;
 }
 
@@ -282,12 +276,10 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     ANS_LOGD("%{public}s", __FUNCTION__);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            return ERR_OK;
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            ANS_LOGE("Get live view by filter failed because check permission is false.");
+            return ERR_ANS_PERMISSION_DENIED;
         }
-
-        ANS_LOGD("Get live view by filter failed because check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (notificationSvrQueue_ == nullptr) {
@@ -308,7 +300,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
             return;
         }
-        result = IsAllowedGetNotificationByFilter(record);
+        result = IsAllowedGetNotificationByFilter(record, bundle);
         if (result != ERR_OK) {
             return;
         }
