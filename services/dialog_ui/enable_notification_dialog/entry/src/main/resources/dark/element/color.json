@@ -1,0 +1,20 @@
+{
+    "color": [
+      {
+        "name": "text_primary",
+        "value": "#DBFFFFFF"
+      },
+      {
+        "name": "comp_divider",
+        "value": "#33FFFFFF"
+      },
+      {
+        "name": "dialog_bg",
+        "value": "#202224"
+      },
+      {
+        "name": "button_text",
+        "value": "#5291FF"
+      }
+    ]
+  }
