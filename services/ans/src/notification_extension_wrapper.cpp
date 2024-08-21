@@ -27,7 +27,7 @@
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
-const std::string EXTENTION_TELEPHONY_PATH = "libtelephony_cust.z.so";
+const std::string EXTENTION_TELEPHONY_PATH = "libtelephony_cust_api.z.so";
 const int32_t ACTIVE_DELETE = 0;
 const int32_t PASSITIVE_DELETE = 1;
 static constexpr const char *SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI =
@@ -98,7 +98,7 @@ void ExtensionWrapper::InitTelExtentionWrapper()
         return;
     }
 
-    getCallerIndex_ = (GET_CALLER_INDEX)dlsym(telephonyCustHandle_, "GetCallerIndex");
+    getCallerIndex_ = (GET_CALLER_INDEX)dlsym(telephonyCustHandle_, "GetCallerNumIndex");
     if (getCallerIndex_ == nullptr) {
         ANS_LOGE("telephony cust symbol failed, error: %{public}s", dlerror());
         return;
@@ -226,7 +226,7 @@ ErrCode ExtensionWrapper::GetCallerIndex(std::shared_ptr<DataShare::DataShareRes
 {
     if (getCallerIndex_ == nullptr) {
         ANS_LOGE("GetCallerIndex wrapper symbol failed");
-        return 0;
+        return -1;
     }
     return getCallerIndex_(resultSet, compNum);
 }
