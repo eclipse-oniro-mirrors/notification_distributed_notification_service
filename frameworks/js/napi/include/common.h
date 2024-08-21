@@ -29,8 +29,8 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
-constexpr int32_t STR_MAX_SIZE = 200;
-constexpr int32_t LONG_STR_MAX_SIZE = 1024;
+constexpr int32_t STR_MAX_SIZE = 204;
+constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr uint8_t OPERATION_MAX_TYPE = 3;
 constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
 constexpr int8_t NO_ERROR = 0;
