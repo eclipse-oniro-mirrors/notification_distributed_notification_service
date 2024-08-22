@@ -44,6 +44,7 @@ public:
     {
         ReminderDataManager::InitInstance(nullptr);
         manager = ReminderDataManager::GetInstance();
+        manager->Init(false);
     }
     static void TearDownTestCase()
     {
