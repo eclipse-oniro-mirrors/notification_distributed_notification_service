@@ -161,7 +161,7 @@ public:
      * @param info Indicates notification info.
      * @return Return true on success, false on failure.
      */
-    bool ParseFromDisturbeDB(NotificationPreferencesInfo &info);
+    bool ParseFromDisturbeDB(NotificationPreferencesInfo &info, int32_t userId = -1);
 
     /**
      * @brief Delete all data from disturbe DB.

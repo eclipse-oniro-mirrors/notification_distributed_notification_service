@@ -168,7 +168,7 @@ public:
 
     /**
      * @brief Cancels all the published notifications.
-     * @note To cancel a specified notification, see CancelNotification(int_32).
+     * @note To cancel a specified notification, see CancelNotification(int32_t).
      *
      * @return Returns cancel all notifications result.
      */

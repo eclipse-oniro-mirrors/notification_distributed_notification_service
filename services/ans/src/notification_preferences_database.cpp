@@ -644,7 +644,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
     return true;
 }
 
-bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreferencesInfo &info)
+bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreferencesInfo &info, int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (!CheckRdbStore()) {
@@ -652,7 +652,12 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         return false;
     }
     std::vector<int> activeUserId;
-    OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
+    if (userId == -1) {
+        OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
+    } else {
+        activeUserId.push_back(userId);
+    }
+
     for (auto iter : activeUserId) {
         GetDoNotDisturbType(info, iter);
         GetDoNotDisturbBeginDate(info, iter);
