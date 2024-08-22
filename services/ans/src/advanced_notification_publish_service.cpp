@@ -1021,6 +1021,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     if (result == ERR_OK && allowed) {
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            SetSlotFlagsTrustlistsAsBundle(bundleOption);
             result = ERR_OK;
             // FA model app can publish notification without user confirm
             allowed = CheckApiCompatibility(bundleOption);
