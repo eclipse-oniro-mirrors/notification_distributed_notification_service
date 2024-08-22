@@ -103,7 +103,6 @@ REMOVE:
 
 ALARM_TRIGGER:
   __BASE: {type: STATISTIC, level: MINOR, tag: PowerStats, desc: alarm trigger}
-  PID: {type: INT32, desc: thread pid}
   UID: {type: INT32, desc: package uid}
   NAME: {type: STRING, desc: call package name}
   TYPE: {type: INT32, desc: reminder type}

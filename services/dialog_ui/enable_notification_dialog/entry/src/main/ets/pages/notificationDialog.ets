@@ -61,7 +61,7 @@ let storage = LocalStorage.getShared();
 @Entry(storage)
 @Component
 struct NotificationDialogPage {
-  @State isUpdate: number = -1;
+  @StorageLink('isUpdate') isUpdate: number = -1;
 
   privacyDialogController: CustomDialogController = new CustomDialogController({
     builder: PermissionDialog({ isUpdate: $isUpdate }),

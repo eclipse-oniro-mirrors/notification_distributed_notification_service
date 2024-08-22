@@ -85,6 +85,7 @@ ErrCode AnsNotification::AddNotificationSlots(const std::vector<NotificationSlot
 
 ErrCode AnsNotification::RemoveNotificationSlot(const NotificationConstant::SlotType &slotType)
 {
+    ANS_LOGI("enter RemoveNotificationSlot，slotType:%{public}d", slotType);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -242,6 +243,7 @@ ErrCode AnsNotification::CancelNotification(int32_t notificationId)
 
 ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t notificationId)
 {
+    ANS_LOGI("enter CancelNotification,notificationId:%{public}d", notificationId);
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -268,6 +270,7 @@ ErrCode AnsNotification::CancelAllNotifications()
 ErrCode AnsNotification::CancelAsBundle(
     int32_t notificationId, const std::string &representativeBundle, int32_t userId)
 {
+    ANS_LOGI("enter CancelAsBundle,notificationId:%{public}d", notificationId);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -279,6 +282,7 @@ ErrCode AnsNotification::CancelAsBundle(
 ErrCode AnsNotification::CancelAsBundle(
     const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
+    ANS_LOGI("enter CancelAsBundle,notificationId:%{public}d", notificationId);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -626,6 +630,8 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
 
 ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t removeReason)
 {
+    ANS_LOGI("enter RemoveNotification,key:%{public}s,removeReason:%{public}d",
+        key.c_str(), removeReason);
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (key.empty()) {
         ANS_LOGW("Input key is empty.");
@@ -643,6 +649,8 @@ ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t remo
 ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bundleOption,
     const int32_t notificationId, const std::string &label, int32_t removeReason)
 {
+    ANS_LOGI("enter RemoveNotification,bundle:%{public}s,Id:%{public}d,reason:%{public}d",
+        bundleOption.GetBundleName().c_str(), notificationId, removeReason);
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
@@ -661,6 +669,7 @@ ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bund
 
 ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &bundleOption)
 {
+    ANS_LOGI("enter RemoveAllNotifications,bundleName:%{public}s", bundleOption.GetBundleName().c_str());
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -678,6 +687,7 @@ ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &
 
 ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason)
 {
+    ANS_LOGI("enter RemoveNotifications,removeReason:%{public}d", removeReason);
     if (hashcodes.empty()) {
         ANS_LOGE("Hashcodes is empty");
         return ERR_ANS_INVALID_PARAM;
@@ -694,6 +704,7 @@ ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hash
 
 ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption)
 {
+    ANS_LOGI("enter RemoveNotificationsByBundle,bundleName:%{public}s", bundleOption.GetBundleName().c_str());
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -921,6 +932,7 @@ ErrCode AnsNotification::GetShowBadgeEnabled(bool &enabled)
 
 ErrCode AnsNotification::CancelGroup(const std::string &groupName)
 {
+    ANS_LOGI("enter CancelGroup,groupName:%{public}s", groupName.c_str());
     if (groupName.empty()) {
         ANS_LOGE("Invalid group name.");
         return ERR_ANS_INVALID_PARAM;
@@ -938,6 +950,7 @@ ErrCode AnsNotification::CancelGroup(const std::string &groupName)
 ErrCode AnsNotification::RemoveGroupByBundle(
     const NotificationBundleOption &bundleOption, const std::string &groupName)
 {
+    ANS_LOGI("enter RemoveGroupByBundle,bundleName:%{public}s", bundleOption.GetBundleName().c_str());
     if (bundleOption.GetBundleName().empty() || groupName.empty()) {
         ANS_LOGE("Invalid parameter.");
         return ERR_ANS_INVALID_PARAM;
@@ -1034,7 +1047,7 @@ ErrCode AnsNotification::DoesSupportDoNotDisturbMode(bool &doesSupport)
     return proxy->DoesSupportDoNotDisturbMode(doesSupport);
 }
 
-ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber)
+ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType)
 {
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -1042,7 +1055,7 @@ ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phone
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber);
+    return proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
 }
 
 ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationRequest &request)
@@ -1090,6 +1103,7 @@ ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationReq
 
 ErrCode AnsNotification::CancelContinuousTaskNotification(const std::string &label, int32_t notificationId)
 {
+    ANS_LOGI("enter CancelContinuousTaskNotification,notificationId:%{public}d", notificationId);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -1764,6 +1778,8 @@ ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, 
 
 ErrCode AnsNotification::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
 {
+    ANS_LOGI("enter CancelAsBundleWithAgent,bundleName:%{public}s,id:%{public}d",
+        bundleOption.GetBundleName().c_str(), id);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");

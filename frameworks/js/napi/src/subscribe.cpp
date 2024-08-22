@@ -509,7 +509,7 @@ void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context
     }
 
     Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, Common::NapiGetNull(dataWorkerData->env));
-
+    DelSubscriberInstancesInfo(dataWorkerData->env, dataWorkerData->subscriber);
     delete dataWorkerData;
     dataWorkerData = nullptr;
 }
@@ -541,7 +541,6 @@ void SubscriberInstance::OnDisconnected()
     napi_acquire_threadsafe_function(unsubscribeCallbackInfo_.tsfn);
     napi_call_threadsafe_function(unsubscribeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
     napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_abort);
-    DelSubscriberInstancesInfo(dataWorker->env, dataWorker->subscriber);
 }
 
 void ThreadSafeOnDestroy(napi_env env, napi_value jsCallback, void* context, void* data)

@@ -337,7 +337,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber) override
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

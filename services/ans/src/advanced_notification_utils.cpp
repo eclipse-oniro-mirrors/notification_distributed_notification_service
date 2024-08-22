@@ -261,16 +261,6 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
 ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
     const std::shared_ptr<NotificationRecord> &record)
 {
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            return ERR_OK;
-        }
-
-        ANS_LOGD("Get live view by filter failed because check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
     std::string bundle = GetClientBundleName();
     if (bundle.empty()) {
         ANS_LOGD("Get live view by filter failed because bundle name is empty.");
@@ -290,6 +280,15 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            return ERR_OK;
+        }
+
+        ANS_LOGD("Get live view by filter failed because check permission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidity.");
@@ -571,6 +570,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         }
         NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
         RemoveDoNotDisturbProfileTrustList(bundleOption);
+        DeleteDuplicateMsgs(bundleOption);
     }));
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER
@@ -644,36 +644,21 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         return;
     }
     auto bundleUpdate = [bundleOption, bundleInfo, this]() {
-        bool hasPopped = false;
-        auto errCode = NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption, hasPopped);
+        bool enabled = false;
+        auto errCode = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
+            bundleOption, enabled);
+        if (bundleOption->GetBundleName().compare("com.ohos.mms") == 0) {
+            uint32_t slotFlags = 63;
+            auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundleOption, slotFlags);
+            if (ret != ERR_OK) {
+                ANS_LOGE("Failed to get slotflags for bundle, use default slotflags.");
+            }
+            UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
+        }
         if (errCode != ERR_OK) {
             ANS_LOGD("Get notification user option fail, need to insert data");
-            errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
-            if (errCode != ERR_OK) {
-                ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
-            }
-            SetSlotFlagsTrustlistsAsBundle(bundleOption);
-            errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
-            if (errCode != ERR_OK) {
-                ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
-            }
+            OnBundleDataAdd(bundleOption);
             return;
-        }
-
-        if (hasPopped) {
-            ANS_LOGI("The user has made changes, subject to the user's selection");
-            return;
-        }
-
-        errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-            bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
-        if (errCode != ERR_OK) {
-            ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
-        }
-        errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
-        if (errCode != ERR_OK) {
-            ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
         }
     };
 
@@ -1201,8 +1186,10 @@ std::vector<std::string> AdvancedNotificationService::GetLocalNotificationKeys(
     std::vector<std::string> keys;
 
     for (auto record : notificationList_) {
-        if ((bundleOption != nullptr) && (record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) &&
-            (record->bundleOption->GetUid() != bundleOption->GetUid()) && record->deviceId.empty()) {
+        if ((bundleOption != nullptr) &&
+            ((record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) ||
+            (record->bundleOption->GetUid() != bundleOption->GetUid())) &&
+            record->deviceId.empty()) {
             continue;
         }
         keys.push_back(record->notification->GetKey());
@@ -1788,8 +1775,8 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    uint32_t slotFlags = 0b111111;
     if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
+        uint32_t slotFlags = 0b111111;
         ErrCode saveRef = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
             bundleOption, slotFlags);
         if (saveRef != ERR_OK) {

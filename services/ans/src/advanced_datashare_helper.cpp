@@ -23,9 +23,7 @@
 #include "singleton.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
-#ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
-#include "tel_cust_manager.h"
-#endif
+#include "notification_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -40,10 +38,11 @@ constexpr const char *USER_SETTINGS_DATA_SECURE_URI =
 constexpr const char *FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
 constexpr const char *FOCUS_MODE_PROFILE_URI = "?Proxy=true&key=focus_mode_profile";
 constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true&key=focus_mode_call_message_policy";
+constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE_URI = "?Proxy=true&key=focus_mode_repeate_callers_enable";
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
-constexpr const char *RAW_CONTACT_URI = "datashare:///com.ohos.contactsdataability/contacts/raw_contact";
-constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
+constexpr const char *CALLLOG_URI = "datashare:///com.ohos.calllogability";
+constexpr const char *CALL_SUBSECTION = "datashare:///com.ohos.calllogability/calls/calllog?Proxy=true";
 constexpr const char *PHONE_NUMBER = "phone_number";
 constexpr const char *IS_DELETED = "is_deleted";
 constexpr const char *TYPE_ID = "type_id";
@@ -53,7 +52,10 @@ constexpr const char *FAVORITE = "favorite";
 constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
+constexpr const char *CALL_DIRECTION = "call_direction";
+constexpr const char *CREATE_TIME = "create_time";
 constexpr const unsigned int PHONE_NUMBER_LENGTH = 7;
+constexpr const unsigned int MAX_TIME_INTERVAL = 15 * 60;
 constexpr const int TYPE_ID_FIVE = 5;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
@@ -89,7 +91,7 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateConta
         ANS_LOGE("The remoteObj is nullptr.");
         return nullptr;
     }
-    return DataShare::DataShareHelper::Creator(remoteObj, CONTACT_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, uri);
 }
 
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
@@ -126,13 +128,12 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
 bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy)
 {
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_DATA);
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_URI);
     if (helper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return false;
     }
     DataShare::DataSharePredicates predicates;
-    std::vector<std::string> columns;
     predicates.EqualTo(IS_DELETED, 0);
     predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
     if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
@@ -148,23 +149,24 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
         helper->Release();
         return false;
     }
+    bool isFound = false;
     int rowCount = 0;
     resultSet->GetRowCount(rowCount);
     if (rowCount <= 0) {
-        ANS_LOGE("Query failed failed");
+        ANS_LOGI("Query success, but rowCount is 0.");
     } else {
         int resultId = -1;
-        #ifdef OHOS_BUILD_ENABLE_TELEPHONY_CUST
-        resultId = Telephony::TelCustManager::GetInstance().GetCallerIndex(resultSet, phoneNumber);
-        #endif
+#ifdef ENABLE_ANS_EXT_WRAPPER
+        resultId = EXTENTION_WRAPPER->GetCallerIndex(resultSet, phoneNumber);
+#endif
         if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
             (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
-            return dealWithContactResult(helper, resultSet, policy);
+            isFound = dealWithContactResult(helper, resultSet, policy);
         }
     }
     resultSet->Close();
     helper->Release();
-    return false;
+    return isFound;
 }
 
 bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
@@ -198,9 +200,47 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
             isNeedSilent = true;
             break;
     }
+    return isNeedSilent;
+}
+
+bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)
+{
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CALLLOG_URI);
+    if (helper == nullptr) {
+        ANS_LOGE("The data share helper is nullptr.");
+        return false;
+    }
+    bool isRepeat = false;
+    DataShare::DataSharePredicates predicates;
+    std::vector<std::string> columns;
+    Uri uri(CALL_SUBSECTION);
+    predicates.EqualTo(PHONE_NUMBER, phoneNumber);
+    predicates.EqualTo(CALL_DIRECTION, 0);
+    predicates.OrderByDesc(CREATE_TIME);
+    columns.push_back(CREATE_TIME);
+    auto resultSet = helper->Query(uri, predicates, columns);
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (resultSet == nullptr) {
+        helper->Release();
+        return false;
+    }
+    int rowCount = 0;
+    resultSet->GetRowCount(rowCount);
+    if (rowCount > 0) {
+        int32_t callTime = 0;
+        if (resultSet->GoToFirstRow() == 0) {
+            int32_t columnIndex;
+            resultSet->GetColumnIndex(CREATE_TIME, columnIndex);
+            resultSet->GetInt(columnIndex, callTime);
+        }
+        if (time(NULL) - callTime < MAX_TIME_INTERVAL) {
+            isRepeat = true;
+        }
+    }
     resultSet->Close();
     helper->Release();
-    return isNeedSilent;
+    return isRepeat;
 }
 
 std::string AdvancedDatashareHelper::GetFocusModeEnableUri(const int32_t &userId) const
@@ -216,6 +256,11 @@ std::string AdvancedDatashareHelper::GetFocusModeProfileUri(const int32_t &userI
 std::string AdvancedDatashareHelper::GetFocusModeCallPolicyUri(const int32_t &userId) const
 {
     return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_CALL_POLICY_URI;
+}
+
+std::string AdvancedDatashareHelper::GetFocusModeRepeatCallUri(const int32_t &userId) const
+{
+    return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_REPEAT_CALLERS_ENABLE_URI;
 }
 } // namespace Notification
 } // namespace OHOS

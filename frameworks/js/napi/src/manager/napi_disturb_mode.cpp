@@ -32,6 +32,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
     AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoSetDoNotDisturb {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -96,6 +97,7 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
     AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -141,6 +143,7 @@ napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
     AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -214,6 +217,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
     AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetDoNotDisturb {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -273,6 +277,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .callback = callback};
 
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;

@@ -56,6 +56,7 @@ ohos_shared_library("cj_notification_manager_ffi") {
       "src/inner_errors.cpp",
       "src/notification_manager_ffi.cpp",
       "src/notification_manager_impl.cpp",
+      "src/notification_utils.cpp",
     ]
   } else {
     defines += [ "PREVIEWER" ]

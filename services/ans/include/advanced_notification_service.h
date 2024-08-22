@@ -607,7 +607,7 @@ public:
      * @param phoneNumber the calling format number.
      * @return Returns silent in do not disturb mode.
      */
-    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber) override;
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override;
 
     /**
      * @brief Cancel notifications according to group.
@@ -1340,6 +1340,7 @@ private:
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);
+    void DeleteDuplicateMsgs(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record);
     std::vector<AppExecFwk::BundleInfo> GetBundlesOfActiveUser();
@@ -1371,6 +1372,7 @@ private:
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
+    ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

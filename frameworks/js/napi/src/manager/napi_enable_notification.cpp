@@ -61,6 +61,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -132,6 +133,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
         ANS_LOGD("Asynccallbackinfo is nullptr.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -253,7 +255,7 @@ void NapiAsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data
 
 napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGI("NapiRequestEnableNotification enter");
     IsEnableParams params {};
     if (ParseRequestEnableParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -263,6 +265,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsEnable *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoIsEnable {
             .env = env, .params = params, .newInterface = true};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -382,11 +385,7 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
         bool stageMode = false;
         napi_status status = OHOS::AbilityRuntime::IsStageContext(env, argv[PARAM0], stageMode);
         if (status == napi_ok && stageMode) {
-            auto context = OHOS::AbilityRuntime::GetStageModeContext(env, argv[PARAM0]);
-            sptr<IRemoteObject> callerToken = context->GetToken();
-            params.context = context;
-            params.callerToken = callerToken;
-            params.hasCallerToken = true;
+            SetEnableParam(params, env, argv[PARAM0]);
         } else {
             ANS_LOGE("Only support stage mode");
             std::string msg = "Incorrect parameter types.Only support stage mode.";
@@ -454,6 +453,7 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
         new (std::nothrow) AsyncCallbackInfoEnableStatus{ .env = env, .asyncWork = nullptr };
     if (asynccallbackinfo == nullptr) {
         ANS_LOGE("asynccallbackinfo is nullptr");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::NapiGetUndefined(env);
     }
     napi_value promise = nullptr;
@@ -588,6 +588,18 @@ void SendDialogEvent(std::string &bundleName, int32_t code)
     ANS_LOGD("SendDialogEvent end");
 }
 
+void SetEnableParam(IsEnableParams &params, const napi_env &env, napi_value &object)
+{
+    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, object);
+    sptr<IRemoteObject> callerToken = nullptr;
+    if (context != nullptr) {
+        callerToken = context->GetToken();
+    }
+    params.context = context;
+    params.callerToken = callerToken;
+    params.hasCallerToken = true;
+}
+
 ModalExtensionCallback::ModalExtensionCallback()
 {}
 
@@ -617,7 +629,7 @@ void ModalExtensionCallback::OnReceive(const AAFwk::WantParams& receive)
  */
 void ModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
-    ANS_LOGD("OnRelease");
+    ANS_LOGI("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
 }
 

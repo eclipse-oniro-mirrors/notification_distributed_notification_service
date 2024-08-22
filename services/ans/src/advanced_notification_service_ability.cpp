@@ -46,6 +46,7 @@ void AdvancedNotificationServiceAbility::OnStart()
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
+    EXTENTION_WRAPPER->InitTelExtentionWrapper();
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #else

@@ -564,7 +564,7 @@ public:
      * @param phoneNumber the calling format number.
      * @return Returns silent in do not disturb mode.
      */
-    virtual ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber) = 0;
+    virtual ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) = 0;
 
     /**
      * @brief Cancel notifications according to group.

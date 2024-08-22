@@ -86,6 +86,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGD("Asynccallbackinfo is nullptr.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -183,6 +184,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGD("Create asynccallbackinfo failed.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;

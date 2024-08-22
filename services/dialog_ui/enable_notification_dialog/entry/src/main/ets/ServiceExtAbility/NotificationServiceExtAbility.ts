@@ -23,10 +23,20 @@ import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import StartOptions from '@ohos.app.ability.StartOptions';
+import configPolicy from '@ohos.configPolicy';
+import fs from '@ohos.file.fs';
+import Constants from '../common/constant';
 
 
 
 const TAG = 'NotificationDialog_Service ';
+
+const UPDATE_INIT = -1;
+const UPDATE_NUM = 1;
+const UPDATE_BOUNDARY = 100;
+
+
+let systemLanguage: string; 
 
 const enableNotificationDialogDestroyedEvent = {
   eventId: 1,
@@ -56,10 +66,18 @@ async function handleDialogQuitException(want: Want): Promise<void> {
   );
 }
 
+interface NotificationConfig {
+  deviceInfo: DeviceInfo;
+}
+
+interface DeviceInfo {
+  isWatch: boolean;
+}
 
 export class EnableNotificationDialog {
   static ENABLE_NOTIFICATION_DIALOG_NAME = 'EnableNotificationDialog';
   static DIALOG_PATH = 'pages/notificationDialog';
+  static WATCH_DIALOG_PATH = 'pages/watchNotificationDialog';
   static TRANSPARANT_COLOR = '#00000000';
 
   id: number;
@@ -132,6 +150,28 @@ export class EnableNotificationDialog {
         'session': session
       });
 
+      let path = EnableNotificationDialog.DIALOG_PATH;
+      try {
+        let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
+        
+        for (let i = 0; i < filePaths.length; i++) {
+          let res = fs.accessSync(filePaths[i]);
+          if (res) {
+            let fileContent = fs.readTextSync(filePaths[i]);
+            let config: NotificationConfig = JSON.parse(fileContent);
+            if (config.deviceInfo !== undefined) {
+              let deviceInfo: DeviceInfo = config.deviceInfo;
+              if (deviceInfo.isWatch !== undefined) {
+                path = EnableNotificationDialog.WATCH_DIALOG_PATH;
+                console.info(TAG, 'watch request');
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error(TAG, 'Failed get ccm files');
+      }
+
       if (stageModel) {
         let subWindowOpts : window.SubWindowOptions = {
           'title': '',
@@ -142,11 +182,12 @@ export class EnableNotificationDialog {
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         let dis = display.getDefaultDisplaySync();
         await subWindow?.resize(dis.width, dis.height);
-        await subWindow.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
+        console.info(TAG, `size : ${dis.width}  ${dis.height}`);
+        await subWindow.loadContent(path, this.storage);
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
       } else {
-        await session.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);  
+        await session.loadContent(path, this.storage);  
       }
       try {    
         await extensionWindow.hideNonSecureWindows(shouldHide);
@@ -199,12 +240,28 @@ export class EnableNotificationDialog {
 };
 
 
-
 class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
+
+  onConfigurationUpdate(newConfig) {
+    console.log(TAG, 'onConfigurationUpdate');
+    if (systemLanguage !== newConfig.language) {
+      console.log(TAG, `onConfigurationUpdate newConfig is ${JSON.stringify(newConfig)}`);
+      systemLanguage = newConfig.language;
+      let isUpdate:number = AppStorage.get('isUpdate');
+      if (isUpdate === undefined || isUpdate > UPDATE_BOUNDARY) {
+        AppStorage.setOrCreate('isUpdate', UPDATE_NUM);
+      } else {
+        AppStorage.setOrCreate('isUpdate', ++isUpdate);
+      }
+    }
+  }
+    
 
   onCreate() {
     console.log(TAG, `UIExtAbility onCreate`);
     AppStorage.setOrCreate('context', this.context);
+    AppStorage.setOrCreate('isUpdate', UPDATE_INIT);
+    systemLanguage = this.context.config.language; 
   
   }
 
