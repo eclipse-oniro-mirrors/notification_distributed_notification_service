@@ -789,6 +789,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     if (!CreateDialogManager()) {
         return ERROR_INTERNAL_ERROR;
     }
+
     result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken);
     if (result == ERR_OK) {
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;

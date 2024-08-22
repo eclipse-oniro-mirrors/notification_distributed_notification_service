@@ -92,11 +92,16 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
 #endif
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-        NotificationPreferences::GetInstance()->InitSettingFromDisturbDB();
-        AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb();
+        int32_t userId = data.GetCode();
+        if (userId <= SUBSCRIBE_USER_INIT) {
+            ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
+            return;
+        }
+        NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
+        AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();
-        if (userId <= DEFAULT_USER_ID) {
+        if (userId <= SUBSCRIBE_USER_INIT) {
             ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
             return;
         }
