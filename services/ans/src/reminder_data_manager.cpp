@@ -1082,6 +1082,10 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
 
 void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times)
 {
+    if (!reminder->IsSystemApp()) {
+        ANSR_LOGI("Start extension ability failed, is not system app");
+        return;
+    }
     times--;
     bool ret = ReminderDataManager::StartExtensionAbility(reminder);
     if (!ret && times > 0 && serviceQueue_ != nullptr) {
@@ -1939,6 +1943,10 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     if (reminder == nullptr) {
         ANSR_LOGE("Invalid reminder id: %{public}d", reminderId);
         return;
+    }
+    if (!reminder->IsSystemApp()) {
+        ANSR_LOGI("Custom button click, is not system app");
+        return false;
     }
     CloseReminder(reminder, false);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CUSTOM);
