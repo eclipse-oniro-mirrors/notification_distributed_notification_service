@@ -37,12 +37,12 @@ namespace OHOS {
 namespace Notification {
 const std::string LOCK_SCREEN_PICTURE_TAG = "lock_screen_picture";
 const std::string PROGRESS_VALUE = "progressValue";
-void AdvancedNotificationService::RecoverLiveViewFromDb()
+void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
-    ANS_LOGI("Start recover live view from db.");
+    ANS_LOGI("Start recover live view from db. userId:%{public}d", userId);
 
     std::vector<NotificationRequestDb> requestsdb;
-    if (GetBatchNotificationRequestsFromDb(requestsdb) != ERR_OK) {
+    if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
         ANS_LOGE("Get liveView from db failed.");
         return;
     }
@@ -290,11 +290,18 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
     return ERR_OK;
 }
 
-int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests)
+int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
+    std::vector<NotificationRequestDb> &requests, int32_t userId)
 {
     std::unordered_map<std::string, std::string> dbRecords;
     std::vector<int32_t> userIds;
-    int32_t ret = OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(userIds);
+    int ret = ERR_OK;
+    if (userId == -1) {
+        ret = OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(userIds);
+    } else {
+        userIds.push_back(userId);
+    }
+
     if (ret != ERR_OK) {
         ANS_LOGE("Get all os account failed.");
         return ret;

@@ -301,7 +301,8 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnSubscriberAdd, this, std::placeholders::_1);
     NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
 
-    std::function<void()> recoverFunc = std::bind(&AdvancedNotificationService::RecoverLiveViewFromDb, this);
+    std::function<void()> recoverFunc = std::bind(
+        &AdvancedNotificationService::RecoverLiveViewFromDb, this, SUBSCRIBE_USER_INIT);
     notificationSvrQueue_->submit(recoverFunc);
 
     ISystemEvent iSystemEvent = {

@@ -929,12 +929,12 @@ ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &devic
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
-void NotificationPreferences::InitSettingFromDisturbDB()
+void NotificationPreferences::InitSettingFromDisturbDB(int32_t userId)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGI("%{public}s userId is %{public}d", __FUNCTION__, userId);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferncesDB_ != nullptr) {
-        preferncesDB_->ParseFromDisturbeDB(preferencesInfo_);
+        preferncesDB_->ParseFromDisturbeDB(preferencesInfo_, userId);
     }
 }
 

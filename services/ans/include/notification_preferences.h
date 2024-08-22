@@ -359,7 +359,7 @@ public:
      */
     bool GetBundleSoundPermission(bool &allPackage, std::set<std::string> &bundleNames);
 
-    void InitSettingFromDisturbDB();
+    void InitSettingFromDisturbDB(int32_t userId = -1);
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
     void RemoveEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption);
