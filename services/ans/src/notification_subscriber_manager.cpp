@@ -504,6 +504,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 6).ErrorCode(ERR_OK);
     ReportDeleteFailedEventPushByNotification(notification, haMetaMessage, deleteReason, "success");
 
+    ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification)) {
@@ -555,6 +556,13 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
     OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 9)
         .ErrorCode(ERR_OK);
     ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
+
+    std::string notificationKeys = "";
+    for (auto notification : notifications) {
+        notificationKeys.append(notification->GetKey()).append("-");
+    }
+    ANS_LOGI("CancelNotification key = %{public}s", notificationKeys.c_str());
+    
     for (auto record : subscriberRecordList_) {
         if (record == nullptr) {
             continue;
