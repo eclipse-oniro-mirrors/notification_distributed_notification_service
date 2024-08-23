@@ -1492,10 +1492,12 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
                 ANSR_LOGW("The application does not request enable notification.");
             }
             if (!record->notification->IsRemoveAllowed() && isAllowedNotification) {
+                ANS_LOGI("BatchRemove-FILTER-RemoveNotAllowed-%{public}s", record->notification->GetKey().c_str());
                 continue;
             }
             if (record->slot != nullptr) {
                 if (record->slot->GetForceControl() && record->slot->GetEnable()) {
+                    ANS_LOGI("BatchRemove-FILTER-ForceControl-%{public}s", record->notification->GetKey().c_str());
                     continue;
                 }
             }
