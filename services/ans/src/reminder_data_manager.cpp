@@ -1946,7 +1946,7 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     }
     if (!reminder->IsSystemApp()) {
         ANSR_LOGI("Custom button click, is not system app");
-        return false;
+        return;
     }
     CloseReminder(reminder, false);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CUSTOM);
