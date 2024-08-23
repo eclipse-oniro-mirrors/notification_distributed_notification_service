@@ -294,6 +294,7 @@ void ReminderEventManager::ReminderNotificationSubscriber::OnCanceled(
     const std::shared_ptr<Notification> &notification,
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason)
 {
+    // Note: Don't modify param notification
     if (deleteReason != NotificationConstant::APP_CANCEL_REASON_DELETE) {
         return;
     }
