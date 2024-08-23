@@ -90,8 +90,6 @@ constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
 constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
 
-const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
-const std::string CONTACTS_BUNDLE_NAME = "com.ohos.contacts";
 const std::string DO_NOT_DISTURB_MODE = "1";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
@@ -722,10 +720,6 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     }
     std::string bundleName = record->bundleOption->GetBundleName();
     ANS_LOGD("The bundle name is %{public}s", bundleName.c_str());
-    if (bundleName == MMS_BUNDLE_NAME || bundleName == CONTACTS_BUNDLE_NAME) {
-        ANS_LOGI("Currently in do not disturb mode, the bundle name is mms or contacts, keep reminder method.");
-        return;
-    }
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
