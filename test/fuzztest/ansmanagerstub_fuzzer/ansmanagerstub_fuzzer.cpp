@@ -44,6 +44,12 @@ namespace OHOS {
         MessageParcel datas;
         MessageParcel reply;
         MessageOption flags;
+        // test HandleIsNeedSilentInDoNotDisturbMode function
+        ansManagerStub.HandleIsNeedSilentInDoNotDisturbMode(datas, reply);
+        // test HandleRegisterSwingCallback function
+        #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+        ansManagerStub.HandleRegisterSwingCallback(datas, reply);
+        #endif
         ansManagerStub.OnRemoteRequest(0, datas, reply, flags);
         ansManagerStub.OnRemoteRequest((int) Notification::NotificationInterfaceCode::PUBLISH_NOTIFICATION,
             datas, reply, flags);
