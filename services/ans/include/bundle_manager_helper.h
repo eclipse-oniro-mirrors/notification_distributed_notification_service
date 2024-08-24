@@ -115,6 +115,15 @@ public:
      */
     int32_t GetAppIndexByUid(const int32_t uid);
 
+    /**
+     * @brief Check API compatibility.
+     *
+     * @param bundleName Indicates the bundle name.
+     * @param uid Indicates the bundle uid.
+     * @return Returns the check result.
+     */
+    bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
+
 private:
     void Connect();
     void Disconnect();
@@ -130,5 +139,4 @@ private:
 };
 }  // namespace Notification
 }  // namespace OHOS
-
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_BUNDLE_MANAGER_HELPER_H

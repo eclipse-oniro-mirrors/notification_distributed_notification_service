@@ -79,12 +79,21 @@ bool BundleManagerHelper::IsSystemApp(int32_t uid)
 
 bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr");
+        return false;
+    }
+    return CheckApiCompatibility(bundleOption->GetBundleName(), bundleOption->GetUid());
+}
+
+bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
+{
     AppExecFwk::BundleInfo bundleInfo;
     int32_t callingUserId;
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), callingUserId);
-    if (!GetBundleInfoByBundleName(bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId);
+    if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
         ANS_LOGW("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
-            bundleOption->GetBundleName().c_str());
+            bundleName.c_str());
         return false;
     }
 

@@ -73,5 +73,10 @@ bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &b
     return true;
 }
 #endif
+
+bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
+{
+    return true;
+}
 }  // namespace Notification
 }  // namespace OHOS
