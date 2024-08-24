@@ -113,8 +113,6 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
         bundle = GetClientBundleName();
         if (bundle.empty()) {
-            message.Message("bundleOption is nullptr", true);
-            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return nullptr;
         }
     }
