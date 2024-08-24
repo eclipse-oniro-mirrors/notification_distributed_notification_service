@@ -40,7 +40,7 @@ void NotificationTrustList::GetCcmPrivilegesConfig()
         return;
     }
     nlohmann::json affects = root[NotificationConfigParse::APP_PRIVILEGES];
-    if (affects.is_null() || affects.empty() || !affects.is_object()) {
+    if (affects.is_null() || affects.empty()) {
         ANS_LOGE("GetCcmPrivileges failed as invalid ccmPrivileges json.");
         return;
     }

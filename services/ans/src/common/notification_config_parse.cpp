@@ -84,11 +84,7 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
         return false;
     }
     nlohmann::json currentDeviceRemindJson = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_SLOT_TYPE_REMINDER];
-    if (currentDeviceRemindJson.is_null() || !currentDeviceRemindJson.is_object()) {
-        ANS_LOGE("Invalid JSON object");
-        return false;
-    }
-    if (!currentDeviceRemindJson.is_array() || currentDeviceRemindJson.empty()) {
+    if (currentDeviceRemindJson.is_null() || !currentDeviceRemindJson.is_array() || currentDeviceRemindJson.empty()) {
         ANS_LOGE("GetCurrentSlotReminder failed as invalid currentDeviceReminder json.");
         return false;
     }
