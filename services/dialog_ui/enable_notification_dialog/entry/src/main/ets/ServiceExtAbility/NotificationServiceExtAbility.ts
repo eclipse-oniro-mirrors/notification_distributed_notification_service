@@ -79,6 +79,7 @@ export class EnableNotificationDialog {
   static DIALOG_PATH = 'pages/notificationDialog';
   static WATCH_DIALOG_PATH = 'pages/watchNotificationDialog';
   static TRANSPARANT_COLOR = '#00000000';
+  static SCENEBOARD_BUNDLE = 'com.ohos.sceneboard';
 
   id: number;
   want: Want;
@@ -270,7 +271,7 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       let stageModel = false;
       let bundleName = want.parameters['ohos.aafwk.param.callerBundleName'];
       let bundleUid = want.parameters['ohos.aafwk.param.callerUid'];
-      if (want.parameters.bundleName === undefined) {
+      if (bundleName !== EnableNotificationDialog.SCENEBOARD_BUNDLE) {
         want.parameters.bundleName = bundleName;
         want.parameters.bundleUid = bundleUid;
         stageModel = true;
