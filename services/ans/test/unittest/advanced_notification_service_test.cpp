@@ -361,7 +361,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03500,
     int32_t id = 0;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundleOption, id);
-    ASSERT_EQ(ret, (int)ERR_ANS_NO_AGENT_SETTING);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**

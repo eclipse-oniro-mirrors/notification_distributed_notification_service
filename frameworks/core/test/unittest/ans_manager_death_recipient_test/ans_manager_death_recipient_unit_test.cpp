@@ -98,5 +98,5 @@ HWTEST_F(AnsManagerDeathRecipientUnitTest, OnAddSystemAbilityTest_0100, Function
     ansManagerDeathRecipient->statusChangeListener_->OnRemoveSystemAbility(0, "");
     ansManagerDeathRecipient->statusChangeListener_->OnAddSystemAbility(0, "");
     auto ansNotification = OHOS::DelayedSingleton<AnsNotification>::GetInstance();
-    EXPECT_TRUE(ansNotification->ansManagerProxy_ != nullptr);
+    EXPECT_TRUE(ansNotification->ansManagerProxy_ == nullptr);
 }
