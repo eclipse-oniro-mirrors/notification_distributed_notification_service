@@ -711,7 +711,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            enabled = false;
+            enabled = true;
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -737,7 +737,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            enabled = false;
+            enabled = true;
         }
     }));
     notificationSvrQueue_->wait(handler);
