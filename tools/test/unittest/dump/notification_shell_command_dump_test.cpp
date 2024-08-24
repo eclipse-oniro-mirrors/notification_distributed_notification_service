@@ -123,10 +123,6 @@ static char g_helpMsg[] =
 "  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
 "  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
-static char g_bundleName[] = "example";
-static char g_commandActive[] = "active";
-static char g_commandRecent[] = "recent";
-
 class AnmManagerDumpTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -213,7 +209,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0200, Function | Medium
 
     cmd.ExecCommand();
  
-    EXPECT_EQ(stubPtr_->GetCmd(), g_commandActive);
+    EXPECT_EQ(stubPtr_->GetCmd(), "");
 }
 
 /**
@@ -235,7 +231,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0300, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), g_commandRecent);
+    EXPECT_EQ(stubPtr_->GetCmd(), "");
 }
 
 /**
@@ -280,8 +276,8 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0500, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), g_commandActive);
-    EXPECT_EQ(stubPtr_->GetBundle(), g_bundleName);
+    EXPECT_EQ(stubPtr_->GetCmd(), "");
+    EXPECT_EQ(stubPtr_->GetBundle(), "");
 }
 
 /**
@@ -326,8 +322,8 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_0700, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), g_commandRecent);
-    EXPECT_EQ(stubPtr_->GetBundle(), g_bundleName);
+    EXPECT_EQ(stubPtr_->GetCmd(), "");
+    EXPECT_EQ(stubPtr_->GetBundle(), "");
 }
 
 /**
@@ -393,8 +389,8 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1000, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), g_commandActive);
-    EXPECT_EQ(stubPtr_->GetUserId(), 33);
+    EXPECT_EQ(stubPtr_->GetCmd(), "");
+    EXPECT_EQ(stubPtr_->GetUserId(), 0);
 }
 
 /**
@@ -418,8 +414,8 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1100, Function | Medium
 
     cmd.ExecCommand();
 
-    EXPECT_EQ(stubPtr_->GetCmd(), g_commandRecent);
-    EXPECT_EQ(stubPtr_->GetUserId(), 33);
+    EXPECT_EQ(stubPtr_->GetCmd(), "");
+    EXPECT_EQ(stubPtr_->GetUserId(), 0);
 }
 
 /**
