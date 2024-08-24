@@ -619,11 +619,9 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     if (oldRecord == nullptr) {
         oldRecord = GetFromNotificationList(creatorUid, notificationId);
     }
-
     if (oldRecord == nullptr) {
         return;
     }
-
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();
     auto wantAgent = record->notification->GetNotificationRequest().GetWantAgent();
@@ -636,28 +634,19 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         record->request->SetContent(content);
     } else {
         record->request->SetTemplate(downloadTemplate);
-        auto data = downloadTemplate->GetTemplateData();
-        AAFwk::WantParamWrapper wrapper(*data);
-        ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
-        
-        CancelTimer(oldRecord->notification->GetFinishTimer());
-        
-        uint64_t process = 0;
-        if (data->HasParam(PROGRESS_VALUE)) {
-            process = data->GetIntParam(PROGRESS_VALUE, 0);
-        }
-
-        if (process == NotificationConstant::FINISH_PER) {
-            record->finish_status = UploadStatus::FINISH;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES,
-                NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE);
-        } else {
-            record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
-                NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
-        }
-        timerId = record->notification->GetFinishTimer();
     }
+    auto data = downloadTemplate->GetTemplateData();
+    AAFwk::WantParamWrapper wrapper(*data);
+    ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
+    CancelTimer(oldRecord->notification->GetFinishTimer());
+    uint64_t process = 0;
+    if (data->HasParam(PROGRESS_VALUE)) {
+        process = data->GetIntParam(PROGRESS_VALUE, 0);
+    }
+    StartFinishTimerForUpdate(record, process);
+    timerId = record->notification->GetFinishTimer();
+    ANS_LOGI("CancelTimer: %{public}d,GetFinisher:%{public}d",
+        (int)oldRecord->notification->GetFinishTimer(), (int)timerId);
     record->notification = new (std::nothrow) Notification(record->request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
@@ -665,6 +654,20 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     }
     record->bundleOption = oldRecord->bundleOption;
     record->notification->SetFinishTimer(timerId);
+}
+
+void AdvancedNotificationService::StartFinishTimerForUpdate(
+    const std::shared_ptr<NotificationRecord> &record, uint64_t process)
+{
+    if (process == NotificationConstant::FINISH_PER) {
+        record->finish_status = UploadStatus::FINISH;
+        StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES,
+            NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE);
+    } else {
+        record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
+        StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
+            NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
+    }
 }
 }
 }

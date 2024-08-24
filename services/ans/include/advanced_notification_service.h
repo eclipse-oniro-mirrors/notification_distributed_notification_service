@@ -1369,6 +1369,7 @@ private:
     ErrCode StartPublishDelayedNotification(const std::shared_ptr<NotificationRecord> &record);
     void StartPublishDelayedNotificationTimeOut(const int32_t ownerUid, const int32_t notificationId);
     void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
+    void StartFinishTimerForUpdate(const std::shared_ptr<NotificationRecord> &record, uint64_t process);
     ErrCode CheckSystemLiveView(const sptr<NotificationRequest> &request, const std::string &key);
     void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName, const int32_t reason);
