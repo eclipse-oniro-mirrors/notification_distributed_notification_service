@@ -651,7 +651,6 @@ HWTEST_F(AnsNotificationBranchTest, RemoveNotifications_0300, Function | MediumT
     hashcodes.emplace_back(hashcode);
     int32_t removeReason = 1;
     MockGetAnsManagerProxy(true);
-    ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     ansNotification->RemoveNotifications(hashcodes, removeReason);
 }
 
@@ -685,8 +684,6 @@ HWTEST_F(AnsNotificationBranchTest, RegisterPushCallback_0200, Function | Medium
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
     sptr<IRemoteObject> pushCallback = nullptr;
-    MockGetAnsManagerProxy(true);
-    ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
     ansNotification->RegisterPushCallback(pushCallback, checkRequest);
 }
@@ -718,8 +715,6 @@ HWTEST_F(AnsNotificationBranchTest, UnregisterPushCallback_0200, Function | Medi
 {
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
-    MockGetAnsManagerProxy(true);
-    ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     ansNotification->UnregisterPushCallback();
 }
 

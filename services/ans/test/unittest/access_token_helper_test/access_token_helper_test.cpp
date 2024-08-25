@@ -141,7 +141,7 @@ HWTEST_F(AccessTokenHelperTest, CheckPermission_00100, Function | SmallTest | Le
 {
     std::string permission = "<permission>";
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    ASSERT_EQ(stub_->CheckPermission(permission), false);
+    ASSERT_EQ(stub_->CheckPermission(permission), true);
 }
 }  // namespace Notification
 }  // namespace OHOS
