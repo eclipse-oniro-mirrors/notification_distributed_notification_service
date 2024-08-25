@@ -51,6 +51,8 @@
 
 namespace OHOS {
 namespace Notification {
+
+static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
 class AdvancedNotificationService final : public AnsManagerStub {
 public:
     struct NotificationRequestDb {
@@ -1358,8 +1360,8 @@ private:
         const sptr<NotificationBundleOption> &bundleOption);
     ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
     ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request, std::string bundleName);
-    void GenerateSlotReminderMode(
-        const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot = false);
+    void GenerateSlotReminderMode(const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle,
+        bool isSpecifiedSlot = false, uint32_t defaultSlotFlags = DEFAULT_SLOT_FLAGS);
     static void CloseAlert(const std::shared_ptr<NotificationRecord> &record);
     bool IsUpdateSystemLiveviewByOwner(const sptr<NotificationRequest> &request);
     bool IsSaCreateSystemLiveViewAsBundle(const std::shared_ptr<NotificationRecord> &record, int32_t ipcUid);
@@ -1376,6 +1378,7 @@ private:
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
+    uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
