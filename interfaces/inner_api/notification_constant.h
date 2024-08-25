@@ -74,6 +74,7 @@ public:
         LIGHTSCREEN_FLAG = 1 << 3,
         VIBRATION_FLAG = 1 << 4,
         STATUSBAR_ICON_FLAG = 1 << 5,
+        SA_SELF_BANNER_FLAG = 1 << 9,
     };
 
     enum class VisiblenessType {

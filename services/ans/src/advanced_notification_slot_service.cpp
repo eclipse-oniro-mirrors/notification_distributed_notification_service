@@ -45,7 +45,7 @@ namespace {
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
 }
-const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
+
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -524,10 +524,10 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     return ret;
 }
 
-void AdvancedNotificationService::GenerateSlotReminderMode(
-    const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot)
+void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<NotificationSlot> &slot,
+    const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot, uint32_t defaultSlotFlags)
 {
-    uint32_t slotFlags = DEFAULT_SLOT_FLAGS;
+    uint32_t slotFlags = defaultSlotFlags;
     auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
     if (ret != ERR_OK) {
         ANS_LOGI("Failed to get slotflags for bundle, use default slotflags.");
@@ -546,6 +546,20 @@ void AdvancedNotificationService::GenerateSlotReminderMode(
         slot->GetType(), slot->GetReminderMode(), bundleName.c_str());
 }
 
+uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<NotificationRequest> &request)
+{
+    auto flags = DEFAULT_SLOT_FLAGS;
+    uint32_t notificationControlFlags = request->GetNotificationControlFlags();
+    // SA publish own's notification with banner
+    if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
+        (request->GetCreatorUid() == IPCSkeleton::GetCallingUid() && request->GetCreatorBundleName().empty() &&
+        request->GetOwnerBundleName().empty() && request->GetOwnerUid() == DEFAULT_UID)) {
+        return (flags |= NotificationConstant::ReminderFlag::BANNER_FLAG);
+    }
+
+    return flags;
+}
+
 void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption)
 {
@@ -562,7 +576,8 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
             ANS_LOGE("Failed to create NotificationSlot instance");
             return;
         }
-        GenerateSlotReminderMode(slot, bundleOption);
+        uint32_t slotFlags = GetDefaultSlotFlags(request);
+        GenerateSlotReminderMode(slot, bundleOption, false, slotFlags);
     }
 
     auto slotReminderMode = slot->GetReminderMode();
