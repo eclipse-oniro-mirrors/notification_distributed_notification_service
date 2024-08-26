@@ -1815,7 +1815,7 @@ bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &age
     }
     ANS_LOGD("The agent relationship is :%{public}s.", agentShip.c_str());
     nlohmann::json jsonAgentShip = nlohmann::json::parse(agentShip, nullptr, false);
-    if (jsonAgentShip.is_null() or !jsonAgentShip.is_object()) {
+    if (jsonAgentShip.is_null() || jsonAgentShip.empty()) {
         ANS_LOGE("Invalid JSON object");
         return false;
     }
