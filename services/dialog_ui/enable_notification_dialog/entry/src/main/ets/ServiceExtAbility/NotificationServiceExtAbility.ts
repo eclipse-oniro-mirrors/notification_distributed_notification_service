@@ -28,6 +28,13 @@ import StartOptions from '@ohos.app.ability.StartOptions';
 
 const TAG = 'NotificationDialog_Service ';
 
+const UPDATE_INIT = -1;
+const UPDATE_NUM = 1;
+const UPDATE_BOUNDARY = 100;
+
+
+let systemLanguage: string; 
+
 const enableNotificationDialogDestroyedEvent = {
   eventId: 1,
   priority: emitter.EventPriority.LOW
@@ -202,10 +209,26 @@ export class EnableNotificationDialog {
 
 class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
 
+  onConfigurationUpdate(newConfig) {
+    console.log(TAG, 'onConfigurationUpdate');
+    if (systemLanguage !== newConfig.language) {
+      console.log(TAG, `onConfigurationUpdate newConfig is ${JSON.stringify(newConfig)}`);
+      systemLanguage = newConfig.language;
+      let isUpdate:number = AppStorage.get('isUpdate');
+      if (isUpdate === undefined || isUpdate > UPDATE_BOUNDARY) {
+        AppStorage.setOrCreate('isUpdate', UPDATE_NUM);
+      } else {
+        AppStorage.setOrCreate('isUpdate', ++isUpdate);
+      }
+    }
+  }
+    
+
   onCreate() {
     console.log(TAG, `UIExtAbility onCreate`);
     AppStorage.setOrCreate('context', this.context);
-  
+    AppStorage.setOrCreate('isUpdate', UPDATE_INIT);
+    systemLanguage = this.context.config.language; 
   }
 
   async onSessionCreate(want: Want, session: UIExtensionContentSession) {
