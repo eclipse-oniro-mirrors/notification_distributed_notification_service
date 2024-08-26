@@ -996,7 +996,7 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
 
     ANS_LOGD("The bundle permission is :%{public}s.", value.c_str());
     nlohmann::json jsonPermission = nlohmann::json::parse(value, nullptr, false);
-    if (jsonPermission.is_null() or !jsonPermission.is_object()) {
+    if (jsonPermission.is_null() || jsonPermission.empty()) {
         ANS_LOGE("Invalid JSON object");
         return false;
     }
