@@ -34,9 +34,11 @@ public:
 
     void GetCcmPrivilegesConfig();
 
+    bool IsLiveViewTrtust(const std::string bundleName);
     bool IsSlotFlagsTrustlistAsBundle(const sptr<NotificationBundleOption> &bundleOption);
     bool IsReminderTrustList(const std::string& bundleName);
 private:
+    std::set<std::string> liveViewTrustlist_;
     std::set<std::string> reminderTrustlist_;
     std::set<std::string> notificationSlotFlagsTrustlist_;
     constexpr static inline const uint32_t PRIVILEGES_CONFIG_MIN_LEN = 2;
