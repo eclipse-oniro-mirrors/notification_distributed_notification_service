@@ -800,7 +800,8 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     if (sync_result != ERR_OK) {
         ANS_LOGE("Sync addition config result: %{public}d, key: %{public}s, value: %{public}s",
             sync_result, key.c_str(), value.c_str());
-        message.ErrorCode(sync_result).Append(" Sync failed");
+        message.Message("Set addition config " + key + " ret " + std::to_string(sync_result));
+        message.ErrorCode(sync_result);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return sync_result;
     }
@@ -814,8 +815,11 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     notificationSvrQueue_->wait(handler);
     ANS_LOGI("Set addition config result: %{public}d, key: %{public}s, value: %{public}s",
         result, key.c_str(), value.c_str());
-    message.ErrorCode(result);
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    if (result != ERR_OK) {
+        message.ErrorCode(result);
+        message.Message("Set addition config " + key + " ret " + std::to_string(result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     return result;
 }
 

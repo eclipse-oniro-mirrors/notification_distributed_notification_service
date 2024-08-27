@@ -164,7 +164,6 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         }
     } while (0);
 
-    NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
     SendPublishHiSysEvent(request, result);
     return result;
 }
