@@ -2253,6 +2253,7 @@ bool NotificationRequest::ConvertJsonToNotificationDistributedOptions(
             }
 
             target->distributedOptions_ = *pOpt;
+            delete pOpt;
         }
     }
 
