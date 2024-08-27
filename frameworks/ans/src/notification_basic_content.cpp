@@ -128,7 +128,8 @@ bool NotificationBasicContent::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        if (!parcel.WriteParcelable(lockScreenPicture_.get())) {
+        std::string lockScreenPictureString = AnsImageUtil::PackImage(lockScreenPicture_);
+        if (!parcel.WriteString(lockScreenPictureString)) {
             ANS_LOGE("Failed to write lockScreenPicture");
             return false;
         }
@@ -156,7 +157,8 @@ bool NotificationBasicContent::ReadFromParcel(Parcel &parcel)
 
     auto valid = parcel.ReadBool();
     if (valid) {
-        lockScreenPicture_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+        std::string lockScreenPictureString = parcel.ReadString();
+        lockScreenPicture_ = AnsImageUtil::UnPackImage(lockScreenPictureString);
         if (!lockScreenPicture_) {
             ANS_LOGE("Failed to read lockScreenPicture");
             return false;
