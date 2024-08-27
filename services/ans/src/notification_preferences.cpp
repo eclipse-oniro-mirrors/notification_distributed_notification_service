@@ -767,12 +767,12 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, value);
             break;
         case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
-            ANS_LOGD("Into BUNDLE_POPPED_DIALOG_TYPE:SetHasPoppedDialog.");
+            ANS_LOGI("Into BUNDLE_POPPED_DIALOG_TYPE:SetHasPoppedDialog.");
             bundleInfo.SetHasPoppedDialog(value);
             storeDBResult = preferncesDB_->PutHasPoppedDialog(bundleInfo, value);
             break;
         case BundleType::BUNDLE_SLOTFLGS_TYPE:
-            ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:SetSlotFlags.");
+            ANS_LOGI("Into BUNDLE_SLOTFLGS_TYPE:SetSlotFlags.");
             bundleInfo.SetSlotFlags(value);
             storeDBResult = preferncesDB_->PutSlotFlags(bundleInfo, value);
             break;

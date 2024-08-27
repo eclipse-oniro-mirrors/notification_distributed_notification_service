@@ -779,7 +779,8 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
-    ANS_LOGI("allowedNotify = %{public}d", allowedNotify);
+    ANS_LOGI("allowedNotify = %{public}d, bundle = %{public}s", allowedNotify,
+        bundleOption->GetBundleName().c_str());
     if (allowedNotify) {
         return ERR_OK;
     }
