@@ -30,7 +30,6 @@
 #include "ans_log_wrapper.h"
 #include "ans_watchdog.h"
 #include "ans_permission_def.h"
-#include "bundle_manager_helper.h"
 #include "errors.h"
 #include "notification_extension_wrapper.h"
 #include "notification_record.h"
