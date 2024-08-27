@@ -152,9 +152,13 @@ export class EnableNotificationDialog {
       });
 
       let path = EnableNotificationDialog.DIALOG_PATH;
+      let hasConfig = true;
       try {
         let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
-        
+        if (filePaths.length === 0) {
+          console.info(TAG, 'not get any configFile');
+          hasConfig = false;
+        }
         for (let i = 0; i < filePaths.length; i++) {
           let res = fs.accessSync(filePaths[i]);
           if (res) {
@@ -173,7 +177,7 @@ export class EnableNotificationDialog {
         console.error(TAG, 'Failed get ccm files');
       }
 
-      if (stageModel) {
+      if (stageModel && hasConfig) {
         let subWindowOpts : window.SubWindowOptions = {
           'title': '',
           decorEnabled: false,
