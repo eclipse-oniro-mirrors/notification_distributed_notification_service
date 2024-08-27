@@ -501,9 +501,6 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         liveViewContent->FillPictureMarshallingMap();
     }
 
-    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 6).ErrorCode(ERR_OK);
-    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage, deleteReason, "success");
-
     ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);

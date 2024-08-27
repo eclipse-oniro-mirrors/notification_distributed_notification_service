@@ -768,6 +768,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     if (notificationSvrQueue_ == nullptr) {
         message.Message("Serial queue is invalid.", true);
+        message.ErrorCode(ERR_ANS_INVALID_PARAM);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
@@ -784,6 +785,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
     if (sync_result != ERR_OK) {
         message.Message("Set addition config " + key + " ret " + std::to_string(sync_result));
+        message.ErrorCode(sync_result);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return sync_result;
     }
@@ -795,8 +797,11 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
     notificationSvrQueue_->wait(handler);
-    message.Message("Set addition config " + key + " ret " + std::to_string(result));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    if (result != ERR_OK) {
+        message.ErrorCode(result);
+        message.Message("Set addition config " + key + " ret " + std::to_string(result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     return result;
 }
 

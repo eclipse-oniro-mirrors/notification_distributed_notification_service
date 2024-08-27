@@ -174,7 +174,7 @@ int32_t ExtensionWrapper::ReminderControl(const std::string &bundleName)
     return reminderControl_(bundleName);
 }
 
-int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
+__attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
 {
     if (localControl_ == nullptr) {
         ANS_LOGE("LocalControl wrapper symbol failed");

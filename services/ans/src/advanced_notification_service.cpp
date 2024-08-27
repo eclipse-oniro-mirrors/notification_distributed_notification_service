@@ -422,6 +422,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
     ErrCode result = PrepareNotificationRequest(request);
     if (result != ERR_OK) {
+        message.Message("PrepareNotificationRequest failed");
         message.ErrorCode(result);
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
@@ -447,6 +448,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
 
     if (bundleOption == nullptr) {
+        message.Message("bundleOption is null");
+        message.BranchId(EventBranchId::BRANCH_4);
         message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_BUNDLE;
