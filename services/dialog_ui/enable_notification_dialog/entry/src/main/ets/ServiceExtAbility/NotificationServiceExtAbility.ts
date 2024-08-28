@@ -23,6 +23,9 @@ import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import StartOptions from '@ohos.app.ability.StartOptions';
+import configPolicy from '@ohos.configPolicy';
+import fs from '@ohos.file.fs';
+import Constants from '../common/constant';
 
 
 
@@ -138,8 +141,20 @@ export class EnableNotificationDialog {
         'dialog': this,
         'session': session
       });
+      
+      let hasConfig = true;
+      try {
+        let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
+        
+        if (filePaths.length === 0) {
+          console.info(TAG, 'not get any configFile');
+          hasConfig = false;
+        }
+      }catch (err) {
+        console.error(TAG, 'Failed get ccm files');
+      }
 
-      if (stageModel) {
+      if (stageModel && hasConfig) {
         let subWindowOpts : window.SubWindowOptions = {
           'title': '',
           decorEnabled: false,
