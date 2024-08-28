@@ -16,6 +16,7 @@
 #include "notification_local_live_view_button.h"
 
 #include <cstdint>
+#include <sstream>
 #include <string>             // for basic_string, operator+, basic_string<>...
 #include <memory>             // for shared_ptr, shared_ptr<>::element_type
 #include <vector>
@@ -257,9 +258,19 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
             ANS_LOGE("Failed to read button names");
             return false;
         }
+        if (iconsResource.size() < BUTTON_RESOURCE_SIZE) {
+            ANS_LOGE("Invalid input for button icons resource");
+            return false;
+        }
         auto resource = std::make_shared<ResourceManager::Resource>();
         resource->bundleName = iconsResource[RESOURCE_BUNDLENAME_INDEX];
         resource->moduleName = iconsResource[RESOURCE_MODULENAME_INDEX];
+        std::stringstream sin(iconsResource[RESOURCE_ID_INDEX]);
+        int32_t checknum;
+        if (!(sin >> checknum)) {
+            ANS_LOGE("Invalid input for button icons resource");
+            return false;
+        }
         resource->id = std::stoi(iconsResource[RESOURCE_ID_INDEX]);
         buttonIconsResource_.emplace_back(resource);
     }
