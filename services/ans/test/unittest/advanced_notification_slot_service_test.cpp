@@ -506,7 +506,7 @@ HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_00001, Function | SmallTes
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     advancedNotificationService_->GenerateSlotReminderMode(slot, bundle);
-    ASSERT_EQ(slot->GetReminderMode(), (int)0b111011);
+    ASSERT_EQ(slot->GetReminderMode(), (int)0b111111);
 }
 
 /**
@@ -520,7 +520,7 @@ HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_00002, Function | SmallTes
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     advancedNotificationService_->GenerateSlotReminderMode(slot, bundle, true);
-    ASSERT_EQ(slot->GetReminderMode(), (int)0b111011);
+    ASSERT_EQ(slot->GetReminderMode(), (int)0b111111);
 }
 
 /**
