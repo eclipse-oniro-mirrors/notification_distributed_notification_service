@@ -247,7 +247,7 @@ export class EnableNotificationDialog {
 
 class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
 
-  onConfigurationUpdate(newConfig) {
+  onConfigurationUpdate(newConfig): void {
     console.log(TAG, 'onConfigurationUpdate');
     if (systemLanguage !== newConfig.language) {
       console.log(TAG, `onConfigurationUpdate newConfig is ${JSON.stringify(newConfig)}`);

@@ -639,7 +639,8 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             bundleOption, enabled);
         if (bundleOption->GetBundleName().compare("com.ohos.mms") == 0) {
             uint32_t slotFlags = 63;
-            auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundleOption, slotFlags);
+            auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
+                bundleOption, slotFlags);
             if (ret != ERR_OK) {
                 ANS_LOGE("Failed to get slotflags for bundle, use default slotflags.");
             }
