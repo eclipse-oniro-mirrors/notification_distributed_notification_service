@@ -1502,11 +1502,40 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
-    slotType_ = static_cast<NotificationConstant::SlotType>(parcel.ReadInt32());
-    groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(parcel.ReadInt32());
-    visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(parcel.ReadInt32());
-    badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(parcel.ReadInt32());
-    notificationContentType_ = static_cast<NotificationContent::Type>(parcel.ReadInt32());
+    int32_t slotTypeValue = parcel.ReadInt32();
+    if (slotTypeValue < 0 ||
+    slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type value :%d", slotTypeValue);
+        return false;
+    }
+    slotType_ = static_cast<NotificationConstant::SlotType>(slotTypeValue);
+    int32_t groupAlertTypeValue = parcel.ReadInt32();
+    if (groupAlertTypeValue < 0 ||
+    groupAlertTypeValue >= static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type value :%d", groupAlertTypeValue);
+        return false;
+    }
+    groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(groupAlertTypeValue);
+    int32_t visiblenessTypeValue = parcel.ReadInt32();
+    if (visiblenessTypeValue < 0 ||
+    visiblenessTypeValue >= static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type value :%d", visiblenessTypeValue);
+        return false;
+    }
+    visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(visiblenessTypeValue);
+    int32_t badgeStyleValue = parcel.ReadInt32();
+    if (badgeStyleValue < 0 || badgeStyleValue >= static_cast<int>(NotificationRequest::BadgeStyle::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type value :%d", badgeStyleValue);
+        return false;
+    }
+    badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(badgeStyleValue);
+    int32_t notificationContentTypeValue = parcel.ReadInt32();
+    if (notificationContentTypeValue <= static_cast<int>(NotificationContent::Type::NONE) ||
+    notificationContentTypeValue >= static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type value :%d", notificationContentTypeValue);
+        return false;
+    }
+    notificationContentType_ = static_cast<NotificationContent::Type>(notificationContentTypeValue);
 
     showDeliveryTime_ = parcel.ReadBool();
     tapDismissed_ = parcel.ReadBool();
