@@ -1900,6 +1900,8 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
     flag->SetLightScreenEnabled(false);
     flag->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
     record->request->SetFlags(flag);
+    ANS_LOGI("SetFlags-CloseAlert, notificationKey = %{public}s flags = %{public}d",
+        record->request->GetKey().c_str(), flag->GetReminderFlags());
 }
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
