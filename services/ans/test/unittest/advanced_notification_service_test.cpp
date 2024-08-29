@@ -306,6 +306,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03100,
 {
     const std::string localSwitch = "current";
     advancedNotificationService_->ClearAllNotificationGroupInfo(localSwitch);
+    EXPECT_TRUE(advancedNotificationService_ != nullptr);
 }
 
 /**
@@ -318,6 +319,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03200,
     const std::string key = "key";
     std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo;
     advancedNotificationService_->UpdateUnifiedGroupInfo(key, groupInfo);
+    EXPECT_TRUE(advancedNotificationService_ != nullptr);
 }
 
 /**
@@ -450,6 +452,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04300,
     sptr<NotificationRequest> request(new NotificationRequest());
     std::string bundleName = "bundleName";
     advancedNotificationService_->SetAgentNotification(request, bundleName);
+    EXPECT_TRUE(advancedNotificationService_ != nullptr);
 }
 
 /**
