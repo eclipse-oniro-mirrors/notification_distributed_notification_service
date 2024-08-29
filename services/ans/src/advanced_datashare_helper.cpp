@@ -23,7 +23,7 @@
 #include "singleton.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
-#include "notification_extension_wrapper.h"
+#include "telephony_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -156,8 +156,9 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
         ANS_LOGI("Query success, but rowCount is 0.");
     } else {
         int resultId = -1;
-#ifdef ENABLE_ANS_EXT_WRAPPER
-        resultId = EXTENTION_WRAPPER->GetCallerIndex(resultSet, phoneNumber);
+#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+        resultId = TEL_EXTENTION_WRAPPER->GetCallerIndex(resultSet, phoneNumber);
+        ANS_LOGI("QueryContact resultId: %{public}d.", resultId);
 #endif
         if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
             (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
@@ -172,35 +173,41 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
 bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
     std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy)
 {
-    bool isNeedSilent = false;
+    bool isNoNeedSilent = false;
     int32_t columnIndex;
     int32_t favorite;
     std::string focus_mode_list;
     switch (atoi(policy.c_str())) {
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
-            resultSet->GetColumnIndex(FAVORITE, columnIndex);
-            resultSet->GetInt(columnIndex, favorite);
-            ANS_LOGI("dealWithContactResult: favorite = %{public}d", favorite);
-            isNeedSilent = favorite == 1;
+            do {
+                resultSet->GetColumnIndex(FAVORITE, columnIndex);
+                resultSet->GetInt(columnIndex, favorite);
+                ANS_LOGI("dealWithContactResult: favorite = %{public}d", favorite);
+                isNoNeedSilent = favorite == 1;
+                if (isNoNeedSilent) {
+                    break;
+                }
+            } while (resultSet->GoToNextRow() == DataShare::E_OK);
             break;
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
-            resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
-            resultSet->GetString(columnIndex, focus_mode_list);
-            ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
-            if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
-                isNeedSilent = false;
-                break;
-            }
-            if (focus_mode_list.c_str()[0] == '1') {
-                isNeedSilent = true;
-                break;
-            }
+            do {
+                resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
+                resultSet->GetString(columnIndex, focus_mode_list);
+                ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
+                if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
+                    isNoNeedSilent = false;
+                }
+                if (focus_mode_list.c_str()[0] == '1') {
+                    isNoNeedSilent = true;
+                    break;
+                }
+            } while (resultSet->GoToNextRow() == DataShare::E_OK);
             break;
         default:
-            isNeedSilent = true;
+            isNoNeedSilent = true;
             break;
     }
-    return isNeedSilent;
+    return isNoNeedSilent;
 }
 
 bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)

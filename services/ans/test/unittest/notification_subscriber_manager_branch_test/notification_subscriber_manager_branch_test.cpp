@@ -1315,5 +1315,22 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_ANS_INVALID_BUNDLE);
 }
+
+/**
+ * @tc.number  : AdvancedNotificationService_06900
+ * @tc.name    : AdvancedNotificationService_06900
+ * @tc.desc    : Test IsNeedSilentInDoNotDisturbMode function and CheckPermission is false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06900, Function | SmallTest | Level1)
+{
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    AdvancedNotificationService advancedNotificationService;
+    ASSERT_EQ(advancedNotificationService.IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), ERR_ANS_GET_ACTIVE_USER_FAILED);
+}
 }  // namespace Notification
 }  // namespace OHOS

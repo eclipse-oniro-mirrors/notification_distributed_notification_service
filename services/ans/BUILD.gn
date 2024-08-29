@@ -97,6 +97,7 @@ ohos_shared_library("libans") {
     "src/reminder_timer_info.cpp",
     "src/system_dialog_connect_stb.cpp",
     "src/system_event_observer.cpp",
+    "src/telephony_extension_wrapper.cpp",
   ]
 
   configs = [ ":public_ans_config" ]
@@ -203,6 +204,10 @@ ohos_shared_library("libans") {
   if (screenlock_mgr_enable) {
     external_deps += [ "screenlock_mgr:screenlock_client" ]
     defines += [ "SCREENLOCK_MGR_ENABLE" ]
+  }
+
+  if (telephony_cust) {
+    defines += [ "ENABLE_ANS_TELEPHONY_CUST_WRAPPER" ]
   }
 
   subsystem_name = "${subsystem_name}"

@@ -1555,6 +1555,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 
     ASSERT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(userId, enable), ERR_OK);
 
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType), ERR_OK);
+
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
 
@@ -2420,6 +2424,23 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_220000
     int64_t ret = 20;
     std::string result = advancedNotificationService_->TimeToString(time);
     ASSERT_EQ(result.size(), ret);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_22600
+ * @tc.name      : ANS_IsNeedSilentInDoNotDisturbMode_0100
+ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22600, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    auto ret = advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
