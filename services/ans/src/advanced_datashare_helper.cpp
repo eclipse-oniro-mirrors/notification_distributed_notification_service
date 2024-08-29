@@ -201,7 +201,7 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
                     isNoNeedSilent = true;
                     break;
                 }
-            } while(resultSet->GoToNextRow() == DataShare::E_OK);
+            } while (resultSet->GoToNextRow() == DataShare::E_OK);
             break;
         default:
             isNoNeedSilent = true;
