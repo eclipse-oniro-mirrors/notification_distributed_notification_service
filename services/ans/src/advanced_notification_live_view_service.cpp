@@ -78,6 +78,8 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
         notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
         notificationFlags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
         record->request->SetFlags(notificationFlags);
+        ANS_LOGI("SetFlags-Recovery, notificationKey = %{public}s flags = %{public}d",
+            record->request->GetKey().c_str(), notificationFlags->GetReminderFlags());
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Add notification to record list failed.");
             continue;

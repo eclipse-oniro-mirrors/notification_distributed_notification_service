@@ -606,8 +606,8 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     request->SetFlags(flags);
-    ANS_LOGD("The reminder flags of %{public}s is %{public}d",
-        request->GetBaseKey("").c_str(), flags->GetReminderFlags());
+    ANS_LOGI("The reminder mode of %{public}d is %{public}d in %{public}s",
+        slot->GetType(), slot->GetReminderMode(), bundleName.c_str());
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif
