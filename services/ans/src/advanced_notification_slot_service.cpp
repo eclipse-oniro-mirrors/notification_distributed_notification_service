@@ -542,7 +542,7 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
     }
 
     std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
-    ANS_LOGD("The reminder mode of %{public}d is %{public}d in %{public}s",
+    ANS_LOGI("The reminder mode of %{public}d is %{public}d in %{public}s",
         slot->GetType(), slot->GetReminderMode(), bundleName.c_str());
 }
 
@@ -606,8 +606,8 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     request->SetFlags(flags);
-    ANS_LOGI("The reminder mode of %{public}d is %{public}d in %{public}s",
-        slot->GetType(), slot->GetReminderMode(), bundleName.c_str());
+    ANS_LOGI("SetFlags-GetRemindMode, notificationKey = %{public}s flags = %{public}d",
+        request->GetKey().c_str(), flags->GetReminderFlags());
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif
