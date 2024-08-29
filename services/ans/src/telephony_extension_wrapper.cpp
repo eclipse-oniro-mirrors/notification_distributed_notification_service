@@ -43,7 +43,8 @@ void TelExtensionWrapper::InitTelExtentionWrapper()
     ANS_LOGI("telephony extension wrapper init success");
 }
 
-ErrCode TelExtensionWrapper::GetCallerIndex(std::shared_ptr<DataShare::DataShareResultSet> resultSet, std::string compNum)
+ErrCode TelExtensionWrapper::GetCallerIndex(
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet, std::string compNum)
 {
     if (getCallerIndex_ == nullptr) {
         ANS_LOGE("GetCallerIndex wrapper symbol failed");

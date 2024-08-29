@@ -187,7 +187,7 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
                 if (isNoNeedSilent) {
                     break;
                 }
-            } while(resultSet->GoToNextRow() == DataShare::E_OK);
+            } while (resultSet->GoToNextRow() == DataShare::E_OK);
             break;
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
             do {

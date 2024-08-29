@@ -1524,7 +1524,7 @@ HWTEST_F(AnsNotificationUnitTest, IsNeedSilentInDoNotDisturbMode_0100, Function 
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::string phoneNumber = "11111111111";
-    int32_t callerType = 0;    
+    int32_t callerType = 0;
     ErrCode ret = ans_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
