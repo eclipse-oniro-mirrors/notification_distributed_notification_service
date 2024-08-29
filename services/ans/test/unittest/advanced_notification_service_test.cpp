@@ -3398,8 +3398,9 @@ HWTEST_F(AdvancedNotificationServiceTest, ChangeNotificationByControlFlags_00001
     flags->SetStatusIconEnabled(true);
     request->SetFlags(flags);
 
+    bool isAgentController = true;
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    advancedNotificationService_->ChangeNotificationByControlFlags(record);
+    advancedNotificationService_->ChangeNotificationByControlFlags(record, isAgentController);
 
     u_int32_t reminderFlags = flags->GetReminderFlags();
     ASSERT_EQ(reminderFlags, 0);
