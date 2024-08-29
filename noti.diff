@@ -1,0 +1,407 @@
+diff --git a/frameworks/ans/test/unittest/notification_helper_test.cpp b/frameworks/ans/test/unittest/notification_helper_test.cpp
+index 85597c7e..eb49dc9b 100644
+--- a/frameworks/ans/test/unittest/notification_helper_test.cpp
++++ b/frameworks/ans/test/unittest/notification_helper_test.cpp
+@@ -1359,5 +1359,20 @@ HWTEST_F(NotificationHelperTest, RegisterSwingCallback_0100, TestSize.Level1)
+     EXPECT_EQ(ret, ERR_OK);
+ #endif
+ }
++
++/**
++ * @tc.name: IsNeedSilentInDoNotDisturbMode_00001
++ * @tc.desc: Test IsNeedSilentInDoNotDisturbMode parameters.
++ * @tc.type: FUNC
++ * @tc.require: issueI5WRQ2
++ */
++HWTEST_F(NotificationHelperTest, IsNeedSilentInDoNotDisturbMode_00001, Function | SmallTest | Level1)
++{
++    std::string phoneNumber = "11111111111";
++    int32_t callerType = 0;
++    NotificationHelper notificationHelper;
++    ErrCode ret = notificationHelper.IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
++    EXPECT_EQ(ret, (int)ERR_OK);
++}
+ }
+ }
+diff --git a/frameworks/core/test/unittest/ans_manager_stub_test/ans_manager_stub_test.cpp b/frameworks/core/test/unittest/ans_manager_stub_test/ans_manager_stub_test.cpp
+index e7dc9849..2a567339 100644
+--- a/frameworks/core/test/unittest/ans_manager_stub_test/ans_manager_stub_test.cpp
++++ b/frameworks/core/test/unittest/ans_manager_stub_test/ans_manager_stub_test.cpp
+@@ -5428,5 +5428,37 @@ HWTEST_F(AnsManagerStubTest, RegisterSwingCallback_0200, TestSize.Level1)
+     EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
+ }
+ #endif
++
++/**
++ * @tc.name: HandleIsNeedSilentInDoNotDisturbMode01
++ * @tc.desc: Test HandleIsNeedSilentInDoNotDisturbMode01 succeeds.
++ * @tc.type: FUNC
++ */
++HWTEST_F(AnsManagerStubTest, HandleIsNeedSilentInDoNotDisturbMode01, Function | SmallTest | Level1)
++{
++    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_NEED_SILENT_IN_DO_NOT_DISTURB_MODE);
++    MessageParcel data;
++    MessageParcel reply;
++    MessageOption option = {MessageOption::TF_SYNC};
++
++    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
++
++    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
++    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
++}
++
++/**
++ * @tc.name: IsNeedSilentInDoNotDisturbMode01
++ * @tc.desc: Test IsNeedSilentInDoNotDisturbMode return.
++ * @tc.type: FUNC
++ */
++HWTEST_F(AnsManagerStubTest, IsNeedSilentInDoNotDisturbMode01, Function | SmallTest | Level1)
++{
++    std::string phoneNumber = "11111111111";
++    int32_t callerType = 0;
++
++    ErrCode result = ansManagerStub_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
++    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
++}
+ }
+ }
+diff --git a/notification.gni b/notification.gni
+index 519394c2..5a995932 100755
+--- a/notification.gni
++++ b/notification.gni
+@@ -58,6 +58,7 @@ declare_args() {
+   notification_smart_reminder_supported = true
+   ans_config_policy_enable = true
+   screenlock_mgr_enable = true
++  telephony_cust = true
+ 
+   if (defined(global_parts_info) &&
+       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
+@@ -95,6 +96,11 @@ declare_args() {
+     notification_smart_reminder_supported = false
+   }
+ 
++  if (defined(global_parts_info) &&
++      !defined(global_parts_info.telephony_telephony_cust)) {
++    telephony_cust = false
++  }
++
+   print("hisysevent_usage = " + "$hisysevent_usage")
+   print("ans_hitrace_usage = " + "$ans_hitrace_usage")
+ }
+diff --git a/services/ans/BUILD.gn b/services/ans/BUILD.gn
+index afa5eac9..f0c1b619 100644
+--- a/services/ans/BUILD.gn
++++ b/services/ans/BUILD.gn
+@@ -97,6 +97,7 @@ ohos_shared_library("libans") {
+     "src/reminder_timer_info.cpp",
+     "src/system_dialog_connect_stb.cpp",
+     "src/system_event_observer.cpp",
++    "src/telephony_extension_wrapper.cpp",
+   ]
+ 
+   configs = [ ":public_ans_config" ]
+@@ -206,6 +207,10 @@ ohos_shared_library("libans") {
+     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
+   }
+ 
++  if (telephony_cust) {
++    defines += [ "ENABLE_ANS_TELEPHONY_CUST_WRAPPER" ]
++  }
++
+   subsystem_name = "${subsystem_name}"
+   part_name = "${component_name}"
+ }
+diff --git a/services/ans/include/notification_extension_wrapper.h b/services/ans/include/notification_extension_wrapper.h
+index 36106c80..88d465c8 100644
+--- a/services/ans/include/notification_extension_wrapper.h
++++ b/services/ans/include/notification_extension_wrapper.h
+@@ -25,7 +25,6 @@
+ #include "notification_unified_group_Info.h"
+ #include "singleton.h"
+ #include "advanced_aggregation_data_roaming_observer.h"
+-#include "datashare_helper.h"
+ 
+ namespace OHOS::Notification {
+ class ExtensionWrapper final {
+@@ -33,7 +32,6 @@ class ExtensionWrapper final {
+ public:
+     DISALLOW_COPY_AND_MOVE(ExtensionWrapper);
+     void InitExtentionWrapper();
+-    void InitTelExtentionWrapper();
+     typedef ErrCode (*SYNC_ADDITION_CONFIG)(const std::string& key, const std::string& value);
+     typedef void (*UPDATE_BY_CANCEL)(const std::vector<sptr<Notification>>& notifications, int deleteType);
+     typedef ErrCode (*GET_UNIFIED_GROUP_INFO)(const sptr<NotificationRequest> &request);
+@@ -43,7 +41,6 @@ public:
+     typedef int32_t (*LOCAL_CONTROL)(const sptr<NotificationRequest> &request);
+     typedef void (*UPDATE_BY_BUNDLE)(const std::string bundleName, int deleteType);
+     typedef int32_t (*REMINDER_CONTROL)(const std::string &bundleName);
+-    typedef ErrCode (*GET_CALLER_INDEX)(std::shared_ptr<DataShare::DataShareResultSet> resultSet, std::string compNum);
+ 
+     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
+     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
+@@ -54,13 +51,11 @@ public:
+     int32_t LocalControl(const sptr<NotificationRequest> &request);
+     void UpdateByBundle(const std::string bundleName, int deleteType);
+     int32_t ReminderControl(const std::string &bundleName);
+-    ErrCode GetCallerIndex(std::shared_ptr<DataShare::DataShareResultSet> resultSet, std::string compNum);
+ 
+ private:
+     static int32_t convertToDelType(int32_t deleteReason);
+ 
+     void* extensionWrapperHandle_ = nullptr;
+-    void* telephonyCustHandle_ = nullptr;
+     SYNC_ADDITION_CONFIG syncAdditionConfig_ = nullptr;
+     UPDATE_BY_CANCEL updateByCancel_ = nullptr;
+     GET_UNIFIED_GROUP_INFO getUnifiedGroupInfo_ = nullptr;
+@@ -70,7 +65,6 @@ private:
+     UPDATE_BY_BUNDLE updateByBundle_ = nullptr;
+     REMINDER_CONTROL reminderControl_ = nullptr;
+     bool isRegisterDataSettingObserver = false;
+-    GET_CALLER_INDEX getCallerIndex_ = nullptr;
+ };
+ 
+ #define EXTENTION_WRAPPER ::OHOS::DelayedSingleton<ExtensionWrapper>::GetInstance()
+diff --git a/services/ans/src/advanced_datashare_helper.cpp b/services/ans/src/advanced_datashare_helper.cpp
+index b197da46..fdeeca14 100644
+--- a/services/ans/src/advanced_datashare_helper.cpp
++++ b/services/ans/src/advanced_datashare_helper.cpp
+@@ -23,7 +23,7 @@
+ #include "singleton.h"
+ #include "system_ability_definition.h"
+ #include "ipc_skeleton.h"
+-#include "notification_extension_wrapper.h"
++#include "telephony_extension_wrapper.h"
+ 
+ namespace OHOS {
+ namespace Notification {
+@@ -156,8 +156,9 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
+         ANS_LOGI("Query success, but rowCount is 0.");
+     } else {
+         int resultId = -1;
+-#ifdef ENABLE_ANS_EXT_WRAPPER
+-        resultId = EXTENTION_WRAPPER->GetCallerIndex(resultSet, phoneNumber);
++#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
++        resultId = TEL_EXTENTION_WRAPPER->GetCallerIndex(resultSet, phoneNumber);
++        ANS_LOGI("QueryContact resultId: %{public}d.", resultId);
+ #endif
+         if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
+             (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
+@@ -172,35 +173,41 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
+ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
+     std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy)
+ {
+-    bool isNeedSilent = false;
++    bool isNoNeedSilent = false;
+     int32_t columnIndex;
+     int32_t favorite;
+     std::string focus_mode_list;
+     switch (atoi(policy.c_str())) {
+         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
+-            resultSet->GetColumnIndex(FAVORITE, columnIndex);
+-            resultSet->GetInt(columnIndex, favorite);
+-            ANS_LOGI("dealWithContactResult: favorite = %{public}d", favorite);
+-            isNeedSilent = favorite == 1;
++            do {
++                resultSet->GetColumnIndex(FAVORITE, columnIndex);
++                resultSet->GetInt(columnIndex, favorite);
++                ANS_LOGI("dealWithContactResult: favorite = %{public}d", favorite);
++                isNoNeedSilent = favorite == 1;
++                if (isNoNeedSilent) {
++                    break;
++                }
++            } while(resultSet->GoToNextRow() == DataShare::E_OK);
+             break;
+         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
+-            resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
+-            resultSet->GetString(columnIndex, focus_mode_list);
+-            ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
+-            if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
+-                isNeedSilent = false;
+-                break;
+-            }
+-            if (focus_mode_list.c_str()[0] == '1') {
+-                isNeedSilent = true;
+-                break;
+-            }
++            do {
++                resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
++                resultSet->GetString(columnIndex, focus_mode_list);
++                ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
++                if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
++                    isNoNeedSilent = false;
++                }
++                if (focus_mode_list.c_str()[0] == '1') {
++                    isNoNeedSilent = true;
++                    break;
++                }
++            } while(resultSet->GoToNextRow() == DataShare::E_OK);
+             break;
+         default:
+-            isNeedSilent = true;
++            isNoNeedSilent = true;
+             break;
+     }
+-    return isNeedSilent;
++    return isNoNeedSilent;
+ }
+ 
+ bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)
+diff --git a/services/ans/src/advanced_notification_service_ability.cpp b/services/ans/src/advanced_notification_service_ability.cpp
+index 82ffa663..8c542f79 100644
+--- a/services/ans/src/advanced_notification_service_ability.cpp
++++ b/services/ans/src/advanced_notification_service_ability.cpp
+@@ -17,6 +17,7 @@
+ #include "notification_extension_wrapper.h"
+ #include "system_event_observer.h"
+ #include "common_event_manager.h"
++#include "telephony_extension_wrapper.h"
+ 
+ namespace OHOS {
+ namespace Notification {
+@@ -47,12 +48,15 @@ void AdvancedNotificationServiceAbility::OnStart()
+ 
+ #ifdef ENABLE_ANS_EXT_WRAPPER
+     EXTENTION_WRAPPER->InitExtentionWrapper();
+-    EXTENTION_WRAPPER->InitTelExtentionWrapper();
+     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+ #else
+     ANS_LOGD("Not enabled ans_ext");
+ #endif
++
++#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
++    TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
++#endif
+ }
+ 
+ void AdvancedNotificationServiceAbility::OnStop()
+diff --git a/services/ans/src/notification_extension_wrapper.cpp b/services/ans/src/notification_extension_wrapper.cpp
+index d950a24d..60fea60a 100644
+--- a/services/ans/src/notification_extension_wrapper.cpp
++++ b/services/ans/src/notification_extension_wrapper.cpp
+@@ -29,7 +29,6 @@
+ 
+ namespace OHOS::Notification {
+ const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
+-const std::string EXTENTION_TELEPHONY_PATH = "libtelephony_cust_api.z.so";
+ const int32_t ACTIVE_DELETE = 0;
+ const int32_t PASSITIVE_DELETE = 1;
+ static constexpr const char *SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI =
+@@ -85,22 +84,6 @@ void ExtensionWrapper::InitExtentionWrapper()
+     ANS_LOGD("extension wrapper init success");
+ }
+ 
+-void ExtensionWrapper::InitTelExtentionWrapper()
+-{
+-    telephonyCustHandle_ = dlopen(EXTENTION_TELEPHONY_PATH.c_str(), RTLD_NOW);
+-    if (telephonyCustHandle_ == nullptr) {
+-        ANS_LOGE("telephony cust symbol failed, error: %{public}s", dlerror());
+-        return;
+-    }
+-
+-    getCallerIndex_ = (GET_CALLER_INDEX)dlsym(telephonyCustHandle_, "GetCallerNumIndex");
+-    if (getCallerIndex_ == nullptr) {
+-        ANS_LOGE("telephony cust symbol failed, error: %{public}s", dlerror());
+-        return;
+-    }
+-    ANS_LOGD("extension wrapper init success");
+-}
+-
+ void ExtensionWrapper::CheckIfSetlocalSwitch()
+ {
+     ANS_LOGD("CheckIfSetlocalSwitch enter");
+@@ -211,13 +194,4 @@ int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
+     ANS_LOGD("convertToDelType from delete reason %d to delete type %d", deleteReason, delType);
+     return delType;
+ }
+-
+-ErrCode ExtensionWrapper::GetCallerIndex(std::shared_ptr<DataShare::DataShareResultSet> resultSet, std::string compNum)
+-{
+-    if (getCallerIndex_ == nullptr) {
+-        ANS_LOGE("GetCallerIndex wrapper symbol failed");
+-        return -1;
+-    }
+-    return getCallerIndex_(resultSet, compNum);
+-}
+ } // namespace OHOS::Notification
+diff --git a/services/ans/test/unittest/advanced_notification_service_branch_test.cpp b/services/ans/test/unittest/advanced_notification_service_branch_test.cpp
+index 9668561f..6195ae5e 100644
+--- a/services/ans/test/unittest/advanced_notification_service_branch_test.cpp
++++ b/services/ans/test/unittest/advanced_notification_service_branch_test.cpp
+@@ -1188,5 +1188,36 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279002, Function | SmallTest | Level1)
+     ASSERT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
+ }
+ 
++/**
++ * @tc.number    : AnsBranchTest_285000
++ * @tc.name      : IsNeedSilentInDoNotDisturbMode_1000
++ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_NON_SYSTEM_APP.
++ */
++HWTEST_F(AnsBranchTest, AnsBranchTest_285000, Function | SmallTest | Level1)
++{
++    MockIsSystemApp(false);
++    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
++
++    std::string phoneNumber = "11111111111";
++    int32_t callerType = 0;
++    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
++        phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
++}
++
++/**
++ * @tc.number    : AnsBranchTest_286000
++ * @tc.name      : IsNeedSilentInDoNotDisturbMode_2000
++ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_PERMISSION_DENIED.
++ */
++HWTEST_F(AnsBranchTest, AnsBranchTest_286000, Function | SmallTest | Level1)
++{
++    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
++    MockIsVerfyPermisson(false);
++
++    std::string phoneNumber = "11111111111";
++    int32_t callerType = 0;
++    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
++        phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
++}
+ }  // namespace Notification
+ }  // namespace OHOS
+diff --git a/services/ans/test/unittest/advanced_notification_service_test.cpp b/services/ans/test/unittest/advanced_notification_service_test.cpp
+index 5b57db45..23097b85 100644
+--- a/services/ans/test/unittest/advanced_notification_service_test.cpp
++++ b/services/ans/test/unittest/advanced_notification_service_test.cpp
+@@ -1550,6 +1550,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
+ 
+     ASSERT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(userId, enable), ERR_OK);
+ 
++    std::string phoneNumber = "11111111111";
++    int32_t callerType = 0;
++    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType), ERR_OK);
++
+     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
+ }
+ 
+@@ -2417,6 +2421,23 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_220000
+     ASSERT_EQ(result.size(), ret);
+ }
+ 
++/**
++ * @tc.number    : AdvancedNotificationServiceTest_22600
++ * @tc.name      : ANS_IsNeedSilentInDoNotDisturbMode_0100
++ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function when the result is ERR_OK
++ * @tc.require   : issueI5S4VP
++ */
++HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22600, Function | SmallTest | Level1)
++{
++    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
++    sptr<NotificationRequest> req = new NotificationRequest();
++    EXPECT_NE(req, nullptr);
++    std::string phoneNumber = "11111111111";
++    int32_t callerType = 0;
++    auto ret = advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
++    ASSERT_EQ(ret, (int)ERR_OK);
++}
++
+ /**
+  * @tc.number    : AdvancedNotificationServiceTest_00001
+  * @tc.name      : PrepareNotificationRequest
