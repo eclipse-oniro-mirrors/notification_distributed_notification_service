@@ -16,6 +16,7 @@
 #include "advanced_notification_service_ability.h"
 #include "notification_extension_wrapper.h"
 #include "system_event_observer.h"
+#include "common_event_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -46,11 +47,14 @@ void AdvancedNotificationServiceAbility::OnStart()
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
-    EXTENTION_WRAPPER->InitTelExtentionWrapper();
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #else
     ANS_LOGI("Not enabled ans_ext");
+#endif
+
+#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+    TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
 #endif
 }
 
