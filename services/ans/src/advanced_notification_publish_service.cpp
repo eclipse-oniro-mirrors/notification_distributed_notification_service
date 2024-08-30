@@ -1615,11 +1615,6 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission is bogus.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;

@@ -367,9 +367,6 @@ public:
   
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
-    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlot> &slot, const int reason);
-
     /**
      * @brief Delete notification based on key.
      *
@@ -1201,6 +1198,8 @@ private:
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
     ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationSlot> &slot, const int reason);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
     static sptr<NotificationBundleOption> GenerateBundleOption();
