@@ -1224,8 +1224,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        std::string littleIconString = AnsImageUtil::PackImage(littleIcon_);
-        if (!parcel.WriteString(littleIconString)) {
+        if (!parcel.WriteParcelable(littleIcon_.get())) {
             ANS_LOGE("Failed to write littleIcon");
             return false;
         }
@@ -1238,8 +1237,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        std::string bigIconString = AnsImageUtil::PackImage(bigIcon_);
-        if (!parcel.WriteString(bigIconString)) {
+        if (!parcel.WriteParcelable(bigIcon_.get())) {
             ANS_LOGE("Failed to write bigIcon");
             return false;
         }
@@ -1252,8 +1250,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        std::string overlayIconString = AnsImageUtil::PackImage(overlayIcon_);
-        if (!parcel.WriteString(overlayIconString)) {
+        if (!parcel.WriteParcelable(overlayIcon_.get())) {
             ANS_LOGE("Failed to write overlayIcon");
             return false;
         }
@@ -1599,8 +1596,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        std::string littleIconString = parcel.ReadString();
-        littleIcon_ = AnsImageUtil::UnPackImage(littleIconString);
+        littleIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!littleIcon_) {
             ANS_LOGE("Failed to read littleIcon");
             return false;
@@ -1609,8 +1605,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        std::string bigIconString = parcel.ReadString();
-        bigIcon_ = AnsImageUtil::UnPackImage(bigIconString);
+        bigIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!bigIcon_) {
             ANS_LOGE("Failed to read bigIcon");
             return false;
@@ -1619,8 +1614,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        std::string overlayIconString = parcel.ReadString();
-        overlayIcon_ = AnsImageUtil::UnPackImage(overlayIconString);
+        overlayIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!overlayIcon_) {
             ANS_LOGE("Failed to read overlayIcon");
             return false;
