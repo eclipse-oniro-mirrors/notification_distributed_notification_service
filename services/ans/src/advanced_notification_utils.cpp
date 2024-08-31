@@ -698,10 +698,12 @@ ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid,
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
     for (auto& notification : notificationList_) {
-        if (notification->request != nullptr && notification->request->GetCreatorUid() == uid &&
-                notification->request->GetSlotType()== slotType &&
-                notification->request->GetNotificationType() == contentType) {
+        if (notification->request != nullptr && notification->request->GetSlotType()== slotType &&
+            notification->request->GetNotificationType() == contentType) {
+            if (notification->request->GetCreatorUid() == uid || (notification->request->GetAgentBundle() != nullptr &&
+                notification->request->GetAgentBundle()->GetUid() == uid)) {
                 recordList.emplace_back(notification);
+            }
         }
     }
     if (recordList.empty()) {
