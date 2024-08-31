@@ -84,21 +84,30 @@ inline tm GetLocalTime(time_t time)
 
 inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     auto result = request->CheckImageSizeForContent();
     if (result != ERR_OK) {
         ANS_LOGE("Check image size failed.");
+        message.ErrorCode(result).Message("Check image size failed.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetLittleIcon(), MAX_ICON_SIZE)) {
+        message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check little image size failed.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_SIZE)) {
+        message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check big image size failed.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
+        message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check overlay size failed.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_ICON_OVER_SIZE;
     }
 

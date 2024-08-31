@@ -835,6 +835,12 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
         auto oldRecord = GetFromNotificationList(record->notification->GetKey());
         result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
         if (result != ERR_OK) {
+            bool liveView = record->request->IsCommonLiveView();
+            int32_t slotType = liveView ? NotificationConstant::SlotType::LIVE_VIEW :
+                NotificationConstant::SlotType::ILLEGAL_TYPE;
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_5)
+                .ErrorCode(result).SlotType(slotType).Message("CheckNotificationRequest failed: ");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             ANS_LOGE("Notification(key %{public}s) isn't ready on publish failed with %{public}d.",
                 record->notification->GetKey().c_str(), result);
             return result;
@@ -950,6 +956,11 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     RemoveExpired(flowControlUpdateTimestampList_, now);
     if (flowControlUpdateTimestampList_.size() >= MAX_UPDATE_NUM_PERSECOND) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_4)
+            .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("UpdateInNotificationList failed");
+        if (record != nullptr) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+        }
         return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
     }
 
@@ -1463,6 +1474,11 @@ ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<No
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     RemoveExpired(flowControlPublishTimestampList_, now);
     if (flowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_3)
+            .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("PublishFlowControl failed");
+        if (record != nullptr) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+        }
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
 
@@ -2006,6 +2022,11 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
 
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), nullptr);
+    if (result != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
+            .ErrorCode(result).Message("Push OnCheckNotification failed.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+    }
     return result;
 }
 
