@@ -203,6 +203,7 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
         static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
 
     want.SetParam("id", request->GetNotificationId());
+    want.SetParam("uid", request->GetOwnerUid());
     want.SetParam("slotType", static_cast<int32_t>(slotType));
     want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
 
