@@ -26,7 +26,7 @@
 #include "os_account_manager.h"
 #include "ipc_skeleton.h"
 #include "bundle_manager_helper.h"
-
+#include "notification_analytics_util.h"
 #include "uri.h"
 namespace OHOS {
 namespace Notification {
@@ -675,7 +675,7 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         }
         ParseBundleFromDistureDB(info, values, iter);
     }
-    
+
     return true;
 }
 
@@ -1685,12 +1685,17 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
 int32_t NotificationPreferencesDatabase::SetKvToDb(
     const std::string &key, const std::string &value, const int32_t &userId)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_2);
     if (!CheckRdbStore()) {
         ANS_LOGE("RdbStore is nullptr.");
+        message.Message("RdbStore is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NativeRdb::E_ERROR;
     }
     int32_t result = rdbDataManager_->InsertData(key, value, userId);
     if (result != NativeRdb::E_OK) {
+        message.Message("Set key failed: " + key);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
@@ -1703,12 +1708,17 @@ int32_t NotificationPreferencesDatabase::SetKvToDb(
 int32_t NotificationPreferencesDatabase::SetByteToDb(
     const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_2);
     if (!CheckRdbStore()) {
+        message.Message("RdbStore is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("RdbStore is nullptr.");
         return NativeRdb::E_ERROR;
     }
     int32_t result = rdbDataManager_->InsertData(key, value, userId);
     if (result != NativeRdb::E_OK) {
+        message.Message("Set key failed: " + key);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }

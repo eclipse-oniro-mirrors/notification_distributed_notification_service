@@ -64,6 +64,9 @@ ErrCode BasePublishProcess::CommonPublishProcess(const sptr<NotificationRequest>
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
     if (AccessTokenHelper::IsDlpHap(callerToken)) {
         ANS_LOGE("DLP hap not allowed to send notifications");
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
+            .ErrorCode(ERR_ANS_DLP_HAP).Message("CommonPublishProcess failed");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_DLP_HAP;
     }
     return ERR_OK;

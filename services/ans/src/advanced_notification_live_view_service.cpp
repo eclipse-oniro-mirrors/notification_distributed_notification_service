@@ -32,6 +32,7 @@
 #include "advanced_notification_inline.cpp"
 #include <cstdint>
 #include <memory>
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -230,35 +231,38 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         ANS_LOGI("Not saving notification request to db for common live view with isOnlyLocalUpdate set to true.");
         return ERR_OK;
     }
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3).
+        BundleName(request->GetCreatorBundleName()).NotificationId(request->GetNotificationId());
     nlohmann::json jsonObject;
     if (!NotificationJsonConverter::ConvertToJson(request, jsonObject)) {
         ANS_LOGE("Convert request to json object failed, bundle name %{public}s, id %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId());
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert request failed"));
         return ERR_ANS_TASK_ERR;
     }
     auto bundleOption = requestDb.bundleOption;
     if (!NotificationJsonConverter::ConvertToJson(bundleOption, jsonObject)) {
         ANS_LOGE("Convert bundle to json object failed, bundle name %{public}s, id %{public}d.",
             bundleOption->GetBundleName().c_str(), request->GetNotificationId());
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert option failed"));
         return ERR_ANS_TASK_ERR;
     }
 
     auto result = NotificationPreferences::GetInstance()->SetKvToDb(
         request->GetKey(), jsonObject.dump(), request->GetReceiverUserId());
     if (result != ERR_OK) {
-        ANS_LOGE(
-            "Set notification request failed, bundle name %{public}s, id %{public}d, key %{public}s, ret %{public}d.",
+        ANS_LOGE("Set failed, bundle name %{public}s, id %{public}d, key %{public}s, ret %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("set failed"));
         return result;
     }
 
     result = SetLockScreenPictureToDb(request);
     if (result != ERR_OK) {
         ANS_LOGE("Failed to set lock screen picture to db");
-        return result;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("SetToDb failed"));
     }
-    return ERR_OK;
+    return result;
 }
 
 int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
@@ -561,7 +565,7 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
     record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;
     StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES,
         NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE);
-    
+
     return ERR_OK;
 }
 
