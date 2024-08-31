@@ -508,6 +508,13 @@ public:
     const std::shared_ptr<Media::PixelMap> GetLittleIcon() const;
 
     /**
+     * @brief Obtains the icon type of the notification.
+     *
+     * @return Returns the notification icon type
+     */
+    const std::string GetLittleIconType() const;
+
+    /**
      * @brief Sets the large icon of this notification, which is usually displayed on the right of the notification.
      *
      * @param bigIcon Indicates the large icon to set. It must be a PixelMap object.
@@ -1497,6 +1504,7 @@ private:
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> maxScreenWantAgent_ {};
     std::shared_ptr<AAFwk::WantParams> additionalParams_ {};
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
+    std::string littleIconType_ {};
     std::shared_ptr<Media::PixelMap> bigIcon_ {};
     std::shared_ptr<Media::PixelMap> overlayIcon_ {};
     std::shared_ptr<NotificationContent> notificationContent_ {};

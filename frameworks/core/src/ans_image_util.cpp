@@ -24,6 +24,7 @@ const uint8_t AnsImageUtil::IMAGE_QUALITY {100};
 const uint8_t AnsImageUtil::SHIFT_FOUR {4};
 const uint8_t AnsImageUtil::NUM_TEN {10};
 const size_t  AnsImageUtil::TWO_TIMES {2};
+const uint32_t AnsImageUtil::DEFAULT_SIZE {25 * 1024 * 1024};
 
 std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &format)
 {
@@ -47,6 +48,9 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
 
     auto size = static_cast<uint32_t>(pixelMap->GetByteCount());
     ANS_LOGD("size of pixelMap : %{public}u", size);
+    if (size < DEFAULT_SIZE) {
+        size = DEFAULT_SIZE;
+    }
     auto pbuf = new (std::nothrow) uint8_t [size];
     if (pbuf == nullptr) {
         ANS_LOGE("create buffer failed");
@@ -66,7 +70,7 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
     return BinToHex(pixelMapStr);
 }
 
-std::shared_ptr<Media::PixelMap> AnsImageUtil::UnPackImage(const std::string &pixelMapStr)
+std::shared_ptr<Media::PixelMap> AnsImageUtil::UnPackImage(const std::string &pixelMapStr, const std::string &format)
 {
     if (pixelMapStr.empty()) {
         return {};
@@ -76,6 +80,7 @@ std::shared_ptr<Media::PixelMap> AnsImageUtil::UnPackImage(const std::string &pi
 
     uint32_t errorCode {0};
     Media::SourceOptions opts;
+    opts.formatHint = format;
     auto imageSource = Media::ImageSource::CreateImageSource(
         reinterpret_cast<const uint8_t*>(binStr.data()),
         static_cast<uint32_t>(binStr.length()),
