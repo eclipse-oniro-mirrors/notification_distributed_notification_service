@@ -87,6 +87,7 @@ export class EnableNotificationDialog {
   extensionWindow:uiExtensionHost.UIExtensionHostWindowProxy;
   storage: LocalStorage;
   stageModel: boolean;
+  subWindow: window.Window;
 
   constructor(id: number, want: Want, stageModel: boolean) {
     this.id = id;
@@ -185,6 +186,7 @@ export class EnableNotificationDialog {
           isTopmost: true
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
+        this.subWindow = subWindow;
         let dis = display.getDefaultDisplaySync();
         await subWindow?.resize(dis.width, dis.height);
         console.info(TAG, `size : ${dis.width}  ${dis.height}`);
