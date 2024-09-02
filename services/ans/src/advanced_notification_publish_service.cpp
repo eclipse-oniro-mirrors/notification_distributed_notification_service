@@ -67,7 +67,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
         ANS_LOGE("Failed to create EnabledNotificationCallbackData instance");
         return ERR_NO_MEMORY;
     }
-
+    SetSlotFlagsTrustlistsAsBundle(bundleOption);
     ErrCode result = ERR_OK;
     result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
     if (result == ERR_OK) {
@@ -1010,7 +1010,6 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     if (result == ERR_OK && allowed) {
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            SetSlotFlagsTrustlistsAsBundle(bundleOption);
             result = ERR_OK;
             // FA model app can publish notification without user confirm
             allowed = CheckApiCompatibility(bundleOption);
