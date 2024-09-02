@@ -272,22 +272,28 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
-        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            ANS_LOGE("Get live view by filter failed because check permission is false.");
-            return ERR_ANS_PERMISSION_DENIED;
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    // get other bundle notification need controller permission
+    if (bundle->GetUid() == IPCSkeleton::GetCallingUid()) {
+        ANS_LOGI("Get self notification uid: %{public}d, curUid: %{public}d.",
+            bundle->GetUid(), IPCSkeleton::GetCallingUid());
+    } else {
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
+            if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+                ANS_LOGW("Get live view by filter failed because check permission is false.");
+                return ERR_ANS_PERMISSION_DENIED;
+            }
         }
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
-    }
-
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;

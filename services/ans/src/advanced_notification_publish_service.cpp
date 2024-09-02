@@ -1456,7 +1456,8 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         std::string message = "no acl permission.";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 2)
             .ErrorCode(ERR_ANS_PERMISSION_DENIED);
