@@ -1211,9 +1211,6 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
         }
     }
     std::string message = "notification not exist";
-    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 5)
-        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS).NotificationId(notificationId);
-    ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::DEFAULT_REASON_DELETE, message);
     ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
@@ -1249,9 +1246,6 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
     }
     RemoveFromDelayedNotificationList(key);
     std::string message = "notification not exist. key:" + key + ".";
-    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 8)
-        .ErrorCode(ERR_ANS_INVALID_BUNDLE);
-    ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
     ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
