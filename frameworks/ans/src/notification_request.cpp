@@ -1237,7 +1237,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         bool isUnPackImage = true;
         std::string littleIconString;
 
-        if (!littleIcon_->IsAstc() && !littleIconType_.empty()) {
+        if (!littleIconType_.empty()) {
             littleIconString = AnsImageUtil::PackImage(littleIcon_, littleIconType_);
         }
 
@@ -1990,7 +1990,7 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
     jsonObject["extraInfo"] = extraInfoStr;
 
     jsonObject["smallIconType"] = littleIconType_;
-    if (!littleIcon_->IsAstc() && !littleIconType_.empty()) {
+    if (!littleIconType_.empty()) {
         jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_, littleIconType_);
     }
     jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
