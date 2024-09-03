@@ -67,7 +67,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
         ANS_LOGE("Failed to create EnabledNotificationCallbackData instance");
         return ERR_NO_MEMORY;
     }
-    SetSlotFlagsTrustlistsAsBundle(bundleOption);
+    SetSlotFlagsTrustlistsAsBundle(bundle);
     ErrCode result = ERR_OK;
     result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
     if (result == ERR_OK) {
