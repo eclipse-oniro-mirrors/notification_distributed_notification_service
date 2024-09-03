@@ -300,9 +300,11 @@ int64_t NotificationRequest::GetArchiveDeadLine() const
 void NotificationRequest::SetLittleIcon(const std::shared_ptr<Media::PixelMap> &littleIcon)
 {
     littleIcon_ = littleIcon;
-    Media::ImageInfo outImageInfo;
-    littleIcon->GetImageInfo(outImageInfo);
-    littleIconType_ = outImageInfo.encodedFormat;
+    if (littleIcon != nullptr) {
+        Media::ImageInfo outImageInfo;
+        littleIcon->GetImageInfo(outImageInfo);
+        littleIconType_ = outImageInfo.encodedFormat;
+    }
 }
 
 const std::shared_ptr<Media::PixelMap> NotificationRequest::GetLittleIcon() const
