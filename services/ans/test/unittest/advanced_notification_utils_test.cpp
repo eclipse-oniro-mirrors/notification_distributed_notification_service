@@ -170,37 +170,15 @@ HWTEST_F(AnsUtilsTest, FillRequestByKeys_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsUtilsTest, IsAllowedGetNotificationByFilter_00001, Function | SmallTest | Level1)
 {
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     auto record = std::make_shared<NotificationRecord>();
     record->bundleOption = new NotificationBundleOption("test", 1);
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(false);
-    int ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
-
-    MockIsVerfyPermisson(true);
-    ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
+    int ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record, bundle);
     ASSERT_EQ(ret, (int)ERR_OK);
-}
-
-/**
- * @tc.name: IsAllowedGetNotificationByFilter_00002
- * @tc.desc: Test IsAllowedGetNotificationByFilter
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsUtilsTest, IsAllowedGetNotificationByFilter_00002, Function | SmallTest | Level1)
-{
-    auto record = std::make_shared<NotificationRecord>();
-    record->bundleOption = new NotificationBundleOption("test", IPCSkeleton::GetCallingUid());
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    int ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     record->bundleOption->SetBundleName("bundleName");
-    ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record);
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record, bundle);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

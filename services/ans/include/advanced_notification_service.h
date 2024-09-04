@@ -365,9 +365,6 @@ public:
   
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
-    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlot> &slot, const int reason);
-
     /**
      * @brief Delete notification based on key.
      *
@@ -1183,6 +1180,8 @@ private:
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
     ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationSlot> &slot, const int reason);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
     static sptr<NotificationBundleOption> GenerateBundleOption();
@@ -1312,7 +1311,8 @@ private:
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
     void FillActionButtons(const sptr<NotificationRequest> &request);
-    ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record,
+        const sptr<NotificationBundleOption> &bundleOption);
     ErrCode FillRequestByKeys(const sptr<NotificationRequest> &oldRequest,
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest);
     ErrCode IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
