@@ -2125,41 +2125,32 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
     if (bundleName.empty()) {
         return;
     }
-    ANS_LOGI("notify bundleName is: %{public}s", bundleName.c_str());
-    // get foreground application
-    std::vector<AppExecFwk::AppStateData> apps;
+    bool isRunning = false;
     {
         std::lock_guard<std::mutex> lock(appMgrMutex_);
         if (!ConnectAppMgr()) {
             return;
         }
-        if (appMgrProxy_->GetForegroundApplications(apps) != ERR_OK) {
-            ANS_LOGW("get foreground application failed");
-            return;
-        }
+        isRunning = appMgrProxy_->GetAppRunningStateByBundleName(bundleName);
     }
-    // notify application
-    for (auto &eachApp : apps) {
-        if (eachApp.bundleName != bundleName) {
-            continue;
-        }
+    if (!isRunning) {
+        return;
+    }
 
-        EventFwk::Want want;
-        // common event not add COMMON_EVENT_REMINDER_STATUS_CHANGE, Temporary use of string
-        want.SetAction("usual.event.REMINDER_STATUS_CHANGE");
-        EventFwk::CommonEventData eventData(want);
+    EventFwk::Want want;
+    // common event not add COMMON_EVENT_REMINDER_STATUS_CHANGE, Temporary use of string
+    want.SetAction("usual.event.REMINDER_STATUS_CHANGE");
+    EventFwk::CommonEventData eventData(want);
 
-        std::string data;
-        data.append(std::to_string(static_cast<int>(buttonType))).append(",");
-        data.append(std::to_string(reminder->GetReminderId()));
-        eventData.SetData(data);
+    std::string data;
+    data.append(std::to_string(static_cast<int>(buttonType))).append(",");
+    data.append(std::to_string(reminder->GetReminderId()));
+    eventData.SetData(data);
 
-        EventFwk::CommonEventPublishInfo info;
-        info.SetBundleName(bundleName);
-        if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
-            ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
-        }
-        break;
+    EventFwk::CommonEventPublishInfo info;
+    info.SetBundleName(bundleName);
+    if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
+        ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
     }
 }
 }
