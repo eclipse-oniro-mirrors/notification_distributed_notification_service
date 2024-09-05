@@ -1944,7 +1944,8 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     if (client == nullptr) {
         return;
     }
-    int32_t result = client->StartAbility(abilityWant);
+    uint32_t specifyTokenId = static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID());
+    int32_t result = client->StartAbilityOnlyUIAbility(abilityWant, nullptr, specifyTokenId);
     if (result != 0) {
         ANSR_LOGE("Start ability failed, result = %{public}d", result);
         return;
@@ -1983,7 +1984,8 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
         ANSR_LOGE("start ability failed, due to ability mgr client is nullptr.");
         return;
     }
-    int32_t result = client->StartAbility(abilityWant);
+    uint32_t specifyTokenId = static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID());
+    int32_t result = client->StartAbilityOnlyUIAbility(abilityWant, nullptr, specifyTokenId);
     if (result != 0) {
         ANSR_LOGE("Start ability failed, result = %{public}d", result);
     }
