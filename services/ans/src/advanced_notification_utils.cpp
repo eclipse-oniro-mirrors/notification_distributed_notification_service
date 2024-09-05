@@ -282,12 +282,9 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         ANS_LOGI("Get self notification uid: %{public}d, curUid: %{public}d.",
             bundle->GetUid(), IPCSkeleton::GetCallingUid());
     } else {
-        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-        if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
-            if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-                ANS_LOGW("Get live view by filter failed because check permission is false.");
-                return ERR_ANS_PERMISSION_DENIED;
-            }
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            ANS_LOGW("Get live view by filter failed because check permission is false.");
+            return ERR_ANS_PERMISSION_DENIED;
         }
     }
 
