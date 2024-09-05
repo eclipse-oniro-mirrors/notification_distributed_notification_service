@@ -640,15 +640,6 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         bool enabled = false;
         auto errCode = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
             bundleOption, enabled);
-        if (bundleOption->GetBundleName().compare("com.ohos.mms") == 0) {
-            uint32_t slotFlags = 63;
-            auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
-                bundleOption, slotFlags);
-            if (ret != ERR_OK) {
-                ANS_LOGE("Failed to get slotflags for bundle, use default slotflags.");
-            }
-            UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
-        }
         if (errCode != ERR_OK) {
             ANS_LOGD("Get notification user option fail, need to insert data");
             OnBundleDataAdd(bundleOption);
@@ -1786,6 +1777,19 @@ void AdvancedNotificationService::InitNotificationEnableList()
         std::vector<AppExecFwk::BundleInfo> bundleInfos = GetBundlesOfActiveUser();
         bool notificationEnable = false;
         for (const auto &bundleInfo : bundleInfos) {
+            if (bundleInfo.applicationInfo.bundleName.compare("com.ohos.mms") == 0) {
+                uint32_t slotFlags = 63;
+                sptr<NotificationBundleOption> mmsBundle = new (std::nothrow) NotificationBundleOption(
+                bundleInfo.applicationInfo.bundleName, bundleInfo.uid);
+                if (mmsBundle == nullptr) {
+                    ANS_LOGE("New bundle option obj error! bundlename:%{public}s",
+                        bundleInfo.applicationInfo.bundleName.c_str());
+                    continue;
+                }
+                NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
+                    mmsBundle, slotFlags);
+                UpdateSlotReminderModeBySlotFlags(mmsBundle, slotFlags);
+            }
             // Currently only the input from the whitelist is written
             if (!bundleInfo.applicationInfo.allowEnableNotification) {
                 continue;
