@@ -80,6 +80,7 @@ export class EnableNotificationDialog {
   static WATCH_DIALOG_PATH = 'pages/watchNotificationDialog';
   static TRANSPARANT_COLOR = '#00000000';
   static SCENEBOARD_BUNDLE = 'com.ohos.sceneboard';
+  static SYSTEMUI_BUNDLE = 'com.ohos.systemui';
 
   id: number;
   want: Want;
@@ -191,17 +192,20 @@ export class EnableNotificationDialog {
         await subWindow?.resize(dis.width, dis.height);
         console.info(TAG, `size : ${dis.width}  ${dis.height}`);
         await subWindow.loadContent(path, this.storage);
+        try {
+          await subWindow.hideNonSystemFloatingWindows(true);
+        } catch (err) {
+          console.error(TAG, 'subWindow hideNonSystemFloatingWindows failed!');
+        }
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
       } else {
         await session.loadContent(path, this.storage);  
-      }
-      try {    
-        await extensionWindow.hideNonSecureWindows(shouldHide);
-      } catch (err) {
-        console.error(TAG, 'window hideNonSecureWindows failed!');
-      }
-      if (!stageModel) {
+        try {    
+          await extensionWindow.hideNonSecureWindows(shouldHide);
+        } catch (err) {
+          console.error(TAG, 'window hideNonSecureWindows failed!');
+        }
         await session.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
       }
     } catch (err) {
@@ -277,7 +281,8 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       let stageModel = false;
       let bundleName = want.parameters['ohos.aafwk.param.callerBundleName'];
       let bundleUid = want.parameters['ohos.aafwk.param.callerUid'];
-      if (bundleName !== EnableNotificationDialog.SCENEBOARD_BUNDLE) {
+      if (bundleName !== EnableNotificationDialog.SCENEBOARD_BUNDLE &&
+        bundleName !== EnableNotificationDialog.SYSTEMUI_BUNDLE) {
         want.parameters.bundleName = bundleName;
         want.parameters.bundleUid = bundleUid;
         stageModel = true;
@@ -299,20 +304,38 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
   onForeground() {
     console.log(TAG, `UIExtAbility onForeground`);
     let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
-    try {
-      dialog?.extensionWindow?.hideNonSecureWindows(true);
-    } catch (err) {
-      console.error(TAG, 'onForeground hideNonSecureWindows failed!');
-    }  
+    
+    if (dialog?.subWindow !== undefined) {
+      try {
+        dialog?.subWindow?.hideNonSystemFloatingWindows(true);
+      } catch (err) {
+        console.error(TAG, 'onForeground hideNonSystemFloatingWindows failed!');
+      } 
+    } else {
+      try {
+        dialog?.extensionWindow?.hideNonSecureWindows(true);
+      } catch (err) {
+        console.error(TAG, 'onForeground hideNonSecureWindows failed!');
+      }  
+    }
   }
 
   onBackground() {
     console.log(TAG, `UIExtAbility onBackground`);
     let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
-    try {
-      dialog?.extensionWindow?.hideNonSecureWindows(false);
-    } catch (err) {
-      console.error(TAG, 'onBackground hideNonSecureWindows failed!');
+
+    if (dialog?.subWindow !== undefined) {
+      try {
+        dialog?.subWindow?.hideNonSystemFloatingWindows(false);
+      } catch (err) {
+        console.error(TAG, 'onBackground hideNonSystemFloatingWindows failed!');
+      } 
+    } else {
+      try {
+        dialog?.extensionWindow?.hideNonSecureWindows(false);
+      } catch (err) {
+        console.error(TAG, 'onBackground hideNonSecureWindows failed!');
+      }  
     }
   }
 
