@@ -122,7 +122,7 @@ std::string HaMetaMessage::Build() const
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
-    CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
+    return;
 }
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
@@ -139,7 +139,6 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationR
             message = message.AgentBundleName(agentBundleName);
         }
     }
-    CommonNotificationEvent(request, DELETE_ERROR_EVENT_CODE, message);
 }
 
 void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationRequest>& request,
@@ -228,8 +227,6 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
     want.SetParam("typeCode", message.typeCode_);
     want.SetParam("id", message.notificationId_);
     want.SetParam("extraInfo", extraContent);
-    IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
-        want, DELETE_ERROR_EVENT_CODE, message.Build()));
 }
 
 void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,

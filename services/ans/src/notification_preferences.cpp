@@ -255,11 +255,6 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
         ANS_LOGW("bundle not exist");
         result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
     }
-    if (result != ERR_OK) {
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_5).SlotType(type)
-            .ErrorCode(result).BundleName(bundleOption->GetBundleName()).Message("Get lot failed.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
-    }
     ANS_LOGD("%{public}s status  = %{public}d ", __FUNCTION__, result);
     return result;
 }
