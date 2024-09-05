@@ -43,11 +43,14 @@ ErrCode BasePublishProcess::CommonPublishCheck(const sptr<NotificationRequest> &
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_1);
     if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
         if (!AccessTokenHelper::IsSystemApp()) {
+            message.Message("Not SystemApp");
             message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_NON_SYSTEM_APP;
         }
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            message.BranchId(EventBranchId::BRANCH_3);
+            message.Message("CheckPermission denied");
             message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_PERMISSION_DENIED;
