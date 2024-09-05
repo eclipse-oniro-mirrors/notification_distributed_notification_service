@@ -208,7 +208,7 @@ struct PermissionDialog {
       this.appName = titleTrim(appName);
       console.info(TAG, `hap label: ${this.appName}`);
     } catch (err) {
-      console.error(TAG, `applicationName error : ${JSON.stringify(err)}`);
+      console.error(TAG, `applicationName error : ${err?.code}`);
     }
   }
 
@@ -227,7 +227,7 @@ struct PermissionDialog {
         this.naviHeight = avoidArea.bottomRect.height;
       }
     } catch (err) {
-      console.error(TAG, `Failed to obtain the area. Cause: ${JSON.stringify(err)}`);
+      console.error(TAG, `Failed to obtain the area. Cause: ${err?.code}`);
     }
   }
 
@@ -244,7 +244,7 @@ struct PermissionDialog {
         }
       }
     } catch (err) {
-      console.error(TAG, 'Failed to get the device foldable status. Code: ' + JSON.stringify(err));
+      console.error(TAG, 'Failed to get the device foldable status. Code: ${err?.code}');
     }
 
     // read ccm configs
@@ -265,7 +265,7 @@ struct PermissionDialog {
         }
       }
     } catch (error) {
-      console.log(TAG, 'Failed get ccm files, Cause: ${JSON.stringify(err)}');
+      console.log(TAG, 'Failed get ccm files, Cause: ${err?.code}');
     }
     this.isBottomPopover = isBottomPopoverTemp && isVertical;
   }
@@ -290,7 +290,7 @@ struct PermissionDialog {
     try {
       await this.updateStatus();
     } catch (err) {
-      console.error(TAG, `aboutToAppear error : + ${JSON.stringify(err)}`);
+      console.error(TAG, `aboutToAppear error : ${err?.code}`);
       await this.dialog?.destroyException();
       await this.session?.terminateSelf();
     }
@@ -305,13 +305,13 @@ struct PermissionDialog {
         await win.resize(dis.width, dis.height);
         await this.updateStatus();
       } catch (err) {
-        console.error(TAG, 'Failed to touch callback. Code: ' + JSON.stringify(err));
+        console.error(TAG, 'Failed to touch callback. Code: ${err?.code}');
       }
     };
     try {
       display.on('foldDisplayModeChange', callback);
     } catch (err) {
-      console.error(TAG, 'Failed to register callback. Code: ' + JSON.stringify(err));
+      console.error(TAG, 'Failed to register callback. Code: ${err?.code}');
     }
   }
 
