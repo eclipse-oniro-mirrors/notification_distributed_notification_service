@@ -61,7 +61,9 @@ ErrCode AdvancedNotificationService::Subscribe(
             break;
         }
 
-        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        int32_t callingUid = IPCSkeleton::GetCallingUid();
+        if ((callingUid != PAC_UID && callingUid != NFC_UID)
+            && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             errCode = ERR_ANS_PERMISSION_DENIED;
             break;
         }
@@ -149,7 +151,8 @@ ErrCode AdvancedNotificationService::Unsubscribe(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != PAC_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_PERMISSION_DENIED));
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
