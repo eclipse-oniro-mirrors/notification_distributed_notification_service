@@ -64,7 +64,12 @@ public:
         /**
          * displayed as a small icon.
          */
-        LITTLE
+        LITTLE,
+        /**
+         * invalid type
+         * It is used as the upper limit of the enumerated value.
+         */
+        ILLEGAL_TYPE
     };
 
     enum class GroupAlertType {
@@ -82,7 +87,12 @@ public:
          * the overview notification has sound or vibration but child notifications are muted (no sound or vibration)
          * in a group if sound or vibration is enabled for the associated NotificationSlot objects.
          */
-        OVERVIEW
+        OVERVIEW,
+        /**
+         * invalid type
+         * It is used as the upper limit of the enumerated value.
+         */
+        ILLEGAL_TYPE
     };
 
     /**
