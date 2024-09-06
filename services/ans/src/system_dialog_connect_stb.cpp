@@ -62,6 +62,10 @@ void SystemDialogConnectStb::SendRemoveBundleEvent()
         return;
     }
     nlohmann::json root = nlohmann::json::parse(commandStr_);
+    if (root.is_null() or !root.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return;
+    }
     if (!root.contains("bundleName") || !root.contains("bundleUid")) {
         ANS_LOGW("not found jsonKey from");
         return;

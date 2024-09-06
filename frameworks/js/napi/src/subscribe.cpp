@@ -658,10 +658,6 @@ void ThreadSafeOnDoNotDisturbChanged(napi_env env, napi_value jsCallback, void* 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("Scope is null");
-        return;
-    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetDoNotDisturbDate(dataWorkerData->env, dataWorkerData->date, result)) {

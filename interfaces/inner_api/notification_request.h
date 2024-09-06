@@ -1273,7 +1273,7 @@ public:
      * @param bundleOption Indicates the bundleOption of this notification.
      */
     void SetBundleOption(const std::shared_ptr<NotificationBundleOption> &bundleOption);
-
+ 
     /**
      * @brief Obtains the bundleOption of the notification.
      *

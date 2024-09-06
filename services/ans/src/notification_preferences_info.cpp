@@ -285,7 +285,6 @@ void NotificationPreferencesInfo::AddDoNotDisturbProfiles(
             continue;
         }
         std::string key = MakeDoNotDisturbProfileKey(userId, profile->GetProfileId());
-        ANS_LOGI("AddDoNotDisturbProfiles key: %{public}s.", key.c_str());
         doNotDisturbProfiles_.insert_or_assign(key, profile);
     }
 }
@@ -299,7 +298,6 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbProfiles(
             continue;
         }
         std::string key = MakeDoNotDisturbProfileKey(userId, profile->GetProfileId());
-        ANS_LOGI("RemoveDoNotDisturbProfiles  key: %{public}s.", key.c_str());
         doNotDisturbProfiles_.erase(key);
     }
 }
@@ -325,7 +323,6 @@ void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
 {
     for (const auto &doNotDisturbProfile : doNotDisturbProfiles_) {
         std::string key = doNotDisturbProfile.first;
-        ANS_LOGI("GetAllDoNotDisturbProfiles key: %{public}s.", key.c_str());
         auto result = key.find(std::to_string(userId));
         if (result != std::string::npos) {
             auto profile = doNotDisturbProfile.second;

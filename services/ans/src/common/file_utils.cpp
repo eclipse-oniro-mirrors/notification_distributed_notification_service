@@ -63,7 +63,7 @@ bool FileUtils::GetJsonFromFile(const char *path, nlohmann::json &root)
 {
     std::ifstream file(path);
     root = nlohmann::json::parse(file);
-    if (root.is_null() || root.empty()) {
+    if (root.is_null() || root.empty() || !root.is_object()) {
         ANS_LOGE("GetJsonFromFile fail as invalid root.");
         return false;
     }

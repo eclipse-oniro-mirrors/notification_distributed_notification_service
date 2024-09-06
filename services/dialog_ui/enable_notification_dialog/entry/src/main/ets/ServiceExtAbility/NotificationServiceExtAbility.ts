@@ -23,10 +23,19 @@ import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import StartOptions from '@ohos.app.ability.StartOptions';
-
+import configPolicy from '@ohos.configPolicy';
+import fs from '@ohos.file.fs';
+import Constants from '../common/constant';
 
 
 const TAG = 'NotificationDialog_Service ';
+
+const UPDATE_INIT = -1;
+const UPDATE_NUM = 1;
+const UPDATE_BOUNDARY = 100;
+
+
+let systemLanguage: string; 
 
 const enableNotificationDialogDestroyedEvent = {
   eventId: 1,
@@ -61,6 +70,7 @@ export class EnableNotificationDialog {
   static ENABLE_NOTIFICATION_DIALOG_NAME = 'EnableNotificationDialog';
   static DIALOG_PATH = 'pages/notificationDialog';
   static TRANSPARANT_COLOR = '#00000000';
+  static SCENEBOARD_BUNDLE = 'com.ohos.sceneboard';
 
   id: number;
   want: Want;
@@ -132,7 +142,18 @@ export class EnableNotificationDialog {
         'session': session
       });
 
-      if (stageModel) {
+      let hasConfig = true;
+      try {
+        let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
+        if (filePaths.length === 0) {
+          console.info(TAG, 'not get any configFile');
+          hasConfig = false;
+        }
+      } catch (err) {
+        console.error(TAG, 'Failed get ccm files');
+      }
+
+      if (stageModel && hasConfig) {
         let subWindowOpts : window.SubWindowOptions = {
           'title': '',
           decorEnabled: false,
@@ -199,12 +220,28 @@ export class EnableNotificationDialog {
 };
 
 
-
 class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
+
+  onConfigurationUpdate(newConfig): void {
+    console.log(TAG, 'onConfigurationUpdate');
+    if (systemLanguage !== newConfig.language) {
+      console.log(TAG, `onConfigurationUpdate newConfig is ${JSON.stringify(newConfig)}`);
+      systemLanguage = newConfig.language;
+      let isUpdate:number = AppStorage.get('isUpdate');
+      if (isUpdate === undefined || isUpdate > UPDATE_BOUNDARY) {
+        AppStorage.setOrCreate('isUpdate', UPDATE_NUM);
+      } else {
+        AppStorage.setOrCreate('isUpdate', ++isUpdate);
+      }
+    }
+  }
+    
 
   onCreate() {
     console.log(TAG, `UIExtAbility onCreate`);
     AppStorage.setOrCreate('context', this.context);
+    AppStorage.setOrCreate('isUpdate', UPDATE_INIT);
+    systemLanguage = this.context.config.language; 
   
   }
 
@@ -213,15 +250,15 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       let stageModel = false;
       let bundleName = want.parameters['ohos.aafwk.param.callerBundleName'];
       let bundleUid = want.parameters['ohos.aafwk.param.callerUid'];
-      if (want.parameters.bundleName === undefined) {
+      if (bundleName !== EnableNotificationDialog.SCENEBOARD_BUNDLE) {
         want.parameters.bundleName = bundleName;
         want.parameters.bundleUid = bundleUid;
         stageModel = true;
       } else {
         stageModel = false;
       }
-      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters.bundleName}`
-        + `uid ${want.parameters.bundleUid}`);
+      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters.bundleName}` +
+        `uid ${want.parameters.bundleUid}`);    
       let dialog = new EnableNotificationDialog(1, want, stageModel);
       await dialog.createUiExtensionWindow(session, stageModel);
       AppStorage.setOrCreate('clicked', false);
@@ -252,7 +289,7 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
     }
   }
 
-  async onSessionDestroy(session: UIExtensionContentSession) {
+  async onSessionDestroy(session: UIExtensionContentSession): Promise<void> {
     console.log(TAG, `UIExtAbility onSessionDestroy`);  
     if (AppStorage.get('clicked') === false) {
       console.log(TAG, `UIExtAbility onSessionDestroy unclick destory`);

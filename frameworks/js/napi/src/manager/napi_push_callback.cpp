@@ -133,7 +133,7 @@ int32_t JSPushCallBack::OnCheckNotification(
     AbilityRuntime::HandleEscape handleEscape(env_);
 
     std::string pkgName;
-    auto checkInfo = new (std::nothrow) NotificationCheckInfo {};
+    auto checkInfo = std::make_shared<NotificationCheckInfo>();
     checkInfo->ConvertJsonStringToValue(notificationData);
 
     NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
