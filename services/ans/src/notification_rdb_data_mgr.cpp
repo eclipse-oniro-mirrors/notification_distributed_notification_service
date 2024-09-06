@@ -303,10 +303,11 @@ int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &ke
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
+        int32_t ret = NativeRdb::E_OK;
         int32_t rowId = -1;
         for (auto key : keys) {
             for (auto tableName : operatedTables) {
-                int32_t ret = DeleteData(tableName, key, rowId);
+                ret = DeleteData(tableName, key, rowId);
                 if (ret != NativeRdb::E_OK) {
                     return ret;
                 }

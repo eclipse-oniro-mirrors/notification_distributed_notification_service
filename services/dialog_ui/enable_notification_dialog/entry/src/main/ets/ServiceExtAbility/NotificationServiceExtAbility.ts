@@ -28,7 +28,6 @@ import fs from '@ohos.file.fs';
 import Constants from '../common/constant';
 
 
-
 const TAG = 'NotificationDialog_Service ';
 
 const UPDATE_INIT = -1;
@@ -146,12 +145,11 @@ export class EnableNotificationDialog {
       let hasConfig = true;
       try {
         let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
-        
         if (filePaths.length === 0) {
           console.info(TAG, 'not get any configFile');
           hasConfig = false;
         }
-      }catch (err) {
+      } catch (err) {
         console.error(TAG, 'Failed get ccm files');
       }
 
@@ -222,7 +220,6 @@ export class EnableNotificationDialog {
 };
 
 
-
 class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
 
   onConfigurationUpdate(newConfig): void {
@@ -245,6 +242,7 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
     AppStorage.setOrCreate('context', this.context);
     AppStorage.setOrCreate('isUpdate', UPDATE_INIT);
     systemLanguage = this.context.config.language; 
+  
   }
 
   async onSessionCreate(want: Want, session: UIExtensionContentSession) {
@@ -259,8 +257,8 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       } else {
         stageModel = false;
       }
-      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters.bundleName}`
-        + `uid ${want.parameters.bundleUid}`);
+      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters.bundleName}` +
+        `uid ${want.parameters.bundleUid}`);    
       let dialog = new EnableNotificationDialog(1, want, stageModel);
       await dialog.createUiExtensionWindow(session, stageModel);
       AppStorage.setOrCreate('clicked', false);
@@ -291,7 +289,7 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
     }
   }
 
-  async onSessionDestroy(session: UIExtensionContentSession) {
+  async onSessionDestroy(session: UIExtensionContentSession): Promise<void> {
     console.log(TAG, `UIExtAbility onSessionDestroy`);  
     if (AppStorage.get('clicked') === false) {
       console.log(TAG, `UIExtAbility onSessionDestroy unclick destory`);

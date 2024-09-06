@@ -57,7 +57,6 @@ void NotificationTrustList::GetCcmPrivilegesConfig()
             affects_value[REMINDER_LIST_INDEX] != PRIVILEGES_BANNER_NOT_ALLOW) {
             reminderTrustlist_.insert(affect.key());
         }
-        notificationSlotFlagsTrustlist_.insert(affect.key());
     }
     return;
 }

@@ -138,6 +138,10 @@ std::string NotificationDoNotDisturbProfile::ToJson()
 void NotificationDoNotDisturbProfile::FromJson(const std::string &jsonObj)
 {
     nlohmann::json jsonObject = nlohmann::json::parse(jsonObj, nullptr, false);
+    if (jsonObject.is_null() or !jsonObject.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return;
+    }
     if (jsonObject.is_discarded()) {
         ANS_LOGE("Failed to parse json string.");
         return;

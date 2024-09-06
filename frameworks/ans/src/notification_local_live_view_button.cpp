@@ -106,7 +106,7 @@ bool NotificationLocalLiveViewButton::ToJson(nlohmann::json &jsonObject) const
     jsonObject["icons"] = iconsArr;
 
     nlohmann::json iconResourceArr = nlohmann::json::array();
-    for (const auto &resource : buttonIconsResource_) {
+    for (auto &resource : buttonIconsResource_) {
         if (!resource) {
             continue;
         }
