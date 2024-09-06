@@ -349,7 +349,7 @@ public:
      */
     virtual ErrCode GetSlotsByBundle(
         const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlot>> &slots) override;
-    
+
     /**
      * @brief Get the specified slot corresponding to the bundle.
      *
@@ -448,7 +448,7 @@ public:
      */
     virtual ErrCode Subscribe(
         const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
-    
+
     /**
      * @brief Subscribes notifications self.
      *
@@ -898,7 +898,7 @@ public:
      */
     ErrCode IsDistributedEnabledByBundle(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, bool &enabled) override;
-    
+
     /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
@@ -929,6 +929,15 @@ public:
      * @return Returns set result.
      */
     virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile object.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
@@ -1040,6 +1049,7 @@ private:
     ErrCode HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif

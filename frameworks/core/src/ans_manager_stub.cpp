@@ -445,6 +445,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetExcludeDates(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DONOTDISTURB_PROFILE): {
+            result = HandleGetDoNotDisturbProfile(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -2609,6 +2613,25 @@ ErrCode AnsManagerStub::HandleSetTargetDeviceStatus(MessageParcel &data, Message
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t profileId = data.ReadInt32();
+    sptr<NotificationDoNotDisturbProfile> profile = nullptr;
+    ErrCode result = GetDoNotDisturbProfile(profileId, profile);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("HandleGetDoNotDisturbProfile write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (result == ERR_OK) {
+        if (!reply.WriteParcelable(profile)) {
+            ANS_LOGE("HandleGetDoNotDisturbProfile write slot failed.");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
     }
     return ERR_OK;
 }

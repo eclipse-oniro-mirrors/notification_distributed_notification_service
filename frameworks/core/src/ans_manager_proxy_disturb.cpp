@@ -461,5 +461,45 @@ ErrCode AnsManagerProxy::IsNeedSilentInDoNotDisturbMode(const std::string &phone
 
     return result;
 }
+
+ErrCode AnsManagerProxy::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("GetDoNotDisturbProfile write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(id)) {
+        ANS_LOGE("GetDoNotDisturbProfile write id failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_DONOTDISTURB_PROFILE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("GetDoNotDisturbProfile transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("GetDoNotDisturbProfile read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (result != ERR_OK) {
+        ANS_LOGE("GetDoNotDisturbProfile result failed %{public}d.", result);
+        return result;
+    }
+
+    profile = reply.ReadParcelable<NotificationDoNotDisturbProfile>();
+    if (profile == nullptr) {
+        ANS_LOGE("GetDoNotDisturbProfile read data failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ERR_OK;
+}
 }  // namespace Notification
 }  // namespace OHOS
