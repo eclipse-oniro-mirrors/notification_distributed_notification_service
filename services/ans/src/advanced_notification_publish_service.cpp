@@ -51,6 +51,8 @@ constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 constexpr int32_t HOURS_IN_ONE_DAY = 24;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 constexpr int32_t RSS_PID = 3051;
+constexpr int32_t ANS_UID = 5523;
+constexpr int32_t PSS_UID = 7123;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 
@@ -67,7 +69,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
         ANS_LOGE("Failed to create EnabledNotificationCallbackData instance");
         return ERR_NO_MEMORY;
     }
-
+    SetSlotFlagsTrustlistsAsBundle(bundle);
     ErrCode result = ERR_OK;
     result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
     if (result == ERR_OK) {
@@ -292,8 +294,10 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
-        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if ((callingUid != NFC_UID && callingUid != PSS_UID && callingUid != PAC_UID) &&
+        (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER))) {
         std::string message = "no acl permission";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 2)
             .ErrorCode(ERR_ANS_PERMISSION_DENIED).NotificationId(notificationId);
@@ -789,6 +793,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     if (!CreateDialogManager()) {
         return ERROR_INTERNAL_ERROR;
     }
+
     result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken);
     if (result == ERR_OK) {
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
@@ -852,7 +857,8 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1057,7 +1063,9 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if ((callingUid != ANS_UID && callingUid != PAC_UID)
+        && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1442,7 +1450,8 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         std::string message = "no acl permission.";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 2)
             .ErrorCode(ERR_ANS_PERMISSION_DENIED);
@@ -1491,6 +1500,15 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
                 && record->deviceId.empty()
 #endif
                 ) {
+                auto notificationRequest = record->request;
+                if (!BundleManagerHelper::GetInstance()->IsSystemApp(bundle->GetUid()) &&
+                    notificationRequest->IsSystemLiveView()) {
+                    auto localLiveviewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
+                        notificationRequest->GetContent()->GetNotificationContent());
+                    if (localLiveviewContent->GetType() == 0) {
+                        continue;
+                    }
+                }
                 ProcForDeleteLiveView(record);
                 removeList.push_back(record);
             }
@@ -1590,11 +1608,6 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission is bogus.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -1609,7 +1622,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->request->GetSlotType() == slot->GetType())) {
-            if (((*it)->request->IsAgentNotification() && (*it)->request->IsSystemLiveView())) {
+            if (((*it)->request->GetAgentBundle() != nullptr && (*it)->request->IsSystemLiveView())) {
                 ANS_LOGI("Agent systemliveview no need remove.");
                 it++;
                 continue;

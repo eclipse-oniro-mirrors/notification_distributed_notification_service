@@ -207,9 +207,8 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         ANS_LOGE("sortingMap is null");
         return;
     }
-    ANS_LOGI("OnCanceled NotificationId = %{public}d", request->GetNotificationRequest().GetNotificationId());
-    ANS_LOGI("OnCanceled sortingMap size = %{public}zu", sortingMap->GetKey().size());
-    ANS_LOGI("OnCanceled deleteReason = %{public}d", deleteReason);
+    ANS_LOGI("OnCanceled NotificationKey = %{public}s. sortingMap size = %{public}zu. deleteReason = %{public}d",
+        request->GetKey().c_str(), sortingMap->GetKey().size(), deleteReason);
 
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
@@ -377,8 +376,10 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
     } else {
         ANS_LOGD("OnConsumed NotificGetAgentBundle = null");
     }
-    ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu",
-        request->GetKey().c_str(), sortingMap->GetKey().size());
+    auto notificationFlags = request->GetNotificationRequest().GetFlags();
+    ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu, notificationFlag = %{public}s",
+        request->GetKey().c_str(), sortingMap->GetKey().size(),
+        notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
     ANS_LOGD("OnConsumed Notification info is %{public}s", request->GetNotificationRequest().Dump().c_str());
     
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();

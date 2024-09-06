@@ -35,8 +35,8 @@ const bottomPopoverTypes = ['default', 'phone'];
 let storage = LocalStorage.getShared();
 
 @Extend(Button) function rightCustomizeButton() {
-  .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
-  .fontColor($r('sys.color.font_emphasize'))
+  .backgroundColor($r('app.color.dialog_bg'))
+  .fontColor($r('app.color.button_text'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
   .fontWeight(FontWeight.Medium)
   .height(Constants.BUTTON_HEIGHT)
@@ -47,8 +47,8 @@ let storage = LocalStorage.getShared();
 }
 
 @Extend(Button) function leftCustomizeButton() {
-  .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
-  .fontColor($r('sys.color.font_emphasize'))
+  .backgroundColor($r('app.color.dialog_bg'))
+  .fontColor($r('app.color.button_text'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
   .fontWeight(FontWeight.Medium)
   .height(Constants.BUTTON_HEIGHT)
@@ -61,7 +61,7 @@ let storage = LocalStorage.getShared();
 @Entry(storage)
 @Component
 struct NotificationDialogPage {
-  @State isUpdate: number = -1;
+  @StorageLink('isUpdate') isUpdate: number = -1;
 
   privacyDialogController: CustomDialogController = new CustomDialogController({
     builder: PermissionDialog({ isUpdate: $isUpdate }),
@@ -119,7 +119,7 @@ struct PermissionDialog {
                       Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
                     }
                     .fontSize($r('sys.float.ohos_id_text_size_headline8'))
-                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .fontColor($r('app.color.text_primary'))
                     .fontWeight(FontWeight.Bold)
                     .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
                     .margin({
@@ -138,7 +138,7 @@ struct PermissionDialog {
                     }
                     .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
                     .fontWeight(FontWeight.Regular)
-                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .fontColor($r('app.color.text_primary'))
                     .lineHeight(Constants.DIALOG_DESP_LINE_HEIGHT)
                     .margin({
                       top: Constants.DIALOG_DESP_MARGIN_TOP,
@@ -159,7 +159,7 @@ struct PermissionDialog {
                   })
                   .leftCustomizeButton()
                 Divider()
-                  .color($r('sys.color.comp_divider'))
+                  .color($r('app.color.comp_divider'))
                   .vertical(true)
                   .height(Constants.DIVIDER_HEIGHT)
                   .strokeWidth(Constants.DIVIDER_WIDTH)
@@ -172,7 +172,7 @@ struct PermissionDialog {
               .margin({ left: Constants.BUTTON_MARGIN_LEFT, right: Constants.BUTTON_MARGIN_RIGHT })
             }
           }
-          .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
+          .backgroundColor($r('app.color.dialog_bg'))
           .borderRadius(Constants.DIALOG_PRIVACY_BORDER_RADIUS)
           .width(Constants.FULL_WIDTH)
           .padding({ bottom: Constants.DIALOG_PADDING_BOTTOM })

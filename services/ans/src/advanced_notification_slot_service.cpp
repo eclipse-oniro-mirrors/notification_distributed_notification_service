@@ -36,6 +36,7 @@
 #include "advanced_notification_inline.cpp"
 #include "notification_extension_wrapper.h"
 #include "notification_analytics_util.h"
+#include "notification_trust_list.h"
 
 namespace OHOS {
 namespace Notification {
@@ -420,7 +421,9 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if ((callingUid != NFC_UID && callingUid != PAC_UID)
+        && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -474,7 +477,9 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
     if (result == ERR_OK) {
         if (slot != nullptr &&
             (bundleOption->GetBundleName() == CALL_UI_BUNDLE || slot->GetEnable() ||
-            (record->request->IsAgentNotification() && record->request->IsSystemLiveView()))) {
+            (record->request->GetAgentBundle() != nullptr && record->request->IsSystemLiveView()) ||
+            (slot->GetType() == NotificationConstant::SlotType::LIVE_VIEW &&
+            DelayedSingleton<NotificationTrustList>::GetInstance()->IsLiveViewTrtust(bundleOption->GetBundleName())))) {
             record->slot = slot;
         } else {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;

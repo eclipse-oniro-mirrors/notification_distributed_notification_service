@@ -30,7 +30,6 @@
 #include "ans_log_wrapper.h"
 #include "ans_watchdog.h"
 #include "ans_permission_def.h"
-#include "bundle_manager_helper.h"
 #include "errors.h"
 #include "notification_extension_wrapper.h"
 #include "notification_record.h"
@@ -89,6 +88,7 @@ constexpr int32_t UI_HALF = 2;
 constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
 constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
+constexpr int32_t RSS_UID = 3051;
 
 const std::string MMS_BUNDLE_NAME = "com.ohos.mms";
 const std::string CONTACTS_BUNDLE_NAME = "com.ohos.contacts";
@@ -301,7 +301,8 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnSubscriberAdd, this, std::placeholders::_1);
     NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
 
-    std::function<void()> recoverFunc = std::bind(&AdvancedNotificationService::RecoverLiveViewFromDb, this);
+    std::function<void()> recoverFunc = std::bind(
+        &AdvancedNotificationService::RecoverLiveViewFromDb, this, SUBSCRIBE_USER_INIT);
     notificationSvrQueue_->submit(recoverFunc);
 
     ISystemEvent iSystemEvent = {
@@ -1325,8 +1326,9 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission failed.");
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("AccessTokenHelper::CheckPermission failed.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 

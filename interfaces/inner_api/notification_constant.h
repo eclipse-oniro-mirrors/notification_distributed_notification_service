@@ -65,6 +65,7 @@ public:
         LIVE_VIEW,              // the notification type is live view
         CUSTOMER_SERVICE,       // the notification type is customer service
         EMERGENCY_INFORMATION,  // the notification type is emergency information
+        ILLEGAL_TYPE,           // invalid type,it is used as the upper limit of the enumerated value
     };
 
     enum ReminderFlag {
@@ -93,7 +94,12 @@ public:
         /**
          * notifications are not displayed on the lock screen.
          */
-        SECRET
+        SECRET,
+        /**
+         * invalid type
+         * It is used as the upper limit of the enumerated value.
+         */
+        ILLEGAL_TYPE
     };
 
     enum class DoNotDisturbType {

@@ -17,6 +17,7 @@
 namespace OHOS {
 namespace Notification {
 
+constexpr static uint32_t LIVE_VIEW_INDEX = 0;
 constexpr static uint32_t REMINDER_LIST_INDEX = 2;
 NotificationTrustList::NotificationTrustList()
 {
@@ -45,6 +46,9 @@ void NotificationTrustList::GetCcmPrivilegesConfig()
     }
     for (auto &affect : affects.items()) {
         std::string affects_value = affect.value().get<std::string>();
+        if (affects_value[LIVE_VIEW_INDEX] != PRIVILEGES_BANNER_NOT_ALLOW) {
+            liveViewTrustlist_.insert(affect.key());
+        }
         if (affects_value.length() >= PRIVILEGES_CONFIG_MIN_LEN &&
             affects_value[PRIVILEGES_BANNER_INDEX] != PRIVILEGES_BANNER_NOT_ALLOW) {
             notificationSlotFlagsTrustlist_.insert(affect.key());
@@ -55,6 +59,11 @@ void NotificationTrustList::GetCcmPrivilegesConfig()
         }
     }
     return;
+}
+
+bool NotificationTrustList::IsLiveViewTrtust(const std::string bundleName)
+{
+    return liveViewTrustlist_.count(bundleName);
 }
 
 bool NotificationTrustList::IsReminderTrustList(const std::string& bundleName)

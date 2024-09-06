@@ -365,9 +365,6 @@ public:
   
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
-    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlot> &slot, const int reason);
-
     /**
      * @brief Delete notification based on key.
      *
@@ -1100,7 +1097,7 @@ public:
     /**
     * @brief Recover LiveView from DB.
     */
-    void RecoverLiveViewFromDb();
+    void RecoverLiveViewFromDb(int32_t userId = -1);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
@@ -1183,6 +1180,8 @@ private:
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
     ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationSlot> &slot, const int reason);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
     static sptr<NotificationBundleOption> GenerateBundleOption();
@@ -1286,7 +1285,8 @@ private:
         std::shared_ptr<NotificationRecord> record);
     static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
     static int32_t GetNotificationRequestFromDb(const std::string &key, NotificationRequestDb &requestDb);
-    static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests);
+    static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests,
+        int32_t userId = -1);
     static int32_t DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId);
     void CancelTimer(uint64_t timerId);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
@@ -1311,7 +1311,8 @@ private:
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
     void FillActionButtons(const sptr<NotificationRequest> &request);
-    ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record,
+        const sptr<NotificationBundleOption> &bundleOption);
     ErrCode FillRequestByKeys(const sptr<NotificationRequest> &oldRequest,
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest);
     ErrCode IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,

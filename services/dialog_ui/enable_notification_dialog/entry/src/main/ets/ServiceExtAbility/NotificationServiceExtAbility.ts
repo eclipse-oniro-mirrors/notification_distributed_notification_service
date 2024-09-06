@@ -141,7 +141,7 @@ export class EnableNotificationDialog {
         'dialog': this,
         'session': session
       });
-
+      
       let hasConfig = true;
       try {
         let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);

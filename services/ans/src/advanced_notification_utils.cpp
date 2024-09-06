@@ -259,29 +259,13 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
 }
 
 ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
-    const std::shared_ptr<NotificationRecord> &record)
+    const std::shared_ptr<NotificationRecord> &record, const sptr<NotificationBundleOption> &bundleOption)
 {
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            return ERR_OK;
-        }
-
-        ANS_LOGD("Get live view by filter failed because check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    std::string bundle = GetClientBundleName();
-    if (bundle.empty()) {
-        ANS_LOGD("Get live view by filter failed because bundle name is empty.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    if (uid == record->bundleOption->GetUid() && bundle == record->bundleOption->GetBundleName()) {
+    if (bundleOption->GetUid() == record->bundleOption->GetUid() &&
+        bundleOption->GetBundleName() == record->bundleOption->GetBundleName()) {
         return ERR_OK;
     }
-
-    ANS_LOGD("Get live view by filter failed because no permission.");
+    ANS_LOGE("Get live view by filter failed because no permission.");
     return ERR_ANS_PERMISSION_DENIED;
 }
 
@@ -290,15 +274,24 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    // get other bundle notification need controller permission
+    if (bundle->GetUid() == IPCSkeleton::GetCallingUid()) {
+        ANS_LOGI("Get self notification uid: %{public}d, curUid: %{public}d.",
+            bundle->GetUid(), IPCSkeleton::GetCallingUid());
+    } else {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            ANS_LOGW("Get live view by filter failed because check permission is false.");
+            return ERR_ANS_PERMISSION_DENIED;
+        }
+    }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
-    }
-
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
@@ -309,7 +302,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
             return;
         }
-        result = IsAllowedGetNotificationByFilter(record);
+        result = IsAllowedGetNotificationByFilter(record, bundle);
         if (result != ERR_OK) {
             return;
         }
@@ -644,36 +637,22 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         return;
     }
     auto bundleUpdate = [bundleOption, bundleInfo, this]() {
-        bool hasPopped = false;
-        auto errCode = NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption, hasPopped);
+        bool enabled = false;
+        auto errCode = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
+            bundleOption, enabled);
+        if (bundleOption->GetBundleName().compare("com.ohos.mms") == 0) {
+            uint32_t slotFlags = 63;
+            auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
+                bundleOption, slotFlags);
+            if (ret != ERR_OK) {
+                ANS_LOGE("Failed to get slotflags for bundle, use default slotflags.");
+            }
+            UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
+        }
         if (errCode != ERR_OK) {
             ANS_LOGD("Get notification user option fail, need to insert data");
-            errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-                bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
-            if (errCode != ERR_OK) {
-                ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
-            }
-            SetSlotFlagsTrustlistsAsBundle(bundleOption);
-            errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
-            if (errCode != ERR_OK) {
-                ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
-            }
+            OnBundleDataAdd(bundleOption);
             return;
-        }
-
-        if (hasPopped) {
-            ANS_LOGI("The user has made changes, subject to the user's selection");
-            return;
-        }
-
-        errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-            bundleOption, bundleInfo.applicationInfo.allowEnableNotification);
-        if (errCode != ERR_OK) {
-            ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
-        }
-        errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
-        if (errCode != ERR_OK) {
-            ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
         }
     };
 

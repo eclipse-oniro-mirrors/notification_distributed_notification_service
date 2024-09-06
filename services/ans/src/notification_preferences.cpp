@@ -72,9 +72,6 @@ ErrCode NotificationPreferences::AddNotificationSlots(
     for (auto slot : slots) {
         result = CheckSlotForCreateSlot(bundleOption, slot, preferencesInfo);
         if (result != ERR_OK) {
-            message.SlotType(static_cast<uint32_t>(slot->GetType()));
-            message.Message("Check slot for create failed." + std::to_string(result));
-            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return result;
         }
     }
@@ -926,12 +923,12 @@ ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &devic
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
-void NotificationPreferences::InitSettingFromDisturbDB()
+void NotificationPreferences::InitSettingFromDisturbDB(int32_t userId)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGI("%{public}s userId is %{public}d", __FUNCTION__, userId);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferncesDB_ != nullptr) {
-        preferncesDB_->ParseFromDisturbeDB(preferencesInfo_);
+        preferncesDB_->ParseFromDisturbeDB(preferencesInfo_, userId);
     }
 }
 
