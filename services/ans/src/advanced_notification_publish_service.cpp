@@ -62,7 +62,6 @@ constexpr int32_t ANS_UID = 5523;
 constexpr int32_t PSS_UID = 7123;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
-static constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
 constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
 
