@@ -886,6 +886,30 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!GetActiveUserId(userId)) {
+        ANS_LOGW("No active user found.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    ErrCode result = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(id, userId, profile);
+    if (result != ERR_OK) {
+        ANS_LOGE("profile failed id: %{public}d, userid: %{public}d", id, userId);
+    }
+    return result;
+}
+
 ErrCode AdvancedNotificationService::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

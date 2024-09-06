@@ -572,6 +572,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject> &swingCallback) override
     {
@@ -841,7 +846,7 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
     ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
- 
+
 /*
  * @tc.name: PublishNotification_0001
  * @tc.desc: PublishNotification
