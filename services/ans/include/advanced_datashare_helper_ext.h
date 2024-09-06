@@ -27,6 +27,7 @@ namespace Notification {
 namespace {
 constexpr const char *KEY_FOCUS_MODE_ENABLE_EXT = "focus_mode_enable";
 constexpr const char *KEY_FOCUS_MODE_PROFILE_EXT = "focus_mode_profile";
+constexpr const char *KEY_FOCUS_MODE_CALL_MESSAGE_POLICY_EXT = "focus_mode_call_message_policy";
 } // namespace
 
 class AdvancedDatashareHelperExt : DelayedSingleton<AdvancedDatashareHelperExt> {

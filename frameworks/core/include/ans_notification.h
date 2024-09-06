@@ -686,6 +686,14 @@ public:
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport);
 
     /**
+     * @brief Is coming call need silent in do not disturb mode.
+     *
+     * @param phoneNumber the calling format number.
+     * @return Returns silent in do not disturb mode.
+     */
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType);
+
+    /**
      * @brief Checks if the device supports distributed notification.
      *
      * @param enabled True if the device supports distributed notification; false otherwise.

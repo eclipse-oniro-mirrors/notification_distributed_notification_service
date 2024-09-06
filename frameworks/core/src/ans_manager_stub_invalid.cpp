@@ -400,6 +400,12 @@ ErrCode AnsManagerStub::DoesSupportDoNotDisturbMode(bool &doesSupport)
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType)
+{
+    ANS_LOGE("AnsManagerStub::IsNeedSilentInDoNotDisturbMode called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::IsDistributedEnabled(bool &enabled)
 {
     ANS_LOGE("AnsManagerStub::IsDistributedEnabled called!");

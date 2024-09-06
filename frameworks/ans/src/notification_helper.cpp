@@ -370,6 +370,11 @@ ErrCode NotificationHelper::DoesSupportDoNotDisturbMode(bool &doesSupport)
     return DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(doesSupport);
 }
 
+ErrCode NotificationHelper::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+}
+
 ErrCode NotificationHelper::IsDistributedEnabled(bool &enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(enabled);

@@ -1189,5 +1189,36 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279002, Function | SmallTest | Level1)
     ASSERT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
 }
 
+/**
+ * @tc.number    : AnsBranchTest_285000
+ * @tc.name      : IsNeedSilentInDoNotDisturbMode_1000
+ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_NON_SYSTEM_APP.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_285000, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_286000
+ * @tc.name      : IsNeedSilentInDoNotDisturbMode_2000
+ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_PERMISSION_DENIED.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
+}
 }  // namespace Notification
 }  // namespace OHOS
