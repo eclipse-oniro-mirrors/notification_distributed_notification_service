@@ -25,13 +25,9 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
     napi_ref callback = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
@@ -40,10 +36,6 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
     };
     if (!asynccallbackinfo) {
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
@@ -115,13 +107,9 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
     napi_ref callback = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
@@ -130,10 +118,6 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
     };
     if (!asynccallbackinfo) {
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }

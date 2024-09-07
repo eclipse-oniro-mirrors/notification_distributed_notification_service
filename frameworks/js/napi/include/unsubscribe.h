@@ -25,12 +25,12 @@ using namespace OHOS::Notification;
 struct AsyncCallbackInfoUnsubscribe {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     CallbackPromiseInfo info;
 };
 
 struct ParametersInfoUnsubscribe {
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     napi_ref callback = nullptr;
 };
 
