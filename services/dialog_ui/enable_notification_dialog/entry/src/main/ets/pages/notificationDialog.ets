@@ -329,6 +329,7 @@ struct PermissionDialog {
       console.error(TAG, `NotificationDialog enable error, code is ${err?.code}`);
       await this.dialog?.destroyException();
     } finally {
+      await this.dialog?.subWindow?.destroyWindow();
       this.session?.terminateSelf();
     }
   }
