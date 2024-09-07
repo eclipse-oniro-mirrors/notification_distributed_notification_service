@@ -364,7 +364,7 @@ public:
     ErrCode RemoveAllNotificationsForDisable(const sptr<NotificationBundleOption> &bundleOption);
 
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
-  
+
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
     /**
@@ -923,7 +923,7 @@ public:
 
     ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
         const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
-        
+
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishPreparedNotification(const sptr<NotificationRequest> &request,
@@ -1128,6 +1128,15 @@ public:
      * @brief Whether reminders are allowed.
      */
     bool AllowUseReminder(const std::string& bundleName);
+
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile object.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
 
 protected:
     /**

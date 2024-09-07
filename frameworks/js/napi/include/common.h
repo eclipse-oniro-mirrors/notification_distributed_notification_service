@@ -1700,7 +1700,7 @@ public:
          * @return Returns a napi value with specified error object for callback
          */
     static napi_value CreateErrorValue(napi_env env, int32_t errCode, std::string &msg);
-    
+
     /**
      * @brief Sets a js object by specified BadgeNumberCallbackData object
      *
@@ -1722,6 +1722,19 @@ public:
      */
     static napi_value GetNotificationBundleOption(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
+    /**
+     * @brief Sets a js object by specified NotificationDoNotDisturbProfile object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param date Indicates a NotificationDoNotDisturbProfile object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetDoNotDisturbProfile(
+        const napi_env &env, const NotificationDoNotDisturbProfile &data, napi_value &result);
+
+    static napi_value SetBundleOption(
+        const napi_env &env, const NotificationBundleOption &bundleInfo, napi_value &result);
     static bool IsValidRemoveReason(int32_t reasonType);
     static void NapiThrow(napi_env env, int32_t errCode);
     static void NapiThrow(napi_env env, int32_t errCode, std::string &msg);
