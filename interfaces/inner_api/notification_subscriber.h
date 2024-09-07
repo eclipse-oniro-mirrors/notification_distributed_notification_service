@@ -172,9 +172,12 @@ private:
 
         sptr<AnsManagerInterface> GetAnsManagerProxy();
 
+        void OnSubscriberDestory();
+
     public:
         NotificationSubscriber &subscriber_;
         sptr<DeathRecipient> recipient_ {nullptr};
+        std::atomic_bool isSubscriberDestory_ {false};
     };
 
 private:
