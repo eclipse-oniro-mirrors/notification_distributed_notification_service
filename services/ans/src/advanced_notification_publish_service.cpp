@@ -77,7 +77,7 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
         ANS_LOGE("Failed to create EnabledNotificationCallbackData instance");
         return ERR_NO_MEMORY;
     }
-
+    SetSlotFlagsTrustlistsAsBundle(bundle);
     ErrCode result = ERR_OK;
     result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
     if (result == ERR_OK) {
@@ -1021,7 +1021,6 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     if (result == ERR_OK && allowed) {
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            SetSlotFlagsTrustlistsAsBundle(bundleOption);
             result = ERR_OK;
             // FA model app can publish notification without user confirm
             allowed = CheckApiCompatibility(bundleOption);
@@ -1456,7 +1455,8 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         std::string message = "no acl permission.";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 2)
             .ErrorCode(ERR_ANS_PERMISSION_DENIED);
@@ -2149,7 +2149,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    bool isAgentController = AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     int32_t uid = request->GetCreatorUid();
     if (request->GetOwnerUid() != DEFAULT_UID) {

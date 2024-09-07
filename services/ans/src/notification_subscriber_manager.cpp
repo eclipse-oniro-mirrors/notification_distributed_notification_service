@@ -420,7 +420,6 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
 
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1).Checkfailed(false);
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
@@ -442,9 +441,6 @@ void NotificationSubscriberManager::NotifyConsumedInner(
             record->subscriber->OnConsumed(notification, notificationMap);
         }
     }
-    message.Message(notification->GetKey() + " " + std::to_string(notification->GetUserId()) +
-        " size " + std::to_string(subscriberRecordList_.size()));
-    NotificationAnalyticsUtil::ReportPublishFailedEvent(notification->GetNotificationRequestPoint(), message);
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -559,7 +555,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         notificationKeys.append(notification->GetKey()).append("-");
     }
     ANS_LOGI("CancelNotification key = %{public}s", notificationKeys.c_str());
-    
+
     for (auto record : subscriberRecordList_) {
         if (record == nullptr) {
             continue;

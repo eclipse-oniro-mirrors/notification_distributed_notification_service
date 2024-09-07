@@ -122,7 +122,7 @@ std::string HaMetaMessage::Build() const
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
-    CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
+    return;
 }
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
@@ -139,7 +139,6 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationR
             message = message.AgentBundleName(agentBundleName);
         }
     }
-    CommonNotificationEvent(request, DELETE_ERROR_EVENT_CODE, message);
 }
 
 void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationRequest>& request,
@@ -176,6 +175,7 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
         static_cast<NotificationConstant::SlotType>(request->GetSlotType()), slotType);
 
     want.SetParam("id", request->GetNotificationId());
+    want.SetParam("uid", request->GetOwnerUid());
     want.SetParam("slotType", static_cast<int32_t>(slotType));
     want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
     want.SetParam("extraInfo", extraContent);
@@ -199,7 +199,8 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
 {
     std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
     std::string reason = std::to_string(message.sceneId_) + MESSAGE_DELIMITER +
-        std::to_string(message.branchId_) + MESSAGE_DELIMITER + message.GetMessage();
+        std::to_string(message.branchId_) + std::to_string(message.notificationId_) +
+        MESSAGE_DELIMITER + message.GetMessage();
     extraInfo->SetParam("reason", AAFwk::String::Box(reason));
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
     std::string extraContent = wWrapper.ToString();
@@ -226,8 +227,6 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
     want.SetParam("typeCode", message.typeCode_);
     want.SetParam("id", message.notificationId_);
     want.SetParam("extraInfo", extraContent);
-    IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
-        want, DELETE_ERROR_EVENT_CODE, message.Build()));
 }
 
 void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,

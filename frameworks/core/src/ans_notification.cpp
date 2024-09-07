@@ -1838,6 +1838,16 @@ bool AnsNotification::IsValidDelayTime(const NotificationRequest &request)  cons
     return request.GetPublishDelayTime() <= MAX_PUBLISH_DELAY_TIME;
 }
 
+ErrCode AnsNotification::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetDoNotDisturbProfile(id, profile);
+}
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 ErrCode AnsNotification::RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc)
 {

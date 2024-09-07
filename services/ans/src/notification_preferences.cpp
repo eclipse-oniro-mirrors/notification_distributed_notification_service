@@ -39,6 +39,11 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
 NotificationPreferences::NotificationPreferences()
 {
     preferncesDB_ = std::make_unique<NotificationPreferencesDatabase>();
+    if (preferncesDB_ == nullptr) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_1)
+           .Message("preferncesDB is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     InitSettingFromDisturbDB();
 }
 
@@ -614,7 +619,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbProfile(
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (!preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_NO_PROFILE_TEMPLATE;
     }
     return ERR_OK;
 }

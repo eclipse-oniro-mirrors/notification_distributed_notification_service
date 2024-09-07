@@ -46,6 +46,7 @@ void NotificationTimerInfo::OnTrigger()
         ANS_LOGD("ffrt enter!");
         if (callBack_ != nullptr) {
             callBack_();
+            callBack_ = nullptr;
         }
     }));
     notificationSvrQueue_->wait(handler);

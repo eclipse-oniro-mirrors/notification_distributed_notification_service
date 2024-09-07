@@ -272,10 +272,18 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (isSubsystem || AccessTokenHelper::IsSystemApp()) {
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    // get other bundle notification need controller permission
+    if (bundle->GetUid() == IPCSkeleton::GetCallingUid()) {
+        ANS_LOGI("Get self notification uid: %{public}d, curUid: %{public}d.",
+            bundle->GetUid(), IPCSkeleton::GetCallingUid());
+    } else {
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            ANS_LOGE("Get live view by filter failed because check permission is false.");
+            ANS_LOGW("Get live view by filter failed because check permission is false.");
             return ERR_ANS_PERMISSION_DENIED;
         }
     }
@@ -283,11 +291,6 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
-    }
-
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
@@ -637,15 +640,6 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         bool enabled = false;
         auto errCode = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
             bundleOption, enabled);
-        if (bundleOption->GetBundleName().compare("com.ohos.mms") == 0) {
-            uint32_t slotFlags = 63;
-            auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
-                bundleOption, slotFlags);
-            if (ret != ERR_OK) {
-                ANS_LOGE("Failed to get slotflags for bundle, use default slotflags.");
-            }
-            UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
-        }
         if (errCode != ERR_OK) {
             ANS_LOGD("Get notification user option fail, need to insert data");
             OnBundleDataAdd(bundleOption);
@@ -698,10 +692,12 @@ ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid,
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
     for (auto& notification : notificationList_) {
-        if (notification->request != nullptr && notification->request->GetCreatorUid() == uid &&
-                notification->request->GetSlotType()== slotType &&
-                notification->request->GetNotificationType() == contentType) {
+        if (notification->request != nullptr && notification->request->GetSlotType()== slotType &&
+            notification->request->GetNotificationType() == contentType) {
+            if (notification->request->GetCreatorUid() == uid || (notification->request->GetAgentBundle() != nullptr &&
+                notification->request->GetAgentBundle()->GetUid() == uid)) {
                 recordList.emplace_back(notification);
+            }
         }
     }
     if (recordList.empty()) {
@@ -888,6 +884,30 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
         }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!GetActiveUserId(userId)) {
+        ANS_LOGW("No active user found.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    ErrCode result = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(id, userId, profile);
+    if (result != ERR_OK) {
+        ANS_LOGE("profile failed id: %{public}d, userid: %{public}d", id, userId);
+    }
+    return result;
 }
 
 ErrCode AdvancedNotificationService::DoesSupportDoNotDisturbMode(bool &doesSupport)
@@ -1783,6 +1803,19 @@ void AdvancedNotificationService::InitNotificationEnableList()
         std::vector<AppExecFwk::BundleInfo> bundleInfos = GetBundlesOfActiveUser();
         bool notificationEnable = false;
         for (const auto &bundleInfo : bundleInfos) {
+            if (bundleInfo.applicationInfo.bundleName.compare("com.ohos.mms") == 0) {
+                uint32_t slotFlags = 63;
+                sptr<NotificationBundleOption> mmsBundle = new (std::nothrow) NotificationBundleOption(
+                bundleInfo.applicationInfo.bundleName, bundleInfo.uid);
+                if (mmsBundle == nullptr) {
+                    ANS_LOGE("New bundle option obj error! bundlename:%{public}s",
+                        bundleInfo.applicationInfo.bundleName.c_str());
+                    continue;
+                }
+                NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
+                    mmsBundle, slotFlags);
+                UpdateSlotReminderModeBySlotFlags(mmsBundle, slotFlags);
+            }
             // Currently only the input from the whitelist is written
             if (!bundleInfo.applicationInfo.allowEnableNotification) {
                 continue;

@@ -300,6 +300,11 @@ int64_t NotificationRequest::GetArchiveDeadLine() const
 void NotificationRequest::SetLittleIcon(const std::shared_ptr<Media::PixelMap> &littleIcon)
 {
     littleIcon_ = littleIcon;
+    if (littleIcon != nullptr) {
+        Media::ImageInfo outImageInfo;
+        littleIcon->GetImageInfo(outImageInfo);
+        littleIconType_ = outImageInfo.encodedFormat;
+    }
 }
 
 const std::shared_ptr<Media::PixelMap> NotificationRequest::GetLittleIcon() const
@@ -1224,10 +1229,36 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        std::string littleIconString = AnsImageUtil::PackImage(littleIcon_);
-        if (!parcel.WriteString(littleIconString)) {
-            ANS_LOGE("Failed to write littleIcon");
+        if (!parcel.WriteString(littleIconType_)) {
+            ANS_LOGE("Failed to write littleIconType");
             return false;
+        }
+
+        bool isUnPackImage = true;
+        std::string littleIconString;
+
+        if (!littleIconType_.empty()) {
+            littleIconString = AnsImageUtil::PackImage(littleIcon_, littleIconType_);
+        }
+
+        if (isUnPackImage && !littleIconString.empty()) {
+            isUnPackImage = false;
+        }
+
+        if (!parcel.WriteBool(isUnPackImage)) {
+            return false;
+        }
+        ANS_LOGD("littleIcon_ : %{public}d, %{public}s", isUnPackImage, littleIconType_.c_str());
+        if (isUnPackImage) {
+            if (!parcel.WriteParcelable(littleIcon_.get())) {
+                ANS_LOGE("Failed to write littleIcon");
+                return false;
+            }
+        } else {
+            if (!parcel.WriteString(littleIconString)) {
+                ANS_LOGE("Failed to write littleIcon");
+                return false;
+            }
         }
     }
 
@@ -1238,8 +1269,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        std::string bigIconString = AnsImageUtil::PackImage(bigIcon_);
-        if (!parcel.WriteString(bigIconString)) {
+        if (!parcel.WriteParcelable(bigIcon_.get())) {
             ANS_LOGE("Failed to write bigIcon");
             return false;
         }
@@ -1252,8 +1282,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        std::string overlayIconString = AnsImageUtil::PackImage(overlayIcon_);
-        if (!parcel.WriteString(overlayIconString)) {
+        if (!parcel.WriteParcelable(overlayIcon_.get())) {
             ANS_LOGE("Failed to write overlayIcon");
             return false;
         }
@@ -1599,8 +1628,15 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        std::string littleIconString = parcel.ReadString();
-        littleIcon_ = AnsImageUtil::UnPackImage(littleIconString);
+        littleIconType_ = parcel.ReadString();
+        bool isUnPackImage = parcel.ReadBool();
+        if (isUnPackImage) {
+            littleIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+        } else {
+            std::string littleIconString = parcel.ReadString();
+            littleIcon_ = AnsImageUtil::UnPackImage(littleIconString, littleIconType_);
+        }
+
         if (!littleIcon_) {
             ANS_LOGE("Failed to read littleIcon");
             return false;
@@ -1609,8 +1645,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        std::string bigIconString = parcel.ReadString();
-        bigIcon_ = AnsImageUtil::UnPackImage(bigIconString);
+        bigIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!bigIcon_) {
             ANS_LOGE("Failed to read bigIcon");
             return false;
@@ -1619,8 +1654,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        std::string overlayIconString = parcel.ReadString();
-        overlayIcon_ = AnsImageUtil::UnPackImage(overlayIconString);
+        overlayIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!overlayIcon_) {
             ANS_LOGE("Failed to read overlayIcon");
             return false;
@@ -1916,6 +1950,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->publishDelayTime_ = other.publishDelayTime_;
+    this->littleIconType_ = other.littleIconType_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -1954,7 +1989,10 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
     }
     jsonObject["extraInfo"] = extraInfoStr;
 
-    jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_);
+    jsonObject["smallIconType"] = littleIconType_;
+    if (!littleIconType_.empty()) {
+        jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_, littleIconType_);
+    }
     jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
     jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";
 
@@ -2200,9 +2238,14 @@ void NotificationRequest::ConvertJsonToPixelMap(NotificationRequest *target, con
 
     const auto &jsonEnd = jsonObject.cend();
 
+    if (jsonObject.find("smallIconType") != jsonEnd && jsonObject.at("smallIconType").is_string()) {
+        std::string littleIconType = jsonObject.at("smallIconType").get<std::string>();
+        target->littleIconType_ = littleIconType;
+    }
+
     if (jsonObject.find("smallIcon") != jsonEnd && jsonObject.at("smallIcon").is_string()) {
-        auto littleIconStr    = jsonObject.at("smallIcon").get<std::string>();
-        target->littleIcon_ = AnsImageUtil::UnPackImage(littleIconStr);
+        auto littleIconStr = jsonObject.at("smallIcon").get<std::string>();
+        target->littleIcon_ = AnsImageUtil::UnPackImage(littleIconStr, target->littleIconType_);
     }
 
     if (jsonObject.find("largeIcon") != jsonEnd && jsonObject.at("largeIcon").is_string()) {
@@ -2728,6 +2771,11 @@ void NotificationRequest::SetUpdateByOwnerAllowed(bool isUpdateByOwnerAllowed)
 bool NotificationRequest::IsUpdateByOwnerAllowed() const
 {
     return isUpdateByOwnerAllowed_;
+}
+
+const std::string NotificationRequest::GetLittleIconType() const
+{
+    return littleIconType_;
 }
 }  // namespace Notification
 }  // namespace OHOS

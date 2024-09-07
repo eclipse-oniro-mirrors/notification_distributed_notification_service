@@ -89,6 +89,7 @@ constexpr int32_t UI_HALF = 2;
 constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
 constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
+constexpr int32_t RSS_UID = 3051;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
@@ -611,7 +612,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
-    bool isAgentController = AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
@@ -835,6 +838,12 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
         auto oldRecord = GetFromNotificationList(record->notification->GetKey());
         result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
         if (result != ERR_OK) {
+            bool liveView = record->request->IsCommonLiveView();
+            int32_t slotType = liveView ? NotificationConstant::SlotType::LIVE_VIEW :
+                NotificationConstant::SlotType::ILLEGAL_TYPE;
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_5)
+                .ErrorCode(result).SlotType(slotType).Message("CheckNotificationRequest failed: ");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             ANS_LOGE("Notification(key %{public}s) isn't ready on publish failed with %{public}d.",
                 record->notification->GetKey().c_str(), result);
             return result;
@@ -950,6 +959,11 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     RemoveExpired(flowControlUpdateTimestampList_, now);
     if (flowControlUpdateTimestampList_.size() >= MAX_UPDATE_NUM_PERSECOND) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_4)
+            .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("UpdateInNotificationList failed");
+        if (record != nullptr) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+        }
         return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
     }
 
@@ -1199,9 +1213,6 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
         }
     }
     std::string message = "notification not exist";
-    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 5)
-        .ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS).NotificationId(notificationId);
-    ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::DEFAULT_REASON_DELETE, message);
     ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
@@ -1237,9 +1248,6 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
     }
     RemoveFromDelayedNotificationList(key);
     std::string message = "notification not exist. key:" + key + ".";
-    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 8)
-        .ErrorCode(ERR_ANS_INVALID_BUNDLE);
-    ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
     ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
@@ -1330,8 +1338,9 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("AccessTokenHelper::CheckPermission failed.");
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("AccessTokenHelper::CheckPermission failed.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1463,6 +1472,11 @@ ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<No
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     RemoveExpired(flowControlPublishTimestampList_, now);
     if (flowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_3)
+            .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("PublishFlowControl failed");
+        if (record != nullptr) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+        }
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
 
@@ -2006,6 +2020,11 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
 
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), nullptr);
+    if (result != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
+            .ErrorCode(result).Message("Push OnCheckNotification failed.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+    }
     return result;
 }
 
