@@ -5428,5 +5428,37 @@ HWTEST_F(AnsManagerStubTest, RegisterSwingCallback_0200, TestSize.Level1)
     EXPECT_EQ(res, ERR_ANS_PARCELABLE_FAILED);
 }
 #endif
+
+/**
+ * @tc.name: HandleIsNeedSilentInDoNotDisturbMode01
+ * @tc.desc: Test HandleIsNeedSilentInDoNotDisturbMode01 succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleIsNeedSilentInDoNotDisturbMode01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::IS_NEED_SILENT_IN_DO_NOT_DISTURB_MODE);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+}
+
+/**
+ * @tc.name: IsNeedSilentInDoNotDisturbMode01
+ * @tc.desc: Test IsNeedSilentInDoNotDisturbMode return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, IsNeedSilentInDoNotDisturbMode01, Function | SmallTest | Level1)
+{
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+
+    ErrCode result = ansManagerStub_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
 }
 }

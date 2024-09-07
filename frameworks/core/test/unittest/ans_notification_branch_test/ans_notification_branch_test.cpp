@@ -337,6 +337,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;

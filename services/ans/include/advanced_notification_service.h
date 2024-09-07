@@ -599,6 +599,14 @@ public:
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override;
 
     /**
+     * @brief Is coming call need silent in do not disturb mode.
+     *
+     * @param phoneNumber the calling format number.
+     * @return Returns silent in do not disturb mode.
+     */
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override;
+
+    /**
      * @brief Cancel notifications according to group.
      *
      * @param groupName Indicates the group name.
@@ -1150,6 +1158,14 @@ private:
         FINISH
     };
 
+    enum ContactPolicy {
+        FORBID_EVERYONE = 1,
+        ALLOW_EVERYONE = 2,
+        ALLOW_EXISTING_CONTACTS = 3,
+        ALLOW_FAVORITE_CONTACTS = 4,
+        ALLOW_SPECIFIED_CONTACTS = 5,
+    };
+
     AdvancedNotificationService();
 
     void StartFilters();
@@ -1356,6 +1372,7 @@ private:
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
+    ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

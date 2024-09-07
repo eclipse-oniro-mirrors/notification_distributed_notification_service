@@ -8080,5 +8080,113 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveDoNotDisturbProfiles_0300, TestSize.Leve
     EXPECT_NE(ERR_OK, res);
     EXPECT_NE(ERR_ANS_PARCELABLE_FAILED, res);
 }
+
+/*
+ * @tc.name: IsNeedSilentInDoNotDisturbModeTest_0100
+ * @tc.desc: test IsNeedSilentInDoNotDisturbMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0100, TestSize.Level1";
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/*
+ * @tc.name: IsNeedSilentInDoNotDisturbModeTest_0200
+ * @tc.desc: test IsNeedSilentInDoNotDisturbMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0200, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, true, true, true)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ERR_OK, result);
+}
+
+/*
+ * @tc.name: IsNeedSilentInDoNotDisturbModeTest_0300
+ * @tc.desc: test IsNeedSilentInDoNotDisturbMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0300, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+}
+
+/*
+ * @tc.name: IsNeedSilentInDoNotDisturbModeTest_0400
+ * @tc.desc: test IsNeedSilentInDoNotDisturbMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0400, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, false, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+}
+
+/*
+ * @tc.name: IsNeedSilentInDoNotDisturbModeTest_0500
+ * @tc.desc: test IsNeedSilentInDoNotDisturbMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0500, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0500, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, true, true, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ERR_OK, result);
+}
 }  // namespace Notification
 }  // namespace OHOS
