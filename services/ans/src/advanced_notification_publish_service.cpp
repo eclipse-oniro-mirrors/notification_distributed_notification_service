@@ -2151,6 +2151,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     int32_t uid = request->GetCreatorUid();
     if (request->GetOwnerUid() != DEFAULT_UID) {
@@ -2227,7 +2230,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
         }
 
-        ChangeNotificationByControlFlags(record);
+        ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
         record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {

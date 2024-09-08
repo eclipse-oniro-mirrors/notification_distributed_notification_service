@@ -610,6 +610,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
@@ -650,7 +653,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
             return;
         }
 
-        result = AddRecordToMemory(record, isSystemApp, isUpdateByOwner);
+        result = AddRecordToMemory(record, isSystemApp, isUpdateByOwner, isAgentController);
         if (result != ERR_OK) {
             return;
         }
@@ -863,7 +866,8 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
     return ERR_OK;
 }
 
-void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record)
+void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record,
+    const bool isAgentController)
 {
     ANS_LOGD("Called.");
     if (record == nullptr || record->request == nullptr || record->notification == nullptr) {
@@ -874,6 +878,10 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
     if (notificationControlFlags == 0) {
         ANS_LOGD("The notificationControlFlags is undefined.");
         return;
+    }
+
+    if (!isAgentController) {
+        record->request->SetNotificationControlFlags(notificationControlFlags & 0xFFFF);
     }
 
     auto flags = record->request->GetFlags();
@@ -2150,7 +2158,8 @@ ErrCode AdvancedNotificationService::CheckSystemLiveView(const sptr<Notification
 }
 
 ErrCode AdvancedNotificationService::AddRecordToMemory(
-    const std::shared_ptr<NotificationRecord> &record, bool isSystemApp, bool isUpdateByOwner)
+    const std::shared_ptr<NotificationRecord> &record, bool isSystemApp, bool isUpdateByOwner,
+    const bool isAgentController)
 {
     auto result = AssignValidNotificationSlot(record, record->bundleOption);
     if (result != ERR_OK) {
@@ -2165,7 +2174,7 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
     }
 
     if (isSystemApp) {
-        ChangeNotificationByControlFlags(record);
+        ChangeNotificationByControlFlags(record, isAgentController);
     }
     CheckDoNotDisturbProfile(record);
 
