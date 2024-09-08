@@ -80,6 +80,7 @@ export class EnableNotificationDialog {
   extensionWindow:uiExtensionHost.UIExtensionHostWindowProxy;
   storage: LocalStorage;
   stageModel: boolean;
+  subWindow: window.Window;
 
   constructor(id: number, want: Want, stageModel: boolean) {
     this.id = id;
