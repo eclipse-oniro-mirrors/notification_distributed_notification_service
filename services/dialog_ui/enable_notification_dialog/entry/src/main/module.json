@@ -23,7 +23,8 @@
         "icon": "$media:icon",
         "label": "$string:NotificationServiceExtAbility_label",
         "exported":true,
-        "type": "sysDialog/common"
+        "type": "sysDialog/common",
+        "extensionProcessMode": "instance"
       }
     ],
     "requestPermissions": [
