@@ -108,7 +108,7 @@ std::string HaMetaMessage::GetMessage() const
 
 HaMetaMessage& HaMetaMessage::SlotType(int32_t slotType)
 {
-    slotType_ = slotType;
+    slotType_ = static_cast<uint32_t>(slotType);
     return *this;
 }
 
@@ -199,7 +199,8 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
 {
     std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
     std::string reason = std::to_string(message.sceneId_) + MESSAGE_DELIMITER +
-        std::to_string(message.branchId_) + MESSAGE_DELIMITER + message.GetMessage();
+        std::to_string(message.branchId_) + std::to_string(message.notificationId_) +
+        MESSAGE_DELIMITER + message.GetMessage();
     extraInfo->SetParam("reason", AAFwk::String::Box(reason));
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
     std::string extraContent = wWrapper.ToString();

@@ -1254,7 +1254,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000,
     int32_t notificationId = 0;
     std::string label = "testLabel";
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    ASSERT_EQ(advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption, 8),
+    ASSERT_EQ(advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption),
         ERR_ANS_INVALID_BUNDLE);
 
     GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test end";
@@ -3273,7 +3273,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto request = new (std::nothrow) NotificationRequest();
 
-    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8);
+    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     std::vector<sptr<NotificationRequest>> requests;
@@ -3419,9 +3419,8 @@ HWTEST_F(AdvancedNotificationServiceTest, ChangeNotificationByControlFlags_00001
     flags->SetStatusIconEnabled(true);
     request->SetFlags(flags);
 
-    bool isAgentController = true;
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    advancedNotificationService_->ChangeNotificationByControlFlags(record, isAgentController);
+    advancedNotificationService_->ChangeNotificationByControlFlags(record);
 
     u_int32_t reminderFlags = flags->GetReminderFlags();
     ASSERT_EQ(reminderFlags, 0);
