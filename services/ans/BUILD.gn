@@ -136,7 +136,6 @@ ohos_shared_library("libans") {
     "ability_base:configuration",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
-    "ability_runtime:appkit_native",
     "ability_runtime:dataobs_manager",
     "ability_runtime:extension_manager",
     "ability_runtime:wantagent_innerkits",
