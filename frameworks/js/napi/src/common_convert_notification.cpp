@@ -171,6 +171,10 @@ napi_value Common::SetNotification(
     napi_create_string_utf8(env, notification->GetDeviceId().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "deviceId", value);
 
+    // notificationControlFlags?: number
+    napi_create_int32(env, notification->GetNotificationRequest().GetNotificationControlFlags(), &value);
+    napi_set_named_property(env, result, "notificationControlFlags", value);
+
     return NapiGetBoolean(env, true);
 }
 
