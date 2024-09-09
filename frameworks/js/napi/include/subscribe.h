@@ -21,7 +21,7 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
-class SubscriberInstance : public NotificationSubscriber {
+class SubscriberInstance : public NotificationSubscriber, public std::enable_shared_from_this<SubscriberInstance> {
 public:
     SubscriberInstance();
     virtual ~SubscriberInstance();
@@ -221,13 +221,13 @@ private:
 
 struct SubscriberInstancesInfo {
     napi_ref ref = nullptr;
-    SubscriberInstance *subscriber = nullptr;
+    std::shared_ptr<SubscriberInstance> subscriber = nullptr;
 };
 
 struct AsyncCallbackInfoSubscribe {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     CallbackPromiseInfo info;
 };
@@ -236,19 +236,19 @@ static std::mutex mutex_;
 static thread_local std::vector<SubscriberInstancesInfo> subscriberInstances_;
 
 static std::mutex delMutex_;
-static std::vector<SubscriberInstance*> DeletingSubscriber;
+static std::vector<std::shared_ptr<SubscriberInstance>> DeletingSubscriber;
 
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo);
 bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesInfo &subscriberInfo);
-bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *subscriber);
+bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<SubscriberInstance> subscriber);
 
-bool AddDeletingSubscriber(SubscriberInstance *subscriber);
-void DelDeletingSubscriber(SubscriberInstance *subscriber);
+bool AddDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber);
+void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber);
 
 napi_value Subscribe(napi_env env, napi_callback_info info);
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
-    NotificationSubscribeInfo &subscriberInfo, SubscriberInstance *&subscriber, napi_ref &callback);
+    NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_SUBSCRIBE_H

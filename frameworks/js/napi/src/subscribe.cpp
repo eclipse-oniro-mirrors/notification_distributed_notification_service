@@ -64,7 +64,7 @@ struct NotificationReceiveDataWorker {
     int32_t deleteReason = 0;
     int32_t result = 0;
     int32_t disturbMode = 0;
-    SubscriberInstance *subscriber = nullptr;
+    std::shared_ptr<SubscriberInstance> subscriber = nullptr;
     Type type;
 };
 
@@ -564,7 +564,7 @@ void SubscriberInstance::OnDisconnected()
 
     dataWorker->env = unsubscribeCallbackInfo_.env;
     dataWorker->ref = unsubscribeCallbackInfo_.ref;
-    dataWorker->subscriber = this;
+    dataWorker->subscriber = shared_from_this();
     dataWorker->type = Type::DIS_CONNECTED;
     
     napi_acquire_threadsafe_function(unsubscribeCallbackInfo_.tsfn);
@@ -1240,7 +1240,7 @@ napi_value GetNotificationSubscriber(
     napi_valuetype valuetype = napi_undefined;
     napi_ref result = nullptr;
 
-    subscriberInfo.subscriber = new (std::nothrow) SubscriberInstance();
+    subscriberInfo.subscriber = std::make_shared<SubscriberInstance>();
     if (subscriberInfo.subscriber == nullptr) {
         ANS_LOGE("subscriber is null");
         std::string msg = "Mandatory parameters are left unspecified. subscriber is null";
@@ -1478,7 +1478,7 @@ bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesIn
     return true;
 }
 
-bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *subscriber)
+bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<SubscriberInstance> subscriber)
 {
     ANS_LOGD("enter");
     if (subscriber == nullptr) {
@@ -1493,8 +1493,6 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *s
                 napi_delete_reference(env, (*it).ref);
             }
             DelDeletingSubscriber((*it).subscriber);
-            delete (*it).subscriber;
-            (*it).subscriber = nullptr;
             subscriberInstances_.erase(it);
             return true;
         }
@@ -1502,7 +1500,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *s
     return false;
 }
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
-    NotificationSubscribeInfo &subscriberInfo, SubscriberInstance *&subscriber, napi_ref &callback)
+    NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback)
 {
     ANS_LOGD("enter");
 
@@ -1531,18 +1529,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (!HasNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo)) {
         if (GetNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo) == nullptr) {
             ANS_LOGE("NotificationSubscriber parse failed");
-            if (subscriberInstancesInfo.subscriber) {
-                delete subscriberInstancesInfo.subscriber;
-                subscriberInstancesInfo.subscriber = nullptr;
-            }
             return nullptr;
         }
         if (!AddSubscriberInstancesInfo(env, subscriberInstancesInfo)) {
             ANS_LOGE("AddSubscriberInstancesInfo add failed");
-            if (subscriberInstancesInfo.subscriber) {
-                delete subscriberInstancesInfo.subscriber;
-                subscriberInstancesInfo.subscriber = nullptr;
-            }
             return nullptr;
         }
     }
@@ -1584,14 +1574,10 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
         ANS_LOGD("ParseParameters is nullptr.");
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         return Common::NapiGetUndefined(env);
     }
 
@@ -1600,10 +1586,6 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     };
     if (!asynccallbackinfo) {
         ANS_LOGD("Asynccallbackinfo is nullptr.");
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -1670,7 +1652,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     }
 }
 
-bool AddDeletingSubscriber(SubscriberInstance *subscriber)
+bool AddDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
 {
     std::lock_guard<std::mutex> lock(delMutex_);
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
@@ -1682,7 +1664,7 @@ bool AddDeletingSubscriber(SubscriberInstance *subscriber)
     return true;
 }
 
-void DelDeletingSubscriber(SubscriberInstance *subscriber)
+void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
 {
     std::lock_guard<std::mutex> lock(delMutex_);
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
