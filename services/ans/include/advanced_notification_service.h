@@ -1170,8 +1170,7 @@ private:
     void StartFilters();
     void StopFilters();
     ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
-    void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record,
-        const bool isAgentController);
+    void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
@@ -1340,7 +1339,7 @@ private:
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
-        bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
+        bool isSystemApp, bool isUpdateByOwner);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);
