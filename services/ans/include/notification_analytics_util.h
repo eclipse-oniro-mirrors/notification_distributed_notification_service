@@ -79,6 +79,11 @@ public:
 };
 
 
+struct FlowControllerOption {
+    int32_t count;
+    int32_t time;
+};
+
 class NotificationAnalyticsUtil {
 public:
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
@@ -89,6 +94,8 @@ public:
 
     static void ReportDeleteFailedEvent(const HaMetaMessage& message);
 
+    static void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
+        const std::chrono::system_clock::time_point &now, int32_t time = 1);
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);
@@ -98,6 +105,12 @@ private:
     static void CommonNotificationEvent(int32_t eventCode, const HaMetaMessage& message);
 
     static void ReportNotificationEvent(EventFwk::Want want, int32_t eventCode, const std::string& reason);
+
+    static bool ReportFlowControl(const int32_t reportType);
+
+    static std::list<std::chrono::system_clock::time_point> GetFlowListByType(const int32_t reportType);
+
+    static FlowControllerOption GetFlowOptionByType(const int32_t reportType);
 };
 } // namespace Notification
 } // namespace OHOS

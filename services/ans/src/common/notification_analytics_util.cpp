@@ -29,7 +29,11 @@ constexpr char MESSAGE_DELIMITER = '#';
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
+constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 6;
+constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
+static std::mutex reportFlowControlMutex_;
+static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_;
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -197,6 +201,10 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
 
 void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
 {
+    if (!ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
+        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        return;
+    }
     std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
     std::string reason = std::to_string(message.sceneId_) + MESSAGE_DELIMITER +
         std::to_string(message.branchId_) + std::to_string(message.notificationId_) +
@@ -240,6 +248,60 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
         ANS_LOGE("Publish event failed %{public}d, %{public}s", eventCode, reason.c_str());
     }
+}
+
+bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
+{
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::lock_guard<std::mutex> lock(reportFlowControlMutex_);
+    std::list<std::chrono::system_clock::time_point> list = GetFlowListByType(reportType);
+    FlowControllerOption option = GetFlowOptionByType(reportType);
+    RemoveExpired(list, now, option.time);
+    if (list.size() >= option.count) {
+        return false;
+    }
+    list.push_back(now);
+    flowControlTimestampMap_[reportType] = list;
+    return true;
+}
+
+std::list<std::chrono::system_clock::time_point> NotificationAnalyticsUtil::GetFlowListByType(const int32_t reportType)
+{
+    std::list<std::chrono::system_clock::time_point> res;
+    auto iter = flowControlTimestampMap_.find(reportType);
+    if (iter != flowControlTimestampMap_.end()) {
+        res = iter->second;
+    }
+    return res;
+}
+
+void NotificationAnalyticsUtil::RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
+    const std::chrono::system_clock::time_point &now, int32_t time)
+{
+    auto iter = list.begin();
+    while (iter != list.end()) {
+        if (abs(now - *iter) > std::chrono::seconds(time)) {
+            iter = list.erase(iter);
+        } else {
+            break;
+        }
+    }
+}
+
+FlowControllerOption NotificationAnalyticsUtil::GetFlowOptionByType(const int32_t reportType)
+{
+    FlowControllerOption option;
+    switch (reportType) {
+        case MODIFY_ERROR_EVENT_CODE:
+            option.count = DEFAULT_ERROR_EVENT_COUNT;
+            option.time = DEFAULT_ERROR_EVENT_TIME;
+            break;
+        default:
+            option.count = DEFAULT_ERROR_EVENT_COUNT;
+            option.time = DEFAULT_ERROR_EVENT_TIME;
+            break;
+    }
+    return option;
 }
 } // namespace Notification
 } // namespace OHOS

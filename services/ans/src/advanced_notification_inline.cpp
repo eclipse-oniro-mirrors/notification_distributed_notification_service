@@ -114,19 +114,6 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
     return ERR_OK;
 }
 
-inline void RemoveExpired(
-    std::list<std::chrono::system_clock::time_point> &list, const std::chrono::system_clock::time_point &now)
-{
-    auto iter = list.begin();
-    while (iter != list.end()) {
-        if (abs(now - *iter) > std::chrono::seconds(1)) {
-            iter = list.erase(iter);
-        } else {
-            break;
-        }
-    }
-}
-
 inline OHOS::Notification::HaMetaMessage AddInformationInMessage(
     OHOS::Notification::HaMetaMessage haMetaMessage, const int32_t reason,
     std::string message)
