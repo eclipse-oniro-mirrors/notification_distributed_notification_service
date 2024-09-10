@@ -180,10 +180,10 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
     want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
     want.SetParam("extraInfo", extraContent);
     if (!request->GetCreatorBundleName().empty()) {
-        want.SetBundle(request->GetCreatorBundleName());
+        want.SetParam("agentBundleName", request->GetCreatorBundleName());
     }
     if (!request->GetOwnerBundleName().empty()) {
-        want.SetParam("agentBundleName", request->GetOwnerBundleName());
+        want.SetBundle(request->GetOwnerBundleName());
     }
     want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
     EventFwk::CommonEventPublishInfo publishInfo;
