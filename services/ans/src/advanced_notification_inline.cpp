@@ -99,16 +99,15 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_SIZE)) {
-        message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check big image size failed.");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_ICON_OVER_SIZE;
-    }
-
     if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
         message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check overlay size failed.");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_ICON_OVER_SIZE;
+    }
+
+    if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_SIZE)) {
+        request->ResetBigIcon();
+        ANS_LOGI("Check big image size over limit");
     }
 
     return ERR_OK;

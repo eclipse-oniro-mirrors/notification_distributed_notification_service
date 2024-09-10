@@ -1392,12 +1392,6 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    auto bigIcon = request.GetBigIcon();
-    if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
-        ANS_LOGE("The size of big icon exceeds limit");
-        return ERR_ANS_ICON_OVER_SIZE;
-    }
-
     auto overlayIcon = request.GetOverlayIcon();
     if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
         ANS_LOGE("The size of overlay icon exceeds limit");
@@ -1431,6 +1425,12 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
             ANS_LOGE("The size of picture in MessageUser exceeds limit");
             return ERR_ANS_ICON_OVER_SIZE;
         }
+    }
+
+    auto bigIcon = request.GetBigIcon();
+    if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
+        request.ResetBigIcon();
+        ANS_LOGI("The size of big icon exceeds limit");
     }
 
     return ERR_OK;

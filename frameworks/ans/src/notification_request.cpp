@@ -317,6 +317,11 @@ void NotificationRequest::SetBigIcon(const std::shared_ptr<Media::PixelMap> &big
     bigIcon_ = bigIcon;
 }
 
+void NotificationRequest::ResetBigIcon() const
+{
+    bigIcon_ = nullptr;
+}
+
 const std::shared_ptr<Media::PixelMap> NotificationRequest::GetBigIcon() const
 {
     return bigIcon_;
