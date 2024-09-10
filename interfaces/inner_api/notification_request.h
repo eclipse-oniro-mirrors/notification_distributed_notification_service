@@ -525,6 +525,12 @@ public:
     void SetBigIcon(const std::shared_ptr<Media::PixelMap> &bigIcon);
 
     /**
+     * @brief reset the large icon of this notification, which is usually displayed on the right of the notification.
+     *
+     */
+    void ResetBigIcon() const;
+
+    /**
      * @brief Obtains the large icon of this notification.
      *
      * @return Returns the large icon of this notification.
@@ -1507,7 +1513,9 @@ private:
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> maxScreenWantAgent_ {};
     std::shared_ptr<AAFwk::WantParams> additionalParams_ {};
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
-    std::shared_ptr<Media::PixelMap> bigIcon_ {};
+    std::string littleIconType_ {};
+    mutable std::shared_ptr<Media::PixelMap> bigIcon_ {};
+
     std::shared_ptr<Media::PixelMap> overlayIcon_ {};
     std::shared_ptr<NotificationContent> notificationContent_ {};
 
