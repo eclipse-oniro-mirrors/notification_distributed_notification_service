@@ -73,6 +73,7 @@
 
 #include "advanced_notification_inline.cpp"
 #include "advanced_datashare_helper_ext.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -907,7 +908,7 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
 ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    RemoveExpired(flowControlUpdateTimestampList_, now);
+    NotificationAnalyticsUtil::RemoveExpired(flowControlUpdateTimestampList_, now);
     if (flowControlUpdateTimestampList_.size() >= MAX_UPDATE_NUM_PERSECOND) {
         return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
     }
@@ -1384,7 +1385,7 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> lock(flowControlMutex_);
-    RemoveExpired(flowControlTimestampList_, now);
+    NotificationAnalyticsUtil::RemoveExpired(flowControlTimestampList_, now);
     if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
@@ -1396,7 +1397,7 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
 ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    RemoveExpired(flowControlPublishTimestampList_, now);
+    NotificationAnalyticsUtil::RemoveExpired(flowControlPublishTimestampList_, now);
     if (flowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
         return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
     }
