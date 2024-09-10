@@ -21,7 +21,15 @@ ohos_fuzztest("AnsManagerStubFuzzTest") {
   module_out_path = service_fuzz_test_path
   fuzz_config_file = "${component_path}/test/fuzztest/ansmanagerstub_fuzzer"
 
-  include_dirs = [ "${component_path}/test/fuzztest/fuzz_common_base" ]
+  include_dirs = [
+    "${component_path}/test/fuzztest/fuzz_common_base",
+    "${component_path}/services/ans/include",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${inner_api_path}",
+    "${ffrt_path}/interfaces/kits",
+  ]
+  defines = []
   cflags = [
     "-g",
     "-O0",
@@ -33,17 +41,73 @@ ohos_fuzztest("AnsManagerStubFuzzTest") {
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
   ]
+
+  if (distributed_notification_supported) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+  }
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_single",
+    "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
   ]
+
+  if (device_usage) {
+    external_deps += [ "device_usage_statistics:usagestatsinner" ]
+    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  if (hisysevent_usage) {
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (standby_enable) {
+    external_deps += [ "device_standby:standby_innerkits" ]
+    defines += [ "DEVICE_STANDBY_ENABLE" ]
+  }
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+
+  if (ans_hitrace_usage) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+    defines += [ "HITRACE_METER_ENABLE" ]
+  }
+
+  if (ans_config_policy_enable) {
+    external_deps += [ "config_policy:configpolicy_util" ]
+    defines += [ "CONFIG_POLICY_ENABLE" ]
+  }
+
+  if (screenlock_mgr_enable) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+    defines += [ "SCREENLOCK_MGR_ENABLE" ]
+  }
+
+  if (distributed_notification_service_feature_summary) {
+    defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
+  }
+
+  if (telephony_cust) {
+    defines += [ "ENABLE_ANS_TELEPHONY_CUST_WRAPPER" ]
+  }
 }
 
 ###############################################################################

@@ -42,6 +42,7 @@ ohos_fuzztest("AnsManagerStubAnnexThreeFuzzTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",
+    "ipc:ipc_single",
     "relational_store:native_rdb",
   ]
 }

@@ -101,9 +101,9 @@ void SystemHapTokenGet(const std::vector<std::string> &permissions)
     for (auto permission : permissions) {
         PermissionStateFull permStateFull = {
             .permissionName = permission,
-            .isGeneral = false,
-            .resDeviceID = {"device 1", "device 2"},
-            .grantStatus = {PermissionState::PERMISSION_GRANTED, PermissionState::PERMISSION_GRANTED},
+            .isGeneral = true,
+            .resDeviceID = {"local"},
+            .grantStatus = {PermissionState::PERMISSION_GRANTED},
             .grantFlags = {1, 2}
         };
         PermissionDef permDef = {
@@ -111,7 +111,7 @@ void SystemHapTokenGet(const std::vector<std::string> &permissions)
             .bundleName = "test.fuzz.ans",
             .grantMode = 1,
             .availableLevel = APL_NORMAL,
-            .label = "label3",
+            .label = "label",
             .labelId = 1,
             .description = "break the door",
             .descriptionId = 1,
