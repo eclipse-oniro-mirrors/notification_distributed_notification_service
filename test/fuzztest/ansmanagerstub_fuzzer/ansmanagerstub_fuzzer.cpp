@@ -23,6 +23,7 @@
 #include <vector>
 #define private public
 #define protected public
+#include "advanced_notification_service.h"
 #include "ans_manager_proxy.h"
 #include "ans_manager_stub.h"
 #include "ans_subscriber_stub.h"
@@ -35,12 +36,18 @@
 constexpr uint8_t SLOT_TYPE_NUM = 5;
 
 namespace OHOS {
+    inline int64_t GetCurrentTime()
+    {
+        auto now = std::chrono::system_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+        return duration.count();
+    }
     bool DoSomethingInterestingWithMyAPI(FuzzData fuzzData)
     {
         std::string stringData = fuzzData.GenerateRandomString();
         int32_t intData = fuzzData.GenerateRandomInt32();
         bool boolData = fuzzData.GenerateRandomBool();
-        Notification::AnsManagerStub ansManagerStub;
+        Notification::AdvancedNotificationService ansManagerStub;
         MessageParcel datas;
         MessageParcel reply;
         MessageOption flags;
@@ -75,6 +82,8 @@ namespace OHOS {
         uint8_t type = fuzzData.GetData<uint8_t>() % SLOT_TYPE_NUM;
 
         sptr<Notification::NotificationDoNotDisturbDate> distribuDate = new Notification::NotificationDoNotDisturbDate();
+        distribuDate->SetBeginDate(GetCurrentTime());
+        distribuDate->SetEndDate(GetCurrentTime());
 
         datas.WriteString(stringData);
         datas.WriteParcelable(notification);
