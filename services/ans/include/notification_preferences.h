@@ -313,7 +313,7 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled);
-    
+
     /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
@@ -359,6 +359,12 @@ public:
      */
     bool GetBundleSoundPermission(bool &allPackage, std::set<std::string> &bundleNames);
 
+    ErrCode UpdateDoNotDisturbProfiles(int32_t userId, int32_t profileId,
+        const std::string& name, const std::vector<NotificationBundleOption>& bundleList);
+
+    void UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
+        const std::vector<NotificationBundleOption> bundleList);
+
     void InitSettingFromDisturbDB(int32_t userId = -1);
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
@@ -373,6 +379,8 @@ public:
     ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     bool CheckDoNotDisturbProfileID(int32_t profileId);
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
+    void GetDoNotDisturbProfileListByUserId(int32_t userId,
+        std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
 
 private:
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,

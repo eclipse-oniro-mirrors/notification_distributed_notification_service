@@ -537,6 +537,14 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
         if (!CheckDoNotDisturbProfileID(profile->GetProfileId())) {
             return ERR_ANS_INVALID_PARAM;
         }
+        auto trustList = profile->GetProfileTrustList();
+        for (auto& bundleInfo : trustList) {
+            int32_t index = BundleManagerHelper::GetInstance()->GetAppIndexByUid(bundleInfo.GetUid());
+            bundleInfo.SetAppIndex(index);
+            ANS_LOGI("Get app index by uid %{public}d %{public}s %{public}d", bundleInfo.GetUid(),
+                bundleInfo.GetBundleName().c_str(), index);
+        }
+        profile->SetProfileTrustList(trustList);
     }
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -577,6 +585,66 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     }
     preferencesInfo_ = preferencesInfo;
     return ERR_OK;
+}
+
+void NotificationPreferences::UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
+    const std::vector<NotificationBundleOption> bundleList)
+{
+    for (auto& item : bundleList) {
+        bool exit = false;
+        for (auto& bundle: trustList) {
+            if (item.GetUid() == bundle.GetUid()) {
+                exit = true;
+                break;
+            }
+        }
+        if (!exit) {
+            trustList.push_back(item);
+        }
+    }
+}
+
+ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int32_t profileId,
+    const std::string& name, const std::vector<NotificationBundleOption>& bundleList)
+{
+    ANS_LOGI("Called update Profile %{public}d %{public}d %{public}zu.", userId, profileId, bundleList.size());
+    if (!CheckDoNotDisturbProfileID(profileId) || bundleList.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    if (preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
+        auto trustList = profile->GetProfileTrustList();
+        UpdateProfilesUtil(trustList, bundleList);
+        profile->SetProfileTrustList(trustList);
+    } else {
+        profile->SetProfileId(profileId);
+        profile->SetProfileName(name);
+        profile->SetProfileTrustList(bundleList);
+    }
+    ANS_LOGI("Update profile %{public}d %{public}d %{public}zu", userId, profile->GetProfileId(),
+        profile->GetProfileTrustList().size());
+    preferencesInfo.AddDoNotDisturbProfiles(userId, {profile});
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("The prefernces db is nullptr.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->AddDoNotDisturbProfiles(userId, {profile})) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    preferencesInfo_ = preferencesInfo;
+    return ERR_OK;
+}
+
+void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
+    std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    preferencesInfo.GetAllDoNotDisturbProfiles(userId, profiles);
+    preferencesInfo_ = preferencesInfo;
 }
 
 ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
@@ -631,8 +699,10 @@ void NotificationPreferences::RemoveDoNotDisturbProfileTrustList(
         ANS_LOGE("The bundle option is nullptr.");
         return;
     }
+    int32_t uid = bundleOption->GetUid();
+    int32_t appIndex = bundleOption->GetAppIndex();
     auto bundleName = bundleOption->GetBundleName();
-    ANS_LOGD("Called, bundle name is %{public}s.", bundleName.c_str());
+    ANS_LOGI("Remove %{public}s %{public}d %{public}d.", bundleName.c_str(), uid, appIndex);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
@@ -645,7 +715,7 @@ void NotificationPreferences::RemoveDoNotDisturbProfileTrustList(
         }
         auto trustList = profile->GetProfileTrustList();
         for (auto it = trustList.begin(); it != trustList.end(); it++) {
-            if (it->GetBundleName() == bundleName) {
+            if (it->GetUid() == uid) {
                 trustList.erase(it);
                 break;
             }
