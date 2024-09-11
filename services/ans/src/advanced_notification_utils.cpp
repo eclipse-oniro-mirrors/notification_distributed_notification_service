@@ -47,6 +47,7 @@
 
 #include "advanced_notification_inline.cpp"
 #include "notification_analytics_util.h"
+#include "notification_clone_disturb_service.h"
 
 #define CHECK_BUNDLE_OPTION_IS_INVALID(option)                              \
     if (option == nullptr || option->GetBundleName().empty()) {             \
@@ -595,6 +596,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
         }
     };
 
+    NotificationCloneDisturb::GetInstance()->OnBundleDataAdd(bundleOption);
     notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(bundleInstall) : bundleInstall();
 }
 
@@ -622,6 +624,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         }
     };
 
+    NotificationCloneDisturb::GetInstance()->OnBundleDataUpdate(bundleOption);
     notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(bundleUpdate) : bundleUpdate();
 }
 

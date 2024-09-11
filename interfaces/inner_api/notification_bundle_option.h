@@ -78,6 +78,20 @@ public:
     int32_t GetInstanceKey() const;
 
     /**
+     * @brief Sets the application index.
+     *
+     * @param uid Indicates the application index.
+     */
+    void SetAppIndex(const int32_t appIndex);
+
+    /**
+     * @brief Obtains the application index.
+     *
+     * @return Returns the application index.
+     */
+    int32_t GetAppIndex() const;
+
+    /**
      * @brief Returns a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -129,6 +143,7 @@ private:
     std::string bundleName_ {};
     int32_t uid_ {};
     int32_t instanceKey_ {};
+    int32_t appIndex_ = -1;
 };
 }  // namespace Notification
 }  // namespace OHOS
