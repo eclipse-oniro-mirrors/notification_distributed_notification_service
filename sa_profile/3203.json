@@ -8,6 +8,7 @@
             "depend": [
                 3299
             ],
+            "extension": ["backup", "restore"],
             "depend_time_out": 60000,
             "distributed": false,
             "dump_level": 1

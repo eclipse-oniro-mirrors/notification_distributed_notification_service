@@ -1138,6 +1138,9 @@ public:
      */
     ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
 
+    int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
+
+    int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
