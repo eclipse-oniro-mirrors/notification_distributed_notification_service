@@ -108,7 +108,7 @@ void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
     uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
     int32_t ringTime = static_cast<int32_t>(reminder->GetRingDuration());
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "PID", 0, "UID", uid, "NAME", bundleName, "TYPE", type, "repeat", repeat, "TRIGGER_TIME", triggerTime,
+        "UID", uid, "NAME", bundleName, "TYPE", type, "REPEAT", repeat, "TRIGGER_TIME", triggerTime,
         "RING_TIME", ringTime);
 #endif
 }
