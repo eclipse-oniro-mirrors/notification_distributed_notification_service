@@ -46,7 +46,6 @@ namespace {
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
 }
 const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
-const uint32_t SA_SLOT_FLAGS = 63; // 0b111111
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -531,11 +530,6 @@ void AdvancedNotificationService::GenerateSlotReminderMode(
     const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot)
 {
     uint32_t slotFlags = DEFAULT_SLOT_FLAGS;
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (isSubsystem) {
-        ANS_LOGD("GenerateSlotReminderMode isSubsystem in");
-        slotFlags = SA_SLOT_FLAGS;
-    }
     auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
     if (ret != ERR_OK) {
         ANS_LOGI("Failed to get slotflags for bundle, use default slotflags.");
