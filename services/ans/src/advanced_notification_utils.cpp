@@ -1278,7 +1278,7 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
         ANS_LOGE("Serial queue is invalid.");
         return;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance()->RemoveSettings(userId);
     }));
