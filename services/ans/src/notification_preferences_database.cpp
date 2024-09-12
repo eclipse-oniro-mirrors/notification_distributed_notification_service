@@ -25,6 +25,7 @@
 #include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
 #include "ipc_skeleton.h"
+#include "bundle_manager_helper.h"
 
 #include "uri.h"
 namespace OHOS {
@@ -595,6 +596,7 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
                 NotificationPreferencesInfo::BundleInfo bundleInfo;
                 bundleInfo.SetBundleName(bundleName);
                 bundleInfo.SetBundleUid(bundleUid);
+                bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleName, bundleUid));
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
                 break;
             }
@@ -1981,6 +1983,16 @@ std::string NotificationPreferencesDatabase::GetAdditionalConfig(const std::stri
     }
     ANS_LOGD("The additional config key is :%{public}s, value is :%{public}s.", key.c_str(), configValue.c_str());
     return configValue;
+}
+
+bool NotificationPreferencesDatabase::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        return false;
+    }
+    return bundleManager->CheckApiCompatibility(bundleName, uid);
 }
 }  // namespace Notification
 }  // namespace OHOS

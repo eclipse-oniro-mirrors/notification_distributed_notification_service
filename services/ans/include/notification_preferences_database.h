@@ -318,6 +318,7 @@ private:
         const std::string &findString, const int32_t &userId);
     void ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
         const std::string &findString, const int32_t &userId);
+    bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
 };
 } // namespace Notification
