@@ -300,6 +300,11 @@ int64_t NotificationRequest::GetArchiveDeadLine() const
 void NotificationRequest::SetLittleIcon(const std::shared_ptr<Media::PixelMap> &littleIcon)
 {
     littleIcon_ = littleIcon;
+    if (littleIcon != nullptr) {
+        Media::ImageInfo outImageInfo;
+        littleIcon->GetImageInfo(outImageInfo);
+        littleIconType_ = outImageInfo.encodedFormat;
+    }
 }
 
 const std::shared_ptr<Media::PixelMap> NotificationRequest::GetLittleIcon() const
@@ -1229,9 +1234,36 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (valid) {
-        if (!parcel.WriteParcelable(littleIcon_.get())) {
-            ANS_LOGE("Failed to write littleIcon");
+        if (!parcel.WriteString(littleIconType_)) {
+            ANS_LOGE("Failed to write littleIconType");
             return false;
+        }
+
+        bool isUnPackImage = true;
+        std::string littleIconString;
+
+        if (!littleIconType_.empty()) {
+            littleIconString = AnsImageUtil::PackImage(littleIcon_, littleIconType_);
+        }
+
+        if (isUnPackImage && !littleIconString.empty()) {
+            isUnPackImage = false;
+        }
+
+        if (!parcel.WriteBool(isUnPackImage)) {
+            return false;
+        }
+        ANS_LOGD("littleIcon_ : %{public}d, %{public}s", isUnPackImage, littleIconType_.c_str());
+        if (isUnPackImage) {
+            if (!parcel.WriteParcelable(littleIcon_.get())) {
+                ANS_LOGE("Failed to write littleIcon");
+                return false;
+            }
+        } else {
+            if (!parcel.WriteString(littleIconString)) {
+                ANS_LOGE("Failed to write littleIcon");
+                return false;
+            }
         }
     }
 
@@ -1509,35 +1541,45 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     int32_t slotTypeValue = parcel.ReadInt32();
     if (slotTypeValue < 0 ||
-    slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", slotTypeValue);
+        slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type value :%d. It should be in [0 , %d).",
+            slotTypeValue, static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE));
         return false;
     }
     slotType_ = static_cast<NotificationConstant::SlotType>(slotTypeValue);
     int32_t groupAlertTypeValue = parcel.ReadInt32();
     if (groupAlertTypeValue < 0 ||
-    groupAlertTypeValue >= static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", groupAlertTypeValue);
+        groupAlertTypeValue >= static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid groupAlert type value :%d. It should be in [0 , %d).",
+            groupAlertTypeValue, static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE));
         return false;
     }
     groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(groupAlertTypeValue);
     int32_t visiblenessTypeValue = parcel.ReadInt32();
     if (visiblenessTypeValue < 0 ||
-    visiblenessTypeValue >= static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", visiblenessTypeValue);
+        visiblenessTypeValue >= static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid visibleness type value :%d. It should be in [0 , %d).",
+            visiblenessTypeValue, static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE));
         return false;
     }
     visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(visiblenessTypeValue);
     int32_t badgeStyleValue = parcel.ReadInt32();
-    if (badgeStyleValue < 0 || badgeStyleValue >= static_cast<int>(NotificationRequest::BadgeStyle::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", badgeStyleValue);
+    if (badgeStyleValue < 0) {
+        ANS_LOGE("Invalid badge style value :%d. It should be greater than 0.", badgeStyleValue);
         return false;
+    }
+    if (badgeStyleValue >= static_cast<int>(NotificationRequest::BadgeStyle::ILLEGAL_TYPE)) {
+        badgeStyleValue = static_cast<int>(NotificationRequest::BadgeStyle::NONE);
+        ANS_LOGE("The badge style value is too large, set it to the default enumeration value: %d.",
+            static_cast<int>(NotificationRequest::BadgeStyle::NONE));
     }
     badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(badgeStyleValue);
     int32_t notificationContentTypeValue = parcel.ReadInt32();
     if (notificationContentTypeValue <= static_cast<int>(NotificationContent::Type::NONE) ||
-    notificationContentTypeValue >= static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", notificationContentTypeValue);
+        notificationContentTypeValue >= static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid notification content type value :%d. It should be in (%d , %d)",
+            notificationContentTypeValue, static_cast<int>(NotificationContent::Type::NONE),
+            static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE));
         return false;
     }
     notificationContentType_ = static_cast<NotificationContent::Type>(notificationContentTypeValue);
@@ -1601,7 +1643,15 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        littleIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+        littleIconType_ = parcel.ReadString();
+        bool isUnPackImage = parcel.ReadBool();
+        if (isUnPackImage) {
+            littleIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+        } else {
+            std::string littleIconString = parcel.ReadString();
+            littleIcon_ = AnsImageUtil::UnPackImage(littleIconString, littleIconType_);
+        }
+
         if (!littleIcon_) {
             ANS_LOGE("Failed to read littleIcon");
             return false;
@@ -1915,6 +1965,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->publishDelayTime_ = other.publishDelayTime_;
+    this->littleIconType_ = other.littleIconType_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -1953,7 +2004,10 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
     }
     jsonObject["extraInfo"] = extraInfoStr;
 
-    jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_);
+    jsonObject["smallIconType"] = littleIconType_;
+    if (!littleIconType_.empty()) {
+        jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_, littleIconType_);
+    }
     jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
     jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";
 
@@ -2199,9 +2253,14 @@ void NotificationRequest::ConvertJsonToPixelMap(NotificationRequest *target, con
 
     const auto &jsonEnd = jsonObject.cend();
 
+    if (jsonObject.find("smallIconType") != jsonEnd && jsonObject.at("smallIconType").is_string()) {
+        std::string littleIconType = jsonObject.at("smallIconType").get<std::string>();
+        target->littleIconType_ = littleIconType;
+    }
+
     if (jsonObject.find("smallIcon") != jsonEnd && jsonObject.at("smallIcon").is_string()) {
-        auto littleIconStr    = jsonObject.at("smallIcon").get<std::string>();
-        target->littleIcon_ = AnsImageUtil::UnPackImage(littleIconStr);
+        auto littleIconStr = jsonObject.at("smallIcon").get<std::string>();
+        target->littleIcon_ = AnsImageUtil::UnPackImage(littleIconStr, target->littleIconType_);
     }
 
     if (jsonObject.find("largeIcon") != jsonEnd && jsonObject.at("largeIcon").is_string()) {
@@ -2727,6 +2786,11 @@ void NotificationRequest::SetUpdateByOwnerAllowed(bool isUpdateByOwnerAllowed)
 bool NotificationRequest::IsUpdateByOwnerAllowed() const
 {
     return isUpdateByOwnerAllowed_;
+}
+
+const std::string NotificationRequest::GetLittleIconType() const
+{
+    return littleIconType_;
 }
 }  // namespace Notification
 }  // namespace OHOS

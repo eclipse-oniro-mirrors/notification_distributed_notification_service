@@ -1150,6 +1150,8 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             return ERR_OK;
         }
     }
+    std::string message = "notification not exist";
+    ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 
@@ -1177,7 +1179,8 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         return ERR_OK;
     }
     RemoveFromDelayedNotificationList(key);
-
+    std::string message = "notification not exist. key:" + key + ".";
+    ANS_LOGE("%{public}s", message.c_str());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 

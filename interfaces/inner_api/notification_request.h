@@ -518,6 +518,13 @@ public:
     const std::shared_ptr<Media::PixelMap> GetLittleIcon() const;
 
     /**
+     * @brief Obtains the icon type of the notification.
+     *
+     * @return Returns the notification icon type
+     */
+    const std::string GetLittleIconType() const;
+
+    /**
      * @brief Sets the large icon of this notification, which is usually displayed on the right of the notification.
      *
      * @param bigIcon Indicates the large icon to set. It must be a PixelMap object.
