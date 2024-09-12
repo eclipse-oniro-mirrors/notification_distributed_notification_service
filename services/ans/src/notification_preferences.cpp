@@ -846,6 +846,10 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
 
     nlohmann::json jsonObj;
     inFile >> jsonObj;
+    if (jsonObj.is_null() || !jsonObj.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
+    }
     if (jsonObj.is_discarded()) {
         ANS_LOGE("template json discarded error.");
         inFile.close();
@@ -989,6 +993,10 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
 
     ANS_LOGD("The bundle permission is :%{public}s.", value.c_str());
     nlohmann::json jsonPermission = nlohmann::json::parse(value, nullptr, false);
+    if (jsonPermission.is_null() || jsonPermission.empty()) {
+        ANS_LOGE("Invalid JSON object");
+        return false;
+    }
     if (jsonPermission.is_discarded() || !jsonPermission.is_array()) {
         ANS_LOGE("Parse bundle permission failed due to data is discarded or not array");
         return false;
