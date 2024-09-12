@@ -89,12 +89,13 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_SIZE)) {
+    if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
-        return ERR_ANS_ICON_OVER_SIZE;
+    if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_SIZE)) {
+        request->ResetBigIcon();
+        ANS_LOGI("Check big image size over limit");
     }
 
     return ERR_OK;
