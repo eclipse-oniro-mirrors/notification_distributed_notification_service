@@ -1504,35 +1504,45 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     int32_t slotTypeValue = parcel.ReadInt32();
     if (slotTypeValue < 0 ||
-    slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", slotTypeValue);
+        slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type value :%d. It should be in [0 , %d).",
+            slotTypeValue, static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE));
         return false;
     }
     slotType_ = static_cast<NotificationConstant::SlotType>(slotTypeValue);
     int32_t groupAlertTypeValue = parcel.ReadInt32();
     if (groupAlertTypeValue < 0 ||
-    groupAlertTypeValue >= static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", groupAlertTypeValue);
+        groupAlertTypeValue >= static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid groupAlert type value :%d. It should be in [0 , %d).",
+            groupAlertTypeValue, static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE));
         return false;
     }
     groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(groupAlertTypeValue);
     int32_t visiblenessTypeValue = parcel.ReadInt32();
     if (visiblenessTypeValue < 0 ||
-    visiblenessTypeValue >= static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", visiblenessTypeValue);
+        visiblenessTypeValue >= static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid visibleness type value :%d. It should be in [0 , %d).",
+            visiblenessTypeValue, static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE));
         return false;
     }
     visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(visiblenessTypeValue);
     int32_t badgeStyleValue = parcel.ReadInt32();
-    if (badgeStyleValue < 0 || badgeStyleValue >= static_cast<int>(NotificationRequest::BadgeStyle::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", badgeStyleValue);
+    if (badgeStyleValue < 0) {
+        ANS_LOGE("Invalid badge style value :%d. It should be greater than 0.", badgeStyleValue);
         return false;
+    }
+    if (badgeStyleValue >= static_cast<int>(NotificationRequest::BadgeStyle::ILLEGAL_TYPE)) {
+        badgeStyleValue = static_cast<int>(NotificationRequest::BadgeStyle::NONE);
+        ANS_LOGE("The badge style value is too large, set it to the default enumeration value: %d.",
+            static_cast<int>(NotificationRequest::BadgeStyle::NONE));
     }
     badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(badgeStyleValue);
     int32_t notificationContentTypeValue = parcel.ReadInt32();
     if (notificationContentTypeValue <= static_cast<int>(NotificationContent::Type::NONE) ||
-    notificationContentTypeValue >= static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%d", notificationContentTypeValue);
+        notificationContentTypeValue >= static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid notification content type value :%d. It should be in (%d , %d)",
+            notificationContentTypeValue, static_cast<int>(NotificationContent::Type::NONE),
+            static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE));
         return false;
     }
     notificationContentType_ = static_cast<NotificationContent::Type>(notificationContentTypeValue);
