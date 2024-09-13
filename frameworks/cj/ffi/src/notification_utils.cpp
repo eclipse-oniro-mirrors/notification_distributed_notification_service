@@ -910,6 +910,8 @@ namespace Notification {
             if (head == nullptr) {
                 free(notificationSlot.desc);
                 free(notificationSlot.sound);
+                notificationSlot.desc = nullptr;
+                notificationSlot.sound = nullptr;
                 LOGE("SetNotificationSlot malloc vibrationValues.head failed.");
                 return false;
             }
@@ -1033,6 +1035,16 @@ namespace Notification {
         }
     }
 
+    static void freeNotificationBasicContent(CNotificationBasicContent* normal)
+    {
+        free(normal->title);
+        free(normal->text);
+        free(normal->additionalText);
+        normal->title = nullptr;
+        normal->text = nullptr;
+        normal->additionalText = nullptr;
+    }
+
     bool SetNotificationBasicContent(
         const NotificationBasicContent *basicContent,
         CNotificationBasicContent* normal)
@@ -1056,17 +1068,13 @@ namespace Notification {
             std::shared_ptr<Media::PixelMap> pix = basicContent->GetLockScreenPicture();
             if (pix == nullptr) {
                 LOGE("Invalid object pixelMap");
-                free(normal->title);
-                free(normal->text);
-                free(normal->additionalText);
+                freeNotificationBasicContent(normal);
                 return false;
             }
             auto native = FFIData::Create<Media::PixelMapImpl>(pix);
             if (native == nullptr) {
                 LOGE("Invalid object pixelMap");
-                free(normal->title);
-                free(normal->text);
-                free(normal->additionalText);
+                freeNotificationBasicContent(normal);
                 return false;
             }
             normal->lockscreenPicture = native->GetID();
@@ -1300,6 +1308,8 @@ namespace Notification {
             if (native == nullptr) {
                 free(cCapsule.title);
                 free(cCapsule.backgroundColor);
+                cCapsule.title = nullptr;
+                cCapsule.backgroundColor = nullptr;
                 LOGE("Invalid object pixelMap of icon");
                 return false;
             }
