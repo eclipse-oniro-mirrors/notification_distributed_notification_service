@@ -57,6 +57,8 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
