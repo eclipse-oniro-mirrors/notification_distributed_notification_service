@@ -304,6 +304,8 @@ void NotificationRequest::SetLittleIcon(const std::shared_ptr<Media::PixelMap> &
         Media::ImageInfo outImageInfo;
         littleIcon->GetImageInfo(outImageInfo);
         littleIconType_ = outImageInfo.encodedFormat;
+    } else {
+        littleIconType_ = "";
     }
 }
 

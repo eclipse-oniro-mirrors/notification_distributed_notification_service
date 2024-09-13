@@ -241,8 +241,9 @@ void AnsSubscriberProxy::OnCanceledList(const std::vector<sptr<Notification>> &n
 
     for (size_t i = 0; i < notifications.size(); i ++) {
         sptr<Notification> notification = notifications[i];
-        notification->GetNotificationRequest().SetBigIcon(nullptr);
-        notification->GetNotificationRequest().SetLittleIcon(nullptr);
+        notification->GetNotificationRequestPoint()->SetBigIcon(nullptr);
+        notification->GetNotificationRequestPoint()->SetLittleIcon(nullptr);
+        notification->GetNotificationRequestPoint()->SetOverlayIcon(nullptr);
     }
     if (!WriteParcelableVector(notifications, data)) {
         ANS_LOGE("Write notifications failed");
