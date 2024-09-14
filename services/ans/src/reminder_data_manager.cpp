@@ -1044,16 +1044,13 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
             continue;
         }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             playSoundReminder = (*it);
             isAlerting = true;
         } else {
-            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             ShowReminder((*it), false, false, false, false);
         }
     }
     if (playSoundReminder != nullptr) {
-        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder(playSoundReminder, true, false, false, true);
     }
 }
@@ -1354,9 +1351,11 @@ void ReminderDataManager::HandleImmediatelyShow(
     bool isAlerting = false;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
+            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             ShowReminder((*it), true, false, isSysTimeChanged, true);
             isAlerting = true;
         } else {
+            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             ShowReminder((*it), false, false, isSysTimeChanged, false);
         }
     }
@@ -2062,6 +2061,7 @@ void ReminderDataManager::OnLanguageChanged()
         showedReminder = showedReminderVector_;
     }
     for (auto it = showedReminder.begin(); it != showedReminder.end(); ++it) {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder((*it), false, false, false, false);
     }
 }
