@@ -888,13 +888,13 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         // Local device
         result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
         bool enableSuccessed = result == ERR_OK;
-        if (!enabled && result == ERR_OK) {
-            result = RemoveAllNotificationsForDisable(bundle);
-        }
-        if (saveRef != ERR_OK) {
-            SetSlotFlagsTrustlistsAsBundle(bundle);
-        }
-        if (enableSuccessed) {
+        if (result == ERR_OK) {
+            if (!enabled) {
+                result = RemoveAllNotificationsForDisable(bundle);
+            }
+            if (saveRef != ERR_OK) {
+                SetSlotFlagsTrustlistsAsBundle(bundle);
+            }
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
             PublishSlotChangeCommonEvent(bundle);
         }

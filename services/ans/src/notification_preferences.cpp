@@ -813,7 +813,9 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
         bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
     }
     result = SaveBundleProperty(bundleInfo, bundleOption, type, value);
-    preferencesInfo.SetBundleInfo(bundleInfo);
+    if (result == ERR_OK) {
+        preferencesInfo.SetBundleInfo(bundleInfo);
+    }
 
     return result;
 }
