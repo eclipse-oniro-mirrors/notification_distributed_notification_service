@@ -73,7 +73,15 @@ bool NotificationTrustList::IsReminderTrustList(const std::string& bundleName)
 
 bool NotificationTrustList::IsSlotFlagsTrustlistAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    return notificationSlotFlagsTrustlist_.count(bundleOption->GetBundleName());
+    if (notificationSlotFlagsTrustlist_.count(bundleOption->GetBundleName()) > 0) {
+        return true;
+    }
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    int32_t ctrlResult = EXTENTION_WRAPPER->BannerControl(bundleOption->GetBundleName());
+    return (ctrlResult == ERR_OK) ? true : false;
+#else
+    return false;
+#endif
 }
 } // namespace Notification
 } // namespace OHOS

@@ -21,7 +21,7 @@
 #include "advanced_datashare_observer.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
- 
+
 #include "common_event_subscriber.h"
 #include "system_event_observer.h"
 
@@ -60,7 +60,8 @@ void ExtensionWrapper::InitExtentionWrapper()
     syncAdditionConfig_ = (SYNC_ADDITION_CONFIG)dlsym(extensionWrapperHandle_, "SyncAdditionConfig");
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
     reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
-    if (syncAdditionConfig_ == nullptr
+    bannerControl_ = (BANNER_CONTROL)dlsym(extensionWrapperHandle_, "BannerControl");
+    if (syncAdditionConfig_ == nullptr || bannerControl_ == nullptr
         || localControl_ == nullptr
         || reminderControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
@@ -117,7 +118,7 @@ void ExtensionWrapper::RegisterDataSettingObserver()
     if (aggregationRoamingObserver == nullptr) {
         return;
     }
-    
+
     Uri dataEnableUri(SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI);
     AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(dataEnableUri, aggregationRoamingObserver);
 }
@@ -155,6 +156,15 @@ int32_t ExtensionWrapper::ReminderControl(const std::string &bundleName)
         return 0;
     }
     return reminderControl_(bundleName);
+}
+
+int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
+{
+    if (bannerControl_ == nullptr) {
+        ANS_LOGE("ReminderControl wrapper symbol failed");
+        return -1;
+    }
+    return bannerControl_(bundleName);
 }
 
 __attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)

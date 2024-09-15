@@ -41,6 +41,7 @@ public:
     typedef int32_t (*LOCAL_CONTROL)(const sptr<NotificationRequest> &request);
     typedef void (*UPDATE_BY_BUNDLE)(const std::string bundleName, int deleteType);
     typedef int32_t (*REMINDER_CONTROL)(const std::string &bundleName);
+    typedef int32_t (*BANNER_CONTROL)(const std::string &bundleName);
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
@@ -51,6 +52,7 @@ public:
     int32_t LocalControl(const sptr<NotificationRequest> &request);
     void UpdateByBundle(const std::string bundleName, int deleteType);
     int32_t ReminderControl(const std::string &bundleName);
+    int32_t BannerControl(const std::string &bundleName);
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -64,6 +66,7 @@ private:
     LOCAL_CONTROL localControl_ = nullptr;
     UPDATE_BY_BUNDLE updateByBundle_ = nullptr;
     REMINDER_CONTROL reminderControl_ = nullptr;
+    BANNER_CONTROL bannerControl_ = nullptr;
     bool isRegisterDataSettingObserver = false;
 };
 
