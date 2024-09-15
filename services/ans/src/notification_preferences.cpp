@@ -48,6 +48,9 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
         std::lock_guard<std::mutex> lock(instanceMutex_);
         if (instance_ == nullptr) {
             auto instance = std::make_shared<NotificationPreferences>();
+            if (instance == nullptr) {
+                ANS_LOGE("failed to create NotificationPreference");
+            }
             instance_ = instance;
         }
     }
@@ -59,11 +62,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1)
-        .BundleName(bundleOption == nullptr ? "" : bundleOption->GetBundleName());
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || slots.empty()) {
-        message.Message("Invalid param.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> lock(preferenceMutex_);
@@ -79,8 +78,6 @@ ErrCode NotificationPreferences::AddNotificationSlots(
     ANS_LOGD("ffrt: add slot to db!");
     if (result == ERR_OK &&
         (!preferncesDB_->PutSlotsToDisturbeDB(bundleOption->GetBundleName(), bundleOption->GetUid(), slots))) {
-        message.Message("put slot for to db failed.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
@@ -117,25 +114,18 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1)
-        .BundleName(bundleOption->GetBundleName());
-    message.SlotType(static_cast<uint32_t>(slotType));
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     result = CheckSlotForRemoveSlot(bundleOption, slotType, preferencesInfo);
     if (result == ERR_OK &&
         (!preferncesDB_->RemoveSlotFromDisturbeDB(GenerateBundleKey(bundleOption), slotType, bundleOption->GetUid()))) {
-        message.Message("Remove slot failed: " + std::to_string(result));
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
     }
-    message.Message("Remove slot successful");
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -145,8 +135,6 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1)
-        .BundleName(bundleOption->GetBundleName());
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
@@ -165,8 +153,6 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
         ANS_LOGD("result is ERR_OK");
         preferencesInfo_ = preferencesInfo;
     }
-    message.Message("Remove all slot: " + std::to_string(result));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -211,8 +197,6 @@ ErrCode NotificationPreferences::UpdateNotificationSlots(
     for (auto slotIter : slots) {
         result = CheckSlotForUpdateSlot(bundleOption, slotIter, preferencesInfo);
         if (result != ERR_OK) {
-            message.Message("Check slot for update failed." + std::to_string(result));
-            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return result;
         }
     }
@@ -550,7 +534,7 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
 ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
-    ANS_LOGE("Called.");
+    ANS_LOGD("Called.");
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");
@@ -747,7 +731,6 @@ template <typename T>
 ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo::BundleInfo &bundleInfo,
     const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, const T &value)
 {
-    HaMetaMessage message = HaMetaMessage().BundleName(bundleInfo.GetBundleName());
     bool storeDBResult = true;
     switch (type) {
         case BundleType::BUNDLE_IMPORTANCE_TYPE:
@@ -779,9 +762,6 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
         default:
             break;
     }
-    message.Message("Save:" + std::to_string(static_cast<int32_t>(type)) +
-        " : " + std::to_string(value) + " : " + std::to_string(storeDBResult));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

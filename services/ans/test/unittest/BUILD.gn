@@ -725,7 +725,6 @@ ohos_unittest("access_token_helper_test") {
   sources = [
     "${services_path}/ans/src/access_token_helper.cpp",
     "${services_path}/ans/test/unittest/mock/mock_accesstoken_kit.cpp",
-    "${services_path}/ans/test/unittest/mock/mock_notification_analytics_util.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "access_token_helper_test/access_token_helper_test.cpp",
   ]
@@ -1019,7 +1018,6 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "${services_path}/ans/src/notification_preferences_database.cpp",
     "${services_path}/ans/src/notification_preferences_info.cpp",
     "${services_path}/ans/src/os_account_manager_helper.cpp",
-    "${services_path}/ans/test/unittest/mock/mock_notification_analytics_util.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_preferences_database_branch_test/mock_notification_rdb_data_mgr.cpp",
     "notification_preferences_database_branch_test/notification_preferences_database_branch_test.cpp",

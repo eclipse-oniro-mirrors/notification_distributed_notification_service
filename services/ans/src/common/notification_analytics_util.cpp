@@ -33,7 +33,9 @@ constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 6;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 static std::mutex reportFlowControlMutex_;
-static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_;
+static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_ = {
+    {MODIFY_ERROR_EVENT_CODE, {}},
+};
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -256,25 +258,18 @@ bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> lock(reportFlowControlMutex_);
-    std::list<std::chrono::system_clock::time_point> list = GetFlowListByType(reportType);
+    auto iter = flowControlTimestampMap_.find(reportType);
+    if (iter == flowControlTimestampMap_.end()) {
+        return false;
+    }
+    auto& list = iter->second;
     FlowControllerOption option = GetFlowOptionByType(reportType);
     RemoveExpired(list, now, option.time);
     if (list.size() >= option.count) {
         return false;
     }
     list.push_back(now);
-    flowControlTimestampMap_[reportType] = list;
     return true;
-}
-
-std::list<std::chrono::system_clock::time_point> NotificationAnalyticsUtil::GetFlowListByType(const int32_t reportType)
-{
-    std::list<std::chrono::system_clock::time_point> res;
-    auto iter = flowControlTimestampMap_.find(reportType);
-    if (iter != flowControlTimestampMap_.end()) {
-        res = iter->second;
-    }
-    return res;
 }
 
 void NotificationAnalyticsUtil::RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,

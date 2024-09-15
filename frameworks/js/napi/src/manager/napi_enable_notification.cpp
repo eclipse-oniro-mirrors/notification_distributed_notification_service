@@ -253,7 +253,7 @@ void NapiAsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data
 
 napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGI("NapiRequestEnableNotification enter");
     IsEnableParams params {};
     if (ParseRequestEnableParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -278,6 +278,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             return;
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
+        std::string deviceId {""};
         sptr<AnsDialogHostClient> client = nullptr;
         if (!AnsDialogHostClient::CreateIfNullptr(client)) {
             asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_IS_POPPING;
@@ -304,7 +305,6 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             }
         } else {
             ANS_LOGD("un stage mode");
-            std::string deviceId {""};
             asynccallbackinfo->info.errorCode =
             NotificationHelper::RequestEnableNotification(deviceId, client,
                 asynccallbackinfo->params.callerToken);
@@ -500,8 +500,9 @@ napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
 
+    int32_t errorCode = 0;
     bool allowed = false;
-    NotificationHelper::IsAllowedNotifySelf(allowed);
+    errorCode = NotificationHelper::IsAllowedNotifySelf(allowed);
     napi_value result = nullptr;
     napi_get_boolean(env, allowed, &result);
     return result;

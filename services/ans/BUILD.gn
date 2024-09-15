@@ -187,10 +187,6 @@ ohos_shared_library("libans") {
     defines += [ "HITRACE_METER_ENABLE" ]
   }
 
-  if (distributed_notification_service_feature_summary) {
-    defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
-  }
-
   if (ans_config_policy_enable) {
     external_deps += [ "config_policy:configpolicy_util" ]
     defines += [ "CONFIG_POLICY_ENABLE" ]
@@ -199,6 +195,10 @@ ohos_shared_library("libans") {
   if (screenlock_mgr_enable) {
     external_deps += [ "screenlock_mgr:screenlock_client" ]
     defines += [ "SCREENLOCK_MGR_ENABLE" ]
+  }
+
+  if (distributed_notification_service_feature_summary) {
+    defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
   }
 
   if (telephony_cust) {

@@ -31,12 +31,14 @@
 #include "ipc_skeleton.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "smart_reminder_center.h"
+#else
+#include "notification_config_parse.h"
 #endif
 
 #include "advanced_notification_inline.cpp"
 #include "notification_extension_wrapper.h"
-#include "notification_analytics_util.h"
 #include "notification_trust_list.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -492,29 +494,21 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags)
 {
     std::vector<sptr<NotificationSlot>> slots;
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_1);
     ErrCode ret = NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundle, slots);
     if (ret != ERR_OK) {
-        message.Message("Failed to get slots by bundle, ret:" + std::to_string(ret), true);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Failed to get slots by bundle, ret is %{public}d.", ret);
         return ret;
     }
 
-    message.BundleName((bundle == nullptr) ? "" : bundle->GetBundleName());
     if (slots.empty()) {
-        message.Message("The bundle has no slots.", true);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGW("The bundle has no slots.");
         return ERR_OK;
     }
-
     for (auto slot : slots) {
         auto configSlotReminderMode =
             DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
         slot->SetReminderMode(slotFlags & configSlotReminderMode);
         std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
-        message.Message("Update reminderMode " + std::to_string(slot->GetType()) + ' '
-            + std::to_string(slot->GetReminderMode()));
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
             slot->GetType(), bundleName.c_str(), slot->GetReminderMode());
     }
@@ -752,10 +746,8 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     if (notificationSvrQueue_ == nullptr) {
-        message.Message("Serial queue is invalid.", true);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -766,6 +758,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
 
     bool isSyncConfig = (strcmp(key.c_str(), KEY_NAME) == 0 ||
         strcmp(key.c_str(), CTRL_LIST_KEY_NAME) == 0);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     if (isSyncConfig) {
 #ifdef ENABLE_ANS_EXT_WRAPPER
     ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);

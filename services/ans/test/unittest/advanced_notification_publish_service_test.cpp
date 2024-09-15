@@ -178,6 +178,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00003, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERR_OK);
 
@@ -205,6 +206,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
     RegisterPushCheck();
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
@@ -243,8 +245,8 @@ HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
-    MockIsOsAccountExists(true);
     RegisterPushCheck();
+    MockIsOsAccountExists(true);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -466,7 +468,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
 
     NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, OHOS::AAFwk::ABILITY_VISIBLE_FALSE_DENY_REQUEST);
 }
 
 /**

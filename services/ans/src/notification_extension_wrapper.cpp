@@ -24,6 +24,8 @@
  
 #include "common_event_subscriber.h"
 #include "system_event_observer.h"
+#include "interface_system_event.h"
+#include "system_event_subscriber.h"
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
