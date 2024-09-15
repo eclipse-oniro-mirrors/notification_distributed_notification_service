@@ -60,19 +60,10 @@ void ExtensionWrapper::InitExtentionWrapper()
     }
 
     syncAdditionConfig_ = (SYNC_ADDITION_CONFIG)dlsym(extensionWrapperHandle_, "SyncAdditionConfig");
-    getUnifiedGroupInfo_ = (GET_UNIFIED_GROUP_INFO)dlsym(extensionWrapperHandle_, "GetUnifiedGroupInfo");
-    updateByCancel_ = (UPDATE_BY_CANCEL)dlsym(extensionWrapperHandle_, "UpdateByCancel");
-    setLocalSwitch_ = (SET_LOCAL_SWITCH)dlsym(extensionWrapperHandle_, "SetlocalSwitch");
-    initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
-    updateByBundle_ = (UPDATE_BY_BUNDLE)dlsym(extensionWrapperHandle_, "UpdateByBundle");
     reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
     if (syncAdditionConfig_ == nullptr
-        || getUnifiedGroupInfo_ == nullptr
-        || updateByCancel_ == nullptr
-        || initSummary_ == nullptr
         || localControl_ == nullptr
-        || updateByBundle_ == nullptr
         || reminderControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
@@ -87,7 +78,9 @@ void ExtensionWrapper::InitExtentionWrapper()
     if (!aggregateConfig.empty()) {
         syncAdditionConfig_("AGGREGATE_CONFIG", aggregateConfig);
     }
-    initSummary_(UpdateUnifiedGroupInfo);
+    if (initSummary_ != nullptr) {
+        initSummary_(UpdateUnifiedGroupInfo);
+    }
     ANS_LOGD("extension wrapper init success");
 }
 
@@ -95,7 +88,6 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
 {
     ANS_LOGD("CheckIfSetlocalSwitch enter");
     if (extensionWrapperHandle_ == nullptr) {
-        ANS_LOGE("CheckIfSetlocalSwitch extension wrapper symbol failed");
         return;
     }
     if (!isRegisterDataSettingObserver) {
@@ -110,7 +102,6 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
 void ExtensionWrapper::SetlocalSwitch(std::string &enable)
 {
     if (setLocalSwitch_ == nullptr) {
-        ANS_LOGE("SetlocalSwitch wrapper symbol failed");
         return;
     }
     bool status = (enable == "false" ? false : true);
@@ -145,7 +136,6 @@ ErrCode ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::
 void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason)
 {
     if (updateByCancel_ == nullptr) {
-        ANS_LOGE("updateUnifiedGroupByCancel wrapper symbol failed");
         return;
     }
     int32_t deleteType = convertToDelType(deleteReason);
@@ -155,7 +145,6 @@ void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& not
 ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &request)
 {
     if (getUnifiedGroupInfo_ == nullptr) {
-        ANS_LOGE("getUnifiedGroupInfo wrapper symbol failed");
         return 0;
     }
     return getUnifiedGroupInfo_(request);
@@ -182,7 +171,6 @@ __attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const
 void ExtensionWrapper::UpdateByBundle(const std::string bundleName, int deleteReason)
 {
     if (updateByBundle_ == nullptr) {
-        ANS_LOGE("UpdateByBundle wrapper symbol failed");
         return;
     }
     int32_t deleteType = convertToDelType(deleteReason);
