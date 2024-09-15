@@ -1988,9 +1988,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
-        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     int32_t uid = request->GetCreatorUid();
     if (request->GetOwnerUid() != DEFAULT_UID) {
         std::shared_ptr<NotificationBundleOption> agentBundle =
@@ -2070,7 +2067,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
         }
 
-        ChangeNotificationByControlFlags(record, isAgentController);
+        ChangeNotificationByControlFlags(record);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
         record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
