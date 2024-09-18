@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include "bundle_info.h"
 #include "notification_live_view_content.h"
+#include "notification_record.h"
+#include <cstdint>
+#include <memory>
 #include <string>
 #define private public
 #define protected public
@@ -21,6 +25,7 @@
 #undef private
 #undef protected
 #include "advancednotificationservice_fuzzer.h"
+#include "ans_dialog_callback_proxy.h"
 #include "ans_subscriber_stub.h"
 #include "ans_permission_def.h"
 #include "notification_request.h"
@@ -29,7 +34,6 @@ constexpr uint8_t SLOT_TYPE_NUM = 5;
 constexpr uint8_t ENABLE = 2;
 
 namespace OHOS {
-    
 
     bool DoSomethingInterestingWithMyAPI(FuzzData fuzzData)
     {
@@ -153,7 +157,7 @@ namespace OHOS {
         service->GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = fuzzData.GenerateRandomInt32();
         service->SetBadgeNumber(badgeNum, fuzzData.GenerateRandomInt32());
-        sptr<Notification::AnsDialogCallback> dialogCallback = NULL;
+        sptr<Notification::AnsDialogCallback> dialogCallback = new Notification::AnsDialogCallbackProxy(nullptr);
         sptr<IRemoteObject> callerToken = new Notification::AnsSubscriberStub();
         std::shared_ptr<Notification::NotificationUnifiedGroupInfo> groupInfo;
         service->RequestEnableNotification(stringData, dialogCallback, callerToken);
@@ -196,6 +200,99 @@ namespace OHOS {
         service->IsSmartReminderEnabled(deviceType, enabled);
         service->SetTargetDeviceStatus(deviceType, fuzzData.GenerateRandomInt32());
         service->ClearAllNotificationGroupInfo(localSwitch);
+        
+        OHOS::DoTestForAdvancedNotificationUtils(service, fuzzData);
+        OHOS::DoTestForAdvancedNotificationService(service, fuzzData);
+        return true;
+    }
+
+    bool DoTestForAdvancedNotificationUtils(std::shared_ptr<Notification::AdvancedNotificationService> service,
+        FuzzData fuzzData)
+    {
+        std::string randomString = fuzzData.GenerateRandomString();
+        int32_t randomInt32 = fuzzData.GenerateRandomInt32();
+        int64_t randomInt64 = fuzzData.GetData<int64_t>();
+        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
+        bundleOption->SetBundleName(randomString);
+        bundleOption->SetUid(randomInt32);
+        sptr<Notification::NotificationBundleOption> targetBundleOption = nullptr;
+        sptr<Notification::NotificationRequest> request = new Notification::NotificationRequest();
+        request->SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
+        auto content = std::make_shared<Notification::NotificationLiveViewContent>();
+        request->SetContent(std::make_shared<Notification::NotificationContent>(content));
+        request->SetOwnerUid(randomInt32);
+        request->SetCreatorUid(randomInt32);
+        auto flag = std::make_shared<Notification::NotificationFlags>();
+        request->SetFlags(flag);
+        service->GetAppTargetBundle(bundleOption, targetBundleOption);
+        std::vector<std::string> infos;
+        infos.emplace_back(randomString);
+        service->SetAgentNotification(request, randomString);
+        service->ActiveNotificationDump(randomString, randomInt32, randomInt32, infos);
+        service->RecentNotificationDump(randomString, randomInt32, randomInt32, infos);
+        service->OnBundleRemoved(bundleOption);
+        service->OnBundleDataAdd(bundleOption);
+        service->OnBundleDataUpdate(bundleOption);
+        service->GetBundlesOfActiveUser();
+        service->InitNotificationEnableList();
+        AppExecFwk::BundleInfo bundleInfo;
+        service->GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo);
+        std::shared_ptr<Notification::NotificationRecord> record =
+            service->MakeNotificationRecord(request, bundleOption);
+        record->slot = new Notification::NotificationSlot(Notification::NotificationConstant::SlotType::LIVE_VIEW);
+        service->StartAutoDelete(record, fuzzData.GetData<int64_t>(), randomInt32);
+        service->PrePublishNotificationBySa(request, randomInt32, randomString);
+        service->SetRequestBundleInfo(request, randomInt32, randomString);
+        std::vector<std::u16string> args;
+        args.emplace_back(fuzzData.GetData<std::u16string>());
+        service->Dump(randomInt32, args);
+        service->OnResourceRemove(randomInt32);
+        service->CheckApiCompatibility(bundleOption);
+        service->OnBundleDataCleared(bundleOption);
+        service->CheckPublishWithoutApp(randomInt32, request);
+        service->GetLocalNotificationKeys(bundleOption);
+        service->OnDistributedPublish(randomString, randomString, request);
+        service->OnDistributedUpdate(randomString, randomString, request);
+        service->OnDistributedDelete(randomString, randomString, randomString, randomInt32);
+        service->AdjustDateForDndTypeOnce(randomInt64, randomInt64);
+        return true;
+    }
+
+    bool DoTestForAdvancedNotificationService(std::shared_ptr<Notification::AdvancedNotificationService> service,
+        FuzzData fuzzData)
+    {
+        std::string randomString = fuzzData.GenerateRandomString();
+        int32_t randomInt32 = fuzzData.GenerateRandomInt32();
+        int64_t randomInt64 = fuzzData.GetData<int64_t>();
+        sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
+        bundleOption->SetBundleName(randomString);
+        bundleOption->SetUid(randomInt32);
+        sptr<Notification::NotificationBundleOption> targetBundleOption = nullptr;
+        sptr<Notification::NotificationRequest> request = new Notification::NotificationRequest();
+        request->SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
+        auto content = std::make_shared<Notification::NotificationLiveViewContent>();
+        request->SetContent(std::make_shared<Notification::NotificationContent>(content));
+        request->SetOwnerUid(randomInt32);
+        request->SetCreatorUid(randomInt32);
+        auto flag = std::make_shared<Notification::NotificationFlags>();
+        request->SetFlags(flag);
+        std::shared_ptr<Notification::NotificationRecord> record =
+            service->MakeNotificationRecord(request, bundleOption);
+        record->slot = new Notification::NotificationSlot(Notification::NotificationConstant::SlotType::LIVE_VIEW);
+        service->StartFinishTimer(record, randomInt64, randomInt32);
+        service->StartUpdateTimer(record, randomInt64, randomInt32);
+        service->StartArchiveTimer(record);
+        service->PublishPreparedNotification(request, bundleOption, fuzzData.GenerateRandomBool());
+        service->QueryDoNotDisturbProfile(randomInt32, randomString, randomString);
+        service->CheckDoNotDisturbProfile(record);
+        service->DoNotDisturbUpdataReminderFlags(record);
+        service->UpdateSlotAuthInfo(record);
+        service->Filter(record, fuzzData.GenerateRandomBool());
+        service->ChangeNotificationByControlFlags(record, fuzzData.GenerateRandomBool());
+        service->CheckPublishPreparedNotification(record, fuzzData.GenerateRandomBool());
+        service->UpdateInNotificationList(record);
+        service->PublishFlowControl(record);
+        service->IsNeedPushCheck(request);
         return true;
     }
 }
