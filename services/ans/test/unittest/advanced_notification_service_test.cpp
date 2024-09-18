@@ -3598,6 +3598,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00001, Function
 {
     ASSERT_NE(advancedNotificationService_, nullptr);
     MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     ASSERT_NE(bundleOption, nullptr);
     std::string bundleName = "invalidBundleName";

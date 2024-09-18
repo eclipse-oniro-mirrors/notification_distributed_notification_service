@@ -310,6 +310,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | 
     notifications.emplace_back(notification);
     notificationSubscriberManager_->notificationSubQueue_ = nullptr;
     notificationSubscriberManager_->BatchNotifyConsumed(notifications, notificationMap, record);
+    EXPECT_NE(notificationSubscriberManager_, nullptr);
 }
 
 /**
