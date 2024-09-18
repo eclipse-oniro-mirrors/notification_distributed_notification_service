@@ -30,6 +30,7 @@
 #include "time_service_client.h"
 #include "notification_timer_info.h"
 #include "advanced_notification_inline.cpp"
+#include "notification_analytics_util.h"
 #include <cstdint>
 #include <memory>
 
@@ -242,16 +243,20 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
 
     auto result = NotificationPreferences::GetInstance()->SetKvToDb(
         request->GetKey(), jsonObject.dump(), request->GetReceiverUserId());
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3).
+        BundleName(request->GetCreatorBundleName()).NotificationId(request->GetNotificationId());
     if (result != ERR_OK) {
         ANS_LOGE(
             "Set notification request failed, bundle name %{public}s, id %{public}d, key %{public}s, ret %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("set failed"));
         return result;
     }
 
     result = SetLockScreenPictureToDb(request);
     if (result != ERR_OK) {
         ANS_LOGE("Failed to set lock screen picture to db");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("SetToDb failed"));
         return result;
     }
     return ERR_OK;

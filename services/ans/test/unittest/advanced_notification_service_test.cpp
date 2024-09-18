@@ -19,11 +19,9 @@
 #include "notification_request.h"
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <thread>
 
 #include "gtest/gtest.h"
-#include <vector>
 
 #define private public
 
@@ -3096,7 +3094,7 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0005, Function | S
 /**
  * @tc.number    : IsNeedPushCheckTest_0006
  * @tc.name      : IsNeedPushCheckTest
- * @tc.desc      : Test notification except live view registered but has inconsistent contentType dont't need push check.
+ * @tc.desc      : Test notification except live view registered but has inconsistent contentType don't need push check.
  * @tc.require   : #I6Z5OV
  */
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0006, Function | SmallTest | Level1)
@@ -3369,7 +3367,7 @@ HWTEST_F(AdvancedNotificationServiceTest, StartArchiveTimer_00001, Function | Sm
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(slotType);
-    request->SetAutoDeletedTime(NotificationConstant::NO_DELAY_DELETE_TIME);
+    request->SetAutoDeletedTime(0);
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->StartArchiveTimer(record);
@@ -3697,7 +3695,6 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00002, Function 
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 #endif
-
 /**
  * @tc.number    : AddExcludeDate_00001
  * @tc.name      : Test AddExcludeDate

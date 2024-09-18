@@ -82,7 +82,6 @@ void AnsBranchTest::SetUp()
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);

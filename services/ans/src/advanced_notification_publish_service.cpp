@@ -39,6 +39,7 @@
 #include "common_event_publish_info.h"
 #include "want_params_wrapper.h"
 #include "ans_convert_enum.h"
+#include "notification_analytics_util.h"
 
 #include "advanced_notification_inline.cpp"
 #include "advanced_datashare_helper.h"
@@ -694,8 +695,12 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     }
     // To get the permission
     bool allowedNotify = false;
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_1)
+        .BundleName(bundleOption->GetBundleName());
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK) {
+        message.Message("Allow notify self failed: " + std::to_string(result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     ANS_LOGI("allowedNotify = %{public}d", allowedNotify);
@@ -706,6 +711,8 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
     if (result != ERR_OK) {
+        message.Message("Has popped dialog: " + std::to_string(result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
@@ -720,6 +727,8 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     if (result == ERR_OK) {
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
     }
+    message.Message("Request dialog: " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -869,6 +878,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
     ANS_LOGD("%{public}s", __FUNCTION__);
     canPop = false;
     ErrCode result = ERR_OK;
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_2);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption == nullptr");
@@ -878,6 +888,8 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
     bool allowedNotify = false;
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK) {
+        message.Message("Allow notify self failed: " + std::to_string(result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     ANS_LOGI("allowedNotify = %{public}d", allowedNotify);
@@ -888,6 +900,8 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
     if (result != ERR_OK) {
+        message.Message("Has popped dialog: " + std::to_string(result));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
@@ -2125,7 +2139,10 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 
     sptr<NotificationBundleOption> bundle = bundleOption;
     ErrCode result = CheckBundleOptionValid(bundle);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_1);
     if (result != ERR_OK) {
+        message.Message("Input bundle option is not correct: " + std::to_string(result), true);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Input parameter bundle option is not correct.");
         return result;
     }
@@ -2139,6 +2156,8 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         bool isAgent = false;
         isAgent = IsAgentRelationship(bundleName, bundle->GetBundleName());
         if (!isAgent) {
+            message.Message("the caller has no agent relationship with the specified bundle.", true);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             ANS_LOGE("The caller has no agent relationship with the specified bundle.");
             return ERR_ANS_NO_AGENT_SETTING;
         }

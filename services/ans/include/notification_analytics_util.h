@@ -108,8 +108,6 @@ private:
 
     static bool ReportFlowControl(const int32_t reportType);
 
-    static std::list<std::chrono::system_clock::time_point> GetFlowListByType(const int32_t reportType);
-
     static FlowControllerOption GetFlowOptionByType(const int32_t reportType);
 };
 } // namespace Notification

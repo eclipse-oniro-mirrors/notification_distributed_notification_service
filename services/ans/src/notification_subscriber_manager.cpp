@@ -32,6 +32,9 @@
 #include "os_account_manager_helper.h"
 #include "remote_death_recipient.h"
 #include "advanced_notification_service.h"
+#include "notification_analytics_util.h"
+
+#include "advanced_notification_inline.cpp"
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
@@ -103,6 +106,10 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         result = this->AddSubscriberInner(subscriber, subInfo);
     }));
     notificationSubQueue_->wait(handler);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2);
+    message.Message("Subscribe notification: " + GetClientBundleName() + " user " +
+        std::to_string(subInfo->GetAppUserId()) + " " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -126,6 +133,11 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationSubQueue_->wait(handler);
+    std::string appUserId = (subscribeInfo == nullptr) ? "all" : std::to_string(subscribeInfo->GetAppUserId());
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3);
+    message.Message("Remove subscriber: " + GetClientBundleName() + " user " +
+        appUserId + " " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 

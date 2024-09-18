@@ -64,6 +64,7 @@
 #include "reminder_swing_decision_center.h"
 #include "notification_extension_wrapper.h"
 #include "bool_wrapper.h"
+#include "notification_analytics_util.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -73,7 +74,6 @@
 
 #include "advanced_notification_inline.cpp"
 #include "advanced_datashare_helper_ext.h"
-#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {

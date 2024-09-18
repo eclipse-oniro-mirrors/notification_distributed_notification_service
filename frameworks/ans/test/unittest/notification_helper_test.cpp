@@ -1359,5 +1359,20 @@ HWTEST_F(NotificationHelperTest, RegisterSwingCallback_0100, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
 #endif
 }
+
+/**
+ * @tc.name: IsNeedSilentInDoNotDisturbMode_00001
+ * @tc.desc: Test IsNeedSilentInDoNotDisturbMode parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationHelperTest, IsNeedSilentInDoNotDisturbMode_00001, Function | SmallTest | Level1)
+{
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
 }
 }
