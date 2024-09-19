@@ -402,8 +402,8 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
     std::string bundleName = bundleOption->GetBundleName();
     int32_t uid = bundleOption->GetUid();
     ANSR_LOGD("OnProcessDiedLocked, bundleName=%{public}s, uid=%{public}d", bundleName.c_str(), uid);
-    std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+    std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
         int32_t reminderId = (*it)->GetReminderId();
         auto mit = notificationBundleOptionMap_.find(reminderId);
@@ -2063,6 +2063,9 @@ void ReminderDataManager::OnLanguageChanged()
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            if ((*it)->IsExpired() || (*it)->GetTriggerTimeInMilli() == 0) {
+                continue;
+            }
             UpdateReminderLanguage(*it);
         }
     }
