@@ -2037,10 +2037,10 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundl
     return resourceManager;
 }
 
-void ReminderDataManager::UpdateReminderLanguage(const sptr<ReminderRequest> &reminder)
+void ReminderDataManager::UpdateReminderLanguage(const std::string& bundleName,
+    const std::vector<sptr<ReminderRequest>>& reminders)
 {
     // obtains the bundle info by bundle name
-    const std::string bundleName = reminder->GetBundleName();
     AppExecFwk::BundleInfo bundleInfo;
     if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, reminder->GetUid(), bundleInfo)) {
@@ -2056,13 +2056,17 @@ void ReminderDataManager::UpdateReminderLanguage(const sptr<ReminderRequest> &re
         return;
     }
     // update action button title
-    reminder->OnLanguageChange(resourceMgr);
+    for (auto reminder : reminders) {
+        reminder->OnLanguageChange(resourceMgr);
+    }
 }
 
 void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    UpdateReminderLanguage(reminder);
+    std::vector<sptr<ReminderRequest>> reminders;
+    reminders.push_back(reminder);
+    UpdateReminderLanguage(reminder->GetBundleName(), reminders);
 }
 
 void ReminderDataManager::OnLanguageChanged()
@@ -2070,8 +2074,12 @@ void ReminderDataManager::OnLanguageChanged()
     ANSR_LOGI("System language config changed.");
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+        std::unordered_map<std::string, std::vector<sptr<ReminderRequest>>> reminders;
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-            UpdateReminderLanguage(*it);
+            reminders[(*it)->GetBundleName()].push_back((*it));
+        }
+        for (auto& each : reminders) {
+            UpdateReminderLanguage(each.first, each.second);
         }
     }
     std::vector<sptr<ReminderRequest>> showedReminder;
