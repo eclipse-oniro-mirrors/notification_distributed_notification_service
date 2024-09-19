@@ -103,6 +103,11 @@ HWTEST_F(AnsManagerStubTest, HandlePublish01, Function | SmallTest | Level1)
 
     std::string label = "this is a notification label";
     sptr<NotificationRequest> notification = new NotificationRequest();
+    notification->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    notification->SetContent(content2);
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteString(label);
     data.WriteParcelable(notification);
@@ -1007,7 +1012,11 @@ HWTEST_F(AnsManagerStubTest, HandlePublishAsBundle01, Function | SmallTest | Lev
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<NotificationRequest> notification = new NotificationRequest();
-
+    notification->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    notification->SetContent(content2);
     std::string representativeBundle = "this is a representativeBundle";
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
@@ -1215,7 +1224,11 @@ HWTEST_F(AnsManagerStubTest, HandlePublishContinuousTaskNotification01, Function
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<NotificationRequest> request = new NotificationRequest();
-
+    request->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    request->SetContent(content2);
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteParcelable(request);
 

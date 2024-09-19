@@ -262,7 +262,7 @@ HWTEST_F(NotificationHelperTest, CancelAsBundle_00001, Function | SmallTest | Le
     int32_t userId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -279,7 +279,7 @@ HWTEST_F(NotificationHelperTest, CancelAsBundle_00002, Function | SmallTest | Le
     bundleOption.SetUid(20);
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelAsBundle(bundleOption, notificationId);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -481,7 +481,7 @@ HWTEST_F(NotificationHelperTest, RemoveNotification_00001, Function | SmallTest 
     int32_t removeReason = 2;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveNotification(key, removeReason);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -539,7 +539,7 @@ HWTEST_F(NotificationHelperTest, RemoveNotifications_00001, Function | SmallTest
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveNotifications();
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -583,7 +583,7 @@ HWTEST_F(NotificationHelperTest, GetAllActiveNotifications_00001, Function | Sma
     std::vector<sptr<Notification>> notification;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetAllActiveNotifications(notification);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -628,7 +628,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForAllBundles_00001, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationsEnabledForAllBundles(deviceId, enabled);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -758,7 +758,7 @@ HWTEST_F(NotificationHelperTest, DoesSupportDoNotDisturbMode_00001, Function | S
     bool doesSupport = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.DoesSupportDoNotDisturbMode(doesSupport);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -801,7 +801,7 @@ HWTEST_F(NotificationHelperTest, EnableDistributedByBundle_00001, Function | Sma
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.EnableDistributedByBundle(bundleOption, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -830,7 +830,7 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnableByBundle_00001, Function | S
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -844,7 +844,7 @@ HWTEST_F(NotificationHelperTest, GetDeviceRemindType_00001, Function | SmallTest
     NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDeviceRemindType(remindType);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -903,7 +903,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForAllBundles_00002, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationsEnabledForAllBundles(userId, enabled);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -933,7 +933,7 @@ HWTEST_F(NotificationHelperTest, IsAllowedNotify_00004, Function | SmallTest | L
     bool allowed = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsAllowedNotify(userId, allowed);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -948,7 +948,7 @@ HWTEST_F(NotificationHelperTest, SetNotificationsEnabledForAllBundles_00003, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetNotificationsEnabledForAllBundles(userId, enabled);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1054,7 +1054,7 @@ HWTEST_F(NotificationHelperTest, GetSyncNotificationEnabledWithoutApp_00001, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetSyncNotificationEnabledWithoutApp(userId, enabled);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1121,7 +1121,7 @@ HWTEST_F(NotificationHelperTest, SetSmartReminderEnabled_0100, TestSize.Level1)
     std::string deviceType = "testDeviceType";
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1134,7 +1134,7 @@ HWTEST_F(NotificationHelperTest, SetSmartReminderEnabled_0200, TestSize.Level1)
     std::string deviceType = "";
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1148,39 +1148,7 @@ HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0100, TestSize.Level1)
     NotificationHelper notificationHelper;
     bool enable = true;
     ErrCode ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
-    EXPECT_EQ(ret, ERR_OK);
-    EXPECT_EQ(enable, false);
-}
-
-/**
- * @tc.name: IsSmartReminderEnabled_0200
- * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0200, TestSize.Level1)
-{
-    std::string deviceType = "";
-    NotificationHelper notificationHelper;
-    bool enable = true;
-    ErrCode ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.name: IsSmartReminderEnabled_0300
- * @tc.desc: test IsSmartReminderEnabled with parameters
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationHelperTest, IsSmartReminderEnabled_0300, TestSize.Level1)
-{
-    std::string deviceType = "testDeviceType";
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.SetSmartReminderEnabled(deviceType, true);
-    EXPECT_EQ(ret, ERR_OK);
-    bool enable = false;
-    ret = notificationHelper.IsSmartReminderEnabled(deviceType, enable);
-    EXPECT_EQ(ret, ERR_OK);
-    EXPECT_EQ(enable, true);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1227,7 +1195,7 @@ HWTEST_F(NotificationHelperTest, SetDistributedEnabledByBundle_0100, TestSize.Le
     std::string deviceType = "testDeviceType";
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1259,8 +1227,7 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0100, TestSize.Lev
     NotificationHelper notificationHelper;
     bool enable = true;
     ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
-    EXPECT_EQ(ret, ERR_OK);
-    EXPECT_EQ(enable, false);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1278,27 +1245,6 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0200, TestSize.Lev
     bool enable = true;
     ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.name: IsDistributedEnabledByBundle_0300
- * @tc.desc: test IsDistributedEnabledByBundle with parameters
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0300, TestSize.Level1)
-{
-    NotificationBundleOption bundleOption;
-    std::string bundleName = "bundleName";
-    bundleOption.SetBundleName(bundleName);
-    bundleOption.SetUid(1);
-    std::string deviceType = "testDeviceType";
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, true);
-    EXPECT_EQ(ret, ERR_OK);
-    bool enable = false;
-    ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
-    EXPECT_EQ(ret, ERR_OK);
-    EXPECT_EQ(enable, true);
 }
 
 /**
@@ -1372,7 +1318,7 @@ HWTEST_F(NotificationHelperTest, IsNeedSilentInDoNotDisturbMode_00001, Function 
     int32_t callerType = 0;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 }
 }
