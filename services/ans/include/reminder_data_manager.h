@@ -256,7 +256,7 @@ public:
      *
      * Update action button title.
      */
-    void UpdateReminderLanguage(const sptr<ReminderRequest> &reminder);
+    void UpdateReminderLanguage(const int32_t uid, const std::vector<sptr<ReminderRequest>>& reminders);
     void UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder);
     
     /**

@@ -1888,6 +1888,9 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
     }
     // update title
     for (auto &button : actionButtonMap_) {
+        if (button.second.resource.empty()) {
+            continue;
+        }
         std::string title;
         resMgr->GetStringByName(button.second.resource.c_str(), title);
         if (title.empty()) {
