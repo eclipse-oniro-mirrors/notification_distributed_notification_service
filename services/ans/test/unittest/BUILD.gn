@@ -75,12 +75,16 @@ ohos_unittest("reminder_unit_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -164,12 +168,16 @@ ohos_unittest("ans_unit_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -251,12 +259,16 @@ ohos_unittest("notification_service_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -335,12 +347,16 @@ ohos_unittest("notification_preferences_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -395,12 +411,16 @@ ohos_unittest("access_token_helper_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -445,12 +465,16 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -496,12 +520,16 @@ ohos_unittest("notification_dialog_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -563,12 +591,16 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -634,12 +666,16 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -688,12 +724,16 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -734,12 +774,16 @@ ohos_unittest("push_callback_stub_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -786,12 +830,16 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -834,12 +882,16 @@ ohos_unittest("notification_config_parse_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 }
 
 group("unittest") {
