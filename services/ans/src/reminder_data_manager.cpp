@@ -2037,22 +2037,27 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundl
     return resourceManager;
 }
 
-void ReminderDataManager::UpdateReminderLanguage(const std::string& bundleName,
+void ReminderDataManager::UpdateReminderLanguage(const int32_t uid,
     const std::vector<sptr<ReminderRequest>>& reminders)
 {
     // obtains the bundle info by bundle name
+    if (reminders.empty()) {
+        return;
+    }
+
+    std::string bundleName = reminders[0]->GetBundleName();
     AppExecFwk::BundleInfo bundleInfo;
     if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
-        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, reminder->GetUid(), bundleInfo)) {
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, uid, bundleInfo)) {
         ANSR_LOGE("Get reminder request[%{public}d][%{public}s] bundle info failed.",
-            reminder->GetReminderId(), bundleName.c_str());
+            uid, bundleName.c_str());
         return;
     }
     // obtains the resource manager
     auto resourceMgr = GetBundleResMgr(bundleInfo);
     if (resourceMgr == nullptr) {
         ANSR_LOGE("Get reminder request[%{public}d][%{public}s] resource manager failed.",
-            reminder->GetReminderId(), bundleName.c_str());
+            uid, bundleName.c_str());
         return;
     }
     // update action button title
@@ -2066,7 +2071,7 @@ void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderReques
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     std::vector<sptr<ReminderRequest>> reminders;
     reminders.push_back(reminder);
-    UpdateReminderLanguage(reminder->GetBundleName(), reminders);
+    UpdateReminderLanguage(reminder->GetUid(), reminders);
 }
 
 void ReminderDataManager::OnLanguageChanged()
@@ -2074,9 +2079,9 @@ void ReminderDataManager::OnLanguageChanged()
     ANSR_LOGI("System language config changed.");
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        std::unordered_map<std::string, std::vector<sptr<ReminderRequest>>> reminders;
+        std::unordered_map<int32_t, std::vector<sptr<ReminderRequest>>> reminders;
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-            reminders[(*it)->GetBundleName()].push_back((*it));
+            reminders[(*it)->GetUid()].push_back((*it));
         }
         for (auto& each : reminders) {
             UpdateReminderLanguage(each.first, each.second);
