@@ -149,9 +149,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
+#ifndef IS_EMULATOR
         if (IsNeedPushCheck(request)) {
             result = PushCheck(request);
         }
+#endif
+
         if (result != ERR_OK) {
             message.ErrorCode(result).Message("Push check failed.");
             break;
