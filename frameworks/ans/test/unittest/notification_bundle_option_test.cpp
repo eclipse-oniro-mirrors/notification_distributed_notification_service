@@ -75,7 +75,8 @@ HWTEST_F(NotificationBundleOptionTest, Dump_00001, Function | SmallTest | Level1
     std::string bundleName = "BundleName";
     int32_t uid = 10;
     auto rrc = std::make_shared<NotificationBundleOption>(bundleName, uid);
-    std::string ret = "NotificationBundleOption{ bundleName = BundleName, uid = 10, instanceKey = 0 }";
+    std::string ret =
+        "NotificationBundleOption{ bundleName = BundleName, uid = 10, instanceKey = 0, appIndex = -1 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
