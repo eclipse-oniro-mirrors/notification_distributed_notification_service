@@ -1567,7 +1567,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         return -1;
     }
 
-    bool isNeedSilent = false;
+    int isNeedSilent = 0;
     std::string policy;
     Uri policyUri(datashareHelper->GetFocusModeCallPolicyUri(userId));
     bool ret = datashareHelper->Query(policyUri, KEY_FOCUS_MODE_CALL_MESSAGE_POLICY, policy);
@@ -1593,7 +1593,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         case ContactPolicy::FORBID_EVERYONE:
             break;
         case ContactPolicy::ALLOW_EVERYONE:
-            isNeedSilent = true;
+            isNeedSilent = 1;
             break;
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
@@ -1603,7 +1603,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
             break;
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
-    return isNeedSilent ? 1 : 0;
+    return isNeedSilent;
 }
 
 ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, int32_t instanceKey)

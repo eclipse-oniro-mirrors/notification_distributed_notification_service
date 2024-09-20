@@ -36,8 +36,8 @@ public:
     AdvancedDatashareHelper();
     ~AdvancedDatashareHelper() = default;
     bool Query(Uri &uri, const std::string &key, std::string &value);
-    bool QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy);
     bool isRepeatCall(const std::string &phoneNumber);
+    ErrCode QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy);
     std::string GetFocusModeEnableUri(const int32_t &userId) const;
     std::string GetFocusModeProfileUri(const int32_t &userId) const;
     std::string GetFocusModeCallPolicyUri(const int32_t &userId) const;
