@@ -192,7 +192,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_003, Function | SmallTest | Level1)
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
     req->SetStatusBarText("text");
-
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
     g_advancedNotificationService->SetNotificationsEnabledForBundle("", false);
 
     g_advancedNotificationService->Publish(label, req);
@@ -237,11 +241,17 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
 
     // create request
     std::string label = "testLabel";
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
     sptr<NotificationRequest> req = new NotificationRequest(0);
     sptr<NotificationRequest> req1 = new NotificationRequest(1);
     req->SetLabel(label);
     req1->SetLabel(label);
-
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req->SetContent(content2);
+    req1->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req1->SetContent(content2);
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
@@ -276,6 +286,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_006, Function | SmallTest | Level1)
     std::string label = "testLabel";
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -320,10 +335,17 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
 
     // create request
     std::string label = "testLabel";
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
     sptr<NotificationRequest> req = new NotificationRequest(0);
     sptr<NotificationRequest> req1 = new NotificationRequest(1);
     req->SetLabel(label);
     req1->SetLabel(label);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req->SetContent(content2);
+    req1->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req1->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -359,6 +381,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0013, Function | SmallTest | Level1)
     std::string label = "testLabel";
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -1224,6 +1251,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0058, Function | SmallTest | Level1)
     req->SetLabel(label);
     req->SetStatusBarText("text");
     req->SetBadgeNumber(1);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // SetShowBadgeEnabledForBundle true
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundleName", 0);
@@ -1271,10 +1303,17 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
 
     // create request
     std::string label = "testLabel";
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
     sptr<NotificationRequest> req = new NotificationRequest(0);
     sptr<NotificationRequest> req1 = new NotificationRequest(1);
     req->SetLabel(label);
     req1->SetLabel(label);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req->SetContent(content2);
+    req1->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req1->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -1316,10 +1355,17 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0063, Function | SmallTest | Level1)
 
     // create request
     std::string label = "testLabel";
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
     sptr<NotificationRequest> req = new NotificationRequest(0);
     sptr<NotificationRequest> req1 = new NotificationRequest(1);
     req->SetLabel(label);
     req1->SetLabel(label);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req->SetContent(content2);
+    req1->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    req1->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -1378,6 +1424,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0066, Function | SmallTest | Level1)
     std::string label = "testLabel";
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -1458,6 +1509,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0101, Function | SmallTest | Level1)
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
     req->SetWantAgent(agent);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -1491,6 +1547,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0102, Function | SmallTest | Level1)
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
     req->SetWantAgent(agent);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -1524,6 +1585,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0103, Function | SmallTest | Level1)
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
     req->SetWantAgent(agent);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -1586,6 +1652,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0106, Function | SmallTest | Level1)
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
     req->SetWantAgent(agent);
+    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
@@ -2166,11 +2237,15 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
     slots.push_back(new NotificationSlot(NotificationConstant::SlotType::OTHER));
     slots.push_back(new NotificationSlot(NotificationConstant::SlotType::CUSTOM));
     EXPECT_EQ(g_advancedNotificationService->AddSlots(slots), 0);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
     sptr<NotificationRequest> req = new NotificationRequest(0);
     sptr<NotificationRequest> req1 = new NotificationRequest(1);
     sptr<NotificationRequest> req2 = new NotificationRequest(2);
     sptr<NotificationRequest> req3 = new NotificationRequest(3);
     sptr<NotificationRequest> req4 = new NotificationRequest(4);
+
     req->SetLabel("testLabel");
     req1->SetLabel("testLabel");
     req2->SetLabel("testLabel");
@@ -2182,6 +2257,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
     req2->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req3->SetSlotType(NotificationConstant::SlotType::OTHER);
     req4->SetSlotType(NotificationConstant::SlotType::CUSTOM);
+    req->SetContent(content2);
+    req1->SetContent(content2);
+    req2->SetContent(content2);
+    req3->SetContent(content2);
+    req4->SetContent(content2);
 
     g_advancedNotificationService->Publish("testLabel", req);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -2268,7 +2348,10 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0125, Function | SmallTest | Level1)
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
     req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Unsubscribe(subscriber->GetImpl(), nullptr);
@@ -2497,6 +2580,11 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0132, Function | SmallTest | Level1)
     sptr<NotificationRequest> req = new NotificationRequest(0);
     req->SetLabel(label);
     req->SetStatusBarText("text");
+    req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
@@ -2533,6 +2621,10 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0133, Function | SmallTest | Level1)
     req->SetLabel(label);
     req->SetStatusBarText("text");
     req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
     auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
@@ -2575,6 +2667,10 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0134, Function | SmallTest | Level1)
     req->SetLabel(label);
     req->SetStatusBarText("text");
     req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
     auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
@@ -2617,6 +2713,10 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0135, Function | SmallTest | Level1)
     req->SetLabel(label);
     req->SetStatusBarText("text");
     req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::shared_ptr<NotificationLongTextContent> longTextContent =
+        std::make_shared<NotificationLongTextContent>("longtext");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
+    req->SetContent(content2);
 
     std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
     auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
