@@ -94,8 +94,7 @@
       "third_party": [
         "libuv",
         "libxml2",
-        "icu",
-        "openssl"
+        "icu"
       ]
     },
     "build": {
