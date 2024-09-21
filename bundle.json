@@ -88,7 +88,8 @@
         "resource_management",
         "config_policy",
         "screenlock_mgr",
-        "ace_engine"
+        "ace_engine",
+        "openssl"
       ],
       "third_party": [
         "libuv",

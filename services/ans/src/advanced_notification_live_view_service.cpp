@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <memory>
 #include "notification_analytics_util.h"
+#include "aes_gcm_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -248,9 +249,15 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert option failed"));
         return ERR_ANS_TASK_ERR;
     }
-
+    
+    std::string encryptValue;
+    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
+    if (errorCode != ERR_OK) {
+        ANS_LOGE("SetNotificationRequestToDb encrypt error");
+        return static_cast<int>(errorCode);
+    }
     auto result = NotificationPreferences::GetInstance()->SetKvToDb(
-        request->GetKey(), jsonObject.dump(), request->GetReceiverUserId());
+        request->GetKey(), encryptValue, request->GetReceiverUserId());
     if (result != ERR_OK) {
         ANS_LOGE("Set failed, bundle name %{public}s, id %{public}d, key %{public}s, ret %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
@@ -322,7 +329,15 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         }
     }
     for (const auto &iter : dbRecords) {
-        auto jsonObject = nlohmann::json::parse(iter.second);
+        std::string decryptValue = iter.second;
+        if (iter.second.find("{") == std::string::npos) {
+            ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
+            if (errorCode != ERR_OK) {
+                ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error");
+                return static_cast<int>(errorCode);
+            }
+        }
+        auto jsonObject = nlohmann::json::parse(decryptValue);
         auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
         if (request == nullptr) {
             ANS_LOGE("Parse json string to request failed.");
