@@ -57,6 +57,8 @@ constexpr const char *CREATE_TIME = "create_time";
 constexpr const unsigned int PHONE_NUMBER_LENGTH = 7;
 constexpr const unsigned int MAX_TIME_INTERVAL = 15 * 60;
 constexpr const int TYPE_ID_FIVE = 5;
+constexpr const int ERROR_QUERY_INFO_FAILED = -1;
+constexpr const int QUERY_INFO_SUCCESS = 1;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
 AdvancedDatashareHelper::AdvancedDatashareHelper()
@@ -125,13 +127,13 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
     return true;
 }
 
-bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy)
+ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy)
 {
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_URI);
     if (helper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
-        return false;
+        return ERROR_QUERY_INFO_FAILED;
     }
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(IS_DELETED, 0);
@@ -147,9 +149,9 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
     if (resultSet == nullptr) {
         ANS_LOGE("Query error, resultSet is null.");
         helper->Release();
-        return false;
+        return ERROR_QUERY_INFO_FAILED;
     }
-    bool isFound = false;
+    int isFound = 0;
     int rowCount = 0;
     resultSet->GetRowCount(rowCount);
     if (rowCount <= 0) {
@@ -162,7 +164,7 @@ bool AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNum
 #endif
         if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
             (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
-            isFound = dealWithContactResult(helper, resultSet, policy);
+            isFound = dealWithContactResult(helper, resultSet, policy) ? QUERY_INFO_SUCCESS : ERR_OK;
         }
     }
     resultSet->Close();
@@ -182,18 +184,17 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
             do {
                 resultSet->GetColumnIndex(FAVORITE, columnIndex);
                 resultSet->GetInt(columnIndex, favorite);
-                ANS_LOGI("dealWithContactResult: favorite = %{public}d", favorite);
                 isNoNeedSilent = favorite == 1;
                 if (isNoNeedSilent) {
                     break;
                 }
             } while (resultSet->GoToNextRow() == DataShare::E_OK);
+            ANS_LOGI("dealWithContactResult: favorite = %{public}d", favorite);
             break;
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
             do {
                 resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
                 resultSet->GetString(columnIndex, focus_mode_list);
-                ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
                 if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
                     isNoNeedSilent = false;
                 }
@@ -202,6 +203,7 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
                     break;
                 }
             } while (resultSet->GoToNextRow() == DataShare::E_OK);
+            ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
             break;
         default:
             isNoNeedSilent = true;
