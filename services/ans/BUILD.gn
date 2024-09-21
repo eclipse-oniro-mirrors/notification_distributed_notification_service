@@ -124,6 +124,8 @@ ohos_shared_library("libans") {
     "../ans:ans.para.dac",
     "//third_party/icu/icu4c:shared_icuuc",
     "//third_party/libxml2:libxml2",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
   ]
 
   if (is_double_framework) {
