@@ -66,6 +66,7 @@ ohos_shared_library("libans") {
     "src/bundle_manager_helper.cpp",
     "src/clone/notification_clone_disturb_service.cpp",
     "src/clone/notification_clone_manager.cpp",
+    "src/common/aes_gcm_helper.cpp",
     "src/common/file_utils.cpp",
     "src/common/notification_analytics_util.cpp",
     "src/common/notification_config_parse.cpp",
@@ -123,6 +124,8 @@ ohos_shared_library("libans") {
     "../ans:ans.para.dac",
     "//third_party/icu/icu4c:shared_icuuc",
     "//third_party/libxml2:libxml2",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
   ]
 
   if (is_double_framework) {
