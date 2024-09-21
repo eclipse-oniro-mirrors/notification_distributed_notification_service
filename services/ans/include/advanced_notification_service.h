@@ -1413,7 +1413,9 @@ private:
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
-    
+    bool IsSystemUser(int32_t userId);
+    ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
@@ -1428,6 +1430,10 @@ private:
     std::list<std::chrono::system_clock::time_point> flowControlTimestampList_;
     std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
     std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
+    static std::mutex systemFlowControlMutex_;
+    std::list<std::chrono::system_clock::time_point> systemFlowControlTimestampList_;
+    std::list<std::chrono::system_clock::time_point> systemFlowControlUpdateTimestampList_;
+    std::list<std::chrono::system_clock::time_point> systemFlowControlPublishTimestampList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
