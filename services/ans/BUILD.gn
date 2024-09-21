@@ -164,7 +164,7 @@ ohos_shared_library("libans") {
     "image_framework:image_native",
     "init:libbegetutil",
     "kv_store:distributeddata_inner",
-    "openssl:libcrypto_shared"
+    "openssl:libcrypto_shared",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
