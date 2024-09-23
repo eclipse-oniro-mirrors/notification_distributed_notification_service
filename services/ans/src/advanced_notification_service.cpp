@@ -1313,9 +1313,6 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotifica
     return nullptr;
 }
 
-static int32_t DoubleDeleteNotificationFromDb(const std::string &key,
-        const std::string &secureKey, const int32_t userId);
-
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromDelayedNotificationList(
     const int32_t ownerUid, const int32_t notificationId)
 {
