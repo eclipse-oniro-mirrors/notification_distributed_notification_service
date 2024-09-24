@@ -1394,16 +1394,15 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
 
 bool AdvancedNotificationService::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
 {
-#ifdef ANS_ENABLE_FA_MODEL
     ANS_LOGD("%{public}s", __FUNCTION__);
+#ifdef ANS_DISABLE_FA_MODEL
+    return false;
+#endif
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         return false;
     }
     return bundleManager->CheckApiCompatibility(bundleOption);
-#else
-    return false;
-#endif
 }
 
 void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
