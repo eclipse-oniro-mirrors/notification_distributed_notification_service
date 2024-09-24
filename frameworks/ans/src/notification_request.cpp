@@ -2597,6 +2597,14 @@ std::string NotificationRequest::GetKey()
     return stream.str();
 }
 
+std::string NotificationRequest::GetSecureKey()
+{
+    std::stringstream stream;
+    const char *keySpliter = "_";
+    stream << REQUEST_STORAGE_SECURE_KEY_PREFIX << keySpliter << GetBaseKey("");
+    return stream.str();
+}
+
 bool NotificationRequest::CheckImageOverSizeForPixelMap(
     const std::shared_ptr<Media::PixelMap> &pixelMap, uint32_t maxSize)
 {

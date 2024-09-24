@@ -38,6 +38,7 @@ namespace OHOS {
 namespace Notification {
 
 inline const std::string REQUEST_STORAGE_KEY_PREFIX {"ans_live_view"};
+inline const std::string REQUEST_STORAGE_SECURE_KEY_PREFIX {"secure_live_view"};
 
 struct NotificationKey {
     int32_t id {};
@@ -1261,6 +1262,13 @@ public:
      * @return Return the unique key of notification request.
      */
     std::string GetKey();
+
+    /**
+     * @brief Get notification request key.
+     *
+     * @return Return the unique key of notification request.
+     */
+    std::string GetSecureKey();
 
     /**
      * @brief Get notification request base key.
