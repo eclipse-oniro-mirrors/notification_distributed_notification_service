@@ -335,8 +335,6 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         std::string decryptValue = iter.second;
         if (iter.first.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) == 0) {
             ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
-            if (iter.first.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) == 0) {
-            ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
             if (errorCode != ERR_OK) {
                 ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error");
                 return static_cast<int>(errorCode);
