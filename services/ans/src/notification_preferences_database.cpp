@@ -1177,7 +1177,7 @@ int32_t NotificationPreferencesDatabase::StringToInt(const std::string &str) con
 {
     int32_t value = 0;
     if (!str.empty()) {
-        value = stoi(str, nullptr);
+        value = atoi(str.c_str());
     }
     return value;
 }
@@ -1186,7 +1186,7 @@ int64_t NotificationPreferencesDatabase::StringToInt64(const std::string &str) c
 {
     int64_t value = 0;
     if (!str.empty()) {
-        value = stoll(str, nullptr);
+        value = atoll(str.c_str());
     }
     return value;
 }
