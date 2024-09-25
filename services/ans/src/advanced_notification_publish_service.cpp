@@ -2210,10 +2210,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_INVALID_PARAM;
     }
 
-    result = FlowControl(record);
-    if (result != ERR_OK) {
-        return result;
-    }
     SetRequestBySlotType(record->request, bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
