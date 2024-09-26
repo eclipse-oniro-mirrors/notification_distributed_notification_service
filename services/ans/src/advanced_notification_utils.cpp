@@ -48,6 +48,7 @@
 #include "advanced_notification_inline.cpp"
 #include "notification_analytics_util.h"
 #include "notification_clone_disturb_service.h"
+#include "notification_clone_bundle_service.h"
 
 #define CHECK_BUNDLE_OPTION_IS_INVALID(option)                              \
     if (option == nullptr || option->GetBundleName().empty()) {             \
@@ -594,6 +595,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
             }
         }
+        NotificationCloneBundle::GetInstance()->OnBundleDataAdd(bundleOption);
     };
 
     NotificationCloneDisturb::GetInstance()->OnBundleDataAdd(bundleOption);
