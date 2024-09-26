@@ -31,6 +31,8 @@ public:
 
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
+    void OnUserSwitch(int32_t userId);
+
 private:
     NotificationCloneManager();
     ~NotificationCloneManager();

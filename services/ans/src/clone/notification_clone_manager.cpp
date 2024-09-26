@@ -25,11 +25,13 @@
 #include "ans_log_wrapper.h"
 #include "nlohmann/json.hpp"
 #include "notification_clone_disturb_service.h"
+#include "notification_clone_bundle_service.h"
 
 namespace OHOS {
 namespace Notification {
 
 const int ANS_CLONE_ERROR = -1;
+constexpr const char *CLONE_ITEM_BUNDLE_INFO = "notificationBundle";
 constexpr const char *CLONE_ITEM_DISTURB = "notificationDisturb";
 constexpr const char *BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notification/backup_config.conf";
 
@@ -109,6 +111,7 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
 NotificationCloneManager::NotificationCloneManager()
 {
     ANS_LOGI("Notification clone manager init.");
+    cloneTemplates.insert_or_assign(CLONE_ITEM_BUNDLE_INFO, NotificationCloneBundle::GetInstance());
     cloneTemplates.insert_or_assign(CLONE_ITEM_DISTURB, NotificationCloneDisturb::GetInstance());
 }
 
@@ -174,6 +177,13 @@ ErrCode NotificationCloneManager::SaveConfig(const std::string& config)
 void NotificationCloneManager::RemoveBackUpFile()
 {
     remove(BACKUP_CONFIG_FILE_PATH);
+}
+
+void NotificationCloneManager::OnUserSwitch(int32_t userId)
+{
+    for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
+        iter->second->OnUserSwitch(userId);
+    }
 }
 }
 }
