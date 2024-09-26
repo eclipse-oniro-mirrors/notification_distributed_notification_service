@@ -30,7 +30,7 @@ public:
     ~NotificationCloneDisturb() override;
     static std::shared_ptr<NotificationCloneDisturb> GetInstance();
     ErrCode OnBackup(nlohmann::json &jsonObject) override;
-    ErrCode OnRestore(const nlohmann::json &jsonObject) override;
+    void OnRestore(const nlohmann::json &jsonObject) override;
     void OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption);
     void OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption);
     void HandlerBundleEvent(const std::string bundleName, int32_t appIndex, int32_t uid);
@@ -41,7 +41,8 @@ public:
     void CheckBundleInfo(std::vector<NotificationBundleOption>& trustList,
         std::vector<NotificationBundleOption>& bundleList, const NotificationBundleOption& bundle);
     int32_t GetActiveUserId();
-    void OnUserSwitch(int32_t userId);
+    void OnUserSwitch(int32_t userId) override;
+
 private:
     std::atomic<int32_t> userId_ = -1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles_;
