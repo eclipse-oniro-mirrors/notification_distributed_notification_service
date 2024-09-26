@@ -33,6 +33,7 @@
 #include "notification_analytics_util.h"
 #include <cstdint>
 #include <memory>
+#include "aes_gcm_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -52,7 +53,8 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
         ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
         if (!IsLiveViewCanRecover(requestObj.request)) {
             int32_t userId = requestObj.request->GetReceiverUserId();
-            if (DeleteNotificationRequestFromDb(requestObj.request->GetKey(), userId) != ERR_OK) {
+            if (DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+                requestObj.request->GetSecureKey(), userId) != ERR_OK) {
                 ANS_LOGE("Delete notification failed.");
             }
             continue;
@@ -143,7 +145,8 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
         return;
     }
     int32_t userId = record->request->GetReceiverUserId();
-    if (DeleteNotificationRequestFromDb(record->request->GetKey(), userId) != ERR_OK) {
+    if (DoubleDeleteNotificationFromDb(record->request->GetKey(),
+        record->request->GetSecureKey(), userId) != ERR_OK) {
         ANS_LOGE("Live View cancel, delete notification failed.");
     }
 
@@ -241,8 +244,14 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         return ERR_ANS_TASK_ERR;
     }
 
+    std::string encryptValue;
+    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
+    if (errorCode != ERR_OK) {
+        ANS_LOGE("SetNotificationRequestToDb encrypt error");
+        return static_cast<int>(errorCode);
+    }
     auto result = NotificationPreferences::GetInstance()->SetKvToDb(
-        request->GetKey(), jsonObject.dump(), request->GetReceiverUserId());
+        request->GetSecureKey(), encryptValue, request->GetReceiverUserId());
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3).
         BundleName(request->GetCreatorBundleName()).NotificationId(request->GetNotificationId());
     if (result != ERR_OK) {
@@ -251,6 +260,8 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("set failed"));
         return result;
+    } else {
+        DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
     }
 
     result = SetLockScreenPictureToDb(request);
@@ -312,13 +323,24 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
     for (const int32_t userId : userIds) {
         int32_t result =
             NotificationPreferences::GetInstance()->GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, dbRecords, userId);
-        if (result != ERR_OK) {
+        int32_t secureResult =
+            NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
+                REQUEST_STORAGE_SECURE_KEY_PREFIX, dbRecords, userId);
+        if (result != ERR_OK && secureResult != ERR_OK) {
             ANS_LOGE("Get batch notification request failed.");
             return result;
         }
     }
     for (const auto &iter : dbRecords) {
-        auto jsonObject = nlohmann::json::parse(iter.second);
+        std::string decryptValue = iter.second;
+        if (iter.first.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) == 0) {
+            ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
+            if (errorCode != ERR_OK) {
+                ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error");
+                return static_cast<int>(errorCode);
+            }
+        }
+        auto jsonObject = nlohmann::json::parse(decryptValue);
         auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
         if (request == nullptr) {
             ANS_LOGE("Parse json string to request failed.");
@@ -327,7 +349,8 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
         if (bundleOption == nullptr) {
             ANS_LOGE("Parse json string to bundle option failed.");
-            (void)DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
+            (void)DoubleDeleteNotificationFromDb(request->GetKey(),
+                request->GetSecureKey(), request->GetReceiverUserId());
             continue;
         }
 
@@ -338,6 +361,18 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         requests.emplace_back(requestDb);
     }
     return ERR_OK;
+}
+
+int32_t AdvancedNotificationService::DoubleDeleteNotificationFromDb(const std::string &key,
+    const std::string &secureKey, const int32_t userId)
+{
+    auto result = NotificationPreferences::GetInstance()->DeleteKvFromDb(secureKey, userId);
+    if (result != ERR_OK) {
+        ANS_LOGE("Delete notification request failed, key %{public}s.", key.c_str());
+        return result;
+    }
+    result = DeleteNotificationRequestFromDb(key, userId);
+    return result;
 }
 
 int32_t AdvancedNotificationService::DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId)
