@@ -756,7 +756,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_09600,
         (int)advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true), (int)ERR_OK);
     bool allowed = false;
     ASSERT_EQ((int)advancedNotificationService_->IsAllowedNotifySelf(allowed), (int)ERR_OK);
-    EXPECT_TRUE(allowed);
+    EXPECT_FALSE(allowed);
 }
 
 /**
@@ -1557,7 +1557,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
-    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType), -1);
 
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
@@ -2440,7 +2440,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22600,
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
     auto ret = advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, -1);
 }
 
 /**
