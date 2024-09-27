@@ -1746,10 +1746,14 @@ uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Noti
 {
     ANS_LOGD("Enter");
 
-    auto triggerFunc = [this, record, reason, deleteTimePoint] {
-        TriggerAutoDelete(record->notification->GetKey(), reason);
-        if (record->finish_status != NotificationConstant::DEFAULT_FINISH_STATUS) {
-            SendLiveViewUploadHiSysEvent(record, record->finish_status);
+    std::weak_ptr<AdvancedNotificationService> wThis = weak_from_this();
+    auto triggerFunc = [wThis, record, reason, deleteTimePoint] {
+        std::shared_ptr<AdvancedNotificationService> sThis = wThis.lock();
+        if (sThis != nullptr) {
+            sThis->TriggerAutoDelete(record->notification->GetKey(), reason);
+            if (record->finish_status != NotificationConstant::DEFAULT_FINISH_STATUS) {
+                sThis->SendLiveViewUploadHiSysEvent(record, record->finish_status);
+            }
         }
     };
     std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
