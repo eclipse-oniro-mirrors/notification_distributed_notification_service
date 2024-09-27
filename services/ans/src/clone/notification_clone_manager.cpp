@@ -93,6 +93,10 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
     }
 
     RemoveBackUpFile();
+    if (storeMessage.empty() || nlohmann::json::accept(storeMessage)) {
+        ANS_LOGE("Invalid JSON");
+        return ANS_CLONE_ERROR;
+    }
     nlohmann::json jsonObject = nlohmann::json::parse(storeMessage, nullptr, false);
     if (jsonObject.is_null() || !jsonObject.is_object()) {
         ANS_LOGE("Invalid JSON object");
@@ -160,7 +164,7 @@ ErrCode NotificationCloneManager::SaveConfig(const std::string& config)
         return ANS_CLONE_ERROR;
     }
 
-    int ret = fwrite(config.c_str(), 1, config.length(), fp);
+    int ret = static_cast<int>(fwrite(config.c_str(), 1, config.length(), fp));
     if (ret != (int)config.length()) {
         ANS_LOGW("Save config file: %{public}s, fwrite %{public}d failed!", BACKUP_CONFIG_FILE_PATH, ret);
     }

@@ -257,7 +257,9 @@ bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
     std::list<std::chrono::system_clock::time_point> list = GetFlowListByType(reportType);
     FlowControllerOption option = GetFlowOptionByType(reportType);
     RemoveExpired(list, now, option.time);
-    if (list.size() >= option.count) {
+    int32_t size = static_cast<int32_t>(list.size());
+    int32_t count = option.count;
+    if (size >= count) {
         return false;
     }
     list.push_back(now);

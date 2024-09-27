@@ -322,6 +322,10 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         }
     }
     for (const auto &iter : dbRecords) {
+        if (iter.second.empty() || !nlohmann::json::accept(iter.second)) {
+            ANS_LOGE("Invalid json");
+            continue;
+        }
         auto jsonObject = nlohmann::json::parse(iter.second);
         auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
         if (request == nullptr) {
