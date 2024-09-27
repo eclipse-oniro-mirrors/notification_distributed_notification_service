@@ -632,11 +632,6 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         return result;
     }
 
-    result = FlowControl(record);
-    if (result != ERR_OK) {
-        return result;
-    }
-
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
