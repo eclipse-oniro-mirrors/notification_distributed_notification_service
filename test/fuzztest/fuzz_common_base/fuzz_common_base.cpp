@@ -92,8 +92,8 @@ void SystemHapTokenGet(const std::vector<std::string> &permissions)
 {
 
     HapPolicyParams hapPolicyPrams = {
-        .apl = APL_NORMAL,
-        .domain = "test.fuzz.ans",
+        .apl = APL_SYSTEM_CORE,
+        .domain = "com.ohos.notificationdialog",
         .permList = {},
         .permStateList = {}
     };
@@ -104,11 +104,11 @@ void SystemHapTokenGet(const std::vector<std::string> &permissions)
             .isGeneral = true,
             .resDeviceID = {"local"},
             .grantStatus = {PermissionState::PERMISSION_GRANTED},
-            .grantFlags = {1, 2}
+            .grantFlags = {1}
         };
         PermissionDef permDef = {
             .permissionName = permission,
-            .bundleName = "test.fuzz.ans",
+            .bundleName = "com.ohos.notificationdialog",
             .grantMode = 1,
             .availableLevel = APL_NORMAL,
             .label = "label",
@@ -122,9 +122,9 @@ void SystemHapTokenGet(const std::vector<std::string> &permissions)
 
     HapInfoParams hapInfoParams = {
         .userID = 100,
-        .bundleName = "test.fuzz.ans",
+        .bundleName = "com.ohos.notificationdialog",
         .instIndex = 0,
-        .appIDDesc = "test.fuzz.ans",
+        .appIDDesc = "com.ohos.notificationdialog",
         .apiVersion = 12,
         .isSystemApp = true
     };

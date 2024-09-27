@@ -23,6 +23,7 @@
 #include "notification_preferences_database.h"
 #include <memory>
 #include <mutex>
+#include "notification_clone_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -381,6 +382,8 @@ public:
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
     void GetDoNotDisturbProfileListByUserId(int32_t userId,
         std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    void GetAllCLoneBundlesInfo(int32_t userId, std::vector<NotificationCloneBundleInfo> &cloneBundles);
+    void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
 
 private:
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,

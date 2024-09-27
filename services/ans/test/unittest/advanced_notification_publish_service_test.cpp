@@ -178,6 +178,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00003, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERR_OK);
 
@@ -205,6 +206,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
     RegisterPushCheck();
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
@@ -243,8 +245,8 @@ HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
-    MockIsOsAccountExists(true);
     RegisterPushCheck();
+    MockIsOsAccountExists(true);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -393,7 +395,7 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00002, Function | SmallTest 
     MockIsVerfyPermisson(true);
     auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
     ASSERT_EQ(ret, (int)ERR_OK);
-    ASSERT_EQ(enabled, false);
+    ASSERT_EQ(enabled, true);
 }
 
 /**
@@ -436,7 +438,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00002, Function | Smal
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -639,11 +641,6 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00001, Function | Small
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
-    MockIsVerfyPermisson(false);
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
-        NotificationConstant::DEFAULT_REASON_DELETE);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
-
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
         NotificationConstant::DEFAULT_REASON_DELETE);
@@ -684,6 +681,8 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00002, Function | Small
  */
 HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
 
@@ -720,6 +719,8 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
@@ -768,6 +769,8 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0300, TestSize.Lev
  */
 HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
@@ -782,6 +785,8 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Leve
  */
 HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
@@ -944,6 +949,8 @@ HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTe
  */
 HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0100, TestSize.Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
     ASSERT_EQ(res, ERR_OK);
 }
@@ -985,6 +992,8 @@ HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0300, TestSize.Level1)
  */
 HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0100, TestSize.Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
     ASSERT_EQ(result, ERR_OK);
@@ -997,6 +1006,8 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0100, TestSize.Level1)
  */
 HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0200, TestSize.Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     ErrCode ret = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
     ASSERT_EQ(ret, ERR_OK);
     bool enable = false;

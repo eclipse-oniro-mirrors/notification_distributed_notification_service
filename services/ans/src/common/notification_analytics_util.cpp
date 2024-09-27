@@ -31,9 +31,17 @@ constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 6;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
+constexpr const int32_t PUBLISH_ERROR_EVENT_COUNT = 3;
+constexpr const int32_t PUBLISH_ERROR_EVENT_TIME = 60;
+constexpr const int32_t DELETE_ERROR_EVENT_COUNT = 3;
+constexpr const int32_t DELETE_ERROR_EVENT_TIME = 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 static std::mutex reportFlowControlMutex_;
-static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_;
+static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_ = {
+    {MODIFY_ERROR_EVENT_CODE, {}},
+    {PUBLISH_ERROR_EVENT_CODE, {}},
+    {DELETE_ERROR_EVENT_CODE, {}},
+};
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -126,7 +134,7 @@ std::string HaMetaMessage::Build() const
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
-    return;
+    CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
 }
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
@@ -143,6 +151,7 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationR
             message = message.AgentBundleName(agentBundleName);
         }
     }
+    CommonNotificationEvent(request, DELETE_ERROR_EVENT_CODE, message);
 }
 
 void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationRequest>& request,
@@ -152,8 +161,14 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
         return;
     }
 
+    if (!ReportFlowControl(eventCode)) {
+        ANS_LOGI("Publish event failed, eventCode:%{public}d, reason:%{public}s",
+            eventCode, message.Build().c_str());
+        return;
+    }
     EventFwk::Want want;
     want.SetParam("bundleName", message.bundleName_);
+    want.SetParam("typeCode", message.typeCode_);
     IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
         request, want, eventCode, message.Build()));
 }
@@ -223,6 +238,10 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& message)
 {
+    if (!ReportFlowControl(DELETE_ERROR_EVENT_CODE)) {
+        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        return;
+    }
     std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
     std::string reason = message.Build();
     extraInfo->SetParam("reason", AAFwk::String::Box(reason));
@@ -235,6 +254,8 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
     want.SetParam("typeCode", message.typeCode_);
     want.SetParam("id", message.notificationId_);
     want.SetParam("extraInfo", extraContent);
+    IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
+        want, DELETE_ERROR_EVENT_CODE, message.Build()));
 }
 
 void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
@@ -254,7 +275,11 @@ bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> lock(reportFlowControlMutex_);
-    std::list<std::chrono::system_clock::time_point> list = GetFlowListByType(reportType);
+    auto iter = flowControlTimestampMap_.find(reportType);
+    if (iter == flowControlTimestampMap_.end()) {
+        return false;
+    }
+    auto& list = iter->second;
     FlowControllerOption option = GetFlowOptionByType(reportType);
     RemoveExpired(list, now, option.time);
     int32_t size = static_cast<int32_t>(list.size());
@@ -263,18 +288,7 @@ bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
         return false;
     }
     list.push_back(now);
-    flowControlTimestampMap_[reportType] = list;
     return true;
-}
-
-std::list<std::chrono::system_clock::time_point> NotificationAnalyticsUtil::GetFlowListByType(const int32_t reportType)
-{
-    std::list<std::chrono::system_clock::time_point> res;
-    auto iter = flowControlTimestampMap_.find(reportType);
-    if (iter != flowControlTimestampMap_.end()) {
-        res = iter->second;
-    }
-    return res;
 }
 
 void NotificationAnalyticsUtil::RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
@@ -297,6 +311,14 @@ FlowControllerOption NotificationAnalyticsUtil::GetFlowOptionByType(const int32_
         case MODIFY_ERROR_EVENT_CODE:
             option.count = DEFAULT_ERROR_EVENT_COUNT;
             option.time = DEFAULT_ERROR_EVENT_TIME;
+            break;
+        case PUBLISH_ERROR_EVENT_CODE:
+            option.count = PUBLISH_ERROR_EVENT_COUNT;
+            option.time = PUBLISH_ERROR_EVENT_TIME;
+            break;
+        case DELETE_ERROR_EVENT_CODE:
+            option.count = DELETE_ERROR_EVENT_COUNT;
+            option.time = DELETE_ERROR_EVENT_TIME;
             break;
         default:
             option.count = DEFAULT_ERROR_EVENT_COUNT;

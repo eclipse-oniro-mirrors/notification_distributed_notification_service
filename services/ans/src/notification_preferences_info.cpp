@@ -16,6 +16,7 @@
 
 #include "ans_log_wrapper.h"
 #include "notification_constant.h"
+#include "bundle_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -332,6 +333,38 @@ void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
             profiles.emplace_back(profile);
         }
     }
+}
+
+void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
+    const std::unordered_map<std::string, std::string> &bunlesMap,
+    std::vector<NotificationCloneBundleInfo> &cloneBundles)
+{
+    for (const auto& bundleItem : bunlesMap) {
+        auto iter = infos_.find(bundleItem.second);
+        if (iter == infos_.end()) {
+            ANS_LOGI("No finde bundle info %{public}s.", bundleItem.second.c_str());
+            continue;
+        }
+
+        std::vector<sptr<NotificationSlot>> slots;
+        NotificationCloneBundleInfo cloneBundleInfo;
+        int32_t index = BundleManagerHelper::GetInstance()->GetAppIndexByUid(iter->second.GetBundleUid());
+        cloneBundleInfo.SetBundleName(iter->second.GetBundleName());
+        cloneBundleInfo.SetAppIndex(index);
+        cloneBundleInfo.SetSlotFlags(iter->second.GetSlotFlags());
+        cloneBundleInfo.SetIsShowBadge(iter->second.GetIsShowBadge());
+        cloneBundleInfo.SetEnableNotification(iter->second.GetEnableNotification());
+        iter->second.GetAllSlots(slots);
+        for (auto& slot : slots) {
+            NotificationCloneBundleInfo::SlotInfo slotInfo;
+            slotInfo.slotType_ = slot->GetType();
+            slotInfo.enable_ = slot->GetEnable();
+            slotInfo.isForceControl_ = slot->GetForceControl();
+            cloneBundleInfo.AddSlotInfo(slotInfo);
+        }
+        cloneBundles.emplace_back(cloneBundleInfo);
+    }
+    ANS_LOGI("GetAllCLoneBundlesInfo size: %{public}zu.", cloneBundles.size());
 }
 
 bool NotificationPreferencesInfo::GetDoNotDisturbDate(const int32_t &userId,

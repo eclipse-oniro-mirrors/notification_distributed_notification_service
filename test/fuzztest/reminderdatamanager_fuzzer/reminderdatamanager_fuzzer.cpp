@@ -69,7 +69,6 @@ namespace OHOS {
         manager->TerminateAlerting(want);
         AppExecFwk::BundleInfo bundleInfo;
         manager->GetBundleResMgr(bundleInfo);
-        manager->UpdateReminderLanguage(reminder);
         manager->UpdateReminderLanguageLocked(reminder);
         return true;
     }

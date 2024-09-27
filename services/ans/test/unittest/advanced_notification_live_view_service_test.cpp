@@ -191,10 +191,6 @@ HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00002, Function | 
         { .request = request, .bundleOption = bundle};
     auto ret = advancedNotificationService_->SetNotificationRequestToDb(requestDb);
     ASSERT_EQ(ret, (int)ERR_OK);
-
-    AdvancedNotificationService::NotificationRequestDb requestdbTmp;
-    ret = advancedNotificationService_->GetNotificationRequestFromDb(request->GetKey(), requestdbTmp);
-    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**

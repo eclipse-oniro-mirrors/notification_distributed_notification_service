@@ -29,10 +29,13 @@
 #include "nlohmann/json.hpp"
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
+#include "notification_config_parse.h"
 
 namespace OHOS {
 namespace Notification {
-
+namespace {
+const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
+}
 std::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
 
@@ -638,6 +641,71 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int3
     return ERR_OK;
 }
 
+void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
+    const NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bundleOption->SetBundleName(cloneBundleInfo.GetBundleName());
+    bundleOption->SetUid(cloneBundleInfo.GetUid());
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    if (!preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
+        bundleInfo.SetBundleName(cloneBundleInfo.GetBundleName());
+        bundleInfo.SetBundleUid(cloneBundleInfo.GetUid());
+    }
+
+    /* after clone, override these witch */
+    bundleInfo.SetSlotFlags(cloneBundleInfo.GetSlotFlags());
+    bundleInfo.SetIsShowBadge(cloneBundleInfo.GetIsShowBadge());
+    bundleInfo.SetEnableNotification(cloneBundleInfo.GetEnableNotification());
+    /* update property to db */
+    if (!preferncesDB_->UpdateBundlePropertyToDisturbeDB(userId, bundleInfo)) {
+        ANS_LOGW("Clone bundle info failed %{public}s.", cloneBundleInfo.Dump().c_str());
+        return;
+    }
+    preferencesInfo.SetBundleInfo(bundleInfo);
+
+    /* update slot info */
+    std::vector<sptr<NotificationSlot>> slots;
+    for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
+        sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
+        uint32_t slotFlags = bundleInfo.GetSlotFlags();
+        auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            GetConfigSlotReminderModeByType(slotInfo->GetType());
+        slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
+        slotInfo->SetEnable(cloneSlot.enable_);
+        slotInfo->SetForceControl(cloneSlot.isForceControl_);
+        slotInfo->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        slots.push_back(slotInfo);
+        bundleInfo.SetSlot(slotInfo);
+    }
+
+    if (!preferncesDB_->UpdateBundleSlotToDisturbeDB(userId, cloneBundleInfo.GetBundleName(),
+        cloneBundleInfo.GetUid(), slots)) {
+        ANS_LOGW("Clone bundle slot failed %{public}s.", cloneBundleInfo.Dump().c_str());
+        preferencesInfo_ = preferencesInfo;
+        return;
+    }
+    preferencesInfo.SetBundleInfo(bundleInfo);
+    preferencesInfo_ = preferencesInfo;
+}
+
+void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t userId,
+    std::vector<NotificationCloneBundleInfo> &cloneBundles)
+{
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    std::unordered_map<std::string, std::string> bundlesMap;
+    if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, userId) != ERR_OK) {
+        ANS_LOGE("Get bundle map info failed.");
+        return;
+    }
+    preferencesInfo.GetAllCLoneBundlesInfo(userId, bundlesMap, cloneBundles);
+    preferencesInfo_ = preferencesInfo;
+}
+
 void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
     std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
@@ -813,7 +881,9 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
         bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
     }
     result = SaveBundleProperty(bundleInfo, bundleOption, type, value);
-    preferencesInfo.SetBundleInfo(bundleInfo);
+    if (result == ERR_OK) {
+        preferencesInfo.SetBundleInfo(bundleInfo);
+    }
 
     return result;
 }

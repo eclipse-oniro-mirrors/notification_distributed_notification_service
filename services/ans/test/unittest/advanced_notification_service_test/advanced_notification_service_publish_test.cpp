@@ -1418,5 +1418,66 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18000,
     GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test end";
 }
 
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_19000
+ * @tc.name      : ANS_Publish_With_PixelMap
+ * @tc.desc      : Publish a notification with pixelMap.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    sptr<NotificationRequest> req = new NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::OTHER);
+    req->SetLabel("label");
+    std::shared_ptr<NotificationPictureContent> pictureContent = std::make_shared<NotificationPictureContent>();
+    EXPECT_NE(pictureContent, nullptr);
+    pictureContent->SetText("notification text");
+    pictureContent->SetTitle("notification title");
+    pictureContent->SetBigPicture(nullptr);
+    EXPECT_EQ(nullptr, pictureContent->GetBigPicture());
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(pictureContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    
+    req->SetLittleIcon(nullptr);
+    EXPECT_EQ(nullptr, req->GetLittleIcon());
+    req->SetBigIcon(nullptr);
+    EXPECT_EQ(nullptr, req->GetBigIcon());
+    req->SetOverlayIcon(nullptr);
+    EXPECT_EQ(nullptr, req->GetOverlayIcon());
+    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20000
+ * @tc.name      : ANS_Publish_With_PixelMap
+ * @tc.desc      : Publish a notification with pixelMap.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    sptr<NotificationRequest> req = new NotificationRequest(1);
+    EXPECT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    req->SetLabel("label");
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    EXPECT_NE(liveViewContent, nullptr);
+    liveViewContent->SetText("notification text");
+    liveViewContent->SetTitle("notification title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    EXPECT_NE(content, nullptr);
+    req->SetContent(content);
+    
+    req->SetLittleIcon(nullptr);
+    EXPECT_EQ(nullptr, req->GetLittleIcon());
+    req->SetBigIcon(nullptr);
+    EXPECT_EQ(nullptr, req->GetBigIcon());
+    req->SetOverlayIcon(nullptr);
+    EXPECT_EQ(nullptr, req->GetOverlayIcon());
+    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

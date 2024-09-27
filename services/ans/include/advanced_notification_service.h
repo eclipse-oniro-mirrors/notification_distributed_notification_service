@@ -1318,6 +1318,8 @@ private:
     static int32_t GetNotificationRequestFromDb(const std::string &key, NotificationRequestDb &requestDb);
     static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests,
         int32_t userId = -1);
+    static int32_t DoubleDeleteNotificationFromDb(const std::string &key,
+        const std::string &secureKey, const int32_t userId);
     static int32_t DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId);
     void CancelTimer(uint64_t timerId);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
@@ -1391,6 +1393,9 @@ private:
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
+    bool IsSystemUser(int32_t userId);
+    ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
@@ -1406,6 +1411,10 @@ private:
     std::list<std::chrono::system_clock::time_point> flowControlTimestampList_;
     std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
     std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
+    static std::mutex systemFlowControlMutex_;
+    std::list<std::chrono::system_clock::time_point> systemFlowControlTimestampList_;
+    std::list<std::chrono::system_clock::time_point> systemFlowControlUpdateTimestampList_;
+    std::list<std::chrono::system_clock::time_point> systemFlowControlPublishTimestampList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;

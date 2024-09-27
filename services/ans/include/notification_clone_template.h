@@ -27,7 +27,8 @@ public:
     NotificationCloneTemplate() = default;
     virtual ~NotificationCloneTemplate() = default;
     virtual ErrCode OnBackup(nlohmann::json &jsonObject) = 0;
-    virtual ErrCode OnRestore(const nlohmann::json &jsonObject) = 0;
+    virtual void OnRestore(const nlohmann::json &jsonObject) = 0;
+    virtual void OnUserSwitch(int32_t userId) = 0;
 };
 } // namespace Notification
 } // namespace OHOS

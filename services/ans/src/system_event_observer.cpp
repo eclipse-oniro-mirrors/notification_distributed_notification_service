@@ -21,7 +21,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "notification_preferences.h"
-#include "notification_clone_disturb_service.h"
+#include "notification_clone_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -100,9 +100,15 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
             ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
             return;
         }
-        NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
-        AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
-        NotificationCloneDisturb::GetInstance()->OnUserSwitch(userId);
+
+        ffrt::submit([=] {
+            ANS_LOGI("COMMON_EVENT_USER_SWITCHED [%{public}d].", userId);
+            NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
+            AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
+            NotificationCloneManager::GetInstance().OnUserSwitch(userId);
+        });
+        ANS_LOGI("COMMON_EVENT_USER_SWITCHED end");
+        return;
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();
         if (userId <= SUBSCRIBE_USER_INIT) {

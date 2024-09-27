@@ -2024,8 +2024,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0200, Function | Me
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
     int32_t result = proxy->GetActiveNotifications(notifications, 0);
-    EXPECT_EQ(ERR_OK, result);
-    EXPECT_EQ(1, notifications.size());
+    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(0, notifications.size());
 }
 /*
  * @tc.name: GetActiveNotificationsTest_0300

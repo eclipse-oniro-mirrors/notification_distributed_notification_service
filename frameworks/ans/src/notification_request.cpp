@@ -304,6 +304,8 @@ void NotificationRequest::SetLittleIcon(const std::shared_ptr<Media::PixelMap> &
         Media::ImageInfo outImageInfo;
         littleIcon->GetImageInfo(outImageInfo);
         littleIconType_ = outImageInfo.encodedFormat;
+    } else {
+        littleIconType_ = "";
     }
 }
 
@@ -2594,6 +2596,14 @@ std::string NotificationRequest::GetKey()
     std::stringstream stream;
     const char *keySpliter = "_";
     stream << REQUEST_STORAGE_KEY_PREFIX << keySpliter << GetBaseKey("");
+    return stream.str();
+}
+
+std::string NotificationRequest::GetSecureKey()
+{
+    std::stringstream stream;
+    const char *keySpliter = "_";
+    stream << REQUEST_STORAGE_SECURE_KEY_PREFIX << keySpliter << GetBaseKey("");
     return stream.str();
 }
 

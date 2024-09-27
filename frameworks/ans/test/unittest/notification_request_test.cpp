@@ -822,6 +822,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0001, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     notificationRequest.FillMissingParameters(nullptr);
+    EXPECT_EQ(notificationRequest.GetNotificationId(), myNotificationId);
 }
 
 /**
@@ -840,6 +841,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0002, Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
     notificationRequest.FillMissingParameters(nullptr);
+    EXPECT_EQ(notificationRequest.GetNotificationId(), myNotificationId);
 }
 
 /**
@@ -862,6 +864,7 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0003, Level1)
     oldNotificationRequest->SetNotificationId(myNotificationId);
 
     notificationRequest.FillMissingParameters(oldNotificationRequest);
+    EXPECT_EQ(notificationRequest.GetNotificationId(), myNotificationId);
 }
 
 /**

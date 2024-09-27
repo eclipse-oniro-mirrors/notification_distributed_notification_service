@@ -149,9 +149,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
+#ifndef IS_EMULATOR
         if (IsNeedPushCheck(request)) {
             result = PushCheck(request);
         }
+#endif
+
         if (result != ERR_OK) {
             message.ErrorCode(result).Message("Push check failed.");
             break;
@@ -887,13 +890,14 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
             bundle, notificationEnable);
         // Local device
         result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
-        if (!enabled) {
-            result = RemoveAllNotificationsForDisable(bundle);
-        }
-        if (saveRef != ERR_OK) {
-            SetSlotFlagsTrustlistsAsBundle(bundle);
-        }
+        bool enableSuccessed = result == ERR_OK;
         if (result == ERR_OK) {
+            if (!enabled) {
+                result = RemoveAllNotificationsForDisable(bundle);
+            }
+            if (saveRef != ERR_OK) {
+                SetSlotFlagsTrustlistsAsBundle(bundle);
+            }
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
             PublishSlotChangeCommonEvent(bundle);
         }
@@ -2210,10 +2214,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_INVALID_PARAM;
     }
 
-    result = FlowControl(record);
-    if (result != ERR_OK) {
-        return result;
-    }
     SetRequestBySlotType(record->request, bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);

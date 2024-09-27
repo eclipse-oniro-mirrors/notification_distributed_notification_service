@@ -1869,11 +1869,6 @@ napi_value Common::GetNotificationControlFlags(
         }
 
         napi_get_value_uint32(env, result, &notificationControlFlags);
-        if (notificationControlFlags == 0) {
-            ANS_LOGD("Undefined notification control flags.");
-            return nullptr;
-        }
-
         request.SetNotificationControlFlags(notificationControlFlags);
     }
 

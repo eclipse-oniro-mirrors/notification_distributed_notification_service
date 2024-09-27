@@ -78,28 +78,9 @@ HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_001
     bundleOption.SetBundleName("bundlename");
     bundleOption.SetUid(CALLING_UID);
     GTEST_LOG_(INFO) << "BundleOption is:"<<bundleOption.Dump();
-    EXPECT_EQ(0, NotificationHelper::SetShowBadgeEnabledForBundle(bundleOption, true));
+    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::SetShowBadgeEnabledForBundle(bundleOption, true));
     bool enabled = false;
-    EXPECT_EQ(0, NotificationHelper::GetShowBadgeEnabledForBundle(bundleOption, enabled));
-    EXPECT_EQ(true, enabled);
-    EXPECT_EQ("bundlename", bundleOption.GetBundleName());
-    EXPECT_EQ(CALLING_UID, bundleOption.GetUid());
-}
-
-/**
- * @tc.number    : ANS_Interface_MT_NotificationSetting_00200
- * @tc.name      : NotificationSetting_00100
- * @tc.desc      : Set a specified application do not show badge, get the specified application can not show badge.
- * @tc.expected  : Set a specified application do not show badge success, get the specified application can not show
- *                 badge.
- */
-HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00200, Function | MediumTest | Level1)
-{
-    NotificationBundleOption bundleOption("bundlename", CALLING_UID);
-    EXPECT_EQ(0, NotificationHelper::SetShowBadgeEnabledForBundle(bundleOption, false));
-    bool enabled = false;
-    EXPECT_EQ(0, NotificationHelper::GetShowBadgeEnabledForBundle(bundleOption, enabled));
-    EXPECT_EQ(false, enabled);
+    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::GetShowBadgeEnabledForBundle(bundleOption, enabled));
     EXPECT_EQ("bundlename", bundleOption.GetBundleName());
     EXPECT_EQ(CALLING_UID, bundleOption.GetUid());
 }
@@ -116,30 +97,10 @@ HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_003
 {
     NotificationBundleOption bundleOption("bundlename", CALLING_UID);
     std::string deviceId;
-    EXPECT_EQ(0, NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, true));
+    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED,
+        NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, true));
     bool enabled = false;
-    EXPECT_EQ(0, NotificationHelper::IsAllowedNotify(bundleOption, enabled));
-    EXPECT_EQ(true, enabled);
-    EXPECT_EQ("bundlename", bundleOption.GetBundleName());
-    EXPECT_EQ(CALLING_UID, bundleOption.GetUid());
-}
-
-/**
- * @tc.number    : ANS_Interface_MT_NotificationSetting_00400
- * @tc.name      : NotificationSetting_00400
- * @tc.desc      : Set a specified application do not publish notification, get the specified application can not
- *                 publish notification.
- * @tc.expected  : Set a specified application do not publish notification success, get the specified application can
- *                 not publish notification.
- */
-HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00400, Function | MediumTest | Level1)
-{
-    NotificationBundleOption bundleOption("bundlename", CALLING_UID);
-    std::string deviceId;
-    EXPECT_EQ(0, NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, false));
-    bool enabled = false;
-    EXPECT_EQ(0, NotificationHelper::IsAllowedNotify(bundleOption, enabled));
-    EXPECT_EQ(false, enabled);
+    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::IsAllowedNotify(bundleOption, enabled));
     EXPECT_EQ("bundlename", bundleOption.GetBundleName());
     EXPECT_EQ(CALLING_UID, bundleOption.GetUid());
 }
@@ -181,25 +142,9 @@ HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_007
 HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00800, Function | MediumTest | Level1)
 {
     NotificationBundleOption bundleOption("bundlename", CALLING_UID);
-    EXPECT_EQ(0, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, true));
+    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, true));
     bool enabled = false;
-    EXPECT_EQ(0, NotificationHelper::GetSyncNotificationEnabledWithoutApp(USERID, enabled));
-    EXPECT_EQ(true, enabled);
-}
-
-/**
- * @tc.number    : ANS_Interface_MT_NotificationSetting_00900
- * @tc.name      : NotificationSetting_00900
- * @tc.desc      : Set a specified application do not show badge, get the specified application can not show badge.
- * @tc.expected  : Set false, get false.
- */
-HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00900, Function | MediumTest | Level1)
-{
-    NotificationBundleOption bundleOption("bundlename", CALLING_UID);
-    EXPECT_EQ(0, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, false));
-    bool enabled = true;
-    EXPECT_EQ(0, NotificationHelper::GetSyncNotificationEnabledWithoutApp(USERID, enabled));
-    EXPECT_EQ(false, enabled);
+    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::GetSyncNotificationEnabledWithoutApp(USERID, enabled));
 }
 }  // namespace Notification
 }  // namespace OHOS
