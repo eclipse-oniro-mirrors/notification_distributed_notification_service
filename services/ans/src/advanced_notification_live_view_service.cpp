@@ -559,8 +559,12 @@ uint64_t AdvancedNotificationService::StartDelayPublishTimer(
 {
     ANS_LOGD("Enter");
 
-    auto timeoutFunc = [this, ownerUid, notificationId] {
-        StartPublishDelayedNotificationTimeOut(ownerUid, notificationId);
+    std::weak_ptr<AdvancedNotificationService> wThis = weak_from_this();
+    auto timeoutFunc = [wThis, ownerUid, notificationId] {
+        std::shared_ptr<AdvancedNotificationService> sThis = wThis.lock();
+        if (sThis != nullptr) {
+            sThis->StartPublishDelayedNotificationTimeOut(ownerUid, notificationId);
+        }
     };
     std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
     notificationTimerInfo->SetCallbackInfo(timeoutFunc);

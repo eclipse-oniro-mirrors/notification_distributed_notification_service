@@ -53,7 +53,8 @@ namespace OHOS {
 namespace Notification {
 
 static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
-class AdvancedNotificationService final : public AnsManagerStub {
+class AdvancedNotificationService final : public AnsManagerStub,
+    public std::enable_shared_from_this<AdvancedNotificationService> {
 public:
     struct NotificationRequestDb {
         sptr<NotificationRequest> request {nullptr};
