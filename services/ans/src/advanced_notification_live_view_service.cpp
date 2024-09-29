@@ -350,6 +350,10 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
                 return static_cast<int>(errorCode);
             }
         }
+        if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
+            ANS_LOGE("Invalid json");
+            continue;
+        }
         auto jsonObject = nlohmann::json::parse(decryptValue);
         auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
         if (request == nullptr) {

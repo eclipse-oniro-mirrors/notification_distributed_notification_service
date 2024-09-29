@@ -282,7 +282,7 @@ bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
     auto& list = iter->second;
     FlowControllerOption option = GetFlowOptionByType(reportType);
     RemoveExpired(list, now, option.time);
-    int32_t size = list.size();
+    int32_t size = static_cast<int32_t>(list.size());
     int32_t count = option.count;
     if (size >= count) {
         return false;
