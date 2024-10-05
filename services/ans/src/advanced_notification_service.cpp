@@ -182,8 +182,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             }
             int32_t uid = -1;
             if (request->GetBundleOption()->GetUid() == DEFAULT_UID) {
-                int32_t userId = 0;
-                GetActiveUserId(userId);
+                int32_t userId = SUBSCRIBE_USER_INIT;
+                OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+                if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
+                    userId = request->GetOwnerUserId();
+                }
                 std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
                 if (bundleManager != nullptr) {
                     uid = bundleManager->GetDefaultUidByBundleName(sourceBundleName, userId);
