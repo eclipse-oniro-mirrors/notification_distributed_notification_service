@@ -109,6 +109,7 @@ int32_t NotificationDataMgr::Init()
             notificationRdbConfig_.journalMode,
             notificationRdbConfig_.syncMode);
     rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
+    rdbStoreConfig.SetHaMode(NativeRdb::HAMode::MAIN_REPLICA);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
     std::lock_guard<std::mutex> lock(createdTableMutex_);
     {
@@ -191,6 +192,9 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
         valuesBucket.PutString(NOTIFICATION_VALUE, value);
         ret = rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
             NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+        if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+            RestoreForMasterSlaver();
+        }
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Insert operation failed, result: %{public}d, key=%{public}s.", ret, key.c_str());
             return NativeRdb::E_ERROR;
@@ -219,6 +223,9 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vecto
     valuesBucket.PutBlob(NOTIFICATION_VALUE, value);
     ret = rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
         NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+            RestoreForMasterSlaver();
+        }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("Insert operation failed, result: %{public}d, key=%{public}s.", ret, key.c_str());
         return NativeRdb::E_ERROR;
@@ -249,6 +256,9 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
             valuesBucket.PutString(NOTIFICATION_VALUE, value.second);
             ret = rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
                 NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+            if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+                RestoreForMasterSlaver();
+            }
             if (ret != NativeRdb::E_OK) {
                 ANS_LOGE("Insert batch operation failed, result: %{public}d.", ret);
                 return NativeRdb::E_ERROR;
@@ -284,6 +294,9 @@ int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        RestoreForMasterSlaver();
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGW("Delete operation failed from %{public}s, result: %{public}d, key=%{public}s.",
             tableName.c_str(), ret, key.c_str());
@@ -346,12 +359,18 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     }
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        RestoreForMasterSlaver();
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, value);
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        RestoreForMasterSlaver();
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
@@ -389,6 +408,9 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     }
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        RestoreForMasterSlaver();
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
@@ -439,6 +461,9 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     }
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        RestoreForMasterSlaver();
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGD("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
@@ -500,6 +525,9 @@ int32_t NotificationDataMgr::QueryAllData(
     }
 
     int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        RestoreForMasterSlaver();
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGD("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
@@ -599,6 +627,14 @@ std::vector<std::string> NotificationDataMgr::GenerateOperatedTables(const int32
     }
     operatedTables.emplace_back(notificationRdbConfig_.tableName);
     return operatedTables;
+}
+
+int32_t NotificationDataMgr::RestoreForMasterSlaver()
+{
+    ANS_LOGI("RestoreForMasterSlaver start");
+    int32_t result =  rdbStore_->Restore("");
+    ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);
+    return result;
 }
 }
 }

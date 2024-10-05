@@ -158,6 +158,7 @@ private:
         std::unordered_map<std::string, std::string> &values);
     int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
     int32_t InitCreatedTables();
+    int32_t RestoreForMasterSlaver();
 
 private:
     NotificationRdbConfig notificationRdbConfig_;

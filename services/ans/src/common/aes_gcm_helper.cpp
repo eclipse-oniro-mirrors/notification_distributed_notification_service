@@ -35,6 +35,7 @@ namespace Notification {
 static const uint32_t G_AES_GCM_IV_LEN{12};
 static const uint32_t G_AES_GCM_TAG_LEN{16};
 static const std::string G_DIR_PATH{"/data/service/el1/public/database/notification_service/keyfile"};
+static const std::string G_KEY_PATH{"/data/service/el1/public/database/notification_service"};
 static const int STEP = 2;
 static const int OFFSET = 4;
 static const int HEX_OF_A = 10;
@@ -82,6 +83,12 @@ std::string AesGcmHelper::Hex2Byte(const std::string &hex)
 bool AesGcmHelper::GenerateKey(std::string &key)
 {
     std::lock_guard<std::mutex> lck(g_generateKeyMutex);
+    const char *keyPathPtr = G_KEY_PATH.c_str();
+    auto realpathRes = realpath(keyPathPtr, NULL);
+    if (realpathRes == NULL) {
+        ANS_LOGE("Fail to randomly generate the key");
+        return false;
+    }
     std::string keyDir = G_DIR_PATH;
     const char *fileNamePtr = keyDir.c_str();
     std::filesystem::path keyPath(keyDir);
