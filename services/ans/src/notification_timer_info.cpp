@@ -56,5 +56,10 @@ void NotificationTimerInfo::SetCallbackInfo(const std::function<void()> &callBac
 {
     callBack_ = callBack;
 }
+
+std::function<void()> NotificationTimerInfo::GetCallBack()
+{
+    return callBack_;
+}
 }
 }

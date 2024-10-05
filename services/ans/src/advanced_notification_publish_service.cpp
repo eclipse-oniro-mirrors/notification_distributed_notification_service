@@ -471,9 +471,6 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is invalidated. key:" + key + ".";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 3)
-            .ErrorCode(ERR_ANS_INVALID_PARAM);
-        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -596,9 +593,6 @@ ErrCode AdvancedNotificationService::DeleteAll()
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is invalidity.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 10)
-            .ErrorCode(ERR_ANS_INVALID_PARAM);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1398,9 +1392,6 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "NotificationSvrQueue_ is null.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 6)
-            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
-        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1515,9 +1506,6 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is nullptr.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 4)
-            .ErrorCode(ERR_ANS_INVALID_BUNDLE);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1794,9 +1782,6 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, i
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is invalid.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(3, 3)
-            .ErrorCode(ERR_ANS_INVALID_PARAM);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1897,9 +1882,6 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is invalid.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(5, 5)
-            .ErrorCode(ERR_ANS_INVALID_PARAM);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -2332,10 +2314,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, int32_t
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
     notificationSvrQueue_->wait(handler);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_1)
-        .Message("Set badge number " + bundleName + " " + std::to_string(badgeNumber)
-        + " " + std::to_string(instanceKey));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return ERR_OK;
 }
 
@@ -2344,8 +2322,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_1);
     if (notificationSvrQueue_ == nullptr) {
-        message.Message("Serial queue is invalid.", true);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -2390,9 +2366,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
     notificationSvrQueue_->wait(handler);
-    message.Message("Set badgenumber: " + bundle->GetBundleName() + ":" +
-        std::to_string(badgeNumber) + " " + std::to_string(result));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
