@@ -23,6 +23,7 @@
 #include "ans_convert_enum.h"
 #include "ans_permission_def.h"
 #include "in_process_call_wrapper.h"
+#include "nlohmann/json.hpp"
 namespace OHOS {
 namespace Notification {
 constexpr char MESSAGE_DELIMITER = '#';
@@ -167,7 +168,10 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
         return;
     }
     EventFwk::Want want;
-    want.SetParam("bundleName", message.bundleName_);
+    nlohmann::json reason;
+    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfoWithReq(message, request, reason);
+    NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
+
     want.SetParam("typeCode", message.typeCode_);
     IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
         request, want, eventCode, message.Build()));
@@ -176,35 +180,24 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
 void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
     EventFwk::Want want, int32_t eventCode, const std::string& reason)
 {
-    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
-    if (request->GetFlags() == nullptr) {
-        extraInfo->SetParam("reason", AAFwk::String::Box(reason));
-    } else {
-        std::string reasons = reason + std::to_string(request->GetFlags()->GetReminderFlags());
-        extraInfo->SetParam("reason", AAFwk::String::Box(reasons));
-    }
-    AAFwk::WantParamWrapper wWrapper(*extraInfo);
-    std::string extraContent = wWrapper.ToString();
-
     NotificationNapi::SlotType slotType;
+    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(
+        static_cast<NotificationConstant::SlotType>(request->GetSlotType()), slotType);
     NotificationNapi::ContentType contentType;
     NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
         static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
-    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(
-        static_cast<NotificationConstant::SlotType>(request->GetSlotType()), slotType);
 
     want.SetParam("id", request->GetNotificationId());
     want.SetParam("uid", request->GetOwnerUid());
     want.SetParam("slotType", static_cast<int32_t>(slotType));
     want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
-    want.SetParam("extraInfo", extraContent);
+
     if (!request->GetCreatorBundleName().empty()) {
         want.SetParam("agentBundleName", request->GetCreatorBundleName());
     }
     if (!request->GetOwnerBundleName().empty()) {
         want.SetBundle(request->GetOwnerBundleName());
     }
-    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
     EventFwk::CommonEventData commonData {want, eventCode, ""};
@@ -220,18 +213,12 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
         ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }
-    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
-    std::string reason = std::to_string(message.sceneId_) + MESSAGE_DELIMITER +
-        std::to_string(message.branchId_) + std::to_string(message.notificationId_) +
-        MESSAGE_DELIMITER + message.GetMessage();
-    extraInfo->SetParam("reason", AAFwk::String::Box(reason));
-    AAFwk::WantParamWrapper wWrapper(*extraInfo);
-    std::string extraContent = wWrapper.ToString();
-
     EventFwk::Want want;
-    want.SetBundle(message.bundleName_);
+    nlohmann::json reason;
+    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message, reason);
+    NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
+
     want.SetParam("slotType", static_cast<int32_t>(message.slotType_));
-    want.SetParam("extraInfo", extraContent);
     IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(want, MODIFY_ERROR_EVENT_CODE,
         message.Build()));
 }
@@ -242,18 +229,15 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
         ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }
-    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
-    std::string reason = message.Build();
-    extraInfo->SetParam("reason", AAFwk::String::Box(reason));
-    AAFwk::WantParamWrapper wWrapper(*extraInfo);
-    std::string extraContent = wWrapper.ToString();
-
     EventFwk::Want want;
+    nlohmann::json reason;
+    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message, reason);
+    NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
+
     want.SetParam("agentBundleName", message.agentBundleName_);
-    want.SetBundle(message.bundleName_);
     want.SetParam("typeCode", message.typeCode_);
     want.SetParam("id", message.notificationId_);
-    want.SetParam("extraInfo", extraContent);
+
     IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
         want, DELETE_ERROR_EVENT_CODE, message.Build()));
 }
@@ -261,7 +245,6 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
 void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
     int32_t eventCode, const std::string& reason)
 {
-    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
     EventFwk::CommonEventData commonData {want, eventCode, ""};
@@ -326,6 +309,53 @@ FlowControllerOption NotificationAnalyticsUtil::GetFlowOptionByType(const int32_
             break;
     }
     return option;
+}
+
+std::string NotificationAnalyticsUtil::BuildExtraInfo(const HaMetaMessage& message, nlohmann::json& reason)
+{
+    reason["scene"] = message.sceneId_;
+    reason["branch"] = message.branchId_;
+    reason["innerErr"] = message.errorCode_;
+    reason["detail"] = message.message_;
+
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    reason["time"] = now;
+
+    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("reason", AAFwk::String::Box(reason.dump()));
+    AAFwk::WantParamWrapper wWrapper(*extraInfo);
+
+    return wWrapper.ToString();
+}
+
+std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage& message,
+    const sptr<NotificationRequest>& request, nlohmann::json& reason)
+{
+    NotificationNapi::ContentType contentType;
+    NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
+        static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
+    if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW ||
+        contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
+        ANS_LOGI("ContentType is liveview type");
+        auto content = request->GetContent()->GetNotificationContent();
+        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+        if (liveViewContent != nullptr) {
+            reason["status"] = static_cast<int32_t>(liveViewContent->GetLiveViewStatus());
+        } else {
+            ANS_LOGW("liveViewContent is nullptr");
+        }
+    }
+
+    return NotificationAnalyticsUtil::BuildExtraInfo(message, reason);
+}
+
+void NotificationAnalyticsUtil::SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message,
+    std::string& extraInfo)
+{
+    want.SetBundle(message.bundleName_);
+    want.SetParam("extraInfo", extraInfo);
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
 }
 } // namespace Notification
 } // namespace OHOS
