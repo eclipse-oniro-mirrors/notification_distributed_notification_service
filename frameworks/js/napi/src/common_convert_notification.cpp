@@ -121,10 +121,6 @@ napi_value Common::SetNotification(
         // readonly creatorUid?: number
         napi_create_int32(env, notification->GetNotificationRequest().GetOwnerUid(), &value);
         napi_set_named_property(env, result, "creatorUid", value);
-
-        // readonly creatorUserId?: number
-        napi_create_int32(env, notification->GetNotificationRequest().GetOwnerUserId(), &value);
-        napi_set_named_property(env, result, "creatorUserId", value);
     } else {
         // readonly creatorBundleName?: string
         napi_create_string_utf8(env, notification->GetCreateBundle().c_str(), NAPI_AUTO_LENGTH, &value);
@@ -133,11 +129,11 @@ napi_value Common::SetNotification(
         // readonly creatorUid?: number
         napi_create_int32(env, notification->GetUid(), &value);
         napi_set_named_property(env, result, "creatorUid", value);
-
-        // readonly creatorUserId?: number
-        napi_create_int32(env, notification->GetUserId(), &value);
-        napi_set_named_property(env, result, "creatorUserId", value);
     }
+
+    // readonly creatorUserId?: number
+    napi_create_int32(env, notification->GetRecvUserId(), &value);
+    napi_set_named_property(env, result, "creatorUserId", value);
 
     // readonly creatorInstanceKey?: number
     napi_create_int32(env, notification->GetInstanceKey(), &value);
