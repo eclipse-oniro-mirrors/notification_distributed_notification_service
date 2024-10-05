@@ -84,9 +84,9 @@ bool AesGcmHelper::GenerateKey(std::string &key)
 {
     std::lock_guard<std::mutex> lck(g_generateKeyMutex);
     const char *keyPathPtr = G_KEY_PATH.c_str();
-    char *resolvedPath = NULL;
-    resolvedPath = realpath(keyPathPtr, NULL);
-    if (resolvedPath == NULL) {
+    char resolvedPath [PATH_MAX + 1];
+    auto realpathRes = realpath(keyPathPtr, resolvedPath);
+    if (realpathRes == NULL || realpathRes == resolvedPath + PATH_MAX) {
         ANS_LOGE("Fail to randomly generate the key");
         return false;
     }
