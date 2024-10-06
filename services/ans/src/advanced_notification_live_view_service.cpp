@@ -42,17 +42,16 @@ const std::string PROGRESS_VALUE = "progressValue";
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
     ANS_LOGI("Start recover live view from db. userId:%{public}d", userId);
-
-    std::vector<NotificationRequestDb> requestsdb;
-    if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
-        ANS_LOGE("Get liveView from db failed.");
-        return;
-    }
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        std::vector<NotificationRequestDb> requestsdb;
+        if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
+            ANS_LOGE("Get liveView from db failed.");
+            return;
+        }
         ANS_LOGI("The number of live views to recover: %{public}zu.", requestsdb.size());
         for (const auto &requestObj : requestsdb) {
             ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
@@ -105,7 +104,6 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             OnSubscriberAdd(subscriber);
         }
     }));
-    notificationSvrQueue_->wait(handler);
     ANS_LOGI("End recover live view from db.");
 }
 
