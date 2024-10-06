@@ -81,6 +81,16 @@ public:
     static ErrCode RemoveAllSlots();
 
     /**
+     * @brief Update all notification slots for the specified bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slots Indicates a list of new notification slots.
+     * @return Returns update notification slots for bundle result.
+     */
+    static ErrCode UpdateNotificationSlots(
+        const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots);
+
+    /**
      * @brief Queries a created notification slot.
      *
      * @param slotType Indicates the ID of the slot, which is created by AddNotificationSlot(NotificationSlot). This
@@ -105,6 +115,61 @@ public:
      * @return Returns get slot number by bundle result.
      */
     static ErrCode GetNotificationSlotNumAsBundle(const NotificationBundleOption &bundleOption, uint64_t &num);
+
+    /**
+     * @brief Obtains all notification slots belonging to the specified bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slots Indicates a list of notification slots.
+     * @return Returns get notification slots for bundle result.
+     */
+    static ErrCode GetNotificationSlotsForBundle(
+
+        const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots);
+
+    /**
+     * @brief Obtains all notification slots belonging to the specified bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotType Indicates the type of the slot, which is created by AddNotificationSlot.
+     * @param slot Indicates a notification slot.
+     * @return Returns get notification slots for bundle result.
+     */
+    static ErrCode GetNotificationSlotForBundle(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
+        sptr<NotificationSlot> &slot);
+
+    /**
+     * Set whether the application slot is enabled.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotType Indicates type of slot.
+     * @param enabled the type of slot enabled.
+     * @param isForceControl Indicates whether the slot is affected by the notification switch.
+     * @return Returns get slot number by bundle result.
+     */
+    static ErrCode SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
+
+    /**
+     * Obtains whether the application slot is enabled.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotType Indicates type of slot.
+     * @param enabled the type of slot enabled to get.
+     * @return Returns get slot number by bundle result.
+     */
+    static ErrCode GetEnabledForBundleSlot(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled);
+
+    /**
+     * Obtains whether the current application slot is enabled.
+     *
+     * @param slotType Indicates type of slot.
+     * @param enabled the type of slot enabled to get.
+     * @return Returns get enabled result.
+     */
+    static ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
 
     /**
      * @brief Obtains slotflags of bundle.
@@ -484,38 +549,6 @@ public:
     static ErrCode RemoveNotifications();
 
     /**
-     * @brief Obtains all notification slots belonging to the specified bundle.
-     *
-     * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param slots Indicates a list of notification slots.
-     * @return Returns get notification slots for bundle result.
-     */
-    static ErrCode GetNotificationSlotsForBundle(
-        const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots);
-
-    /**
-     * @brief Obtains all notification slots belonging to the specified bundle.
-     *
-     * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param slotType Indicates the type of the slot, which is created by AddNotificationSlot.
-     * @param slot Indicates a notification slot.
-     * @return Returns get notification slots for bundle result.
-     */
-    static ErrCode GetNotificationSlotForBundle(
-        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
-        sptr<NotificationSlot> &slot);
-
-    /**
-     * @brief Update all notification slots for the specified bundle.
-     *
-     * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param slots Indicates a list of new notification slots.
-     * @return Returns update notification slots for bundle result.
-     */
-    static ErrCode UpdateNotificationSlots(
-        const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots);
-
-    /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
      * call this method.
      *
@@ -826,38 +859,6 @@ public:
      * @return Returns set do not disturb time result.
      */
     static ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-
-    /**
-     * Set whether the application slot is enabled.
-     *
-     * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param slotType Indicates type of slot.
-     * @param enabled the type of slot enabled.
-     * @param isForceControl Indicates whether the slot is affected by the notification switch.
-     * @return Returns get slot number by bundle result.
-     */
-    static ErrCode SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
-
-    /**
-     * Obtains whether the application slot is enabled.
-     *
-     * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param slotType Indicates type of slot.
-     * @param enabled the type of slot enabled to get.
-     * @return Returns get slot number by bundle result.
-     */
-    static ErrCode GetEnabledForBundleSlot(
-        const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled);
-
-    /**
-     * Obtains whether the current application slot is enabled.
-     *
-     * @param slotType Indicates type of slot.
-     * @param enabled the type of slot enabled to get.
-     * @return Returns get enabled result.
-     */
-    static ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
 
     /**
      * @brief Set whether to sync notifications to devices that do not have the app installed.
