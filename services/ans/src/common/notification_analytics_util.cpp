@@ -335,16 +335,10 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
     NotificationNapi::ContentType contentType;
     NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
         static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
-    if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW ||
-        contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
-        ANS_LOGI("ContentType is liveview type");
+    if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
         auto content = request->GetContent()->GetNotificationContent();
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
-        if (liveViewContent != nullptr) {
-            reason["status"] = static_cast<int32_t>(liveViewContent->GetLiveViewStatus());
-        } else {
-            ANS_LOGW("liveViewContent is nullptr");
-        }
+        reason["status"] = static_cast<int32_t>(liveViewContent->GetLiveViewStatus());
     }
 
     return NotificationAnalyticsUtil::BuildExtraInfo(message, reason);
