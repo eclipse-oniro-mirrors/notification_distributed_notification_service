@@ -880,7 +880,8 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
     if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
         auto wantAgentValue  = jsonObject.at("wantAgent").get<std::string>();
         ANS_LOGI("wantAgent FromString, uid = %{public}d", pRequest->GetReceiverUserId());
-        pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue, pRequest->GetReceiverUserId());
+        pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(
+            wantAgentValue, pRequest->GetReceiverUserId());
     }
 
     if (!ConvertJsonToNotificationContent(pRequest, jsonObject)) {
