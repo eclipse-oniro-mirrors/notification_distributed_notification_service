@@ -2240,6 +2240,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
+    record->isThirdparty = false;
     if (request->IsAgentNotification()) {
         record->bundleOption = new (std::nothrow) NotificationBundleOption("", request->GetCreatorUid());
     } else {

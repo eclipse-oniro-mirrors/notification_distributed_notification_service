@@ -629,8 +629,16 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         return ctrlResult;
     }
 #endif
-    auto record = MakeNotificationRecord(request, bundleOption);
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
+    bool isThirdparty;
+    if (isSystemApp || isSubsystem) {
+        isThirdparty = false;
+    } else {
+        isThirdparty = true;
+    }
+    auto record = MakeNotificationRecord(request, bundleOption);
+    record->isThirdparty = isThirdparty;
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
         message.ErrorCode(result);
@@ -959,15 +967,13 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
 
 ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record)
 {
+    if (record->isNeedFlowCtrl == false) {
+        return ERR_OK;
+    }
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    auto uid = record->request->GetCreatorUid();
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
-    bool isSystemApp = BundleManagerHelper::GetInstance()->IsSystemApp(uid);
-    bool isSubsystem = IsSystemUser(userId);
-    ANS_LOGD("UpdateInNotificationList uid %{public}d, userid %{public}d, size %{public}zu,%{public}zu",
-        uid, userId, flowControlUpdateTimestampList_.size(), systemFlowControlUpdateTimestampList_.size());
-    if (!isSubsystem && !isSystemApp) {
+    ANS_LOGD("UpdateInNotificationList size %{public}zu,%{public}zu",
+        flowControlUpdateTimestampList_.size(), systemFlowControlUpdateTimestampList_.size());
+    if (record->isThirdparty == true) {
         // 三方流控
         std::lock_guard<std::mutex> lock(flowControlMutex_);
         NotificationAnalyticsUtil::RemoveExpired(flowControlUpdateTimestampList_, now);
@@ -1488,17 +1494,14 @@ static bool SortNotificationsByLevelAndTime(
 
 ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
+    if (record->isNeedFlowCtrl == false) {
+        return ERR_OK;
+    }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2);
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-
-    auto uid = record->request->GetCreatorUid();
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
-    bool isSystemApp = BundleManagerHelper::GetInstance()->IsSystemApp(uid);
-    bool isSubsystem = IsSystemUser(userId);
-    ANS_LOGD("FlowControl uid %{public}d, userid %{public}d, size %{public}zu,%{public}zu",
-        uid, userId, flowControlTimestampList_.size(), systemFlowControlTimestampList_.size());
-    if (!isSubsystem && !isSystemApp) {
+    ANS_LOGD("FlowControl size %{public}zu,%{public}zu",
+        flowControlTimestampList_.size(), systemFlowControlTimestampList_.size());
+    if (record->isThirdparty == true) {
         std::lock_guard<std::mutex> lock(flowControlMutex_);
         NotificationAnalyticsUtil::RemoveExpired(flowControlTimestampList_, now);
         if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
@@ -1528,15 +1531,13 @@ bool AdvancedNotificationService::IsSystemUser(int32_t userId)
 
 ErrCode AdvancedNotificationService::PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record)
 {
+    if (record->isNeedFlowCtrl == false) {
+        return ERR_OK;
+    }
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    auto uid = record->request->GetCreatorUid();
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
-    bool isSystemApp = BundleManagerHelper::GetInstance()->IsSystemApp(uid);
-    bool isSubsystem = IsSystemUser(userId);
-    ANS_LOGD("PublishFlowControl uid %{public}d, userid %{public}d, size %{public}zu,%{public}zu",
-        uid, userId, flowControlPublishTimestampList_.size(), systemFlowControlPublishTimestampList_.size());
-    if (!isSubsystem && !isSystemApp) {
+    ANS_LOGD("PublishFlowControl size %{public}zu,%{public}zu",
+        flowControlPublishTimestampList_.size(), systemFlowControlPublishTimestampList_.size());
+    if (record->isThirdparty == true) {
         // 三方流控
         std::lock_guard<std::mutex> lock(flowControlMutex_);
         NotificationAnalyticsUtil::RemoveExpired(flowControlPublishTimestampList_, now);
