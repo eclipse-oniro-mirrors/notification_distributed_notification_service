@@ -15,6 +15,10 @@
       {
         "name": "button_text",
         "value": "#5291FF"
+      },
+      {
+        "name": "mask_thin",
+        "value": "#66000000"
       }
     ]
   }
