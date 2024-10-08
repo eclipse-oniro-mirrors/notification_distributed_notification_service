@@ -41,9 +41,7 @@ let storage = LocalStorage.getShared();
   .fontWeight(FontWeight.Medium)
   .height(Constants.BUTTON_HEIGHT)
   .flexGrow(Constants.FLEX_GROW)
-  .margin({
-    left: Constants.BUTTON_LEFT
-  })
+  .width('50%')
 }
 
 @Extend(Button) function leftCustomizeButton() {
@@ -53,21 +51,20 @@ let storage = LocalStorage.getShared();
   .fontWeight(FontWeight.Medium)
   .height(Constants.BUTTON_HEIGHT)
   .flexGrow(Constants.FLEX_GROW)
-  .margin({
-    right: Constants.BUTTON_RIGHT
-  })
+  .width('50%')
 }
 
 @Entry(storage)
 @Component
 struct NotificationDialogPage {
-  @StorageLink('isUpdate') isUpdate: number = -1;
+  @StorageLink('isUpdate') isUpdate: number = 0;
 
   privacyDialogController: CustomDialogController = new CustomDialogController({
     builder: PermissionDialog({ isUpdate: $isUpdate }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
     customStyle: true,
+    maskColor: $r('app.color.mask_thin'),
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
     }
@@ -80,7 +77,6 @@ struct NotificationDialogPage {
   }
 
   onPageShow() {
-    this.isUpdate++;
   }
 }
 
@@ -101,14 +97,16 @@ struct PermissionDialog {
         offset: {xs: Constants.XS_OFFSET, sm: Constants.SM_OFFSET, md: Constants.DIALOG_MD_OFFSET, lg: Constants.DIALOG_LG_OFFSET} }) {
         Flex({ justifyContent: FlexAlign.Center, alignItems: this.isBottomPopover ? ItemAlign.End : ItemAlign.Center }) {
           Column() {
-            Image(permission.icon)
-              .width(Constants.DIALOG_ICON_WIDTH)
-              .height(Constants.DIALOG_ICON_HEIGHT)
-              .margin({
-                top: Constants.DIALOG_ICON_MARGIN_TOP
-              })
             Scroll() {
               Column() {
+                Row() {
+                  Image(permission.icon)
+                  .width(Constants.DIALOG_ICON_WIDTH)
+                  .height(Constants.DIALOG_ICON_HEIGHT)
+                  .margin({
+                    top: Constants.DIALOG_ICON_MARGIN_TOP
+                  })
+                }
                 Row() {
                   Flex({ justifyContent: FlexAlign.Center }) {
                     Text() {
@@ -118,6 +116,8 @@ struct PermissionDialog {
                     .fontColor($r('app.color.text_primary'))
                     .fontWeight(FontWeight.Bold)
                     .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
+                    .maxLines(2)
+                    .textOverflow({overflow: TextOverflow.Ellipsis})
                     .margin({
                       top: Constants.DIALOG_REQ_MARGIN_TOP,
                       bottom:Constants.DIALOG_REQ_MARGIN_BUTTOM,
@@ -144,35 +144,36 @@ struct PermissionDialog {
                     })
                   }
                 }
+                Row() {
+                  Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
+                    Button($r('app.string.BAN'))
+                      .onClick(async (): Promise<void> => {
+                      await this.enableNotification(false);
+                      })
+                      .leftCustomizeButton()
+                    Divider()
+                      .color($r('app.color.comp_divider'))
+                      .vertical(true)
+                      .height(Constants.DIVIDER_HEIGHT)
+                      .strokeWidth(Constants.DIVIDER_WIDTH)
+                      .margin({left: Constants.BUTTON_LEFT, right: Constants.BUTTON_RIGHT})
+                    Button($r('app.string.ALLOW'))
+                      .onClick(async (): Promise<void> => {
+                        await this.enableNotification(true);
+                      })
+                      .rightCustomizeButton()
+                  }
+                  .margin({ left: Constants.BUTTON_MARGIN_LEFT, right: Constants.BUTTON_MARGIN_RIGHT })
+                }
               }
             }
             .constraintSize({ maxHeight: Constants.MAXIMUM_HEADER_HEIGHT })
-            Row() {
-              Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-                Button($r('app.string.BAN'))
-                  .onClick(async (): Promise<void> => {
-                   await this.enableNotification(false);
-                  })
-                  .leftCustomizeButton()
-                Divider()
-                  .color($r('app.color.comp_divider'))
-                  .vertical(true)
-                  .height(Constants.DIVIDER_HEIGHT)
-                  .strokeWidth(Constants.DIVIDER_WIDTH)
-                Button($r('app.string.ALLOW'))
-                  .onClick(async (): Promise<void> => {
-                    await this.enableNotification(true);
-                  })
-                  .rightCustomizeButton()
-              }
-              .margin({ left: Constants.BUTTON_MARGIN_LEFT, right: Constants.BUTTON_MARGIN_RIGHT })
-            }
           }
           .backgroundColor($r('app.color.dialog_bg'))
           .borderRadius(Constants.DIALOG_PRIVACY_BORDER_RADIUS)
+          .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
           .width(Constants.FULL_WIDTH)
           .padding({ bottom: Constants.DIALOG_PADDING_BOTTOM })
-          .margin({ bottom: $r('sys.float.ohos_id_dialog_margin_bottom') })
           .clip(true)
         }
         .width(Constants.FULL_WIDTH)
