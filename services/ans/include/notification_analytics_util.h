@@ -111,6 +111,13 @@ private:
     static std::list<std::chrono::system_clock::time_point> GetFlowListByType(const int32_t reportType);
 
     static FlowControllerOption GetFlowOptionByType(const int32_t reportType);
+
+    static std::string BuildExtraInfo(const HaMetaMessage& message, nlohmann::json& reason);
+
+    static std::string BuildExtraInfoWithReq(const HaMetaMessage& message,
+        const sptr<NotificationRequest>& request, nlohmann::json& reason);
+
+    static void SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message, std::string& extraInfo);
 };
 } // namespace Notification
 } // namespace OHOS
