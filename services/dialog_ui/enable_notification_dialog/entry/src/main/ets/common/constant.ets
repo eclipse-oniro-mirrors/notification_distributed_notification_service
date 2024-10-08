@@ -129,7 +129,7 @@ export default class Constants {
   public static DIALOG_DESP_MARGIN_TOP = 0;
   public static DIALOG_DESP_MARGIN_LEFT = 24;
   public static DIALOG_DESP_MARGIN_RIGHT = 24;
-  public static DIALOG_DESP_MARGIN_BOTTOM = 12;
+  public static DIALOG_DESP_MARGIN_BOTTOM = 8;
   public static DIALOG_DESP_LINE_HEIGHT = 21;
 
   public static BUTTON_MARGIN_TOP = 8;
