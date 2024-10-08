@@ -41,60 +41,66 @@ const std::string PROGRESS_VALUE = "progressValue";
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
     ANS_LOGI("Start recover live view from db. userId:%{public}d", userId);
-
-    std::vector<NotificationRequestDb> requestsdb;
-    if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
-        ANS_LOGE("Get liveView from db failed.");
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return;
     }
-
-    for (const auto &requestObj : requestsdb) {
-        ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
-        if (!IsLiveViewCanRecover(requestObj.request)) {
-            int32_t userId = requestObj.request->GetReceiverUserId();
-            if (DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
-                requestObj.request->GetSecureKey(), userId) != ERR_OK) {
-                ANS_LOGE("Delete notification failed.");
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        std::vector<NotificationRequestDb> requestsdb;
+        if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
+            ANS_LOGE("Get liveView from db failed.");
+            return;
+        }
+        ANS_LOGI("The number of live views to recover: %{public}zu.", requestsdb.size());
+        for (const auto &requestObj : requestsdb) {
+            ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
+            if (!IsLiveViewCanRecover(requestObj.request)) {
+                int32_t userId = requestObj.request->GetReceiverUserId();
+                if (DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+                    requestObj.request->GetSecureKey(), userId) != ERR_OK) {
+                    ANS_LOGE("Delete notification failed.");
+                }
+                continue;
             }
-            continue;
+
+            auto record = std::make_shared<NotificationRecord>();
+            if (FillNotificationRecord(requestObj, record) != ERR_OK) {
+                ANS_LOGE("Fill notification record failed.");
+                continue;
+            }
+
+            if (Filter(record, true) != ERR_OK) {
+                ANS_LOGE("Filter record failed.");
+                continue;
+            }
+
+            if (FlowControl(record) != ERR_OK) {
+                ANS_LOGE("Flow control failed.");
+                continue;
+            }
+
+            // Turn off ringtone and vibration during recovery process
+            auto notificationFlags = record->request->GetFlags();
+            notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+            notificationFlags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+            record->request->SetFlags(notificationFlags);
+            ANS_LOGI("SetFlags-Recovery, notificationKey = %{public}s flags = %{public}d",
+                record->request->GetKey().c_str(), notificationFlags->GetReminderFlags());
+            if (AssignToNotificationList(record) != ERR_OK) {
+                ANS_LOGE("Add notification to record list failed.");
+                continue;
+            }
+            UpdateRecentNotification(record->notification, false, 0);
+
+            StartFinishTimer(record, requestObj.request->GetFinishDeadLine());
+            StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine());
         }
 
-        auto record = std::make_shared<NotificationRecord>();
-        if (FillNotificationRecord(requestObj, record) != ERR_OK) {
-            ANS_LOGE("Fill notification record failed.");
-            continue;
+        // publish notifications
+        for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
+            OnSubscriberAdd(subscriber);
         }
-
-        if (Filter(record, true) != ERR_OK) {
-            ANS_LOGE("Filter record failed.");
-            continue;
-        }
-
-        if (FlowControl(record) != ERR_OK) {
-            ANS_LOGE("Flow control failed.");
-            continue;
-        }
-
-        // Turn off ringtone and vibration during recovery process
-        auto notificationFlags = record->request->GetFlags();
-        notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-        notificationFlags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-        record->request->SetFlags(notificationFlags);
-        if (AssignToNotificationList(record) != ERR_OK) {
-            ANS_LOGE("Add notification to record list failed.");
-            continue;
-        }
-        UpdateRecentNotification(record->notification, false, 0);
-
-        StartFinishTimer(record, requestObj.request->GetFinishDeadLine());
-        StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine());
-    }
-
-    // publish notifications
-    for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
-        OnSubscriberAdd(subscriber);
-    }
-
+    }));
     ANS_LOGI("End recover live view from db.");
 }
 
