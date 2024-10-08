@@ -101,13 +101,9 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
             return;
         }
 
-        ffrt::submit([=] {
-            ANS_LOGI("COMMON_EVENT_USER_SWITCHED [%{public}d].", userId);
-            NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
-            AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
-            NotificationCloneManager::GetInstance().OnUserSwitch(userId);
-        });
-        ANS_LOGI("COMMON_EVENT_USER_SWITCHED end");
+        NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
+        AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
+        NotificationCloneManager::GetInstance().OnUserSwitch(userId);
         return;
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();
