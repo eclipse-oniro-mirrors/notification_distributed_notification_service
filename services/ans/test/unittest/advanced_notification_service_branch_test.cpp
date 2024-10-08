@@ -1074,6 +1074,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_275000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     MockVerifyNativeToken(true);
     MockGetDistributedEnableInApplicationInfo(true, 2);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(

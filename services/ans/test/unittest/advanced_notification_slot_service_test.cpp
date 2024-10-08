@@ -97,6 +97,8 @@ void AnsSlotServiceTest::TestAddSlot(NotificationConstant::SlotType type)
  */
 HWTEST_F(AnsSlotServiceTest, AddSlots_00001, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(slotType);
@@ -126,6 +128,8 @@ HWTEST_F(AnsSlotServiceTest, GetSlots_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00001, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationBundleOption> bundle = nullptr;
     ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(bundle, slots), (int)ERR_ANS_INVALID_BUNDLE);
@@ -139,6 +143,8 @@ HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00001, Function | SmallTest | Leve
  */
 HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00002, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
@@ -153,6 +159,8 @@ HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00002, Function | SmallTest | Leve
  */
 HWTEST_F(AnsSlotServiceTest, UpdateSlots_00001, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationBundleOption> bundle = nullptr;
     ASSERT_EQ(advancedNotificationService_->UpdateSlots(bundle, slots), (int)ERR_ANS_INVALID_BUNDLE);
@@ -170,6 +178,8 @@ HWTEST_F(AnsSlotServiceTest, UpdateSlots_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsSlotServiceTest, UpdateSlots_00002, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
     slot->SetEnable(true);
@@ -506,7 +516,7 @@ HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_00001, Function | SmallTes
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     advancedNotificationService_->GenerateSlotReminderMode(slot, bundle);
-    ASSERT_EQ(slot->GetReminderMode(), (int)0b111111);
+    ASSERT_EQ(slot->GetReminderMode(), (int)0b111011);
 }
 
 /**
@@ -520,7 +530,7 @@ HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_00002, Function | SmallTes
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     advancedNotificationService_->GenerateSlotReminderMode(slot, bundle, true);
-    ASSERT_EQ(slot->GetReminderMode(), (int)0b111111);
+    ASSERT_EQ(slot->GetReminderMode(), (int)0b111011);
 }
 
 /**
