@@ -2028,6 +2028,14 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
+    bool isThirdparty;
+    if (isSystemApp || isSubsystem) {
+        isThirdparty = false;
+    } else {
+        isThirdparty = true;
+    }
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
@@ -2066,6 +2074,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
+    record->isThirdparty = isThirdparty;
     if (request->IsAgentNotification()) {
         record->bundleOption = new (std::nothrow) NotificationBundleOption("", request->GetCreatorUid());
     } else {
