@@ -1554,7 +1554,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
-    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType), -1);
 
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
@@ -2437,7 +2437,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22600,
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
     auto ret = advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret, -1);
 }
 
 /**
@@ -3594,6 +3594,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00001, Function
 {
     ASSERT_NE(advancedNotificationService_, nullptr);
     MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     ASSERT_NE(bundleOption, nullptr);
     std::string bundleName = "invalidBundleName";

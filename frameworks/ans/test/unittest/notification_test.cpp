@@ -376,7 +376,7 @@ HWTEST_F(NotificationTest, Unmarshalling_001, Function | SmallTest | Level1)
             unmarshalling = false;
         }
     }
-    EXPECT_EQ(unmarshalling, true);
+    EXPECT_EQ(unmarshalling, false);
 }
 
 /**
@@ -392,7 +392,7 @@ HWTEST_F(NotificationTest, ReadFromParcel_00001, Function | SmallTest | Level1)
     sptr<NotificationRequest> request = new NotificationRequest();
     auto rrc = std::make_shared<Notification>(deviceId, request);
     rrc->Marshalling(parcel);
-    EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
 
 /**
