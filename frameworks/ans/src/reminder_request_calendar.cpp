@@ -287,6 +287,9 @@ bool ReminderRequestCalendar::OnDateTimeChange()
     if (IsExpired()) {
         return false;
     }
+    if (startDateTime_ == endDateTime_) {
+        return ReminderRequest::OnDateTimeChange();
+    }
     uint64_t now = GetNowInstantMilli();
     if (now == 0) {
         ANSR_LOGE("get now time failed");
@@ -347,7 +350,8 @@ bool ReminderRequestCalendar::IsNeedNotification()
         ANSR_LOGE("get now time failed");
         return false;
     }
-    if (now <= endDateTime_ && now >= startDateTime_) {
+    if ((now <= endDateTime_ && now >= startDateTime_) ||
+        (startDateTime_ == endDateTime_)) {
         return true;
     }
     uint64_t triggerTime = GetNextTriggerTime(true);
