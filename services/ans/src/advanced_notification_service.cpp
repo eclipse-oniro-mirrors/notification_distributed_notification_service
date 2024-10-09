@@ -146,7 +146,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_GET_ACTIVE_USER_FAILED;
             }
             if (request->GetOwnerUid() == DEFAULT_UID) {
-                GetActiveUserId(userId);
+                OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
                 uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), userId);
             } else {
                 uid = request->GetOwnerUid();

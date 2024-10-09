@@ -24,7 +24,7 @@
 #undef protected
 #include "ans_inner_errors.h"
 
-extern void MockQueryActiveOsAccountIds(bool mockRet, uint8_t mockCase);
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 
 
 using namespace testing::ext;
@@ -39,29 +39,13 @@ public:
 };
 
 /**
- * @tc.name      : NotificationDialog_00100
- * @tc.number    :
- * @tc.desc      : test GetActiveUserId function and QueryActiveOsAccountIds is ERR_OK
- */
-HWTEST_F(NotificationDialogTest, NotificationDialog_00100, Function | SmallTest | Level1)
-{
-    MockQueryActiveOsAccountIds(true, 0);
-    int32_t result = NotificationDialog::GetActiveUserId();
-    int32_t activeUserId = 100;
-    ASSERT_EQ(result, activeUserId);
-}
-
-/**
  * @tc.name      : NotificationDialog_00200
  * @tc.number    :
- * @tc.desc      : test GetActiveUserId function and QueryActiveOsAccountIds is ERR_INVALID_OPERATION
+ * @tc.desc      : test QueryActiveOsAccountIds is ERR_INVALID_OPERATION
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00200, Function | SmallTest | Level1)
 {
-    MockQueryActiveOsAccountIds(false, 1);
-    int32_t result = NotificationDialog::GetActiveUserId();
-    int32_t activeUserId = -4;
-    ASSERT_EQ(result, activeUserId);
+    MockQueryForgroundOsAccountId(false, 1);
 
     std::string bundleName = "BundleName";
     int32_t result2 =  NotificationDialog::GetUidByBundleName(bundleName);
@@ -76,10 +60,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00200, Function | SmallTest 
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest | Level1)
 {
-    MockQueryActiveOsAccountIds(false, 1);
-    int32_t result = NotificationDialog::GetActiveUserId();
-    int32_t activeUserId = -4;
-    ASSERT_EQ(result, activeUserId);
+    MockQueryForgroundOsAccountId(false, 1);
 
     std::string bundleName = "BundleName";
     int32_t result2 =  NotificationDialog::GetUidByBundleName(bundleName);
@@ -104,10 +85,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest 
  */
 HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest | Level1)
 {
-    MockQueryActiveOsAccountIds(false, 1);
-    int32_t result = NotificationDialog::GetActiveUserId();
-    int32_t activeUserId = -4;
-    ASSERT_EQ(result, activeUserId);
+    MockQueryForgroundOsAccountId(false, 1);
 
     std::string bundleName = "BundleName";
     int32_t result2 =  NotificationDialog::GetUidByBundleName(bundleName);

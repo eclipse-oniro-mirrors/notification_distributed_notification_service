@@ -1265,7 +1265,7 @@ private:
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);
     ErrCode PrepareNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
-    static bool GetActiveUserId(int& userId);
+
     void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request);
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);

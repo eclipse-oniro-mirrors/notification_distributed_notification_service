@@ -37,6 +37,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "common_event_publish_info.h"
+#include "os_account_manager_helper.h"
 #include "want_params_wrapper.h"
 #include "ans_convert_enum.h"
 #include "notification_analytics_util.h"
@@ -682,7 +683,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         int32_t activeUserId = SUBSCRIBE_USER_INIT;
-        if (!GetActiveUserId(activeUserId)) {
+        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
             return;
         }
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
@@ -947,7 +948,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
@@ -1054,7 +1055,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
@@ -1185,7 +1186,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
@@ -1215,7 +1216,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
@@ -1268,7 +1269,7 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
@@ -1848,7 +1849,7 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }

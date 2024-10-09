@@ -17,6 +17,7 @@
 
 #include "bundle_manager_helper.h"
 #include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -24,12 +25,9 @@ namespace Notification {
 constexpr int32_t MAIN_USER_ID = 100;
 int32_t NotificationCloneUtil::GetActiveUserId()
 {
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-    if (activeUserId.size() > 0) {
-        return activeUserId[0];
-    }
-    return MAIN_USER_ID;
+    int32_t userId = MAIN_USER_ID;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    return userId;
 }
 
 int32_t NotificationCloneUtil::GetBundleUid(const std::string bundleName, int32_t userId, int32_t appIndex)
