@@ -364,6 +364,13 @@ public:
      */
     static ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
         bool &canPop, std::string &bundleName);
+    
+    /**
+     * @brief remove enable notification dialog.
+     *
+     * @return Returns remove dialog result.
+     */
+    static ErrCode RemoveEnableNotificationDialog();
 
     /**
      * @brief Allow the current application to publish notifications on a specified device.

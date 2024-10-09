@@ -23,9 +23,6 @@
 #include "js_ans_dialog_callback.h"
 #include "common_event_manager.h"
 
-constexpr int32_t CRASH_CODE = 2;
-constexpr int32_t REMOVE_CODE = 3;
-
 namespace OHOS {
 namespace NotificationNapi {
 const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
@@ -303,7 +300,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
             } else {
                 asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-                SendDialogEvent(bundleName, REMOVE_CODE);
+                NotificationHelper::RemoveEnableNotificationDialog();
             }
         } else {
             ANS_LOGD("un stage mode");
@@ -566,28 +563,6 @@ bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, s
     return true;
 }
 
-void SendDialogEvent(std::string &bundleName, int32_t code)
-{
-    ANS_LOGD("SendDialogEvent start");
-    if (bundleName.empty()) {
-        ANS_LOGE("SendDialogEvent bundleName is nullptr");
-        return;
-    }
-    std::string action = "OnNotificationServiceDialogClicked";
-
-    EventFwk::Want want;
-    want.SetAction(action);
-
-    EventFwk::CommonEventData commonData;
-    commonData.SetWant(want);
-    commonData.SetCode(code);
-    commonData.SetData(bundleName);
-    if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
-        ANS_LOGE("PublishCommonEvent failed");
-    }
-    ANS_LOGD("SendDialogEvent end");
-}
-
 void SetEnableParam(IsEnableParams &params, const napi_env &env, napi_value &object)
 {
     auto context = OHOS::AbilityRuntime::GetStageModeContext(env, object);
@@ -640,7 +615,7 @@ void ModalExtensionCallback::OnError(int32_t code, const std::string& name, cons
 {
     ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
-    SendDialogEvent(this->bundleName_, CRASH_CODE);
+    NotificationHelper::RemoveEnableNotificationDialog();
 }
 
 /*
