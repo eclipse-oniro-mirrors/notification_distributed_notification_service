@@ -1316,6 +1316,28 @@ ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<AnsDialogCall
     return result;
 }
 
+ErrCode AnsManagerProxy::RemoveEnableNotificationDialog()
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_ENABLE_NOTIFICATION_DIALOG,
+        option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[RemoveEnableNotificationDialog] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[CanPopEnableNotificationDialog] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
 ErrCode AnsManagerProxy::IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed)
 {
     if (bundleOption == nullptr) {
