@@ -32,6 +32,7 @@
 #include "os_account_manager.h"
 #include "notification_preferences.h"
 #include "distributed_database.h"
+#include "os_account_manager_helper.h"
 #include "singleton.h"
 #include "want_agent_helper.h"
 #include "hitrace_meter.h"
@@ -142,7 +143,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
         if (bundleManager != nullptr) {
             int32_t activeUserId = -1;
-            if (!GetActiveUserId(activeUserId)) {
+            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
                 ANS_LOGE("Failed to get active user id!");
                 return validBundleOption;
             }
@@ -328,7 +329,7 @@ void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>
 {
     auto bundleManager = BundleManagerHelper::GetInstance();
     int32_t activeUserId = -1;
-    if (!GetActiveUserId(activeUserId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANSR_LOGW("Failed to get active user id!");
         return;
     }
@@ -804,7 +805,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const sptr<Notification
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGW("No active user found!");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
@@ -826,7 +827,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDate(sptr<NotificationDoNotD
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
@@ -849,7 +850,7 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
         return ERR_ANS_INVALID_PARAM;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGW("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
@@ -878,7 +879,7 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
         return ERR_ANS_INVALID_PARAM;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGW("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
@@ -902,7 +903,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int32_t id, sptr<Not
         return ERR_ANS_PERMISSION_DENIED;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!GetActiveUserId(userId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGW("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
@@ -938,7 +939,7 @@ void AdvancedNotificationService::OnDistributedPublish(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     int32_t activeUserId = -1;
-    if (!GetActiveUserId(activeUserId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id!");
         return;
     }
@@ -1013,7 +1014,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     int32_t activeUserId = -1;
-    if (!GetActiveUserId(activeUserId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id!");
         return;
     }
@@ -1095,7 +1096,7 @@ void AdvancedNotificationService::OnDistributedDelete(
     notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, label, id]() {
         ANS_LOGD("ffrt enter!");
         int32_t activeUserId = -1;
-        if (!GetActiveUserId(activeUserId)) {
+        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
             ANS_LOGE("Failed to get active user id!");
             return;
         }
@@ -1306,18 +1307,6 @@ ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templa
     }));
     notificationSvrQueue_->wait(handler);
     return result;
-}
-
-bool AdvancedNotificationService::GetActiveUserId(int& userId)
-{
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-    if (activeUserId.size() > 0) {
-        userId = activeUserId[0];
-        ANS_LOGD("Return active userId=%{public}d", userId);
-        return true;
-    }
-    return false;
 }
 
 void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<NotificationRequest> &request)
@@ -1885,7 +1874,7 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
     }
 
     int32_t activeUserId = 0;
-    if (!GetActiveUserId(activeUserId)) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id.");
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -1918,7 +1907,7 @@ std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfAct
     }
 
     std::vector<int32_t> activeUserId;
-    AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
+    OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
     if (activeUserId.empty()) {
         activeUserId.push_back(MAIN_USER_ID);
     }
