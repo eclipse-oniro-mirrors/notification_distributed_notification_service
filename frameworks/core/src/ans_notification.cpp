@@ -449,6 +449,17 @@ ErrCode AnsNotification::CanPopEnableNotificationDialog(sptr<AnsDialogHostClient
     return proxy->CanPopEnableNotificationDialog(hostClient, canPop, bundleName);
 }
 
+ErrCode AnsNotification::RemoveEnableNotificationDialog()
+{
+    ANS_LOGD("enter");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->RemoveEnableNotificationDialog();
+}
+
 ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId,
     sptr<AnsDialogHostClient> &hostClient,
     sptr<IRemoteObject> &callerToken)

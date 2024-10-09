@@ -62,7 +62,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     auto topBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     auto topUid = NotificationDialog::GetUidByBundleName(topBundleName);
     if (topBundleName != appBundleName) {
-        ANS_LOGE("Current application isn't in foreground, top is %{private}s.", topBundleName.c_str());
+        ANS_LOGE("Current application isn't in foreground, top is %{public}s.", topBundleName.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
     
