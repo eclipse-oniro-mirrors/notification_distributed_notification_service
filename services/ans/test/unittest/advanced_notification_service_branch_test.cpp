@@ -1203,8 +1203,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_285000, Function | SmallTest | Level1)
 
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
-    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
-        phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType), -1);
 }
 
 /**
