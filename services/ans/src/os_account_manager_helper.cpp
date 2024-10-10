@@ -57,10 +57,12 @@ ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &userId)
 
 ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
 {
-    std::vector<int> activeUserId;
-    int32_t ret = GetAllActiveOsAccount(activeUserId);
-    if (activeUserId.size() > 0) {
-        id = activeUserId[0];
+    int32_t ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(id);
+    if (ret != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_4)
+            .Message("Get foreground os account failed ret " + std::to_string(ret));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Failed to call OsAccountManager::GetForegroundOsAccountLocalId, code is %{public}d", ret);
     }
     return ret;
 }

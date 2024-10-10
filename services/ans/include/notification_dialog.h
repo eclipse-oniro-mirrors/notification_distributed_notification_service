@@ -36,7 +36,6 @@ public:
         std::string appBundleName,
         const sptr<IRemoteObject> &callerToken);
 
-    static int32_t GetActiveUserId();
     static int32_t GetUidByBundleName(const std::string &bundleName);
 };
 } // namespace Notification

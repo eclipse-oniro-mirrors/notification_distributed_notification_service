@@ -21,32 +21,18 @@
 #include "bundle_manager_helper.h"
 #include "in_process_call_wrapper.h"
 #include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "system_dialog_connect_stb.h"
 #include "extension_manager_client.h"
 
 namespace OHOS {
 namespace Notification {
 constexpr int32_t DEFAULT_VALUE = -1;
-int32_t NotificationDialog::GetActiveUserId()
-{
-    std::vector<int32_t> activeUserId;
-    auto errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-    if (errCode != ERR_OK) {
-        ANS_LOGE("Query active accountIds failed with %{public}d.", errCode);
-        return AppExecFwk::Constants::ANY_USERID;
-    }
-
-    if (activeUserId.empty()) {
-        ANS_LOGE("Active accountIds is empty.");
-        return AppExecFwk::Constants::ANY_USERID;
-    }
-
-    return activeUserId.front();
-}
 
 int32_t NotificationDialog::GetUidByBundleName(const std::string &bundleName)
 {
-    auto userId = NotificationDialog::GetActiveUserId();
+    int32_t userId = AppExecFwk::Constants::ANY_USERID;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     return IN_PROCESS_CALL(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId));
 }
 
