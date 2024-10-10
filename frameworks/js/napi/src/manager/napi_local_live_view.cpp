@@ -171,6 +171,7 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
 
     if (ParseTriggerParameters(env, info, asynccallbackinfo, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        delete asynccallbackinfo;
         return Common::NapiGetUndefined(env);
     }
 

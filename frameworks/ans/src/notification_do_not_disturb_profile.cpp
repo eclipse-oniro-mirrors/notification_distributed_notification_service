@@ -164,7 +164,12 @@ void NotificationDoNotDisturbProfile::FromJson(const std::string &jsonObj)
             if (bundleOption == nullptr) {
                 continue;
             }
-            trustList_.emplace_back(*bundleOption);
+            NotificationBundleOption bundleOptionCopy;
+            bundleOptionCopy.SetUid(bundleOption->GetUid());
+            bundleOptionCopy.SetBundleName(bundleOption->GetBundleName());
+            bundleOptionCopy.SetInstanceKey(bundleOption->GetInstanceKey());
+            bundleOptionCopy.SetAppIndex(bundleOption->GetAppIndex());
+            trustList_.emplace_back(bundleOptionCopy);
         }
     }
 }
