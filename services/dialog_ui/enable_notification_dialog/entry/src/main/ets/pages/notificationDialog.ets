@@ -35,7 +35,7 @@ const bottomPopoverTypes = ['default', 'phone'];
 let storage = LocalStorage.getShared();
 
 @Extend(Button) function rightCustomizeButton() {
-  .backgroundColor($r('app.color.dialog_bg'))
+  .backgroundColor(Color.Transparent)
   .fontColor($r('app.color.button_text'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
   .fontWeight(FontWeight.Medium)
@@ -45,7 +45,7 @@ let storage = LocalStorage.getShared();
 }
 
 @Extend(Button) function leftCustomizeButton() {
-  .backgroundColor($r('app.color.dialog_bg'))
+  .backgroundColor(Color.Transparent)
   .fontColor($r('app.color.button_text'))
   .fontSize(Constants.TEXT_MIDDLE_FONT_SIZE)
   .fontWeight(FontWeight.Medium)
@@ -169,7 +169,6 @@ struct PermissionDialog {
             }
             .constraintSize({ maxHeight: Constants.MAXIMUM_HEADER_HEIGHT })
           }
-          .backgroundColor($r('app.color.dialog_bg'))
           .borderRadius(Constants.DIALOG_PRIVACY_BORDER_RADIUS)
           .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
           .width(Constants.FULL_WIDTH)
