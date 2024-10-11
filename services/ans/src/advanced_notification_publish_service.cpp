@@ -922,7 +922,9 @@ ErrCode AdvancedNotificationService::RemoveEnableNotificationDialog()
 
 ErrCode AdvancedNotificationService::RemoveEnableNotificationDialog(const sptr<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGI("RemoveEnableNotificationDialog  %{public}s, %{public}d", bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+    ANS_LOGI("RemoveEnableNotificationDialog  %{public}s, %{public}d",
+        bundleOption->GetBundleName().c_str(),
+        bundleOption->GetUid());
     if (!CreateDialogManager()) {
         return ERROR_INTERNAL_ERROR;
     }
