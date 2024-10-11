@@ -1397,7 +1397,13 @@ private:
     bool IsSystemUser(int32_t userId);
     ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
-
+    ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationBundleOption> &bundle,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
+    ErrCode AddSlotThenPublishEvent(
+        const sptr<NotificationSlot> &slot,
+        const sptr<NotificationBundleOption> &bundle,
+        bool enabled, bool isForceControl);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

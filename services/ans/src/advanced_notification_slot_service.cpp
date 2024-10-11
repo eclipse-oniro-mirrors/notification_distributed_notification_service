@@ -714,6 +714,73 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
     return result;
 }
 
+ErrCode AdvancedNotificationService::AddSlotThenPublishEvent(
+    const sptr<NotificationSlot> &slot,
+    const sptr<NotificationBundleOption> &bundle,
+    bool enabled, bool isForceControl)
+{
+    bool allowed = false;
+    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, allowed);
+    if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        result = ERR_OK;
+        allowed = CheckApiCompatibility(bundle);
+        SetDefaultNotificationEnabled(bundle, allowed);
+    }
+
+    slot->SetEnable(enabled);
+    slot->SetForceControl(isForceControl);
+    slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+    result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
+    if (result != ERR_OK) {
+        ANS_LOGE("Set enable slot: AddNotificationSlot failed");
+        return result;
+    }
+
+    if (!slot->GetEnable()) {
+        RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
+    } else {
+        if (!slot->GetForceControl() && !allowed) {
+            RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE);
+        }
+    }
+
+    PublishSlotChangeCommonEvent(bundle);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SetEnabledForBundleSlotInner(
+    const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<NotificationBundleOption> &bundle,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
+{
+    sptr<NotificationSlot> slot;
+    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
+    if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
+        result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        slot = new (std::nothrow) NotificationSlot(slotType);
+        if (slot == nullptr) {
+            ANS_LOGE("Failed to create NotificationSlot ptr.");
+            return ERR_ANS_NO_MEMORY;
+        }
+        GenerateSlotReminderMode(slot, bundleOption);
+        return AddSlotThenPublishEvent(slot, bundle, enabled, isForceControl);
+    } else if ((result == ERR_OK) && (slot != nullptr)) {
+        if (slot->GetEnable() == enabled && slot->GetForceControl() == isForceControl) {
+            slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+            std::vector<sptr<NotificationSlot>> slots;
+            slots.push_back(slot);
+            return NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
+        }
+        NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundle, slotType);
+        return AddSlotThenPublishEvent(slot, bundle, enabled, isForceControl);
+    } else {
+        ANS_LOGE("Set enable slot: GetNotificationSlot failed");
+        return result;
+    }
+}
+
 ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
     const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
@@ -731,62 +798,8 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        sptr<NotificationSlot> slot;
-        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
-            result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            slot = new (std::nothrow) NotificationSlot(slotType);
-            if (slot == nullptr) {
-                ANS_LOGE("Failed to create NotificationSlot ptr.");
-                result = ERR_ANS_NO_MEMORY;
-                return;
-            }
-            GenerateSlotReminderMode(slot, bundleOption);
-        } else if ((result == ERR_OK) && (slot != nullptr)) {
-            if (slot->GetEnable() == enabled && slot->GetForceControl() == isForceControl) {
-                // 设置authorizedStatus为已授权
-                slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
-                std::vector<sptr<NotificationSlot>> slots;
-                slots.push_back(slot);
-                result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
-                return;
-            }
-            NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundle, slotType);
-        } else {
-            ANS_LOGE("Set enable slot: GetNotificationSlot failed");
-            return;
-        }
-        bool allowed = false;
-        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, allowed);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_OK;
-            allowed = CheckApiCompatibility(bundle);
-            SetDefaultNotificationEnabled(bundle, allowed);
-        }
-
-        slot->SetEnable(enabled);
-        slot->SetForceControl(isForceControl);
-        // 设置authorizedStatus为已授权
-        slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
-        std::vector<sptr<NotificationSlot>> slots;
-        slots.push_back(slot);
-        result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
-        if (result != ERR_OK) {
-            ANS_LOGE("Set enable slot: AddNotificationSlot failed");
-            return;
-        }
-
-        if (!slot->GetEnable()) {
-            RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
-        } else {
-            if (!slot->GetForceControl() && !allowed) {
-                RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE);
-            }
-        }
-
-        PublishSlotChangeCommonEvent(bundle);
+        result = SetEnabledForBundleSlotInner(bundleOption, bundle, slotType, enabled, isForceControl);
     }));
     notificationSvrQueue_->wait(handler);
 
