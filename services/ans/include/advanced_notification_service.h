@@ -1431,7 +1431,7 @@ private:
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
-    std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
+    std::list<std::pair<std::chrono::steady_clock::time_point, std::string>> uniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
     std::mutex delayNotificationMutext_;
 };
