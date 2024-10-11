@@ -502,7 +502,7 @@ public:
      *
      * @return Returns remove dialog result.
      */
-    ErrCode RemoveEnableNotificationDialog() override;    
+    ErrCode RemoveEnableNotificationDialog() override;
 
     /**
      * @brief Checks whether notifications are allowed for a specific bundle.
