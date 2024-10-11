@@ -514,7 +514,7 @@ public:
     *
     * @return Returns remove dialog result.
     */
-    virtual ErrCode RemoveEnableNotificationDialog() = 0; 
+    virtual ErrCode RemoveEnableNotificationDialog() = 0;
 
     /**
      * @brief Checks whether notifications are allowed for a specific bundle.
