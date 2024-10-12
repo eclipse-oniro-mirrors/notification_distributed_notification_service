@@ -548,6 +548,15 @@ public:
      */
     ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
+    
+    /**
+     * @brief remove enable notification dialog.
+     *
+     * @return Returns remove dialog result.
+     */
+    ErrCode RemoveEnableNotificationDialog() override;
+
+    ErrCode RemoveEnableNotificationDialog(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Checks whether notifications are allowed for a specific bundle.
