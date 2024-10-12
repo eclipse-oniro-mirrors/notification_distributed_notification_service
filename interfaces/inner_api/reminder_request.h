@@ -19,11 +19,9 @@
 #include <map>
 #include <string>
 
-#include "abs_shared_result_set.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_request.h"
-#include "values_bucket.h"
 #include "want_params.h"
 
 namespace OHOS {
@@ -438,6 +436,27 @@ public:
     std::string GetBundleName() const;
 
     /**
+     * @brief Set the reminder type.
+     *
+     * @param reminderType the reminder type.
+     */
+    void SetReminderType(const ReminderType type);
+
+    /**
+     * @brief Set the reminder state.
+     *
+     * @param state the reminder state.
+     */
+    void SetState(const uint8_t state);
+
+    /**
+     * @brief Set the reminder repeat days of week.
+     *
+     * @param state the reminder repeat days of week.
+     */
+    void SetRepeatDaysOfWeek(const uint8_t repeatDaysOfWeek);
+
+    /**
      * @brief Set the app system.
      *
      */
@@ -607,17 +626,6 @@ public:
      * @return true if need to show reminder immediately.
      */
     virtual bool OnTimeZoneChange();
-
-    void RecoverBasicFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-
-    /**
-     * @brief Recovery reminder instance from database record.
-     *
-     * @param resultSet Indicates the resultSet with pointer to the row of record data.
-     */
-    void RecoverFromDbBase(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) {};
 
     /**
      * @brief Sets action button.
@@ -801,7 +809,9 @@ public:
         return true;
     }
 
+    void SetWantAgentStr(const std::string& wantStr);
     std::string GetWantAgentStr();
+    void SetMaxWantAgentStr(const std::string& maxWantStr);
     std::string GetMaxWantAgentStr();
 
     /**
@@ -880,21 +890,51 @@ public:
     std::vector<int32_t> GetDaysOfWeek() const;
 
     /**
+     * @brief Create notification request struct when recover from rdb or
+     * recv reminder info from ipc.
+     */
+    bool InitNotificationRequest();
+
+    /**
+     * @brief Gets repeat days of week
+     */
+    uint8_t GetRepeatDaysOfWeek() const;
+
+    /**
      * @brief When system language change, will call this function.
      *     need load resource to update button title
      * @param resMgr Indicates the resource manager for get button title
      */
     void OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr);
 
+public:
+    /**
+     * @brief Serialize want agent info and max want agent info to string.
+     * Persist to the rdb.
+     */
+    void SerializeWantAgent(std::string& wantInfoStr, std::string& maxWantInfoStr);
+
+    /**
+     * @brief Deserialize want agent info and max want agent info from string.
+     * Recover from the rdb.
+     */
+    void DeserializeWantAgent(const std::string& wantAgentInfo, const uint8_t type);
+
+    /**
+     * @brief Serialize action button info to string.
+     * Persist to the rdb.
+     */
+    std::string SerializeButtonInfo() const;
+
+    /**
+     * @brief Deserialize action button info from string.
+     * Recover from the rdb.
+     */
+    void DeserializeButtonInfo(const std::string& buttonInfoStr);
+
     static int32_t GetActualTime(const TimeTransferType &type, int32_t cTime);
     static int32_t GetCTime(const TimeTransferType &type, int32_t actualTime);
     static uint64_t GetDurationSinceEpochInMilli(const time_t target);
-    static int32_t GetUid(const int32_t &userId, const std::string &bundleName);
-    static int32_t GetAppIndex(const int32_t uid);
-    static int32_t GetUserId(const int32_t &uid);
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values,
-        bool oldVersion = false);
     static std::vector<std::string> StringSplit(std::string source, const std::string &split);
 
     static int32_t GLOBAL_ID;
@@ -979,9 +1019,6 @@ protected:
         return INVALID_LONG_LONG_VALUE;
     }
 
-    int64_t RecoverInt64FromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
-        const std::string &columnName, const DbRecoveryType &columnType);
-
     uint8_t repeatDaysOfWeek_{0};
 
     /**
@@ -993,7 +1030,6 @@ protected:
      */
     int64_t GetNextDaysOfWeek(const time_t now, const time_t target) const;
     void SetRepeatDaysOfWeek(bool set, const std::vector<uint8_t> &daysOfWeek);
-    uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetNowInstantMilli() const;
@@ -1003,13 +1039,11 @@ private:
     void AddRemovalWantAgent();
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element) const;
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateMaxWantAgent(AppExecFwk::ElementName &element) const;
-    std::string GetButtonInfo() const;
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;
     bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
     bool HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
-    bool InitNotificationRequest();
     void InitServerObj();
     void SetMaxScreenWantAgent(AppExecFwk::ElementName &element);
     void SetState(bool deSet, const uint8_t newState, std::string function);
@@ -1047,18 +1081,12 @@ private:
      */
     void UpdateNotificationStateForSnooze();
 
-    static void AppendWantAgentValuesBucket(const sptr<ReminderRequest>& reminder,
-        NativeRdb::ValuesBucket& values);
-
     bool MarshallingWantParameters(Parcel& parcel, const AAFwk::WantParams& params) const;
     bool MarshallingActionButton(Parcel& parcel) const;
     bool ReadWantParametersFromParcel(Parcel& parcel, AAFwk::WantParams& wantParams);
     bool ReadActionButtonFromParcel(Parcel& parcel);
 
-    void RecoverBasicFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
     void RecoverActionButtonJsonMode(const std::string& jsonString);
-    void RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    void RecoverWantAgent(const std::string& wantAgentInfo, const uint8_t& type);
     void RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type);
 
     static const uint32_t MIN_TIME_INTERVAL_IN_MILLI;

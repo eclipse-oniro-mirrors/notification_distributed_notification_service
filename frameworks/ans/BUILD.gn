@@ -116,9 +116,6 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/reminder_request_alarm.cpp",
     "${frameworks_module_ans_path}/src/reminder_request_calendar.cpp",
     "${frameworks_module_ans_path}/src/reminder_request_timer.cpp",
-    "${frameworks_module_ans_path}/src/reminder_store.cpp",
-    "${frameworks_module_ans_path}/src/reminder_table.cpp",
-    "${frameworks_module_ans_path}/src/reminder_table_old.cpp",
   ]
 
   public_configs = [ ":ans_innerkits_public_config" ]
@@ -136,8 +133,6 @@ ohos_shared_library("ans_innerkits") {
     "hilog:libhilog",
     "i18n:intl_util",
     "ipc:ipc_core",
-    "os_account:os_account_innerkits",
-    "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
     "time_service:time_client",
