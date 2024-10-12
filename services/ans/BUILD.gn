@@ -102,6 +102,7 @@ ohos_shared_library("libans") {
     "src/reminder_table.cpp",
     "src/reminder_table_old.cpp",
     "src/reminder_timer_info.cpp",
+    "src/report_time_info.cpp",
     "src/system_dialog_connect_stb.cpp",
     "src/system_event_observer.cpp",
     "src/telephony_extension_wrapper.cpp",

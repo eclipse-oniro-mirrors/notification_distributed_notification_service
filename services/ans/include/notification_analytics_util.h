@@ -84,6 +84,11 @@ struct FlowControllerOption {
     int32_t time;
 };
 
+struct ReportCache {
+    EventFwk::Want want;
+    int32_t eventCode;
+};
+
 class NotificationAnalyticsUtil {
 public:
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
@@ -96,6 +101,8 @@ public:
 
     static void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
+
+    static int64_t GetCurrentTime();
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);
@@ -118,6 +125,12 @@ private:
         const sptr<NotificationRequest>& request, nlohmann::json& reason);
 
     static void SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message, std::string& extraInfo);
+    
+    static void AddListCache(EventFwk::Want& want, int32_t eventCode);
+
+    static void ExecuteCacheList();
+    
+    static void ReportCommonEvent(const ReportCache& reportCache);
 };
 } // namespace Notification
 } // namespace OHOS
