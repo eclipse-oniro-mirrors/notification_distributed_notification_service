@@ -655,7 +655,6 @@ HWTEST_F(AnsNotificationBranchTest, RemoveNotifications_0300, Function | MediumT
     std::vector<std::string> hashcodes;
     hashcodes.emplace_back(hashcode);
     int32_t removeReason = 1;
-    MockGetAnsManagerProxy(true);
     ansNotification->RemoveNotifications(hashcodes, removeReason);
 }
 
