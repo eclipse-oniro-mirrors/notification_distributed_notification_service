@@ -46,7 +46,6 @@ ErrCode AdvancedNotificationService::Subscribe(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {
@@ -78,8 +77,6 @@ ErrCode AdvancedNotificationService::Subscribe(
             break;
         }
     } while (0);
-    message.Message("Subscribe notification: " + std::to_string(errCode));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
 }

@@ -381,9 +381,6 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "notificationSvrQueue is null";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 3)
-            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
