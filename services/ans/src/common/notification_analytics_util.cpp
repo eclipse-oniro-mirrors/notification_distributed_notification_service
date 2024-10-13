@@ -151,17 +151,6 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<Notification
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
     HaMetaMessage& message)
 {
-    if (request == nullptr || !message.NeedReport()) {
-        ANS_LOGE("request is null %{public}d", message.NeedReport());
-        return;
-    }
-    std::shared_ptr<NotificationBundleOption> agentBundleNameOption = request->GetAgentBundle();
-    if (agentBundleNameOption != nullptr) {
-        std::string agentBundleName = agentBundleNameOption->GetBundleName();
-        if (!agentBundleName.empty()) {
-            message = message.AgentBundleName(agentBundleName);
-        }
-    }
     CommonNotificationEvent(request, DELETE_ERROR_EVENT_CODE, message);
 }
 
@@ -169,6 +158,7 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
     int32_t eventCode, const HaMetaMessage& message)
 {
     if (request == nullptr) {
+        ANS_LOGE("request is null");
         return;
     }
 
@@ -177,83 +167,37 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
             eventCode, message.Build().c_str());
         return;
     }
+
     EventFwk::Want want;
     nlohmann::json reason;
-    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfoWithReq(message, request, reason);
-    NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
-
-    want.SetParam("typeCode", message.typeCode_);
-    IN_PROCESS_CALL_WITHOUT_RET(ReportNotificationEvent(
-        request, want, eventCode, message.Build()));
-}
-
-void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
-    EventFwk::Want want, int32_t eventCode, const std::string& reason)
-{
-    NotificationNapi::SlotType slotType;
-    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(
-        static_cast<NotificationConstant::SlotType>(request->GetSlotType()), slotType);
-    NotificationNapi::ContentType contentType;
-    NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
-        static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
-
-    want.SetParam("id", request->GetNotificationId());
-    want.SetParam("uid", request->GetOwnerUid());
-    want.SetParam("slotType", static_cast<int32_t>(slotType));
-    want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
-
-    if (!request->GetCreatorBundleName().empty()) {
-        want.SetParam("agentBundleName", request->GetCreatorBundleName());
-    }
-    if (!request->GetOwnerBundleName().empty()) {
-        want.SetBundle(request->GetOwnerBundleName());
-    }
+    NotificationAnalyticsUtil::BuildMessage(reason, want, message, request, eventCode);
+    
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, eventCode));
 }
 
 void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
 {
-    if (!ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
-        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
-        return;
-    }
-    EventFwk::Want want;
-    nlohmann::json reason;
-    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message, reason);
-    NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
-
-    want.SetParam("slotType", static_cast<int32_t>(message.slotType_));
-    IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, MODIFY_ERROR_EVENT_CODE));
+    CommonNotificationEvent(MODIFY_ERROR_EVENT_CODE, message);
 }
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& message)
 {
-    if (!ReportFlowControl(DELETE_ERROR_EVENT_CODE)) {
+    CommonNotificationEvent(DELETE_ERROR_EVENT_CODE, message);
+}
+
+void NotificationAnalyticsUtil::CommonNotificationEvent(int32_t eventCode, const HaMetaMessage& message)
+{
+    if (!ReportFlowControl(eventCode)) {
         ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }
+
     EventFwk::Want want;
     nlohmann::json reason;
-    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message, reason);
-    NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
+    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+    NotificationAnalyticsUtil::BuildMessage(reason, want, message, eventCode, extraInfo);
 
-    want.SetParam("agentBundleName", message.agentBundleName_);
-    want.SetParam("typeCode", message.typeCode_);
-    want.SetParam("id", message.notificationId_);
-
-    IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, DELETE_ERROR_EVENT_CODE));
-}
-
-void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
-    int32_t eventCode, const std::string& reason)
-{
-    EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
-    EventFwk::CommonEventData commonData {want, eventCode, ""};
-    ANS_LOGD("Publish event success %{public}d, %{public}s", eventCode, reason.c_str());
-    if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
-        ANS_LOGE("Publish event failed %{public}d, %{public}s", eventCode, reason.c_str());
-    }
+    IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, eventCode));
 }
 
 bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
@@ -295,7 +239,7 @@ FlowControllerOption NotificationAnalyticsUtil::GetFlowOptionByType(const int32_
     switch (reportType) {
         case MODIFY_ERROR_EVENT_CODE:
             option.count = MODIFY_ERROR_EVENT_COUNT;
-            option.time = MODIFY_ERROR_EVENT_TIME;
+            option.time = MODIFY_ERROR_EVENT_TIME;;
             break;
         default:
             option.count = DEFAULT_ERROR_EVENT_COUNT;
@@ -305,7 +249,8 @@ FlowControllerOption NotificationAnalyticsUtil::GetFlowOptionByType(const int32_
     return option;
 }
 
-std::string NotificationAnalyticsUtil::BuildExtraInfo(const HaMetaMessage& message, nlohmann::json& reason)
+void NotificationAnalyticsUtil::BuildMessage(nlohmann::json& reason, EventFwk::Want& want,
+    const HaMetaMessage& message, int32_t eventCode, std::shared_ptr<AAFwk::WantParams>& extraInfo)
 {
     reason["scene"] = message.sceneId_;
     reason["branch"] = message.branchId_;
@@ -316,34 +261,69 @@ std::string NotificationAnalyticsUtil::BuildExtraInfo(const HaMetaMessage& messa
         std::chrono::system_clock::now().time_since_epoch()).count();
     reason["time"] = now;
 
-    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
     extraInfo->SetParam("reason", AAFwk::String::Box(reason.dump()));
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
+    std::string extraContent = wWrapper.ToString();
 
-    return wWrapper.ToString();
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    want.SetParam("extraInfo", extraContent);
+
+    if (eventCode == MODIFY_ERROR_EVENT_CODE) {
+        want.SetBundle(message.bundleName_);
+        want.SetParam("slotType", static_cast<int32_t>(message.slotType_));
+        return;
+    }
+
+    if (eventCode == DELETE_ERROR_EVENT_CODE) {
+        want.SetParam("agentBundleName", message.agentBundleName_);
+        want.SetBundle(message.bundleName_);
+        want.SetParam("typeCode", message.typeCode_);
+        want.SetParam("id", message.notificationId_);
+        return;
+    }
+
+    if (eventCode == PUBLISH_ERROR_EVENT_CODE) {
+        want.SetParam("bundleName", message.bundleName_);
+        want.SetParam("typeCode", message.typeCode_);
+        return;
+    }
 }
 
-std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage& message,
-    const sptr<NotificationRequest>& request, nlohmann::json& reason)
+void NotificationAnalyticsUtil::BuildMessage(nlohmann::json& reason, EventFwk::Want& want,
+    const HaMetaMessage& message, const sptr<NotificationRequest>& request, int32_t eventCode)
 {
     NotificationNapi::ContentType contentType;
     NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
         static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
+    NotificationNapi::SlotType slotType;
+    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(
+        static_cast<NotificationConstant::SlotType>(request->GetSlotType()), slotType);
+
     if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
         auto content = request->GetContent()->GetNotificationContent();
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
         reason["status"] = static_cast<int32_t>(liveViewContent->GetLiveViewStatus());
     }
 
-    return NotificationAnalyticsUtil::BuildExtraInfo(message, reason);
-}
+    want.SetParam("id", request->GetNotificationId());
+    want.SetParam("uid", request->GetOwnerUid());
+    want.SetParam("slotType", static_cast<int32_t>(slotType));
+    want.SetParam("contentType", std::to_string(static_cast<int32_t>(contentType)));
+    if (!request->GetCreatorBundleName().empty()) {
+        want.SetParam("agentBundleName", request->GetCreatorBundleName());
+    }
+    if (!request->GetOwnerBundleName().empty()) {
+        want.SetBundle(request->GetOwnerBundleName());
+    }
 
-void NotificationAnalyticsUtil::SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message,
-    std::string& extraInfo)
-{
-    want.SetBundle(message.bundleName_);
-    want.SetParam("extraInfo", extraInfo);
-    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
+    if (request->GetUnifiedGroupInfo() != nullptr &&
+        request->GetUnifiedGroupInfo()->GetExtraInfo() != nullptr) {
+        extraInfo = request->GetUnifiedGroupInfo()->GetExtraInfo();
+    } else {
+        extraInfo = std::make_shared<AAFwk::WantParams>();
+    }
+    NotificationAnalyticsUtil::BuildMessage(reason, want, message, eventCode, extraInfo);
 }
 
 void NotificationAnalyticsUtil::AddListCache(EventFwk::Want& want, int32_t eventCode)
