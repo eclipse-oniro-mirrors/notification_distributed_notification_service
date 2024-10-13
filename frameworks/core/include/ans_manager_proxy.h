@@ -498,13 +498,6 @@ public:
         bool &canPop, std::string &bundleName) override;
 
     /**
-     * @brief remove enable notification dialog.
-     *
-     * @return Returns remove dialog result.
-     */
-    ErrCode RemoveEnableNotificationDialog() override;
-
-    /**
      * @brief Checks whether notifications are allowed for a specific bundle.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.

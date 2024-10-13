@@ -351,12 +351,6 @@ ErrCode AnsManagerStub::CanPopEnableNotificationDialog(const sptr<AnsDialogCallb
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::RemoveEnableNotificationDialog()
-{
-    ANS_LOGE("AnsManagerStub::RemoveEnableNotificationDialog called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed)
 {
     ANS_LOGE("AnsManagerStub::IsSpecialBundleAllowedNotify called!");

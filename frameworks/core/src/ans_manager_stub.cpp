@@ -223,10 +223,6 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleCanPopEnableNotificationDialog(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_ENABLE_NOTIFICATION_DIALOG): {
-            result = HandleRemoveEnableNotificationDialog(data, reply);
-            break;
-        }
         case static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY): {
             result = HandleIsSpecialBundleAllowedNotify(data, reply);
             break;
@@ -1648,16 +1644,6 @@ ErrCode AnsManagerStub::HandleCanPopEnableNotificationDialog(MessageParcel &data
     return ERR_OK;
 }
 
-ErrCode AnsManagerStub::HandleRemoveEnableNotificationDialog(MessageParcel &data, MessageParcel &reply)
-{
-    ErrCode result = RemoveEnableNotificationDialog();
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleRemoveEnableNotificationDialog] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
 ErrCode AnsManagerStub::HandleIsSpecialBundleAllowedNotify(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
@@ -2522,13 +2508,13 @@ ErrCode AnsManagerStub::HandleSetAdditionConfig(MessageParcel &data, MessageParc
         ANS_LOGE("Failed to read key.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+ 
     std::string value;
     if (!data.ReadString(value)) {
         ANS_LOGE("Failed to read value.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+ 
     ErrCode result = SetAdditionConfig(key, value);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("Failed to write result, ErrCode=%{public}d", result);
@@ -2590,14 +2576,14 @@ ErrCode AnsManagerStub::HandleIsSmartReminderEnabled(MessageParcel &data, Messag
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: read deviceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+    
     bool enabled = false;
     ErrCode result = IsSmartReminderEnabled(deviceType, enabled);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+  
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;

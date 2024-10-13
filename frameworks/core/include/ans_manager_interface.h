@@ -510,13 +510,6 @@ public:
         bool &canPop, std::string &bundleName) = 0;
 
     /**
-    * @brief remove enable notification dialog.
-    *
-    * @return Returns remove dialog result.
-    */
-    virtual ErrCode RemoveEnableNotificationDialog() = 0;
-
-    /**
      * @brief Checks whether notifications are allowed for a specific bundle.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.

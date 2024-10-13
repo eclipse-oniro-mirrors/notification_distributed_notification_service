@@ -120,6 +120,7 @@ napi_value NapiSetDistributedEnabledByBundle(napi_env env, napi_callback_info in
     AsyncCallbackDistributedEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackDistributedEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -230,6 +231,7 @@ napi_value NapiSetSmartReminderEnabled(napi_env env, napi_callback_info info)
     AsyncCallbackSmartReminderEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackSmartReminderEnabled {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -298,6 +300,7 @@ napi_value NapiIsSmartReminderEnabled(napi_env env, napi_callback_info info)
     AsyncCallbackSmartReminderEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackSmartReminderEnabled {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;

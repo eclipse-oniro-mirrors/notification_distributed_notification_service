@@ -21,6 +21,7 @@
 #include "ans_const_define.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
+#include "notification_constant.h"
 #include "reminder_request_calendar.h"
 #include "in_process_call_wrapper.h"
 #ifdef DEVICE_STANDBY_ENABLE
@@ -330,7 +331,7 @@ void ReminderDataManager::CancelNotification(const sptr<ReminderRequest> &remind
     }
     sptr<NotificationBundleOption> bundleOption = FindNotificationBundleOption(reminder->GetReminderId());
     advancedNotificationService_->CancelPreparedNotification(notification->GetNotificationId(),
-        ReminderRequest::NOTIFICATION_LABEL, bundleOption);
+        ReminderRequest::NOTIFICATION_LABEL, bundleOption, NotificationConstant::APP_CANCEL_REMINDER_REASON_DELETE);
 }
 
 bool ReminderDataManager::CheckReminderLimitExceededLocked(const sptr<NotificationBundleOption> &bundleOption,

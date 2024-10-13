@@ -307,11 +307,6 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode RemoveEnableNotificationDialog() override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed) override
     {
         return ERR_ANS_INVALID_PARAM;

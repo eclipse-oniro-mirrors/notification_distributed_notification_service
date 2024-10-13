@@ -43,13 +43,21 @@ void NapiPush::Finalizer(napi_env env, void *data, void *hint)
 napi_value NapiPush::RegisterPushCallback(napi_env env, napi_callback_info info)
 {
     NapiPush *me = CheckParamsAndGetThis<NapiPush>(env, info);
-    return (me != nullptr) ? me->OnRegisterPushCallback(env, info) : nullptr;
+    if (me == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return nullptr;
+    }
+    return me->OnRegisterPushCallback(env, info);
 }
 
 napi_value NapiPush::UnregisterPushCallback(napi_env env, napi_callback_info info)
 {
     NapiPush *me = CheckParamsAndGetThis<NapiPush>(env, info);
-    return (me != nullptr) ? me->OnUnregisterPushCallback(env, info) : nullptr;
+    if (me == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return nullptr;
+    }
+    return me->OnUnregisterPushCallback(env, info);
 }
 
 napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_info info)
@@ -161,8 +169,6 @@ napi_value NapiPush::OnUnregisterPushCallback(napi_env env, const napi_callback_
     }
 
     NotificationHelper::UnregisterPushCallback();
-    delete jsPushCallBack_;
-    jsPushCallBack_ = nullptr;
     return undefined;
 }
 

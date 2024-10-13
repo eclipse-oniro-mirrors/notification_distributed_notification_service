@@ -14,16 +14,15 @@
  */
 
 #include "errors.h"
+#include "notification_bundle_option.h"
 #include "notification_content.h"
 #include "notification_record.h"
 #include "notification_request.h"
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <thread>
 
 #include "gtest/gtest.h"
-#include <vector>
 
 #define private public
 
@@ -306,6 +305,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03100,
 {
     const std::string localSwitch = "current";
     advancedNotificationService_->ClearAllNotificationGroupInfo(localSwitch);
+    EXPECT_TRUE(advancedNotificationService_ != nullptr);
 }
 
 /**
@@ -318,6 +318,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03200,
     const std::string key = "key";
     std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo;
     advancedNotificationService_->UpdateUnifiedGroupInfo(key, groupInfo);
+    EXPECT_TRUE(advancedNotificationService_ != nullptr);
 }
 
 /**
@@ -450,6 +451,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04300,
     sptr<NotificationRequest> request(new NotificationRequest());
     std::string bundleName = "bundleName";
     advancedNotificationService_->SetAgentNotification(request, bundleName);
+    EXPECT_TRUE(advancedNotificationService_ != nullptr);
 }
 
 /**
@@ -1254,7 +1256,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000,
     int32_t notificationId = 0;
     std::string label = "testLabel";
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    ASSERT_EQ(advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption),
+    ASSERT_EQ(advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption, 8),
         ERR_ANS_INVALID_BUNDLE);
 
     GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test end";
@@ -3096,7 +3098,7 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0005, Function | S
 /**
  * @tc.number    : IsNeedPushCheckTest_0006
  * @tc.name      : IsNeedPushCheckTest
- * @tc.desc      : Test notification except live view registered but has inconsistent contentType dont't need push check.
+ * @tc.desc      : Test notification except live view registered but has inconsistent contentType don't need push check.
  * @tc.require   : #I6Z5OV
  */
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0006, Function | SmallTest | Level1)
@@ -3273,7 +3275,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto request = new (std::nothrow) NotificationRequest();
 
-    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle);
+    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     std::vector<sptr<NotificationRequest>> requests;
@@ -3313,6 +3315,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
 {
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> bundle1 = nullptr;
     auto request = new (std::nothrow) NotificationRequest();
 
     auto ret = advancedNotificationService_->EnableDistributedSelf(true);
@@ -3322,7 +3325,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
     ret = advancedNotificationService_->IsDistributedEnableByBundle(bundle, enable);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    ret = advancedNotificationService_->GetHasPoppedDialog(bundle, enable);
+    ret = advancedNotificationService_->GetHasPoppedDialog(bundle1, enable);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(1, enable);
@@ -3331,7 +3334,6 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
     ret = advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(1, enable);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    advancedNotificationService_->FillActionButtons(request);
     request->SetIsCoverActionButtons(true);
     advancedNotificationService_->FillActionButtons(request);
 }
@@ -3369,7 +3371,7 @@ HWTEST_F(AdvancedNotificationServiceTest, StartArchiveTimer_00001, Function | Sm
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(slotType);
-    request->SetAutoDeletedTime(NotificationConstant::NO_DELAY_DELETE_TIME);
+    request->SetAutoDeletedTime(0);
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->StartArchiveTimer(record);
@@ -3419,8 +3421,9 @@ HWTEST_F(AdvancedNotificationServiceTest, ChangeNotificationByControlFlags_00001
     flags->SetStatusIconEnabled(true);
     request->SetFlags(flags);
 
+    bool isAgentController = true;
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    advancedNotificationService_->ChangeNotificationByControlFlags(record);
+    advancedNotificationService_->ChangeNotificationByControlFlags(record, isAgentController);
 
     u_int32_t reminderFlags = flags->GetReminderFlags();
     ASSERT_EQ(reminderFlags, 0);

@@ -31,6 +31,8 @@
 #include "ipc_skeleton.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "smart_reminder_center.h"
+#else
+#include "notification_config_parse.h"
 #endif
 
 #include "advanced_notification_inline.cpp"
@@ -45,7 +47,7 @@ namespace {
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
 }
-const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
+
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -420,9 +422,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    if ((callingUid != NFC_UID && callingUid != PAC_UID)
-        && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -459,12 +459,15 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
 {
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_3).SlotType(slotType);
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
     if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
         (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
         slot = new (std::nothrow) NotificationSlot(slotType);
         if (slot == nullptr) {
             ANS_LOGE("Failed to create NotificationSlot instance");
+            message.ErrorCode(ERR_NO_MEMORY).Message("Create failed");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             return ERR_NO_MEMORY;
         }
 
@@ -481,9 +484,15 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
             DelayedSingleton<NotificationTrustList>::GetInstance()->IsLiveViewTrtust(bundleOption->GetBundleName())))) {
             record->slot = slot;
         } else {
+            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
             ANS_LOGE("Type[%{public}d] slot enable closed", slotType);
         }
+    }
+    if (result != ERR_OK) {
+        message.ErrorCode(result).Message("assign slot failed");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
     }
     return result;
 }
@@ -526,10 +535,10 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     return ret;
 }
 
-void AdvancedNotificationService::GenerateSlotReminderMode(
-    const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot)
+void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<NotificationSlot> &slot,
+    const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot, uint32_t defaultSlotFlags)
 {
-    uint32_t slotFlags = DEFAULT_SLOT_FLAGS;
+    uint32_t slotFlags = defaultSlotFlags;
     auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
     if (ret != ERR_OK) {
         ANS_LOGI("Failed to get slotflags for bundle, use default slotflags.");
@@ -544,8 +553,22 @@ void AdvancedNotificationService::GenerateSlotReminderMode(
     }
 
     std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
-    ANS_LOGD("The reminder mode of %{public}d is %{public}d in %{public}s",
+    ANS_LOGI("The reminder mode of %{public}d is %{public}d in %{public}s",
         slot->GetType(), slot->GetReminderMode(), bundleName.c_str());
+}
+
+uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<NotificationRequest> &request)
+{
+    auto flags = DEFAULT_SLOT_FLAGS;
+    uint32_t notificationControlFlags = request->GetNotificationControlFlags();
+    // SA publish own's notification with banner
+    if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
+        (request->GetCreatorUid() == IPCSkeleton::GetCallingUid() && request->GetCreatorBundleName().empty() &&
+        request->GetOwnerBundleName().empty() && request->GetOwnerUid() == DEFAULT_UID)) {
+        return (flags |= NotificationConstant::ReminderFlag::BANNER_FLAG);
+    }
+
+    return flags;
 }
 
 void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request,
@@ -564,7 +587,8 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
             ANS_LOGE("Failed to create NotificationSlot instance");
             return;
         }
-        GenerateSlotReminderMode(slot, bundleOption);
+        uint32_t slotFlags = GetDefaultSlotFlags(request);
+        GenerateSlotReminderMode(slot, bundleOption, false, slotFlags);
     }
 
     auto slotReminderMode = slot->GetReminderMode();
@@ -593,8 +617,8 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     request->SetFlags(flags);
-    ANS_LOGD("The reminder flags of %{public}s is %{public}d",
-        request->GetBaseKey("").c_str(), flags->GetReminderFlags());
+    ANS_LOGI("SetFlags-GetRemindMode, notificationKey = %{public}s flags = %{public}d",
+        request->GetKey().c_str(), flags->GetReminderFlags());
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif

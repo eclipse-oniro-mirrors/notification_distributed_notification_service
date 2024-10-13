@@ -75,6 +75,7 @@ public:
         LIGHTSCREEN_FLAG = 1 << 3,
         VIBRATION_FLAG = 1 << 4,
         STATUSBAR_ICON_FLAG = 1 << 5,
+        SA_SELF_BANNER_FLAG = 1 << 9,
     };
 
     enum class VisiblenessType {
@@ -144,6 +145,8 @@ public:
         CLOSE
     };
 
+    static const int32_t DEFAULT_REASON_DELETE = 0;
+
     /**
      * Indicates that a notification is deleted because it is clicked.
      */
@@ -208,6 +211,86 @@ public:
      * Indicates that a notification is deleted because enable state is changed.
      */
     static const int32_t DISABLE_NOTIFICATION_REASON_DELETE = 13;
+
+    /**
+     * Indicates that a notification is deleted by bundle because the application cancel it.
+     */
+    static const int32_t APP_CANCEL_AS_BUNELE_REASON_DELETE = 14;
+
+    /**
+     * Indicates that a notification is deleted by agent because the application cancel it.
+     */
+    static const int32_t APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE = 15;
+
+    /**
+     * Indicates that a notification is deleted because the reminder cancel it.
+     */
+    static const int32_t APP_CANCEL_REMINDER_REASON_DELETE = 16;
+
+    /**
+     * Indicates that a notification is deleted because the application cancel it by group.
+     */
+    static const int32_t APP_CANCEL_GROPU_REASON_DELETE = 17;
+    
+    /**
+     * Indicates that a notification is deleted by group because the system cancel it.
+     */
+    static const int32_t APP_REMOVE_GROUP_REASON_DELETE = 18;
+
+    /**
+     * Indicates that aLL notification is deleted because the system cancel it.
+     */
+    static const int32_t APP_REMOVE_ALL_REASON_DELETE = 19;
+
+    /**
+     * Indicates that aLL notification is deleted by userId because the system cancel it.
+     */
+    static const int32_t APP_REMOVE_ALL_USER_REASON_DELETE = 20;
+
+    /**
+     * Indicates that notification is deleted because eight-hour timer cancel it.
+     */
+    static const int32_t TRIGGER_EIGHT_HOUR_REASON_DELETE = 21;
+
+    /**
+     * Indicates that notification is deleted because four-hour timer cancel it.
+     */
+    static const int32_t TRIGGER_FOUR_HOUR_REASON_DELETE = 22;
+
+    /**
+     * Indicates that notification is deleted because ten-minutes timer cancel it.
+     */
+    static const int32_t TRIGGER_TEN_MINUTES_REASON_DELETE = 23;
+    
+    /**
+     * Indicates that notification is deleted because fifteen-minutes timer cancel it.
+     */
+    static const int32_t TRIGGER_FIFTEEN_MINUTES_REASON_DELETE = 24;
+
+    /**
+     * Indicates that notification is deleted because thirty-minutes timer cancel it.
+     */
+    static const int32_t TRIGGER_THIRTY_MINUTES_REASON_DELETE = 25;
+
+    /**
+     * Indicates that notification is deleted because startArchive timer cancel it.
+     */
+    static const int32_t TRIGGER_START_ARCHIVE_REASON_DELETE = 26;
+
+    /**
+     * Indicates that notification is deleted because auto delete timer cancel it.
+     */
+    static const int32_t TRIGGER_AUTO_DELETE_REASON_DELETE = 27;
+
+    /**
+     * Indicates that notification is deleted because auto packge remove cancel it.
+     */
+    static const int32_t PACKAGE_REMOVE_REASON_DELETE = 28;
+
+    /**
+     * Indicates that notification is deleted because slot enabled close remove cancel it.
+     */
+    static const int32_t SLOT_ENABLED_REASON_DELETE = 29;
 
     /**
      * Indicates that a notification is deleted for other reasons.

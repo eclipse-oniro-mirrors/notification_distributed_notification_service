@@ -16,6 +16,7 @@
 #define private public
 #define protected public
 #include "ans_subscriber_stub.h"
+#include "ans_subscriber_local_live_view_stub.h"
 #undef private
 #undef protected
 #include "ans_permission_def.h"
@@ -26,6 +27,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         Notification::AnsSubscriberStub ansSubscriberStub;
+        Notification::AnsSubscriberLocalLiveViewStub ansSubscriberLocalLiveViewStub;
         uint32_t code = GetU32Data(data);
         MessageParcel datas;
         MessageParcel reply;
@@ -64,6 +66,20 @@ namespace OHOS {
         ansSubscriberStub.OnDoNotDisturbDateChange(date);
         // test OnEnabledNotificationChanged function
         sptr<Notification::EnabledNotificationCallbackData> callbackData = new Notification::EnabledNotificationCallbackData();
+        // test HandleOnBadgeEnabledChanged function
+        ansSubscriberStub.HandleOnBadgeEnabledChanged(datas, reply);
+        // test HandleOnResponse function
+        ansSubscriberLocalLiveViewStub.HandleOnResponse(datas, reply);
+        // test HandleOnConsumedListMap function
+        ansSubscriberStub.HandleOnConsumedListMap(datas, reply);
+        // test HandleOnDisconnected function
+        ansSubscriberLocalLiveViewStub.HandleOnDisconnected(datas, reply);
+        // test HandleOnBadgeChanged function
+        ansSubscriberStub.HandleOnBadgeChanged(datas, reply);
+        // test HandleOnCanceledListMap function
+        ansSubscriberStub.HandleOnCanceledListMap(datas, reply);
+        // test HandleOnConnected function
+        ansSubscriberLocalLiveViewStub.HandleOnConnected(datas, reply);
         return true;
     }
 }

@@ -47,7 +47,12 @@ std::shared_ptr<LivePublishProcess> LivePublishProcess::GetInstance()
 
 ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     if (!CheckLocalLiveViewAllowed(request, isUpdateByOwnerAllowed)) {
+        message.BranchId(EventBranchId::BRANCH_3).ErrorCode(ERR_ANS_NON_SYSTEM_APP)
+            .Message("CheckLocalLiveViewAllowed is false", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        ANS_LOGE("CheckLocalLiveViewAllowed is false");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -61,6 +66,9 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
         !AccessTokenHelper::IsSystemApp();
     if (isUpdateByOwnerAllowed && isHap) {
         if (request->GetTemplate() == nullptr) {
+            message.BranchId(EventBranchId::BRANCH_4).ErrorCode(ERR_ANS_INVALID_PARAM)
+                .Message("Owner must has template to update", true);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             ANS_LOGE("Owner must has template to update.");
             return ERR_ANS_INVALID_PARAM;
         }

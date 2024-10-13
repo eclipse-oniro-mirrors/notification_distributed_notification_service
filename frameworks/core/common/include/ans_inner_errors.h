@@ -107,14 +107,14 @@ enum ReminderErrorCode : uint32_t {
 };
 
 static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
-    { ERR_REMINDER_PERMISSION_DENIED, "BussinessError 201: Permission denied." },
-    { ERR_REMINDER_INVALID_PARAM, "BussinessError 401: Parameter error." },
-    { ERR_REMINDER_NOTIFICATION_NOT_ENABLE, "BussinessError 1700001: Notification not enable." },
-    { ERR_REMINDER_NUMBER_OVERLOAD, "BussinessError 1700002: The number of reminders exceeds the limit." },
-    { ERR_REMINDER_NOT_EXIST, "BussinessError 1700003: The reminder not exist." },
-    { ERR_REMINDER_PACKAGE_NOT_EXIST, "BussinessError 1700004: The package name not exist." },
-    { ERR_REMINDER_CALLER_TOKEN_INVALID, "BussinessError 1700005: The caller token invalid." },
-    { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "BussinessError 1700006: The data share permission denied." }
+    { ERR_REMINDER_PERMISSION_DENIED, "Permission denied." },
+    { ERR_REMINDER_INVALID_PARAM, "Parameter error." },
+    { ERR_REMINDER_NOTIFICATION_NOT_ENABLE, "Notification not enable." },
+    { ERR_REMINDER_NUMBER_OVERLOAD, "The number of reminders exceeds the limit." },
+    { ERR_REMINDER_NOT_EXIST, "The reminder not exist." },
+    { ERR_REMINDER_PACKAGE_NOT_EXIST, "The package name not exist." },
+    { ERR_REMINDER_CALLER_TOKEN_INVALID, "The caller token invalid." },
+    { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "The data share permission denied." }
 };
 
 // Notification error msg
@@ -147,6 +147,7 @@ const int32_t ERROR_NO_RIGHT                     = 1600014;    // No permission.
 const int32_t ERROR_REPEAT_SET                   = 1600015;    // Repeat create or end.
 const int32_t ERROR_EXPIRED_NOTIFICATION         = 1600016;    // Low update version.
 const int32_t ERROR_NO_AGENT_SETTING             = 1600017;    // No corresponding agent relationship configuration.
+const int32_t ERROR_SETTING_WINDOW_EXIST         = 1600018;    // The notification settings window is already displayed.
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification

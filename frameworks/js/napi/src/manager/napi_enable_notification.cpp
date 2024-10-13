@@ -23,6 +23,9 @@
 #include "js_ans_dialog_callback.h"
 #include "common_event_manager.h"
 
+constexpr int32_t CRASH_CODE = 2;
+constexpr int32_t REMOVE_CODE = 3;
+
 namespace OHOS {
 namespace NotificationNapi {
 const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
@@ -58,6 +61,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -129,6 +133,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
         ANS_LOGD("Asynccallbackinfo is nullptr.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -250,7 +255,7 @@ void NapiAsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data
 
 napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGI("NapiRequestEnableNotification enter");
     IsEnableParams params {};
     if (ParseRequestEnableParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -260,6 +265,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsEnable *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoIsEnable {
             .env = env, .params = params, .newInterface = true};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -297,7 +303,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
             } else {
                 asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-                NotificationHelper::RemoveEnableNotificationDialog();
+                SendDialogEvent(bundleName, REMOVE_CODE);
             }
         } else {
             ANS_LOGD("un stage mode");
@@ -447,6 +453,7 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
         new (std::nothrow) AsyncCallbackInfoEnableStatus{ .env = env, .asyncWork = nullptr };
     if (asynccallbackinfo == nullptr) {
         ANS_LOGE("asynccallbackinfo is nullptr");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::NapiGetUndefined(env);
     }
     napi_value promise = nullptr;
@@ -559,6 +566,28 @@ bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, s
     return true;
 }
 
+void SendDialogEvent(std::string &bundleName, int32_t code)
+{
+    ANS_LOGD("SendDialogEvent start");
+    if (bundleName.empty()) {
+        ANS_LOGE("SendDialogEvent bundleName is nullptr");
+        return;
+    }
+    std::string action = "OnNotificationServiceDialogClicked";
+
+    EventFwk::Want want;
+    want.SetAction(action);
+
+    EventFwk::CommonEventData commonData;
+    commonData.SetWant(want);
+    commonData.SetCode(code);
+    commonData.SetData(bundleName);
+    if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
+        ANS_LOGE("PublishCommonEvent failed");
+    }
+    ANS_LOGD("SendDialogEvent end");
+}
+
 void SetEnableParam(IsEnableParams &params, const napi_env &env, napi_value &object)
 {
     auto context = OHOS::AbilityRuntime::GetStageModeContext(env, object);
@@ -611,7 +640,7 @@ void ModalExtensionCallback::OnError(int32_t code, const std::string& name, cons
 {
     ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
-    NotificationHelper::RemoveEnableNotificationDialog();
+    SendDialogEvent(this->bundleName_, CRASH_CODE);
 }
 
 /*

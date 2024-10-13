@@ -304,7 +304,12 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
     }
     ANS_LOGI("OnBatchCancel sortingMap size = %{public}zu", sortingMap->GetKey().size());
     ANS_LOGI("OnBatchCancel deleteReason = %{public}d", deleteReason);
-    
+    std::string notificationKeys = "";
+    for (auto notification : requestList) {
+        notificationKeys.append(notification->GetKey()).append("-");
+    }
+    ANS_LOGI("OnBatchCancel. cancel keys = %{public}s", notificationKeys.c_str());
+
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("DataWorker is nullptr.");
