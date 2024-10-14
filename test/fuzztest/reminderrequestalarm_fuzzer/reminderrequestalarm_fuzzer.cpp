@@ -69,10 +69,6 @@ namespace OHOS {
         Parcel parcel;
         rrc->Unmarshalling(parcel);
         rrc->ReadFromParcel(parcel);
-        // test RecoverFromDb function
-        std::shared_ptr<NativeRdb::ResultSet> resultSet =
-        std::make_shared<NativeRdb::AbsSharedResultSet>();
-        rrc->RecoverFromDb(resultSet);
         return rrc->Marshalling(parcel);
     }
 }

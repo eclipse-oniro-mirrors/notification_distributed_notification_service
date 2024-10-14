@@ -33,6 +33,7 @@ namespace OHOS {
 
         Notification::ReminderDataManager::InitInstance(nullptr);
         auto manager = Notification::ReminderDataManager::GetInstance();
+        manager->Init(false);
         manager->Dump();
         manager->CancelAllReminders(bundleName, userId, uid);
         sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
@@ -127,6 +128,16 @@ namespace OHOS {
         manager->ShowReminder(reminder, value, value, value, value);
         return true;
     }
+
+    bool Clear()
+    {
+        auto manager = Notification::ReminderDataManager::GetInstance();
+        if (manager->queue_ != nullptr) {
+            auto handler = manager->queue_->submit_h(std::bind([]() {}));
+            manager->queue_->wait(handler);
+        }
+        return true;
+    }
 }
 
 /* Fuzzer entry point */
@@ -137,6 +148,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (ch != nullptr && size >= GetU32Size()) {
         OHOS::DoSomethingInterestingWithManager(ch, size);
         OHOS::DoSomethingInterestingWithReminder(ch, size);
+        OHOS::Clear();
         free(ch);
         ch = nullptr;
     }

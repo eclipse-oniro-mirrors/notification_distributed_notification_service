@@ -16,9 +16,6 @@
 #include "reminder_request_alarm.h"
 
 #include "ans_log_wrapper.h"
-#include "reminder_table.h"
-#include "reminder_table_old.h"
-#include "reminder_store.h"
 
 namespace OHOS {
 namespace Notification {
@@ -114,6 +111,16 @@ uint64_t ReminderRequestAlarm::GetNextTriggerTime(bool forceToGetNext) const
     return GetTriggerTime(now, nextTriggerTime);
 }
 
+void ReminderRequestAlarm::SetHour(const uint8_t hour)
+{
+    hour_ = hour;
+}
+
+void ReminderRequestAlarm::SetMinute(const uint8_t minute)
+{
+    minute_ = minute;
+}
+
 uint8_t ReminderRequestAlarm::GetHour() const
 {
     return hour_;
@@ -196,50 +203,6 @@ bool ReminderRequestAlarm::ReadFromParcel(Parcel &parcel)
         return true;
     }
     return false;
-}
-
-void ReminderRequestAlarm::RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet)
-{
-    ReminderRequest::RecoverFromOldVersion(resultSet);
-
-    // hour
-    hour_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::ALARM_HOUR,
-            DbRecoveryType::INT));
-
-    // minute
-    minute_ =
-        static_cast<uint8_t>(RecoverInt64FromDb(resultSet, ReminderTable::ALARM_MINUTE,
-            DbRecoveryType::INT));
-}
-
-void ReminderRequestAlarm::RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet)
-{
-    if (resultSet == nullptr) {
-        ANSR_LOGE("ResultSet is null");
-        return;
-    }
-    ReminderStore::GetUInt8Val(resultSet, ReminderAlarmTable::ALARM_HOUR, hour_);
-    ReminderStore::GetUInt8Val(resultSet, ReminderAlarmTable::ALARM_MINUTE, minute_);
-    ReminderStore::GetUInt8Val(resultSet, ReminderAlarmTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek_);
-}
-
-void ReminderRequestAlarm::AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-    const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values)
-{
-    uint8_t hour = 0;
-    uint8_t minute = 0;
-    uint8_t repeatDaysOfWeek = 0;
-    if (reminder->GetReminderType() == ReminderRequest::ReminderType::ALARM) {
-        ReminderRequestAlarm* alarm = static_cast<ReminderRequestAlarm*>(reminder.GetRefPtr());
-        hour = alarm->GetHour();
-        minute = alarm->GetMinute();
-        repeatDaysOfWeek = alarm->GetRepeatDaysOfWeek();
-    }
-    values.PutInt(ReminderAlarmTable::REMINDER_ID, reminder->GetReminderId());
-    values.PutInt(ReminderAlarmTable::ALARM_HOUR, hour);
-    values.PutInt(ReminderAlarmTable::ALARM_MINUTE, minute);
-    values.PutInt(ReminderAlarmTable::REPEAT_DAYS_OF_WEEK, repeatDaysOfWeek);
 }
 }
 }

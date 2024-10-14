@@ -31,6 +31,7 @@
 #include "ipc_skeleton.h"
 #include "notification_slot.h"
 #include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "reminder_event_manager.h"
 #include "time_service_client.h"
 #include "singleton.h"
@@ -403,8 +404,8 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
     std::string bundleName = bundleOption->GetBundleName();
     int32_t uid = bundleOption->GetUid();
     ANSR_LOGD("OnProcessDiedLocked, bundleName=%{public}s, uid=%{public}d", bundleName.c_str(), uid);
-    std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+    std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
         int32_t reminderId = (*it)->GetReminderId();
         auto mit = notificationBundleOptionMap_.find(reminderId);
@@ -893,7 +894,9 @@ void ReminderDataManager::UpdateAndSaveReminderLocked(
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     reminder->InitReminderId();
-    reminder->InitUserId(ReminderRequest::GetUserId(bundleOption->GetUid()));
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    reminder->InitUserId(userId);
     reminder->InitUid(bundleOption->GetUid());
     reminder->InitBundleName(bundleOption->GetBundleName());
 
@@ -929,7 +932,8 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
         ANSR_LOGD("The reminder (reminderId=%{public}d) is silent", reminderId);
         return false;
     }
-    int32_t userId = ReminderRequest::GetUserId(bundleOption->GetUid());
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     if (currentUserId_ != userId) {
         ANSR_LOGD("The reminder (reminderId=%{public}d) is silent for not in active user, " \
             "current user id: %{private}d, reminder user id: %{private}d", reminderId, currentUserId_, userId);
@@ -1079,6 +1083,10 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
 
 void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times)
 {
+    if (!reminder->IsSystemApp()) {
+        ANSR_LOGI("Start extension ability failed, is not system app");
+        return;
+    }
     times--;
     bool ret = ReminderDataManager::StartExtensionAbility(reminder);
     if (!ret && times > 0 && serviceQueue_ != nullptr) {
@@ -1581,7 +1589,7 @@ bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder,
     std::string bundleName = reminder->GetCreatorBundleName();
     int32_t uid = reminder->GetCreatorUid();
     if (uid == -1) {
-        uid = ReminderRequest::GetUid(reminder->GetUserId(), bundleName);
+        uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, reminder->GetUserId());
     }
     return bundleName == other->GetBundleName() && uid == other->GetUid();
 }
@@ -1592,7 +1600,11 @@ bool ReminderDataManager::IsBelongToSameApp(const sptr<NotificationBundleOption>
     int32_t uidSrc = bundleOption->GetUid();
     int32_t uidTar = other->GetUid();
     bool result = uidSrc == uidTar;
-    result = result && (ReminderRequest::GetUserId(uidSrc) == ReminderRequest::GetUserId(uidTar));
+    int32_t userIdSrc = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uidSrc, userIdSrc);
+    int32_t userIdTar = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uidTar, userIdTar);
+    result = result && (userIdSrc == userIdTar);
     result = result && (bundleOption->GetBundleName() == other->GetBundleName());
     return result;
 }
@@ -1935,6 +1947,10 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
         ANSR_LOGE("Invalid reminder id: %{public}d", reminderId);
         return;
     }
+    if (!reminder->IsSystemApp()) {
+        ANSR_LOGI("Custom button click, is not system app");
+        return;
+    }
     CloseReminder(reminder, false);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CUSTOM);
     std::string buttonPkgName = want.GetStringParam("PkgName");
@@ -1979,7 +1995,7 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
     abilityWant.SetElement(element);
     abilityWant.SetUri(wantInfo->uri);
     abilityWant.SetParams(wantInfo->parameters);
-    int32_t appIndex = ReminderRequest::GetAppIndex(reminder->GetUid());
+    int32_t appIndex = BundleManagerHelper::GetInstance()->GetAppIndexByUid(reminder->GetUid());
     abilityWant.SetParam("ohos.extra.param.key.appCloneIndex", appIndex);
 
     auto client = AppExecFwk::AbilityManagerClient::GetInstance();
@@ -2056,6 +2072,9 @@ void ReminderDataManager::OnLanguageChanged()
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            if ((*it)->IsExpired() || (*it)->GetTriggerTimeInMilli() == 0) {
+                continue;
+            }
             UpdateReminderLanguage(*it);
         }
     }
@@ -2110,41 +2129,32 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
     if (bundleName.empty()) {
         return;
     }
-    ANS_LOGI("notify bundleName is: %{public}s", bundleName.c_str());
-    // get foreground application
-    std::vector<AppExecFwk::AppStateData> apps;
+    bool isRunning = false;
     {
         std::lock_guard<std::mutex> lock(appMgrMutex_);
         if (!ConnectAppMgr()) {
             return;
         }
-        if (appMgrProxy_->GetForegroundApplications(apps) != ERR_OK) {
-            ANS_LOGW("get foreground application failed");
-            return;
-        }
+        isRunning = appMgrProxy_->GetAppRunningStateByBundleName(bundleName);
     }
-    // notify application
-    for (auto &eachApp : apps) {
-        if (eachApp.bundleName != bundleName) {
-            continue;
-        }
+    if (!isRunning) {
+        return;
+    }
 
-        EventFwk::Want want;
-        // common event not add COMMON_EVENT_REMINDER_STATUS_CHANGE, Temporary use of string
-        want.SetAction("usual.event.REMINDER_STATUS_CHANGE");
-        EventFwk::CommonEventData eventData(want);
+    EventFwk::Want want;
+    // common event not add COMMON_EVENT_REMINDER_STATUS_CHANGE, Temporary use of string
+    want.SetAction("usual.event.REMINDER_STATUS_CHANGE");
+    EventFwk::CommonEventData eventData(want);
 
-        std::string data;
-        data.append(std::to_string(static_cast<int>(buttonType))).append(",");
-        data.append(std::to_string(reminder->GetReminderId()));
-        eventData.SetData(data);
+    std::string data;
+    data.append(std::to_string(static_cast<int>(buttonType))).append(",");
+    data.append(std::to_string(reminder->GetReminderId()));
+    eventData.SetData(data);
 
-        EventFwk::CommonEventPublishInfo info;
-        info.SetBundleName(bundleName);
-        if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
-            ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
-        }
-        break;
+    EventFwk::CommonEventPublishInfo info;
+    info.SetBundleName(bundleName);
+    if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
+        ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
     }
 }
 }
