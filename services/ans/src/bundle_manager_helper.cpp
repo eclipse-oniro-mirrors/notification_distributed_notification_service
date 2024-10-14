@@ -226,5 +226,20 @@ bool BundleManagerHelper::GetBundleInfos(
     IPCSkeleton::SetCallingIdentity(identity);
     return ret;
 }
+
+int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
+{
+    int32_t appIndex = 0;
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+    if (nullptr == bundleMgr_) {
+        return appIndex;
+    }
+    std::string bundleName;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return appIndex;
+}
 }  // namespace Notification
 }  // namespace OHOS

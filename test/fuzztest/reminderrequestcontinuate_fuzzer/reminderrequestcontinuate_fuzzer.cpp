@@ -26,8 +26,8 @@ namespace OHOS {
         std::string stringData(data);
         int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
         Notification::ReminderRequest reminderRequest(reminderId);
-        reminderRequest.GetButtonInfo();
-        return reminderRequest.GetUid(reminderId, stringData);
+        reminderRequest.SerializeButtonInfo();
+        return true;
     }
 }
 

@@ -51,6 +51,8 @@ public:
     ~ReminderRequestTimer() override {};
 
     uint64_t GetInitInfo() const;
+    void SetInitInfo(const uint64_t countDownTimeInSeconds);
+
     virtual bool OnDateTimeChange() override;
     virtual bool OnTimeZoneChange() override;
     virtual bool UpdateNextReminder() override;
@@ -68,10 +70,6 @@ public:
     static ReminderRequestTimer *Unmarshalling(Parcel &parcel);
 
     bool ReadFromParcel(Parcel &parcel) override;
-
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;

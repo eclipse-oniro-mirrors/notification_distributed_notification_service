@@ -432,7 +432,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
     reminder1->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE, "",
         buttonWantAgent1, buttonDataShareUpdate1);
     manager->UpdateAppDatabase(reminder1, ReminderRequest::ActionButtonType::CLOSE);
-    SUCCEED();
+    EXPECT_TRUE(reminder1->actionButtonMap_.size() > 0);
 }
 
 /**
