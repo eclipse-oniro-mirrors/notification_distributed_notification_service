@@ -56,6 +56,8 @@ bool NotificationSubscriber::ProcessSyncDecision(
     }
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+        ANS_LOGI("SetFlags-before filte, notificationKey = %{public}s flagIter flags = %{public}d",
+            request->GetKey().c_str(), flagIter->second->GetReminderFlags());
         std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
         tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
         tempFlags->SetVibrationEnabled(
@@ -67,6 +69,8 @@ bool NotificationSubscriber::ProcessSyncDecision(
         tempFlags->SetLightScreenEnabled(
             tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
         request->SetFlags(tempFlags);
+        ANS_LOGI("SetFlags-after filte, notificationKey = %{public}s flags = %{public}d",
+            request->GetKey().c_str(), tempFlags->GetReminderFlags());
         return true;
     }
     if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
@@ -168,7 +172,7 @@ void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<s
     if (notificationMap == nullptr) {
         subscriber_.OnBatchCanceled(notificationList,
             std::make_shared<NotificationSortingMap>(), deleteReason);
-    } else if (notificationMap != nullptr) {
+    } else {
         subscriber_.OnBatchCanceled(notificationList,
             std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
     }

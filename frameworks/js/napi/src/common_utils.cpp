@@ -50,6 +50,7 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
     {ERROR_NO_AGENT_SETTING, "There is no corresponding agent relationship configuration"},
     {ERROR_DIALOG_IS_POPPING, "Dialog is popping"},
+    {ERROR_SETTING_WINDOW_EXIST, "The notification settings window is already displayed"},
 };
 }
 

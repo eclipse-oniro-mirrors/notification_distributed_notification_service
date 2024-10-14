@@ -39,6 +39,11 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
 NotificationPreferences::NotificationPreferences()
 {
     preferncesDB_ = std::make_unique<NotificationPreferencesDatabase>();
+    if (preferncesDB_ == nullptr) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_1)
+           .Message("preferncesDB is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     InitSettingFromDisturbDB();
 }
 
@@ -550,7 +555,7 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
 ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
-    ANS_LOGE("Called.");
+    ANS_LOGD("Called.");
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");
@@ -738,7 +743,9 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
         bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
     }
     result = SaveBundleProperty(bundleInfo, bundleOption, type, value);
-    preferencesInfo.SetBundleInfo(bundleInfo);
+    if (result == ERR_OK) {
+        preferencesInfo.SetBundleInfo(bundleInfo);
+    }
 
     return result;
 }
@@ -767,12 +774,12 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, value);
             break;
         case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
-            ANS_LOGD("Into BUNDLE_POPPED_DIALOG_TYPE:SetHasPoppedDialog.");
+            ANS_LOGI("Into BUNDLE_POPPED_DIALOG_TYPE:SetHasPoppedDialog.");
             bundleInfo.SetHasPoppedDialog(value);
             storeDBResult = preferncesDB_->PutHasPoppedDialog(bundleInfo, value);
             break;
         case BundleType::BUNDLE_SLOTFLGS_TYPE:
-            ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:SetSlotFlags.");
+            ANS_LOGI("Into BUNDLE_SLOTFLGS_TYPE:SetSlotFlags.");
             bundleInfo.SetSlotFlags(value);
             storeDBResult = preferncesDB_->PutSlotFlags(bundleInfo, value);
             break;

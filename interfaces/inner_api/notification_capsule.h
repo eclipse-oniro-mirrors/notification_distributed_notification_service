@@ -16,7 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_CAPSULE_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_CAPSULE_H
 
-#include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
+#include "pixel_map.h"
 #include "notification_json_convert.h"
 #include "parcel.h"
 #include <string>
@@ -107,6 +107,7 @@ public:
     void ResetIcon();
 
 private:
+
     /**
      * @brief Read a NotificationConversationalMessage object from a Parcel.
      *

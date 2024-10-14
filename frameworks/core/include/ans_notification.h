@@ -300,13 +300,6 @@ public:
         bool &canPop, std::string &bundleName);
 
     /**
-     * @brief remove enable notification dialog.
-     *
-     * @return Returns remove dialog result.
-     */
-    ErrCode RemoveEnableNotificationDialog();
-
-    /**
      * @brief Allows the current application to publish notifications on a specified device.
      *
      * @param deviceId Indicates the ID of the device running the application. At present, this parameter can

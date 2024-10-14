@@ -61,9 +61,7 @@ ErrCode AdvancedNotificationService::Subscribe(
             break;
         }
 
-        int32_t callingUid = IPCSkeleton::GetCallingUid();
-        if ((callingUid != PAC_UID && callingUid != NFC_UID)
-            && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             errCode = ERR_ANS_PERMISSION_DENIED;
             break;
         }
@@ -130,6 +128,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
         ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
             LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
         }));
+        notificationSvrQueue_->wait(handler);
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
     return errCode;
@@ -151,8 +150,7 @@ ErrCode AdvancedNotificationService::Unsubscribe(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid != PAC_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_PERMISSION_DENIED));
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;

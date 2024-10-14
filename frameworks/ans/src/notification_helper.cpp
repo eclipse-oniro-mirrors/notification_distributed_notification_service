@@ -170,11 +170,6 @@ ErrCode NotificationHelper::CanPopEnableNotificationDialog(sptr<AnsDialogHostCli
         hostClient, canPop, bundleName);
 }
 
-ErrCode NotificationHelper::RemoveEnableNotificationDialog()
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
-}
-
 ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId,
     sptr<AnsDialogHostClient> &hostClient,
     sptr<IRemoteObject> &callerToken)

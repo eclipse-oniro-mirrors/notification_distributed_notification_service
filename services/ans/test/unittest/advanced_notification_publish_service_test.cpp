@@ -178,6 +178,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00003, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERR_OK);
 
@@ -205,6 +206,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
     RegisterPushCheck();
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
@@ -243,8 +245,8 @@ HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
-    MockIsOsAccountExists(true);
     RegisterPushCheck();
+    MockIsOsAccountExists(true);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -634,12 +636,14 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00001, Function | Small
     MockIsSystemApp(false);
     sptr<NotificationBundleOption> bundle = nullptr;
     sptr<NotificationSlot> slot = nullptr;
-    auto ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    auto ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -664,7 +668,8 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotificationBySlot_00002, Function | Small
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
     auto slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 
-    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot);
+    ret = advancedNotificationService_->RemoveNotificationBySlot(bundle, slot,
+        NotificationConstant::DEFAULT_REASON_DELETE);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 

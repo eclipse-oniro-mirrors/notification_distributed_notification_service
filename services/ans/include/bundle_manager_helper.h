@@ -116,7 +116,7 @@ public:
      * @return Returns the check result.
      */
     bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
-    
+
     /**
      * @brief Obtains the app index by uid.
      * @param uid Indicates uid.

@@ -40,7 +40,8 @@
     "subsystem": "notification",
     "syscap": [
       "SystemCapability.Notification.Notification",
-      "SystemCapability.Notification.ReminderAgent"
+      "SystemCapability.Notification.ReminderAgent",
+      "SystemCapability.Notification.NotificationSettings"
     ],
     "features": [
       "distributed_notification_service_feature_summary",
@@ -104,7 +105,8 @@
         "fwk_group": [
           "//base/notification/distributed_notification_service/frameworks/ans:ans_client",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
-          "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder"
+          "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
+          "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification"
         ],
         "service_group": [
           "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",

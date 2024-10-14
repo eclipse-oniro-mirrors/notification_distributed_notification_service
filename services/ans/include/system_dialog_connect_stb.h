@@ -38,6 +38,8 @@ public:
         const sptr<IRemoteObject> &remoteObject, int32_t resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override;
 
+    void SendRemoveBundleEvent();
+
 private:
     std::string commandStr_;
 };

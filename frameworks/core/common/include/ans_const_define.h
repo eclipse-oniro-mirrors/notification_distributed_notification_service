@@ -53,9 +53,6 @@ constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
 
-constexpr int32_t NFC_UID = 1027;
-constexpr int32_t PAC_UID = 7007;
-
 // Default sound for notification
 const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");
 const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};

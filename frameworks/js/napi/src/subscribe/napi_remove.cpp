@@ -72,6 +72,7 @@ napi_value NapiRemove(napi_env env, napi_callback_info info)
     }
     auto removeInfo = new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
     if (!removeInfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -103,6 +104,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
     AsyncCallbackInfoRemove *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -115,7 +117,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGD("NapiRemoveAll work excute.");
+            ANS_LOGI("NapiRemoveAll work excute.");
             AsyncCallbackInfoRemove *asynccallbackinfo = static_cast<AsyncCallbackInfoRemove *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {

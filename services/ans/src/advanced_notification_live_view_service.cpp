@@ -32,6 +32,7 @@
 #include "advanced_notification_inline.cpp"
 #include <cstdint>
 #include <memory>
+#include "notification_analytics_util.h"
 #include "aes_gcm_helper.h"
 
 namespace OHOS {
@@ -92,8 +93,10 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             }
             UpdateRecentNotification(record->notification, false, 0);
 
-            StartFinishTimer(record, requestObj.request->GetFinishDeadLine());
-            StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine());
+            StartFinishTimer(record, requestObj.request->GetFinishDeadLine(),
+                NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
+            StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine(),
+                NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
         }
 
         // publish notifications
@@ -171,7 +174,8 @@ void AdvancedNotificationService::OnSubscriberAdd(
     sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
     std::vector<sptr<Notification>> notifications;
     for (auto notificationRecord : notificationList_) {
-        if (notificationRecord->notification != nullptr &&
+        if (notificationRecord != nullptr &&
+            notificationRecord->notification != nullptr &&
             notificationRecord->notification->GetNotificationRequest().IsCommonLiveView()) {
             notifications.emplace_back(notificationRecord->notification);
         }
@@ -235,17 +239,20 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         ANS_LOGI("Not saving notification request to db for common live view with isOnlyLocalUpdate set to true.");
         return ERR_OK;
     }
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3).
+        BundleName(request->GetCreatorBundleName()).NotificationId(request->GetNotificationId());
     nlohmann::json jsonObject;
     if (!NotificationJsonConverter::ConvertToJson(request, jsonObject)) {
         ANS_LOGE("Convert request to json object failed, bundle name %{public}s, id %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId());
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert request failed"));
         return ERR_ANS_TASK_ERR;
     }
     auto bundleOption = requestDb.bundleOption;
     if (!NotificationJsonConverter::ConvertToJson(bundleOption, jsonObject)) {
         ANS_LOGE("Convert bundle to json object failed, bundle name %{public}s, id %{public}d.",
             bundleOption->GetBundleName().c_str(), request->GetNotificationId());
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert option failed"));
         return ERR_ANS_TASK_ERR;
     }
 
@@ -258,9 +265,9 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     auto result = NotificationPreferences::GetInstance()->SetKvToDb(
         request->GetSecureKey(), encryptValue, request->GetReceiverUserId());
     if (result != ERR_OK) {
-        ANS_LOGE(
-            "Set notification request failed, bundle name %{public}s, id %{public}d, key %{public}s, ret %{public}d.",
+        ANS_LOGE("Set failed, bundle name %{public}s, id %{public}d, key %{public}s, ret %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("set failed"));
         return result;
     } else {
         DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
@@ -269,9 +276,9 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     result = SetLockScreenPictureToDb(request);
     if (result != ERR_OK) {
         ANS_LOGE("Failed to set lock screen picture to db");
-        return result;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("SetToDb failed"));
     }
-    return ERR_OK;
+    return result;
 }
 
 int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
@@ -363,6 +370,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
     }
     return ERR_OK;
 }
+
 
 int32_t AdvancedNotificationService::DoubleDeleteNotificationFromDb(const std::string &key,
     const std::string &secureKey, const int32_t userId)
@@ -592,12 +600,13 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
     NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
         StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::APP_CANCEL_REASON_DELETE);
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
 
     record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;
-    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES);
-    
+    StartFinishTimer(record, GetCurrentTime() + NotificationConstant::TEN_MINUTES,
+        NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE);
+
     return ERR_OK;
 }
 
@@ -657,11 +666,9 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     if (oldRecord == nullptr) {
         oldRecord = GetFromNotificationList(creatorUid, notificationId);
     }
-
     if (oldRecord == nullptr) {
         return;
     }
-
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();
     auto wantAgent = record->notification->GetNotificationRequest().GetWantAgent();
@@ -677,21 +684,12 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         auto data = downloadTemplate->GetTemplateData();
         AAFwk::WantParamWrapper wrapper(*data);
         ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
-        
         CancelTimer(oldRecord->notification->GetFinishTimer());
-        
         uint64_t process = 0;
         if (data->HasParam(PROGRESS_VALUE)) {
             process = data->GetIntParam(PROGRESS_VALUE, 0);
         }
-
-        if (process == NotificationConstant::FINISH_PER) {
-            record->finish_status = UploadStatus::FINISH;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES);
-        } else {
-            record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
-            StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES);
-        }
+        StartFinishTimerForUpdate(record, process);
         timerId = record->notification->GetFinishTimer();
     }
     record->notification = new (std::nothrow) Notification(record->request);
@@ -701,6 +699,20 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     }
     record->bundleOption = oldRecord->bundleOption;
     record->notification->SetFinishTimer(timerId);
+}
+
+void AdvancedNotificationService::StartFinishTimerForUpdate(
+    const std::shared_ptr<NotificationRecord> &record, uint64_t process)
+{
+    if (process == NotificationConstant::FINISH_PER) {
+        record->finish_status = UploadStatus::FINISH;
+        StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES,
+            NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE);
+    } else {
+        record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
+        StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
+            NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
+    }
 }
 }
 }

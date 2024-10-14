@@ -32,6 +32,10 @@
 #include "os_account_manager_helper.h"
 #include "remote_death_recipient.h"
 #include "advanced_notification_service.h"
+#include "notification_analytics_util.h"
+
+#include "advanced_notification_inline.cpp"
+
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
@@ -99,10 +103,14 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         ANS_LOGE("queue is nullptr");
         return result;
     }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2);
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber, &subInfo, &result]() {
         result = this->AddSubscriberInner(subscriber, subInfo);
     }));
     notificationSubQueue_->wait(handler);
+    message.Message("Subscribe notification: " + GetClientBundleName() + " user " +
+        std::to_string(subInfo->GetAppUserId()) + " " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -120,12 +128,17 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         ANS_LOGE("queue is nullptr");
         return result;
     }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3);
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber,
         &subscribeInfo, &result]() {
         ANS_LOGE("ffrt enter!");
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationSubQueue_->wait(handler);
+    std::string appUserId = (subscribeInfo == nullptr) ? "all" : std::to_string(subscribeInfo->GetAppUserId());
+    message.Message("Remove subscriber: " + GetClientBundleName() + " user " +
+        appUserId + " " + std::to_string(result));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -484,6 +497,10 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         liveViewContent->FillPictureMarshallingMap();
     }
 
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 6).ErrorCode(ERR_OK);
+    ReportDeleteFailedEventPushByNotification(notification, haMetaMessage, deleteReason, "success");
+
+    ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification)) {
@@ -530,6 +547,18 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
 
     ANS_LOGD("notifications size = <%{public}zu>", notifications.size());
+    std::string message = "BatchNotifyCanceledInner.size:" +
+        std::to_string(notifications.size()) + ".";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 9)
+        .ErrorCode(ERR_OK);
+    ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
+
+    std::string notificationKeys = "";
+    for (auto notification : notifications) {
+        notificationKeys.append(notification->GetKey()).append("-");
+    }
+    ANS_LOGI("CancelNotification key = %{public}s", notificationKeys.c_str());
+
     for (auto record : subscriberRecordList_) {
         if (record == nullptr) {
             continue;
