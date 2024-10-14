@@ -95,7 +95,7 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
     }
 
     RemoveBackUpFile();
-    if (storeMessage.empty() || nlohmann::json::accept(storeMessage)) {
+    if (storeMessage.empty() || !nlohmann::json::accept(storeMessage)) {
         ANS_LOGE("Invalid JSON");
         return ANS_CLONE_ERROR;
     }
