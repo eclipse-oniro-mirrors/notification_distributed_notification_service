@@ -122,7 +122,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     if (isSubsystem) {
         return PublishNotificationBySa(request);
     }
-    if (request->GetRemovalWantAgent() != nullptr) {
+    if (request->GetRemovalWantAgent() != nullptr && request->GetRemovalWantAgent()->GetPendingWant() != nullptr) {
         uint32_t operationType = (uint32_t)(request->GetRemovalWantAgent()->GetPendingWant()
             ->GetType(request->GetRemovalWantAgent()->GetPendingWant()->GetTarget()));
         bool isSystemApp = AccessTokenHelper::IsSystemApp();
