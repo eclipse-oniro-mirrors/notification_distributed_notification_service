@@ -45,6 +45,10 @@ void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName 
     ANS_LOGI("AbilityConnectionWrapperProxy::OnAbilityConnectDone result %{public}d", errCode);
     if (errCode != ERR_OK) {
         ANS_LOGE("send Request to SytemDialog fail");
+        if (commandStr_.empty() || !nlohmann::json::accept(commandStr_)) {
+            ANS_LOGE("Invalid JSON");
+            return;
+        }
         nlohmann::json root = nlohmann::json::parse(commandStr_);
         if (root.is_null() or !root.is_object()) {
             ANS_LOGE("Invalid JSON object");
@@ -52,6 +56,10 @@ void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName 
         }
         if (!root.contains("bundleName") || !root.contains("bundleUid")) {
             ANS_LOGE("not found jsonKey from");
+            return;
+        }
+        if (!root["bundleName"].is_string() || !root["bundleUid"].is_number_integer()) {
+            ANS_LOGE("value type is not right");
             return;
         }
         std::string bundleName = root["bundleName"];
