@@ -206,9 +206,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_BUNDLE;
             }
             request->SetAgentBundle(agentBundle);
-            bundle = sourceBundleName;
         }
-        request->SetOwnerBundleName(bundle);
+        request->SetOwnerBundleName(sourceBundleName);
     }
 
     int32_t uid = IPCSkeleton::GetCallingUid();
@@ -223,6 +222,9 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
     request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(bundle);
+    if (request->GetOwnerBundleName().empty()) {
+        request->SetOwnerBundleName(bundle);
+    }
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
@@ -427,24 +429,17 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
-
-    if (request->IsAgentNotification()) {
+    std::string sourceBundleName =
+        request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+    if ((!sourceBundleName.empty() &&
+        NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) ||
+        request->IsAgentNotification()) {
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
     } else {
-        std::string sourceBundleName =
-            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
-        if (!sourceBundleName.empty() &&
-            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
-            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
-                GetClientBundleName().c_str(), sourceBundleName.c_str());
-            request->SetCreatorBundleName(request->GetOwnerBundleName());
-            request->SetCreatorUid(request->GetOwnerUid());
-            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
-                request->GetOwnerUid());
-        } else {
-            bundleOption = GenerateBundleOption();
-        }
+        bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(),
+            request->GetCreatorUid());
     }
 
     if (bundleOption == nullptr) {
