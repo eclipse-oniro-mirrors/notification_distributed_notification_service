@@ -877,7 +877,12 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
 
     if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
         auto wantAgentValue  = jsonObject.at("wantAgent").get<std::string>();
-        pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue);
+        int32_t targetUid = -1;
+        if (pRequest->GetOwnerUid() != DEFAULT_UID) {
+            targetUid = pRequest->GetOwnerUid();
+        }
+        ANS_LOGI("wantAgent Fromjson, uid = %{public}d ", targetUid);
+        pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue, targetUid);
     }
 
     if (!ConvertJsonToNotificationContent(pRequest, jsonObject)) {
