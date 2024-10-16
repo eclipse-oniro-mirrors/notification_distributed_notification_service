@@ -97,6 +97,39 @@ void ReminderDataManager::HandleAutoDeleteReminder(const int32_t notificationId,
     StartRecentReminder();
 }
 
+bool ReminderDataManager::GetCustomRingFileDesc(const sptr<ReminderRequest>& reminder,
+    Global::Resource::ResourceManager::RawFileDescriptor& desc)
+{
+    // obtains the resource manager
+    std::lock_guard<std::mutex> locker(resourceMutex_);
+    soundResource_ = GetResourceMgr(reminder->GetBundleName(), reminder->GetUid());
+    if (soundResource_ == nullptr) {
+        ANSR_LOGE("GetResourceMgr fail.");
+        return false;
+    }
+    auto result = soundResource_->GetRawFileDescriptor(reminder->GetCustomRingUri(), desc);
+    if (result != Global::Resource::SUCCESS) {
+        ANSR_LOGE("GetRawFileDescriptor fail[%{public}d].", static_cast<int32_t>(result));
+        return false;
+    }
+    return true;
+}
+
+void ReminderDataManager::CloseCustomRingFileDesc(const int32_t reminderId, const std::string& customRingUri)
+{
+    std::lock_guard<std::mutex> locker(resourceMutex_);
+    if (soundResource_ == nullptr) {
+        ANSR_LOGW("ResourceManager is nullptr.");
+        return;
+    }
+    auto result = soundResource_->CloseRawFileDescriptor(customRingUri);
+    if (result != Global::Resource::SUCCESS) {
+        ANSR_LOGW("CloseRawFileDescriptor fail[%{public}d]", static_cast<int32_t>(result));
+    }
+    ANSR_LOGI("Stop custom sound, reminderId:[%{public}d].", reminderId);
+    soundResource_ = nullptr;
+}
+
 void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
 {
 #ifdef HAS_HISYSEVENT_PART

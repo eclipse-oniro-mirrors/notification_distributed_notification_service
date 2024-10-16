@@ -246,12 +246,6 @@ public:
     void TerminateAlerting(const OHOS::EventFwk::Want &want);
 
     /**
-     * @brief Get resource manager by handle info.
-     */
-    std::shared_ptr<Global::Resource::ResourceManager> GetBundleResMgr(
-        const AppExecFwk::BundleInfo &bundleInfo);
-
-    /**
      * @brief Update reminders based on the system language.
      *
      * Update action button title.
@@ -641,6 +635,25 @@ private:
         const uint32_t callerTokenId);
 
     /**
+     * @brief Get resource manager by bundlename and uid.
+     */
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceMgr(const std::string& bundleName,
+        const int32_t uid);
+
+    /**
+     * @brief Get custom ring file desc.
+     *    lock by resourceMutex_ in function
+     */
+    bool GetCustomRingFileDesc(const sptr<ReminderRequest>& reminder,
+        Global::Resource::ResourceManager::RawFileDescriptor& desc);
+
+    /**
+     * @brief Close custom ring file desc.
+     *    lock by resourceMutex_ in function
+     */
+    void CloseCustomRingFileDesc(const int32_t reminderId, const std::string& customRingUri);
+
+    /**
      * @brief report event to dfx
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
@@ -714,6 +727,8 @@ private:
     sptr<ReminderRequest> alertingReminder_ = nullptr;
 #ifdef PLAYER_FRAMEWORK_ENABLE
     std::shared_ptr<Media::Player> soundPlayer_ = nullptr;
+    std::mutex resourceMutex_;  // for soundResource_
+    std::shared_ptr<Global::Resource::ResourceManager> soundResource_ = nullptr;
 #endif
     /**
      * Indicates the total count of reminders in system.
