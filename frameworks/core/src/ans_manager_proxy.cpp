@@ -78,6 +78,45 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
     return result;
 }
 
+ErrCode AnsManagerProxy::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &notification)
+{
+    if (notification == nullptr) {
+        ANS_LOGE("[PublishNotificationForIndirectProxy] fail: notification is null ptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (notification->IsCommonLiveView()) {
+        if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[PublishNotificationForIndirectProxy] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteParcelable(notification)) {
+        ANS_LOGE("[PublishNotificationForIndirectProxy] fail: write notification parcelable failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::PUBLISH_NOTIFICATION_INDIRECTPROXY, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[PublishNotificationForIndirectProxy] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[PublishNotificationForIndirectProxy] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey)
 {
     MessageParcel data;

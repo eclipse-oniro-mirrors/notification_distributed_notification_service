@@ -1690,6 +1690,37 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::PrePublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request,
+    int32_t uid)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_5);
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("failed to get bundleManager!");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    request->SetCreatorPid(IPCSkeleton::GetCallingPid());
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId);
+        request->SetCreatorUserId(userId);
+    } else {
+        userId = request->GetCreatorUserId();
+    }
+
+    if (request->GetDeliveryTime() <= 0) {
+        request->SetDeliveryTime(GetCurrentTime());
+    }
+    ErrCode result = CheckPictureSize(request);
+    if (result != ERR_OK) {
+        message.ErrorCode(result).Message("Failed to check picture size", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    return ERR_OK;
+}
+
 uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
     int64_t deleteTimePoint, int32_t reason)
 {
