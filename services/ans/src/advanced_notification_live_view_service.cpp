@@ -431,6 +431,14 @@ ErrCode AdvancedNotificationService::IsAllowedRemoveSlot(const sptr<Notification
 void AdvancedNotificationService::FillLockScreenPicture(const sptr<NotificationRequest> &newRequest,
     const sptr<NotificationRequest> &oldRequest)
 {
+    if (oldRequest->GetContent() == nullptr ||
+        newRequest->GetContent() == nullptr) {
+        return;
+    }
+    if (oldRequest->GetContent()->GetNotificationContent() == nullptr ||
+        newRequest->GetContent()->GetNotificationContent() == nullptr) {
+        return;
+    }
     if (newRequest->GetSlotType() != NotificationConstant::SlotType::LIVE_VIEW) {
         return;
     }
