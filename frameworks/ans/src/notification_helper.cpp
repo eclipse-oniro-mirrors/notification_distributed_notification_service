@@ -82,6 +82,11 @@ ErrCode NotificationHelper::PublishNotification(const std::string &label, const 
     return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(label, request);
 }
 
+ErrCode NotificationHelper::PublishNotification(const NotificationRequest &request)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotificationForIndirectProxy(request);
+}
+
 ErrCode NotificationHelper::CancelNotification(int32_t notificationId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(notificationId);

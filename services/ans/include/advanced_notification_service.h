@@ -105,6 +105,17 @@ public:
     ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &request) override;
 
     /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     *       this method will update the notification.
+     *
+     * @param notification Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PublishNotificationForIndirectProxy(const std::string &label, const sptr<NotificationRequest> &request) override;
+
+    /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
      * @param notificationId Indicates the ID of the notification to cancel.
@@ -1299,6 +1310,7 @@ private:
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
+    ErrCode PrePublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request,int32_t uid);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,

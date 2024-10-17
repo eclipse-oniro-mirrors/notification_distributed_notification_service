@@ -171,6 +171,117 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     return result;
 }
 
+ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const std::string &label, const sptr<NotificationRequest> &request)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    if (!request) {
+        ANSR_LOGE("ReminderRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!InitPublishProcess()) {
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_1);
+    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    result = CheckUserIdParams(request->GetReceiverUserId());
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_1).ErrorCode(result).Message("User is invalid", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+    message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
+    int32_t uid = request->GetCreatorUid();
+    if (uid <= 0) {
+        message.ErrorCode(ERR_ANS_INVALID_UID).Message("createUid failed" + std::to_string(uid), true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return ERR_ANS_INVALID_UID;
+    }
+    std::string bundle = request->GetCreatorBundleName();
+    result = PrePublishNotificationForIndirectProxy(request, uid, bundle);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    // SA not support sound
+    if (!request->GetSound().empty()) {
+        request->SetSound("");
+    }
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->isThirdparty = false;
+    record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    record->bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (record->bundleOption == nullptr || bundleOption == nullptr) {
+        ANS_LOGE("Failed to create bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    record->notification = new (std::nothrow) Notification(request);
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create notification");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    SetRequestBySlotType(record->request, bundleOption);
+
+    auto ipcUid = IPCSkeleton::GetCallingUid();
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (!bundleOption->GetBundleName().empty()) {
+            ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
+            if (ret != ERR_OK) {
+                ANS_LOGE("Can not assign valid slot!");
+            }
+        }
+
+        ChangeNotificationByControlFlags(record, isAgentController);
+        if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
+        (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
+        record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
+            result = SaPublishSystemLiveViewAsBundle(record);
+            if (result == ERR_OK) {
+                SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
+            }
+            return;
+        }
+
+        if (AssignToNotificationList(record) != ERR_OK) {
+            ANS_LOGE("Failed to assign notification list");
+            return;
+        }
+
+        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+    });
+    notificationSvrQueue_->wait(handler);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
+        StartAutoDelete(record,
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    }
+    return ERR_OK;
+
+}
+
 bool AdvancedNotificationService::InitPublishProcess()
 {
     if (publishProcess_.size() > 0) {
