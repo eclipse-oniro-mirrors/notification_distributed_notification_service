@@ -1588,11 +1588,9 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
-
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue is nullptr.");
         return ERR_ANS_INVALID_PARAM;
