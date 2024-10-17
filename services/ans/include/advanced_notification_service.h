@@ -1324,6 +1324,7 @@ private:
         const std::string &secureKey, const int32_t userId);
     static int32_t DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId);
     void CancelTimer(uint64_t timerId);
+    void BatchCancelTimer(std::vector<uint64_t> timerIds);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
@@ -1335,6 +1336,7 @@ private:
     void CancelUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode StartAutoDeletedTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
     ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record);
     void QueryDoNotDisturbProfile(const int32_t &userId, std::string &enable, std::string &profileId);
