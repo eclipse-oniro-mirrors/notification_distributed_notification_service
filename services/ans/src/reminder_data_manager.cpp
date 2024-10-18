@@ -1671,19 +1671,25 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
             return;
         }
     }
-    std::string defaultPath;
-    if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
-        defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
+    std::string customRingUri = reminder->GetCustomRingUri();
+    if (customRingUri.empty()) {
+        // use default ring
+        std::string defaultPath;
+        if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
+            defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
+        } else {
+            defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
+        }
+        Uri defaultSound(defaultPath);
+        soundPlayer_->SetSource(defaultSound.GetSchemeSpecificPart());
+        ANSR_LOGI("Play default sound.");
     } else {
-        defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
+        Global::Resource::ResourceManager::RawFileDescriptor desc;
+        if (GetCustomRingFileDesc(reminder, desc)) {
+            soundPlayer_->SetSource(desc.fd, desc.offset, desc.length);
+        }
+        ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
     }
-    std::string ringUri = GetCustomRingUri(reminder);
-    Uri reminderSound(ringUri);
-    Uri defaultSound(defaultPath);
-    Uri soundUri = ringUri.empty() ? defaultSound : reminderSound;
-    std::string uri = soundUri.GetSchemeSpecificPart();
-    ANSR_LOGD("uri:%{public}s", uri.c_str());
-    soundPlayer_->SetSource(uri);
     soundPlayer_->SetLooping(true);
     soundPlayer_->PrepareAsync();
     soundPlayer_->Play();
@@ -1736,6 +1742,12 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
     if (soundPlayer_ == nullptr) {
         ANSR_LOGW("Sound player is null");
     } else {
+        std::string customRingUri = reminder->GetCustomRingUri();
+        if (customRingUri.empty()) {
+            ANSR_LOGI("Stop default sound.");
+        } else {
+            CloseCustomRingFileDesc(reminder->GetReminderId(), customRingUri);
+        }
         soundPlayer_->Stop();
         soundPlayer_->Release();
         soundPlayer_ = nullptr;
@@ -2002,12 +2014,19 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
     }
 }
 
-std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundleResMgr(
-    const AppExecFwk::BundleInfo &bundleInfo)
+std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetResourceMgr(const std::string& bundleName,
+    const int32_t uid)
 {
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, uid, bundleInfo)) {
+        ANSR_LOGE("GetBundleInfo[%{public}s][%{public}d] fail.", bundleName.c_str(), uid);
+        return nullptr;
+    }
+    // obtains the resource manager
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (!resourceManager) {
-        ANSR_LOGE("create resourceManager failed.");
+        ANSR_LOGE("CreateResourceManager fail.");
         return nullptr;
     }
     // obtains the resource path.
@@ -2016,9 +2035,8 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundl
         if (moduleResPath.empty()) {
             continue;
         }
-        ANSR_LOGD("GetBundleResMgr, moduleResPath: %{private}s", moduleResPath.c_str());
         if (!resourceManager->AddResource(moduleResPath.c_str())) {
-            ANSR_LOGW("GetBundleResMgr AddResource failed");
+            ANSR_LOGW("AddResource fail.");
         }
     }
     // obtains the current system language.
@@ -2039,15 +2057,8 @@ void ReminderDataManager::UpdateReminderLanguage(const int32_t uid,
     }
 
     std::string bundleName = reminders[0]->GetBundleName();
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
-        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, uid, bundleInfo)) {
-        ANSR_LOGE("Get reminder request[%{public}d][%{public}s] bundle info failed.",
-            uid, bundleName.c_str());
-        return;
-    }
     // obtains the resource manager
-    auto resourceMgr = GetBundleResMgr(bundleInfo);
+    auto resourceMgr = GetResourceMgr(bundleName, uid);
     if (resourceMgr == nullptr) {
         ANSR_LOGE("Get reminder request[%{public}d][%{public}s] resource manager failed.",
             uid, bundleName.c_str());
