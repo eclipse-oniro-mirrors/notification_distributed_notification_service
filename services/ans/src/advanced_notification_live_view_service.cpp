@@ -53,10 +53,12 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             return;
         }
         ANS_LOGI("The number of live views to recover: %{public}zu.", requestsdb.size());
+        std::vector<std::string> keys;
         for (const auto &requestObj : requestsdb) {
             ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
             if (!IsLiveViewCanRecover(requestObj.request)) {
                 int32_t userId = requestObj.request->GetReceiverUserId();
+                keys.emplace_back(requestObj.request->GetBaseKey(""));
                 if (DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
                     requestObj.request->GetSecureKey(), userId) != ERR_OK) {
                     ANS_LOGE("Delete notification failed.");
@@ -100,6 +102,9 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
         }
 
+        if (!keys.empty()) {
+            OnRecoverLiveView(keys);
+        }
         // publish notifications
         for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
             OnSubscriberAdd(subscriber);
