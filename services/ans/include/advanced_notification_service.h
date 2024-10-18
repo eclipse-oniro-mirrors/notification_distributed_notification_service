@@ -1415,6 +1415,8 @@ private:
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
+    ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
+    
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
