@@ -413,14 +413,6 @@ private:
     sptr<ReminderRequest> FindReminderRequestLocked(const int32_t &reminderId, const std::string &pkgName);
 
     /**
-     * Find bundle option from {@link notificationBundleOptionMap_} by reminder id.
-     *
-     * @param reminderId Indicates the reminder id.
-     * @return pointer of NotificationBundleOption or nullptr.
-     */
-    sptr<NotificationBundleOption> FindNotificationBundleOption(const int32_t &reminderId) const;
-
-    /**
      * Obtains the recent reminder which is not expired from reminder vector.
      *
      * The expired reminders will be removed from reminderVector_ and notificationBundleOptionMap_.
@@ -698,11 +690,6 @@ private:
      * Vector used to record all the reminders which has been shown on panel.
      */
     std::vector<sptr<ReminderRequest>> showedReminderVector_;
-
-    /**
-     * Map used to record all the bundle information of the reminders in system.
-     */
-    std::map<int32_t, sptr<NotificationBundleOption>> notificationBundleOptionMap_;
 
     /**
      * This timer is used to control the triggerTime of next reminder.

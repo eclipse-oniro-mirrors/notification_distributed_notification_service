@@ -947,6 +947,16 @@ std::string ReminderRequest::GetCustomRingUri() const
     return customRingUri_;
 }
 
+sptr<NotificationBundleOption> ReminderRequest::GetNotificationBundleOption() const
+{
+    return notificationOption_;
+}
+
+void ReminderRequest::SetNotificationBundleOption(const sptr<NotificationBundleOption>& option)
+{
+    notificationOption_ = option;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
