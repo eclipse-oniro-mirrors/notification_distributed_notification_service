@@ -307,6 +307,20 @@ public:
      */
     void SetArchiveTimer(uint64_t archiveTimerId);
 
+    /**
+     * @brief Obtains the autoDeleted timer id of notification.
+     *
+     * @return Returns the id of the notification autoDeleted timer.
+     */
+    uint64_t GetAutoDeletedTimer() const;
+
+    /**
+     * @brief Obtains the autoDeleted timer id.
+     *
+     * @param autoDeletedTimerId the id of the notification archive autoDeleted.
+     */
+    void SetAutoDeletedTimer(uint64_t autoDeletedTimerId);
+
 private:
     Notification();
     void SetEnableSound(const bool &enable);
@@ -352,6 +366,7 @@ private:
     uint64_t archiveTimerId_ {0};
     std::shared_ptr<Uri> sound_ {nullptr};
     std::vector<int64_t> vibrationStyle_ {};
+    uint64_t autoDeletedTimerId_ {0};
 
     friend class AdvancedNotificationService;
     friend class NotificationSlotFilter;
