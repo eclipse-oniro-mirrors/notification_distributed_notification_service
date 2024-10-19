@@ -56,7 +56,8 @@ namespace OHOS {
 
         manager->RegisterConfigurationObserver();
         manager->OnUserRemove(userId);
-        manager->OnServiceStart();
+        manager->OnBundleMgrServiceStart();
+        manager->OnAbilityMgrServiceStart();
         manager->OnUserSwitch(userId);
         manager->OnProcessDiedLocked(option);
         manager->RefreshRemindersDueToSysTimeChange(type);
@@ -67,7 +68,6 @@ namespace OHOS {
         manager->HandleCustomButtonClick(want);
         manager->ClickReminder(want);
         manager->TerminateAlerting(want);
-        manager->UpdateReminderLanguageLocked(reminder);
         return true;
     }
 

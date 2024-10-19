@@ -1898,8 +1898,6 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
         }
         button.second.title = title;
     }
-    // update action button
-    UpdateActionButtons(false);
 }
 }
 }
