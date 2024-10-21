@@ -28,6 +28,7 @@
 #include "notification_subscriber.h"
 #include "notification_local_live_view_subscriber.h"
 #include "want_params.h"
+#include <memory>
 
 namespace OHOS {
 namespace Notification {
@@ -355,12 +356,43 @@ public:
      *        notification. To subscribe to notifications published only by specified sources, for example,
      *        notifications from certain applications,
      *        call the {SubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)} method.
-     *
+     * @deprecated This function is deprecated,
+     *             use 'SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)'.
      * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
      *                   This parameter must be specified.
      * @return Returns unsubscribe notification result.
      */
     static ErrCode SubscribeNotification(const NotificationSubscriber &subscriber);
+
+    /**
+     * @brief Subscribes to notifications from all applications. This method can be called only by applications
+     * with required system permissions.
+     * @note  To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     *        notification. To subscribe to notifications published only by specified sources, for example,
+     *        notifications from certain applications,
+     *        call the {SubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)} method.
+     *
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns unsubscribe notification result.
+     */
+    static ErrCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
+
+    /**
+     * @brief Subscribes to notifications from the appliaction self.
+     * @note  To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     *        notification.
+     * @deprecated This function is deprecated,
+     *             use 'SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber)'.
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns unsubscribe notification result.
+     */
+    static ErrCode SubscribeNotificationSelf(const NotificationSubscriber &subscriber);
 
     /**
      * @brief Subscribes to notifications from the appliaction self.
@@ -373,7 +405,29 @@ public:
      *                   This parameter must be specified.
      * @return Returns unsubscribe notification result.
      */
-    static ErrCode SubscribeNotificationSelf(const NotificationSubscriber &subscriber);
+    static ErrCode SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber);
+
+    /**
+     * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only
+     * by applications with required system permissions.
+     * @note  After {subscribeInfo} is specified, a subscriber receives only the notifications that
+     *        meet the filter criteria specified by {subscribeInfo}.
+     *        To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     *        notification. To subscribe to and receive all notifications, call the
+     *        {SubscribeNotification(NotificationSubscriber)} method.
+     * @deprecated This function is deprecated,
+     *             use 'SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+     *             const sptr<NotificationSubscribeInfo> &subscribeInfo)'.
+     * @param subscriber Indicates the subscribers to receive notifications. This parameter must be specified.
+     *                   For details, see {NotificationSubscriber}.
+     * @param subscribeInfo Indicates the filters for specified notification sources, including application name,
+     *                      user ID, or device name. This parameter is optional.
+     * @return Returns subscribe notification result.
+     */
+    static ErrCode SubscribeNotification(
+        const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo);
 
     /**
      * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only
@@ -392,8 +446,8 @@ public:
      *                      user ID, or device name. This parameter is optional.
      * @return Returns subscribe notification result.
      */
-    static ErrCode SubscribeNotification(
-        const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo);
+    static ErrCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+        const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
      * @brief Subscribes the localLiveView button click. This method can be called only
@@ -419,12 +473,45 @@ public:
      *        To unsubscribe from notifications published only by specified sources, for example,
      *       notifications from certain applications, call the
      *       {UnSubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)} method.
-     *
+     * @deprecated This function is deprecated,
+     *             use 'UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)'.
      * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
      *                   This parameter must be specified.
      * @return Returns unsubscribe notification result.
      */
     static ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber);
+
+    /**
+     * @brief Unsubscribes from all notifications. This method can be called only by applications with required
+     * system permissions.
+     * @note Generally, you subscribe to a notification by calling the
+     *       {SubscribeNotification(NotificationSubscriber)} method. If you do not want your application
+     *       to receive a notification any longer, unsubscribe from that notification using this method.
+     *       You can unsubscribe from only those notifications that your application has subscribed to.
+     *        To unsubscribe from notifications published only by specified sources, for example,
+     *       notifications from certain applications, call the
+     *       {UnSubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)} method.
+     *
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns unsubscribe notification result.
+     */
+    static ErrCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
+
+    /**
+     * @brief Unsubscribes from all notifications based on the filtering criteria. This method can be called
+     * only by applications with required system permissions.
+     * @note A subscriber will no longer receive the notifications from specified notification sources.
+     * @deprecated This function is deprecated,
+     *             use 'UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+     *             const sptr<NotificationSubscribeInfo> &subscribeInfo)'.
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @param subscribeInfo Indicates the filters for , including application name,
+     *                      user ID, or device name. This parameter is optional.
+     * @return Returns unsubscribe notification result.
+     */
+    static ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
 
     /**
      * @brief Unsubscribes from all notifications based on the filtering criteria. This method can be called
@@ -437,7 +524,8 @@ public:
      *                      user ID, or device name. This parameter is optional.
      * @return Returns unsubscribe notification result.
      */
-    static ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
+    static ErrCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+        const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
      * @brief Trigger the local live view after the button has been clicked.

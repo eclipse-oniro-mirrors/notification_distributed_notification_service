@@ -16,6 +16,7 @@
 #include "notification_helper.h"
 #include "ans_notification.h"
 #include "singleton.h"
+#include <memory>
 
 namespace OHOS {
 namespace Notification {
@@ -203,7 +204,17 @@ ErrCode NotificationHelper::SubscribeNotification(const NotificationSubscriber &
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber);
 }
 
+ErrCode NotificationHelper::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber, nullptr);
+}
+
 ErrCode NotificationHelper::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(subscriber);
+}
+
+ErrCode NotificationHelper::SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(subscriber);
 }
@@ -220,13 +231,30 @@ ErrCode NotificationHelper::SubscribeNotification(
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber, subscribeInfo);
 }
 
+ErrCode NotificationHelper::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber, subscribeInfo);
+}
+
 ErrCode NotificationHelper::UnSubscribeNotification(NotificationSubscriber &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber);
+}
+
+ErrCode NotificationHelper::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber);
 }
 
 ErrCode NotificationHelper::UnSubscribeNotification(
     NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber, subscribeInfo);
+}
+
+ErrCode NotificationHelper::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber, subscribeInfo);
 }

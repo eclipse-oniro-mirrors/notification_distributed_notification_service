@@ -25,6 +25,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_subscriber_listener.h"
 #include "ans_ut_constant.h"
 #include "iremote_object.h"
 #include "want_agent_info.h"
@@ -82,7 +83,6 @@ void AnsBranchTest::SetUp()
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);

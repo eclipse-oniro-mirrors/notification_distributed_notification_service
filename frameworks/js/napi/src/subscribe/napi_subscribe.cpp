@@ -18,6 +18,8 @@
 #include "ans_inner_errors.h"
 #include "subscribe.h"
 #include "unsubscribe.h"
+#include <memory>
+#include <new>
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -58,18 +60,16 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
                     ANS_LOGI("Subscribe with NotificationSubscribeInfo");
-                    OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
-                    subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
-                    subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
-                    subscribeInfo.AddDeviceType(asynccallbackinfo->subscriberInfo.deviceType);
+                    sptr<OHOS::Notification::NotificationSubscribeInfo> subscribeInfo =
+                        new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
+                    subscribeInfo->AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
+                    subscribeInfo->AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    subscribeInfo->AddDeviceType(asynccallbackinfo->subscriberInfo.deviceType);
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo, subscribeInfo);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
-                }
-                if (asynccallbackinfo->info.errorCode == ERR_OK) {
-                    DelDeletingSubscriber(asynccallbackinfo->objectInfo);
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo);
                 }
             }
         },
@@ -142,10 +142,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::SubscribeNotificationSelf(*(asynccallbackinfo->objectInfo));
-                if (asynccallbackinfo->info.errorCode == ERR_OK) {
-                    DelDeletingSubscriber(asynccallbackinfo->objectInfo);
-                }
+                    NotificationHelper::SubscribeNotificationSelf(asynccallbackinfo->objectInfo);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -219,7 +216,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
                 bool ret = AddDeletingSubscriber(asynccallbackinfo->objectInfo);
                 if (ret) {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::UnSubscribeNotification(*(asynccallbackinfo->objectInfo));
+                        NotificationHelper::UnSubscribeNotification(asynccallbackinfo->objectInfo);
                     if (asynccallbackinfo->info.errorCode != ERR_OK) {
                         DelDeletingSubscriber(asynccallbackinfo->objectInfo);
                     }
