@@ -30,6 +30,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 napi_value Common::SetNotificationByDistributedOptions(
     const napi_env &env, const OHOS::Notification::Notification *notification, napi_value &result)
 {
@@ -87,6 +88,7 @@ napi_value Common::SetNotificationByDistributedOptions(
 
     return NapiGetBoolean(env, true);
 }
+#endif
 
 napi_value Common::SetNotification(
     const napi_env &env, const OHOS::Notification::Notification *notification, napi_value &result)
@@ -132,6 +134,7 @@ napi_value Common::SetNotification(
     napi_create_int32(env, notification->GetPid(), &value);
     napi_set_named_property(env, result, "creatorPid", value);
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     // distributedOption?:DistributedOptions
     napi_value distributedResult = nullptr;
     napi_create_object(env, &distributedResult);
@@ -139,7 +142,7 @@ napi_value Common::SetNotification(
         return NapiGetBoolean(env, false);
     }
     napi_set_named_property(env, result, "distributedOption", distributedResult);
-
+#endif
     // readonly isRemoveAllowed?: boolean
     napi_get_boolean(env, notification->IsRemoveAllowed(), &value);
     napi_set_named_property(env, result, "isRemoveAllowed", value);
@@ -163,7 +166,7 @@ napi_value Common::SetNotification(
     return NapiGetBoolean(env, true);
 }
 
-
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 napi_value Common::GetNotificationRequestDistributedOptions(const napi_env &env,
     const napi_value &value, NotificationRequest &request)
 {
@@ -225,5 +228,6 @@ napi_value Common::GetNotificationIsDistributed(
 
     return NapiGetNull(env);
 }
+#endif
 }
 }

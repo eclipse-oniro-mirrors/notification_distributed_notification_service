@@ -226,10 +226,11 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
         ANS_LOGE("Create notificationRequest ptr fail.");
         return ERR_ANS_NO_MEMORY;
     }
-
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
+#endif
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
     reqPtr->SetCreatorInstanceKey(instanceKey);
 
@@ -389,9 +390,11 @@ ErrCode AnsNotification::PublishNotificationAsBundle(
         ANS_LOGE("Failed to create NotificationRequest ptr");
         return ERR_ANS_NO_MEMORY;
     }
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
+#endif
     return proxy->PublishAsBundle(reqPtr, representativeBundle);
 }
 
@@ -1106,9 +1109,11 @@ ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationReq
     }
 
     sptr<NotificationRequest> sptrReq(pReq);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     if (IsNonDistributedNotificationType(sptrReq->GetNotificationType())) {
         sptrReq->SetDistributed(false);
     }
+#endif
     return proxy->PublishContinuousTaskNotification(sptrReq);
 }
 
