@@ -19,7 +19,6 @@
 #include <list>
 
 #include "ans_dialog_host_client.h"
-#include "ans_manager_death_recipient.h"
 #include "ans_manager_interface.h"
 #include "notification_subscriber.h"
 #include "notification_local_live_view_subscriber.h"

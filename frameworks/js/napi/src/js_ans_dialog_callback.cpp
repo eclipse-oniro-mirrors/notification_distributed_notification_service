@@ -22,9 +22,6 @@
 #include "ans_log_wrapper.h"
 
 namespace OHOS {
-using Notification::ANS_LABEL;
-using Notification::AnsLogWrapper;
-using Notification::AnsLogLevel;
 
 namespace NotificationNapi {
 bool JsAnsDialogCallback::Init(napi_env env,

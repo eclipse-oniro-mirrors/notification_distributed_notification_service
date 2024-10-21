@@ -46,13 +46,10 @@ ohos_shared_library("ans_innerkits") {
 
   sources = [
     "${core_path}/common/src/ans_convert_enum.cpp",
-    "${core_path}/common/src/ans_log_wrapper.cpp",
-    "${core_path}/common/src/ans_watchdog.cpp",
     "${core_path}/src/ans_dialog_callback_interface.cpp",
     "${core_path}/src/ans_dialog_callback_proxy.cpp",
     "${core_path}/src/ans_dialog_callback_stub.cpp",
     "${core_path}/src/ans_image_util.cpp",
-    "${core_path}/src/ans_manager_death_recipient.cpp",
     "${core_path}/src/ans_manager_proxy.cpp",
     "${core_path}/src/ans_manager_proxy_disturb.cpp",
     "${core_path}/src/ans_manager_proxy_reminder.cpp",
@@ -134,7 +131,6 @@ ohos_shared_library("ans_innerkits") {
     "hilog:libhilog",
     "i18n:intl_util",
     "ipc:ipc_core",
-    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]

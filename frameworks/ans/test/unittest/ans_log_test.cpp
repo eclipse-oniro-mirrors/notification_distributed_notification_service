@@ -42,43 +42,6 @@ void AnsLogTest::TearDown()
 {}
 
 /*
- * @tc.name: AnsLogTest_001
- * @tc.desc: test GetBriefFileName function
- * @tc.type: FUNC
- * @tc.require: issueI5UI8T
- */
-HWTEST_F(AnsLogTest, AnsLogTest_001, TestSize.Level1)
-{
-    std::string fileName = "../function/EventFwk/test.cpp";
-    std::string exceptStr = "test.cpp";
-
-    std::string result = AnsLogWrapper::GetBriefFileName(fileName.c_str());
-    EXPECT_EQ(exceptStr, result);
-}
-
-/*
- * @tc.name: AnsLogTest_002
- * @tc.desc: test GetBriefFileName function
- * @tc.type: FUNC
- * @tc.require: issueI5UI8T
- */
-HWTEST_F(AnsLogTest, AnsLogTest_002, TestSize.Level1)
-{
-    std::string fileName = "test.cpp";
-    std::string exceptStr = "";
-
-    std::string result = AnsLogWrapper::GetBriefFileName(fileName.c_str());
-    EXPECT_EQ(exceptStr, result);
-
-    fileName = "";
-    result = AnsLogWrapper::GetBriefFileName(fileName.c_str());
-    EXPECT_EQ(exceptStr, result);
-
-    result = AnsLogWrapper::GetBriefFileName(nullptr);
-    EXPECT_EQ(exceptStr, result);
-}
-
-/*
  * @tc.name: AnsConvertTest_001
  * @tc.desc: test ContentTypeJSToC function
  * @tc.type: FUNC

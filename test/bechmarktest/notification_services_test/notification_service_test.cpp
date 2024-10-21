@@ -30,7 +30,6 @@
 #include "token_setproc.h"
 #include "ans_permission_def.h"
 
-
 using namespace OHOS;
 using namespace OHOS::Notification;
 using namespace OHOS::AbilityRuntime;

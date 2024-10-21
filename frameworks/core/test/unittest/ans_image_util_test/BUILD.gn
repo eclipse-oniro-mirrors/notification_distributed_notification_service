@@ -26,7 +26,6 @@ ohos_unittest("ans_image_util_test") {
   ]
 
   sources = [
-    "${core_path}/common/src/ans_log_wrapper.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "../mock/mock_image_packer.cpp",
     "../mock/mock_image_source.cpp",
